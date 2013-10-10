@@ -1,3 +1,4 @@
-Repository for OncoGKB, an oncogenomics knowledgebase
+Repository for OncoGKB, an oncogenomics knowledgebase.
 
-Multi-tier system for annotating and classifying mutations and copy number events in cancerd copy number events in cancer
+Multi-tier system for annotating and classifying mutations and copy number events in cancer.
+
