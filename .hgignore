@@ -3,3 +3,4 @@ OncoGKB/.classpath
 OncoGKB/.project
 OncoGKB/.settings/*
 
+^OncoGKB/src/main/webapp/META-INF/context\.xml$
