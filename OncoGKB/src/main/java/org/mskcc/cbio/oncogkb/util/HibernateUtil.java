@@ -13,7 +13,11 @@ import org.hibernate.SessionFactory;
  *
  * @author jgao
  */
-public class HibernateUtil {
+public final class HibernateUtil {
+    
+    private HibernateUtil() {
+	throw new AssertionError();
+    }
 
     private static final SessionFactory sessionFactory;
     

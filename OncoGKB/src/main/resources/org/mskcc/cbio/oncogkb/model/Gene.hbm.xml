@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 31, 2013 4:28:42 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.mskcc.cbio.oncogkb.model.Gene" table="gene" catalog="oncogkb">
+        <id name="entrezGeneId" type="int">
+            <column name="entrez_gene_id" />
+            <generator class="assigned" />
+        </id>
+        <property name="hugoSymbol" type="string">
+            <column name="hugo_symbol" length="50" not-null="true" unique="true" />
+        </property>
+        <property name="aliases" type="string">
+            <column name="aliases" length="500" />
+        </property>
+        <set name="alterations" inverse="true">
+            <key>
+                <column name="entrez_gene_id" not-null="true" />
+            </key>
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.Alteration" />
+        </set>
+        <set name="evidences" inverse="true">
+            <key>
+                <column name="entrez_gene_id" not-null="true" />
+            </key>
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.Evidence" />
+        </set>
+    </class>
+</hibernate-mapping>

@@ -1,6 +1,14 @@
 
+# drop in reverse order of create to satisfy the foreign key constraint.
+DROP TABLE IF EXISTS `evidence`;
+DROP TABLE IF EXISTS `alteration`;
+DROP TABLE IF EXISTS `drug`;
+DROP TABLE IF EXISTS `gene`;
 DROP TABLE IF EXISTS `tumor_type`;
-CREATE TABLE IF NOT EXISTS `tumor_type` (
+
+-- --------------------------------------------------------
+
+CREATE TABLE `tumor_type` (
   `tumor_type_id` varchar(25) NOT NULL,
   `name` varchar(255) NOT NULL,
   `short_name` varchar(25) NOT NULL,
@@ -12,8 +20,7 @@ CREATE TABLE IF NOT EXISTS `tumor_type` (
 
 -- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `gene`;
-CREATE TABLE IF NOT EXISTS `gene` (
+CREATE TABLE `gene` (
   `entrez_gene_id` int(11) NOT NULL,
   `hugo_symbol` varchar(50) NOT NULL,
   `aliases` varchar(500),
@@ -23,8 +30,18 @@ CREATE TABLE IF NOT EXISTS `gene` (
 
 -- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `alteration`;
-CREATE TABLE IF NOT EXISTS `alteration` (
+CREATE TABLE `drug` (
+  `drug_id` int(11) NOT NULL auto_increment,
+  `drug_name` varchar(255) NOT NULL,
+  `synonyms` varchar(1000),
+  `fda_approved` tinyint(1) NOT NULL,
+  PRIMARY KEY (`drug_id`),
+  UNIQUE KEY `drug_name` (`drug_name`)
+) ENGINE=INNODB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `alteration` (
   `alteration_id` int(11) NOT NULL auto_increment,
   `entrez_gene_id` int(11) NOT NULL,
   `alteration` varchar(30) NOT NULL COMMENT 'V600E, truncating, AMP, DEL',
@@ -35,24 +52,11 @@ CREATE TABLE IF NOT EXISTS `alteration` (
 
 -- --------------------------------------------------------
 
-DROP TABLE IF EXISTS `drug`;
-CREATE TABLE IF NOT EXISTS `drug` (
-  `drug_id` smallint(6) NOT NULL auto_increment,
-  `drug_name` varchar(255) NOT NULL,
-  `synonyms` varchar(1000),
-  `fda_approved` tinyint(1) NOT NULL,
-  PRIMARY KEY (`drug_id`),
-  UNIQUE KEY `drug_name` (`drug_name`)
-) ENGINE=INNODB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
-
--- --------------------------------------------------------
-
-DROP TABLE IF EXISTS `evidence`;
-CREATE TABLE IF NOT EXISTS `evidence` (
+CREATE TABLE `evidence` (
   `evidence_id` int(11) NOT NULL auto_increment,
   `evidence_type` varchar(20) NOT NULL,
   `entrez_gene_id` int(11) NOT NULL,
-  `drug_id` smallint(6),
+  `drug_id` int(11),
   `tumor_type_id` varchar(25) NOT NULL,
   `pmids` varchar(200) COMMENT 'comma delimited pmids',
   PRIMARY KEY (`evidence_id`),

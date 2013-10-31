@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 31, 2013 4:28:42 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.mskcc.cbio.oncogkb.model.Alteration" table="alteration" catalog="oncogkb">
+        <id name="alterationId" type="java.lang.Integer">
+            <column name="alteration_id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="gene" class="org.mskcc.cbio.oncogkb.model.Gene" fetch="select">
+            <column name="entrez_gene_id" not-null="true" />
+        </many-to-one>
+        <property name="alteration" type="string">
+            <column name="alteration" length="30" not-null="true">
+                <comment>V600E, truncating, AMP, DEL</comment>
+            </column>
+        </property>
+        <property name="type" type="string">
+            <column name="type" length="10" not-null="true">
+                <comment>Mutation, CNA</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>

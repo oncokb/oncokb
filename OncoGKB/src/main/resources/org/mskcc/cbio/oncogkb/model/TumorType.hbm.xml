@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 31, 2013 4:28:42 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.mskcc.cbio.oncogkb.model.TumorType" table="tumor_type" catalog="oncogkb">
+        <id name="tumorTypeId" type="string">
+            <column name="tumor_type_id" length="25" />
+            <generator class="assigned" />
+        </id>
+        <property name="name" type="string">
+            <column name="name" not-null="true" unique="true" />
+        </property>
+        <property name="shortName" type="string">
+            <column name="short_name" length="25" not-null="true" unique="true" />
+        </property>
+        <property name="color" type="string">
+            <column name="color" length="31" />
+        </property>
+        <set name="evidences" inverse="true">
+            <key>
+                <column name="tumor_type_id" length="25" not-null="true" />
+            </key>
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.Evidence" />
+        </set>
+    </class>
+</hibernate-mapping>
