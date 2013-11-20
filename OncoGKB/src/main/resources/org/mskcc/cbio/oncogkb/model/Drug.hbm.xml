@@ -17,11 +17,5 @@
         <property name="fdaApproved" type="boolean">
             <column name="fda_approved" not-null="true" />
         </property>
-        <set name="evidences" inverse="true">
-            <key>
-                <column name="drug_id" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.Evidence" />
-        </set>
     </class>
 </hibernate-mapping>

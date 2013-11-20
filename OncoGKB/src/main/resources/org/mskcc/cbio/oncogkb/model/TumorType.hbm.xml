@@ -17,11 +17,5 @@
         <property name="color" type="string">
             <column name="color" length="31" />
         </property>
-        <set name="evidences" inverse="true">
-            <key>
-                <column name="tumor_type_id" length="25" not-null="true" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.Evidence" />
-        </set>
     </class>
 </hibernate-mapping>

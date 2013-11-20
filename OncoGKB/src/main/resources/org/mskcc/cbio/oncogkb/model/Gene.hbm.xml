@@ -14,17 +14,5 @@
         <property name="aliases" type="string">
             <column name="aliases" length="500" />
         </property>
-        <set name="alterations" inverse="true">
-            <key>
-                <column name="entrez_gene_id" not-null="true" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.Alteration" />
-        </set>
-        <set name="evidences" inverse="true">
-            <key>
-                <column name="entrez_gene_id" not-null="true" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.Evidence" />
-        </set>
     </class>
 </hibernate-mapping>
