@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncogkb.controller;
 
+import org.mskcc.cbio.oncogkb.Dao.DbQueryHelper;
 import org.mskcc.cbio.oncogkb.model.Gene;
 
 import org.springframework.stereotype.Controller;
@@ -20,9 +21,16 @@ public class GeneController {
     
     @RequestMapping(value="/gene.json")
     public @ResponseBody Gene getGene(
-            @RequestParam(value="gene", required=true) String hugoSymbol) {
-        Gene gene = new Gene(123, hugoSymbol);
-        gene.setAliases("test");
-        return gene;
+            @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
+            @RequestParam(value="hugoSymbol", required=false) String hugoSymbol) {
+        if (entrezGeneId!=null) {
+            return DbQueryHelper.getGeneByEntrezGeneId(entrezGeneId);
+        }
+        
+        if (hugoSymbol!=null) {
+            return DbQueryHelper.getGeneByHugoSymbol(hugoSymbol);
+        }
+        
+        return null;
     }
 }
