@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncogkb.util;
+package org.mskcc.cbio.oncogkb.Dao;
 
 import org.hibernate.Session;
 
