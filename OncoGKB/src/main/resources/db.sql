@@ -1,6 +1,8 @@
 
 # drop in reverse order of create to satisfy the foreign key constraint.
-DROP TABLE IF EXISTS `evidence`;
+DROP TABLE IF EXISTS `gene_evidence`;
+DROP TABLE IF EXISTS `alteration_activity_evidence`;
+DROP TABLE IF EXISTS `drug_sensitivity_evidence`;
 DROP TABLE IF EXISTS `alteration`;
 DROP TABLE IF EXISTS `drug`;
 DROP TABLE IF EXISTS `gene`;
@@ -52,15 +54,47 @@ CREATE TABLE `alteration` (
 
 -- --------------------------------------------------------
 
-CREATE TABLE `evidence` (
+CREATE TABLE `gene_evidence` (
   `evidence_id` int(11) NOT NULL auto_increment,
-  `evidence_type` varchar(20) NOT NULL,
+  `conclusion` varchar(20) NOT NULL COMMENT 'tumor suppressor gene, oncogene',
   `entrez_gene_id` int(11) NOT NULL,
-  `drug_id` int(11),
-  `tumor_type_id` varchar(25) NOT NULL,
+  `tumor_type_id` varchar(25) DEFAULT NULL,
   `pmids` varchar(200) COMMENT 'comma delimited pmids',
+  `comments` text,
   PRIMARY KEY (`evidence_id`),
   FOREIGN KEY (`entrez_gene_id`) REFERENCES `gene`(`entrez_gene_id`),
+  FOREIGN KEY (`tumor_type_id`) REFERENCES `tumor_type`(`tumor_type_id`)
+) ENGINE=INNODB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `alteration_activity_evidence` (
+  `evidence_id` int(11) NOT NULL auto_increment,
+  `conclusion` varchar(20) NOT NULL COMMENT 'activating, inactivating, switch of function',
+  `downstream_effect` varchar(1000) COMMENT 'e.g. AKT activation for PTEN deletion',
+  `context` varchar(1000) COMMENT 'coregulated events',
+  `alteration_id` int(11) NOT NULL,
+  `tumor_type_id` varchar(25) DEFAULT NULL,
+  `pmids` varchar(200) COMMENT 'comma delimited pmids',
+  `comments` text,
+  PRIMARY KEY (`evidence_id`),
+  FOREIGN KEY (`alteration_id`) REFERENCES `alteration`(`alteration_id`),
+  FOREIGN KEY (`tumor_type_id`) REFERENCES `tumor_type`(`tumor_type_id`)
+) ENGINE=INNODB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `drug_sensitivity_evidence` (
+  `evidence_id` int(11) NOT NULL auto_increment,
+  `conclusion` varchar(20) NOT NULL COMMENT 'sensitive, insensitive',
+  `context` varchar(1000) COMMENT 'coregulated events',
+  `alteration_id` int(11) NOT NULL,
+  `drug_id` int(11),
+  `tumor_type_id` varchar(25) DEFAULT NULL,
+  `pmids` varchar(200) COMMENT 'comma delimited pmids',
+  `comments` text,
+  PRIMARY KEY (`evidence_id`),
+  FOREIGN KEY (`alteration_id`) REFERENCES `alteration`(`alteration_id`),
   FOREIGN KEY (`drug_id`) REFERENCES `drug`(`drug_id`),
   FOREIGN KEY (`tumor_type_id`) REFERENCES `tumor_type`(`tumor_type_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
