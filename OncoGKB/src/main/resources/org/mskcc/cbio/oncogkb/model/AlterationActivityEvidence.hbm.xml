@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.mskcc.cbio.oncogkb.model.AlterationActivityEvidence" table="alteration_activity_evidence" catalog="oncogkb">
+        <id name="evidenceId" type="java.lang.Integer">
+            <column name="evidence_id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="tumorType" class="org.mskcc.cbio.oncogkb.model.TumorType" fetch="select">
+            <column name="tumor_type_id" length="25" />
+        </many-to-one>
+        <many-to-one name="alteration" class="org.mskcc.cbio.oncogkb.model.Alteration" fetch="select">
+            <column name="alteration_id" not-null="true" />
+        </many-to-one>
+        <property name="conclusion" type="string">
+            <column name="conclusion" length="20" not-null="true">
+                <comment>activating, inactivating, switch of function</comment>
+            </column>
+        </property>
+        <property name="downstreamEffect" type="string">
+            <column name="downstream_effect" length="1000">
+                <comment>e.g. AKT activation for PTEN deletion</comment>
+            </column>
+        </property>
+        <property name="context" type="string">
+            <column name="context" length="1000">
+                <comment>coregulated events</comment>
+            </column>
+        </property>
+        <property name="pmids" type="string">
+            <column name="pmids" length="200">
+                <comment>comma delimited pmids</comment>
+            </column>
+        </property>
+        <property name="comments" type="string">
+            <column name="comments" length="65535" />
+        </property>
+    </class>
+</hibernate-mapping>

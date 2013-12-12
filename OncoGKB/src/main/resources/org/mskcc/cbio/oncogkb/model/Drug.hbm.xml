@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Oct 31, 2013 4:28:42 PM by Hibernate Tools 3.2.1.GA -->
+<!-- Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncogkb.model.Drug" table="drug" catalog="oncogkb">
         <id name="drugId" type="java.lang.Integer">
@@ -17,5 +17,11 @@
         <property name="fdaApproved" type="boolean">
             <column name="fda_approved" not-null="true" />
         </property>
+        <set name="drugSensitivityEvidences" inverse="true">
+            <key>
+                <column name="drug_id" />
+            </key>
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.DrugSensitivityEvidence" />
+        </set>
     </class>
 </hibernate-mapping>
