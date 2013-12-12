@@ -4,7 +4,7 @@
  */
 package org.mskcc.cbio.oncogkb.controller;
 
-import org.mskcc.cbio.oncogkb.dao1.DbQueryHelper;
+import org.mskcc.cbio.oncogkb.dao.DbQueryHelper;
 import org.mskcc.cbio.oncogkb.model.Gene;
 
 import org.springframework.stereotype.Controller;

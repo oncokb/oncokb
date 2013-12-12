@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncogkb.dao1;
+package org.mskcc.cbio.oncogkb.dao;
 
 import java.util.List;
 import org.hibernate.Query;
