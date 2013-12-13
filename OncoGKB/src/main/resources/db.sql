@@ -70,8 +70,8 @@ CREATE TABLE `gene_evidence` (
 
 CREATE TABLE `alteration_activity_evidence` (
   `evidence_id` int(11) NOT NULL auto_increment,
-  `conclusion` varchar(20) NOT NULL COMMENT 'activating, inactivating, switch of function',
-  `downstream_effect` varchar(1000) COMMENT 'e.g. AKT activation for PTEN deletion',
+  `conclusion` varchar(20) NOT NULL COMMENT 'gain-of-function, loss-of-function, switch_of_function',
+  `downstream_effect` varchar(1000) COMMENT 'e.g. AKT activation',
   `context` varchar(1000) COMMENT 'coregulated events',
   `alteration_id` int(11) NOT NULL,
   `tumor_type_id` varchar(25) DEFAULT NULL,

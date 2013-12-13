@@ -16,12 +16,12 @@
         </many-to-one>
         <property name="conclusion" type="string">
             <column name="conclusion" length="20" not-null="true">
-                <comment>activating, inactivating, switch of function</comment>
+                <comment>gain-of-function, loss-of-function, switch_of_function</comment>
             </column>
         </property>
         <property name="downstreamEffect" type="string">
             <column name="downstream_effect" length="1000">
-                <comment>e.g. AKT activation for PTEN deletion</comment>
+                <comment>e.g. AKT activation</comment>
             </column>
         </property>
         <property name="context" type="string">
