@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA
+// Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA
 
 
 import java.util.HashSet;
@@ -17,7 +17,6 @@ public class TumorType  implements java.io.Serializable {
      private String color;
      private Set<DrugSensitivityEvidence> drugSensitivityEvidences = new HashSet<DrugSensitivityEvidence>(0);
      private Set<AlterationActivityEvidence> alterationActivityEvidences = new HashSet<AlterationActivityEvidence>(0);
-     private Set<GeneEvidence> geneEvidences = new HashSet<GeneEvidence>(0);
 
     public TumorType() {
     }
@@ -28,14 +27,13 @@ public class TumorType  implements java.io.Serializable {
         this.name = name;
         this.shortName = shortName;
     }
-    public TumorType(String tumorTypeId, String name, String shortName, String color, Set<DrugSensitivityEvidence> drugSensitivityEvidences, Set<AlterationActivityEvidence> alterationActivityEvidences, Set<GeneEvidence> geneEvidences) {
+    public TumorType(String tumorTypeId, String name, String shortName, String color, Set<DrugSensitivityEvidence> drugSensitivityEvidences, Set<AlterationActivityEvidence> alterationActivityEvidences) {
        this.tumorTypeId = tumorTypeId;
        this.name = name;
        this.shortName = shortName;
        this.color = color;
        this.drugSensitivityEvidences = drugSensitivityEvidences;
        this.alterationActivityEvidences = alterationActivityEvidences;
-       this.geneEvidences = geneEvidences;
     }
    
     public String getTumorTypeId() {
@@ -79,13 +77,6 @@ public class TumorType  implements java.io.Serializable {
     
     public void setAlterationActivityEvidences(Set<AlterationActivityEvidence> alterationActivityEvidences) {
         this.alterationActivityEvidences = alterationActivityEvidences;
-    }
-    public Set<GeneEvidence> getGeneEvidences() {
-        return this.geneEvidences;
-    }
-    
-    public void setGeneEvidences(Set<GeneEvidence> geneEvidences) {
-        this.geneEvidences = geneEvidences;
     }
 
 

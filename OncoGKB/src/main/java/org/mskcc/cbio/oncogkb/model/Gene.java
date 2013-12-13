@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA
+// Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA
 
 
 import java.util.HashSet;
@@ -15,7 +15,7 @@ public class Gene  implements java.io.Serializable {
      private String hugoSymbol;
      private String aliases;
      private Set<Alteration> alterations = new HashSet<Alteration>(0);
-     private Set<GeneEvidence> geneEvidences = new HashSet<GeneEvidence>(0);
+     private Set<GeneLabel> geneLabels = new HashSet<GeneLabel>(0);
 
     public Gene() {
     }
@@ -25,12 +25,12 @@ public class Gene  implements java.io.Serializable {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
     }
-    public Gene(int entrezGeneId, String hugoSymbol, String aliases, Set<Alteration> alterations, Set<GeneEvidence> geneEvidences) {
+    public Gene(int entrezGeneId, String hugoSymbol, String aliases, Set<Alteration> alterations, Set<GeneLabel> geneLabels) {
        this.entrezGeneId = entrezGeneId;
        this.hugoSymbol = hugoSymbol;
        this.aliases = aliases;
        this.alterations = alterations;
-       this.geneEvidences = geneEvidences;
+       this.geneLabels = geneLabels;
     }
    
     public int getEntrezGeneId() {
@@ -61,12 +61,12 @@ public class Gene  implements java.io.Serializable {
     public void setAlterations(Set<Alteration> alterations) {
         this.alterations = alterations;
     }
-    public Set<GeneEvidence> getGeneEvidences() {
-        return this.geneEvidences;
+    public Set<GeneLabel> getGeneLabels() {
+        return this.geneLabels;
     }
     
-    public void setGeneEvidences(Set<GeneEvidence> geneEvidences) {
-        this.geneEvidences = geneEvidences;
+    public void setGeneLabels(Set<GeneLabel> geneLabels) {
+        this.geneLabels = geneLabels;
     }
 
 

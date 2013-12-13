@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA
+// Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA
 
 
 
@@ -9,39 +9,37 @@ package org.mskcc.cbio.oncogkb.model;
 public class AlterationActivityEvidence  implements java.io.Serializable {
 
 
-     private Integer evidenceId;
+     private Integer alterationActivityEvidenceId;
      private TumorType tumorType;
      private Alteration alteration;
-     private String conclusion;
-     private String downstreamEffect;
-     private String context;
+     private String knownEffect;
+     private String descriptionOfKnownEffect;
+     private String genomicContext;
      private String pmids;
-     private String comments;
 
     public AlterationActivityEvidence() {
     }
 
 	
-    public AlterationActivityEvidence(Alteration alteration, String conclusion) {
+    public AlterationActivityEvidence(Alteration alteration, String knownEffect) {
         this.alteration = alteration;
-        this.conclusion = conclusion;
+        this.knownEffect = knownEffect;
     }
-    public AlterationActivityEvidence(TumorType tumorType, Alteration alteration, String conclusion, String downstreamEffect, String context, String pmids, String comments) {
+    public AlterationActivityEvidence(TumorType tumorType, Alteration alteration, String knownEffect, String descriptionOfKnownEffect, String genomicContext, String pmids) {
        this.tumorType = tumorType;
        this.alteration = alteration;
-       this.conclusion = conclusion;
-       this.downstreamEffect = downstreamEffect;
-       this.context = context;
+       this.knownEffect = knownEffect;
+       this.descriptionOfKnownEffect = descriptionOfKnownEffect;
+       this.genomicContext = genomicContext;
        this.pmids = pmids;
-       this.comments = comments;
     }
    
-    public Integer getEvidenceId() {
-        return this.evidenceId;
+    public Integer getAlterationActivityEvidenceId() {
+        return this.alterationActivityEvidenceId;
     }
     
-    public void setEvidenceId(Integer evidenceId) {
-        this.evidenceId = evidenceId;
+    public void setAlterationActivityEvidenceId(Integer alterationActivityEvidenceId) {
+        this.alterationActivityEvidenceId = alterationActivityEvidenceId;
     }
     public TumorType getTumorType() {
         return this.tumorType;
@@ -57,26 +55,26 @@ public class AlterationActivityEvidence  implements java.io.Serializable {
     public void setAlteration(Alteration alteration) {
         this.alteration = alteration;
     }
-    public String getConclusion() {
-        return this.conclusion;
+    public String getKnownEffect() {
+        return this.knownEffect;
     }
     
-    public void setConclusion(String conclusion) {
-        this.conclusion = conclusion;
+    public void setKnownEffect(String knownEffect) {
+        this.knownEffect = knownEffect;
     }
-    public String getDownstreamEffect() {
-        return this.downstreamEffect;
-    }
-    
-    public void setDownstreamEffect(String downstreamEffect) {
-        this.downstreamEffect = downstreamEffect;
-    }
-    public String getContext() {
-        return this.context;
+    public String getDescriptionOfKnownEffect() {
+        return this.descriptionOfKnownEffect;
     }
     
-    public void setContext(String context) {
-        this.context = context;
+    public void setDescriptionOfKnownEffect(String descriptionOfKnownEffect) {
+        this.descriptionOfKnownEffect = descriptionOfKnownEffect;
+    }
+    public String getGenomicContext() {
+        return this.genomicContext;
+    }
+    
+    public void setGenomicContext(String genomicContext) {
+        this.genomicContext = genomicContext;
     }
     public String getPmids() {
         return this.pmids;
@@ -84,13 +82,6 @@ public class AlterationActivityEvidence  implements java.io.Serializable {
     
     public void setPmids(String pmids) {
         this.pmids = pmids;
-    }
-    public String getComments() {
-        return this.comments;
-    }
-    
-    public void setComments(String comments) {
-        this.comments = comments;
     }
 
 

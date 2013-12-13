@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA -->
+<!-- Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncogkb.model.TumorType" table="tumor_type" catalog="oncogkb">
         <id name="tumorTypeId" type="string">
@@ -28,12 +28,6 @@
                 <column name="tumor_type_id" length="25" />
             </key>
             <one-to-many class="org.mskcc.cbio.oncogkb.model.AlterationActivityEvidence" />
-        </set>
-        <set name="geneEvidences" inverse="true">
-            <key>
-                <column name="tumor_type_id" length="25" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneEvidence" />
         </set>
     </class>
 </hibernate-mapping>

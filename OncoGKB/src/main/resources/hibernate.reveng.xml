@@ -4,9 +4,9 @@
   <schema-selection match-catalog="oncogkb"/>
   <table-filter match-name="tumor_type"/>
   <table-filter match-name="gene"/>
+  <table-filter match-name="gene_label"/>
   <table-filter match-name="drug"/>
   <table-filter match-name="alteration"/>
-  <table-filter match-name="gene_evidence"/>
   <table-filter match-name="alteration_activity_evidence"/>
   <table-filter match-name="drug_sensitivity_evidence"/>
 </hibernate-reverse-engineering>

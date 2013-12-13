@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA
+// Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA
 
 
 
@@ -9,39 +9,39 @@ package org.mskcc.cbio.oncogkb.model;
 public class DrugSensitivityEvidence  implements java.io.Serializable {
 
 
-     private Integer evidenceId;
+     private Integer drugSensitivityEvidenceId;
      private TumorType tumorType;
      private Drug drug;
      private Alteration alteration;
-     private String conclusion;
+     private String knownEffect;
+     private String descriptionOfKnownEffect;
      private String context;
      private String pmids;
-     private String comments;
 
     public DrugSensitivityEvidence() {
     }
 
 	
-    public DrugSensitivityEvidence(Alteration alteration, String conclusion) {
+    public DrugSensitivityEvidence(Alteration alteration, String knownEffect) {
         this.alteration = alteration;
-        this.conclusion = conclusion;
+        this.knownEffect = knownEffect;
     }
-    public DrugSensitivityEvidence(TumorType tumorType, Drug drug, Alteration alteration, String conclusion, String context, String pmids, String comments) {
+    public DrugSensitivityEvidence(TumorType tumorType, Drug drug, Alteration alteration, String knownEffect, String descriptionOfKnownEffect, String context, String pmids) {
        this.tumorType = tumorType;
        this.drug = drug;
        this.alteration = alteration;
-       this.conclusion = conclusion;
+       this.knownEffect = knownEffect;
+       this.descriptionOfKnownEffect = descriptionOfKnownEffect;
        this.context = context;
        this.pmids = pmids;
-       this.comments = comments;
     }
    
-    public Integer getEvidenceId() {
-        return this.evidenceId;
+    public Integer getDrugSensitivityEvidenceId() {
+        return this.drugSensitivityEvidenceId;
     }
     
-    public void setEvidenceId(Integer evidenceId) {
-        this.evidenceId = evidenceId;
+    public void setDrugSensitivityEvidenceId(Integer drugSensitivityEvidenceId) {
+        this.drugSensitivityEvidenceId = drugSensitivityEvidenceId;
     }
     public TumorType getTumorType() {
         return this.tumorType;
@@ -64,12 +64,19 @@ public class DrugSensitivityEvidence  implements java.io.Serializable {
     public void setAlteration(Alteration alteration) {
         this.alteration = alteration;
     }
-    public String getConclusion() {
-        return this.conclusion;
+    public String getKnownEffect() {
+        return this.knownEffect;
     }
     
-    public void setConclusion(String conclusion) {
-        this.conclusion = conclusion;
+    public void setKnownEffect(String knownEffect) {
+        this.knownEffect = knownEffect;
+    }
+    public String getDescriptionOfKnownEffect() {
+        return this.descriptionOfKnownEffect;
+    }
+    
+    public void setDescriptionOfKnownEffect(String descriptionOfKnownEffect) {
+        this.descriptionOfKnownEffect = descriptionOfKnownEffect;
     }
     public String getContext() {
         return this.context;
@@ -84,13 +91,6 @@ public class DrugSensitivityEvidence  implements java.io.Serializable {
     
     public void setPmids(String pmids) {
         this.pmids = pmids;
-    }
-    public String getComments() {
-        return this.comments;
-    }
-    
-    public void setComments(String comments) {
-        this.comments = comments;
     }
 
 

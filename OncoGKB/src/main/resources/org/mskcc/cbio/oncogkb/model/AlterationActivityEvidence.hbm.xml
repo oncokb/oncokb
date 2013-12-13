@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Dec 12, 2013 4:07:37 PM by Hibernate Tools 3.2.1.GA -->
+<!-- Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncogkb.model.AlterationActivityEvidence" table="alteration_activity_evidence" catalog="oncogkb">
-        <id name="evidenceId" type="java.lang.Integer">
-            <column name="evidence_id" />
+        <id name="alterationActivityEvidenceId" type="java.lang.Integer">
+            <column name="alteration_activity_evidence_id" />
             <generator class="identity" />
         </id>
         <many-to-one name="tumorType" class="org.mskcc.cbio.oncogkb.model.TumorType" fetch="select">
@@ -14,18 +14,18 @@
         <many-to-one name="alteration" class="org.mskcc.cbio.oncogkb.model.Alteration" fetch="select">
             <column name="alteration_id" not-null="true" />
         </many-to-one>
-        <property name="conclusion" type="string">
-            <column name="conclusion" length="20" not-null="true">
+        <property name="knownEffect" type="string">
+            <column name="known_effect" length="20" not-null="true">
                 <comment>gain-of-function, loss-of-function, switch_of_function</comment>
             </column>
         </property>
-        <property name="downstreamEffect" type="string">
-            <column name="downstream_effect" length="1000">
+        <property name="descriptionOfKnownEffect" type="string">
+            <column name="description_of_known_effect" length="65535">
                 <comment>e.g. AKT activation</comment>
             </column>
         </property>
-        <property name="context" type="string">
-            <column name="context" length="1000">
+        <property name="genomicContext" type="string">
+            <column name="genomic_context" length="1000">
                 <comment>coregulated events</comment>
             </column>
         </property>
@@ -33,9 +33,6 @@
             <column name="pmids" length="200">
                 <comment>comma delimited pmids</comment>
             </column>
-        </property>
-        <property name="comments" type="string">
-            <column name="comments" length="65535" />
         </property>
     </class>
 </hibernate-mapping>

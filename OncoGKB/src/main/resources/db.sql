@@ -71,7 +71,7 @@ CREATE TABLE `alteration_activity_evidence` (
   `known_effect` varchar(20) NOT NULL COMMENT 'gain-of-function, loss-of-function, switch_of_function',
   `description_of_known_effect` text COMMENT 'e.g. AKT activation',
   `genomic_context` varchar(1000) COMMENT 'coregulated events',
-  `pmids` varchar(200) COMMENT 'comma delimited pmids'
+  `pmids` varchar(200) COMMENT 'comma delimited pmids',
   PRIMARY KEY (`alteration_activity_evidence_id`),
   FOREIGN KEY (`alteration_id`) REFERENCES `alteration`(`alteration_id`),
   FOREIGN KEY (`tumor_type_id`) REFERENCES `tumor_type`(`tumor_type_id`)
