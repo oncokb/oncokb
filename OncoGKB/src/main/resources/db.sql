@@ -25,6 +25,8 @@ CREATE TABLE `tumor_type` (
 CREATE TABLE `gene` (
   `entrez_gene_id` int(11) NOT NULL,
   `hugo_symbol` varchar(50) NOT NULL,
+  `name` varchar(500) NOT NULL,
+  `summary` text NOT NULL,
   `aliases` varchar(500),
   PRIMARY KEY (`entrez_gene_id`),
   UNIQUE KEY `hugo_symbol` (`hugo_symbol`)

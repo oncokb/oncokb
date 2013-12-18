@@ -11,6 +11,12 @@
         <property name="hugoSymbol" type="string">
             <column name="hugo_symbol" length="50" not-null="true" unique="true" />
         </property>
+        <property name="name" type="string">
+            <column name="name" length="500" />
+        </property>
+        <property name="summary" type="string">
+            <column name="summary" length="65535" />
+        </property>
         <property name="aliases" type="string">
             <column name="aliases" length="500" />
         </property>

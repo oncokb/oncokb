@@ -13,6 +13,8 @@ public class Gene  implements java.io.Serializable {
 
      private int entrezGeneId;
      private String hugoSymbol;
+     private String name;
+     private String summary;
      private String aliases;
      private Set<Alteration> alterations = new HashSet<Alteration>(0);
      private Set<GeneLabel> geneLabels = new HashSet<GeneLabel>(0);
@@ -25,9 +27,12 @@ public class Gene  implements java.io.Serializable {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
     }
-    public Gene(int entrezGeneId, String hugoSymbol, String aliases, Set<Alteration> alterations, Set<GeneLabel> geneLabels) {
+    public Gene(int entrezGeneId, String hugoSymbol, String name, String summary,
+            String aliases, Set<Alteration> alterations, Set<GeneLabel> geneLabels) {
        this.entrezGeneId = entrezGeneId;
        this.hugoSymbol = hugoSymbol;
+       this.name = name;
+       this.summary = summary;
        this.aliases = aliases;
        this.alterations = alterations;
        this.geneLabels = geneLabels;
@@ -46,6 +51,22 @@ public class Gene  implements java.io.Serializable {
     
     public void setHugoSymbol(String hugoSymbol) {
         this.hugoSymbol = hugoSymbol;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
     public String getAliases() {
         return this.aliases;
