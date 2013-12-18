@@ -7,10 +7,12 @@ package org.mskcc.cbio.oncogkb.dao.importor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncogkb.model.Gene;
+import org.mskcc.cbio.oncogkb.model.GeneAlias;
 import org.mskcc.cbio.oncogkb.util.FileUtils;
 import org.mskcc.cbio.oncogkb.util.JsonUtils;
 
@@ -92,10 +94,18 @@ public final class GeneImporterMyGeneInfo2 {
         Object objAlias = map.get("alias");
         if (objAlias!=null) {
             if (objAlias instanceof String) {
-                gene.setAliases(String.class.cast(objAlias));
+                GeneAlias alias = new GeneAlias(gene, String.class.cast(objAlias));
+                HashSet<GeneAlias> aliases = new HashSet<GeneAlias>(1);
+                aliases.add(alias);
+                gene.setGeneAliases(aliases);
             } else if (objAlias instanceof List) {
-                List<String> aliases = List.class.cast(objAlias);
-                gene.setAliases(StringUtils.join(aliases, ", "));
+                List<String> strAliases = List.class.cast(objAlias);
+                HashSet<GeneAlias> aliases = new HashSet<GeneAlias>(strAliases.size());
+                for (String alias : strAliases) {
+                    aliases.add(new GeneAlias(gene, alias));
+                }
+                
+                gene.setGeneAliases(aliases);
             }
         }
     }

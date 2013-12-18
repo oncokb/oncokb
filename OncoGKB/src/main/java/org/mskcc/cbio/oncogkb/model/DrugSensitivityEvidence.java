@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA
+// Generated Dec 18, 2013 3:43:05 PM by Hibernate Tools 3.2.1.GA
 
 
 

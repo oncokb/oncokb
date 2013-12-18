@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA
+// Generated Dec 18, 2013 3:43:05 PM by Hibernate Tools 3.2.1.GA
 
 
 import java.util.HashSet;
@@ -15,9 +15,9 @@ public class Gene  implements java.io.Serializable {
      private String hugoSymbol;
      private String name;
      private String summary;
-     private String aliases;
      private Set<Alteration> alterations = new HashSet<Alteration>(0);
      private Set<GeneLabel> geneLabels = new HashSet<GeneLabel>(0);
+     private Set<GeneAlias> geneAliases = new HashSet<GeneAlias>(0);
 
     public Gene() {
     }
@@ -28,15 +28,14 @@ public class Gene  implements java.io.Serializable {
         this.hugoSymbol = hugoSymbol;
         this.name = name;
     }
-    public Gene(int entrezGeneId, String hugoSymbol, String name, String summary,
-            String aliases, Set<Alteration> alterations, Set<GeneLabel> geneLabels) {
+    public Gene(int entrezGeneId, String hugoSymbol, String name, String summary, Set<Alteration> alterations, Set<GeneLabel> geneLabels, Set<GeneAlias> geneAliases) {
        this.entrezGeneId = entrezGeneId;
        this.hugoSymbol = hugoSymbol;
        this.name = name;
        this.summary = summary;
-       this.aliases = aliases;
        this.alterations = alterations;
        this.geneLabels = geneLabels;
+       this.geneAliases = geneAliases;
     }
    
     public int getEntrezGeneId() {
@@ -53,28 +52,19 @@ public class Gene  implements java.io.Serializable {
     public void setHugoSymbol(String hugoSymbol) {
         this.hugoSymbol = hugoSymbol;
     }
-
     public String getName() {
-        return name;
+        return this.name;
     }
-
+    
     public void setName(String name) {
         this.name = name;
     }
-
     public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-    public String getAliases() {
-        return this.aliases;
+        return this.summary;
     }
     
-    public void setAliases(String aliases) {
-        this.aliases = aliases;
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
     public Set<Alteration> getAlterations() {
         return this.alterations;
@@ -90,10 +80,18 @@ public class Gene  implements java.io.Serializable {
     public void setGeneLabels(Set<GeneLabel> geneLabels) {
         this.geneLabels = geneLabels;
     }
+    public Set<GeneAlias> getGeneAliases() {
+        return this.geneAliases;
+    }
+    
+    public void setGeneAliases(Set<GeneAlias> geneAliases) {
+        this.geneAliases = geneAliases;
+    }
 
     @Override
     public int hashCode() {
-        int hash = 7;
+        int hash = 3;
+        hash = 53 * hash + this.entrezGeneId;
         return hash;
     }
 
@@ -112,7 +110,7 @@ public class Gene  implements java.io.Serializable {
         return true;
     }
 
-    
+
 }
 
 

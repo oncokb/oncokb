@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA -->
+<!-- Generated Dec 18, 2013 3:43:05 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncogkb.model.DrugSensitivityEvidence" table="drug_sensitivity_evidence" catalog="oncogkb">
         <id name="drugSensitivityEvidenceId" type="java.lang.Integer">

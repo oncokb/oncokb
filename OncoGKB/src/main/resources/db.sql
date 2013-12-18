@@ -1,10 +1,11 @@
 
 # drop in reverse order of create to satisfy the foreign key constraint.
-DROP TABLE IF EXISTS `gene_label`;
-DROP TABLE IF EXISTS `alteration_activity_evidence`;
 DROP TABLE IF EXISTS `drug_sensitivity_evidence`;
+DROP TABLE IF EXISTS `alteration_activity_evidence`;
 DROP TABLE IF EXISTS `alteration`;
 DROP TABLE IF EXISTS `drug`;
+DROP TABLE IF EXISTS `gene_label`;
+DROP TABLE IF EXISTS `gene_alias`;
 DROP TABLE IF EXISTS `gene`;
 DROP TABLE IF EXISTS `tumor_type`;
 
@@ -26,10 +27,20 @@ CREATE TABLE `gene` (
   `entrez_gene_id` int(11) NOT NULL,
   `hugo_symbol` varchar(50) NOT NULL,
   `name` varchar(500) NOT NULL,
-  `summary` text NOT NULL,
-  `aliases` varchar(500),
+  `summary` text,
   PRIMARY KEY (`entrez_gene_id`),
   UNIQUE KEY `hugo_symbol` (`hugo_symbol`)
+) ENGINE=INNODB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `gene_alias` (
+  `gene_alias_id` int(11) NOT NULL auto_increment,
+  `entrez_gene_id` int(11) NOT NULL,
+  `aliase` varchar(100) NOT NULL,
+  PRIMARY KEY (`gene_alias_id`),
+  UNIQUE KEY (`gene_alias_id`, `entrez_gene_id`),
+  FOREIGN KEY (`entrez_gene_id`) REFERENCES `gene`(`entrez_gene_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

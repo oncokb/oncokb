@@ -3,18 +3,16 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 18, 2013 3:43:05 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncogkb.model.GeneLabel" table="gene_label" catalog="oncogkb">
-        <id name="geneLabelId" type="java.lang.Integer">
-            <column name="gene_label_id" />
+    <class name="org.mskcc.cbio.oncogkb.model.GeneAlias" table="gene_alias" catalog="oncogkb">
+        <id name="geneAliasId" type="java.lang.Integer">
+            <column name="gene_alias_id" />
             <generator class="identity" />
         </id>
         <many-to-one name="gene" class="org.mskcc.cbio.oncogkb.model.Gene" fetch="select">
             <column name="entrez_gene_id" not-null="true" />
         </many-to-one>
-        <property name="label" type="string">
-            <column name="label" length="20" not-null="true">
-                <comment>tumor-suppressor-gene, oncogene, IMPACT, foundation-medicine</comment>
-            </column>
+        <property name="aliase" type="string">
+            <column name="aliase" length="100" not-null="true" />
         </property>
     </class>
 </hibernate-mapping>

@@ -15,6 +15,7 @@
     <mapping resource="org/mskcc/cbio/oncogkb/model/AlterationActivityEvidence.hbm.xml"/>
     <mapping resource="org/mskcc/cbio/oncogkb/model/DrugSensitivityEvidence.hbm.xml"/>
     <mapping resource="org/mskcc/cbio/oncogkb/model/GeneLabel.hbm.xml"/>
+    <mapping resource="org/mskcc/cbio/oncogkb/model/GeneAlias.hbm.xml"/>
     <mapping resource="org/mskcc/cbio/oncogkb/model/Gene.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

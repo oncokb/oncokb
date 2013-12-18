@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Dec 13, 2013 4:22:38 PM by Hibernate Tools 3.2.1.GA -->
+<!-- Generated Dec 18, 2013 3:43:05 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncogkb.model.Gene" table="gene" catalog="oncogkb">
         <id name="entrezGeneId" type="int">
@@ -12,13 +12,10 @@
             <column name="hugo_symbol" length="50" not-null="true" unique="true" />
         </property>
         <property name="name" type="string">
-            <column name="name" length="500" />
+            <column name="name" length="500" not-null="true" />
         </property>
         <property name="summary" type="string">
             <column name="summary" length="65535" />
-        </property>
-        <property name="aliases" type="string">
-            <column name="aliases" length="500" />
         </property>
         <set name="alterations" inverse="true">
             <key>
@@ -31,6 +28,12 @@
                 <column name="entrez_gene_id" not-null="true" />
             </key>
             <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneLabel" />
+        </set>
+        <set name="geneAliases" inverse="true">
+            <key>
+                <column name="entrez_gene_id" not-null="true" />
+            </key>
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneAlias" />
         </set>
     </class>
 </hibernate-mapping>
