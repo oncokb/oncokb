@@ -23,9 +23,10 @@ public class Gene  implements java.io.Serializable {
     }
 
 	
-    public Gene(int entrezGeneId, String hugoSymbol) {
+    public Gene(int entrezGeneId, String hugoSymbol, String name) {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
+        this.name = name;
     }
     public Gene(int entrezGeneId, String hugoSymbol, String name, String summary,
             String aliases, Set<Alteration> alterations, Set<GeneLabel> geneLabels) {
@@ -90,9 +91,28 @@ public class Gene  implements java.io.Serializable {
         this.geneLabels = geneLabels;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Gene other = (Gene) obj;
+        if (this.entrezGeneId != other.entrezGeneId) {
+            return false;
+        }
+        return true;
+    }
 
-
+    
 }
 
 
