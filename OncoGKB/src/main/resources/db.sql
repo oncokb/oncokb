@@ -37,9 +37,9 @@ CREATE TABLE `gene` (
 CREATE TABLE `gene_alias` (
   `gene_alias_id` int(11) NOT NULL auto_increment,
   `entrez_gene_id` int(11) NOT NULL,
-  `aliase` varchar(100) NOT NULL,
+  `alias` varchar(100) NOT NULL,
   PRIMARY KEY (`gene_alias_id`),
-  UNIQUE KEY (`entrez_gene_id`, `aliase`),
+  UNIQUE KEY (`entrez_gene_id`, `alias`),
   FOREIGN KEY (`entrez_gene_id`) REFERENCES `gene`(`entrez_gene_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=latin1;
 

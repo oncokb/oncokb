@@ -66,6 +66,52 @@ public final class DaoGene {
     }
     
     /**
+     * Get GeneAlias 
+     * @param entrezGeneId
+     * @param alias
+     * @return 
+     */
+    public static GeneAlias getGeneAlias(int entrezGeneId, String alias) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction tx = session.beginTransaction();
+        Query q = session.createQuery ("from GeneAlias as gene_alias"
+                + " where gene_alias.gene=?"
+                + " and gene_alias.alias=?");
+        q.setInteger(0, entrezGeneId);
+        q.setString(1, alias);
+        List list = q.list();
+        
+        if (list==null || list.isEmpty()) {
+            return null;
+        }
+        
+        return GeneAlias.class.cast(list.get(0));
+    }
+    
+    /**
+     * get GeneLabel
+     * @param entrezGeneId
+     * @param label
+     * @return 
+     */
+    public static GeneLabel getGeneLabel(int entrezGeneId, String label) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction tx = session.beginTransaction();
+        Query q = session.createQuery ("from GeneLabel as gene_label"
+                + " where gene_label.gene=?"
+                + " and gene_label.label=?");
+        q.setInteger(0, entrezGeneId);
+        q.setString(1, label);
+        List list = q.list();
+        
+        if (list==null || list.isEmpty()) {
+            return null;
+        }
+        
+        return GeneLabel.class.cast(list.get(0));
+    }
+    
+    /**
      * Save a gene to db.
      * @param gene 
      */

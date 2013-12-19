@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 19, 2013 12:58:26 AM by Hibernate Tools 3.2.1.GA
+// Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
 import java.util.HashSet;

@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 19, 2013 12:58:26 AM by Hibernate Tools 3.2.1.GA
+// Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
 
@@ -11,14 +11,14 @@ public class GeneAlias  implements java.io.Serializable {
 
      private Integer geneAliasId;
      private Gene gene;
-     private String aliase;
+     private String alias;
 
     public GeneAlias() {
     }
 
-    public GeneAlias(Gene gene, String aliase) {
+    public GeneAlias(Gene gene, String alias) {
        this.gene = gene;
-       this.aliase = aliase;
+       this.alias = alias;
     }
    
     public Integer getGeneAliasId() {
@@ -35,17 +35,19 @@ public class GeneAlias  implements java.io.Serializable {
     public void setGene(Gene gene) {
         this.gene = gene;
     }
-    public String getAliase() {
-        return this.aliase;
+    public String getAlias() {
+        return this.alias;
     }
     
-    public void setAliase(String aliase) {
-        this.aliase = aliase;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 23 * hash + (this.gene != null ? this.gene.hashCode() : 0);
+        hash = 23 * hash + (this.alias != null ? this.alias.hashCode() : 0);
         return hash;
     }
 
@@ -61,7 +63,7 @@ public class GeneAlias  implements java.io.Serializable {
         if (this.gene != other.gene && (this.gene == null || !this.gene.equals(other.gene))) {
             return false;
         }
-        if ((this.aliase == null) ? (other.aliase != null) : !this.aliase.equals(other.aliase)) {
+        if ((this.alias == null) ? (other.alias != null) : !this.alias.equals(other.alias)) {
             return false;
         }
         return true;

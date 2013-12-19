@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncogkb.model;
-// Generated Dec 19, 2013 12:58:26 AM by Hibernate Tools 3.2.1.GA
+// Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
 
@@ -46,6 +46,8 @@ public class GeneLabel  implements java.io.Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 47 * hash + (this.gene != null ? this.gene.hashCode() : 0);
+        hash = 47 * hash + (this.label != null ? this.label.hashCode() : 0);
         return hash;
     }
 
