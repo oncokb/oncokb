@@ -39,7 +39,7 @@ CREATE TABLE `gene_alias` (
   `entrez_gene_id` int(11) NOT NULL,
   `aliase` varchar(100) NOT NULL,
   PRIMARY KEY (`gene_alias_id`),
-  UNIQUE KEY (`gene_alias_id`, `entrez_gene_id`),
+  UNIQUE KEY (`entrez_gene_id`, `aliase`),
   FOREIGN KEY (`entrez_gene_id`) REFERENCES `gene`(`entrez_gene_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=latin1;
 
@@ -48,8 +48,9 @@ CREATE TABLE `gene_alias` (
 CREATE TABLE `gene_label` (
   `gene_label_id` int(11) NOT NULL auto_increment,
   `entrez_gene_id` int(11) NOT NULL,
-  `label` varchar(20) NOT NULL COMMENT 'tumor-suppressor-gene, oncogene, IMPACT, foundation-medicine',
+  `label` varchar(200) NOT NULL COMMENT 'tumor-suppressor-gene, oncogene, IMPACT, foundation-medicine',
   PRIMARY KEY (`gene_label_id`),
+  UNIQUE KEY (`entrez_gene_id`, `label`),
   FOREIGN KEY (`entrez_gene_id`) REFERENCES `gene`(`entrez_gene_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 

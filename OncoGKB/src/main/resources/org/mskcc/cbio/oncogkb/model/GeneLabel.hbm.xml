@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Dec 18, 2013 3:43:05 PM by Hibernate Tools 3.2.1.GA -->
+<!-- Generated Dec 19, 2013 12:58:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncogkb.model.GeneLabel" table="gene_label" catalog="oncogkb">
         <id name="geneLabelId" type="java.lang.Integer">
@@ -12,7 +12,7 @@
             <column name="entrez_gene_id" not-null="true" />
         </many-to-one>
         <property name="label" type="string">
-            <column name="label" length="20" not-null="true">
+            <column name="label" length="200" not-null="true">
                 <comment>tumor-suppressor-gene, oncogene, IMPACT, foundation-medicine</comment>
             </column>
         </property>

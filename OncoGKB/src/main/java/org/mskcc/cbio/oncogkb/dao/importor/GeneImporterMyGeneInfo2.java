@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncogkb.model.Gene;
 import org.mskcc.cbio.oncogkb.model.GeneAlias;
 import org.mskcc.cbio.oncogkb.util.FileUtils;
@@ -25,10 +24,10 @@ public final class GeneImporterMyGeneInfo2 {
         throw new AssertionError();
     }
     
-    private static final String urlMyGeneInfo2 = "http://mygene.info/v2/";
+    private static final String URL_MY_GENE_INFO_2 = "http://mygene.info/v2/";
     
     public static Gene readByEntrezId(int entrezId) throws IOException {
-        String url = urlMyGeneInfo2 + "query?species=human&q=entrezgene:" + entrezId;
+        String url = URL_MY_GENE_INFO_2 + "query?species=human&q=entrezgene:" + entrezId;
         String json = FileUtils.readRemote(url);
         
         List<Gene> genes = parseGenes(json);
@@ -48,7 +47,7 @@ public final class GeneImporterMyGeneInfo2 {
     }
     
     public static List<Gene> readBySymbol(String symbol) throws IOException {
-        String url = urlMyGeneInfo2 + "query?species=human&q=" + symbol;
+        String url = URL_MY_GENE_INFO_2 + "query?species=human&q=" + symbol;
         String json = FileUtils.readRemote(url);
         
         List<Gene> genes = parseGenes(json);
@@ -82,7 +81,8 @@ public final class GeneImporterMyGeneInfo2 {
     }
     
     private static void annotateGene(Gene gene) throws IOException {
-        String url = urlMyGeneInfo2 + "gene/" + gene.getEntrezGeneId();
+        String url = URL_MY_GENE_INFO_2 + "gene/" + gene.getEntrezGeneId()
+                + "?fields=summary,alias";
         String json = FileUtils.readRemote(url);
         
         Map<String,Object> map = JsonUtils.jsonToMap(json);
