@@ -5,3 +5,4 @@ OncoGKB/.project
 OncoGKB/.settings/*
 OncoGKB/nb-configuration.xml
 ^OncoGKB/src/main/webapp/META-INF/context\.xml$
+^OncoGKB/src/main/resources/properties/database\.properties$

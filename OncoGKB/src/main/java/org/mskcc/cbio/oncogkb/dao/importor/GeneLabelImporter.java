@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 import org.mskcc.cbio.oncogkb.bo.GeneBo;
 import org.mskcc.cbio.oncogkb.model.Gene;
-import org.mskcc.cbio.oncogkb.model.GeneLabel;
 import org.mskcc.cbio.oncogkb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncogkb.util.FileUtils;
 import org.springframework.context.ApplicationContext;
@@ -55,11 +54,10 @@ public final class GeneLabelImporter {
                         + " to " + gene.getHugoSymbol());
             }
             
-            Set<GeneLabel> labels = new HashSet<GeneLabel>();
+            Set<String> labels = new HashSet<String>();
             for (int j=2; j<parts.length; j++) {
                 if (parts[j].equals("1")) {
-                    GeneLabel label = new GeneLabel(gene, headers[j]);
-                    labels.add(label);
+                    labels.add(headers[j]);
                 }
             }
             gene.setGeneLabels(labels);

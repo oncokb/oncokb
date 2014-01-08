@@ -6,8 +6,6 @@ package org.mskcc.cbio.oncogkb.bo;
 
 import java.util.Collection;
 import org.mskcc.cbio.oncogkb.model.Gene;
-import org.mskcc.cbio.oncogkb.model.GeneAlias;
-import org.mskcc.cbio.oncogkb.model.GeneLabel;
 
 /**
  * Gene business object (BO) interface and implementation, it’s used to store
@@ -29,22 +27,6 @@ public interface GeneBo {
      * @return gene object or null.
      */
     Gene getGeneByEntrezGeneId(int entrezGeneId);
-    
-    /**
-     * Get GeneAlias 
-     * @param entrezGeneId
-     * @param alias
-     * @return 
-     */
-    GeneAlias getGeneAlias(int entrezGeneId, String alias);
-    
-    /**
-     * get GeneLabel
-     * @param entrezGeneId
-     * @param label
-     * @return 
-     */
-    GeneLabel getGeneLabel(int entrezGeneId, String label);
     
     /**
      * Save a gene to db.

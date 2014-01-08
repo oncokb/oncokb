@@ -17,23 +17,17 @@
         <property name="summary" type="string">
             <column name="summary" length="65535" />
         </property>
-        <set name="alterations" inverse="true">
+        <set name="geneLabels" table="gene_label" inverse="true" lazy="false">
             <key>
                 <column name="entrez_gene_id" not-null="true" />
             </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.Alteration" lazy="false" />
+            <element column="label" type="string"></element> 
         </set>
-        <set name="geneLabels" inverse="true">
+        <set name="geneAliases" table="gene_alias" inverse="true" lazy="false">
             <key>
                 <column name="entrez_gene_id" not-null="true" />
             </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneLabel" lazy="false" />
-        </set>
-        <set name="geneAliases" inverse="true">
-            <key>
-                <column name="entrez_gene_id" not-null="true" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneAlias" lazy="false" />
+            <element column="alias" type="string"></element> 
         </set>
     </class>
 </hibernate-mapping>

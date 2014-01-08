@@ -6,8 +6,6 @@ package org.mskcc.cbio.oncogkb.dao;
 
 import java.util.Collection;
 import org.mskcc.cbio.oncogkb.model.Gene;
-import org.mskcc.cbio.oncogkb.model.GeneAlias;
-import org.mskcc.cbio.oncogkb.model.GeneLabel;
 
 /**
  * handling db requests for gene, gene_alias, and gene_label
@@ -27,22 +25,6 @@ public interface GeneDao {
      * @return gene object or null.
      */
     Gene getGeneByEntrezGeneId(int entrezGeneId);
-    
-    /**
-     * Get GeneAlias 
-     * @param entrezGeneId
-     * @param alias
-     * @return 
-     */
-    GeneAlias getGeneAlias(int entrezGeneId, String alias);
-    
-    /**
-     * get GeneLabel
-     * @param entrezGeneId
-     * @param label
-     * @return 
-     */
-    GeneLabel getGeneLabel(int entrezGeneId, String label);
     
     /**
      * Save a gene to db.

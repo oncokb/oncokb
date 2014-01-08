@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.mskcc.cbio.oncogkb.model.Gene;
-import org.mskcc.cbio.oncogkb.model.GeneAlias;
 import org.mskcc.cbio.oncogkb.util.FileUtils;
 import org.mskcc.cbio.oncogkb.util.JsonUtils;
 
@@ -94,18 +93,13 @@ public final class GeneImporterMyGeneInfo2 {
         Object objAlias = map.get("alias");
         if (objAlias!=null) {
             if (objAlias instanceof String) {
-                GeneAlias alias = new GeneAlias(gene, String.class.cast(objAlias));
-                HashSet<GeneAlias> aliases = new HashSet<GeneAlias>(1);
+                String alias = String.class.cast(objAlias);
+                HashSet<String> aliases = new HashSet<String>(1);
                 aliases.add(alias);
                 gene.setGeneAliases(aliases);
             } else if (objAlias instanceof List) {
-                List<String> strAliases = List.class.cast(objAlias);
-                HashSet<GeneAlias> aliases = new HashSet<GeneAlias>(strAliases.size());
-                for (String alias : strAliases) {
-                    aliases.add(new GeneAlias(gene, alias));
-                }
-                
-                gene.setGeneAliases(aliases);
+                List<String> aliases = List.class.cast(objAlias);
+                gene.setGeneAliases(new HashSet<String>(aliases));
             }
         }
     }
