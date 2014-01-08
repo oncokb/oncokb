@@ -21,17 +21,5 @@
                 <comment>Mutation, CNA</comment>
             </column>
         </property>
-        <set name="drugSensitivityEvidences" inverse="true">
-            <key>
-                <column name="alteration_id" not-null="true" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.DrugSensitivityEvidence" />
-        </set>
-        <set name="alterationActivityEvidences" inverse="true">
-            <key>
-                <column name="alteration_id" not-null="true" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.AlterationActivityEvidence" />
-        </set>
     </class>
 </hibernate-mapping>

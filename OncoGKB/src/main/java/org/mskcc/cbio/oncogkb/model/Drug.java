@@ -15,21 +15,18 @@ public class Drug  implements java.io.Serializable {
      private String drugName;
      private String synonyms;
      private boolean fdaApproved;
-     private Set<DrugSensitivityEvidence> drugSensitivityEvidences = new HashSet<DrugSensitivityEvidence>(0);
 
     public Drug() {
     }
 
-	
     public Drug(String drugName, boolean fdaApproved) {
         this.drugName = drugName;
         this.fdaApproved = fdaApproved;
     }
-    public Drug(String drugName, String synonyms, boolean fdaApproved, Set<DrugSensitivityEvidence> drugSensitivityEvidences) {
+    public Drug(String drugName, String synonyms, boolean fdaApproved) {
        this.drugName = drugName;
        this.synonyms = synonyms;
        this.fdaApproved = fdaApproved;
-       this.drugSensitivityEvidences = drugSensitivityEvidences;
     }
    
     public Integer getDrugId() {
@@ -60,17 +57,30 @@ public class Drug  implements java.io.Serializable {
     public void setFdaApproved(boolean fdaApproved) {
         this.fdaApproved = fdaApproved;
     }
-    public Set<DrugSensitivityEvidence> getDrugSensitivityEvidences() {
-        return this.drugSensitivityEvidences;
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + (this.drugName != null ? this.drugName.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Drug other = (Drug) obj;
+        if ((this.drugName == null) ? (other.drugName != null) : !this.drugName.equals(other.drugName)) {
+            return false;
+        }
+        return true;
     }
     
-    public void setDrugSensitivityEvidences(Set<DrugSensitivityEvidence> drugSensitivityEvidences) {
-        this.drugSensitivityEvidences = drugSensitivityEvidences;
-    }
-
-
-
-
+    
 }
 
 

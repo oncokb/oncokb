@@ -17,17 +17,5 @@
         <property name="color" type="string">
             <column name="color" length="31" />
         </property>
-        <set name="drugSensitivityEvidences" inverse="true">
-            <key>
-                <column name="tumor_type_id" length="25" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.DrugSensitivityEvidence" />
-        </set>
-        <set name="alterationActivityEvidences" inverse="true">
-            <key>
-                <column name="tumor_type_id" length="25" />
-            </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.AlterationActivityEvidence" />
-        </set>
     </class>
 </hibernate-mapping>

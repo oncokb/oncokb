@@ -15,8 +15,6 @@ public class TumorType  implements java.io.Serializable {
      private String name;
      private String shortName;
      private String color;
-     private Set<DrugSensitivityEvidence> drugSensitivityEvidences = new HashSet<DrugSensitivityEvidence>(0);
-     private Set<AlterationActivityEvidence> alterationActivityEvidences = new HashSet<AlterationActivityEvidence>(0);
 
     public TumorType() {
     }
@@ -27,13 +25,11 @@ public class TumorType  implements java.io.Serializable {
         this.name = name;
         this.shortName = shortName;
     }
-    public TumorType(String tumorTypeId, String name, String shortName, String color, Set<DrugSensitivityEvidence> drugSensitivityEvidences, Set<AlterationActivityEvidence> alterationActivityEvidences) {
+    public TumorType(String tumorTypeId, String name, String shortName, String color) {
        this.tumorTypeId = tumorTypeId;
        this.name = name;
        this.shortName = shortName;
        this.color = color;
-       this.drugSensitivityEvidences = drugSensitivityEvidences;
-       this.alterationActivityEvidences = alterationActivityEvidences;
     }
    
     public String getTumorTypeId() {
@@ -64,22 +60,28 @@ public class TumorType  implements java.io.Serializable {
     public void setColor(String color) {
         this.color = color;
     }
-    public Set<DrugSensitivityEvidence> getDrugSensitivityEvidences() {
-        return this.drugSensitivityEvidences;
-    }
-    
-    public void setDrugSensitivityEvidences(Set<DrugSensitivityEvidence> drugSensitivityEvidences) {
-        this.drugSensitivityEvidences = drugSensitivityEvidences;
-    }
-    public Set<AlterationActivityEvidence> getAlterationActivityEvidences() {
-        return this.alterationActivityEvidences;
-    }
-    
-    public void setAlterationActivityEvidences(Set<AlterationActivityEvidence> alterationActivityEvidences) {
-        this.alterationActivityEvidences = alterationActivityEvidences;
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + (this.tumorTypeId != null ? this.tumorTypeId.hashCode() : 0);
+        return hash;
     }
 
-
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TumorType other = (TumorType) obj;
+        if ((this.tumorTypeId == null) ? (other.tumorTypeId != null) : !this.tumorTypeId.equals(other.tumorTypeId)) {
+            return false;
+        }
+        return true;
+    }
 
 
 }
