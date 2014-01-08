@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.mskcc.cbio.oncogkb.dao.DaoGene;
+import org.mskcc.cbio.oncogkb.bo.GeneBo;
 import org.mskcc.cbio.oncogkb.model.Gene;
 import org.mskcc.cbio.oncogkb.model.GeneLabel;
+import org.mskcc.cbio.oncogkb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncogkb.util.FileUtils;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -65,7 +67,11 @@ public final class GeneLabelImporter {
             genes.add(gene);
             break;
         }
-                
-        DaoGene.saveGenes(genes);
+              
+        ApplicationContext appContext = 
+    		ApplicationContextSingleton.getApplicationContext();
+	
+    	GeneBo geneBo = GeneBo.class.cast(appContext.getBean("geneBo"));
+        geneBo.saveGenes(genes);
     }
 }

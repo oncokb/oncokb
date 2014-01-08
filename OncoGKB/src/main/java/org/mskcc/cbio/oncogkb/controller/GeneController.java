@@ -4,8 +4,9 @@
  */
 package org.mskcc.cbio.oncogkb.controller;
 
-import org.mskcc.cbio.oncogkb.dao.DaoGene;
+import org.mskcc.cbio.oncogkb.bo.GeneBo;
 import org.mskcc.cbio.oncogkb.model.Gene;
+import org.mskcc.cbio.oncogkb.util.ApplicationContextSingleton;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +24,14 @@ public class GeneController {
     public @ResponseBody Gene getGene(
             @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol) {
+        
+        GeneBo geneBo = GeneBo.class.cast(ApplicationContextSingleton.getApplicationContext().getBean("geneBo"));
         if (entrezGeneId!=null) {
-            return DaoGene.getGeneByEntrezGeneId(entrezGeneId);
+            return geneBo.getGeneByEntrezGeneId(entrezGeneId);
         }
         
         if (hugoSymbol!=null) {
-            return DaoGene.getGeneByHugoSymbol(hugoSymbol);
+            return geneBo.getGeneByHugoSymbol(hugoSymbol);
         }
         
         return null;

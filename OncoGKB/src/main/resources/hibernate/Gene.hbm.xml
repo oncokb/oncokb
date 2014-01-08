@@ -21,19 +21,19 @@
             <key>
                 <column name="entrez_gene_id" not-null="true" />
             </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.Alteration" />
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.Alteration" lazy="false" />
         </set>
         <set name="geneLabels" inverse="true">
             <key>
                 <column name="entrez_gene_id" not-null="true" />
             </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneLabel" />
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneLabel" lazy="false" />
         </set>
         <set name="geneAliases" inverse="true">
             <key>
                 <column name="entrez_gene_id" not-null="true" />
             </key>
-            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneAlias" />
+            <one-to-many class="org.mskcc.cbio.oncogkb.model.GeneAlias" lazy="false" />
         </set>
     </class>
 </hibernate-mapping>

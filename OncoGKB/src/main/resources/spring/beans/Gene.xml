@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- Gene business object -->
+    <bean id="geneBo" class="org.mskcc.cbio.oncogkb.bo.impl.GeneBoImpl" >
+   		<property name="geneDao" ref="geneDao" />
+    </bean>
+ 
+    <!-- Gene Data Access Object -->
+    <bean id="geneDao" class="org.mskcc.cbio.oncogkb.dao.impl.GeneDaoImpl" >
+   		<property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+   
+   		
+</beans>
