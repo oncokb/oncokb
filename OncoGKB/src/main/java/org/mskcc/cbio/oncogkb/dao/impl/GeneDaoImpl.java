@@ -24,7 +24,7 @@ public class GeneDaoImpl extends HibernateDaoSupport implements GeneDao {
      * @return gene object or null
      */
     public Gene getGeneByHugoSymbol(String symbol) {
-        List list = getHibernateTemplate().find("from Gene as gene where gene.hugoSymbol=?", symbol);
+        List list = getHibernateTemplate().find("from GeneImpl as gene where gene.hugoSymbol=?", symbol);
         
         if (list==null || list.isEmpty()) {
             return null;
@@ -39,7 +39,7 @@ public class GeneDaoImpl extends HibernateDaoSupport implements GeneDao {
      * @return gene object or null.
      */
     public Gene getGeneByEntrezGeneId(int entrezGeneId) {
-        List list = getHibernateTemplate().find("from Gene as gene where gene.entrezGeneId=?",entrezGeneId);
+        List list = getHibernateTemplate().find("from GeneImpl as gene where gene.entrezGeneId=?",entrezGeneId);
         
         if (list==null || list.isEmpty()) {
             return null;

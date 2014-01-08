@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.mskcc.cbio.oncogkb.model.Gene;
+import org.mskcc.cbio.oncogkb.model.impl.GeneImpl;
 import org.mskcc.cbio.oncogkb.util.FileUtils;
 import org.mskcc.cbio.oncogkb.util.JsonUtils;
 
@@ -72,7 +73,7 @@ public final class GeneImporterMyGeneInfo2 {
             String symbol = String.class.cast(hit.get("symbol"));
             String name = String.class.cast(hit.get("name"));
             
-            Gene gene = new Gene(entrez, symbol, name);
+            Gene gene = new GeneImpl(entrez, symbol, name);
             genes.add(gene);
         }
         
