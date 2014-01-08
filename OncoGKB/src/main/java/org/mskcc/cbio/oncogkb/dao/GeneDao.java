@@ -31,10 +31,4 @@ public interface GeneDao {
      * @param gene 
      */
     void saveGene(Gene gene);
-    
-    /**
-     * Save genes to db.
-     * @param genes 
-     */
-    void saveGenes(Collection<Gene> genes);
 }

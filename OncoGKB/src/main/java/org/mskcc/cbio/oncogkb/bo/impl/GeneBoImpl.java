@@ -32,9 +32,5 @@ public class GeneBoImpl implements GeneBo {
     public void saveGene(Gene gene) {
         geneDao.saveGene(gene);
     }
-
-    public void saveGenes(Collection<Gene> genes) {
-        geneDao.saveGenes(genes);
-    }
     
 }

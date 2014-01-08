@@ -53,19 +53,6 @@ public class GeneDaoImpl extends HibernateDaoSupport implements GeneDao {
      * @param gene 
      */
     public void saveGene(Gene gene) {
-        saveGenes(Collections.singletonList(gene));
-    }
-    
-    /**
-     * Save genes to db.
-     * @param genes 
-     */
-    public void saveGenes(Collection<Gene> genes) {
-        HibernateTemplate hibernateTemplate = getHibernateTemplate();
-        
-        for (Gene gene : genes) {
-            hibernateTemplate.saveOrUpdate(gene);
-        }
-        
+        getHibernateTemplate().saveOrUpdate(gene);
     }
 }

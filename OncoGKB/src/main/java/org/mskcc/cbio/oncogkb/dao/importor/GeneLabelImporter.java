@@ -5,7 +5,6 @@
 package org.mskcc.cbio.oncogkb.dao.importor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +29,12 @@ public final class GeneLabelImporter {
         List<String> lines = FileUtils.readLinesStream(
                 GeneLabelImporter.class.getResourceAsStream(GENE_LABEL_FILE));
         String[] headers = lines.get(0).split("\t");
+              
+        ApplicationContext appContext = 
+    		ApplicationContextSingleton.getApplicationContext();
+	
+    	GeneBo geneBo = GeneBo.class.cast(appContext.getBean("geneBo"));
         
-        List<Gene> genes = new ArrayList<Gene>();
         int nLines = lines.size();
         System.out.println("importing...");
         for (int i=1; i<nLines; i++) {
@@ -62,14 +65,8 @@ public final class GeneLabelImporter {
             }
             gene.setGeneLabels(labels);
             
-            genes.add(gene);
-            break;
+            geneBo.saveGene(gene);
         }
-              
-        ApplicationContext appContext = 
-    		ApplicationContextSingleton.getApplicationContext();
-	
-    	GeneBo geneBo = GeneBo.class.cast(appContext.getBean("geneBo"));
-        geneBo.saveGenes(genes);
+        
     }
 }
