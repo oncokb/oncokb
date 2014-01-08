@@ -9,11 +9,11 @@
     <property name="hibernate.show_sql">true</property>
     <property name="hibernate.current_session_context_class">thread</property>
     <property name="hibernate.query.factory_class">org.hibernate.hql.classic.ClassicQueryTranslatorFactory</property>
-    <mapping resource="org/mskcc/cbio/oncogkb/model/Drug.hbm.xml"/>
-    <mapping resource="org/mskcc/cbio/oncogkb/model/TumorType.hbm.xml"/>
-    <mapping resource="org/mskcc/cbio/oncogkb/model/Alteration.hbm.xml"/>
-    <mapping resource="org/mskcc/cbio/oncogkb/model/AlterationActivityEvidence.hbm.xml"/>
-    <mapping resource="org/mskcc/cbio/oncogkb/model/DrugSensitivityEvidence.hbm.xml"/>
-    <mapping resource="org/mskcc/cbio/oncogkb/model/Gene.hbm.xml"/>
+    <mapping resource="hibernate/Drug.hbm.xml"/>
+    <mapping resource="hibernate/TumorType.hbm.xml"/>
+    <mapping resource="hibernate/Alteration.hbm.xml"/>
+    <mapping resource="hibernate/AlterationActivityEvidence.hbm.xml"/>
+    <mapping resource="hibernate/DrugSensitivityEvidence.hbm.xml"/>
+    <mapping resource="hibernate/Gene.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>
