@@ -1,8 +1,8 @@
 .DS_Store
-OncoGKB/target
-OncoGKB/.classpath
-OncoGKB/.project
-OncoGKB/.settings/*
-OncoGKB/nb-configuration.xml
-^OncoGKB/src/main/webapp/META-INF/context\.xml$
-^OncoGKB/src/main/resources/properties/database\.properties$
+OncoKB/target
+OncoKB/.classpath
+OncoKB/.project
+OncoKB/.settings/*
+OncoKB/nb-configuration.xml
+^OncoKB/src/main/webapp/META-INF/context\.xml$
+^OncoKB/src/main/resources/properties/database\.properties$
