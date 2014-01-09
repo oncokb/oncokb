@@ -4,7 +4,6 @@
  */
 package org.mskcc.cbio.oncogkb.bo;
 
-import java.util.Collection;
 import org.mskcc.cbio.oncogkb.model.Gene;
 
 /**
@@ -32,6 +31,6 @@ public interface GeneBo {
      * Save a gene to db.
      * @param gene 
      */
-    void saveGene(Gene gene);
+    void saveOrUpdate(Gene gene);
     
 }

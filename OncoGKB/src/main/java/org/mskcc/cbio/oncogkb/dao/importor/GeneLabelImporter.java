@@ -65,7 +65,7 @@ public final class GeneLabelImporter {
             }
             gene.setGeneLabels(labels);
             
-            geneBo.saveGene(gene);
+            geneBo.saveOrUpdate(gene);
         }
         
     }

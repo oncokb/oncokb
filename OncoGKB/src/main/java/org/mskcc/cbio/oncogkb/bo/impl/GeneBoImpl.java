@@ -4,7 +4,6 @@
  */
 package org.mskcc.cbio.oncogkb.bo.impl;
 
-import java.util.Collection;
 import org.mskcc.cbio.oncogkb.bo.GeneBo;
 import org.mskcc.cbio.oncogkb.dao.GeneDao;
 import org.mskcc.cbio.oncogkb.model.Gene;
@@ -29,8 +28,8 @@ public class GeneBoImpl implements GeneBo {
         return geneDao.getGeneByEntrezGeneId(entrezGeneId);
     }
 
-    public void saveGene(Gene gene) {
-        geneDao.saveGene(gene);
+    public void saveOrUpdate(Gene gene) {
+        geneDao.saveOrUpdate(gene);
     }
     
 }

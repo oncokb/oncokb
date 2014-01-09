@@ -4,7 +4,6 @@
  */
 package org.mskcc.cbio.oncogkb.dao;
 
-import java.util.Collection;
 import org.mskcc.cbio.oncogkb.model.Gene;
 
 /**
@@ -30,5 +29,5 @@ public interface GeneDao {
      * Save a gene to db.
      * @param gene 
      */
-    void saveGene(Gene gene);
+    void saveOrUpdate(Gene gene);
 }

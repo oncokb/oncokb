@@ -8,7 +8,7 @@
             <column name="alteration_id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="gene" class="org.mskcc.cbio.oncogkb.model.impl.GeneImpl" fetch="join">
+        <many-to-one name="gene" class="org.mskcc.cbio.oncogkb.model.impl.GeneImpl" lazy="false" fetch="join">
             <column name="entrez_gene_id" not-null="true" />
         </many-to-one>
         <property name="alteration" type="string">

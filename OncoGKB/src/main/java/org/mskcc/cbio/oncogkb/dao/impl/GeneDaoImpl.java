@@ -4,12 +4,9 @@
  */
 package org.mskcc.cbio.oncogkb.dao.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncogkb.dao.GeneDao;
 import org.mskcc.cbio.oncogkb.model.Gene;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
@@ -24,7 +21,7 @@ public class GeneDaoImpl extends HibernateDaoSupport implements GeneDao {
      * @return gene object or null
      */
     public Gene getGeneByHugoSymbol(String symbol) {
-        List list = getHibernateTemplate().find("from GeneImpl as gene where gene.hugoSymbol=?", symbol);
+        List list = getHibernateTemplate().find("from GeneImpl where hugoSymbol=?", symbol);
         
         if (list==null || list.isEmpty()) {
             return null;
@@ -39,7 +36,7 @@ public class GeneDaoImpl extends HibernateDaoSupport implements GeneDao {
      * @return gene object or null.
      */
     public Gene getGeneByEntrezGeneId(int entrezGeneId) {
-        List list = getHibernateTemplate().find("from GeneImpl as gene where gene.entrezGeneId=?",entrezGeneId);
+        List list = getHibernateTemplate().find("from GeneImpl where entrezGeneId=?",entrezGeneId);
         
         if (list==null || list.isEmpty()) {
             return null;
@@ -52,7 +49,7 @@ public class GeneDaoImpl extends HibernateDaoSupport implements GeneDao {
      * Save a gene to db.
      * @param gene 
      */
-    public void saveGene(Gene gene) {
+    public void saveOrUpdate(Gene gene) {
         getHibernateTemplate().saveOrUpdate(gene);
     }
 }
