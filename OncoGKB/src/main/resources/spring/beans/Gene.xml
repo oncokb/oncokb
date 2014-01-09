@@ -4,12 +4,12 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <!-- Gene business object -->
-    <bean id="geneBo" class="org.mskcc.cbio.oncogkb.bo.impl.GeneBoImpl" >
+    <bean id="geneBo" class="org.mskcc.cbio.oncokb.bo.impl.GeneBoImpl" >
    		<property name="geneDao" ref="geneDao" />
     </bean>
  
     <!-- Gene Data Access Object -->
-    <bean id="geneDao" class="org.mskcc.cbio.oncogkb.dao.impl.GeneDaoImpl" >
+    <bean id="geneDao" class="org.mskcc.cbio.oncokb.dao.impl.GeneDaoImpl" >
    		<property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
    

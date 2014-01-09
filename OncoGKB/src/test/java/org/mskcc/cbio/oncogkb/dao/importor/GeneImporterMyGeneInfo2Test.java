@@ -2,11 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncogkb.dao.importor;
+package org.mskcc.cbio.oncokb.dao.importor;
 
+import org.mskcc.cbio.oncokb.dao.importor.GeneImporterMyGeneInfo2;
 import java.io.IOException;
 import java.util.List;
-import org.mskcc.cbio.oncogkb.model.Gene;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

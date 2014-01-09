@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.mskcc.cbio</groupId>
-	<artifactId>OncoGKB</artifactId>
+	<artifactId>OncoKB</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>OncoGKB</name>
+	<name>OncoKB</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -127,7 +127,7 @@
 	</repositories>
 
 	<build>
-		<finalName>OncoGKB</finalName>
+		<finalName>OncoKB</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

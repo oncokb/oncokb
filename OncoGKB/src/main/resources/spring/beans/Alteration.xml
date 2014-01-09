@@ -4,12 +4,12 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <!-- Alteration business object -->
-    <bean id="alterationBo" class="org.mskcc.cbio.oncogkb.bo.impl.AlterationBoImpl" >
+    <bean id="alterationBo" class="org.mskcc.cbio.oncokb.bo.impl.AlterationBoImpl" >
    		<property name="alterationDao" ref="alterationDao" />
     </bean>
  
     <!-- Alteration Data Access Object -->
-    <bean id="alterationDao" class="org.mskcc.cbio.oncogkb.dao.impl.AlterationDaoImpl" >
+    <bean id="alterationDao" class="org.mskcc.cbio.oncokb.dao.impl.AlterationDaoImpl" >
    		<property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
    
