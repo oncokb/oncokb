@@ -4,6 +4,8 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
+import java.util.List;
+
 /**
  * 
  * @author jgao
@@ -12,4 +14,6 @@ package org.mskcc.cbio.oncokb.bo;
 public interface GenericBo<T> {
     
     void saveOrUpdate(T t);
+    
+    List<T> findAll();
 }

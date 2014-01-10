@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
+import java.util.List;
 import org.mskcc.cbio.oncokb.bo.GenericBo;
 import org.mskcc.cbio.oncokb.dao.GenericDao;
 
@@ -27,4 +28,7 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
         dao.saveOrUpdate(t);
     }
     
+    public List<T> findAll() {
+        return dao.findAll();
+    }
 }

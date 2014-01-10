@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
@@ -26,8 +27,8 @@ public class AlterationController {
     
     @RequestMapping(value="/alteration.json")
     public @ResponseBody List<Alteration> getAlteration(
-            @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
-            @RequestParam(value="hugoSymbol", required=false) String hugoSymbol) {
+            @RequestParam(value="entrez_gene_id", required=false) Integer entrezGeneId,
+            @RequestParam(value="hugo_symbol", required=false) String hugoSymbol) {
         
         ApplicationContext applicationContext = ApplicationContextSingleton.getApplicationContext();
         
@@ -43,7 +44,7 @@ public class AlterationController {
         }
         
         if (gene == null) {
-            return null;
+            return Collections.emptyList();
         }
         
         AlterationBo alterationBo = AlterationBo.class.cast(applicationContext.getBean("alterationBo"));
