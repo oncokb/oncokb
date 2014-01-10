@@ -14,7 +14,7 @@ import org.mskcc.cbio.oncokb.model.Alteration;
  */
 public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> implements AlterationDao {
 
-    public List<Alteration> getAlterationsByGene(int entrezGeneId) {
-        return findByParamValue("entrez_gene_id", entrezGeneId);
+    public List<Alteration> findAlterationsByGene(int entrezGeneId) {
+        return findByNamedQuery("findAlterationsByGene", entrezGeneId);
     }    
 }

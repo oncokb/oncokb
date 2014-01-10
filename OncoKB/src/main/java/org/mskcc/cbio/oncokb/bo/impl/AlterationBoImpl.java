@@ -15,8 +15,8 @@ import org.mskcc.cbio.oncokb.model.Alteration;
  */
 public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> implements AlterationBo {
 
-    public List<Alteration> getAlterationsByGene(int entrezGeneId) {
-        return getDao().getAlterationsByGene(entrezGeneId);
+    public List<Alteration> findAlterationsByGene(int entrezGeneId) {
+        return getDao().findAlterationsByGene(entrezGeneId);
     }
     
 }

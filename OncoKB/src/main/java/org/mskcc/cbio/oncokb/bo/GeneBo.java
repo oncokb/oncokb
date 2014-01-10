@@ -18,13 +18,13 @@ public interface GeneBo extends GenericBo<Gene> {
      * @param symbol
      * @return gene object or null
      */
-    Gene getGeneByHugoSymbol(String symbol);
+    Gene findGeneByHugoSymbol(String symbol);
     
     /**
      * Get a gene by Entrez Gene Id.
      * @param entrezGeneId
      * @return gene object or null.
      */
-    Gene getGeneByEntrezGeneId(int entrezGeneId);
+    Gene findGeneByEntrezGeneId(int entrezGeneId);
     
 }

@@ -27,11 +27,11 @@ public class GeneController {
         
         GeneBo geneBo = GeneBo.class.cast(ApplicationContextSingleton.getApplicationContext().getBean("geneBo"));
         if (entrezGeneId!=null) {
-            return geneBo.getGeneByEntrezGeneId(entrezGeneId);
+            return geneBo.findGeneByEntrezGeneId(entrezGeneId);
         }
         
         if (hugoSymbol!=null) {
-            return geneBo.getGeneByHugoSymbol(hugoSymbol);
+            return geneBo.findGeneByHugoSymbol(hugoSymbol);
         }
         
         return null;

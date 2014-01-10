@@ -12,6 +12,6 @@ import org.mskcc.cbio.oncokb.model.TumorType;
  */
 public interface TumorTypeBo extends GenericBo<TumorType> {
 
-    TumorType getTumorTypeById(String tumorTypeId);
+    TumorType findTumorTypeById(String tumorTypeId);
     
 }

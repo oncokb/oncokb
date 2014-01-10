@@ -35,11 +35,11 @@ public class AlterationController {
         
         Gene gene = null; 
         if (entrezGeneId!=null) {
-            gene = geneBo.getGeneByEntrezGeneId(entrezGeneId);
+            gene = geneBo.findGeneByEntrezGeneId(entrezGeneId);
         }
         
         if (hugoSymbol!=null) {
-            gene = geneBo.getGeneByHugoSymbol(hugoSymbol);
+            gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
         }
         
         if (gene == null) {
@@ -48,6 +48,6 @@ public class AlterationController {
         
         AlterationBo alterationBo = AlterationBo.class.cast(applicationContext.getBean("alterationBo"));
         
-        return alterationBo.getAlterationsByGene(gene.getEntrezGeneId());
+        return alterationBo.findAlterationsByGene(gene.getEntrezGeneId());
     }
 }

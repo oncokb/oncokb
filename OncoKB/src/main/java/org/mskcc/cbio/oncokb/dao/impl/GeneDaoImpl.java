@@ -19,8 +19,8 @@ public class GeneDaoImpl extends GenericDaoImpl<Gene, Integer> implements GeneDa
      * @param symbol
      * @return gene object or null
      */
-    public Gene getGeneByHugoSymbol(String symbol) {
-        List<Gene> list = findByParamValue("hugoSymbol", symbol);
+    public Gene findGeneByHugoSymbol(String symbol) {
+        List<Gene> list = findByNamedQuery("findGeneByHugoSymbol", symbol);
         return list.isEmpty() ? null : list.get(0);
     }
     
@@ -29,7 +29,7 @@ public class GeneDaoImpl extends GenericDaoImpl<Gene, Integer> implements GeneDa
      * @param entrezGeneId
      * @return gene object or null.
      */
-    public Gene getGeneByEntrezGeneId(int entrezGeneId) {
+    public Gene findGeneByEntrezGeneId(int entrezGeneId) {
         return findById(entrezGeneId);
     }
 }

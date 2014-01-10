@@ -30,4 +30,8 @@
             <element column="alias" type="string"></element> 
         </set>
     </class>
+    
+    <query name="findGeneByHugoSymbol">
+        <![CDATA[from Gene g where g.hugoSymbol=?]]>
+    </query>
 </hibernate-mapping>

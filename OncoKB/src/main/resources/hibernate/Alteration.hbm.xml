@@ -22,4 +22,8 @@
             </column>
         </property>
     </class>
+    
+    <query name="findAlterationsByGene">
+        <![CDATA[from Alteration where entrez_gene_id=?]]>
+    </query>
 </hibernate-mapping>

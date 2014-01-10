@@ -18,5 +18,5 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param entrezGeneId
      * @return 
      */
-    List<Alteration> getAlterationsByGene(int entrezGeneId);
+    List<Alteration> findAlterationsByGene(int entrezGeneId);
 }

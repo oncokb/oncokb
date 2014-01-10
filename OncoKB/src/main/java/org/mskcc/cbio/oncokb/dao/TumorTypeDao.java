@@ -12,5 +12,5 @@ import org.mskcc.cbio.oncokb.model.TumorType;
  */
 public interface TumorTypeDao extends GenericDao<TumorType, String> {
 
-    TumorType getTumorTypeById(String tumorTypeId);
+    TumorType findTumorTypeById(String tumorTypeId);
 }

@@ -14,12 +14,12 @@ import org.mskcc.cbio.oncokb.model.Gene;
  */
 public class GeneBoImpl extends GenericBoImpl<Gene, GeneDao> implements GeneBo {
     
-    public Gene getGeneByHugoSymbol(String symbol) {
-        return getDao().getGeneByHugoSymbol(symbol);
+    public Gene findGeneByHugoSymbol(String symbol) {
+        return getDao().findGeneByHugoSymbol(symbol);
     }
 
-    public Gene getGeneByEntrezGeneId(int entrezGeneId) {
-        return getDao().getGeneByEntrezGeneId(entrezGeneId);
+    public Gene findGeneByEntrezGeneId(int entrezGeneId) {
+        return getDao().findGeneByEntrezGeneId(entrezGeneId);
     }
     
 }

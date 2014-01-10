@@ -57,6 +57,29 @@ public interface GenericDao<T, ID extends Serializable> {
     
     /**
      * 
+     * @param queryName
+     * @return 
+     */
+    List<T> findByNamedQuery(String queryName);
+    
+    /**
+     * 
+     * @param queryName
+     * @param value
+     * @return 
+     */
+    List<T> findByNamedQuery(String queryName, Object value);
+    
+    /**
+     * 
+     * @param queryName
+     * @param values
+     * @return 
+     */
+    List<T> findByNamedQuery(String queryName, Object... values);
+    
+    /**
+     * 
      * @param t 
      */
     void save(T t);

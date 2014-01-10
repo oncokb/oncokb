@@ -14,7 +14,7 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 public class TumorTypeDaoImpl extends GenericDaoImpl<TumorType, String> implements TumorTypeDao {
     
     @Override
-    public TumorType getTumorTypeById(String tumorTypeId) {
+    public TumorType findTumorTypeById(String tumorTypeId) {
         return findById(tumorTypeId);
     }
 }
