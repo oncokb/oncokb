@@ -3,18 +3,18 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncokb.model.impl.DrugSensitivityEvidenceImpl" table="drug_sensitivity_evidence" catalog="oncokb">
+    <class name="org.mskcc.cbio.oncokb.model.DrugSensitivityEvidence" table="drug_sensitivity_evidence" catalog="oncokb">
         <id name="drugSensitivityEvidenceId" type="java.lang.Integer">
             <column name="drug_sensitivity_evidence_id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="tumorType" class="org.mskcc.cbio.oncokb.model.impl.TumorTypeImpl" fetch="join">
+        <many-to-one name="tumorType" class="org.mskcc.cbio.oncokb.model.TumorType" lazy="false" fetch="join">
             <column name="tumor_type_id" length="25" />
         </many-to-one>
-        <many-to-one name="drug" class="org.mskcc.cbio.oncokb.model.impl.DrugImpl" fetch="join">
+        <many-to-one name="drug" class="org.mskcc.cbio.oncokb.model.Drug" lazy="false" fetch="join">
             <column name="drug_id" />
         </many-to-one>
-        <many-to-one name="alteration" class="org.mskcc.cbio.oncokb.model.impl.AlterationImpl" fetch="join">
+        <many-to-one name="alteration" class="org.mskcc.cbio.oncokb.model.Alteration" lazy="false" fetch="join">
             <column name="alteration_id" not-null="true" />
         </many-to-one>
         <property name="knownEffect" type="string">

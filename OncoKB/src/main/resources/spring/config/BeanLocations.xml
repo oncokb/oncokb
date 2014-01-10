@@ -10,5 +10,6 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<!-- Beans Declaration -->
 	<import resource="../beans/Gene.xml"/>
 	<import resource="../beans/Alteration.xml"/>
+	<import resource="../beans/TumorType.xml"/>
 	
 </beans>

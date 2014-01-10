@@ -11,18 +11,12 @@ import org.mskcc.cbio.oncokb.model.Alteration;
  *
  * @author jgao
  */
-public interface AlterationBo {
+public interface AlterationBo extends GenericBo<Alteration> {
     
     /**
      * Get set of alterations by entrez gene Id.
      * @param entrezGeneId
      * @return 
      */
-    List<Alteration> getAlterations(long entrezGeneId);
-    
-    /**
-     * Save alteration to db.
-     * @param alteration 
-     */
-    void saveOrUpdate(Alteration alteration);
+    List<Alteration> getAlterationsByGene(int entrezGeneId);
 }

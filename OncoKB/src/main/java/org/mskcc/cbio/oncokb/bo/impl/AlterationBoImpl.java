@@ -13,20 +13,10 @@ import org.mskcc.cbio.oncokb.model.Alteration;
  *
  * @author jgao
  */
-public class AlterationBoImpl implements AlterationBo {
+public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> implements AlterationBo {
 
-    AlterationDao alterationDao;
-
-    public void setAlterationDao(AlterationDao alterationDao) {
-        this.alterationDao = alterationDao;
-    }
-
-    public List<Alteration> getAlterations(long entrezGeneId) {
-        return alterationDao.getAlterations(entrezGeneId);
-    }
-
-    public void saveOrUpdate(Alteration alteration) {
-        alterationDao.saveOrUpdate(alteration);
+    public List<Alteration> getAlterationsByGene(int entrezGeneId) {
+        return getDao().getAlterationsByGene(entrezGeneId);
     }
     
 }

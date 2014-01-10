@@ -10,7 +10,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
  * handling db requests for gene, gene_alias, and gene_label
  * @author jgao
  */
-public interface GeneDao {
+public interface GeneDao extends GenericDao<Gene, Integer> {
     /**
      * Get a gene by hugo symbol
      * @param symbol
@@ -25,9 +25,4 @@ public interface GeneDao {
      */
     Gene getGeneByEntrezGeneId(int entrezGeneId);
     
-    /**
-     * Save a gene to db.
-     * @param gene 
-     */
-    void saveOrUpdate(Gene gene);
 }

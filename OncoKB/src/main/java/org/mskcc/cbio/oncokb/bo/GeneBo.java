@@ -12,7 +12,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
  * should not involved in this class, instead it has a DAO (GeneDao) class to do it.
  * @author jgao
  */
-public interface GeneBo {
+public interface GeneBo extends GenericBo<Gene> {
     /**
      * Get a gene by hugo symbol
      * @param symbol
@@ -26,11 +26,5 @@ public interface GeneBo {
      * @return gene object or null.
      */
     Gene getGeneByEntrezGeneId(int entrezGeneId);
-    
-    /**
-     * Save a gene to db.
-     * @param gene 
-     */
-    void saveOrUpdate(Gene gene);
     
 }

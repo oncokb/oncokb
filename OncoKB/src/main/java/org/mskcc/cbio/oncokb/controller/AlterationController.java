@@ -48,6 +48,6 @@ public class AlterationController {
         
         AlterationBo alterationBo = AlterationBo.class.cast(applicationContext.getBean("alterationBo"));
         
-        return alterationBo.getAlterations(gene.getEntrezGeneId());
+        return alterationBo.getAlterationsByGene(gene.getEntrezGeneId());
     }
 }

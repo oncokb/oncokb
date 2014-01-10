@@ -3,12 +3,12 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncokb.model.impl.AlterationImpl" table="alteration" catalog="oncokb">
+    <class name="org.mskcc.cbio.oncokb.model.Alteration" table="alteration" catalog="oncokb">
         <id name="alterationId" type="java.lang.Integer">
             <column name="alteration_id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.impl.GeneImpl" lazy="false" fetch="join">
+        <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
             <column name="entrez_gene_id" not-null="true" />
         </many-to-one>
         <property name="alteration" type="string">

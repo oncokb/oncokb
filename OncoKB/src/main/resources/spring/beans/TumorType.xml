@@ -3,13 +3,13 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <!-- Alteration business object -->
-    <bean id="alterationBo" class="org.mskcc.cbio.oncokb.bo.impl.AlterationBoImpl" >
-   		<property name="dao" ref="alterationDao" />
+    <!-- TumorType business object -->
+    <bean id="tumorTypeBo" class="org.mskcc.cbio.oncokb.bo.impl.TumorTypeBoImpl" >
+   		<property name="dao" ref="tumorTypeDao" />
     </bean>
  
-    <!-- Alteration Data Access Object -->
-    <bean id="alterationDao" class="org.mskcc.cbio.oncokb.dao.impl.AlterationDaoImpl" >
+    <!-- TumorType Data Access Object -->
+    <bean id="tumorTypeDao" class="org.mskcc.cbio.oncokb.dao.impl.TumorTypeDaoImpl" >
    		<property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
    

@@ -5,7 +5,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <!-- Gene business object -->
     <bean id="geneBo" class="org.mskcc.cbio.oncokb.bo.impl.GeneBoImpl" >
-   		<property name="geneDao" ref="geneDao" />
+   		<property name="dao" ref="geneDao" />
     </bean>
  
     <!-- Gene Data Access Object -->
