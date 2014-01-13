@@ -58,7 +58,7 @@ public class AlterationActivityEvidenceImporter {
             String desc = parts[3];
             String context = parts[4];
             String tumorType = "";//parts[5];
-            Set<String> pmids = new HashSet<String>(Arrays.asList(parts[6]));
+            Set<String> pmids = new HashSet<String>(Arrays.asList(parts[6].split(", *")));
             
             Gene gene = geneBo.findGeneByHugoSymbol(hugo);
             if (gene == null) {
