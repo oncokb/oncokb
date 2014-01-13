@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.dao.importor;
+package org.mskcc.cbio.oncokb.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,8 +18,8 @@ import org.mskcc.cbio.oncokb.util.JsonUtils;
  *
  * @author jgao
  */
-public final class GeneImporterMyGeneInfo2 {
-    private GeneImporterMyGeneInfo2() {
+public final class GeneAnnotatorMyGeneInfo2 {
+    private GeneAnnotatorMyGeneInfo2() {
         throw new AssertionError();
     }
     
@@ -45,8 +45,28 @@ public final class GeneImporterMyGeneInfo2 {
         return gene;
     }
     
-    public static List<Gene> readBySymbol(String symbol) throws IOException {
-        String url = URL_MY_GENE_INFO_2 + "query?species=human&q=" + symbol;
+    public static Gene readByHugoSymbol(String symbol) throws IOException {
+        String url = URL_MY_GENE_INFO_2 + "query?species=human&q=symbol:" + symbol;
+        String json = FileUtils.readRemote(url);
+        
+        List<Gene> genes = parseGenes(json);
+        
+        if (genes.isEmpty()) {
+            return null;
+        }
+        
+        if (genes.size()>1) {
+            System.out.println("More than one hits:\n"+url);
+        }
+        
+        Gene gene = genes.get(0);
+        annotateGene(gene);
+        
+        return gene;
+    }
+    
+    public static List<Gene> readByAlias(String alias) throws IOException {
+        String url = URL_MY_GENE_INFO_2 + "query?species=human&q=" + alias;
         String json = FileUtils.readRemote(url);
         
         List<Gene> genes = parseGenes(json);

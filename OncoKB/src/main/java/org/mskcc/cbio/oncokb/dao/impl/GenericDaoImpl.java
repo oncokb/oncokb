@@ -90,17 +90,23 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     @Override
     public void save(T t)
     {
-        getHibernateTemplate().save(t);
+        if (t!=null) {
+            getHibernateTemplate().save(t);
+        }
     }
 
     @Override
     public void update(T t) {
-        getHibernateTemplate().update(t);
+        if (t!=null) {
+            getHibernateTemplate().update(t);
+        }
     }
 
     @Override
     public void saveOrUpdate(T t) {
-        getHibernateTemplate().saveOrUpdate(t);
+        if (t!=null) {
+            getHibernateTemplate().saveOrUpdate(t);
+        }
     }
 
     @SuppressWarnings("unchecked")

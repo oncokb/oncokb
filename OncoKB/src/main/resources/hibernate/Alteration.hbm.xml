@@ -8,14 +8,16 @@
             <column name="alteration_id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
-            <column name="entrez_gene_id" not-null="true" />
-        </many-to-one>
-        <property name="alteration" type="string">
-            <column name="alteration" length="30" not-null="true">
-                <comment>V600E, truncating, AMP, DEL</comment>
-            </column>
-        </property>
+        <!--<properties name="uk1" unique="true">-->
+            <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
+                <column name="entrez_gene_id" not-null="true" />
+            </many-to-one>
+            <property name="alteration" type="string">
+                <column name="alteration" length="30" not-null="true">
+                    <comment>V600E, truncating, AMP, DEL</comment>
+                </column>
+            </property>
+        <!--</properties>-->
         <property name="type" type="string">
             <column name="type" length="10" not-null="true">
                 <comment>Mutation, CNA</comment>
@@ -25,5 +27,8 @@
     
     <query name="findAlterationsByGene">
         <![CDATA[from Alteration where entrez_gene_id=?]]>
+    </query>
+    <query name="findAlteration">
+        <![CDATA[from Alteration where entrez_gene_id=? and alteration=?]]>
     </query>
 </hibernate-mapping>

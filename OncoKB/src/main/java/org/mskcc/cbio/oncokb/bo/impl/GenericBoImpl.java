@@ -24,6 +24,14 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
         return dao;
     }
     
+    public void save(T t) {
+        dao.save(t);
+    }
+    
+    public void update(T t) {
+        dao.update(t);
+    }
+    
     public void saveOrUpdate(T t) {
         dao.saveOrUpdate(t);
     }

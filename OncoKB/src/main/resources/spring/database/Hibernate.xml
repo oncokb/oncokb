@@ -12,7 +12,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
     		<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
 				<prop key="hibernate.show_sql">true</prop>
-                                <!--prop key="hibernate.hbm2ddl.auto">create</prop-->
+                                <!--<prop key="hibernate.hbm2ddl.auto">create</prop>-->
     		</props>
     	</property>
     	
@@ -21,8 +21,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                                 <value>/hibernate/Drug.hbm.xml</value>
                                 <value>/hibernate/TumorType.hbm.xml</value>
                                 <value>/hibernate/Alteration.hbm.xml</value>
-                                <value>/hibernate/AlterationActivityEvidence.hbm.xml</value>
-                                <value>/hibernate/DrugSensitivityEvidence.hbm.xml</value>
+                                <value>/hibernate/Evidence.hbm.xml</value>
                                 <value>/hibernate/Gene.hbm.xml</value>
 			</list>
 		</property>

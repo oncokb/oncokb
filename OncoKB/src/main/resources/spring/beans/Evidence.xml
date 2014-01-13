@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- Evidence business object -->
+    <bean id="evidenceBo" class="org.mskcc.cbio.oncokb.bo.impl.EvidenceBoImpl" >
+   		<property name="dao" ref="evidenceDao" />
+    </bean>
+ 
+    <!-- Evidence Data Access Object -->
+    <bean id="evidenceDao" class="org.mskcc.cbio.oncokb.dao.impl.EvidenceDaoImpl" >
+   		<property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+   
+   		
+</beans>

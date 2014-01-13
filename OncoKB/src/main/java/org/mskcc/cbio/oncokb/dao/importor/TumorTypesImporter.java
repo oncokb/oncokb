@@ -5,9 +5,7 @@
 package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;

@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.dao.importor;
 
+import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +46,7 @@ public final class GeneLabelImporter {
             
             int entrez = Integer.parseInt(parts[0]);
             
-            Gene gene = GeneImporterMyGeneInfo2.readByEntrezId(entrez);
+            Gene gene = GeneAnnotatorMyGeneInfo2.readByEntrezId(entrez);
             if (gene==null) {
                 System.err.println("No gene information for entrez: " + entrez
                         + "(" + parts[1] + ") from gene.info");

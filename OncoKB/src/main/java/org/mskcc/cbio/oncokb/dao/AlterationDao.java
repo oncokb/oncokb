@@ -19,4 +19,12 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @return 
      */
     List<Alteration> findAlterationsByGene(int entrezGeneId);
+    
+    /**
+     * 
+     * @param entrezGeneId
+     * @param alteration
+     * @return 
+     */
+    Alteration findAlteration(int entrezGeneId, String alteration);
 }

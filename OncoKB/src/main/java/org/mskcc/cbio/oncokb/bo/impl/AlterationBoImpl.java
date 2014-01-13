@@ -19,4 +19,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return getDao().findAlterationsByGene(entrezGeneId);
     }
     
+    /**
+     * 
+     * @param entrezGeneId
+     * @param alteration
+     * @return 
+     */
+    public Alteration findAlteration(int entrezGeneId, String alteration) {
+        return getDao().findAlteration(entrezGeneId, alteration);
+    }
 }

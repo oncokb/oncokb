@@ -12,8 +12,7 @@
     <mapping resource="hibernate/Drug.hbm.xml"/>
     <mapping resource="hibernate/TumorType.hbm.xml"/>
     <mapping resource="hibernate/Alteration.hbm.xml"/>
-    <mapping resource="hibernate/AlterationActivityEvidence.hbm.xml"/>
-    <mapping resource="hibernate/DrugSensitivityEvidence.hbm.xml"/>
+    <mapping resource="hibernate/Evidence.hbm.xml"/>
     <mapping resource="hibernate/Gene.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

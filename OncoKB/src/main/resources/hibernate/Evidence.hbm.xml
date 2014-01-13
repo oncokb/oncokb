@@ -3,11 +3,16 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncokb.model.DrugSensitivityEvidence" table="drug_sensitivity_evidence" catalog="oncokb">
-        <id name="drugSensitivityEvidenceId" type="java.lang.Integer">
-            <column name="drug_sensitivity_evidence_id" />
+    <class name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence" catalog="oncokb">
+        <id name="EvidenceId" type="java.lang.Integer">
+            <column name="evidence_id" />
             <generator class="identity" />
         </id>
+        <property name="evidenceType" type="string">
+            <column name="evidence_type" length="50" not-null="true">
+                <comment>Alteration_Activity, Drug_Sensitivity</comment>
+            </column>
+        </property>
         <many-to-one name="tumorType" class="org.mskcc.cbio.oncokb.model.TumorType" lazy="false" fetch="join">
             <column name="tumor_type_id" length="25" />
         </many-to-one>
@@ -19,7 +24,7 @@
         </many-to-one>
         <property name="knownEffect" type="string">
             <column name="known_effect" length="20" not-null="true">
-                <comment>sensitive, insensitive</comment>
+                <comment>gain-of-function, loss-of-function, switch_of_function; sensitive, insensitive</comment>
             </column>
         </property>
         <property name="descriptionOfKnownEffect" type="string">
@@ -30,10 +35,11 @@
                 <comment>coregulated events</comment>
             </column>
         </property>
-        <property name="pmids" type="string">
-            <column name="pmids" length="200">
-                <comment>comma delimited pmids</comment>
-            </column>
-        </property>
+        <set name="pmids" table="literature" lazy="false">
+            <key>
+                <column name="evidence_id" not-null="true" />
+            </key>
+            <element column="pmid" type="string"></element> 
+        </set>
     </class>
 </hibernate-mapping>
