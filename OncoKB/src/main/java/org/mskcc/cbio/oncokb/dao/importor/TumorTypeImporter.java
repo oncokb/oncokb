@@ -16,8 +16,8 @@ import org.springframework.context.ApplicationContext;
  *
  * @author jgao
  */
-public class TumorTypesImporter {
-    private TumorTypesImporter() {
+public class TumorTypeImporter {
+    private TumorTypeImporter() {
         throw new AssertionError();
     }
     
@@ -25,7 +25,7 @@ public class TumorTypesImporter {
     
     public static void main(String[] args) throws IOException {
         List<String> lines = FileUtils.readLinesStream(
-                TumorTypesImporter.class.getResourceAsStream(TUMOR_TYPES_FILE));
+                TumorTypeImporter.class.getResourceAsStream(TUMOR_TYPES_FILE));
         String[] headers = lines.get(0).split("\t");
               
         ApplicationContext appContext = 
