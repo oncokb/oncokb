@@ -14,7 +14,9 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
@@ -49,10 +51,10 @@ public class AlterationActivityEvidenceImporter {
             String line = lines.get(i);
             String[] parts = line.split("\t");
             
-            String evidenceType = "Alteration-activity";
+            EvidenceType evidenceType = EvidenceType.ACTIVITY;
             String hugo = parts[0];
             String alt = parts[1];
-            String effect = parts[2];
+            KnownEffectOfEvidence effect = KnownEffectOfEvidence.valueOf(parts[2]);
             String desc = parts[3];
             String context = parts[4];
             String tumorType = "";//parts[5];

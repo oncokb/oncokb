@@ -13,11 +13,11 @@ public class Evidence implements java.io.Serializable {
 
 
      private Integer evidenceId;
-     private String evidenceType;
+     private EvidenceType evidenceType;
      private TumorType tumorType;
      private Drug drug;
      private Alteration alteration;
-     private String knownEffect;
+     private KnownEffectOfEvidence knownEffect;
      private String descriptionOfKnownEffect;
      private String context;
      private Set<String> pmids = new HashSet<String>(0);
@@ -26,12 +26,12 @@ public class Evidence implements java.io.Serializable {
     }
 
 	
-    public Evidence(String evidenceType, Alteration alteration, String knownEffect) {
+    public Evidence(EvidenceType evidenceType, Alteration alteration, KnownEffectOfEvidence knownEffect) {
         this.evidenceType = evidenceType;
         this.alteration = alteration;
         this.knownEffect = knownEffect;
     }
-    public Evidence(String evidenceType, TumorType tumorType, Drug drug, Alteration alteration, String knownEffect, String descriptionOfKnownEffect, String context, Set<String> pmids) {
+    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Alteration alteration, KnownEffectOfEvidence knownEffect, String descriptionOfKnownEffect, String context, Set<String> pmids) {
         this.evidenceType = evidenceType;
         this.tumorType = tumorType;
         this.drug = drug;
@@ -52,11 +52,11 @@ public class Evidence implements java.io.Serializable {
         this.evidenceId = evidenceId;
     }
 
-    public String getEvidenceType() {
+    public EvidenceType getEvidenceType() {
         return evidenceType;
     }
 
-    public void setEvidenceType(String evidenceType) {
+    public void setEvidenceType(EvidenceType evidenceType) {
         this.evidenceType = evidenceType;
     }
     
@@ -87,12 +87,12 @@ public class Evidence implements java.io.Serializable {
         this.alteration = alteration;
     }
     
-    public String getKnownEffect() {
+    public KnownEffectOfEvidence getKnownEffect() {
         return this.knownEffect;
     }
     
     
-    public void setKnownEffect(String knownEffect) {
+    public void setKnownEffect(KnownEffectOfEvidence knownEffect) {
         this.knownEffect = knownEffect;
     }
     
