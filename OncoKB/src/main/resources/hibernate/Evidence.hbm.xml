@@ -35,8 +35,8 @@
         <property name="descriptionOfKnownEffect" type="string">
             <column name="description_of_known_effect" length="65535" />
         </property>
-        <property name="context" type="string">
-            <column name="context" length="1000">
+        <property name="genomicContext" type="string">
+            <column name="genomic_context" length="1000">
                 <comment>coregulated events</comment>
             </column>
         </property>
@@ -46,5 +46,8 @@
             </key>
             <element column="pmid" type="string"></element> 
         </set>
+        <property name="comments" type="string">
+            <column name="comments" length="65535" />
+        </property>
     </class>
 </hibernate-mapping>

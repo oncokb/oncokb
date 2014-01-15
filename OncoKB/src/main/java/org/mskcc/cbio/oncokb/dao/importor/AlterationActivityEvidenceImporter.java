@@ -13,6 +13,7 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -57,8 +58,10 @@ public class AlterationActivityEvidenceImporter {
             KnownEffectOfEvidence effect = KnownEffectOfEvidence.valueOf(parts[2]);
             String desc = parts[3];
             String context = parts[4];
-            String tumorType = "";//parts[5];
+            String comments = parts[5];
             Set<String> pmids = new HashSet<String>(Arrays.asList(parts[6].split(", *")));
+//            String tumorType = "";//parts[7];
+            AlterationType type = AlterationType.valueOf(parts[8]);
             
             Gene gene = geneBo.findGeneByHugoSymbol(hugo);
             if (gene == null) {
@@ -73,7 +76,7 @@ public class AlterationActivityEvidenceImporter {
             
             Alteration alteration = alterationBo.findAlteration(gene.getEntrezGeneId(), alt);
             if (alteration==null) {
-                alteration = new Alteration(gene, alt, "Mutation");
+                alteration = new Alteration(gene, alt, type);
                 alterationBo.save(alteration);
             }
             
@@ -81,8 +84,8 @@ public class AlterationActivityEvidenceImporter {
             evidence.setEvidenceType(evidenceType);
             evidence.setAlteration(alteration);
             evidence.setTumorType(null);
-            evidence.setContext(context);
-            evidence.setDescriptionOfKnownEffect(desc);
+            evidence.setGenomicContext(context.isEmpty()?null:context);
+            evidence.setDescriptionOfKnownEffect(desc.isEmpty()?null:desc);
             evidence.setKnownEffect(effect);
             evidence.setPmids(pmids);
             

@@ -18,10 +18,13 @@
                 </column>
             </property>
         <!--</properties>-->
-        <property name="type" type="string">
-            <column name="type" length="10" not-null="true">
-                <comment>Mutation, CNA</comment>
-            </column>
+        
+        <property name="alterationType" column="alteration_type">
+            <type name="org.hibernate.type.EnumType">
+               <param name="enumClass">org.mskcc.cbio.oncokb.model.AlterationType</param>
+               <param name="type">12</param>
+               <param name="useNamed">true</param>
+            </type>
         </property>
     </class>
     

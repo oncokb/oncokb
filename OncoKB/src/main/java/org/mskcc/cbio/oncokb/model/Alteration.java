@@ -11,16 +11,16 @@ public class Alteration implements java.io.Serializable {
      private Integer alterationId;
      private Gene gene;
      private String alteration;
-     private String type;
+     private AlterationType alterationType;
 
     public Alteration() {
     }
 
 	
-    public Alteration(Gene gene, String alteration, String type) {
+    public Alteration(Gene gene, String alteration, AlterationType alterationType) {
         this.gene = gene;
         this.alteration = alteration;
-        this.type = type;
+        this.alterationType = alterationType;
     }
    
     
@@ -51,13 +51,13 @@ public class Alteration implements java.io.Serializable {
         this.alteration = alteration;
     }
     
-    public String getType() {
-        return this.type;
+    public AlterationType getAlterationType() {
+        return this.alterationType;
     }
     
     
-    public void setType(String type) {
-        this.type = type;
+    public void setAlterationType(AlterationType alterationType) {
+        this.alterationType = alterationType;
     }
 
     
@@ -66,7 +66,7 @@ public class Alteration implements java.io.Serializable {
         int hash = 7;
         hash = 83 * hash + (this.gene != null ? this.gene.hashCode() : 0);
         hash = 83 * hash + (this.alteration != null ? this.alteration.hashCode() : 0);
-        hash = 83 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 83 * hash + (this.alterationType != null ? this.alterationType.hashCode() : 0);
         return hash;
     }
 
@@ -86,7 +86,7 @@ public class Alteration implements java.io.Serializable {
         if ((this.alteration == null) ? (other.alteration != null) : !this.alteration.equals(other.alteration)) {
             return false;
         }
-        if ((this.type == null) ? (other.type != null) : !this.type.equals(other.type)) {
+        if ((this.alterationType == null) ? (other.alterationType != null) : !this.alterationType.equals(other.alterationType)) {
             return false;
         }
         return true;

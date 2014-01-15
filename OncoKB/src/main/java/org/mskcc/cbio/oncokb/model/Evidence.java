@@ -19,8 +19,9 @@ public class Evidence implements java.io.Serializable {
      private Alteration alteration;
      private KnownEffectOfEvidence knownEffect;
      private String descriptionOfKnownEffect;
-     private String context;
+     private String genomicContext;
      private Set<String> pmids = new HashSet<String>(0);
+     private String comments;
 
     public Evidence() {
     }
@@ -31,15 +32,16 @@ public class Evidence implements java.io.Serializable {
         this.alteration = alteration;
         this.knownEffect = knownEffect;
     }
-    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Alteration alteration, KnownEffectOfEvidence knownEffect, String descriptionOfKnownEffect, String context, Set<String> pmids) {
+    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Alteration alteration, KnownEffectOfEvidence knownEffect, String descriptionOfKnownEffect, String genomicContext, Set<String> pmids, String comments) {
         this.evidenceType = evidenceType;
         this.tumorType = tumorType;
         this.drug = drug;
         this.alteration = alteration;
         this.knownEffect = knownEffect;
         this.descriptionOfKnownEffect = descriptionOfKnownEffect;
-        this.context = context;
+        this.genomicContext = genomicContext;
         this.pmids = pmids;
+        this.comments = comments;
     }
    
     
@@ -105,13 +107,13 @@ public class Evidence implements java.io.Serializable {
         this.descriptionOfKnownEffect = descriptionOfKnownEffect;
     }
     
-    public String getContext() {
-        return this.context;
+    public String getGenomicContext() {
+        return this.genomicContext;
     }
     
     
-    public void setContext(String context) {
-        this.context = context;
+    public void setGenomicContext(String genomicContext) {
+        this.genomicContext = genomicContext;
     }
     
     public Set<String> getPmids() {
@@ -123,7 +125,13 @@ public class Evidence implements java.io.Serializable {
         this.pmids = pmids;
     }
 
+    public String getComments() {
+        return comments;
+    }
 
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
 
 
 }
