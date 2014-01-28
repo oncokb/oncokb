@@ -17,7 +17,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param alterationId
      * @return 
      */
-    List<Evidence> findEvidencesByAlterationId(int alterationId);
+    List<Evidence> findEvidencesByAlteration(int alterationId);
     
     /**
      * Find Evidences by Entrez Gene ID

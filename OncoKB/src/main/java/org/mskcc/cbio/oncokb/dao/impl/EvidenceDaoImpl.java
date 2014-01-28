@@ -16,8 +16,8 @@ public class EvidenceDaoImpl
             extends GenericDaoImpl<Evidence, Integer>
             implements EvidenceDao {
 
-    public List<Evidence> findEvidencesByAlterationId(int alterationId) {
-        return findByNamedQuery("findEvidencesByAlterationId", alterationId);
+    public List<Evidence> findEvidencesByAlteration(int alterationId) {
+        return findByNamedQuery("findEvidencesByAlteration", alterationId);
     }
 
     public List<Evidence> findEvidencesByGene(int entrezGeneId) {

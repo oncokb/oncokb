@@ -19,8 +19,8 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
      * @param alterationId
      * @return 
      */
-    public List<Evidence> findEvidencesByAlterationId(int alterationId) {
-        return getDao().findEvidencesByAlterationId(alterationId);
+    public List<Evidence> findEvidencesByAlteration(int alterationId) {
+        return getDao().findEvidencesByAlteration(alterationId);
     }
     
     /**

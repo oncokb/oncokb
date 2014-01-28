@@ -50,4 +50,17 @@
             <column name="comments" length="65535" />
         </property>
     </class>
+    
+    <query name="findEvidencesByAlteration">
+        <![CDATA[from Evidence where alteration_id=?]]>
+    </query>
+    <query name="findEvidencesByGene">
+        <![CDATA[from Evidence e join e.alteration where entrez_gene_id=?]]>
+    </query>
+    <query name="findEvidencesByTumorType">
+        <![CDATA[from Evidence where tumor_type_id=?]]>
+    </query>
+    <query name="findEvidencesByGeneAndTumorType">
+        <![CDATA[from Evidence e join e.alteration where entrez_gene_id=? and tumor_type_id=?]]>
+    </query>
 </hibernate-mapping>

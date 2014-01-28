@@ -17,7 +17,7 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @param alterationId
      * @return 
      */
-    List<Evidence> findEvidencesByAlterationId(int alterationId);
+    List<Evidence> findEvidencesByAlteration(int alterationId);
     
     /**
      * Find AlterationActivityEvidences by Entrez Gene ID
