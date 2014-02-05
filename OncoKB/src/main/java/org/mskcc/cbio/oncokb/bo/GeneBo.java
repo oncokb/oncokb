@@ -7,8 +7,8 @@ package org.mskcc.cbio.oncokb.bo;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
- * Gene business object (BO) interface and implementation, it’s used to store
- * the project’s business function, the real database operations (CRUD) works
+ * Gene business object (BO) interface and implementation, it's used to store
+ * the project's business function, the real database operations (CRUD) works
  * should not involved in this class, instead it has a DAO (GeneDao) class to do it.
  * @author jgao
  */
