@@ -127,7 +127,7 @@
 	</repositories>
 
 	<build>
-		<finalName>OncoKB</finalName>
+		<finalName>oncokb</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
