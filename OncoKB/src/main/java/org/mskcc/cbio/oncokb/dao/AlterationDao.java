@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.dao;
 
 import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
  *
@@ -18,7 +19,7 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param entrezGeneId
      * @return 
      */
-    List<Alteration> findAlterationsByGene(int entrezGeneId);
+    List<Alteration> findAlterationsByGene(Gene gene);
     
     /**
      * 
@@ -26,5 +27,5 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param alteration
      * @return 
      */
-    Alteration findAlteration(int entrezGeneId, String alteration);
+    Alteration findAlteration(Gene gene, String alteration);
 }

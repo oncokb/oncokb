@@ -6,7 +6,9 @@ package org.mskcc.cbio.oncokb.dao.impl;
 
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
  *
@@ -15,13 +17,14 @@ import org.mskcc.cbio.oncokb.model.Evidence;
 public class EvidenceDaoImpl
             extends GenericDaoImpl<Evidence, Integer>
             implements EvidenceDao {
-
-    public List<Evidence> findEvidencesByAlteration(int alterationId) {
-        return findByNamedQuery("findEvidencesByAlteration", alterationId);
+    @Override
+    public List<Evidence> findEvidencesByAlteration(Alteration alteration) {
+        return findByNamedQuery("findEvidencesByAlteration", alteration.getAlterationId());
     }
 
-    public List<Evidence> findEvidencesByGene(int entrezGeneId) {
-        return findByNamedQuery("findEvidencesByGene", entrezGeneId);
+    @Override
+    public List<Evidence> findEvidencesByGene(Gene gene) {
+        return findByNamedQuery("findEvidencesByGene", gene.getEntrezGeneId());
     }
     
 }

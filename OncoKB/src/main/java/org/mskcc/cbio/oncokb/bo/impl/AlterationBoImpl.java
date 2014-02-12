@@ -4,10 +4,13 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
  *
@@ -15,17 +18,17 @@ import org.mskcc.cbio.oncokb.model.Alteration;
  */
 public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> implements AlterationBo {
 
-    public List<Alteration> findAlterationsByGene(int entrezGeneId) {
-        return getDao().findAlterationsByGene(entrezGeneId);
+    @Override
+    public List<Alteration> findAlterationsByGene(Collection<Gene> genes) {
+        List<Alteration> alterations = new ArrayList<Alteration>();
+        for (Gene gene : genes) {
+            alterations.addAll(getDao().findAlterationsByGene(gene));
+        }
+        return alterations;
     }
     
-    /**
-     * 
-     * @param entrezGeneId
-     * @param alteration
-     * @return 
-     */
-    public Alteration findAlteration(int entrezGeneId, String alteration) {
-        return getDao().findAlteration(entrezGeneId, alteration);
+    @Override
+    public Alteration findAlteration(Gene gene, String alteration) {
+        return getDao().findAlteration(gene, alteration);
     }
 }

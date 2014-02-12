@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
@@ -27,28 +28,28 @@ public class EvidenceController {
     
     @RequestMapping(value="/evidence.json")
     public @ResponseBody List<Evidence> getAlteration(
-            @RequestParam(value="entrez_gene_id", required=false) Integer entrezGeneId,
-            @RequestParam(value="hugo_symbol", required=false) String hugoSymbol) {
+            @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
+            @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
         
         ApplicationContext applicationContext = ApplicationContextSingleton.getApplicationContext();
         
         GeneBo geneBo = GeneBo.class.cast(applicationContext.getBean("geneBo"));
         
-        Gene gene = null; 
-        if (entrezGeneId!=null) {
-            gene = geneBo.findGeneByEntrezGeneId(entrezGeneId);
+        List<Gene> genes = new ArrayList<Gene>(); 
+        if (entrezGeneIds!=null) {
+            genes.addAll(geneBo.findGenesByEntrezGeneId(entrezGeneIds));
         }
         
-        if (hugoSymbol!=null) {
-            gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
+        if (hugoSymbols!=null) {
+            genes.addAll(geneBo.findGenesByHugoSymbol(hugoSymbols));
         }
         
-        if (gene == null) {
+        if (genes == null) {
             return Collections.emptyList();
         }
         
         EvidenceBo evidenceBo = EvidenceBo.class.cast(applicationContext.getBean("evidenceBo"));
         
-        return evidenceBo.findEvidencesByGene(gene.getEntrezGeneId());
+        return evidenceBo.findEvidencesByGene(genes);
     }
 }

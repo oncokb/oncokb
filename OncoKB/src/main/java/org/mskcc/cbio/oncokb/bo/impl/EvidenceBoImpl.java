@@ -4,31 +4,36 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import org.mskcc.cbio.oncokb.bo.*;
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
  *
  * @author jgao
  */
 public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implements EvidenceBo {
-    /**
-     * Find Evidences by alteration ID
-     * @param alterationId
-     * @return 
-     */
-    public List<Evidence> findEvidencesByAlteration(int alterationId) {
-        return getDao().findEvidencesByAlteration(alterationId);
+    
+    @Override
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations) {
+        List<Evidence> evidences = new ArrayList<Evidence>();
+        for (Alteration alteration : alterations) {
+            evidences.addAll(getDao().findEvidencesByAlteration(alteration));
+        }
+        return evidences;
     }
     
-    /**
-     * Find Evidences by Entrez Gene ID
-     * @param entrezGeneId
-     * @return 
-     */
-    public List<Evidence> findEvidencesByGene(int entrezGeneId) {
-        return getDao().findEvidencesByGene(entrezGeneId);
+    @Override
+    public List<Evidence> findEvidencesByGene(Collection<Gene> genes) {
+        List<Evidence> evidences = new ArrayList<Evidence>();
+        for (Gene gene : genes) {
+            evidences.addAll(getDao().findEvidencesByGene(gene));
+        }
+        return evidences;
     }
 }

@@ -4,7 +4,6 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -22,17 +21,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TumorTypeController {
     
-    @RequestMapping(value="/tumor_type.json")
+    @RequestMapping(value="/tumorType.json")
     public @ResponseBody List<TumorType> getTumorType(
-            @RequestParam(value="tumor_type_id", required=false) String tumorTypeId) {
+            @RequestParam(value="tumorTypeId", required=false) List<String> tumorTypeIds) {
         TumorTypeBo tumorTypeBo = TumorTypeBo.class.cast(ApplicationContextSingleton.getApplicationContext().getBean("tumorTypeBo"));
-        if (tumorTypeId!=null) {
-            TumorType tumorType = tumorTypeBo.findTumorTypeById(tumorTypeId);
-            if (tumorType==null) {
-                return Collections.emptyList();
-            } else {
-                return Collections.singletonList(tumorType);
-            }
+        if (tumorTypeIds!=null) {
+            return tumorTypeBo.findTumorTypesById(tumorTypeIds);
         } else {
             return tumorTypeBo.findAll();
         }

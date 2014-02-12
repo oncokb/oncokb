@@ -4,6 +4,8 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
+import java.util.Collection;
+import java.util.List;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
@@ -12,6 +14,5 @@ import org.mskcc.cbio.oncokb.model.TumorType;
  */
 public interface TumorTypeBo extends GenericBo<TumorType> {
 
-    TumorType findTumorTypeById(String tumorTypeId);
-    
+    List<TumorType> findTumorTypesById(Collection<String> tumorTypeIds);   
 }

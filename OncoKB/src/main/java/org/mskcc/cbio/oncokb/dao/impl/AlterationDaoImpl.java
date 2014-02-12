@@ -7,19 +7,21 @@ package org.mskcc.cbio.oncokb.dao.impl;
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
  *
  * @author jgao
  */
 public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> implements AlterationDao {
-
-    public List<Alteration> findAlterationsByGene(int entrezGeneId) {
-        return findByNamedQuery("findAlterationsByGene", entrezGeneId);
+    @Override
+    public List<Alteration> findAlterationsByGene(Gene gene) {
+        return findByNamedQuery("findAlterationsByGene", gene.getEntrezGeneId());
     }
     
-    public Alteration findAlteration(int entrezGeneId, String alteration) {
-        List<Alteration> alterations = findByNamedQuery("findAlteration", entrezGeneId, alteration);
+    @Override
+    public Alteration findAlteration(Gene gene, String alteration) {
+        List<Alteration> alterations = findByNamedQuery("findAlteration", gene.getEntrezGeneId(), alteration);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 }

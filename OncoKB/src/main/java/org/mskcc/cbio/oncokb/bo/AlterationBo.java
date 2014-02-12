@@ -4,8 +4,10 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
+import java.util.Collection;
 import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
  *
@@ -14,17 +16,17 @@ import org.mskcc.cbio.oncokb.model.Alteration;
 public interface AlterationBo extends GenericBo<Alteration> {
     
     /**
-     * Get set of alterations by entrez gene Id.
-     * @param entrezGeneId
+     * Get set of alterations by entrez gene Ids.
+     * @param genes
      * @return 
      */
-    List<Alteration> findAlterationsByGene(int entrezGeneId);
+    List<Alteration> findAlterationsByGene(Collection<Gene> genes);
     
     /**
      * 
-     * @param entrezGeneId
+     * @param gene
      * @param alteration
      * @return 
      */
-    Alteration findAlteration(int entrezGeneId, String alteration);
+    Alteration findAlteration(Gene gene, String alteration);
 }

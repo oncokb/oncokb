@@ -74,7 +74,7 @@ public class AlterationActivityEvidenceImporter {
                 geneBo.save(gene);
             }
             
-            Alteration alteration = alterationBo.findAlteration(gene.getEntrezGeneId(), alt);
+            Alteration alteration = alterationBo.findAlteration(gene, alt);
             if (alteration==null) {
                 alteration = new Alteration(gene, alt, type);
                 alterationBo.save(alteration);

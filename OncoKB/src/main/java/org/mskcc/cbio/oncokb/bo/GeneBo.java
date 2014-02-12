@@ -4,6 +4,8 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
+import java.util.Collection;
+import java.util.List;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
@@ -14,17 +16,30 @@ import org.mskcc.cbio.oncokb.model.Gene;
  */
 public interface GeneBo extends GenericBo<Gene> {
     /**
-     * Get a gene by hugo symbol
-     * @param symbol
-     * @return gene object or null
+     * Gene genes by hugo symbol
+     * @param symbols
+     * @return a list of genes
      */
-    Gene findGeneByHugoSymbol(String symbol);
+    List<Gene> findGenesByHugoSymbol(Collection<String> symbols);
     
     /**
-     * Get a gene by Entrez Gene Id.
+     * 
+     * @param symbol
+     * @return 
+     */
+    Gene findGeneByHugoSymbol(String symbol);
+
+    /**
+     * Get genes by Entrez Gene Id.
+     * @param entrezGeneIds
+     * @return a list of genes
+     */
+    List<Gene> findGenesByEntrezGeneId(Collection<Integer> entrezGeneIds);
+    
+    /**
+     * 
      * @param entrezGeneId
-     * @return gene object or null.
+     * @return 
      */
     Gene findGeneByEntrezGeneId(int entrezGeneId);
-    
 }
