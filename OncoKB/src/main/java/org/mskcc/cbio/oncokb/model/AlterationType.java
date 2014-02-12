@@ -11,7 +11,8 @@ package org.mskcc.cbio.oncokb.model;
 public enum AlterationType {
     
      MUTATION ("Mutation"),
-     COPY_NUMBER_ALTERATION("Copy number alteration");
+     COPY_NUMBER_ALTERATION("Copy number alteration"),
+     FUSION ("Fusion");
 
      private AlterationType(String label) {
          this.label = label;
