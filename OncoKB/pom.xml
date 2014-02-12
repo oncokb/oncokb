@@ -15,6 +15,7 @@
 		<spring.version>3.1.0.RELEASE</spring.version>
 		<cglib.version>2.2.2</cglib.version>
 	 <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
+	 <project.build.sourceEncoding>US-ASCII</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -136,8 +137,28 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+				 <encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
+		 <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+		  <artifactId>maven-resources-plugin</artifactId>
+		  <version>2.4.3</version>
+		  <configuration>
+		   <encoding>${project.build.sourceEncoding}</encoding>
+		  </configuration>
+		 </plugin>
 		</plugins>
 	</build>
+ <reporting>
+  <plugins>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-checkstyle-plugin</artifactId>
+    <configuration>
+     <configLocation>config/sun_checks.xml</configLocation>
+    </configuration>
+   </plugin>
+  </plugins>
+ </reporting>
 </project>
