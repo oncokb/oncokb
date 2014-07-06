@@ -9,9 +9,8 @@ package org.mskcc.cbio.oncokb.model;
  * @author jgao
  */
 public enum KnownEffectOfEvidence {
-         GAIN_OF_FUNCTION ("Gain of function"),
-         LOSS_OF_FUNCTION("Loss of function"),
-         SWITCH_OF_FUNCTION("Switch of function"),
+         ACTIVATING ("Activating"),
+         INACTIVATING("Inactivating"),
          SENSITIVE_TO_DRUG("Sensitive"),
          INSENSITIVE_TO_DRUG("Insensitive");
          
@@ -19,7 +18,7 @@ public enum KnownEffectOfEvidence {
              this.label = label;
          }
          
-         private String label;
+         private final String label;
          
          public String label() {
              return label;

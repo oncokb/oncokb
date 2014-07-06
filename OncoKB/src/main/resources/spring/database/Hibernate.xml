@@ -21,6 +21,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                                 <value>/hibernate/Drug.hbm.xml</value>
                                 <value>/hibernate/TumorType.hbm.xml</value>
                                 <value>/hibernate/Alteration.hbm.xml</value>
+                                <value>/hibernate/Document.hbm.xml</value>
                                 <value>/hibernate/Evidence.hbm.xml</value>
                                 <value>/hibernate/Gene.hbm.xml</value>
 			</list>

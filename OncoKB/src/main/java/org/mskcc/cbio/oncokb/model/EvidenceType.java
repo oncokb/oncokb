@@ -10,13 +10,14 @@ package org.mskcc.cbio.oncokb.model;
  */
 public enum EvidenceType {
          ACTIVITY ("Activity"),
-         DRUG_SENSITIVITY("Drug sensivity");
+         DRUG_SENSITIVITY("Drug sensivity"),
+         PREVALENCE ("Prevalence");
          
          private EvidenceType(String label) {
              this.label = label;
          }
          
-         private String label;
+         private final String label;
          
          public String label() {
              return label;

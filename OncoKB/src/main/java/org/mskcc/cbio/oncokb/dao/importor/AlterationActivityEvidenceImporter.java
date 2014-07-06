@@ -1,19 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.DocumentBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
+import org.mskcc.cbio.oncokb.model.Document;
+import org.mskcc.cbio.oncokb.model.DocumentType;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -44,6 +45,7 @@ public class AlterationActivityEvidenceImporter {
 	
     	GeneBo geneBo = GeneBo.class.cast(appContext.getBean("geneBo"));
     	AlterationBo alterationBo = AlterationBo.class.cast(appContext.getBean("alterationBo"));
+    	DocumentBo documentBo = DocumentBo.class.cast(appContext.getBean("documentBo"));
     	EvidenceBo evidenceBo = EvidenceBo.class.cast(appContext.getBean("evidenceBo"));
         
         int nLines = lines.size();
@@ -80,6 +82,19 @@ public class AlterationActivityEvidenceImporter {
                 alterationBo.save(alteration);
             }
             
+            Set<Document> docs = new HashSet<Document>(pmids.size());
+            for (String pmid : pmids) {
+                Document doc = new Document(DocumentType.JOURNAL_ARTICLE);
+                doc.setPmid(pmid);
+                Document existingDoc = documentBo.findDocument(doc);
+                if (existingDoc!=null) {
+                    docs.add(existingDoc);
+                } else {
+                    docs.add(doc);
+                    documentBo.save(doc);
+                }
+            }
+            
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
             evidence.setAlteration(alteration);
@@ -87,7 +102,7 @@ public class AlterationActivityEvidenceImporter {
             evidence.setGenomicContext(context.isEmpty()?null:context);
             evidence.setDescriptionOfKnownEffect(desc.isEmpty()?null:desc);
             evidence.setKnownEffect(effect);
-            evidence.setPmids(pmids);
+            evidence.setDocuments(docs);
             
             evidenceBo.save(evidence);
         }

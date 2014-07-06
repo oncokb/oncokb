@@ -20,7 +20,7 @@ public class Evidence implements java.io.Serializable {
      private KnownEffectOfEvidence knownEffect;
      private String descriptionOfKnownEffect;
      private String genomicContext;
-     private Set<String> pmids = new HashSet<String>(0);
+     private Set<Document> documents = new HashSet<Document>(0);
      private String comments;
 
     public Evidence() {
@@ -32,7 +32,7 @@ public class Evidence implements java.io.Serializable {
         this.alteration = alteration;
         this.knownEffect = knownEffect;
     }
-    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Alteration alteration, KnownEffectOfEvidence knownEffect, String descriptionOfKnownEffect, String genomicContext, Set<String> pmids, String comments) {
+    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Alteration alteration, KnownEffectOfEvidence knownEffect, String descriptionOfKnownEffect, String genomicContext, Set<Document> documents, String comments) {
         this.evidenceType = evidenceType;
         this.tumorType = tumorType;
         this.drug = drug;
@@ -40,7 +40,7 @@ public class Evidence implements java.io.Serializable {
         this.knownEffect = knownEffect;
         this.descriptionOfKnownEffect = descriptionOfKnownEffect;
         this.genomicContext = genomicContext;
-        this.pmids = pmids;
+        this.documents = documents;
         this.comments = comments;
     }
    
@@ -116,13 +116,13 @@ public class Evidence implements java.io.Serializable {
         this.genomicContext = genomicContext;
     }
     
-    public Set<String> getPmids() {
-        return this.pmids;
+    public Set<Document> getDocuments() {
+        return this.documents;
     }
     
     
-    public void setPmids(Set<String> pmids) {
-        this.pmids = pmids;
+    public void setDocuments(Set<Document> documents) {
+        this.documents = documents;
     }
 
     public String getComments() {
