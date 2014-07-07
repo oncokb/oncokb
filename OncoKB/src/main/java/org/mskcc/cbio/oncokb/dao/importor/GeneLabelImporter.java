@@ -30,11 +30,8 @@ public final class GeneLabelImporter {
         List<String> lines = FileUtils.readLinesStream(
                 GeneLabelImporter.class.getResourceAsStream(GENE_LABEL_FILE));
         String[] headers = lines.get(0).split("\t");
-              
-        ApplicationContext appContext = 
-    		ApplicationContextSingleton.getApplicationContext();
 	
-    	GeneBo geneBo = GeneBo.class.cast(appContext.getBean("geneBo"));
+    	GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         int nLines = lines.size();
         System.out.println("importing...");

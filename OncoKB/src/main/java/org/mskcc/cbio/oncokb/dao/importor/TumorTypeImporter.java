@@ -27,11 +27,8 @@ public class TumorTypeImporter {
         List<String> lines = FileUtils.readLinesStream(
                 TumorTypeImporter.class.getResourceAsStream(TUMOR_TYPES_FILE));
         String[] headers = lines.get(0).split("\t");
-              
-        ApplicationContext appContext = 
-    		ApplicationContextSingleton.getApplicationContext();
 	
-    	TumorTypeBo tumorTypeBo = TumorTypeBo.class.cast(appContext.getBean("tumorTypeBo"));
+    	TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         
         int nLines = lines.size();
         System.out.println("importing...");

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.mskcc.cbio.oncokb.util;
 
 import java.io.IOException;
@@ -11,8 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.util.FileUtils;
-import org.mskcc.cbio.oncokb.util.JsonUtils;
 
 /**
  *
@@ -88,7 +82,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         
         List<Gene> genes = new ArrayList<Gene>();
         for (Map<String,Object> hit : hits) {
-            int entrez = Integer.class.cast(hit.get("entrezgene")).intValue();
+            int entrez = Integer.class.cast(hit.get("entrezgene"));
             String symbol = String.class.cast(hit.get("symbol"));
             String name = String.class.cast(hit.get("name"));
             

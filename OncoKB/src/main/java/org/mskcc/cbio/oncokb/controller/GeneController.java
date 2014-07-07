@@ -27,7 +27,7 @@ public class GeneController {
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
         
-        GeneBo geneBo = GeneBo.class.cast(ApplicationContextSingleton.getApplicationContext().getBean("geneBo"));
+        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         if (entrezGeneIds == null && hugoSymbols == null) {
             return geneBo.findAll();

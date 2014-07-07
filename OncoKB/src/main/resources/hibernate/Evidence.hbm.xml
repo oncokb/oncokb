@@ -1,68 +1,68 @@
-<?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence" catalog="oncokb">
-        <id name="EvidenceId" type="java.lang.Integer">
-            <column name="evidence_id" />
-            <generator class="identity" />
-        </id>
-        <property name="evidenceType" column="evidence_type">
-            <type name="org.hibernate.type.EnumType">
-               <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
-               <param name="type">12</param>
-               <param name="useNamed">true</param>
-            </type>
-        </property>
-        <many-to-one name="tumorType" class="org.mskcc.cbio.oncokb.model.TumorType" lazy="false" fetch="join">
-            <column name="tumor_type_id" length="50" />
-        </many-to-one>
-        <many-to-one name="drug" class="org.mskcc.cbio.oncokb.model.Drug" lazy="false" fetch="join">
-            <column name="drug_id" />
-        </many-to-one>
-        <many-to-one name="alteration" class="org.mskcc.cbio.oncokb.model.Alteration" lazy="false" fetch="join">
-            <column name="alteration_id" not-null="true" />
-        </many-to-one>
-        
-        <property name="knownEffect" column="known_effect">
-            <type name="org.hibernate.type.EnumType">
-               <param name="enumClass">org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence</param>
-               <param name="type">12</param>
-               <param name="useNamed">true</param>
-            </type>
-        </property>
-        <property name="descriptionOfKnownEffect" type="string">
-            <column name="description_of_known_effect" length="65535" />
-        </property>
-        <property name="genomicContext" type="string">
-            <column name="genomic_context" length="1000">
-                <comment>coregulated events</comment>
-            </column>
-        </property>
-        <set name="documents" table="evidence_document" lazy="false" cascade="all">
-            <key>
-                <column name="evidence_id" not-null="true" />
-            </key>
-            <many-to-many class="org.mskcc.cbio.oncokb.model.Document">
-                <column name="document_id" not-null="true" />
-            </many-to-many>
-        </set>
-        <property name="comments" type="string">
-            <column name="comments" length="65535" />
-        </property>
-    </class>
-    
-    <query name="findEvidencesByAlteration">
-        <![CDATA[from Evidence where alteration_id=?]]>
+  <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence">
+    <id name="EvidenceId" type="java.lang.Integer">
+      <column name="evidence_id"/>
+      <generator class="identity"/>
+    </id>
+    <property column="evidence_type" name="evidenceType">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
+        <param name="type">12</param>
+        <param name="useNamed">true</param>
+      </type>
+    </property>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.TumorType" fetch="join" lazy="false" name="tumorType">
+      <column length="50" name="tumor_type_id"/>
+    </many-to-one>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.Drug" fetch="join" lazy="false" name="drug">
+      <column name="drug_id"/>
+    </many-to-one>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
+      <column name="entrez_gene_id"/>
+    </many-to-one>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.Alteration" fetch="join" lazy="false" name="alteration">
+      <column name="alteration_id"/>
+    </many-to-one>
+    <property column="known_effect" name="knownEffect">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence</param>
+        <param name="type">12</param>
+        <param name="useNamed">true</param>
+      </type>
+    </property>
+    <property name="description" type="string">
+      <column length="65535" name="description"/>
+    </property>
+    <property name="genomicContext" type="string">
+      <column length="1000" name="genomic_context">
+        <comment>coregulated events</comment>
+      </column>
+    </property>
+    <set cascade="all" lazy="false" name="documents" table="evidence_document">
+      <key>
+        <column name="evidence_id" not-null="true"/>
+      </key>
+      <many-to-many class="org.mskcc.cbio.oncokb.model.Document">
+        <column name="document_id" not-null="true"/>
+      </many-to-many>
+    </set>
+    <property name="comments" type="string">
+      <column length="65535" name="comments"/>
+    </property>
+  </class>
+  <query name="findEvidencesByAlteration">
+        from Evidence where alteration_id=?
     </query>
-    <query name="findEvidencesByGene">
-        <![CDATA[from Evidence e join e.alteration where entrez_gene_id=?]]>
+  <query name="findEvidencesByGene">
+        from Evidence e join e.alteration where entrez_gene_id=?
     </query>
-    <query name="findEvidencesByTumorType">
-        <![CDATA[from Evidence where tumor_type_id=?]]>
+  <query name="findEvidencesByTumorType">
+        from Evidence where tumor_type_id=?
     </query>
-    <query name="findEvidencesByGeneAndTumorType">
-        <![CDATA[from Evidence e join e.alteration where entrez_gene_id=? and tumor_type_id=?]]>
+  <query name="findEvidencesByGeneAndTumorType">
+        from Evidence e join e.alteration where entrez_gene_id=? and tumor_type_id=?
     </query>
 </hibernate-mapping>

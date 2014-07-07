@@ -24,7 +24,7 @@ public class TumorTypeController {
     @RequestMapping(value="/tumorType.json")
     public @ResponseBody List<TumorType> getTumorType(
             @RequestParam(value="tumorTypeId", required=false) List<String> tumorTypeIds) {
-        TumorTypeBo tumorTypeBo = TumorTypeBo.class.cast(ApplicationContextSingleton.getApplicationContext().getBean("tumorTypeBo"));
+        TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (tumorTypeIds!=null) {
             return tumorTypeBo.findTumorTypesById(tumorTypeIds);
         } else {

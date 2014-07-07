@@ -12,33 +12,38 @@ import java.util.Set;
 public class Evidence implements java.io.Serializable {
 
 
-     private Integer evidenceId;
-     private EvidenceType evidenceType;
-     private TumorType tumorType;
-     private Drug drug;
-     private Alteration alteration;
-     private KnownEffectOfEvidence knownEffect;
-     private String descriptionOfKnownEffect;
-     private String genomicContext;
-     private Set<Document> documents = new HashSet<Document>(0);
-     private String comments;
+    private Integer evidenceId;
+    private EvidenceType evidenceType;
+    private TumorType tumorType;
+    private Drug drug;
+    private Gene gene;
+    private Alteration alteration;
+    private KnownEffectOfEvidence knownEffect;
+    private String description;
+    private String genomicContext;
+    private Set<Document> documents = new HashSet<Document>(0);
+    private String comments;
 
     public Evidence() {
     }
 
+    public Evidence(EvidenceType evidenceType) {
+        this.evidenceType = evidenceType;
+    }
 	
     public Evidence(EvidenceType evidenceType, Alteration alteration, KnownEffectOfEvidence knownEffect) {
         this.evidenceType = evidenceType;
         this.alteration = alteration;
         this.knownEffect = knownEffect;
     }
-    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Alteration alteration, KnownEffectOfEvidence knownEffect, String descriptionOfKnownEffect, String genomicContext, Set<Document> documents, String comments) {
+    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Gene gene, Alteration alteration, KnownEffectOfEvidence knownEffect, String description, String genomicContext, Set<Document> documents, String comments) {
         this.evidenceType = evidenceType;
         this.tumorType = tumorType;
         this.drug = drug;
+        this.gene = gene;
         this.alteration = alteration;
         this.knownEffect = knownEffect;
-        this.descriptionOfKnownEffect = descriptionOfKnownEffect;
+        this.description = description;
         this.genomicContext = genomicContext;
         this.documents = documents;
         this.comments = comments;
@@ -79,6 +84,14 @@ public class Evidence implements java.io.Serializable {
     public void setDrug(Drug drug) {
         this.drug = drug;
     }
+
+    public Gene getGene() {
+        return gene;
+    }
+
+    public void setGene(Gene gene) {
+        this.gene = gene;
+    }
     
     public Alteration getAlteration() {
         return this.alteration;
@@ -98,13 +111,13 @@ public class Evidence implements java.io.Serializable {
         this.knownEffect = knownEffect;
     }
     
-    public String getDescriptionOfKnownEffect() {
-        return this.descriptionOfKnownEffect;
+    public String getDescription() {
+        return this.description;
     }
     
     
-    public void setDescriptionOfKnownEffect(String descriptionOfKnownEffect) {
-        this.descriptionOfKnownEffect = descriptionOfKnownEffect;
+    public void setDescription(String description) {
+        this.description = description;
     }
     
     public String getGenomicContext() {

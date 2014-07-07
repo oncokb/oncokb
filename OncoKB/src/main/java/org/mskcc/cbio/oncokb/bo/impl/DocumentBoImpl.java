@@ -24,7 +24,7 @@ public class DocumentBoImpl extends GenericBoImpl<Document, DocumentDao> impleme
             if (doc.getPmid() == null) {
                 return null;
             }
-            return getDao().findDocumentbyPmid(doc.getPmid());
+            return findDocumentByPmid(doc.getPmid());
         }
         
         if (doc.getDocType() == DocumentType.CONFERENCE_ABSTRACT) {
@@ -54,5 +54,10 @@ public class DocumentBoImpl extends GenericBoImpl<Document, DocumentDao> impleme
         }
         
         return null;
+    }
+
+    @Override
+    public Document findDocumentByPmid(String pmid) {
+        return getDao().findDocumentbyPmid(pmid);
     }
 }

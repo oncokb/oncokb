@@ -14,4 +14,11 @@ public interface DocumentBo extends GenericBo<Document> {
      * @return 
      */
     Document findDocument(Document doc);
+    
+    /**
+     * 
+     * @param pmid
+     * @return 
+     */
+    Document findDocumentByPmid(String pmid);
 }

@@ -39,14 +39,11 @@ public class AlterationActivityEvidenceImporter {
         List<String> lines = FileUtils.readLinesStream(
                 AlterationActivityEvidenceImporter.class.getResourceAsStream(ALTERATION_ACTIVITY_EVIDENCE_FILE));
         String[] headers = lines.get(0).split("\t");
-              
-        ApplicationContext appContext = 
-    		ApplicationContextSingleton.getApplicationContext();
 	
-    	GeneBo geneBo = GeneBo.class.cast(appContext.getBean("geneBo"));
-    	AlterationBo alterationBo = AlterationBo.class.cast(appContext.getBean("alterationBo"));
-    	DocumentBo documentBo = DocumentBo.class.cast(appContext.getBean("documentBo"));
-    	EvidenceBo evidenceBo = EvidenceBo.class.cast(appContext.getBean("evidenceBo"));
+    	GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+    	AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+    	DocumentBo documentBo = ApplicationContextSingleton.getDocumentBo();
+    	EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         int nLines = lines.size();
         System.out.println("importing...");
@@ -84,23 +81,20 @@ public class AlterationActivityEvidenceImporter {
             
             Set<Document> docs = new HashSet<Document>(pmids.size());
             for (String pmid : pmids) {
-                Document doc = new Document(DocumentType.JOURNAL_ARTICLE);
-                doc.setPmid(pmid);
-                Document existingDoc = documentBo.findDocument(doc);
-                if (existingDoc!=null) {
-                    docs.add(existingDoc);
-                } else {
-                    docs.add(doc);
-                    documentBo.save(doc);
+                Document doc = documentBo.findDocumentByPmid(pmid);
+                if (doc==null) {
+                    doc = new Document(DocumentType.JOURNAL_ARTICLE);
+                    doc.setPmid(pmid);
                 }
+                docs.add(doc);
             }
             
-            Evidence evidence = new Evidence();
-            evidence.setEvidenceType(evidenceType);
+            Evidence evidence = new Evidence(evidenceType);
+            evidence.setGene(gene);
             evidence.setAlteration(alteration);
             evidence.setTumorType(null);
             evidence.setGenomicContext(context.isEmpty()?null:context);
-            evidence.setDescriptionOfKnownEffect(desc.isEmpty()?null:desc);
+            evidence.setDescription(desc.isEmpty()?null:desc);
             evidence.setKnownEffect(effect);
             evidence.setDocuments(docs);
             

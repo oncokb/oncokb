@@ -12,7 +12,6 @@ import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.springframework.context.ApplicationContext;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,13 +26,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class EvidenceController {
     
     @RequestMapping(value="/evidence.json")
-    public @ResponseBody List<Evidence> getAlteration(
+    public @ResponseBody List<Evidence> getEvidence(
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
         
-        ApplicationContext applicationContext = ApplicationContextSingleton.getApplicationContext();
-        
-        GeneBo geneBo = GeneBo.class.cast(applicationContext.getBean("geneBo"));
+        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         List<Gene> genes = new ArrayList<Gene>(); 
         if (entrezGeneIds!=null) {
@@ -44,11 +41,11 @@ public class EvidenceController {
             genes.addAll(geneBo.findGenesByHugoSymbol(hugoSymbols));
         }
         
-        if (genes == null) {
+        if (genes.isEmpty()) {
             return Collections.emptyList();
         }
         
-        EvidenceBo evidenceBo = EvidenceBo.class.cast(applicationContext.getBean("evidenceBo"));
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         return evidenceBo.findEvidencesByGene(genes);
     }

@@ -31,9 +31,7 @@ public class AlterationController {
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
         
-        ApplicationContext applicationContext = ApplicationContextSingleton.getApplicationContext();
-        
-        GeneBo geneBo = GeneBo.class.cast(applicationContext.getBean("geneBo"));
+        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         List<Gene> genes = new ArrayList<Gene>(); 
         if (entrezGeneIds!=null) {
@@ -48,7 +46,7 @@ public class AlterationController {
             return Collections.emptyList();
         }
         
-        AlterationBo alterationBo = AlterationBo.class.cast(applicationContext.getBean("alterationBo"));
+        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         
         return alterationBo.findAlterationsByGene(genes);
     }
