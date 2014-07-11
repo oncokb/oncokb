@@ -32,6 +32,6 @@
         <![CDATA[from Alteration where entrez_gene_id=?]]>
     </query>
     <query name="findAlteration">
-        <![CDATA[from Alteration where entrez_gene_id=? and alteration=?]]>
+        <![CDATA[from Alteration where entrez_gene_id=? and alteration_type=? and alteration=?]]>
     </query>
 </hibernate-mapping>

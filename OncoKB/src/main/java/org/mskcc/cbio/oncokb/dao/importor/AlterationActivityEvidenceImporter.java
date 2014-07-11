@@ -73,7 +73,7 @@ public class AlterationActivityEvidenceImporter {
                 geneBo.save(gene);
             }
             
-            Alteration alteration = alterationBo.findAlteration(gene, alt);
+            Alteration alteration = alterationBo.findAlteration(gene, type, alt);
             if (alteration==null) {
                 alteration = new Alteration(gene, alt, type);
                 alterationBo.save(alteration);
@@ -85,6 +85,7 @@ public class AlterationActivityEvidenceImporter {
                 if (doc==null) {
                     doc = new Document(DocumentType.JOURNAL_ARTICLE);
                     doc.setPmid(pmid);
+                    documentBo.save(doc);
                 }
                 docs.add(doc);
             }

@@ -10,6 +10,7 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
@@ -28,7 +29,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
     
     @Override
-    public Alteration findAlteration(Gene gene, String alteration) {
-        return getDao().findAlteration(gene, alteration);
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
+        return getDao().findAlteration(gene, alterationType, alteration);
     }
 }
