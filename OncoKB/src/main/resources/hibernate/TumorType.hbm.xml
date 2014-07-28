@@ -18,4 +18,8 @@
             <column name="color" length="31" />
         </property>
     </class>
+    
+    <query name="findTumorTypeByName">
+        <![CDATA[from TumorType t where t.name=?]]>
+    </query>
 </hibernate-mapping>

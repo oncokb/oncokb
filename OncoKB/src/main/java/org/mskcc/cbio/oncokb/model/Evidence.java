@@ -15,10 +15,11 @@ public class Evidence implements java.io.Serializable {
     private Integer evidenceId;
     private EvidenceType evidenceType;
     private TumorType tumorType;
-    private Drug drug;
+    private Set<Drug> drugs;
     private Gene gene;
     private Alteration alteration;
     private KnownEffectOfEvidence knownEffect;
+    private LevelOfEvidence levelOfEvidence;
     private String description;
     private String genomicContext;
     private Set<Document> documents = new HashSet<Document>(0);
@@ -36,13 +37,14 @@ public class Evidence implements java.io.Serializable {
         this.alteration = alteration;
         this.knownEffect = knownEffect;
     }
-    public Evidence(EvidenceType evidenceType, TumorType tumorType, Drug drug, Gene gene, Alteration alteration, KnownEffectOfEvidence knownEffect, String description, String genomicContext, Set<Document> documents, String comments) {
+    public Evidence(EvidenceType evidenceType, TumorType tumorType, Set<Drug> drugs, Gene gene, Alteration alteration, KnownEffectOfEvidence knownEffect, LevelOfEvidence levelOfEvidence, String description, String genomicContext, Set<Document> documents, String comments) {
         this.evidenceType = evidenceType;
         this.tumorType = tumorType;
-        this.drug = drug;
+        this.drugs = drugs;
         this.gene = gene;
         this.alteration = alteration;
         this.knownEffect = knownEffect;
+        this.levelOfEvidence = levelOfEvidence;
         this.description = description;
         this.genomicContext = genomicContext;
         this.documents = documents;
@@ -66,6 +68,14 @@ public class Evidence implements java.io.Serializable {
     public void setEvidenceType(EvidenceType evidenceType) {
         this.evidenceType = evidenceType;
     }
+
+    public LevelOfEvidence getLevelOfEvidence() {
+        return levelOfEvidence;
+    }
+
+    public void setLevelOfEvidence(LevelOfEvidence levelOfEvidence) {
+        this.levelOfEvidence = levelOfEvidence;
+    }
     
     public TumorType getTumorType() {
         return this.tumorType;
@@ -75,14 +85,13 @@ public class Evidence implements java.io.Serializable {
     public void setTumorType(TumorType tumorType) {
         this.tumorType = tumorType;
     }
-    
-    public Drug getDrug() {
-        return this.drug;
+
+    public Set<Drug> getDrugs() {
+        return drugs;
     }
-    
-    
-    public void setDrug(Drug drug) {
-        this.drug = drug;
+
+    public void setDrugs(Set<Drug> drugs) {
+        this.drugs = drugs;
     }
 
     public Gene getGene() {

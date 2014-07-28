@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -26,7 +27,14 @@ public class TumorTypeController {
             @RequestParam(value="tumorTypeId", required=false) List<String> tumorTypeIds) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (tumorTypeIds!=null) {
-            return tumorTypeBo.findTumorTypesById(tumorTypeIds);
+            List<TumorType> tumorTypes = new ArrayList<TumorType>(tumorTypeIds.size());
+            for (String tumorTypeId : tumorTypeIds) {
+                TumorType tumorType = tumorTypeBo.findTumorTypeById(tumorTypeId);
+                if (tumorType!=null) {
+                    tumorTypes.add(tumorType);
+                }
+            }
+            return tumorTypes;
         } else {
             return tumorTypeBo.findAll();
         }

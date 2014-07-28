@@ -22,7 +22,6 @@ import org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
-import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -33,7 +32,7 @@ public class AlterationActivityEvidenceImporter {
         throw new AssertionError();
     }
     
-    private static String ALTERATION_ACTIVITY_EVIDENCE_FILE = "/data/alteration-activity-evidence.txt";
+    private static final String ALTERATION_ACTIVITY_EVIDENCE_FILE = "/data/alteration-activity-evidence.txt";
     
     public static void main(String[] args) throws IOException {
         List<String> lines = FileUtils.readLinesStream(
@@ -51,7 +50,7 @@ public class AlterationActivityEvidenceImporter {
             String line = lines.get(i);
             String[] parts = line.split("\t");
             
-            EvidenceType evidenceType = EvidenceType.ACTIVITY;
+            EvidenceType evidenceType = EvidenceType.MUTATION_EFFECT;
             String hugo = parts[0];
             String alt = parts[1];
             KnownEffectOfEvidence effect = KnownEffectOfEvidence.valueOf(parts[2]);

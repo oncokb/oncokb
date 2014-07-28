@@ -18,15 +18,13 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 public class TumorTypeBoImpl extends GenericBoImpl<TumorType, TumorTypeDao> implements TumorTypeBo {
     
     @Override
-    public List<TumorType> findTumorTypesById(Collection<String> tumorTypeIds) {
-        List<TumorType> tumorTypes = new ArrayList<TumorType>();
-        for (String tumorTypeId : tumorTypeIds) {
-            TumorType tumorType = getDao().findTumorTypeById(tumorTypeId);
-            if (tumorType != null) {
-                tumorTypes.add(tumorType);
-            }
-        }
-        return tumorTypes;
+    public TumorType findTumorTypeById(String tumorTypeId) {
+        return getDao().findTumorTypeById(tumorTypeId);
     }   
+
+    @Override
+    public TumorType findTumorTypeByName(String tumorTypeName) {
+        return getDao().findTumorTypeByName(tumorTypeName);
+    }
 
 }
