@@ -7,9 +7,9 @@ package org.mskcc.cbio.oncokb.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBlobBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceBlob;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author jgao
  */
 @Controller
-public class EvidenceController {
+public class EvidenceBlobController {
     
-    @RequestMapping(value="/evidence.json")
-    public @ResponseBody List<Evidence> getEvidence(
+    @RequestMapping(value="/EvidenceBlob.json")
+    public @ResponseBody List<EvidenceBlob> getEvidenceBlob(
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
         
@@ -45,8 +45,8 @@ public class EvidenceController {
             return Collections.emptyList();
         }
         
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        EvidenceBlobBo EvidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
         
-        return evidenceBo.findEvidencesByGene(genes);
+        return EvidenceBlobBo.findEvidenceBlobsByGene(genes);
     }
 }

@@ -7,15 +7,8 @@
       <column name="evidence_id"/>
       <generator class="identity"/>
     </id>
-    <property column="evidence_type" name="evidenceType">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
-        <param name="type">12</param>
-        <param name="useNamed">true</param>
-      </type>
-    </property>
-    <many-to-one class="org.mskcc.cbio.oncokb.model.TumorType" fetch="join" lazy="false" name="tumorType">
-      <column length="50" name="tumor_type_id"/>
+    <many-to-one name="EvidenceBlob" class="org.mskcc.cbio.oncokb.model.EvidenceBlob" fetch="join" lazy="false">
+       <column name="evidence_blob_id" not-null="true" />
     </many-to-one>
     <set cascade="all" lazy="false" name="drugs" table="evidence_drug">
       <key>
@@ -25,12 +18,6 @@
         <column name="drug_id" not-null="true"/>
       </many-to-many>
     </set>
-    <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
-      <column name="entrez_gene_id"/>
-    </many-to-one>
-    <many-to-one class="org.mskcc.cbio.oncokb.model.Alteration" fetch="join" lazy="false" name="alteration">
-      <column name="alteration_id"/>
-    </many-to-one>
     <property column="known_effect" name="knownEffect">
       <type name="org.hibernate.type.EnumType">
         <param name="enumClass">org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence</param>
@@ -45,14 +32,6 @@
         <param name="useNamed">true</param>
       </type>
     </property>
-    <property name="description" type="string">
-      <column length="65535" name="description"/>
-    </property>
-    <property name="genomicContext" type="string">
-      <column length="1000" name="genomic_context">
-        <comment>coregulated events</comment>
-      </column>
-    </property>
     <set cascade="all" lazy="false" name="documents" table="evidence_document">
       <key>
         <column name="evidence_id" not-null="true"/>
@@ -61,20 +40,5 @@
         <column name="document_id" not-null="true"/>
       </many-to-many>
     </set>
-    <property name="comments" type="string">
-      <column length="65535" name="comments"/>
-    </property>
   </class>
-  <query name="findEvidencesByAlteration">
-        from Evidence where alteration_id=?
-    </query>
-  <query name="findEvidencesByGene">
-        from Evidence e join e.alteration where entrez_gene_id=?
-    </query>
-  <query name="findEvidencesByTumorType">
-        from Evidence where tumor_type_id=?
-    </query>
-  <query name="findEvidencesByGeneAndTumorType">
-        from Evidence e join e.alteration where entrez_gene_id=? and tumor_type_id=?
-    </query>
 </hibernate-mapping>

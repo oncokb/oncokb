@@ -9,7 +9,7 @@ public enum EvidenceType {
     MUTATION_EFFECT ("Mutation effect"),
 //    DRUG_SENSITIVITY("Drug sensivity"),
     PREVALENCE ("Prevalence"),
-    SPROGNOSTIC_IMPLICATION ("Prognostic implications"),
+    PROGNOSTIC_IMPLICATION ("Prognostic implications"),
     STANDARD_THERAPEUTIC_IMPLICATIONS("Standard therapeutic implications"),
     INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS("Investigational therapeutic implications");
 

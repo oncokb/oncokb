@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.EvidenceBlob" table="evidence_blob">
+    <id name="EvidenceBlobId" type="java.lang.Integer">
+      <column name="evidence_blob_id"/>
+      <generator class="identity"/>
+    </id>
+    <property column="evidence_type" name="evidenceType">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
+        <param name="type">12</param>
+        <param name="useNamed">true</param>
+      </type>
+    </property>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.TumorType" fetch="join" lazy="false" name="tumorType">
+      <column length="50" name="tumor_type_id"/>
+    </many-to-one>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
+      <column name="entrez_gene_id"/>
+    </many-to-one>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.Alteration" fetch="join" lazy="false" name="alteration">
+      <column name="alteration_id"/>
+    </many-to-one>
+    <property name="description" type="string">
+      <column length="65535" name="description"/>
+    </property>
+    <set cascade="all" lazy="false" name="evidences" table="evidence" fetch="join" inverse="false">
+        <key>
+            <column name="evidence_blob_id" not-null="true" />
+        </key>
+        <one-to-many class="org.mskcc.cbio.oncokb.model.Evidence" />
+    </set>
+  </class>
+  <query name="findEvidenceBlobsByAlteration">
+        from EvidenceBlob where alteration_id=?
+    </query>
+  <query name="findEvidenceBlobsByGene">
+        from EvidenceBlob e join e.alteration where entrez_gene_id=?
+    </query>
+  <query name="findEvidenceBlobsByTumorType">
+        from EvidenceBlob where tumor_type_id=?
+    </query>
+  <query name="findEvidenceBlobsByGeneAndTumorType">
+        from EvidenceBlob e join e.alteration where entrez_gene_id=? and tumor_type_id=?
+    </query>
+</hibernate-mapping>

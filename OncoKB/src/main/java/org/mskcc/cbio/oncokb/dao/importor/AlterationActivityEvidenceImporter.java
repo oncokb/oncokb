@@ -2,13 +2,14 @@
 package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.DocumentBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBlobBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
@@ -16,6 +17,7 @@ import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Document;
 import org.mskcc.cbio.oncokb.model.DocumentType;
 import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceBlob;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence;
@@ -42,7 +44,8 @@ public class AlterationActivityEvidenceImporter {
     	GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
     	AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
     	DocumentBo documentBo = ApplicationContextSingleton.getDocumentBo();
-    	EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+    	EvidenceBlobBo EvidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
+    	EvidenceBo EvidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         int nLines = lines.size();
         System.out.println("importing...");
@@ -89,16 +92,20 @@ public class AlterationActivityEvidenceImporter {
                 docs.add(doc);
             }
             
-            Evidence evidence = new Evidence(evidenceType);
-            evidence.setGene(gene);
-            evidence.setAlteration(alteration);
-            evidence.setTumorType(null);
-            evidence.setGenomicContext(context.isEmpty()?null:context);
-            evidence.setDescription(desc.isEmpty()?null:desc);
+            EvidenceBlob ec = new EvidenceBlob();
+            ec.setDescription(desc);
+            ec.setEvidenceType(evidenceType);
+            ec.setGene(gene);
+            ec.setAlteration(alteration);
+            ec.setTumorType(null);
+            
+            Evidence evidence = new Evidence();
             evidence.setKnownEffect(effect);
             evidence.setDocuments(docs);
+            evidence.setEvidenceBlob(ec);
+            ec.setEvidences(Collections.singleton(evidence));
             
-            evidenceBo.save(evidence);
+            EvidenceBlobBo.save(ec);
         }
         
     }
