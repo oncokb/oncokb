@@ -1,6 +1,10 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.HashSet;
+import java.util.Set;
+
+
 /**
  * 
  * @author jgao
@@ -10,17 +14,16 @@ public class Drug implements java.io.Serializable {
 
      private Integer drugId;
      private String drugName;
-     private String synonyms;
+     private Set<String> synonyms = new HashSet<String>(0);
      private boolean fdaApproved;
 
     public Drug() {
     }
 
-    public Drug(String drugName, boolean fdaApproved) {
+    public Drug(String drugName) {
         this.drugName = drugName;
-        this.fdaApproved = fdaApproved;
     }
-    public Drug(String drugName, String synonyms, boolean fdaApproved) {
+    public Drug(String drugName, Set<String> synonyms, boolean fdaApproved) {
        this.drugName = drugName;
        this.synonyms = synonyms;
        this.fdaApproved = fdaApproved;
@@ -45,12 +48,12 @@ public class Drug implements java.io.Serializable {
         this.drugName = drugName;
     }
     
-    public String getSynonyms() {
+    public Set<String> getSynonyms() {
         return this.synonyms;
     }
     
     
-    public void setSynonyms(String synonyms) {
+    public void setSynonyms(Set<String> synonyms) {
         this.synonyms = synonyms;
     }
     

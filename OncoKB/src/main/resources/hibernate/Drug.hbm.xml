@@ -11,11 +11,18 @@
         <property name="drugName" type="string">
             <column name="drug_name" not-null="true" unique="true" />
         </property>
-        <property name="synonyms" type="string">
-            <column name="synonyms" length="1000" />
-        </property>
+        <set name="synonyms" table="drug_synonym" lazy="false">
+            <key>
+                <column name="drug_id" not-null="true" />
+            </key>
+            <element column="synonym" type="string"></element> 
+        </set>
         <property name="fdaApproved" type="boolean">
-            <column name="fda_approved" not-null="true" />
+            <column name="fda_approved"/>
         </property>
     </class>
+    
+    <query name="findDrugByName">
+        <![CDATA[from Drug d where d.drugName=?]]>
+    </query>
 </hibernate-mapping>

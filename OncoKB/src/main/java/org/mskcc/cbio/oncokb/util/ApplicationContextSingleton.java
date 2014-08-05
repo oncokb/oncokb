@@ -40,6 +40,10 @@ public final class ApplicationContextSingleton {
         return GeneBo.class.cast(getApplicationContext().getBean("geneBo"));
     }
     
+    public static DrugBo getDrugBo() {
+        return DrugBo.class.cast(getApplicationContext().getBean("drugBo"));
+    }
+    
     public static TumorTypeBo getTumorTypeBo() {
         return TumorTypeBo.class.cast(getApplicationContext().getBean("tumorTypeBo"));
     }
