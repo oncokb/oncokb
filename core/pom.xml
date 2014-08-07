@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.mskcc.cbio.oncokb</groupId>
+        <artifactId>master</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>core</artifactId>
+    <packaging>jar</packaging>
+    <name>OncoKB Core</name>
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+		<spring.version>3.1.0.RELEASE</spring.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Spring core & mvc -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+                
+                <!-- jackson -->
+                <dependency>
+                        <groupId>org.codehaus.jackson</groupId>
+                        <artifactId>jackson-mapper-asl</artifactId>
+                        <version>1.4.2</version>
+                </dependency>
+                
+        <dependency>
+	  <groupId>org.hibernate</groupId>
+	  <artifactId>hibernate</artifactId>
+	  <version>3.2.5.ga</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.hibernate</groupId>
+	  <artifactId>hibernate-entitymanager</artifactId>
+	  <version>3.3.2.GA</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>javax.sql</groupId>
+	  <artifactId>jdbc-stdext</artifactId>
+	  <version>2.0</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>javax.transaction</groupId>
+	  <artifactId>jta</artifactId>
+	  <version>1.0.1B</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>mysql</groupId>
+	  <artifactId>mysql-connector-java</artifactId>
+	  <version>5.1.6</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.testng</groupId>
+	  <artifactId>testng</artifactId>
+	  <version>6.5.2</version>
+	  <scope>test</scope>
+	 </dependency>
+	 <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-lang3</artifactId>
+          <version>3.1</version>
+	 </dependency>
+    </dependencies>
+    
+    <repositories>
+		<repository>
+			<id>springsource-milestones</id>
+			<name>SpringSource Milestones Proxy</name>
+			<url>https://oss.sonatype.org/content/repositories/springsource-milestones</url>
+		</repository>
+                <repository>
+			<id>java.net-m2</id>
+			<name>java.net - Maven 2</name>
+			<url>https://repository.jboss.org/nexus/content/repositories/java.net-m2</url>
+		</repository>
+    </repositories>
+</project>

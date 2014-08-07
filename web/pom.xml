@@ -2,12 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.mskcc.cbio</groupId>
-	<artifactId>OncoKB</artifactId>
+	<parent>
+            <groupId>org.mskcc.cbio.oncokb</groupId>
+            <artifactId>master</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </parent>
+	<artifactId>web</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>OncoKB</name>
+	<name>OncoKB Web</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -19,6 +23,12 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.mskcc.cbio.oncokb</groupId>
+			<artifactId>core</artifactId>
+			<version>${version}</version>
+		</dependency>
+                
 		<!-- Spring core & mvc -->
 		<dependency>
 			<groupId>org.springframework</groupId>
