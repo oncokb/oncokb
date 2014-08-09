@@ -15,14 +15,14 @@ public class Evidence implements java.io.Serializable {
     private Integer evidenceId;
     private EvidenceBlob EvidenceBlob;
     private Set<Drug> drugs;
-    private KnownEffectOfEvidence knownEffect;
+    private String knownEffect;
     private LevelOfEvidence levelOfEvidence;
     private Set<Document> documents = new HashSet<Document>(0);
 
     public Evidence() {
     }
     
-    public Evidence(EvidenceBlob EvidenceBlob, Set<Drug> drugs, KnownEffectOfEvidence knownEffect, LevelOfEvidence levelOfEvidence, Set<Document> documents) {
+    public Evidence(EvidenceBlob EvidenceBlob, Set<Drug> drugs, String knownEffect, LevelOfEvidence levelOfEvidence, Set<Document> documents) {
         this.drugs = drugs;
         this.knownEffect = knownEffect;
         this.levelOfEvidence = levelOfEvidence;
@@ -62,12 +62,12 @@ public class Evidence implements java.io.Serializable {
         this.drugs = drugs;
     }
     
-    public KnownEffectOfEvidence getKnownEffect() {
+    public String getKnownEffect() {
         return this.knownEffect;
     }
     
     
-    public void setKnownEffect(KnownEffectOfEvidence knownEffect) {
+    public void setKnownEffect(String knownEffect) {
         this.knownEffect = knownEffect;
     }
     

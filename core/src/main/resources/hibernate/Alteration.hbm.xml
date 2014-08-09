@@ -13,7 +13,7 @@
                 <column name="entrez_gene_id" not-null="true" />
             </many-to-one>
             <property name="alteration" type="string">
-                <column name="alteration" length="30" not-null="true">
+                <column name="alteration" length="300" not-null="true">
                     <comment>V600E, truncating, AMP, DEL</comment>
                 </column>
             </property>

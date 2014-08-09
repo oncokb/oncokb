@@ -10,7 +10,7 @@
     <many-to-one name="EvidenceBlob" class="org.mskcc.cbio.oncokb.model.EvidenceBlob" fetch="join" lazy="false">
        <column name="evidence_blob_id" not-null="true" />
     </many-to-one>
-    <set cascade="all" lazy="false" name="drugs" table="evidence_drug">
+    <set lazy="false" name="drugs" table="evidence_drug">
       <key>
         <column name="evidence_id" not-null="true"/>
       </key>
@@ -18,12 +18,8 @@
         <column name="drug_id" not-null="true"/>
       </many-to-many>
     </set>
-    <property column="known_effect" name="knownEffect">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence</param>
-        <param name="type">12</param>
-        <param name="useNamed">true</param>
-      </type>
+    <property name="knownEffect" type="string">
+        <column name="known_effect" length="50"/>
     </property>
     <property column="level_of_evidence" name="levelOfEvidence">
       <type name="org.hibernate.type.EnumType">
@@ -32,7 +28,7 @@
         <param name="useNamed">true</param>
       </type>
     </property>
-    <set cascade="all" lazy="false" name="documents" table="evidence_document">
+    <set lazy="false" name="documents" table="evidence_document">
       <key>
         <column name="evidence_id" not-null="true"/>
       </key>

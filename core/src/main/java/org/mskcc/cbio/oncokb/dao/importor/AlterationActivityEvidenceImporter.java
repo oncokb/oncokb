@@ -20,7 +20,6 @@ import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.KnownEffectOfEvidence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
@@ -56,7 +55,7 @@ public class AlterationActivityEvidenceImporter {
             EvidenceType evidenceType = EvidenceType.MUTATION_EFFECT;
             String hugo = parts[0];
             String alt = parts[1];
-            KnownEffectOfEvidence effect = KnownEffectOfEvidence.valueOf(parts[2]);
+            String effect = parts[2];
             String desc = parts[3];
             String context = parts[4];
             String comments = parts[5];
