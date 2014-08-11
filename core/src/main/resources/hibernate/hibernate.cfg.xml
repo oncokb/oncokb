@@ -12,7 +12,8 @@
     <mapping resource="hibernate/Drug.hbm.xml"/>
     <mapping resource="hibernate/TumorType.hbm.xml"/>
     <mapping resource="hibernate/Alteration.hbm.xml"/>
-    <mapping resource="hibernate/Document.hbm.xml"/>
+    <mapping resource="hibernate/Article.hbm.xml"/>
+    <mapping resource="hibernate/NccnGuideline.hbm.xml"/>
     <mapping resource="hibernate/Evidence.hbm.xml"/>
     <mapping resource="hibernate/EvidenceBlob.hbm.xml"/>
     <mapping resource="hibernate/Gene.hbm.xml"/>

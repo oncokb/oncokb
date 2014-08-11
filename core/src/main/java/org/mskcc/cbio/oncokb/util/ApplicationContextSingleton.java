@@ -24,8 +24,12 @@ public final class ApplicationContextSingleton {
         return AlterationBo.class.cast(getApplicationContext().getBean("alterationBo"));
     }
     
-    public static DocumentBo getDocumentBo() {
-        return DocumentBo.class.cast(getApplicationContext().getBean("documentBo"));
+    public static ArticleBo getArticleBo() {
+        return ArticleBo.class.cast(getApplicationContext().getBean("articleBo"));
+    }
+    
+    public static NccnGuidelineBo getNccnGuidelineBo() {
+        return NccnGuidelineBo.class.cast(getApplicationContext().getBean("nccnGuidelineBo"));
     }
     
     public static EvidenceBo getEvidenceBo() {

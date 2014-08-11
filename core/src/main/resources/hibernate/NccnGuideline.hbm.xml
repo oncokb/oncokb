@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class name="org.mskcc.cbio.oncokb.model.NccnGuideline" table="nccnGuideline" catalog="oncokb" >
+    <id name="nccnGuidelineId" type="java.lang.Integer">
+      <column name="nccn_guideline_id"/>
+      <generator class="identity"/>
+    </id>
+    <property name="disease" type="string">
+      <column name="disease"/>
+    </property>
+    <property name="pages" type="string">
+      <column name="pages"/>
+    </property>
+    <property name="version" type="string">
+      <column name="version"/>
+    </property>
+  </class>
+  
+  <query name="findNccnGuideline">
+        <![CDATA[from NccnGuideline n where n.disease=? and n.version=? and n.pages=?]]>
+  </query>
+</hibernate-mapping>

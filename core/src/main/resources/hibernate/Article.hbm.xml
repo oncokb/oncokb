@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class name="org.mskcc.cbio.oncokb.model.Article" table="article" catalog="oncokb" >
+    <id name="articleId" type="java.lang.Integer">
+      <column name="article_id"/>
+      <generator class="identity"/>
+    </id>
+    <property name="pmid" type="string">
+      <column name="pmid"/>
+    </property>
+    <property name="title" type="string">
+      <column name="title"/>
+    </property>
+    <property name="reference" type="string">
+      <column name="reference"/>
+    </property>
+    <property name="link" type="string">
+      <column name="link"/>
+    </property>
+  </class>
+  
+  <query name="findArticleByPmid">
+        <![CDATA[from Article a where a.pmid=?]]>
+  </query>
+</hibernate-mapping>

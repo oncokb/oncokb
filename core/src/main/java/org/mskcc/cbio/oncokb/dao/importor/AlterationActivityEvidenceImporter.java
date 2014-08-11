@@ -8,14 +8,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.DocumentBo;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBlobBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Document;
-import org.mskcc.cbio.oncokb.model.DocumentType;
+import org.mskcc.cbio.oncokb.model.Article;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
@@ -42,7 +41,7 @@ public class AlterationActivityEvidenceImporter {
 	
     	GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
     	AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-    	DocumentBo documentBo = ApplicationContextSingleton.getDocumentBo();
+    	ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
     	EvidenceBlobBo EvidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
     	EvidenceBo EvidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
@@ -80,13 +79,12 @@ public class AlterationActivityEvidenceImporter {
                 alterationBo.save(alteration);
             }
             
-            Set<Document> docs = new HashSet<Document>(pmids.size());
+            Set<Article> docs = new HashSet<Article>(pmids.size());
             for (String pmid : pmids) {
-                Document doc = documentBo.findDocumentByPmid(pmid);
+                Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc==null) {
-                    doc = new Document(DocumentType.JOURNAL_ARTICLE);
-                    doc.setPmid(pmid);
-                    documentBo.save(doc);
+                    doc = new Article(pmid);
+                    articleBo.save(doc);
                 }
                 docs.add(doc);
             }
@@ -100,7 +98,7 @@ public class AlterationActivityEvidenceImporter {
             
             Evidence evidence = new Evidence();
             evidence.setKnownEffect(effect);
-            evidence.setDocuments(docs);
+            evidence.setArticles(docs);
             evidence.setEvidenceBlob(ec);
             ec.setEvidences(Collections.singleton(evidence));
             

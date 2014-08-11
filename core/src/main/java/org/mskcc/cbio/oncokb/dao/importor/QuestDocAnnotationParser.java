@@ -10,21 +10,22 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.DocumentBo;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBlobBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Document;
-import org.mskcc.cbio.oncokb.model.DocumentType;
+import org.mskcc.cbio.oncokb.model.Article;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.NccnGuideline;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
@@ -59,9 +60,9 @@ public final class QuestDocAnnotationParser {
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "^Description of evidence: ?(.*)";
     
     private static final String NCCN_GUIDELINES_P = "^NCCN guidelines$";
-    private static final String NCCN_DISEASE_P = "^Disease: ?(.*)";
-    private static final String NCCN_VERSION_P = "^Version: ?(.*)";
-    private static final String NCCN_PAGES_P = "^Pages: ?(.*)";
+    private static final String NCCN_DISEASE_P = "^Disease: ?(.+)";
+    private static final String NCCN_VERSION_P = "^Version: ?(.+)";
+    private static final String NCCN_PAGES_P = "^Pages: ?(.+)";
         
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "^Investigational therapeutic implications for drug sensitivity$";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "^Sensitive to \\(Highest level of evidence\\): ?(.*)";
@@ -140,9 +141,9 @@ public final class QuestDocAnnotationParser {
         eb.setGene(gene);
         eb.setDescription(bg);
         
-        Set<Document> docs = extractDocuments(bg);
+        Set<Article> docs = extractArticles(bg);
         Evidence evidence = new Evidence();
-        evidence.setDocuments(docs);
+        evidence.setArticles(docs);
         evidence.setEvidenceBlob(eb);
         eb.setEvidences(Collections.singleton(evidence));
         
@@ -189,7 +190,7 @@ public final class QuestDocAnnotationParser {
             System.err.println("wrong format of mutation effect line: "+mutationEffectStr);
         } else if (m.groupCount()>0) {
             String effect = m.group(1).trim();
-            Set<Document> docs = extractDocuments(mutationEffectStr);
+            Set<Article> docs = extractArticles(mutationEffectStr);
 
             // Description of mutation effect
             List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
@@ -203,7 +204,7 @@ public final class QuestDocAnnotationParser {
 
             Evidence evidence = new Evidence();
             evidence.setKnownEffect(effect);
-            evidence.setDocuments(docs);
+            evidence.setArticles(docs);
             evidence.setEvidenceBlob(eb);
             eb.setEvidences(Collections.singleton(evidence));
 
@@ -242,7 +243,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> prevalenceLines = extractLines(lines, start+1, end, PREVALENCE_P, PROGNOSTIC_IMPLICATIONS_P, 1);
         String prevalenceTxt = joinLines(lines, prevalenceLines.get(0)[0]+1, prevalenceLines.get(0)[1]).trim();
         if (!prevalenceTxt.isEmpty()) {
-            Set<Document> prevalenceDocs = extractDocuments(prevalenceTxt);
+            Set<Article> prevalenceDocs = extractArticles(prevalenceTxt);
             
             EvidenceBlob eb = new EvidenceBlob();
             eb.setEvidenceType(EvidenceType.PREVALENCE);
@@ -252,7 +253,7 @@ public final class QuestDocAnnotationParser {
             eb.setDescription(prevalenceTxt);
             
             Evidence evidence = new Evidence();
-            evidence.setDocuments(prevalenceDocs);
+            evidence.setArticles(prevalenceDocs);
             evidence.setEvidenceBlob(eb);
             eb.setEvidences(Collections.singleton(evidence));
 
@@ -263,7 +264,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> prognosticLines = extractLines(lines, prevalenceLines.get(0)[1], end, PROGNOSTIC_IMPLICATIONS_P, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, 1);
         String prognosticTxt = joinLines(lines, prognosticLines.get(0)[0]+1, prognosticLines.get(0)[1]).trim();
         if (!prognosticTxt.isEmpty()) {
-            Set<Document> prognosticDocs = extractDocuments(prognosticTxt);
+            Set<Article> prognosticDocs = extractArticles(prognosticTxt);
             
             EvidenceBlob eb = new EvidenceBlob();
             eb.setEvidenceType(EvidenceType.PROGNOSTIC_IMPLICATION);
@@ -273,7 +274,7 @@ public final class QuestDocAnnotationParser {
             eb.setDescription(prognosticTxt);
             
             Evidence evidence = new Evidence();
-            evidence.setDocuments(prognosticDocs);
+            evidence.setArticles(prognosticDocs);
             evidence.setEvidenceBlob(eb);
             eb.setEvidences(Collections.singleton(evidence));
 
@@ -288,33 +289,40 @@ public final class QuestDocAnnotationParser {
         
         // standard therapeutic implications of drug resistance
         List<int[]> standardResistanceLines = extractLines(lines, prognosticLines.get(0)[1], end, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, NCCN_GUIDELINES_P, 1);
-        parseTherapeuticImplcations(alteration, tumorType, lines, standardResistanceLines.get(0)[0], standardResistanceLines.get(0)[1],
+        EvidenceBlob eb = parseTherapeuticImplcations(alteration, tumorType, lines, standardResistanceLines.get(0)[0], standardResistanceLines.get(0)[1],
                 EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS, "Resistant",
                 STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P);
         
         // NCCN
         List<int[]> nccnLines = extractLines(lines, standardResistanceLines.get(0)[1], end, NCCN_GUIDELINES_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, 1);
-        parseNCCN(alteration, tumorType, lines, nccnLines.get(0)[0], nccnLines.get(0)[1]);
+        Evidence ev = parseNCCN(alteration, tumorType, lines, nccnLines.get(0)[0], nccnLines.get(0)[1]);
+        if (ev!=null) {
+            eb.getEvidences().add(ev);
+        }
+        
+        evidenceBlobBo.save(eb);
         
         // Investigational therapeutic implications of drug sensitivity
         List<int[]> investigationalSensitivityLines = extractLines(lines, nccnLines.get(0)[1], end, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, 1);
-        parseTherapeuticImplcations(alteration, tumorType, lines, investigationalSensitivityLines.get(0)[0], investigationalSensitivityLines.get(0)[1],
+        eb = parseTherapeuticImplcations(alteration, tumorType, lines, investigationalSensitivityLines.get(0)[0], investigationalSensitivityLines.get(0)[1],
                 EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS, "Sensitive",
                 INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P);
+        evidenceBlobBo.save(eb);
         
         // Investigational therapeutic implications of drug resistance
         List<int[]> investigationalResistanceLines = extractLines(lines, nccnLines.get(0)[1], end, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, ONGOING_CLINICAL_TRIALS_P, 1);
-        parseTherapeuticImplcations(alteration, tumorType, lines, investigationalResistanceLines.get(0)[0], investigationalResistanceLines.get(0)[1],
+        eb = parseTherapeuticImplcations(alteration, tumorType, lines, investigationalResistanceLines.get(0)[0], investigationalResistanceLines.get(0)[1],
                 EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS, "Resistant",
                 INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P);
+        evidenceBlobBo.save(eb);
     }
     
-    private static void parseTherapeuticImplcations(Alteration alteration, TumorType tumorType, List<String> lines, int start, int end,
+    private static EvidenceBlob parseTherapeuticImplcations(Alteration alteration, TumorType tumorType, List<String> lines, int start, int end,
             EvidenceType evidenceType, String knownEffectOfEvidence, String sensitivieP, String evidenceP) {
         List<int[]> descLines = extractLines(lines, start+1, end, evidenceP, null, 1);
         String desc = joinLines(lines, descLines.get(0)[0]+1, descLines.get(0)[1]).trim();
         if (desc.isEmpty()) {
-            return;
+            return null;
         }
         
         EvidenceBlob eb = new EvidenceBlob();
@@ -341,12 +349,63 @@ public final class QuestDocAnnotationParser {
             }
         }
         
-        EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
-        evidenceBlobBo.save(eb);
+        return eb;
     }
     
-    private static void parseNCCN(Alteration alteration, TumorType tumorType, List<String> lines, int start, int end) {
+    private static Evidence parseNCCN(Alteration alteration, TumorType tumorType, List<String> lines, int start, int end) {
+        // disease
+        String txt = lines.get(start+1).trim();
+        Pattern p = Pattern.compile(NCCN_DISEASE_P);
+        Matcher m = p.matcher(txt);
+        if (!m.matches()) {
+            System.err.println("Problem with NCCN disease line: "+txt);
+            return null;
+        }
         
+        if (m.groupCount()==0) {
+            return null;
+        }
+        
+        String disease = m.group(1);
+        
+        // version
+        txt = lines.get(start+2).trim();
+        p = Pattern.compile(NCCN_VERSION_P);
+        m = p.matcher(txt);
+        if (!m.matches()) {
+            System.err.println("Problem with NCCN version line: "+txt);
+        }
+        
+        String version = null;
+        if (m.groupCount()>0) {
+            version = m.group(1);
+        }
+        
+        // pages
+        txt = lines.get(start+3);
+        p = Pattern.compile(NCCN_PAGES_P);
+        m = p.matcher(txt);
+        if (!m.matches()) {
+            System.err.println("Problem with NCCN pages line: "+txt);
+        }
+        
+        String pages = null;
+        if (m.groupCount()>0) {
+            pages = m.group(1);
+        }
+        
+        NccnGuidelineBo nccnGuideLineBo = ApplicationContextSingleton.getNccnGuidelineBo();
+        
+        NccnGuideline nccnGuideline = nccnGuideLineBo.findNccnGuideline(disease, version, pages);
+        if (nccnGuideline==null) {
+            nccnGuideline = new NccnGuideline(disease, version, pages);
+            nccnGuideLineBo.save(nccnGuideline);
+        }
+
+        Evidence evidence = new Evidence();
+        evidence.setNccnGuidelines(Collections.singleton(nccnGuideline));
+        
+        return evidence;
     }
     
     private static void parseDrugEvidence(String txt, Evidence evidence) {
@@ -357,7 +416,7 @@ public final class QuestDocAnnotationParser {
             return;
         }
         
-        DocumentBo documentBo = ApplicationContextSingleton.getDocumentBo();
+        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
 
         String drugName = m.group(1);
@@ -372,17 +431,16 @@ public final class QuestDocAnnotationParser {
             String[] parts = m.group(2).split("; *");
             LevelOfEvidence loe = LevelOfEvidence.getByLevel(parts[0]);
             evidence.setLevelOfEvidence(loe); // note that it could be null
-            Set<Document> docs = new HashSet<Document>();
-            evidence.setDocuments(docs);
+            Set<Article> docs = new HashSet<Article>();
+            evidence.setArticles(docs);
             for (String part : parts) {
                 if (part.startsWith("PMID")) {
                     String[] pmids = part.substring(part.indexOf(":")+1).trim().split(", *");
                     for (String pmid : pmids) {
-                        Document doc = documentBo.findDocumentByPmid(pmid);
+                        Article doc = articleBo.findArticleByPmid(pmid);
                         if (doc==null) {
-                            doc = new Document(DocumentType.JOURNAL_ARTICLE);
-                            doc.setPmid(pmid);
-                            documentBo.save(doc);
+                            doc = new Article(pmid);
+                            articleBo.save(doc);
                         }
                         docs.add(doc);
                     }
@@ -390,7 +448,7 @@ public final class QuestDocAnnotationParser {
                     // support NCT numbers
 //                    String[] nctIds = part.split(", *");
 //                    for (String nctId : nctIds) {
-//                        Document doc = documentBo.
+//                        Article doc = articleBo.
 //                    }
                 }
             }
@@ -437,9 +495,9 @@ public final class QuestDocAnnotationParser {
         return sb.toString();
     }
     
-    private static Set<Document> extractDocuments(String str) {
-        Set<Document> docs = new HashSet<Document>();
-        DocumentBo documentBo = ApplicationContextSingleton.getDocumentBo();
+    private static Set<Article> extractArticles(String str) {
+        Set<Article> docs = new HashSet<Article>();
+        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         Pattern pmidPattern = Pattern.compile("\\(PMIDs?:([^\\)]+)\\)");
         Matcher m = pmidPattern.matcher(str);
         if (m.matches()) {
@@ -447,11 +505,10 @@ public final class QuestDocAnnotationParser {
             for (int i=1; i<=n; i++) {
                 String pmids = m.group(i).trim();
                 for (String pmid : pmids.split(", *")) {
-                    Document doc = documentBo.findDocumentByPmid(pmid);
+                    Article doc = articleBo.findArticleByPmid(pmid);
                     if (doc==null) {
-                        doc = new Document(DocumentType.JOURNAL_ARTICLE);
-                        doc.setPmid(pmid);
-                        documentBo.save(doc);
+                        doc = new Article(pmid);
+                        articleBo.save(doc);
                     }
                     docs.add(doc);
                 }

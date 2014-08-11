@@ -17,16 +17,18 @@ public class Evidence implements java.io.Serializable {
     private Set<Drug> drugs;
     private String knownEffect;
     private LevelOfEvidence levelOfEvidence;
-    private Set<Document> documents = new HashSet<Document>(0);
+    private Set<Article> articles;
+    private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
 
     public Evidence() {
     }
     
-    public Evidence(EvidenceBlob EvidenceBlob, Set<Drug> drugs, String knownEffect, LevelOfEvidence levelOfEvidence, Set<Document> documents) {
+    public Evidence(EvidenceBlob EvidenceBlob, Set<Drug> drugs, String knownEffect, LevelOfEvidence levelOfEvidence, Set<Article> articles, Set<NccnGuideline> nccnGuidelines) {
         this.drugs = drugs;
         this.knownEffect = knownEffect;
         this.levelOfEvidence = levelOfEvidence;
-        this.documents = documents;
+        this.articles = articles;
+        this.nccnGuidelines = nccnGuidelines;
     }
    
     public Integer getEvidenceId() {
@@ -70,14 +72,22 @@ public class Evidence implements java.io.Serializable {
     public void setKnownEffect(String knownEffect) {
         this.knownEffect = knownEffect;
     }
+
+    public Set<Article> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(Set<Article> articles) {
+        this.articles = articles;
+    }
     
-    public Set<Document> getDocuments() {
-        return this.documents;
+    public Set<NccnGuideline> getNccnGuidelines() {
+        return this.nccnGuidelines;
     }
     
     
-    public void setDocuments(Set<Document> documents) {
-        this.documents = documents;
+    public void setNccnGuidelines(Set<NccnGuideline> nccnGuidelines) {
+        this.nccnGuidelines = nccnGuidelines;
     }
 }
 
