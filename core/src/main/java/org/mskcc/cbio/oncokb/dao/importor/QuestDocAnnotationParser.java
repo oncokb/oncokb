@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
+import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBlobBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
@@ -19,6 +20,7 @@ import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Article;
+import org.mskcc.cbio.oncokb.model.ClinicalTrial;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
@@ -73,6 +75,9 @@ public final class QuestDocAnnotationParser {
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "^Description of evidence: ?(.*)";
     
     private static final String ONGOING_CLINICAL_TRIALS_P = "^Ongoing clinical trials:?$";
+    private static final String CLINICAL_TRIALS_P = "(^NCT[0-9]+)";
+    
+    private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "^Interacting gene alterations$";
     
     private QuestDocAnnotationParser() {
         throw new AssertionError();
@@ -315,6 +320,37 @@ public final class QuestDocAnnotationParser {
                 EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS, "Resistant",
                 INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P);
         evidenceBlobBo.save(eb);
+        
+        List<int[]> clinicalTrialsLines = extractLines(lines, investigationalResistanceLines.get(0)[1], end, ONGOING_CLINICAL_TRIALS_P, INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P, 1);
+        eb = parseClinicalTrials(alteration, tumorType, lines, clinicalTrialsLines.get(0)[0], clinicalTrialsLines.get(0)[1]);
+        evidenceBlobBo.save(eb);
+    }
+    
+    private static EvidenceBlob parseClinicalTrials(Alteration alteration, TumorType tumorType, List<String> lines, int start, int end) {
+        EvidenceBlob eb = new EvidenceBlob();
+        eb.setEvidenceType(EvidenceType.CLINICAL_TRIAL);
+        eb.setAlteration(alteration);
+        eb.setGene(alteration.getGene());
+        eb.setTumorType(tumorType);
+        Set<Evidence> evidences = new HashSet<Evidence>();
+        eb.setEvidences(evidences);
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        Pattern p = Pattern.compile(CLINICAL_TRIALS_P);
+        for (int i=start; i<end; i++) {
+            Matcher m = p.matcher(lines.get(i));
+            if (m.find()) {
+                String nctId = m.group(1);
+                ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByPmid(nctId);
+                if (ct==null) {
+                    ct = new ClinicalTrial(nctId);
+                    clinicalTrialBo.save(ct);
+                }
+                Evidence ev = new Evidence();
+                ev.setEvidenceBlob(eb);
+                ev.setClinicalTrials(Collections.singleton(ct));
+            }
+        }
+        return eb;
     }
     
     private static EvidenceBlob parseTherapeuticImplcations(Alteration alteration, TumorType tumorType, List<String> lines, int start, int end,
@@ -409,7 +445,7 @@ public final class QuestDocAnnotationParser {
     }
     
     private static void parseDrugEvidence(String txt, Evidence evidence) {
-        Pattern p = Pattern.compile("([^\\(]+) ?\\((.+)\\)?");
+        Pattern p = Pattern.compile("([^\\(]+) ?(\\(.+\\))?");
         Matcher m = p.matcher(txt);
         if (!m.matches()) {
             System.err.println("Cannot process drug evidence: "+txt);
@@ -417,6 +453,7 @@ public final class QuestDocAnnotationParser {
         }
         
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
 
         String drugName = m.group(1);
@@ -428,11 +465,13 @@ public final class QuestDocAnnotationParser {
         evidence.setDrugs(Collections.singleton(drug));
         
         if (m.groupCount()==2) {
-            String[] parts = m.group(2).split("; *");
+            String[] parts = m.group(2).replaceAll("[\\(\\)]", "").split("; *");
             LevelOfEvidence loe = LevelOfEvidence.getByLevel(parts[0]);
             evidence.setLevelOfEvidence(loe); // note that it could be null
             Set<Article> docs = new HashSet<Article>();
             evidence.setArticles(docs);
+            Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>();
+            evidence.setClinicalTrials(clinicalTrials);
             for (String part : parts) {
                 if (part.startsWith("PMID")) {
                     String[] pmids = part.substring(part.indexOf(":")+1).trim().split(", *");
@@ -446,10 +485,15 @@ public final class QuestDocAnnotationParser {
                     }
                 } else if (part.startsWith("NCT")) {
                     // support NCT numbers
-//                    String[] nctIds = part.split(", *");
-//                    for (String nctId : nctIds) {
-//                        Article doc = articleBo.
-//                    }
+                    String[] nctIds = part.split(", *");
+                    for (String nctId : nctIds) {
+                        ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByPmid(nctId);
+                        if (ct==null) {
+                            ct = new ClinicalTrial(nctId);
+                            clinicalTrialBo.save(ct);
+                        }
+                        clinicalTrials.add(ct);
+                    }
                 }
             }
         }

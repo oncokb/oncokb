@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class name="org.mskcc.cbio.oncokb.model.ClinicalTrial" table="clinical_trial" catalog="oncokb" >
+    <id name="trialId" type="java.lang.Integer">
+      <column name="trial_id"/>
+      <generator class="identity"/>
+    </id>
+    <property name="nctId" type="string">
+      <column name="nci_id" not-null="true"/>
+    </property>
+    <property name="title" type="string">
+      <column name="title"/>
+    </property>
+    <property name="purpose" type="string">
+      <column name="purpose"/>
+    </property>
+    <property name="recuitingStatus" type="string">
+      <column name="recuiting_status"/>
+    </property>
+    <property name="eligibilityCriteria" type="string">
+      <column name="eligibility_criteria"/>
+    </property>
+    <property name="phase" type="string">
+      <column name="phase"/>
+    </property>
+    <property name="location" type="string">
+      <column name="location"/>
+    </property>
+    <property name="isMskccTrial" type="boolean">
+        <column name="is_mskcc_trial"/>
+    </property>
+  </class>
+  
+  <query name="findClinicalTrialByNctId">
+        <![CDATA[from ClinicalTrial a where a.nctId=?]]>
+  </query>
+</hibernate-mapping>

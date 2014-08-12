@@ -18,7 +18,7 @@ public class ArticleDaoImpl
      * @param pmid
      * @return gene object or null
      */
-    public Article findArticlebyPmid(String pmid) {
+    public Article findArticleByPmid(String pmid) {
         List<Article> list = findByNamedQuery("findArticleByPmid", pmid);
         return list.isEmpty() ? null : list.get(0);
     }

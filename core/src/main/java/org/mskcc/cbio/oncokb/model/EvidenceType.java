@@ -11,7 +11,8 @@ public enum EvidenceType {
     PREVALENCE ("Prevalence"),
     PROGNOSTIC_IMPLICATION ("Prognostic implications"),
     STANDARD_THERAPEUTIC_IMPLICATIONS("Standard therapeutic implications"),
-    INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS("Investigational therapeutic implications");
+    INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS("Investigational therapeutic implications"),
+    CLINICAL_TRIAL("clinical trial");
 
     private EvidenceType(String label) {
         this.label = label;

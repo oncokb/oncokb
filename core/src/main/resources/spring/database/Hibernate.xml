@@ -22,6 +22,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                                 <value>/hibernate/TumorType.hbm.xml</value>
                                 <value>/hibernate/Alteration.hbm.xml</value>
                                 <value>/hibernate/Article.hbm.xml</value>
+                                <value>/hibernate/ClinicalTrial.hbm.xml</value>
                                 <value>/hibernate/NccnGuideline.hbm.xml</value>
                                 <value>/hibernate/Evidence.hbm.xml</value>
                                 <value>/hibernate/EvidenceBlob.hbm.xml</value>

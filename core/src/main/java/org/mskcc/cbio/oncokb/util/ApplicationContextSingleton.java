@@ -28,6 +28,10 @@ public final class ApplicationContextSingleton {
         return ArticleBo.class.cast(getApplicationContext().getBean("articleBo"));
     }
     
+    public static ClinicalTrialBo getClinicalTrialBo() {
+        return ClinicalTrialBo.class.cast(getApplicationContext().getBean("clinicalTrialBo"));
+    }
+    
     public static NccnGuidelineBo getNccnGuidelineBo() {
         return NccnGuidelineBo.class.cast(getApplicationContext().getBean("nccnGuidelineBo"));
     }
