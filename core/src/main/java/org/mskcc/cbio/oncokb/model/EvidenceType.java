@@ -10,6 +10,7 @@ public enum EvidenceType {
 //    DRUG_SENSITIVITY("Drug sensivity"),
     PREVALENCE ("Prevalence"),
     PROGNOSTIC_IMPLICATION ("Prognostic implications"),
+    NCCN_GUIDELINES ("NCCN Guidelines"),
     STANDARD_THERAPEUTIC_IMPLICATIONS("Standard therapeutic implications"),
     INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS("Investigational therapeutic implications"),
     CLINICAL_TRIAL("clinical trial");

@@ -45,7 +45,7 @@ public final class QuestDocAnnotationParser {
     
     private static final String MUTATION_P = "^Mutations?: ?(.+)";
     private static final String MUTATION_EFFECT_P = "^Mutation effect: ?([^\\(]+)(\\(PMIDs?:.+\\))?";
-    private static final String MUTATION_EFFECT_DESCRIPTION_P = "^Description of mutation effect: ?$";
+    private static final String MUTATION_EFFECT_DESCRIPTION_P = "^Description of mutation effect:? *";
     
     private static final String TUMOR_TYPE_P = "^Tumor type: ?(.+)";
     
