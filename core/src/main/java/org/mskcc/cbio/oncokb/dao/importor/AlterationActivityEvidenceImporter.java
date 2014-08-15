@@ -22,6 +22,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
+import org.mskcc.cbio.oncokb.util.NcbiEUtils;
 
 /**
  *
@@ -83,7 +84,7 @@ public class AlterationActivityEvidenceImporter {
             for (String pmid : pmids) {
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc==null) {
-                    doc = new Article(pmid);
+                    doc = NcbiEUtils.readPubmedArticle(pmid);
                     articleBo.save(doc);
                 }
                 docs.add(doc);
