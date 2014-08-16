@@ -24,7 +24,7 @@ public class TumorTypeImporter {
     private static String TUMOR_TYPES_FILE = "/data/tumor-types.txt";
     
     public static void main(String[] args) throws IOException {
-        List<String> lines = FileUtils.readLinesStream(
+        List<String> lines = FileUtils.readTrimedLinesStream(
                 TumorTypeImporter.class.getResourceAsStream(TUMOR_TYPES_FILE));
         String[] headers = lines.get(0).split("\t");
 	

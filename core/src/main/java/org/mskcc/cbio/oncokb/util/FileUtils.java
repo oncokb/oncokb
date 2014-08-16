@@ -5,7 +5,9 @@
 package org.mskcc.cbio.oncokb.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,6 +23,23 @@ import org.apache.commons.lang3.StringUtils;
 public class FileUtils {
     private FileUtils() {
         throw new AssertionError();
+    }
+    
+    public static List<String> getFilesInFolder(final String pathToFolder, final String suffix) {
+        File folder = new File(pathToFolder);
+        
+        String[] files = folder.list(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.toUpperCase().endsWith(suffix.toUpperCase());
+            }
+        });
+        
+        List<String> ret = new ArrayList<String>();
+        for (String file : files) {
+            ret.add(pathToFolder + File.separator + file);
+        }
+        
+        return ret;
     }
     
     /**
@@ -51,8 +70,12 @@ public class FileUtils {
      * @throws IOException 
      */
     public static String readStream(InputStream is) throws IOException {
-        List<String> lines = readLinesStream(is);
+        List<String> lines = readTrimedLinesStream(is);
         return StringUtils.join(lines, "\n");
+    }
+    
+    public static List<String> readTrimedLinesStream(InputStream is) throws IOException {
+        return readLinesStream(is, true);
     }
     
     /**
@@ -61,12 +84,15 @@ public class FileUtils {
      * @return
      * @throws IOException 
      */
-    public static List<String> readLinesStream(InputStream is) throws IOException {
+    public static List<String> readLinesStream(InputStream is, boolean trim) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(is));
 
         List<String> lines = new ArrayList<String>();
         String line;
         while ((line = in.readLine()) != null) {
+            if (trim) {
+                line = line.trim().replaceAll("[\uFEFF-\uFFFF]", "");// trim and remove unicode
+            }
             lines.add(line);
         }
         in.close();

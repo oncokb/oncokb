@@ -27,7 +27,7 @@ public final class GeneLabelImporter {
     private static String GENE_LABEL_FILE = "/data/gene-label.txt";
     
     public static void main(String[] args) throws IOException {
-        List<String> lines = FileUtils.readLinesStream(
+        List<String> lines = FileUtils.readTrimedLinesStream(
                 GeneLabelImporter.class.getResourceAsStream(GENE_LABEL_FILE));
         String[] headers = lines.get(0).split("\t");
 	

@@ -36,7 +36,7 @@ public class AlterationActivityEvidenceImporter {
     private static final String ALTERATION_ACTIVITY_EVIDENCE_FILE = "/data/alteration-activity-evidence.txt";
     
     public static void main(String[] args) throws IOException {
-        List<String> lines = FileUtils.readLinesStream(
+        List<String> lines = FileUtils.readTrimedLinesStream(
                 AlterationActivityEvidenceImporter.class.getResourceAsStream(ALTERATION_ACTIVITY_EVIDENCE_FILE));
         String[] headers = lines.get(0).split("\t");
 	

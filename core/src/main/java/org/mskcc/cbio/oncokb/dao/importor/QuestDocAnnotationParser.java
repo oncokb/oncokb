@@ -1,7 +1,9 @@
 
 package org.mskcc.cbio.oncokb.dao.importor;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,46 +41,46 @@ import org.mskcc.cbio.oncokb.util.NcbiEUtils;
  * @author jgao
  */
 public final class QuestDocAnnotationParser {
-    private static final String GENE_P = "^>Gene: ?(.+)";
+    private static final String GENE_P = "Gene: ?(.+)";
     private static final String GENE_BACKGROUND_P = "^Background:? *";
     
-    private static final String MUTATIONS_P = "^Mutations";
+    private static final String MUTATIONS_P = "Mutations";
     
-    private static final String MUTATION_P = "^Mutations?: ?(.+)";
-    private static final String MUTATION_EFFECT_P = "^Mutation effect: ?([^\\(]+)(\\(PMIDs?:.+\\))?";
+    private static final String MUTATION_P = "Mutations?: ?(.+)";
+    private static final String MUTATION_EFFECT_P = "Mutation effect: ?([^\\(]+)(\\(PMIDs?:.+\\))?";
     private static final String MUTATION_EFFECT_DESCRIPTION_P = "^Description of mutation effect:? *";
     
-    private static final String TUMOR_TYPE_P = "^Tumor type: ?(.+)";
+    private static final String TUMOR_TYPE_P = "Tumor type: ?(.+)";
     
-    private static final String PREVALENCE_P = "^Prevalence:? *";
+    private static final String PREVALENCE_P = "Prevalence:? *";
     
-    private static final String PROGNOSTIC_IMPLICATIONS_P = "^Prognostic implications:? *";
+    private static final String PROGNOSTIC_IMPLICATIONS_P = "Prognostic implications:? *";
     
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "^Standard therapeutic implications for drug sensitivity:?";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "^Sensitive to: ?(.*)";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "^Description of evidence: ?(.*)";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Standard therapeutic implications for drug sensitivity:?";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to: ?(.*)";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence: ?(.*)";
     
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "^Standard therapeutic implications for drug resistance:?";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "^Resistant to: ?(.*)";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "^Description of evidence: ?(.*)";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Standard therapeutic implications for drug resistance:?";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence: ?(.*)";
     
-    private static final String NCCN_GUIDELINES_P = "^NCCN guidelines$";
-    private static final String NCCN_DISEASE_P = "^Disease: ?(.+)";
-    private static final String NCCN_VERSION_P = "^Version: ?(.+)";
-    private static final String NCCN_PAGES_P = "^Pages: ?(.+)";
+    private static final String NCCN_GUIDELINES_P = "NCCN guidelines$";
+    private static final String NCCN_DISEASE_P = "Disease: ?(.+)";
+    private static final String NCCN_VERSION_P = "Version: ?(.+)";
+    private static final String NCCN_PAGES_P = "Pages: ?(.+)";
         
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "^Investigational therapeutic implications for drug sensitivity$";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "^Sensitive to \\(Highest level of evidence\\): ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "^Description of evidence: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Investigational therapeutic implications for drug sensitivity$";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to \\(Highest level of evidence\\): ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence: ?(.*)";
     
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "^Investigational therapeutic implications for drug resistance$";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "^Resistant to: ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "^Description of evidence: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Investigational therapeutic implications for drug resistance$";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence: ?(.*)";
     
-    private static final String ONGOING_CLINICAL_TRIALS_P = "^Ongoing clinical trials:?$";
-    private static final String CLINICAL_TRIALS_P = "(^NCT[0-9]+)";
+    private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?$";
+    private static final String CLINICAL_TRIALS_P = "(NCT[0-9]+)";
     
-    private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "^Interacting gene alterations$";
+    private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "Interacting gene alterations$";
     
     private static final String[] CANCER_HEADERS_P = new String[] {
         PREVALENCE_P,
@@ -96,15 +98,23 @@ public final class QuestDocAnnotationParser {
         throw new AssertionError();
     }
     
+    private static final String QUEST_CURATION_FOLDER = "/Users/jgao/projects/oncokb-data/quest-annotation";
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
     public static void main(String[] args) throws IOException {
-        parse(QUEST_CURATION_FILE);
+        //parse(QuestDocAnnotationParser.class.getResourceAsStream(QUEST_CURATION_FILE));
+        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
+        for (String file : files) {
+            try {
+                parse(new FileInputStream(file));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
     
-    private static void parse(String file) throws IOException {
-        List<String> lines = FileUtils.readLinesStream(
-                GeneLabelImporter.class.getResourceAsStream(file));
+    private static void parse(InputStream is) throws IOException {
+        List<String> lines = FileUtils.readTrimedLinesStream(is);
         List<int[]> geneLines = extractLines(lines, 0, lines.size(), GENE_P, GENE_P, -1);
         for (int[] ix : geneLines) {
             parseGene(lines, ix[0], ix[1]);
@@ -144,7 +154,7 @@ public final class QuestDocAnnotationParser {
     private static int[] parseGeneBackground(Gene gene, List<String> lines, int start, int end) {
         List<int[]> backgroundLines = extractLines(lines, start, end, GENE_BACKGROUND_P, MUTATION_P, 1);
         if (backgroundLines.size()!=1) {
-            System.err.println("There should be one background section for a gene");
+            System.err.println("There should be one background section for gene: "+gene.getHugoSymbol());
         }
         
         System.out.println("##  Background");
