@@ -1,17 +1,21 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.HashSet;
+import java.util.Set;
+
+
 /**
  * 
  * @author jgao
  */
 public class Alteration implements java.io.Serializable {
 
-
      private Integer alterationId;
      private Gene gene;
      private String alteration;
      private AlterationType alterationType;
+     private Set<EvidenceBlob> evidenceBlobs = new HashSet<EvidenceBlob>(0);
 
     public Alteration() {
     }
@@ -21,6 +25,15 @@ public class Alteration implements java.io.Serializable {
         this.gene = gene;
         this.alteration = alteration;
         this.alterationType = alterationType;
+    }
+   
+
+	
+    public Alteration(Gene gene, String alteration, AlterationType alterationType, Set<EvidenceBlob> evidenceBlobs) {
+        this.gene = gene;
+        this.alteration = alteration;
+        this.alterationType = alterationType;
+        this.evidenceBlobs = evidenceBlobs;
     }
    
     
@@ -58,6 +71,14 @@ public class Alteration implements java.io.Serializable {
     
     public void setAlterationType(AlterationType alterationType) {
         this.alterationType = alterationType;
+    }
+
+    public Set<EvidenceBlob> getEvidenceBlobs() {
+        return evidenceBlobs;
+    }
+
+    public void setEvidenceBlobs(Set<EvidenceBlob> evidenceBlobs) {
+        this.evidenceBlobs = evidenceBlobs;
     }
 
     

@@ -13,18 +13,18 @@ public class EvidenceBlob {
     private EvidenceType evidenceType;
     private TumorType tumorType;
     private Gene gene;
-    private Alteration alteration;
+    private Set<Alteration> alterations;
     private String description;
     private Set<Evidence> evidences = new HashSet<Evidence>(0);
 
     public EvidenceBlob() {
     }
 
-    public EvidenceBlob(EvidenceType evidenceType, TumorType tumorType, Gene gene, Alteration alteration, String description, Set<Evidence> evidences) {
+    public EvidenceBlob(EvidenceType evidenceType, TumorType tumorType, Gene gene, Set<Alteration> alterations, String description, Set<Evidence> evidences) {
         this.evidenceType = evidenceType;
         this.tumorType = tumorType;
         this.gene = gene;
-        this.alteration = alteration;
+        this.alterations = alterations;
         this.description = description;
         this.evidences = evidences;
     }
@@ -61,12 +61,12 @@ public class EvidenceBlob {
         this.gene = gene;
     }
 
-    public Alteration getAlteration() {
-        return alteration;
+    public Set<Alteration> getAlterations() {
+        return alterations;
     }
 
-    public void setAlteration(Alteration alteration) {
-        this.alteration = alteration;
+    public void setAlterations(Set<Alteration> alterations) {
+        this.alterations = alterations;
     }
 
     public String getDescription() {

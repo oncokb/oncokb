@@ -94,7 +94,7 @@ public class AlterationActivityEvidenceImporter {
             ec.setDescription(desc);
             ec.setEvidenceType(evidenceType);
             ec.setGene(gene);
-            ec.setAlteration(alteration);
+            ec.setAlterations(Collections.singleton(alteration));
             ec.setTumorType(null);
             
             Evidence evidence = new Evidence();
