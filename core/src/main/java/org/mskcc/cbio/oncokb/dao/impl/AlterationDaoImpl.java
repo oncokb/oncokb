@@ -22,7 +22,7 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
     
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
-        List<Alteration> alterations = findByNamedQuery("findAlteration", gene.getEntrezGeneId(), alterationType, alteration);
+        List<Alteration> alterations = findByNamedQuery("findAlteration", gene.getEntrezGeneId(), alterationType.name(), alteration);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 }

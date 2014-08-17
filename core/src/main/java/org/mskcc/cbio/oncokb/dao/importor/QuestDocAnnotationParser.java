@@ -102,7 +102,7 @@ public final class QuestDocAnnotationParser {
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
     public static void main(String[] args) throws IOException {
-        //parse(QuestDocAnnotationParser.class.getResourceAsStream(QUEST_CURATION_FILE));
+//        parse(QuestDocAnnotationParser.class.getResourceAsStream(QUEST_CURATION_FILE));
         List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
         for (String file : files) {
             try {
@@ -214,7 +214,7 @@ public final class QuestDocAnnotationParser {
         AlterationType type = AlterationType.MUTATION; //TODO: cna and fution
         
         Set<Alteration> alterations = new HashSet<Alteration>();
-            for (String mutation : parseMutationString(mutationStr)) {
+        for (String mutation : parseMutationString(mutationStr)) {
             Alteration alteration = alterationBo.findAlteration(gene, type, mutation);
             if (alteration==null) {
                 alteration = new Alteration(gene, mutation, type);
