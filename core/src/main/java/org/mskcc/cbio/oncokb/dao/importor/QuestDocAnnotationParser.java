@@ -559,13 +559,18 @@ public final class QuestDocAnnotationParser {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
 
-        String drugName = m.group(1);
-        Drug drug = drugBo.findDrugByName(drugName);
-        if (drug==null) {
-            drug = new Drug(drugName);
-            drugBo.save(drug);
+        String[] drugNames = m.group(1).split("\\+");
+        Set<Drug> drugs = new HashSet<Drug>();
+        for (String drugName : drugNames) {
+            drugName = drugName.trim();
+            Drug drug = drugBo.findDrugByName(drugName);
+            if (drug==null) {
+                drug = new Drug(drugName);
+                drugBo.save(drug);
+            }
+            drugs.add(drug);
         }
-        evidence.setDrugs(Collections.singleton(drug));
+        evidence.setDrugs(drugs);
         
         if (m.groupCount()==2) {
             String[] parts = m.group(2).replaceAll("[\\(\\)]", "").split("; *");
