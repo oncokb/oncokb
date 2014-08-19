@@ -4,11 +4,10 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.dao.TumorTypeDao;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
@@ -27,4 +26,8 @@ public class TumorTypeBoImpl extends GenericBoImpl<TumorType, TumorTypeDao> impl
         return getDao().findTumorTypeByName(tumorTypeName);
     }
 
+    @Override
+    public List<TumorType> findTumorTypesWithEvidencesForAlteration(Alteration alteration) {
+        return getDao().findTumorTypesWithEvidencesForAlteration(alteration);
+    }
 }

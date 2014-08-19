@@ -22,4 +22,7 @@
     <query name="findTumorTypeByName">
         <![CDATA[from TumorType t where t.name=?]]>
     </query>
+  <query name="findTumorTypesWithEvidencesForAlteration">
+        <![CDATA[select distinct e.tumorType from EvidenceBlob e join e.alterations a where a.alterationId=?]]>
+  </query>
 </hibernate-mapping>

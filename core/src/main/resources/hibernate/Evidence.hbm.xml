@@ -19,7 +19,7 @@
       </many-to-many>
     </set>
     <property name="knownEffect" type="string">
-        <column name="known_effect" length="50"/>
+        <column name="known_effect" length="255"/>
     </property>
     <property column="level_of_evidence" name="levelOfEvidence">
       <type name="org.hibernate.type.EnumType">

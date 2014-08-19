@@ -39,15 +39,21 @@
     </set>
   </class>
   <query name="findEvidenceBlobsByAlteration">
-        <![CDATA[from EvidenceBlob e join e.alterations a where a.alterationId=?]]>
-    </query>
+        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.alterationId=?]]>
+  </query>
+  <query name="findEvidenceBlobsByAlterationAndEvidenceType">
+        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.alterationId=? and e.evidenceType=?]]>
+  </query>
+  <query name="findEvidenceBlobsByAlterationAndEvidenceTypeAndTumorType">
+        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?]]>
+  </query>
   <query name="findEvidenceBlobsByGene">
-        <![CDATA[from EvidenceBlob e join e.alterations a where a.gene=?]]>
-    </query>
+        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.gene=?]]>
+  </query>
   <query name="findEvidenceBlobsByTumorType">
-        <![CDATA[from EvidenceBlob e where e.tumorType=?]]>
-    </query>
+        <![CDATA[select e from EvidenceBlob e where e.tumorType=?]]>
+  </query>
   <query name="findEvidenceBlobsByGeneAndTumorType">
-        <![CDATA[from EvidenceBlob e join e.alterations a where a.gene=? and e.tumorType=?]]>
+        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.gene=? and e.tumorType=?]]>
   </query>
 </hibernate-mapping>

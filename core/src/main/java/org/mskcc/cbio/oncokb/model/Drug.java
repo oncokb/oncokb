@@ -15,7 +15,7 @@ public class Drug implements java.io.Serializable {
      private Integer drugId;
      private String drugName;
      private Set<String> synonyms = new HashSet<String>(0);
-     private boolean fdaApproved;
+     private Boolean fdaApproved;
 
     public Drug() {
     }
@@ -57,12 +57,12 @@ public class Drug implements java.io.Serializable {
         this.synonyms = synonyms;
     }
     
-    public boolean isFdaApproved() {
+    public Boolean isFdaApproved() {
         return this.fdaApproved;
     }
     
     
-    public void setFdaApproved(boolean fdaApproved) {
+    public void setFdaApproved(Boolean fdaApproved) {
         this.fdaApproved = fdaApproved;
     }
 

@@ -58,11 +58,11 @@ public final class QuestDocAnnotationParser {
     
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Standard therapeutic implications for drug sensitivity:?";
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to: ?(.*)";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence: ?(.*)";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Standard therapeutic implications for drug resistance:?";
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence: ?(.*)";
+    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String NCCN_GUIDELINES_P = "NCCN guidelines$";
     private static final String NCCN_DISEASE_P = "Disease: ?(.+)";
@@ -71,11 +71,11 @@ public final class QuestDocAnnotationParser {
         
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Investigational therapeutic implications for drug sensitivity$";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to \\(Highest level of evidence\\): ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Investigational therapeutic implications for drug resistance$";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?$";
     private static final String CLINICAL_TRIALS_P = "(NCT[0-9]+)";
@@ -230,30 +230,33 @@ public final class QuestDocAnnotationParser {
         m = p.matcher(mutationEffectStr);
         if (!m.matches()) {
             System.err.println("wrong format of mutation effect line: "+mutationEffectStr);
-        } else if (m.groupCount()>0) {
-            System.out.println("##    Effect");
-            
-            String effect = m.group(1).trim();
-            Set<Article> docs = extractArticles(mutationEffectStr);
+        } else {
+            String effect = m.group(1);
+            if (effect!=null && !effect.isEmpty()) {
+                System.out.println("##    Effect");
 
-            // Description of mutation effect
-            List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
-            String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
+                effect = effect.trim();
+                Set<Article> docs = extractArticles(mutationEffectStr);
 
-            EvidenceBlob eb = new EvidenceBlob();
-            eb.setEvidenceType(EvidenceType.MUTATION_EFFECT);
-            eb.setAlterations(alterations);
-            eb.setGene(gene);
-            eb.setDescription(descMutationEffectStr);
+                // Description of mutation effect
+                List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
+                String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
 
-            Evidence evidence = new Evidence();
-            evidence.setKnownEffect(effect);
-            evidence.setArticles(docs);
-            evidence.setEvidenceBlob(eb);
-            eb.setEvidences(Collections.singleton(evidence));
+                EvidenceBlob eb = new EvidenceBlob();
+                eb.setEvidenceType(EvidenceType.MUTATION_EFFECT);
+                eb.setAlterations(alterations);
+                eb.setGene(gene);
+                eb.setDescription(descMutationEffectStr);
 
-            EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
-            evidenceBlobBo.save(eb);
+                Evidence evidence = new Evidence();
+                evidence.setKnownEffect(effect);
+                evidence.setArticles(docs);
+                evidence.setEvidenceBlob(eb);
+                eb.setEvidences(Collections.singleton(evidence));
+
+                EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
+                evidenceBlobBo.save(eb);
+            }
         }
         
         // cancers
@@ -290,7 +293,7 @@ public final class QuestDocAnnotationParser {
         if (!m.matches()) {
             System.err.println("wrong format of type type line: "+line);
         }
-        String cancer = m.group(1);
+        String cancer = m.group(1).trim();
         
         System.out.println("##    Cancer type: " + cancer);
         
@@ -491,22 +494,20 @@ public final class QuestDocAnnotationParser {
             return;
         }
         
-        if (m.groupCount()==0) {
+        String disease = m.group(1);
+        
+        if (disease == null) {
             return;
         }
-        
-        String disease = m.group(1);
         
         // version
         txt = lines.get(start+2).trim();
         p = Pattern.compile(NCCN_VERSION_P);
         m = p.matcher(txt);
+        String version = null;
         if (!m.matches()) {
             System.err.println("Problem with NCCN version line: "+txt);
-        }
-        
-        String version = null;
-        if (m.groupCount()>0) {
+        } else {
             version = m.group(1);
         }
         
@@ -514,12 +515,10 @@ public final class QuestDocAnnotationParser {
         txt = lines.get(start+3);
         p = Pattern.compile(NCCN_PAGES_P);
         m = p.matcher(txt);
+        String pages = null;
         if (!m.matches()) {
             System.err.println("Problem with NCCN pages line: "+txt);
-        }
-        
-        String pages = null;
-        if (m.groupCount()>0) {
+        } else {
             pages = m.group(1);
         }
         
@@ -572,7 +571,8 @@ public final class QuestDocAnnotationParser {
         }
         evidence.setDrugs(drugs);
         
-        if (m.groupCount()==2) {
+        String refs = m.group(2);
+        if (refs!=null) {
             String[] parts = m.group(2).replaceAll("[\\(\\)]", "").split("; *");
             LevelOfEvidence loe = LevelOfEvidence.getByLevel(parts[0]);
             evidence.setLevelOfEvidence(loe); // note that it could be null
@@ -667,19 +667,18 @@ public final class QuestDocAnnotationParser {
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         Pattern pmidPattern = Pattern.compile("\\(PMIDs?:([^\\)]+)\\)");
         Matcher m = pmidPattern.matcher(str);
-        if (m.matches()) {
-            int n = m.groupCount();
-            for (int i=1; i<=n; i++) {
-                String pmids = m.group(i).trim();
-                for (String pmid : pmids.split(", *")) {
-                    Article doc = articleBo.findArticleByPmid(pmid);
-                    if (doc==null) {
-                        doc = NcbiEUtils.readPubmedArticle(pmid);
-                        articleBo.save(doc);
-                    }
-                    docs.add(doc);
+        int start = 0;
+        while (m.find(start)) {
+            String pmids = m.group(1).trim();
+            for (String pmid : pmids.split(", *")) {
+                Article doc = articleBo.findArticleByPmid(pmid);
+                if (doc==null) {
+                    doc = NcbiEUtils.readPubmedArticle(pmid);
+                    articleBo.save(doc);
                 }
+                docs.add(doc);
             }
+            start = m.end();
         }
         return docs;
     }

@@ -4,14 +4,14 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import org.mskcc.cbio.oncokb.bo.*;
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.EvidenceBlobDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
  *
@@ -20,20 +20,22 @@ import org.mskcc.cbio.oncokb.model.Gene;
 public class EvidenceBlobBoImpl  extends GenericBoImpl<EvidenceBlob, EvidenceBlobDao> implements EvidenceBlobBo {
     
     @Override
-    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Collection<Alteration> alterations) {
-        List<EvidenceBlob> evidences = new ArrayList<EvidenceBlob>();
-        for (Alteration alteration : alterations) {
-            evidences.addAll(getDao().findEvidenceBlobsByAlteration(alteration));
-        }
-        return evidences;
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration) {
+        return getDao().findEvidenceBlobsByAlteration(alteration);
     }
     
     @Override
-    public List<EvidenceBlob> findEvidenceBlobsByGene(Collection<Gene> genes) {
-        List<EvidenceBlob> evidences = new ArrayList<EvidenceBlob>();
-        for (Gene gene : genes) {
-            evidences.addAll(getDao().findEvidenceBlobsByGene(gene));
-        }
-        return evidences;
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alterationId, EvidenceType evidenceType) {
+        return getDao().findEvidenceBlobsByAlteration(alterationId, evidenceType);
+    }
+    
+    @Override
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration, EvidenceType evidenceType, TumorType tumorType) {
+        return getDao().findEvidenceBlobsByAlteration(alteration, evidenceType, tumorType);
+    }
+    
+    @Override
+    public List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene) {
+        return getDao().findEvidenceBlobsByGene(gene);
     }
 }

@@ -8,7 +8,9 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.dao.EvidenceBlobDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
  *
@@ -21,10 +23,20 @@ public class EvidenceBlobDaoImpl
     public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration) {
         return findByNamedQuery("findEvidenceBlobsByAlteration", alteration.getAlterationId());
     }
+    
+    @Override
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration, EvidenceType evidenceType) {
+        return findByNamedQuery("findEvidenceBlobsByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType.name());
+    }
+    
+    @Override
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration, EvidenceType evidenceType, TumorType tumorType) {
+        return findByNamedQuery("findEvidenceBlobsByAlterationAndEvidenceTypeAndTumorType", alteration.getAlterationId(), evidenceType, tumorType);
+    }
+
 
     @Override
     public List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene) {
         return findByNamedQuery("findEvidenceBlobsByGene", gene.getEntrezGeneId());
     }
-    
 }

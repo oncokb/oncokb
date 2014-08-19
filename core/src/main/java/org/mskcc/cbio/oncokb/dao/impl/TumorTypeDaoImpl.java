@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.dao.impl;
 
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.TumorTypeDao;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
@@ -23,5 +24,10 @@ public class TumorTypeDaoImpl extends GenericDaoImpl<TumorType, String> implemen
     public TumorType findTumorTypeByName(String tumorTypeName) {
         List<TumorType> list = findByNamedQuery("findTumorTypeByName", tumorTypeName);
         return list.isEmpty() ? null : list.get(0);
+    }
+    
+    @Override
+    public List<TumorType> findTumorTypesWithEvidencesForAlteration(Alteration alteration) {
+        return findByNamedQuery("findTumorTypesWithEvidencesForAlteration", alteration.getAlterationId());
     }
 }
