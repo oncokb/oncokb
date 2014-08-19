@@ -102,14 +102,10 @@ public final class QuestDocAnnotationParser {
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
     public static void main(String[] args) throws IOException {
-//        parse(QuestDocAnnotationParser.class.getResourceAsStream(QUEST_CURATION_FILE));
+//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/ERBB2.docx.txt"));
         List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
         for (String file : files) {
-            try {
-                parse(new FileInputStream(file));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            parse(new FileInputStream(file));
         }
     }
     

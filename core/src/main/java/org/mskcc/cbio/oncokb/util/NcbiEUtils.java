@@ -27,20 +27,34 @@ public final class NcbiEUtils {
         Article article = new Article(pmid);
         
         try {
-//            String json = FileUtils.readRemote(url);
-//            Map map = JsonUtils.jsonToMap(json);
-//            Map result = Map.class.cast(map.get("result"));
-//            Map articleInfo = Map.class.cast(result.get(pmid));
-//            String pubdate = String.class.cast(articleInfo.get("pubdate"));
-//            List<Map<String, String>> authors = List.class.cast(articleInfo.get("authors"));
-//            String title = String.class.cast(articleInfo.get("title"));
-//            String volumn = String.class.cast(articleInfo.get("volumn"));
-//            String issue = String.class.cast(articleInfo.get("issue"));
-//            String pages = String.class.cast(articleInfo.get("pages"));
-//            String fulljournalname = String.class.cast(articleInfo.get("fulljournalname"));
-//            String elocationid = String.class.cast(articleInfo.get("elocationid"));
-             
+            String json = FileUtils.readRemote(url);
+            Map map = JsonUtils.jsonToMap(json);
+            Map result = Map.class.cast(map.get("result"));
+            Map articleInfo = Map.class.cast(result.get(pmid));
             
+            String pubdate = String.class.cast(articleInfo.get("pubdate"));
+            article.setPubDate(pubdate);
+            
+            List<Map<String, String>> authors = List.class.cast(articleInfo.get("authors"));
+            article.setAuthors(formatAuthors(authors));
+            
+            String title = String.class.cast(articleInfo.get("title"));
+            article.setTitle(title);
+            
+            String volume = String.class.cast(articleInfo.get("volume"));
+            article.setVolume(volume);
+            
+            String issue = String.class.cast(articleInfo.get("issue"));
+            article.setIssue(issue);
+            
+            String pages = String.class.cast(articleInfo.get("pages"));
+            article.setPages(pages);
+            
+            String fulljournalname = String.class.cast(articleInfo.get("fulljournalname"));
+            article.setJournal(fulljournalname);
+            
+            String elocationId = String.class.cast(articleInfo.get("elocationid"));
+            article.setElocationId(elocationId);
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -48,8 +62,7 @@ public final class NcbiEUtils {
         return article;
     }
     
-    private static String makeReference(String pubdate, List<Map<String, String>> authors, String title, String volumn,
-            String issue, String pages, String fulljournalname, String elocationid) {
+    private static String formatAuthors(List<Map<String, String>> authors) {
         StringBuilder sb = new StringBuilder();
         sb.append(authors.get(0).get("name"));
         if (authors.size()>1) {

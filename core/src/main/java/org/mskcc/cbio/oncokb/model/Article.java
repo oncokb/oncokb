@@ -12,8 +12,13 @@ public class Article implements java.io.Serializable {
     private Integer articleId;
     private String pmid;
     private String title;
-    private String reference;
-    private String link;
+    private String journal;
+    private String pubDate;
+    private String volume;
+    private String issue;
+    private String pages;
+    private String authors;
+    private String elocationId;
 
     public Article() {
     }
@@ -22,10 +27,16 @@ public class Article implements java.io.Serializable {
         this.pmid = pmid;
     }
 
-    public Article(String pmid, String title, String reference, String link) {
-        this.title = title;
-        this.reference = reference;
+    public Article(String pmid, String title, String journal, String pubDate, String volume, String issue, String pages, String authors, String elocationId) {
         this.pmid = pmid;
+        this.title = title;
+        this.journal = journal;
+        this.pubDate = pubDate;
+        this.volume = volume;
+        this.issue = issue;
+        this.pages = pages;
+        this.authors = authors;
+        this.elocationId = elocationId;
     }
 
     public Integer getArticleId() {
@@ -52,27 +63,83 @@ public class Article implements java.io.Serializable {
         this.title = title;
     }
 
+    public String getJournal() {
+        return journal;
+    }
+
+    public void setJournal(String journal) {
+        this.journal = journal;
+    }
+
+    public String getPubDate() {
+        return pubDate;
+    }
+
+    public void setPubDate(String pubDate) {
+        this.pubDate = pubDate;
+    }
+
+    public String getVolume() {
+        return volume;
+    }
+
+    public void setVolume(String volume) {
+        this.volume = volume;
+    }
+
+    public String getIssue() {
+        return issue;
+    }
+
+    public void setIssue(String issue) {
+        this.issue = issue;
+    }
+
+    public String getPages() {
+        return pages;
+    }
+
+    public void setPages(String pages) {
+        this.pages = pages;
+    }
+
+    public String getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(String authors) {
+        this.authors = authors;
+    }
+
+    public String getElocationId() {
+        return elocationId;
+    }
+
+    public void setElocationId(String elocationId) {
+        this.elocationId = elocationId;
+    }
+    
     public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
+        StringBuilder sb = new StringBuilder();
+        sb.append(authors).append(". ")
+                .append(journal).append(". ");
+        if (pubDate!=null)
+            sb.append(pubDate).append(";");
+        if (volume!=null)
+            sb.append(volume);
+        if (issue!=null)
+            sb.append("(").append(issue).append(")");
+        if (pages!=null)
+            sb.append(pages);
+        sb.append(".");
+        
+        return sb.toString();
     }
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 37 * hash + Objects.hashCode(this.pmid);
-        hash = 37 * hash + Objects.hashCode(this.reference);
+        int hash = 7;
+        hash = 19 * hash + Objects.hashCode(this.pmid);
         return hash;
     }
 
@@ -88,14 +155,7 @@ public class Article implements java.io.Serializable {
         if (!Objects.equals(this.pmid, other.pmid)) {
             return false;
         }
-        if (!Objects.equals(this.reference, other.reference)) {
-            return false;
-        }
         return true;
     }
-    
-    
-
-    
     
 }
