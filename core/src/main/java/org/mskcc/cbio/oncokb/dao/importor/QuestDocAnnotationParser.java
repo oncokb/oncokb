@@ -362,7 +362,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> standardSensitivityLines = extractLines(lines, start+1, end, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, CANCER_HEADERS_P, 1);
         if (!standardSensitivityLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, standardSensitivityLines.get(0)[0], standardSensitivityLines.get(0)[1],
-                    EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS, "Sensitive",
+                    EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, "Sensitive",
                     STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P);
         } else {
             System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P);
@@ -372,7 +372,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> standardResistanceLines = extractLines(lines, start+1, end, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, CANCER_HEADERS_P, 1);
         if (!standardResistanceLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, standardResistanceLines.get(0)[0], standardResistanceLines.get(0)[1],
-                    EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS, "Resistant",
+                    EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant",
                     STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P); 
         } else {
             System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P);
@@ -392,7 +392,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> investigationalSensitivityLines = extractLines(lines, start+1, end, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, CANCER_HEADERS_P, 1);
         if (!investigationalSensitivityLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, investigationalSensitivityLines.get(0)[0], investigationalSensitivityLines.get(0)[1],
-                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS, "Sensitive",
+                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, "Sensitive",
                 INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P);
         } else {
             System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P);
@@ -402,7 +402,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> investigationalResistanceLines = extractLines(lines, start+1, end, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, CANCER_HEADERS_P, 1);
         if (!investigationalResistanceLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, investigationalResistanceLines.get(0)[0], investigationalResistanceLines.get(0)[1],
-                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS, "Resistant",
+                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant",
                 INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P);
         } else {
             System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P);

@@ -11,8 +11,10 @@ public enum EvidenceType {
     PREVALENCE ("Prevalence"),
     PROGNOSTIC_IMPLICATION ("Prognostic implications"),
     NCCN_GUIDELINES ("NCCN Guidelines"),
-    STANDARD_THERAPEUTIC_IMPLICATIONS("Standard therapeutic implications"),
-    INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS("Investigational therapeutic implications"),
+    STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY("Standard therapeutic implications for drug sensitivity"),
+    STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE("Standard therapeutic implications for drug resistance"),
+    INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY("Investigational therapeutic implications for drug sensitivity"),
+    INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE("Investigational therapeutic implications for drug resistance"),
     CLINICAL_TRIAL("clinical trial");
 
     private EvidenceType(String label) {
