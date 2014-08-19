@@ -27,26 +27,24 @@ public class EvidenceBlobController {
     
     @RequestMapping(value="/EvidenceBlob.json")
     public @ResponseBody List<EvidenceBlob> getEvidenceBlob(
-            @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
-            @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
+            @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
+            @RequestParam(value="hugoSymbol", required=false) String hugoSymbol) {
         
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
-        List<Gene> genes = new ArrayList<Gene>(); 
-        if (entrezGeneIds!=null) {
-            genes.addAll(geneBo.findGenesByEntrezGeneId(entrezGeneIds));
+        Gene gene = null; 
+        if (entrezGeneId!=null) {
+            gene = geneBo.findGeneByEntrezGeneId(entrezGeneId);
+        } else if (hugoSymbol!=null) {
+            gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
         }
         
-        if (hugoSymbols!=null) {
-            genes.addAll(geneBo.findGenesByHugoSymbol(hugoSymbols));
-        }
-        
-        if (genes.isEmpty()) {
+        if (gene == null) {
             return Collections.emptyList();
         }
         
         EvidenceBlobBo EvidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
         
-        return EvidenceBlobBo.findEvidenceBlobsByGene(genes);
+        return EvidenceBlobBo.findEvidenceBlobsByGene(gene);
     }
 }

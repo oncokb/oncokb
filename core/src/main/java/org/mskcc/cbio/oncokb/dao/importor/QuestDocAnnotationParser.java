@@ -439,6 +439,7 @@ public final class QuestDocAnnotationParser {
                 Evidence ev = new Evidence();
                 ev.setEvidenceBlob(eb);
                 ev.setClinicalTrials(Collections.singleton(ct));
+                evidences.add(ev);
             }
         }
         

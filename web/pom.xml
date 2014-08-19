@@ -27,6 +27,7 @@
 			<groupId>org.mskcc.cbio.oncokb</groupId>
 			<artifactId>core</artifactId>
 			<version>${version}</version>
+                        <scope>compile</scope>
 		</dependency>
                 
 		<!-- Spring core & mvc -->

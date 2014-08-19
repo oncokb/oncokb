@@ -101,7 +101,7 @@ public class ClinicalTrial implements java.io.Serializable {
         this.phase = phase;
     }
 
-    public Boolean isIsMskccTrial() {
+    public Boolean getIsMskccTrial() {
         return isMskccTrial;
     }
 
