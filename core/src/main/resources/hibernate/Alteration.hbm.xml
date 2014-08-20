@@ -49,15 +49,15 @@
     </class>
     
     <query name="findAlterationsByGene">
-        <![CDATA[from Alteration where a.gene=?>
+        <![CDATA[from Alteration a where a.gene=?]]>
     </query>
     <query name="findAlteration">
-        <![CDATA[from Alteration a where a.gene and a.alterationType=? and a.alteration=?]]>
+        <![CDATA[from Alteration a where a.gene=? and a.alterationType=? and a.alteration=?]]>
     </query>
     <query name="findMutationsByConsequence">
-        <![CDATA[from Alteration where entrez_gene_id=? and alteration_type='MUTATION' and consequence=?]]>
+        <![CDATA[from Alteration a where a.gene=? and a.alterationType='MUTATION' and a.consequence=?]]>
     </query>
     <query name="findMutationsByConsequenceAndPosition">
-        <![CDATA[from Alteration a where a.gene and a.alterationType='MUTATION' and a.consequence=? and a.proteinStart<=? a.proteinEnd>=?]]>
+        <![CDATA[from Alteration a where a.gene=? and a.alterationType='MUTATION' and a.consequence=? and a.proteinStart<=? and a.proteinEnd>=?]]>
     </query>
 </hibernate-mapping>

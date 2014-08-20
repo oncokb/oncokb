@@ -18,12 +18,12 @@ import org.mskcc.cbio.oncokb.model.VariantConsequence;
 public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> implements AlterationDao {
     @Override
     public List<Alteration> findAlterationsByGene(Gene gene) {
-        return findByNamedQuery("findAlterationsByGene", gene.getEntrezGeneId());
+        return findByNamedQuery("findAlterationsByGene", gene);
     }
     
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
-        List<Alteration> alterations = findByNamedQuery("findAlteration", gene.getEntrezGeneId(), alterationType.name(), alteration);
+        List<Alteration> alterations = findByNamedQuery("findAlteration", gene, alterationType, alteration);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 

@@ -25,10 +25,13 @@ public final class AlterationUtils {
         String consequence = "N/A";
         String ref = null;
         String var = null;
-        Integer start = null;
-        Integer end = null;
+        Integer start = -1;
+        Integer end = 100000;
         
         String alt = alteration.getAlteration();
+        if (alt.startsWith("p.")) {
+            alt = alt.substring(2);
+        }
         
         Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*]?)");
         Matcher m = p.matcher(alt);
@@ -64,6 +67,8 @@ public final class AlterationUtils {
                     consequence = "inframe_deletion";
                 } else if (v.equals("fs")) {
                     consequence = "frameshift_variant";
+                } else if (v.equals("trunc")) {
+                    consequence = "feature_truncation";
                 }
             } else {
                 p = Pattern.compile("([A-Z\\*])([0-9]+)fs.*");

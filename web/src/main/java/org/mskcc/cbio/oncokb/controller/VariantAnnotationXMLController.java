@@ -26,6 +26,7 @@ import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.NccnGuideline;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +51,9 @@ public class VariantAnnotationXMLController {
             @RequestParam(value="cancerType", required=false) String cancerType) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
+        Alteration alt = new Alteration();
+        alt.setAlteration(alteration);
+        
         // find alteration
         if (entrezGeneId == null && hugoSymbol == null) {
             return "<!-- no gene was specified --><xml/>";
@@ -66,6 +70,8 @@ public class VariantAnnotationXMLController {
             return "<!-- cound not find gene --><xml></xml>";
         }
         
+        alt.setGene(gene);
+        
         if (alterationType==null) {
             return "<!-- no alteration type --><xml></xml>";
         }
@@ -74,6 +80,7 @@ public class VariantAnnotationXMLController {
         if (type == null) {
             return "<!-- wrong alteration type --><xml></xml>";
         }
+        alt.setAlterationType(type);
         
         VariantConsequence variantConsequence = null;
         if (consequence!=null) {
@@ -82,9 +89,16 @@ public class VariantAnnotationXMLController {
                 return "<!-- could not find variant consequence --><xml></xml>";
             }
         }
+        alt.setConsequence(variantConsequence);
+        alt.setProteinStart(proteinStart);
+        alt.setProteinEnd(proteinEnd);
+        
+        if (variantConsequence==null && proteinStart==null && proteinEnd==null) {
+            AlterationUtils.annotateAlteration(alt);
+        }
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        List<Alteration> alterations = alterationBo.findRelevantAlterations(gene, type, alteration, variantConsequence, proteinStart, proteinEnd);
+        List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
         if (alterations.isEmpty()) {
             return "<!-- cound not find any relevant variants in OncoKb --><xml></xml>";
         }

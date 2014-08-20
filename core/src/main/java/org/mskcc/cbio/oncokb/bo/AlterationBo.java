@@ -45,13 +45,8 @@ public interface AlterationBo extends GenericBo<Alteration> {
 
     /**
      * 
-     * @param gene
-     * @param alterationType
      * @param alteration
-     * @param consequence
-     * @param start
-     * @param end
      * @return 
      */
-    List<Alteration> findRelevantAlterations(Gene gene, AlterationType alterationType, String alteration, VariantConsequence consequence, Integer start, Integer end);
+    List<Alteration> findRelevantAlterations(Alteration alteration);
 }

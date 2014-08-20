@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
 /**
  *
@@ -40,28 +42,20 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findRelevantAlterations(Gene gene, AlterationType alterationType, String alteration, VariantConsequence consequence, Integer start, Integer end) {
+    public List<Alteration> findRelevantAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<Alteration>();
-        Alteration matchedAlt = findAlteration(gene, alterationType, alteration);
+        Alteration matchedAlt = findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
         if (matchedAlt!=null) {
             alterations.add(matchedAlt);
         }
-        
-        if (end==null) {
-            end = start;
-        }
-        if (consequence!=null) {
-            if (start!=null) {
-                alterations.addAll(findMutationsByConsequenceAndPosition(gene, consequence, start, end));
+        if (alteration.getConsequence()!=null) {
+            if (alteration.getProteinStart()!=null) {
+                alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd()));
             }
 
-            if (consequence.getIsGenerallyTruncating()) {
-                Alteration truncatingMutation = findAlteration(gene, AlterationType.MUTATION, "truncating mutations");
-                if (truncatingMutation!=null) {
-                    if (truncatingMutation.getProteinStart()==null || (truncatingMutation.getProteinStart()<=start && truncatingMutation.getProteinStart()>=start)) {
-                        alterations.add(truncatingMutation);
-                    }
-                }
+            if (alteration.getConsequence().getIsGenerallyTruncating()) {
+                VariantConsequence truncatingVariantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm("feature_truncation");
+                alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd()));
             }
         }
             
