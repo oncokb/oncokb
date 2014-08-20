@@ -247,6 +247,7 @@ public final class QuestDocAnnotationParser {
                 // Description of mutation effect
                 List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
                 String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
+                docs.addAll(extractArticles(descMutationEffectStr));
 
                 EvidenceBlob eb = new EvidenceBlob();
                 eb.setEvidenceType(EvidenceType.MUTATION_EFFECT);
