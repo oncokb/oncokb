@@ -51,12 +51,16 @@ public class VariantAnnotationXMLController {
             @RequestParam(value="cancerType", required=false) String cancerType) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
+        StringBuilder sb = new StringBuilder();
+        sb.append("<xml>\n");
+        
         Alteration alt = new Alteration();
         alt.setAlteration(alteration);
         
         // find alteration
         if (entrezGeneId == null && hugoSymbol == null) {
-            return "<!-- no gene was specified --><xml/>";
+            sb.append("<!-- no gene was specified --></xml>");
+            return sb.toString();
         }
         
         Gene gene = null;
@@ -67,18 +71,38 @@ public class VariantAnnotationXMLController {
         }
         
         if (gene == null) {
-            return "<!-- cound not find gene --><xml></xml>";
+            sb.append("<!-- cound not find gene --></xml>");
+            return sb.toString();
         }
+        
+        // gene background
+        EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
+        List<EvidenceBlob> geneBgEbs = evidenceBlobBo.findEvidenceBlobsByGene(gene, EvidenceType.GENE_BACKGROUND);
+        if (!geneBgEbs.isEmpty()) {
+            EvidenceBlob eb = geneBgEbs.get(0);
+            sb.append("<gene_annotation>\n");
+            sb.append("<description>\n");
+            sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+            sb.append("</description>\n");
+            if (!eb.getEvidences().isEmpty()) {
+                exportRefereces(eb.getEvidences().iterator().next(), sb);
+            }
+
+            sb.append("</gene_annotation>\n");
+        }
+        
         
         alt.setGene(gene);
         
         if (alterationType==null) {
-            return "<!-- no alteration type --><xml></xml>";
+            sb.append("<!-- no alteration type --></xml>");
+            return sb.toString();
         }
         
         AlterationType type = AlterationType.valueOf(alterationType.toUpperCase());
         if (type == null) {
-            return "<!-- wrong alteration type --><xml></xml>";
+            sb.append("<!-- wrong alteration type --></xml>");
+            return sb.toString();
         }
         alt.setAlterationType(type);
         
@@ -86,7 +110,8 @@ public class VariantAnnotationXMLController {
         if (consequence!=null) {
             variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(consequence);
             if (variantConsequence==null) {
-                return "<!-- could not find variant consequence --><xml></xml>";
+                sb.append("<!-- could not find variant consequence --></xml>");
+                return sb.toString();
             }
         }
         alt.setConsequence(variantConsequence);
@@ -100,11 +125,32 @@ public class VariantAnnotationXMLController {
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
         if (alterations.isEmpty()) {
-            return "<!-- cound not find any relevant variants in OncoKb --><xml></xml>";
+            sb.append("<!-- cound not find any relevant variants in OncoKb --></xml>");
+            return sb.toString();
         }
         
-        StringBuilder sb = new StringBuilder();
-        sb.append("<xml>\n");
+        List<EvidenceBlob> mutationEffectEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.MUTATION_EFFECT);
+        if (!mutationEffectEbs.isEmpty()) {
+            EvidenceBlob eb = mutationEffectEbs.get(0);
+            Evidence ev = null;
+            if (!eb.getEvidences().isEmpty()) {
+                ev = eb.getEvidences().iterator().next();
+            }
+            sb.append("<variant_effect>\n");
+            sb.append("<effect>\n");
+            if (ev!=null) {
+                sb.append(ev.getKnownEffect());
+            }
+            sb.append("</effect>\n");
+            sb.append("<description>\n");
+            sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+            sb.append("</description>\n");
+            if (ev!=null) {
+                exportRefereces(ev, sb);
+            }
+
+            sb.append("</variant_effect>\n");
+        }
         
         // find tumor types
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
@@ -114,7 +160,6 @@ public class VariantAnnotationXMLController {
             sb.append("<cancer_type type=\"").append(tumorType.getName()).append("\">\n");
             
             // find prevalence evidence blob
-            EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
             List<EvidenceBlob> prevalanceEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.PREVALENCE, tumorType);
             for (EvidenceBlob eb : prevalanceEbs) {
                 sb.append("<prevalence>\n");

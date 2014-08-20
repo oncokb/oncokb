@@ -48,12 +48,15 @@
         <![CDATA[select e from EvidenceBlob e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?]]>
   </query>
   <query name="findEvidenceBlobsByGene">
-        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.gene=?]]>
+        <![CDATA[select e from EvidenceBlob e where e.gene=?]]>
+  </query>
+  <query name="findEvidenceBlobsByGeneAndEvidenceType">
+        <![CDATA[select e from EvidenceBlob e where e.gene=? and e.evidenceType=?]]>
   </query>
   <query name="findEvidenceBlobsByTumorType">
         <![CDATA[select e from EvidenceBlob e where e.tumorType=?]]>
   </query>
   <query name="findEvidenceBlobsByGeneAndTumorType">
-        <![CDATA[select e from EvidenceBlob e join e.alterations a where a.gene=? and e.tumorType=?]]>
+        <![CDATA[select e from EvidenceBlob e join e.alterations a where e.gene=? and e.tumorType=?]]>
   </query>
 </hibernate-mapping>

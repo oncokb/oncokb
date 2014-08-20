@@ -47,4 +47,12 @@ public interface EvidenceBlobBo extends GenericBo<EvidenceBlob> {
      * @return 
      */
     List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene);
+    
+    /**
+     * 
+     * @param gene
+     * @param evidenceType
+     * @return 
+     */
+    List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene, EvidenceType evidenceType);
 }

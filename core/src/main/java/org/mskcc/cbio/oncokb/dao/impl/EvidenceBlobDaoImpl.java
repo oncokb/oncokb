@@ -26,7 +26,7 @@ public class EvidenceBlobDaoImpl
     
     @Override
     public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration, EvidenceType evidenceType) {
-        return findByNamedQuery("findEvidenceBlobsByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType.name());
+        return findByNamedQuery("findEvidenceBlobsByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType);
     }
     
     @Override
@@ -37,6 +37,11 @@ public class EvidenceBlobDaoImpl
 
     @Override
     public List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene) {
-        return findByNamedQuery("findEvidenceBlobsByGene", gene.getEntrezGeneId());
+        return findByNamedQuery("findEvidenceBlobsByGene", gene);
+    }
+
+    @Override
+    public List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene, EvidenceType evidenceType) {
+        return findByNamedQuery("findEvidenceBlobsByGeneAndEvidenceType", gene, evidenceType);
     }
 }

@@ -52,4 +52,9 @@ public class EvidenceBlobBoImpl  extends GenericBoImpl<EvidenceBlob, EvidenceBlo
     public List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene) {
         return getDao().findEvidenceBlobsByGene(gene);
     }
+
+    @Override
+    public List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene, EvidenceType evidenceType) {
+        return getDao().findEvidenceBlobsByGene(gene, evidenceType);
+    }
 }

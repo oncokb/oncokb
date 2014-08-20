@@ -45,4 +45,12 @@ public interface EvidenceBlobDao extends GenericDao<EvidenceBlob, Integer> {
      * @return 
      */
     List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene);
+    
+    /**
+     * 
+     * @param gene
+     * @param evidenceType
+     * @return 
+     */
+    List<EvidenceBlob> findEvidenceBlobsByGene(Gene gene, EvidenceType evidenceType);
 }
