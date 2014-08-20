@@ -91,23 +91,23 @@ public final class AlterationUtils {
         VariantConsequenceBo variantConsequenceBo = ApplicationContextSingleton.getVariantConsequenceBo();
         VariantConsequence variantConsequence = variantConsequenceBo.findVariantConsequenceByTerm(consequence);
         
-        if (ref!=null && !ref.isEmpty()) {
+        if (alteration.getRefResidues()==null && ref!=null && !ref.isEmpty()) {
             alteration.setRefResidues(ref);
         }
         
-        if (var!=null && !var.isEmpty()) {
+        if (alteration.getVariantResidues()==null && var!=null && !var.isEmpty()) {
             alteration.setVariantResidues(var);
         }
         
-        if (start!=null) {
+        if (alteration.getProteinStart()==null && start!=null) {
             alteration.setProteinStart(start);
         }
         
-        if (end!=null) {
+        if (alteration.getProteinEnd()==null && end!=null) {
             alteration.setProteinEnd(end);
         }
         
-        if (variantConsequence!=null) {
+        if (alteration.getConsequence()==null && variantConsequence!=null) {
             alteration.setConsequence(variantConsequence);
         }
     }

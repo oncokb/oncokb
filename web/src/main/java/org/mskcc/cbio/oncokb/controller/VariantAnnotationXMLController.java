@@ -115,12 +115,14 @@ public class VariantAnnotationXMLController {
             }
         }
         alt.setConsequence(variantConsequence);
+        
+        if (proteinEnd==null) {
+            proteinEnd = proteinStart;
+        }
         alt.setProteinStart(proteinStart);
         alt.setProteinEnd(proteinEnd);
         
-        if (variantConsequence==null && proteinStart==null && proteinEnd==null) {
-            AlterationUtils.annotateAlteration(alt);
-        }
+        AlterationUtils.annotateAlteration(alt);
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
