@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.bo.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.dao.DrugDao;
@@ -31,5 +32,30 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
             }
         }
         return drugs;
+    }
+
+    @Override
+    public List<Drug> findDrugBySynonym(String synonym) {
+        return getDao().findDrugBySynonym(synonym);
+    }
+
+    @Override
+    public List<Drug> guessDrugs(String drugNameOrSynonym) {
+        Drug drug = findDrugByName(drugNameOrSynonym);
+        if (drug!=null) {
+            return Collections.singletonList(drug);
+        }
+        
+        return findDrugBySynonym(drugNameOrSynonym);
+    }
+
+    @Override
+    public Drug guessUnambiguousDrug(String drugNameOrSynonym) {
+        List<Drug> drugs = guessDrugs(drugNameOrSynonym);
+        if (drugs.size()==1) {
+            return drugs.get(0);
+        }
+        
+        return null;
     }
 }

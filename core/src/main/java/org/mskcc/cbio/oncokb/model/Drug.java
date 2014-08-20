@@ -16,17 +16,14 @@ public class Drug implements java.io.Serializable {
      private String drugName;
      private Set<String> synonyms = new HashSet<String>(0);
      private Boolean fdaApproved;
+     private Set<String> atcCodes;
+     private String description;
 
     public Drug() {
     }
 
     public Drug(String drugName) {
         this.drugName = drugName;
-    }
-    public Drug(String drugName, Set<String> synonyms, boolean fdaApproved) {
-       this.drugName = drugName;
-       this.synonyms = synonyms;
-       this.fdaApproved = fdaApproved;
     }
    
     
@@ -72,6 +69,22 @@ public class Drug implements java.io.Serializable {
         int hash = 5;
         hash = 29 * hash + (this.drugName != null ? this.drugName.hashCode() : 0);
         return hash;
+    }
+
+    public Set<String> getAtcCodes() {
+        return atcCodes;
+    }
+
+    public void setAtcCodes(Set<String> atcCodes) {
+        this.atcCodes = atcCodes;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     

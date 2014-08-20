@@ -104,6 +104,7 @@ public final class QuestDocAnnotationParser {
     
     public static void main(String[] args) throws IOException {
         VariantConsequenceImporter.main(args);
+        PiHelperDrugImporter.main(args);
 //        arse(new FileInputStream(QUEST_CURATION_FOLDER+"/MAP2K1.docx.txt"));
         List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
         for (String file : files) {
@@ -570,7 +571,7 @@ public final class QuestDocAnnotationParser {
         Set<Drug> drugs = new HashSet<Drug>();
         for (String drugName : drugNames) {
             drugName = drugName.trim();
-            Drug drug = drugBo.findDrugByName(drugName);
+            Drug drug = drugBo.guessUnambiguousDrug(drugName);
             if (drug==null) {
                 drug = new Drug(drugName);
                 drugBo.save(drug);

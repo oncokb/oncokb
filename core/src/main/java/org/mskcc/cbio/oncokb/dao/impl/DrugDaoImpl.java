@@ -23,4 +23,9 @@ public class DrugDaoImpl extends GenericDaoImpl<Drug, Integer> implements DrugDa
         List<Drug> list = findByNamedQuery("findDrugByName", drugName);
         return list.isEmpty() ? null : list.get(0);
     }
+
+    @Override
+    public List<Drug> findDrugBySynonym(String synonym) {
+        return findByNamedQuery("findDrugByName", synonym);
+    }
 }

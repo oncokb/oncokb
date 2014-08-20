@@ -28,4 +28,25 @@ public interface DrugBo extends GenericBo<Drug> {
      * @return 
      */
     Drug findDrugByName(String drugName);
+    
+    /**
+     * 
+     * @param synonym
+     * @return 
+     */
+    List<Drug> findDrugBySynonym(String synonym);
+    
+    /**
+     * 
+     * @param drugNameOrSynonym
+     * @return 
+     */
+    List<Drug> guessDrugs(String drugNameOrSynonym);
+    
+    /**
+     * 
+     * @param drugNameOrSynonym
+     * @return 
+     */
+    Drug guessUnambiguousDrug(String drugNameOrSynonym);
 }

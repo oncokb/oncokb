@@ -359,6 +359,13 @@ public class VariantAnnotationXMLController {
             }
             sb.append("</fda_approved>\n");
             
+//            sb.append("<description>");
+//            String desc = drug.getDescription();
+//            if (desc != null) {
+//                sb.append(StringEscapeUtils.escapeXml(desc));
+//            }
+//            sb.append("</description>\n");
+            
             sb.append("</drug>\n");
         
         }
