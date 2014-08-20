@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.mskcc.cbio.oncokb.model.VariantConsequence" table="variant_consequence" catalog="oncokb">
+        <id name="term" type="string">
+            <column name="term" length="100" />
+            <generator class="assigned" />
+        </id>
+        <property name="description" type="string">
+            <column name="description" not-null="true"/>
+        </property>
+        <property name="isGenerallyTruncating" type="boolean">
+            <column name="is_generally_truncating" not-null="true"/>
+        </property>
+    </class>
+    
+    <query name="findVariantConsequenceByTerm">
+        <![CDATA[from VariantConsequence v where v.term=?]]>
+    </query>
+</hibernate-mapping>

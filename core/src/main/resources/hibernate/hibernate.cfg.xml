@@ -18,5 +18,6 @@
     <mapping resource="hibernate/Evidence.hbm.xml"/>
     <mapping resource="hibernate/EvidenceBlob.hbm.xml"/>
     <mapping resource="hibernate/Gene.hbm.xml"/>
+    <mapping resource="hibernate/VariantConsequence.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

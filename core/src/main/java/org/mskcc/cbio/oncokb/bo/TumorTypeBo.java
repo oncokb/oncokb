@@ -4,7 +4,8 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
@@ -21,5 +22,5 @@ public interface TumorTypeBo extends GenericBo<TumorType> {
      * @param alteration
      * @return 
      */
-    List<TumorType> findTumorTypesWithEvidencesForAlteration(Alteration alteration);
+    Set<TumorType> findTumorTypesWithEvidencesForAlterations(Collection<Alteration> alterations);
 }

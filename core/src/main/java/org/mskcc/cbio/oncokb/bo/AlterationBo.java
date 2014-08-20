@@ -9,6 +9,7 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 /**
  *
@@ -31,4 +32,26 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @return 
      */
     Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration);
+    
+    /**
+     * 
+     * @param gene
+     * @param consequence
+     * @param start
+     * @param end
+     * @return 
+     */
+    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end);
+
+    /**
+     * 
+     * @param gene
+     * @param alterationType
+     * @param alteration
+     * @param consequence
+     * @param start
+     * @param end
+     * @return 
+     */
+    List<Alteration> findRelevantAlterations(Gene gene, AlterationType alterationType, String alteration, VariantConsequence consequence, Integer start, Integer end);
 }

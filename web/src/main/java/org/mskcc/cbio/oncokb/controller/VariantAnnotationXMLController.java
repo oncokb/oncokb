@@ -25,6 +25,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.NccnGuideline;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,12 +38,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class VariantAnnotationXMLController {
-    @RequestMapping(value="/var_annotation", produces="application/xml")
+    @RequestMapping(value="/var_annotation", produces="application/xml")//plain/text
     public @ResponseBody String getVariantAnnotation(
             @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
             @RequestParam(value="alterationType", required=false) String alterationType,
             @RequestParam(value="alteration", required=false) String alteration,
+            @RequestParam(value="consequence", required=false) String consequence,
+            @RequestParam(value="proteinStart", required=false) Integer proteinStart,
+            @RequestParam(value="proteinEnd", required=false) Integer proteinEnd,
             @RequestParam(value="cancerType", required=false) String cancerType) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
@@ -71,10 +75,18 @@ public class VariantAnnotationXMLController {
             return "<!-- wrong alteration type --><xml></xml>";
         }
         
+        VariantConsequence variantConsequence = null;
+        if (consequence!=null) {
+            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(consequence);
+            if (variantConsequence==null) {
+                return "<!-- could not find variant consequence --><xml></xml>";
+            }
+        }
+        
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        Alteration alt = alterationBo.findAlteration(gene, type, alteration);
-        if (alt == null) {
-            return "<!-- cound not find variant --><xml></xml>";
+        List<Alteration> alterations = alterationBo.findRelevantAlterations(gene, type, alteration, variantConsequence, proteinStart, proteinEnd);
+        if (alterations.isEmpty()) {
+            return "<!-- cound not find any relevant variants in OncoKb --><xml></xml>";
         }
         
         StringBuilder sb = new StringBuilder();
@@ -82,14 +94,14 @@ public class VariantAnnotationXMLController {
         
         // find tumor types
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
-        List<TumorType> tumorTypes = tumorTypeBo.findTumorTypesWithEvidencesForAlteration(alt);
+        Set<TumorType> tumorTypes = tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations);
         
         for (TumorType tumorType : tumorTypes) {
             sb.append("<cancer_type type=\"").append(tumorType.getName()).append("\">\n");
             
             // find prevalence evidence blob
             EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
-            List<EvidenceBlob> prevalanceEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.PREVALENCE, tumorType);
+            List<EvidenceBlob> prevalanceEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.PREVALENCE, tumorType);
             for (EvidenceBlob eb : prevalanceEbs) {
                 sb.append("<prevalence>\n");
                 sb.append("<description>\n");
@@ -103,7 +115,7 @@ public class VariantAnnotationXMLController {
             }
             
             // find prognostic implication evidence blob
-            List<EvidenceBlob> prognosticEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.PROGNOSTIC_IMPLICATION, tumorType);
+            List<EvidenceBlob> prognosticEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.PROGNOSTIC_IMPLICATION, tumorType);
             for (EvidenceBlob eb : prognosticEbs) {
                 sb.append("<prognostic_implications>\n");
                 sb.append("<description>\n");
@@ -117,8 +129,8 @@ public class VariantAnnotationXMLController {
             }
             
             // STANDARD_THERAPEUTIC_IMPLICATIONS
-            List<EvidenceBlob> stdImpEbsSensitivity = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, tumorType);
-            List<EvidenceBlob> stdImpEbsResisitance = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, tumorType);
+            List<EvidenceBlob> stdImpEbsSensitivity = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, tumorType);
+            List<EvidenceBlob> stdImpEbsResisitance = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, tumorType);
             if (!stdImpEbsSensitivity.isEmpty() || !stdImpEbsResisitance.isEmpty()) {
                 sb.append("<standard_therapeutic_implications>\n");
                 for (EvidenceBlob eb : stdImpEbsSensitivity) {
@@ -135,7 +147,7 @@ public class VariantAnnotationXMLController {
             }
             
             // NCCN_GUIDELINES
-            List<EvidenceBlob> nccnEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.NCCN_GUIDELINES, tumorType);
+            List<EvidenceBlob> nccnEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.NCCN_GUIDELINES, tumorType);
             for (EvidenceBlob eb : nccnEbs) {
                 for (Evidence ev : eb.getEvidences()) {
                     for (NccnGuideline nccnGuideline : ev.getNccnGuidelines()) {
@@ -162,8 +174,8 @@ public class VariantAnnotationXMLController {
             }
             
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
-            List<EvidenceBlob> invImpEbsSensitivity = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, tumorType);
-            List<EvidenceBlob> invImpEbsResisitance = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, tumorType);
+            List<EvidenceBlob> invImpEbsSensitivity = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, tumorType);
+            List<EvidenceBlob> invImpEbsResisitance = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, tumorType);
             if (!invImpEbsSensitivity.isEmpty() || !invImpEbsResisitance.isEmpty()) {
                 sb.append("<investigational_therapeutic_implications>\n");
                 for (EvidenceBlob eb : invImpEbsSensitivity) {
@@ -180,7 +192,7 @@ public class VariantAnnotationXMLController {
             }
             
             // CLINICAL_TRIAL
-            List<EvidenceBlob> trialsEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alt, EvidenceType.CLINICAL_TRIAL, tumorType);
+            List<EvidenceBlob> trialsEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tumorType);
             for (EvidenceBlob eb : trialsEbs) {
                 for (Evidence ev : eb.getEvidences()) {
                     for (ClinicalTrial trial : ev.getClinicalTrials()) {
@@ -292,8 +304,13 @@ public class VariantAnnotationXMLController {
         
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
         if (levelOfEvidence!=null) {
-            sb.append("<level_of_evidence>");
-            sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()));
+            sb.append("<level_of_evidence>\n");
+            sb.append("<level>");
+            sb.append(levelOfEvidence.getLevel());
+            sb.append("</level>\n");
+            sb.append("<description>\n");
+            sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription())).append("\n");
+            sb.append("</description>\n");
             sb.append("</level_of_evidence>\n");
         }
         

@@ -10,8 +10,8 @@ import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBlobBo;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Article;
@@ -19,6 +19,8 @@ import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceBlob;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
@@ -36,6 +38,7 @@ public class AlterationActivityEvidenceImporter {
     private static final String ALTERATION_ACTIVITY_EVIDENCE_FILE = "/data/alteration-activity-evidence.txt";
     
     public static void main(String[] args) throws IOException {
+        VariantConsequenceImporter.main(args);
         List<String> lines = FileUtils.readTrimedLinesStream(
                 AlterationActivityEvidenceImporter.class.getResourceAsStream(ALTERATION_ACTIVITY_EVIDENCE_FILE));
         String[] headers = lines.get(0).split("\t");
@@ -43,8 +46,7 @@ public class AlterationActivityEvidenceImporter {
     	GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
     	AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
     	ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
-    	EvidenceBlobBo EvidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
-    	EvidenceBo EvidenceBo = ApplicationContextSingleton.getEvidenceBo();
+    	EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();        
         
         int nLines = lines.size();
         System.out.println("importing...");
@@ -76,7 +78,12 @@ public class AlterationActivityEvidenceImporter {
             
             Alteration alteration = alterationBo.findAlteration(gene, type, alt);
             if (alteration==null) {
-                alteration = new Alteration(gene, alt, type);
+                alteration = new Alteration();
+                alteration.setGene(gene);
+                alteration.setAlterationType(type);
+                alteration.setAlteration(alt);
+                AlterationUtils.annotateAlteration(alteration);
+                
                 alterationBo.save(alteration);
             }
             
@@ -103,7 +110,7 @@ public class AlterationActivityEvidenceImporter {
             evidence.setEvidenceBlob(ec);
             ec.setEvidences(Collections.singleton(evidence));
             
-            EvidenceBlobBo.save(ec);
+            evidenceBlobBo.save(ec);
         }
         
     }

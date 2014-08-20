@@ -31,6 +31,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.NccnGuideline;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
@@ -102,7 +103,8 @@ public final class QuestDocAnnotationParser {
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
     public static void main(String[] args) throws IOException {
-//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/ERBB2.docx.txt"));
+        VariantConsequenceImporter.main(args);
+//        arse(new FileInputStream(QUEST_CURATION_FOLDER+"/MAP2K1.docx.txt"));
         List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
         for (String file : files) {
             parse(new FileInputStream(file));
@@ -202,7 +204,11 @@ public final class QuestDocAnnotationParser {
             System.err.println("wrong format of mutation line: "+lines.get(0));
         }
         
-        String mutationStr = m.group(1).trim();
+        String mutationStr = m.group(1);
+        if (mutationStr.contains("[")) {
+            mutationStr = mutationStr.substring(0, mutationStr.indexOf("["));
+        }
+        mutationStr = mutationStr.trim();
         
         System.out.println("##  Mutation: "+mutationStr);
         
@@ -213,7 +219,11 @@ public final class QuestDocAnnotationParser {
         for (String mutation : parseMutationString(mutationStr)) {
             Alteration alteration = alterationBo.findAlteration(gene, type, mutation);
             if (alteration==null) {
-                alteration = new Alteration(gene, mutation, type);
+                alteration = new Alteration();
+                alteration.setGene(gene);
+                alteration.setAlterationType(type);
+                alteration.setAlteration(mutation);
+                AlterationUtils.annotateAlteration(alteration);
                 alterationBo.save(alteration);
             }
             alterations.add(alteration);
@@ -662,12 +672,14 @@ public final class QuestDocAnnotationParser {
     private static Set<Article> extractArticles(String str) {
         Set<Article> docs = new HashSet<Article>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
-        Pattern pmidPattern = Pattern.compile("\\(PMIDs?:([^\\)]+)\\)");
+        Pattern pmidPattern = Pattern.compile("\\(PMIDs?:([^\\);]+).*\\)");
         Matcher m = pmidPattern.matcher(str);
         int start = 0;
         while (m.find(start)) {
             String pmids = m.group(1).trim();
-            for (String pmid : pmids.split(", *")) {
+            for (String pmid : pmids.split(", *(PMID:)? *")) {
+                if (pmid.startsWith("NCT")) continue; // process this..
+                
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc==null) {
                     doc = NcbiEUtils.readPubmedArticle(pmid);

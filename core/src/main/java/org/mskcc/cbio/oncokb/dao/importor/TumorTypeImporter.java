@@ -10,7 +10,6 @@ import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
-import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -21,7 +20,7 @@ public class TumorTypeImporter {
         throw new AssertionError();
     }
     
-    private static String TUMOR_TYPES_FILE = "/data/tumor-types.txt";
+    private static final String TUMOR_TYPES_FILE = "/data/tumor-types.txt";
     
     public static void main(String[] args) throws IOException {
         List<String> lines = FileUtils.readTrimedLinesStream(

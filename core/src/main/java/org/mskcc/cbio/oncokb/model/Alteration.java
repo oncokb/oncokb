@@ -9,17 +9,16 @@ public class Alteration implements java.io.Serializable {
 
      private Integer alterationId;
      private Gene gene;
-     private String alteration;
      private AlterationType alterationType;
+     private VariantConsequence consequence;
+     
+     private String alteration;
+     private String refResidues;
+     private Integer proteinStart;
+     private Integer proteinEnd;
+     private String variantResidues;
 
     public Alteration() {
-    }
-
-	
-    public Alteration(Gene gene, String alteration, AlterationType alterationType) {
-        this.gene = gene;
-        this.alteration = alteration;
-        this.alterationType = alterationType;
     }
    
     
@@ -59,7 +58,46 @@ public class Alteration implements java.io.Serializable {
         this.alterationType = alterationType;
     }
 
-    
+    public VariantConsequence getConsequence() {
+        return consequence;
+    }
+
+    public void setConsequence(VariantConsequence consequence) {
+        this.consequence = consequence;
+    }
+
+    public String getRefResidues() {
+        return refResidues;
+    }
+
+    public void setRefResidues(String refResidues) {
+        this.refResidues = refResidues;
+    }
+
+    public Integer getProteinStart() {
+        return proteinStart;
+    }
+
+    public void setProteinStart(Integer proteinStart) {
+        this.proteinStart = proteinStart;
+    }
+
+    public Integer getProteinEnd() {
+        return proteinEnd;
+    }
+
+    public void setProteinEnd(Integer proteinEnd) {
+        this.proteinEnd = proteinEnd;
+    }
+
+    public String getVariantResidues() {
+        return variantResidues;
+    }
+
+    public void setVariantResidues(String variantResidues) {
+        this.variantResidues = variantResidues;
+    }
+
      @Override
     public int hashCode() {
         int hash = 7;

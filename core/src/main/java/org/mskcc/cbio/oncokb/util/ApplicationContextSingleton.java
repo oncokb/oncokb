@@ -48,6 +48,10 @@ public final class ApplicationContextSingleton {
         return GeneBo.class.cast(getApplicationContext().getBean("geneBo"));
     }
     
+    public static VariantConsequenceBo getVariantConsequenceBo() {
+        return VariantConsequenceBo.class.cast(getApplicationContext().getBean("variantConsequenceBo"));
+    }
+    
     public static DrugBo getDrugBo() {
         return DrugBo.class.cast(getApplicationContext().getBean("drugBo"));
     }

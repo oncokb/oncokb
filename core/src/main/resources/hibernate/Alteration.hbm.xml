@@ -26,12 +26,38 @@
                <param name="useNamed">true</param>
             </type>
         </property>
+        
+        <many-to-one name="consequence" class="org.mskcc.cbio.oncokb.model.VariantConsequence" lazy="false" fetch="join">
+            <column name="consequence"/>
+        </many-to-one>
+        
+        <property name="refResidues" type="string">
+          <column name="ref_residues"/>
+        </property>
+        
+        <property name="proteinStart" type="int">
+          <column name="protein_start"/>
+        </property>
+        
+        <property name="proteinEnd" type="int">
+          <column name="protein_end"/>
+        </property>
+        
+        <property name="variantResidues" type="string">
+          <column name="variant_residues"/>
+        </property>
     </class>
     
     <query name="findAlterationsByGene">
-        <![CDATA[from Alteration where entrez_gene_id=?]]>
+        <![CDATA[from Alteration where a.gene=?>
     </query>
     <query name="findAlteration">
-        <![CDATA[from Alteration where entrez_gene_id=? and alteration_type=? and alteration=?]]>
+        <![CDATA[from Alteration a where a.gene and a.alterationType=? and a.alteration=?]]>
+    </query>
+    <query name="findMutationsByConsequence">
+        <![CDATA[from Alteration where entrez_gene_id=? and alteration_type='MUTATION' and consequence=?]]>
+    </query>
+    <query name="findMutationsByConsequenceAndPosition">
+        <![CDATA[from Alteration a where a.gene and a.alterationType='MUTATION' and a.consequence=? and a.proteinStart<=? a.proteinEnd>=?]]>
     </query>
 </hibernate-mapping>

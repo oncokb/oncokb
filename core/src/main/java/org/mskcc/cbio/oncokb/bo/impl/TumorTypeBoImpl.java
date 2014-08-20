@@ -4,7 +4,9 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.dao.TumorTypeDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
@@ -27,7 +29,11 @@ public class TumorTypeBoImpl extends GenericBoImpl<TumorType, TumorTypeDao> impl
     }
 
     @Override
-    public List<TumorType> findTumorTypesWithEvidencesForAlteration(Alteration alteration) {
-        return getDao().findTumorTypesWithEvidencesForAlteration(alteration);
+    public Set<TumorType> findTumorTypesWithEvidencesForAlterations(Collection<Alteration> alterations) {
+        Set<TumorType> tumorTypes = new HashSet<TumorType>();
+        for (Alteration alteration : alterations) {
+            tumorTypes.addAll(getDao().findTumorTypesWithEvidencesForAlteration(alteration));
+        }
+        return tumorTypes;
     }
 }

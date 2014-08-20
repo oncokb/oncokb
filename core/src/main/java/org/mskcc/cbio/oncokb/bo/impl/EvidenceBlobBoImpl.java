@@ -4,6 +4,8 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import org.mskcc.cbio.oncokb.bo.*;
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.EvidenceBlobDao;
@@ -20,18 +22,30 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 public class EvidenceBlobBoImpl  extends GenericBoImpl<EvidenceBlob, EvidenceBlobDao> implements EvidenceBlobBo {
     
     @Override
-    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration) {
-        return getDao().findEvidenceBlobsByAlteration(alteration);
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Collection<Alteration> alterations) {
+        List<EvidenceBlob> list = new ArrayList<EvidenceBlob>();
+        for (Alteration alteration : alterations) {
+            list.addAll(getDao().findEvidenceBlobsByAlteration(alteration));
+        }
+        return list;
     }
     
     @Override
-    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alterationId, EvidenceType evidenceType) {
-        return getDao().findEvidenceBlobsByAlteration(alterationId, evidenceType);
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Collection<Alteration> alterations, EvidenceType evidenceType) {
+        List<EvidenceBlob> list = new ArrayList<EvidenceBlob>();
+        for (Alteration alteration : alterations) {
+            list.addAll(getDao().findEvidenceBlobsByAlteration(alteration, evidenceType));
+        }
+        return list;
     }
     
     @Override
-    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Alteration alteration, EvidenceType evidenceType, TumorType tumorType) {
-        return getDao().findEvidenceBlobsByAlteration(alteration, evidenceType, tumorType);
+    public List<EvidenceBlob> findEvidenceBlobsByAlteration(Collection<Alteration> alterations, EvidenceType evidenceType, TumorType tumorType) {
+        List<EvidenceBlob> list = new ArrayList<EvidenceBlob>();
+        for (Alteration alteration : alterations) {
+            list.addAll(getDao().findEvidenceBlobsByAlteration(alteration, evidenceType, tumorType));
+        }
+        return list;
     }
     
     @Override

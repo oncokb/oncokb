@@ -1,0 +1,15 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- VariantConsequence business object -->
+    <bean id="variantConsequenceBo" class="org.mskcc.cbio.oncokb.bo.impl.VariantConsequenceBoImpl" >
+   		<property name="dao" ref="variantConsequenceDao" />
+    </bean>
+ 
+    <!-- VariantConsequence Data Access Object -->
+    <bean id="variantConsequenceDao" class="org.mskcc.cbio.oncokb.dao.impl.VariantConsequenceDaoImpl" >
+   		<property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+</beans>

@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 /**
  *
@@ -24,5 +25,10 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
         List<Alteration> alterations = findByNamedQuery("findAlteration", gene.getEntrezGeneId(), alterationType.name(), alteration);
         return alterations.isEmpty() ? null : alterations.get(0);
+    }
+
+    @Override
+    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end) {
+        return findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, start, end);
     }
 }

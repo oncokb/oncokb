@@ -8,6 +8,7 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 /**
  *
@@ -25,9 +26,19 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
     /**
      * 
      * @param gene
-     * @param alteration_type
+     * @param alterationType
      * @param alteration
      * @return 
      */
     Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration);
+    
+    /**
+     * 
+     * @param gene
+     * @param consequence
+     * @param start
+     * @param end
+     * @return 
+     */
+    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end);
 }
