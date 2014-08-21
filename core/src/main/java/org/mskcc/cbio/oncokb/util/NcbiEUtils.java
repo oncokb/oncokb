@@ -57,6 +57,7 @@ public final class NcbiEUtils {
             article.setElocationId(elocationId);
         } catch(Exception ex) {
             ex.printStackTrace();
+            System.out.println(url);
         }
         
         return article;

@@ -110,7 +110,7 @@ public class VariantAnnotationXMLController {
         if (consequence!=null) {
             variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(consequence);
             if (variantConsequence==null) {
-                sb.append("<!-- could not find variant consequence --></xml>");
+                sb.append("<!-- could not find the specified variant consequence --></xml>");
                 return sb.toString();
             }
         }
@@ -127,7 +127,7 @@ public class VariantAnnotationXMLController {
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
         if (alterations.isEmpty()) {
-            sb.append("<!-- cound not find any relevant variants in OncoKb --></xml>");
+            sb.append("<!-- There is no information about the function of this variant in the MSKCC OncoKB. --></xml>");
             return sb.toString();
         }
         
@@ -163,7 +163,8 @@ public class VariantAnnotationXMLController {
             
             // find prevalence evidence blob
             List<EvidenceBlob> prevalanceEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.PREVALENCE, tumorType);
-            for (EvidenceBlob eb : prevalanceEbs) {
+            if (!prevalanceEbs.isEmpty()) {
+                EvidenceBlob eb = prevalanceEbs.get(0);
                 sb.append("<prevalence>\n");
                 sb.append("<description>\n");
                 sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
@@ -177,7 +178,8 @@ public class VariantAnnotationXMLController {
             
             // find prognostic implication evidence blob
             List<EvidenceBlob> prognosticEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.PROGNOSTIC_IMPLICATION, tumorType);
-            for (EvidenceBlob eb : prognosticEbs) {
+            if (!prognosticEbs.isEmpty()) {
+                EvidenceBlob eb = prevalanceEbs.get(0);
                 sb.append("<prognostic_implications>\n");
                 sb.append("<description>\n");
                 sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");

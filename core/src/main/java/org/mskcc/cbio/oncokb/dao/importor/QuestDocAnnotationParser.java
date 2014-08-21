@@ -105,7 +105,9 @@ public final class QuestDocAnnotationParser {
     public static void main(String[] args) throws IOException {
         VariantConsequenceImporter.main(args);
         PiHelperDrugImporter.main(args);
-//        arse(new FileInputStream(QUEST_CURATION_FOLDER+"/MAP2K1.docx.txt"));
+        
+//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
+        
         List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
         for (String file : files) {
             parse(new FileInputStream(file));
@@ -567,7 +569,13 @@ public final class QuestDocAnnotationParser {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
 
-        String[] drugNames = m.group(1).split("\\+");
+        String drugStr = m.group(1);
+        if (drugStr.contains("[")) {
+            drugStr = drugStr.substring(0, drugStr.indexOf("["));
+        }
+        drugStr = drugStr.trim();
+        
+        String[] drugNames = drugStr.split("\\+");
         Set<Drug> drugs = new HashSet<Drug>();
         for (String drugName : drugNames) {
             drugName = drugName.trim();
