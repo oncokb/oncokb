@@ -234,11 +234,11 @@ public class VariantAnnotationXMLController {
                             sb.append(nccnGuideline.getVersion());
                         }
                         sb.append("</version>\n");
-                        sb.append("<page>");
+                        sb.append("<pages>");
                         if (nccnGuideline.getPages() != null) {
                             sb.append(nccnGuideline.getPages());
                         }
-                        sb.append("</page>\n");
+                        sb.append("</pages>\n");
                         sb.append("</nccn_guidelines>\n");
                         
                     }
@@ -407,12 +407,54 @@ public class VariantAnnotationXMLController {
             }
             sb.append("</pmid>\n");
             
-            sb.append("<citation>");
-            String reference = article.getReference();
-            if (reference != null) {
-                sb.append(StringEscapeUtils.escapeXml(reference));
+            sb.append("<authors>");
+            if (article.getAuthors()!=null) {
+                sb.append(article.getAuthors());
             }
-            sb.append("</citation>\n");
+            sb.append("</authors>\n");
+            
+            sb.append("<title>");
+            if (article.getTitle()!=null) {
+                sb.append(article.getTitle());
+            }
+            sb.append("</title>\n");
+            
+            sb.append("<journal>");
+            if (article.getJournal()!=null) {
+                sb.append(article.getJournal());
+            }
+            sb.append("</journal>\n");
+            
+            sb.append("<pub_date>");
+            if (article.getPubDate()!=null) {
+                sb.append(article.getPubDate());
+            }
+            sb.append("</pub_date>");
+            
+            sb.append("<volume>");
+            if (article.getVolume()!=null) {
+                sb.append(article.getVolume());
+            }
+            sb.append("</volume>\n");
+            
+            sb.append("<issue>");
+            if (article.getIssue()!=null) {
+                sb.append(article.getIssue());
+            }
+            sb.append("</issue>\n");
+            
+            sb.append("<pages>");
+            if (article.getPages()!=null) {
+                sb.append(article.getPages());
+            }
+            sb.append("</pages>\n");
+            
+//            sb.append("<citation>");
+//            String reference = article.getReference();
+//            if (reference != null) {
+//                sb.append(StringEscapeUtils.escapeXml(reference));
+//            }
+//            sb.append("</citation>\n");
             
             sb.append("</reference>\n");
         }
