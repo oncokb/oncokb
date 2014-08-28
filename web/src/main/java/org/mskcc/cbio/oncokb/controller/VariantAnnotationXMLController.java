@@ -188,7 +188,7 @@ public class VariantAnnotationXMLController {
             // find prognostic implication evidence blob
             List<EvidenceBlob> prognosticEbs = evidenceBlobBo.findEvidenceBlobsByAlteration(alterations, EvidenceType.PROGNOSTIC_IMPLICATION, tt);
             if (!prognosticEbs.isEmpty()) {
-                EvidenceBlob eb = prevalanceEbs.get(0);
+                EvidenceBlob eb = prognosticEbs.get(0);
                 sb.append("<prognostic_implications>\n");
                 sb.append("<description>\n");
                 sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
