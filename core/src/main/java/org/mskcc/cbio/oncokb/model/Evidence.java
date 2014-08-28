@@ -17,20 +17,12 @@ public class Evidence implements java.io.Serializable {
     private Set<Drug> drugs;
     private String knownEffect;
     private LevelOfEvidence levelOfEvidence;
+    private String description;
     private Set<Article> articles;
     private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
     private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
 
     public Evidence() {
-    }
-    
-    public Evidence(EvidenceBlob EvidenceBlob, Set<Drug> drugs, String knownEffect, LevelOfEvidence levelOfEvidence, Set<Article> articles, Set<NccnGuideline> nccnGuidelines, Set<ClinicalTrial> clinicalTrials) {
-        this.drugs = drugs;
-        this.knownEffect = knownEffect;
-        this.levelOfEvidence = levelOfEvidence;
-        this.articles = articles;
-        this.nccnGuidelines = nccnGuidelines;
-        this.clinicalTrials = clinicalTrials;
     }
    
     public Integer getEvidenceId() {
@@ -73,6 +65,14 @@ public class Evidence implements java.io.Serializable {
     
     public void setKnownEffect(String knownEffect) {
         this.knownEffect = knownEffect;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Set<Article> getArticles() {

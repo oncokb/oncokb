@@ -17,6 +17,12 @@
     <property name="version" type="string">
       <column name="version"/>
     </property>
+    <property name="category" type="string">
+      <column name="category"/>
+    </property>
+    <property name="description" type="string">
+      <column length="65535" name="description"/>
+    </property>
   </class>
   
   <query name="findNccnGuideline">

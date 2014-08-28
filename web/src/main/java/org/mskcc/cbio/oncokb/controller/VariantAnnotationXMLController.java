@@ -239,6 +239,16 @@ public class VariantAnnotationXMLController {
                             sb.append(nccnGuideline.getPages());
                         }
                         sb.append("</pages>\n");
+                        sb.append("<recommendation_category>");
+                        if (nccnGuideline.getCategory()!= null) {
+                            sb.append(nccnGuideline.getCategory());
+                        }
+                        sb.append("</recommendation_category>\n");
+                        sb.append("<description>");
+                        if (nccnGuideline.getDescription()!= null) {
+                            sb.append(nccnGuideline.getDescription());
+                        }
+                        sb.append("</description>\n");
                         sb.append("</nccn_guidelines>\n");
                         
                     }

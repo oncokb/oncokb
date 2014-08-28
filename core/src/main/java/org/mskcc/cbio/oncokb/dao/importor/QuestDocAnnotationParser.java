@@ -68,14 +68,18 @@ public final class QuestDocAnnotationParser {
     private static final String NCCN_GUIDELINES_P = "NCCN guidelines$";
     private static final String NCCN_DISEASE_P = "Disease: ?(.+)";
     private static final String NCCN_VERSION_P = "Version: ?(.+)";
-    private static final String NCCN_PAGES_P = "Pages: ?(.+)";
+    private static final String NCCN_PAGES_P = "Recommendation category: ?(.+)";
+    private static final String NCCN_PAGES_RECOMMENDATION_CATEGORY = "Pages: ?(.+)";
+    private static final String NCCN_EVIDENCE_P = "Description of evidence:? ?";
         
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Investigational therapeutic implications for drug sensitivity$";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to \\(Highest level of evidence\\): ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_HIGHEST_LEVEL_OF_EVIDENCE = "Highest level of evidence: ?(.*)";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Investigational therapeutic implications for drug resistance$";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_HIGHEST_LEVEL_OF_EVIDENCE = "Highest level of evidence: ?(.*)";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?$";
@@ -106,12 +110,12 @@ public final class QuestDocAnnotationParser {
         VariantConsequenceImporter.main(args);
         PiHelperDrugImporter.main(args);
         
-//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
+        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
         
-        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
-        for (String file : files) {
-            parse(new FileInputStream(file));
-        }
+//        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
+//        for (String file : files) {
+//            parse(new FileInputStream(file));
+//        }
     }
     
     private static void parse(InputStream is) throws IOException {
@@ -392,7 +396,10 @@ public final class QuestDocAnnotationParser {
         List<int[]> nccnLines = extractLines(lines, start+1, end, NCCN_GUIDELINES_P, CANCER_HEADERS_P, 1);
         if (!standardResistanceLines.isEmpty()) {
             System.out.println("##      NCCN");
-            parseNCCN(gene, alterations, tumorType, lines, nccnLines.get(0)[0], nccnLines.get(0)[1]);
+            nccnLines = extractLines(lines, start+1, end, NCCN_DISEASE_P, NCCN_DISEASE_P, -1);
+            for (int[] nccnLine : nccnLines) {
+                parseNCCN(gene, alterations, tumorType, lines, nccnLine[0], nccnLine[1]);
+            }
         } else {
             System.out.println("##      No NCCN");
         }
@@ -497,7 +504,7 @@ public final class QuestDocAnnotationParser {
     
     private static void parseNCCN(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end) {
         // disease
-        String txt = lines.get(start+1).trim();
+        String txt = lines.get(start).trim();
         Pattern p = Pattern.compile(NCCN_DISEASE_P);
         Matcher m = p.matcher(txt);
         if (!m.matches()) {
@@ -512,7 +519,7 @@ public final class QuestDocAnnotationParser {
         }
         
         // version
-        txt = lines.get(start+2).trim();
+        txt = lines.get(start+1).trim();
         p = Pattern.compile(NCCN_VERSION_P);
         m = p.matcher(txt);
         String version = null;
@@ -523,7 +530,7 @@ public final class QuestDocAnnotationParser {
         }
         
         // pages
-        txt = lines.get(start+3);
+        txt = lines.get(start+2);
         p = Pattern.compile(NCCN_PAGES_P);
         m = p.matcher(txt);
         String pages = null;
@@ -532,6 +539,32 @@ public final class QuestDocAnnotationParser {
         } else {
             pages = m.group(1);
         }
+        
+        // Recommendation category
+        txt = lines.get(start+3);
+        p = Pattern.compile(NCCN_PAGES_RECOMMENDATION_CATEGORY);
+        m = p.matcher(txt);
+        String category = null;
+        if (!m.matches()) {
+            System.err.println("Problem with NCCN category line: "+txt);
+        } else {
+            pages = m.group(1);
+        }
+        
+        // description
+        txt = lines.get(start+4);
+        p = Pattern.compile(NCCN_PAGES_RECOMMENDATION_CATEGORY);
+        m = p.matcher(txt);
+        String nccnDescription = null;
+        if (!m.matches()) {
+            System.err.println("Problem with NCCN description line: "+txt);
+        } else {
+            String desc = joinLines(lines, start+5, end).trim();
+            if (!desc.isEmpty()) {
+                nccnDescription = desc;
+            }
+        }
+        
         
         EvidenceBlob eb = new EvidenceBlob();
         eb.setEvidenceType(EvidenceType.NCCN_GUIDELINES);
@@ -543,7 +576,12 @@ public final class QuestDocAnnotationParser {
         
         NccnGuideline nccnGuideline = nccnGuideLineBo.findNccnGuideline(disease, version, pages);
         if (nccnGuideline==null) {
-            nccnGuideline = new NccnGuideline(disease, version, pages);
+            nccnGuideline = new NccnGuideline();
+            nccnGuideline.setDisease(disease);
+            nccnGuideline.setVersion(version);
+            nccnGuideline.setPages(pages);
+            nccnGuideline.setCategory(category);
+            nccnGuideline.setDescription(nccnDescription);
             nccnGuideLineBo.save(nccnGuideline);
         }
 

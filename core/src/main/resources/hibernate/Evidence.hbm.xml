@@ -28,6 +28,9 @@
         <param name="useNamed">true</param>
       </type>
     </property>
+    <property name="description" type="string">
+      <column length="65535" name="description"/>
+    </property>
     <set lazy="false" name="articles" table="evidence_article">
       <key>
         <column name="evidence_id" not-null="true"/>

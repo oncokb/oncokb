@@ -13,14 +13,10 @@ public class NccnGuideline implements java.io.Serializable {
     private String disease;
     private String version;
     private String pages;
+    private String category;
+    private String description;
 
     public NccnGuideline() {
-    }
-
-    public NccnGuideline(String disease, String version, String pages) {
-        this.disease = disease;
-        this.version = version;
-        this.pages = pages;
     }
 
     public Integer getNccnGuidelineId() {
@@ -53,6 +49,22 @@ public class NccnGuideline implements java.io.Serializable {
 
     public void setPages(String pages) {
         this.pages = pages;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
