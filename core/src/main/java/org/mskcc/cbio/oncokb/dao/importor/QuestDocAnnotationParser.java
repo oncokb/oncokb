@@ -58,12 +58,14 @@ public final class QuestDocAnnotationParser {
     private static final String PROGNOSTIC_IMPLICATIONS_P = "Prognostic implications:? *";
     
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Standard therapeutic implications for drug sensitivity:?";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to: ?(.*)";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence:? ?(.*)";
-    
     private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Standard therapeutic implications for drug resistance:?";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
-    private static final String STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence:? ?(.*)";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Investigational therapeutic implications for drug sensitivity$";
+    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Investigational therapeutic implications for drug resistance$";
+    private static final String SENSITIVE_TO_P = "Sensitive to: ?(.*)";
+    private static final String RESISTANT_TO_P = "Resistant to: ?(.*)";
+    private static final String HIGHEST_LEVEL_OF_EVIDENCE = "Highest level of evidence: ?(.*)";
+    private static final String DESCRIPTION_OF_EVIDENCE_P = "Description of evidence:? ?(.*)";
+    
     
     private static final String NCCN_GUIDELINES_P = "NCCN guidelines$";
     private static final String NCCN_DISEASE_P = "Disease: ?(.+)";
@@ -71,16 +73,6 @@ public final class QuestDocAnnotationParser {
     private static final String NCCN_PAGES_P = "Recommendation category: ?(.+)";
     private static final String NCCN_PAGES_RECOMMENDATION_CATEGORY = "Pages: ?(.+)";
     private static final String NCCN_EVIDENCE_P = "Description of evidence:? ?";
-        
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Investigational therapeutic implications for drug sensitivity$";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P = "Sensitive to: ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_HIGHEST_LEVEL_OF_EVIDENCE = "Highest level of evidence: ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P = "Description of evidence:? ?(.*)";
-    
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Investigational therapeutic implications for drug resistance$";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P = "Resistant to: ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_HIGHEST_LEVEL_OF_EVIDENCE = "Highest level of evidence: ?(.*)";
-    private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P = "Description of evidence:? ?(.*)";
     
     private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?$";
     private static final String CLINICAL_TRIALS_P = "(NCT[0-9]+)";
@@ -376,20 +368,18 @@ public final class QuestDocAnnotationParser {
         List<int[]> standardSensitivityLines = extractLines(lines, start+1, end, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, CANCER_HEADERS_P, 1);
         if (!standardSensitivityLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, standardSensitivityLines.get(0)[0], standardSensitivityLines.get(0)[1],
-                    EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, "Sensitive",
-                    STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P);
+                    EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, "Sensitive", SENSITIVE_TO_P);
         } else {
-            System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P);
+            System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P);
         }
         
         // standard therapeutic implications of drug resistance
         List<int[]> standardResistanceLines = extractLines(lines, start+1, end, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, CANCER_HEADERS_P, 1);
         if (!standardResistanceLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, standardResistanceLines.get(0)[0], standardResistanceLines.get(0)[1],
-                    EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant",
-                    STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P); 
+                    EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant", RESISTANT_TO_P); 
         } else {
-            System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P);
+            System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P);
         }
         
         // NCCN
@@ -409,20 +399,18 @@ public final class QuestDocAnnotationParser {
         List<int[]> investigationalSensitivityLines = extractLines(lines, start+1, end, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P, CANCER_HEADERS_P, 1);
         if (!investigationalSensitivityLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, investigationalSensitivityLines.get(0)[0], investigationalSensitivityLines.get(0)[1],
-                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, "Sensitive",
-                INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_EVIDENCE_P);
+                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, "Sensitive", SENSITIVE_TO_P);
         } else {
-            System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVE_TO_P);
+            System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P);
         }
         
         // Investigational therapeutic implications of drug resistance
         List<int[]> investigationalResistanceLines = extractLines(lines, start+1, end, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, CANCER_HEADERS_P, 1);
         if (!investigationalResistanceLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, investigationalResistanceLines.get(0)[0], investigationalResistanceLines.get(0)[1],
-                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant",
-                INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_EVIDENCE_P);
+                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant", RESISTANT_TO_P);
         } else {
-            System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANT_TO_P);
+            System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P);
         }
         
         List<int[]> clinicalTrialsLines = extractLines(lines, start+1, end, ONGOING_CLINICAL_TRIALS_P, CANCER_HEADERS_P, 1);
@@ -465,11 +453,13 @@ public final class QuestDocAnnotationParser {
     }
     
     private static void parseTherapeuticImplcations(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end,
-            EvidenceType evidenceType, String knownEffectOfEvidence, String sensitivieP, String evidenceP) {
+            EvidenceType evidenceType, String knownEffectOfEvidence, String sensitivieP) {
         System.out.println("##      "+sensitivieP);
         
-        List<int[]> descLines = extractLines(lines, start+1, end, evidenceP, 1);
-        String desc = joinLines(lines, descLines.get(0)[0]+1, descLines.get(0)[1]).trim();
+        List<int[]> drugLines = extractLines(lines, start+1, end, DESCRIPTION_OF_EVIDENCE_P, DESCRIPTION_OF_EVIDENCE_P, -1);
+        if (drugLines.isEmpty()) return;
+        
+        String desc = joinLines(lines, start, drugLines.get(0)[0]).trim();
         if (desc.isEmpty()) {
             return;
         }
@@ -483,19 +473,26 @@ public final class QuestDocAnnotationParser {
         Set<Evidence> evidences = new HashSet<Evidence>();
         eb.setEvidences(evidences);
         
-        // sensitive to
-        List<int[]> sensitiveLines = extractLines(lines, start+1, end, sensitivieP, evidenceP, 1);
-        String sensitiveTxt = joinLines(lines, sensitiveLines.get(0)[0],sensitiveLines.get(0)[1]);
-        sensitiveTxt = sensitiveTxt.substring(sensitiveTxt.indexOf(":")+1).trim();
-        if (!sensitiveTxt.isEmpty()) {
-            String[] drugsTxt = sensitiveTxt.split("\n");
-            for (String drugTxt : drugsTxt) {
-                Evidence ev = new Evidence();
-                ev.setEvidenceBlob(eb);
-                ev.setKnownEffect(knownEffectOfEvidence);
-                parseDrugEvidence(drugTxt, ev);
-                evidences.add(ev);
+        for (int[] drugLine : drugLines) {
+            // sensitive to
+            List<int[]> sensitiveLines = extractLines(lines, drugLine[0], drugLine[1], sensitivieP, 1);
+            if (sensitiveLines.isEmpty()) continue;
+            
+            
+            
+            String sensitiveTxt = joinLines(lines, sensitiveLines.get(0)[0],sensitiveLines.get(0)[1]);
+            sensitiveTxt = sensitiveTxt.substring(sensitiveTxt.indexOf(":")+1).trim();
+            if (!sensitiveTxt.isEmpty()) {
+                String[] drugsTxt = sensitiveTxt.split("\n");
+                for (String drugTxt : drugsTxt) {
+                    Evidence ev = new Evidence();
+                    ev.setEvidenceBlob(eb);
+                    ev.setKnownEffect(knownEffectOfEvidence);
+                    parseDrugEvidence(drugTxt, ev);
+                    evidences.add(ev);
+                }
             }
+            
         }
         
         EvidenceBlobBo evidenceBlobBo = ApplicationContextSingleton.getEvidenceBlobBo();
