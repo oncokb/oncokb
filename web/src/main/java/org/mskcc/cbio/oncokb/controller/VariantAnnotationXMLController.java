@@ -88,8 +88,8 @@ public class VariantAnnotationXMLController {
         if (!geneBgEbs.isEmpty()) {
             EvidenceBlob eb = geneBgEbs.get(0);
             sb.append("<gene_annotation>\n");
-            sb.append("<description>\n");
-            sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+            sb.append("<description>");
+            sb.append(StringEscapeUtils.escapeXml(eb.getDescription()).trim());
             sb.append("</description>\n");
             if (!eb.getEvidences().isEmpty()) {
                 exportRefereces(eb.getEvidences().iterator().next(), sb);
@@ -146,13 +146,13 @@ public class VariantAnnotationXMLController {
                 ev = eb.getEvidences().iterator().next();
             }
             sb.append("<variant_effect>\n");
-            sb.append("<effect>\n");
+            sb.append("<effect>");
             if (ev!=null) {
                 sb.append(ev.getKnownEffect());
             }
             sb.append("</effect>\n");
-            sb.append("<description>\n");
-            sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+            sb.append("<description>");
+            sb.append(StringEscapeUtils.escapeXml(eb.getDescription()).trim());
             sb.append("</description>\n");
             if (ev!=null) {
                 exportRefereces(ev, sb);
@@ -175,8 +175,8 @@ public class VariantAnnotationXMLController {
             if (!prevalanceEbs.isEmpty()) {
                 EvidenceBlob eb = prevalanceEbs.get(0);
                 sb.append("<prevalence>\n");
-                sb.append("<description>\n");
-                sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+                sb.append("<description>");
+                sb.append(StringEscapeUtils.escapeXml(eb.getDescription()).trim());
                 sb.append("</description>\n");
                 if (!eb.getEvidences().isEmpty()) {
                     exportRefereces(eb.getEvidences().iterator().next(), sb);
@@ -190,8 +190,8 @@ public class VariantAnnotationXMLController {
             if (!prognosticEbs.isEmpty()) {
                 EvidenceBlob eb = prognosticEbs.get(0);
                 sb.append("<prognostic_implications>\n");
-                sb.append("<description>\n");
-                sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+                sb.append("<description>");
+                sb.append(StringEscapeUtils.escapeXml(eb.getDescription()).trim());
                 sb.append("</description>\n");
                 if (!eb.getEvidences().isEmpty()) {
                     exportRefereces(eb.getEvidences().iterator().next(), sb);
@@ -348,8 +348,8 @@ public class VariantAnnotationXMLController {
             exportDrugSensitivity(ev, sb);
             sb.append("</drugs>\n");
         }
-        sb.append("<description>\n");
-        sb.append(StringEscapeUtils.escapeXml(eb.getDescription())).append("\n");
+        sb.append("<description>");
+        sb.append(StringEscapeUtils.escapeXml(eb.getDescription()).trim());
         sb.append("</description>\n");
     }
     
@@ -357,7 +357,7 @@ public class VariantAnnotationXMLController {
         
         Set<Drug> drugs = evidence.getDrugs();
         for (Drug drug : drugs) {
-            sb.append("<drug>");
+            sb.append("<drug>\n");
             
             sb.append("<name>");
             String name = drug.getDrugName();
@@ -397,8 +397,8 @@ public class VariantAnnotationXMLController {
             sb.append("<level>");
             sb.append(levelOfEvidence.getLevel());
             sb.append("</level>\n");
-            sb.append("<description>\n");
-            sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription())).append("\n");
+            sb.append("<description>");
+            sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()).trim());
             sb.append("</description>\n");
             sb.append("</level_of_evidence>\n");
         }
@@ -409,7 +409,7 @@ public class VariantAnnotationXMLController {
     private void exportRefereces(Evidence evidence, StringBuilder sb) {
         Set<Article> articles = evidence.getArticles();
         for (Article article : articles) {
-            sb.append("<reference>");
+            sb.append("<reference>\n");
             sb.append("<pmid>");
             String pmid = article.getPmid();
             if (pmid != null) {
@@ -439,7 +439,7 @@ public class VariantAnnotationXMLController {
             if (article.getPubDate()!=null) {
                 sb.append(article.getPubDate());
             }
-            sb.append("</pub_date>");
+            sb.append("</pub_date>\n");
             
             sb.append("<volume>");
             if (article.getVolume()!=null) {
