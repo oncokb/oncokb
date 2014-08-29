@@ -88,10 +88,10 @@ public class VariantAnnotationXMLController {
         if (!geneBgEvs.isEmpty()) {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");
-            sb.append("<description>");
+            sb.append("    <description>");
             sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
             sb.append("</description>\n");
-            exportRefereces(ev, sb);
+            exportRefereces(ev, sb, "    ");
             sb.append("</gene_annotation>\n");
         }
         
@@ -139,16 +139,16 @@ public class VariantAnnotationXMLController {
         if (!mutationEffectEbs.isEmpty()) {
             Evidence ev = mutationEffectEbs.get(0);
             sb.append("<variant_effect>\n");
-            sb.append("<effect>");
+            sb.append("    <effect>");
             if (ev!=null) {
                 sb.append(ev.getKnownEffect());
             }
             sb.append("</effect>\n");
-            sb.append("<description>");
+            sb.append("    <description>");
             sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
             sb.append("</description>\n");
             if (ev!=null) {
-                exportRefereces(ev, sb);
+                exportRefereces(ev, sb, "    ");
             }
 
             sb.append("</variant_effect>\n");
@@ -167,75 +167,75 @@ public class VariantAnnotationXMLController {
             List<Evidence> prevalanceEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PREVALENCE, tt);
             if (!prevalanceEbs.isEmpty()) {
                 Evidence ev = prevalanceEbs.get(0);
-                sb.append("<prevalence>\n");
-                sb.append("<description>");
+                sb.append("    <prevalence>\n");
+                sb.append("        <description>");
                 sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
                 sb.append("</description>\n");
-                exportRefereces(ev, sb);
-                sb.append("</prevalence>\n");
+                exportRefereces(ev, sb, "        ");
+                sb.append("    </prevalence>\n");
             }
             
             // find prognostic implication evidence blob
             List<Evidence> prognosticEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PROGNOSTIC_IMPLICATION, tt);
             if (!prognosticEbs.isEmpty()) {
                 Evidence ev = prognosticEbs.get(0);
-                sb.append("<prognostic_implications>\n");
-                sb.append("<description>");
+                sb.append("    <prognostic_implications>\n");
+                sb.append("        <description>");
                 sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
                 sb.append("</description>\n");
-                exportRefereces(ev, sb);
-                sb.append("</prognostic_implications>\n");
+                exportRefereces(ev, sb, "        ");
+                sb.append("    </prognostic_implications>\n");
             }
             
             // STANDARD_THERAPEUTIC_IMPLICATIONS
             List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, tt);
             List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, tt);
             if (!stdImpEbsSensitivity.isEmpty() || !stdImpEbsResisitance.isEmpty()) {
-                sb.append("<standard_therapeutic_implications>\n");
+                sb.append("    <standard_therapeutic_implications>\n");
                 for (Evidence ev : stdImpEbsSensitivity) {
-                    sb.append("<sensitive_to>\n");
-                    exportTherapeuticImplications(ev, sb);
-                    sb.append("</sensitive_to>\n");
+                    sb.append("        <sensitive_to>\n");
+                    exportTherapeuticImplications(ev, sb, "            ");
+                    sb.append("        </sensitive_to>\n");
                 }
                 for (Evidence ev : stdImpEbsResisitance) {
-                    sb.append("<resistant_to>\n");
-                    exportTherapeuticImplications(ev, sb);
-                    sb.append("</resistant_to>\n");
+                    sb.append("        <resistant_to>\n");
+                    exportTherapeuticImplications(ev, sb, "            ");
+                    sb.append("        </resistant_to>\n");
                 }
-                sb.append("</standard_therapeutic_implications>\n");
+                sb.append("    </standard_therapeutic_implications>\n");
             }
             
             // NCCN_GUIDELINES
             List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.NCCN_GUIDELINES, tt);
             for (Evidence ev : nccnEvs) {
                 for (NccnGuideline nccnGuideline : ev.getNccnGuidelines()) {
-                    sb.append("<nccn_guidelines>\n");
-                    sb.append("<disease>");
+                    sb.append("    <nccn_guidelines>\n");
+                    sb.append("        <disease>");
                     if (nccnGuideline.getDisease() != null) {
                         sb.append(nccnGuideline.getDisease());
                     }
                     sb.append("</disease>\n");
-                    sb.append("<version>");
+                    sb.append("        <version>");
                     if (nccnGuideline.getVersion() != null) {
                         sb.append(nccnGuideline.getVersion());
                     }
                     sb.append("</version>\n");
-                    sb.append("<pages>");
+                    sb.append("        <pages>");
                     if (nccnGuideline.getPages() != null) {
                         sb.append(nccnGuideline.getPages());
                     }
                     sb.append("</pages>\n");
-                    sb.append("<recommendation_category>");
+                    sb.append("        <recommendation_category>");
                     if (nccnGuideline.getCategory()!= null) {
                         sb.append(nccnGuideline.getCategory());
                     }
                     sb.append("</recommendation_category>\n");
-                    sb.append("<description>");
+                    sb.append("        <description>");
                     if (nccnGuideline.getDescription()!= null) {
                         sb.append(nccnGuideline.getDescription());
                     }
                     sb.append("</description>\n");
-                    sb.append("</nccn_guidelines>\n");
+                    sb.append("    </nccn_guidelines>\n");
                 }
             }
             
@@ -243,69 +243,63 @@ public class VariantAnnotationXMLController {
             List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, tt);
             List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, tt);
             if (!invImpEbsSensitivity.isEmpty() || !invImpEbsResisitance.isEmpty()) {
-                sb.append("<investigational_therapeutic_implications>\n");
+                sb.append("    <investigational_therapeutic_implications>\n");
                 for (Evidence ev : invImpEbsSensitivity) {
-                    sb.append("<sensitive_to>\n");
-                    exportTherapeuticImplications(ev, sb);
-                    sb.append("</sensitive_to>\n");
+                    sb.append("        <sensitive_to>\n");
+                    exportTherapeuticImplications(ev, sb, "            ");
+                    sb.append("        </sensitive_to>\n");
                 }
                 for (Evidence ev : invImpEbsResisitance) {
-                    sb.append("<resistant_to>\n");
-                    exportTherapeuticImplications(ev, sb);
-                    sb.append("</resistant_to>\n");
+                    sb.append("        <resistant_to>\n");
+                    exportTherapeuticImplications(ev, sb, "            ");
+                    sb.append("        </resistant_to>\n");
                 }
-                sb.append("</investigational_therapeutic_implications>\n");
+                sb.append("    </investigational_therapeutic_implications>\n");
             }
             
             // CLINICAL_TRIAL
             List<Evidence> trialsEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tt);
             for (Evidence ev : trialsEvs) {
                 for (ClinicalTrial trial : ev.getClinicalTrials()) {
-                    sb.append("<clinical_trial>\n");
+                    sb.append("    <clinical_trial>\n");
 
-                    sb.append("<trial_id>");
+                    sb.append("        <trial_id>");
                     if (trial.getNctId() != null) {
                         sb.append(trial.getNctId());
                     }
                     sb.append("</trial_id>\n");
 
-                    sb.append("<locations>");
+                    sb.append("        <locations>");
                     if (trial.getLocation() != null) {
                         sb.append(StringEscapeUtils.escapeXml(trial.getLocation()));
                     }
                     sb.append("</locations>\n");
 
-                    sb.append("<mskcc_trial>");
-                    if (trial.getIsMskccTrial() != null) {
-                        sb.append(trial.getIsMskccTrial()?"Yes":"No");
-                    }
-                    sb.append("</mskcc_trial>");
-
-                    sb.append("<title>\n");
+                    sb.append("        <title>\n");
                     if (trial.getTitle() != null) {
                         sb.append(StringEscapeUtils.escapeXml(trial.getTitle())).append("\n");
                     }
                     sb.append("</title>\n");
 
-                    sb.append("<purpose>\n");
+                    sb.append("        <purpose>\n");
                     if (trial.getPurpose() != null) {
                         sb.append(StringEscapeUtils.escapeXml(trial.getPurpose())).append("\n");
                     }
                     sb.append("</purpose>\n");
 
-                    sb.append("<recruiting_status>");
+                    sb.append("        <recruiting_status>");
                     if (trial.getRecuitingStatus() != null) {
                         sb.append(StringEscapeUtils.escapeXml(trial.getRecuitingStatus()));
                     }
                     sb.append("</recruiting_status>\n");
 
-                    sb.append("<eligibility_criteria>\n");
+                    sb.append("        <eligibility_criteria>\n");
                     if (trial.getEligibilityCriteria() != null) {
                         sb.append(StringEscapeUtils.escapeXml(trial.getEligibilityCriteria())).append("\n");
                     }
                     sb.append("</eligibility_criteria>\n");
 
-                    sb.append("<phase>\n");
+                    sb.append("        <phase>\n");
                     if (trial.getPhase() != null) {
                         sb.append(StringEscapeUtils.escapeXml(trial.getPhase()));
                     }
@@ -324,38 +318,38 @@ public class VariantAnnotationXMLController {
         return sb.toString();
     }
     
-    private void exportTherapeuticImplications(Evidence evidence, StringBuilder sb) {
+    private void exportTherapeuticImplications(Evidence evidence, StringBuilder sb, String indent) {
         for (Treatment t : evidence.getTreatments()) {
-            sb.append("<treatment>\n");
-            exportTreatment(t, sb);
-            sb.append("</treatment>\n");
+            sb.append(indent).append("<treatment>\n");
+            exportTreatment(t, sb, indent+"    ");
+            sb.append(indent).append("</treatment>\n");
         }
         
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
         if (levelOfEvidence!=null) {
-            sb.append("<level_of_evidence>\n");
-            sb.append("<level>");
+            sb.append(indent).append("<level_of_evidence>\n");
+            sb.append(indent).append("    <level>");
             sb.append(levelOfEvidence.getLevel());
             sb.append("</level>\n");
-            sb.append("<description>");
+            sb.append(indent).append("    <description>");
             sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()).trim());
             sb.append("</description>\n");
-            sb.append("</level_of_evidence>\n");
+            sb.append(indent).append("</level_of_evidence>\n");
         }
         
-        sb.append("<description>");
+        sb.append(indent).append("<description>");
         sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
         sb.append("</description>\n");
         
-        exportRefereces(evidence, sb);
+        exportRefereces(evidence, sb, indent);
     }
     
-    private void exportTreatment(Treatment treatment, StringBuilder sb) {
+    private void exportTreatment(Treatment treatment, StringBuilder sb, String indent) {
         Set<Drug> drugs = treatment.getDrugs();
         for (Drug drug : drugs) {
-            sb.append("<drug>\n");
+            sb.append(indent).append("<drug>\n");
             
-            sb.append("<name>");
+            sb.append(indent).append("    <name>");
             String name = drug.getDrugName();
             if (name != null) {
                 sb.append(StringEscapeUtils.escapeXml(name));
@@ -364,97 +358,97 @@ public class VariantAnnotationXMLController {
             
             Set<String> synonyms = drug.getSynonyms();
             for (String synonym : synonyms) {
-                sb.append("<synonym>");
+                sb.append(indent).append("    <synonym>");
                 sb.append(synonym);
                 sb.append("</synonym>\n");
             }
             
-            sb.append("<fda_approved>");
+            sb.append(indent).append("    <fda_approved>");
             Boolean fdaApproved = drug.isFdaApproved();
             if (fdaApproved!=null) {
                 sb.append(fdaApproved ? "Yes" : "No");
             }
             sb.append("</fda_approved>\n");
             
-//            sb.append("<description>");
+//            sb.append(indent).append("    <description>");
 //            String desc = drug.getDescription();
 //            if (desc != null) {
 //                sb.append(StringEscapeUtils.escapeXml(desc));
 //            }
 //            sb.append("</description>\n");
             
-            sb.append("</drug>\n");
+            sb.append(indent).append("</drug>\n");
         
         }
     }
     
-    private void exportRefereces(Evidence evidence, StringBuilder sb) {
+    private void exportRefereces(Evidence evidence, StringBuilder sb, String indent) {
         Set<Article> articles = evidence.getArticles();
         for (Article article : articles) {
-            sb.append("<reference>\n");
-            sb.append("<pmid>");
+            sb.append(indent).append("<reference>\n");
+            sb.append(indent).append("    <pmid>");
             String pmid = article.getPmid();
             if (pmid != null) {
                 sb.append(pmid);
             }
             sb.append("</pmid>\n");
             
-            sb.append("<authors>");
+            sb.append(indent).append("    <authors>");
             if (article.getAuthors()!=null) {
                 sb.append(article.getAuthors());
             }
             sb.append("</authors>\n");
             
-            sb.append("<title>");
+            sb.append(indent).append("    <title>");
             if (article.getTitle()!=null) {
                 sb.append(article.getTitle());
             }
             sb.append("</title>\n");
             
-            sb.append("<journal>");
+            sb.append(indent).append("    <journal>");
             if (article.getJournal()!=null) {
                 sb.append(article.getJournal());
             }
             sb.append("</journal>\n");
             
-            sb.append("<pub_date>");
+            sb.append(indent).append("    <pub_date>");
             if (article.getPubDate()!=null) {
                 sb.append(article.getPubDate());
             }
             sb.append("</pub_date>\n");
             
-            sb.append("<volume>");
+            sb.append(indent).append("    <volume>");
             if (article.getVolume()!=null) {
                 sb.append(article.getVolume());
             }
             sb.append("</volume>\n");
             
-            sb.append("<issue>");
+            sb.append(indent).append("    <issue>");
             if (article.getIssue()!=null) {
                 sb.append(article.getIssue());
             }
             sb.append("</issue>\n");
             
-            sb.append("<pages>");
+            sb.append(indent).append("    <pages>");
             if (article.getPages()!=null) {
                 sb.append(article.getPages());
             }
             sb.append("</pages>\n");
             
-            sb.append("<elocation_id>");
+            sb.append(indent).append("    <elocation_id>");
             if (article.getElocationId()!=null) {
                 sb.append(article.getElocationId());
             }
             sb.append("</elocation_id>\n");
             
-//            sb.append("<citation>");
+//            sb.append(indent).append("    <citation>");
 //            String reference = article.getReference();
 //            if (reference != null) {
 //                sb.append(StringEscapeUtils.escapeXml(reference));
 //            }
 //            sb.append("</citation>\n");
             
-            sb.append("</reference>\n");
+            sb.append(indent).append("</reference>\n");
         }
     }
     

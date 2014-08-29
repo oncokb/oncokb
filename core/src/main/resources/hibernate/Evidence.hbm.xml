@@ -20,9 +20,9 @@
     <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
       <column name="entrez_gene_id"/>
     </many-to-one>
-    <set lazy="false" name="alterations" table="evidence_blob_alteration">
+    <set lazy="false" name="alterations" table="evidence_alteration">
       <key>
-        <column name="evidence_blob_id" not-null="true"/>
+        <column name="evidence_id" not-null="true"/>
       </key>
       <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
         <column name="alteration_id" not-null="true"/>
