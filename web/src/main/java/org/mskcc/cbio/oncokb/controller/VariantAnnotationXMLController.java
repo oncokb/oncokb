@@ -136,8 +136,7 @@ public class VariantAnnotationXMLController {
         }
         
         List<Evidence> mutationEffectEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.MUTATION_EFFECT);
-        if (!mutationEffectEbs.isEmpty()) {
-            Evidence ev = mutationEffectEbs.get(0);
+        for (Evidence ev : mutationEffectEbs) {
             sb.append("<variant_effect>\n");
             sb.append("    <effect>");
             if (ev!=null) {
@@ -165,8 +164,7 @@ public class VariantAnnotationXMLController {
             
             // find prevalence evidence blob
             List<Evidence> prevalanceEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PREVALENCE, tt);
-            if (!prevalanceEbs.isEmpty()) {
-                Evidence ev = prevalanceEbs.get(0);
+            for (Evidence ev : prevalanceEbs) {
                 sb.append("    <prevalence>\n");
                 sb.append("        <description>");
                 sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
@@ -177,8 +175,7 @@ public class VariantAnnotationXMLController {
             
             // find prognostic implication evidence blob
             List<Evidence> prognosticEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PROGNOSTIC_IMPLICATION, tt);
-            if (!prognosticEbs.isEmpty()) {
-                Evidence ev = prognosticEbs.get(0);
+            for (Evidence ev : prognosticEbs) {
                 sb.append("    <prognostic_implications>\n");
                 sb.append("        <description>");
                 sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
@@ -190,20 +187,7 @@ public class VariantAnnotationXMLController {
             // STANDARD_THERAPEUTIC_IMPLICATIONS
             List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, tt);
             List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, tt);
-            if (!stdImpEbsSensitivity.isEmpty() || !stdImpEbsResisitance.isEmpty()) {
-                sb.append("    <standard_therapeutic_implications>\n");
-                for (Evidence ev : stdImpEbsSensitivity) {
-                    sb.append("        <sensitive_to>\n");
-                    exportTherapeuticImplications(ev, sb, "            ");
-                    sb.append("        </sensitive_to>\n");
-                }
-                for (Evidence ev : stdImpEbsResisitance) {
-                    sb.append("        <resistant_to>\n");
-                    exportTherapeuticImplications(ev, sb, "            ");
-                    sb.append("        </resistant_to>\n");
-                }
-                sb.append("    </standard_therapeutic_implications>\n");
-            }
+            exportTherapeuticImplications(stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sb, "    ");
             
             // NCCN_GUIDELINES
             List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.NCCN_GUIDELINES, tt);
@@ -242,20 +226,7 @@ public class VariantAnnotationXMLController {
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
             List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, tt);
             List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, tt);
-            if (!invImpEbsSensitivity.isEmpty() || !invImpEbsResisitance.isEmpty()) {
-                sb.append("    <investigational_therapeutic_implications>\n");
-                for (Evidence ev : invImpEbsSensitivity) {
-                    sb.append("        <sensitive_to>\n");
-                    exportTherapeuticImplications(ev, sb, "            ");
-                    sb.append("        </sensitive_to>\n");
-                }
-                for (Evidence ev : invImpEbsResisitance) {
-                    sb.append("        <resistant_to>\n");
-                    exportTherapeuticImplications(ev, sb, "            ");
-                    sb.append("        </resistant_to>\n");
-                }
-                sb.append("    </investigational_therapeutic_implications>\n");
-            }
+            exportTherapeuticImplications(invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sb, "    ");
             
             // CLINICAL_TRIAL
             List<Evidence> trialsEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tt);
@@ -316,6 +287,65 @@ public class VariantAnnotationXMLController {
         sb.append("</xml>");
         
         return sb.toString();
+    }
+    
+    private void exportTherapeuticImplications(List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+        if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
+            return;
+        }
+        
+        sb.append(indent).append("<").append(tagTherapeuticImp).append(">\n");
+        
+        List<List<Evidence>> evsSensitivity = seperateGeneralAndSpecificEvidencesForTherapeuticImplications(evSensitivity);
+        List<List<Evidence>> evsResisitance = seperateGeneralAndSpecificEvidencesForTherapeuticImplications(evResisitance);
+        
+        // general evs
+        if (!evsSensitivity.get(0).isEmpty() || !evsResisitance.get(0).isEmpty()) {
+            sb.append(indent).append("    <general_statement>\n");
+            for (Evidence ev : evsSensitivity.get(0)) {
+                sb.append(indent).append("        <sensitivity>\n");
+                exportTherapeuticImplications(ev, sb, indent+"            ");
+                sb.append(indent).append("        </sensitivity>\n");
+            }
+            for (Evidence ev : evsResisitance.get(0)) {
+                sb.append(indent).append("        <resistance>\n");
+                exportTherapeuticImplications(ev, sb, indent+"            ");
+                sb.append(indent).append("        </resistance>\n");
+            }
+            sb.append(indent).append("    </general_statement>\n");
+        }
+        
+        // specific evs
+        if (!evsSensitivity.get(1).isEmpty() || !evsResisitance.get(1).isEmpty()) {
+            for (Evidence ev : evsSensitivity.get(1)) {
+                sb.append(indent).append("    <sensitive_to>\n");
+                exportTherapeuticImplications(ev, sb, indent+"        ");
+                sb.append(indent).append("    </sensitive_to>\n");
+            }
+            for (Evidence ev : evsResisitance.get(1)) {
+                sb.append(indent).append("    <resistant_to>\n");
+                exportTherapeuticImplications(ev, sb, indent+"        ");
+                sb.append(indent).append("    </resistant_to>\n");
+            }
+        }
+
+        sb.append(indent).append("</").append(tagTherapeuticImp).append(">\n");
+    }
+    
+    private List<List<Evidence>> seperateGeneralAndSpecificEvidencesForTherapeuticImplications (List<Evidence> evs) {
+        List<List<Evidence>> ret = new ArrayList<List<Evidence>>();
+        ret.add(new ArrayList<Evidence>());
+        ret.add(new ArrayList<Evidence>());
+        
+        for (Evidence ev : evs) {
+            if (ev.getTreatments().isEmpty()) {
+                ret.get(0).add(ev);
+            } else {
+                ret.get(1).add(ev);
+            }
+        }
+        
+        return ret;
     }
     
     private void exportTherapeuticImplications(Evidence evidence, StringBuilder sb, String indent) {

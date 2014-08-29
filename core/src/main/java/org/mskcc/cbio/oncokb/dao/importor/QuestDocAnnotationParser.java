@@ -99,14 +99,14 @@ public final class QuestDocAnnotationParser {
     
     public static void main(String[] args) throws IOException {
         VariantConsequenceImporter.main(args);
-        PiHelperDrugImporter.main(args);
+//        PiHelperDrugImporter.main(args);
         
-//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
+        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
         
-        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
-        for (String file : files) {
-            parse(new FileInputStream(file));
-        }
+//        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
+//        for (String file : files) {
+//            parse(new FileInputStream(file));
+//        }
     }
     
     private static void parse(InputStream is) throws IOException {
@@ -432,28 +432,30 @@ public final class QuestDocAnnotationParser {
             EvidenceType evidenceType, String knownEffectOfEvidence, String sensitivieP) {
         System.out.println("##      "+evidenceType+" for "+alterations.toString()+" "+tumorType.getName());
         
-        List<int[]> drugLines = extractLines(lines, start+1, end, SENSITIVE_TO_P, SENSITIVE_TO_P, -1);
+        List<int[]> drugLines = extractLines(lines, start+1, end, sensitivieP, sensitivieP, -1);
         if (drugLines.isEmpty()) return;
+        
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         {
             // general description
-            String desc = joinLines(lines, start, drugLines.get(0)[0]).trim();
-            if (desc.isEmpty()) {
-                desc = null;
+            String desc = joinLines(lines, start+1, drugLines.get(0)[0]).trim();
+            if (!desc.isEmpty()) {
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(evidenceType);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
+                evidence.setTumorType(tumorType);
+                evidence.setKnownEffect(knownEffectOfEvidence);
+                evidence.setDescription(desc);
+                setDocuments(desc, evidence);
+                evidenceBo.save(evidence);
             }
-
-            Evidence evidence = new Evidence();
-            evidence.setEvidenceType(evidenceType);
-            evidence.setAlterations(alterations);
-            evidence.setGene(gene);
-            evidence.setTumorType(tumorType);
-            evidence.setDescription(desc);
         }
         
         // specific evidence
         Pattern pSensitiveTo = Pattern.compile(sensitivieP);
         Pattern pLevel = Pattern.compile(HIGHEST_LEVEL_OF_EVIDENCE);
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
         

@@ -49,7 +49,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.add(matchedAlt);
         }
         if (alteration.getConsequence()!=null) {
-            if (alteration.getProteinStart()!=null) {
+            if (matchedAlt==null // only when there is no specific match
+                    && alteration.getProteinStart()!=null) { // only whe 
                 alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd()));
             }
 

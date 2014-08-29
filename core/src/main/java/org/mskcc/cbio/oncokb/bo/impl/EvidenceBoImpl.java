@@ -6,7 +6,9 @@ package org.mskcc.cbio.oncokb.bo.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
@@ -23,29 +25,29 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations) {
-        List<Evidence> list = new ArrayList<Evidence>();
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
-            list.addAll(getDao().findEvidencesByAlteration(alteration));
+            set.addAll(getDao().findEvidencesByAlteration(alteration));
         }
-        return list;
+        return new ArrayList<Evidence>(set);
     }
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, EvidenceType evidenceType) {
-        List<Evidence> list = new ArrayList<Evidence>();
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
-            list.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType));
+            set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType));
         }
-        return list;
+        return new ArrayList<Evidence>(set);
     }
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, EvidenceType evidenceType, TumorType tumorType) {
-        List<Evidence> list = new ArrayList<Evidence>();
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
-            list.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+            set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
         }
-        return list;
+        return new ArrayList<Evidence>(set);
     }
     
     @Override
