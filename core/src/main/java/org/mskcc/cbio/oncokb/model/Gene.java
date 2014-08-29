@@ -114,6 +114,11 @@ public class Gene implements java.io.Serializable {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return hugoSymbol;
+    }
+
 
 }
 

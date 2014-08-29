@@ -128,8 +128,11 @@ public class Alteration implements java.io.Serializable {
         }
         return true;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "Alteration{" + "gene=" + gene + ", alteration=" + alteration + '}';
+    }
 }
 
 

@@ -40,8 +40,8 @@ public final class ApplicationContextSingleton {
         return EvidenceBo.class.cast(getApplicationContext().getBean("evidenceBo"));
     }
     
-    public static EvidenceBlobBo getEvidenceBlobBo() {
-        return EvidenceBlobBo.class.cast(getApplicationContext().getBean("evidenceBlobBo"));
+    public static TreatmentBo getTreatmentBo() {
+        return TreatmentBo.class.cast(getApplicationContext().getBean("treatmentBo"));
     }
     
     public static GeneBo getGeneBo() {

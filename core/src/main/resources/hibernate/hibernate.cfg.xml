@@ -16,7 +16,7 @@
     <mapping resource="hibernate/ClinicalTrial.hbm.xml"/>
     <mapping resource="hibernate/NccnGuideline.hbm.xml"/>
     <mapping resource="hibernate/Evidence.hbm.xml"/>
-    <mapping resource="hibernate/EvidenceBlob.hbm.xml"/>
+    <mapping resource="hibernate/Treatment.hbm.xml"/>
     <mapping resource="hibernate/Gene.hbm.xml"/>
     <mapping resource="hibernate/VariantConsequence.hbm.xml"/>
   </session-factory>

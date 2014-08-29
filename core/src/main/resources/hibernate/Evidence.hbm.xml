@@ -7,19 +7,37 @@
       <column name="evidence_id"/>
       <generator class="identity"/>
     </id>
-    <many-to-one name="EvidenceBlob" class="org.mskcc.cbio.oncokb.model.EvidenceBlob" fetch="join" lazy="false">
-       <column name="evidence_blob_id" not-null="true" />
+    <property column="evidence_type" name="evidenceType">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
+        <param name="type">12</param>
+        <param name="useNamed">true</param>
+      </type>
+    </property>
+    <many-to-one class="org.mskcc.cbio.oncokb.model.TumorType" fetch="join" lazy="false" name="tumorType">
+      <column length="50" name="tumor_type_id"/>
     </many-to-one>
-    <set lazy="false" name="drugs" table="evidence_drug">
+    <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
+      <column name="entrez_gene_id"/>
+    </many-to-one>
+    <set lazy="false" name="alterations" table="evidence_blob_alteration">
+      <key>
+        <column name="evidence_blob_id" not-null="true"/>
+      </key>
+      <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
+        <column name="alteration_id" not-null="true"/>
+      </many-to-many>
+    </set>
+    <set lazy="false" name="treatments" table="evidence_treatment">
       <key>
         <column name="evidence_id" not-null="true"/>
       </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.Drug">
-        <column name="drug_id" not-null="true"/>
+      <many-to-many class="org.mskcc.cbio.oncokb.model.Treatment">
+        <column name="treatment_id" not-null="true"/>
       </many-to-many>
     </set>
     <property name="knownEffect" type="string">
-        <column name="known_effect" length="255"/>
+      <column length="255" name="known_effect"/>
     </property>
     <property column="level_of_evidence" name="levelOfEvidence">
       <type name="org.hibernate.type.EnumType">
@@ -56,4 +74,25 @@
       </many-to-many>
     </set>
   </class>
+  <query name="findEvidencesByAlteration">
+        select e from Evidence e join e.alterations a where a.alterationId=?
+  </query>
+  <query name="findEvidencesByAlterationAndEvidenceType">
+        select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?
+  </query>
+  <query name="findEvidencesByAlterationAndEvidenceTypeAndTumorType">
+        select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?
+  </query>
+  <query name="findEvidencesByGene">
+        select e from Evidence e where e.gene=?
+  </query>
+  <query name="findEvidencesByGeneAndEvidenceType">
+        select e from Evidence e where e.gene=? and e.evidenceType=?
+  </query>
+  <query name="findEvidencesByTumorType">
+        select e from Evidence e where e.tumorType=?
+  </query>
+  <query name="findEvidencesByGeneAndTumorType">
+        select e from Evidence e join e.alterations a where e.gene=? and e.tumorType=?
+  </query>
 </hibernate-mapping>

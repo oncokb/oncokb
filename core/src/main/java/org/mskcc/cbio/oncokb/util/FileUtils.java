@@ -91,9 +91,10 @@ public class FileUtils {
         String line;
         while ((line = in.readLine()) != null) {
             if (trim) {
-                line = line.trim().replaceAll("[\uFEFF-\uFFFF]", "");// trim and remove unicode
+                line = line.replaceAll("^[\uFEFF-\uFFFF]+", "").trim();// trim and remove unicode
             }
-            lines.add(line);
+            if (!line.isEmpty())
+                lines.add(line);
         }
         in.close();
         
