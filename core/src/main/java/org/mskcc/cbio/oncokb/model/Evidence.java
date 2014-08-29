@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -120,6 +121,29 @@ public class Evidence implements java.io.Serializable {
 
     public void setClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
         this.clinicalTrials = clinicalTrials;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 67 * hash + Objects.hashCode(this.evidenceId==null?this:this.evidenceId);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Evidence other = (Evidence) obj;
+        if (this.evidenceId==null || other.evidenceId==null ||
+                !Objects.equals(this.evidenceId, other.evidenceId)) {
+            return false;
+        }
+        return true;
     }
 
     

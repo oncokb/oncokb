@@ -62,7 +62,12 @@ public class VariantAnnotationXMLController {
         sb.append("<xml>\n");
         
         Alteration alt = new Alteration();
-        alt.setAlteration(alteration);
+        if (alteration!=null) {
+            if (alteration.startsWith("p.")) {
+                alteration = alteration.substring(2);
+            }
+            alt.setAlteration(alteration);
+        }
         
         // find alteration
         if (entrezGeneId == null && hugoSymbol == null) {

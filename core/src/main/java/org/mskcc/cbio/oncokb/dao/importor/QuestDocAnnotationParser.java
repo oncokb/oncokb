@@ -99,14 +99,14 @@ public final class QuestDocAnnotationParser {
     
     public static void main(String[] args) throws IOException {
         VariantConsequenceImporter.main(args);
-//        PiHelperDrugImporter.main(args);
+        PiHelperDrugImporter.main(args);
         
-        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
+//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
         
-//        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
-//        for (String file : files) {
-//            parse(new FileInputStream(file));
-//        }
+        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
+        for (String file : files) {
+            parse(new FileInputStream(file));
+        }
     }
     
     private static void parse(InputStream is) throws IOException {
