@@ -70,9 +70,7 @@ public class NccnGuideline implements java.io.Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + Objects.hashCode(this.disease);
-        hash = 31 * hash + Objects.hashCode(this.version);
-        hash = 31 * hash + Objects.hashCode(this.pages);
+        hash = 89 * hash + Objects.hashCode(this.nccnGuidelineId);
         return hash;
     }
 
@@ -85,17 +83,12 @@ public class NccnGuideline implements java.io.Serializable {
             return false;
         }
         final NccnGuideline other = (NccnGuideline) obj;
-        if (!Objects.equals(this.disease, other.disease)) {
-            return false;
-        }
-        if (!Objects.equals(this.version, other.version)) {
-            return false;
-        }
-        if (!Objects.equals(this.pages, other.pages)) {
+        if (!Objects.equals(this.nccnGuidelineId, other.nccnGuidelineId)) {
             return false;
         }
         return true;
     }
+    
     
     
 }

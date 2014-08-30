@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class VariantAnnotationXMLController {
-    @RequestMapping(value="/var_annotation", produces="application/xml")//plain/text
+    @RequestMapping(value="/var_annotation", produces="application/xml;charset=UTF-8")//plain/text
     public @ResponseBody String getVariantAnnotation(
             @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
@@ -196,36 +197,39 @@ public class VariantAnnotationXMLController {
             
             // NCCN_GUIDELINES
             List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.NCCN_GUIDELINES, tt);
+            Set<NccnGuideline> nccnGuidelines = new LinkedHashSet<NccnGuideline>();
             for (Evidence ev : nccnEvs) {
-                for (NccnGuideline nccnGuideline : ev.getNccnGuidelines()) {
-                    sb.append("    <nccn_guidelines>\n");
-                    sb.append("        <disease>");
-                    if (nccnGuideline.getDisease() != null) {
-                        sb.append(nccnGuideline.getDisease());
-                    }
-                    sb.append("</disease>\n");
-                    sb.append("        <version>");
-                    if (nccnGuideline.getVersion() != null) {
-                        sb.append(nccnGuideline.getVersion());
-                    }
-                    sb.append("</version>\n");
-                    sb.append("        <pages>");
-                    if (nccnGuideline.getPages() != null) {
-                        sb.append(nccnGuideline.getPages());
-                    }
-                    sb.append("</pages>\n");
-                    sb.append("        <recommendation_category>");
-                    if (nccnGuideline.getCategory()!= null) {
-                        sb.append(nccnGuideline.getCategory());
-                    }
-                    sb.append("</recommendation_category>\n");
-                    sb.append("        <description>");
-                    if (nccnGuideline.getDescription()!= null) {
-                        sb.append(nccnGuideline.getDescription());
-                    }
-                    sb.append("</description>\n");
-                    sb.append("    </nccn_guidelines>\n");
+                nccnGuidelines.addAll(ev.getNccnGuidelines());
+            }
+            
+            for (NccnGuideline nccnGuideline : nccnGuidelines) {
+                sb.append("    <nccn_guidelines>\n");
+                sb.append("        <disease>");
+                if (nccnGuideline.getDisease() != null) {
+                    sb.append(nccnGuideline.getDisease());
                 }
+                sb.append("</disease>\n");
+                sb.append("        <version>");
+                if (nccnGuideline.getVersion() != null) {
+                    sb.append(nccnGuideline.getVersion());
+                }
+                sb.append("</version>\n");
+                sb.append("        <pages>");
+                if (nccnGuideline.getPages() != null) {
+                    sb.append(nccnGuideline.getPages());
+                }
+                sb.append("</pages>\n");
+                sb.append("        <recommendation_category>");
+                if (nccnGuideline.getCategory()!= null) {
+                    sb.append(nccnGuideline.getCategory());
+                }
+                sb.append("</recommendation_category>\n");
+                sb.append("        <description>");
+                if (nccnGuideline.getDescription()!= null) {
+                    sb.append(nccnGuideline.getDescription());
+                }
+                sb.append("</description>\n");
+                sb.append("    </nccn_guidelines>\n");
             }
             
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS

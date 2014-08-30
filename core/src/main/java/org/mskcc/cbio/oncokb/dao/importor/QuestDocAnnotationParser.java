@@ -99,14 +99,14 @@ public final class QuestDocAnnotationParser {
     
     public static void main(String[] args) throws IOException {
         VariantConsequenceImporter.main(args);
-        PiHelperDrugImporter.main(args);
         
-//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/BRAF.docx.txt"));
+//        PiHelperDrugImporter.main(args);
+//        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
+//        for (String file : files) {
+//            parse(new FileInputStream(file));
+//        }
         
-        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
-        for (String file : files) {
-            parse(new FileInputStream(file));
-        }
+        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }
     
     private static void parse(InputStream is) throws IOException {
@@ -599,16 +599,13 @@ public final class QuestDocAnnotationParser {
         
         NccnGuidelineBo nccnGuideLineBo = ApplicationContextSingleton.getNccnGuidelineBo();
         
-        NccnGuideline nccnGuideline = nccnGuideLineBo.findNccnGuideline(disease, version, pages);
-        if (nccnGuideline==null) {
-            nccnGuideline = new NccnGuideline();
+        NccnGuideline nccnGuideline = new NccnGuideline();
             nccnGuideline.setDisease(disease);
             nccnGuideline.setVersion(version);
             nccnGuideline.setPages(pages);
             nccnGuideline.setCategory(category);
             nccnGuideline.setDescription(nccnDescription);
             nccnGuideLineBo.save(nccnGuideline);
-        }
 
         evidence.setNccnGuidelines(Collections.singleton(nccnGuideline));
                 
