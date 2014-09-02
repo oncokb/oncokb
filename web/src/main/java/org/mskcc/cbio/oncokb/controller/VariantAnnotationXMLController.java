@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
@@ -238,57 +240,12 @@ public class VariantAnnotationXMLController {
             exportTherapeuticImplications(invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sb, "    ");
             
             // CLINICAL_TRIAL
-            List<Evidence> trialsEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tt);
-            for (Evidence ev : trialsEvs) {
-                for (ClinicalTrial trial : ev.getClinicalTrials()) {
-                    sb.append("    <clinical_trial>\n");
-
-                    sb.append("        <trial_id>");
-                    if (trial.getNctId() != null) {
-                        sb.append(trial.getNctId());
-                    }
-                    sb.append("</trial_id>\n");
-
-                    sb.append("        <locations>");
-                    if (trial.getLocation() != null) {
-                        sb.append(StringEscapeUtils.escapeXml(trial.getLocation()));
-                    }
-                    sb.append("</locations>\n");
-
-                    sb.append("        <title>\n");
-                    if (trial.getTitle() != null) {
-                        sb.append(StringEscapeUtils.escapeXml(trial.getTitle())).append("\n");
-                    }
-                    sb.append("</title>\n");
-
-                    sb.append("        <purpose>\n");
-                    if (trial.getPurpose() != null) {
-                        sb.append(StringEscapeUtils.escapeXml(trial.getPurpose())).append("\n");
-                    }
-                    sb.append("</purpose>\n");
-
-                    sb.append("        <recruiting_status>");
-                    if (trial.getRecuitingStatus() != null) {
-                        sb.append(StringEscapeUtils.escapeXml(trial.getRecuitingStatus()));
-                    }
-                    sb.append("</recruiting_status>\n");
-
-                    sb.append("        <eligibility_criteria>\n");
-                    if (trial.getEligibilityCriteria() != null) {
-                        sb.append(StringEscapeUtils.escapeXml(trial.getEligibilityCriteria())).append("\n");
-                    }
-                    sb.append("</eligibility_criteria>\n");
-
-                    sb.append("        <phase>\n");
-                    if (trial.getPhase() != null) {
-                        sb.append(StringEscapeUtils.escapeXml(trial.getPhase()));
-                    }
-                    sb.append("</phase>\n");
-
-
-                    sb.append("</clinical_trial>\n");
-                }
-            }
+//            List<Evidence> trialsEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tt);
+//            for (Evidence ev : trialsEvs) {
+//                for (ClinicalTrial trial : ev.getClinicalTrials()) {
+//                    exportClinicalTrial(trial);
+//                }
+//            }
             
             sb.append("</cancer_type>\n");
         }
@@ -329,6 +286,7 @@ public class VariantAnnotationXMLController {
             for (Evidence ev : evsSensitivity.get(1)) {
                 sb.append(indent).append("    <sensitive_to>\n");
                 exportTherapeuticImplications(ev, sb, indent+"        ");
+                exportClinicalTrials(ev, sb,  indent+"        ");
                 sb.append(indent).append("    </sensitive_to>\n");
             }
             for (Evidence ev : evsResisitance.get(1)) {
@@ -357,10 +315,67 @@ public class VariantAnnotationXMLController {
         return ret;
     }
     
+    private void exportClinicalTrials(Evidence evidence, StringBuilder sb, String indent) {
+        Set<Drug> drugs = new HashSet<Drug>();
+        for (Treatment treatment : evidence.getTreatments()) {
+            drugs.addAll(treatment.getDrugs());
+        }
+        
+        TumorType tumorType = evidence.getTumorType();
+        
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(Collections.singletonList(tumorType), drugs);
+        for (ClinicalTrial clinicalTrial : clinicalTrials) {
+            exportClinicalTrial(clinicalTrial, sb, indent);
+        }
+    }
+    
+    private void exportClinicalTrial(ClinicalTrial trial, StringBuilder sb, String indent) {
+        sb.append(indent).append("<clinical_trial>\n");
+
+        sb.append(indent).append("    <trial_id>");
+        if (trial.getNctId() != null) {
+            sb.append(trial.getNctId());
+        }
+        sb.append("</trial_id>\n");
+
+        sb.append(indent).append("    <title>");
+        if (trial.getTitle() != null) {
+            sb.append(StringEscapeUtils.escapeXml(trial.getTitle()));
+        }
+        sb.append("</title>\n");
+
+        sb.append(indent).append("    <purpose>");
+        if (trial.getPurpose() != null) {
+            sb.append(StringEscapeUtils.escapeXml(trial.getPurpose()));
+        }
+        sb.append("</purpose>\n");
+
+        sb.append(indent).append("    <recruiting_status>");
+        if (trial.getRecuitingStatus() != null) {
+            sb.append(StringEscapeUtils.escapeXml(trial.getRecuitingStatus()));
+        }
+        sb.append("</recruiting_status>\n");
+
+        sb.append(indent).append("    <eligibility_criteria>");
+        if (trial.getEligibilityCriteria() != null) {
+            sb.append(StringEscapeUtils.escapeXml(trial.getEligibilityCriteria()));
+        }
+        sb.append("</eligibility_criteria>\n");
+
+        sb.append(indent).append("    <phase>");
+        if (trial.getPhase() != null) {
+            sb.append(StringEscapeUtils.escapeXml(trial.getPhase()));
+        }
+        sb.append("</phase>\n");
+
+        sb.append(indent).append("</clinical_trial>\n");
+    }
+    
     private void exportTherapeuticImplications(Evidence evidence, StringBuilder sb, String indent) {
-        for (Treatment t : evidence.getTreatments()) {
+        for (Treatment treatment : evidence.getTreatments()) {
             sb.append(indent).append("<treatment>\n");
-            exportTreatment(t, sb, indent+"    ");
+            exportTreatment(treatment, sb, indent+"    ");
             sb.append(indent).append("</treatment>\n");
         }
         

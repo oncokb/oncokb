@@ -5,7 +5,10 @@
 package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
@@ -37,10 +40,19 @@ public class TumorTypeImporter {
             
             String id = parts[0];
             String name = parts[1];
-            String shortName = parts[2];
-            String color = parts[3];
+            String tissue = parts[2];
+            String clinicalTrialKeywordsStr = parts[3];
             
-            TumorType tumorType = new TumorType(id, name, shortName, color);
+            TumorType tumorType = new TumorType();
+            tumorType.setTumorTypeId(id);
+            tumorType.setName(name);
+            if (!tissue.isEmpty())
+                tumorType.setTissue(tissue);
+            if (!clinicalTrialKeywordsStr.isEmpty()) {
+                Set<String> keywords = new HashSet<String>(Arrays.asList(clinicalTrialKeywordsStr.split(",")));
+                keywords.add(name);
+                tumorType.setClinicalTrialKeywords(keywords);
+            }
             
             tumorTypeBo.saveOrUpdate(tumorType);
         }

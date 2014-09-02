@@ -95,4 +95,7 @@
   <query name="findEvidencesByGeneAndTumorType">
         select e from Evidence e join e.alterations a where e.gene=? and e.tumorType=?
   </query>
+  <query name="findTumorTypesWithEvidencesForAlteration">
+        <![CDATA[select distinct e.tumorType from Evidence e join e.alterations a where a.alterationId=?]]>
+  </query>
 </hibernate-mapping>

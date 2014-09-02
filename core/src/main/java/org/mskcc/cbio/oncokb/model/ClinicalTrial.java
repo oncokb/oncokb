@@ -3,6 +3,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -17,24 +18,12 @@ public class ClinicalTrial implements java.io.Serializable {
     private String recuitingStatus;
     private String eligibilityCriteria;
     private String phase;
-    private String location;
-    private Boolean isMskccTrial;
+    private String diseaseCondition;
+    private Set<TumorType> tumorTypes;
+    private Set<Drug> drugs;
+    
 
     public ClinicalTrial() {
-    }
-
-    public ClinicalTrial(String nctId) {
-        this.nctId = nctId;
-    }
-
-    public ClinicalTrial(String nctId, String title, String purpose, String recuitingStatus, String eligibilityCriteria, String phase, String location, Boolean isMskccTrial) {
-        this.nctId = nctId;
-        this.title = title;
-        this.purpose = purpose;
-        this.recuitingStatus = recuitingStatus;
-        this.eligibilityCriteria = eligibilityCriteria;
-        this.phase = phase;
-        this.isMskccTrial = isMskccTrial;
     }
 
     public Integer getTrialId() {
@@ -85,14 +74,6 @@ public class ClinicalTrial implements java.io.Serializable {
         this.eligibilityCriteria = eligibilityCriteria;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getPhase() {
         return phase;
     }
@@ -101,12 +82,28 @@ public class ClinicalTrial implements java.io.Serializable {
         this.phase = phase;
     }
 
-    public Boolean getIsMskccTrial() {
-        return isMskccTrial;
+    public String getDiseaseCondition() {
+        return diseaseCondition;
     }
 
-    public void setIsMskccTrial(Boolean isMskccTrial) {
-        this.isMskccTrial = isMskccTrial;
+    public void setDiseaseCondition(String diseaseCondition) {
+        this.diseaseCondition = diseaseCondition;
+    }
+
+    public Set<TumorType> getTumorTypes() {
+        return tumorTypes;
+    }
+
+    public void setTumorTypes(Set<TumorType> tumorTypes) {
+        this.tumorTypes = tumorTypes;
+    }
+
+    public Set<Drug> getDrugs() {
+        return drugs;
+    }
+
+    public void setDrugs(Set<Drug> drugs) {
+        this.drugs = drugs;
     }
 
     @Override

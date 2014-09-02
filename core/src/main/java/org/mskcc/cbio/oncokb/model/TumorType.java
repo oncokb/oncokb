@@ -1,6 +1,10 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.HashSet;
+import java.util.Set;
+
+
 
 
 /**
@@ -12,24 +16,11 @@ public class TumorType implements java.io.Serializable {
      private String tumorTypeId;
      private String name;
      private String shortName;
-     private String color;
+     private String tissue;
+     private Set<String> clinicalTrialKeywords = new HashSet<String>();
 
     public TumorType() {
     }
-
-	
-    public TumorType(String tumorTypeId, String name, String shortName) {
-        this.tumorTypeId = tumorTypeId;
-        this.name = name;
-        this.shortName = shortName;
-    }
-    public TumorType(String tumorTypeId, String name, String shortName, String color) {
-       this.tumorTypeId = tumorTypeId;
-       this.name = name;
-       this.shortName = shortName;
-       this.color = color;
-    }
-   
     
     public String getTumorTypeId() {
         return this.tumorTypeId;
@@ -58,13 +49,21 @@ public class TumorType implements java.io.Serializable {
         this.shortName = shortName;
     }
     
-    public String getColor() {
-        return this.color;
+    public String getTissue() {
+        return this.tissue;
     }
     
     
-    public void setColor(String color) {
-        this.color = color;
+    public void setTissue(String tissue) {
+        this.tissue = tissue;
+    }
+
+    public Set<String> getClinicalTrialKeywords() {
+        return clinicalTrialKeywords;
+    }
+
+    public void setClinicalTrialKeywords(Set<String> clinicalTrialKeywords) {
+        this.clinicalTrialKeywords = clinicalTrialKeywords;
     }
 
     

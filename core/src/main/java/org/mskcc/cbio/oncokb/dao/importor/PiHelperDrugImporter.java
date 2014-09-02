@@ -41,6 +41,7 @@ public class PiHelperDrugImporter {
         
         int nLines = lines.size();
         for (; i<nLines; i++) {
+            System.out.println("Processing.. "+i+"/"+nLines);
             String line = lines.get(i);
             
             String[] parts = line.split(" *\"?\t\"? *");

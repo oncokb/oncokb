@@ -1,9 +1,8 @@
-<?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class name="org.mskcc.cbio.oncokb.model.ClinicalTrial" table="clinical_trial" catalog="oncokb" >
+  <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.ClinicalTrial" table="clinical_trial">
     <id name="trialId" type="java.lang.Integer">
       <column name="trial_id"/>
       <generator class="identity"/>
@@ -12,29 +11,44 @@
       <column name="nci_id" not-null="true"/>
     </property>
     <property name="title" type="string">
-      <column name="title"/>
+      <column length="2000" name="title"/>
     </property>
     <property name="purpose" type="string">
-      <column name="purpose"/>
+      <column length="65535" name="purpose"/>
     </property>
     <property name="recuitingStatus" type="string">
       <column name="recuiting_status"/>
     </property>
     <property name="eligibilityCriteria" type="string">
-      <column name="eligibility_criteria"/>
+      <column length="65535" name="eligibility_criteria"/>
     </property>
     <property name="phase" type="string">
       <column name="phase"/>
     </property>
-    <property name="location" type="string">
-      <column name="location"/>
+    <property name="diseaseCondition" type="string">
+      <column name="disease_condition"/>
     </property>
-    <property name="isMskccTrial" type="boolean">
-        <column name="is_mskcc_trial"/>
-    </property>
+    <set lazy="false" name="tumorTypes" table="clinical_trial_tumor_type">
+      <key>
+        <column name="trial_id" not-null="true"/>
+      </key>
+      <many-to-many class="org.mskcc.cbio.oncokb.model.TumorType">
+        <column name="tumor_type_id" not-null="true"/>
+      </many-to-many>
+    </set>
+    <set lazy="false" name="drugs" table="clinical_trial_drug">
+      <key>
+        <column name="trial_id" not-null="true"/>
+      </key>
+      <many-to-many class="org.mskcc.cbio.oncokb.model.Drug">
+        <column name="drug_id" not-null="true"/>
+      </many-to-many>
+    </set>
   </class>
-  
   <query name="findClinicalTrialByNctId">
-        <![CDATA[from ClinicalTrial a where a.nctId=?]]>
+        <![CDATA[from ClinicalTrial c where c.nctId=?]]>
+  </query>
+  <query name="findClinicalTrialByTumorTypeAndDrug">
+        <![CDATA[select c from ClinicalTrial c join c.tumorTypes t join c.drugs d where t.tumorTypeId=? and d.drugId=?]]>
   </query>
 </hibernate-mapping>

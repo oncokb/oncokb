@@ -12,17 +12,23 @@
             <column name="name" not-null="true" unique="true" />
         </property>
         <property name="shortName" type="string">
-            <column name="short_name" length="100" not-null="true" unique="true" />
+            <column name="short_name" length="100" unique="true" />
         </property>
-        <property name="color" type="string">
-            <column name="color" length="31" />
+        <property name="tissue" type="string">
+            <column name="tissue" />
         </property>
+        <set name="clinicalTrialKeywords" table="tumor_type_clinical_trial_keyword" lazy="false">
+            <key>
+                <column name="tumor_type_id" not-null="true" />
+            </key>
+            <element column="clinical_trial_keyword" type="string"></element> 
+        </set>
     </class>
     
     <query name="findTumorTypeByName">
         <![CDATA[from TumorType t where t.name=?]]>
     </query>
-  <query name="findTumorTypesWithEvidencesForAlteration">
+<!--  <query name="findTumorTypesWithEvidencesForAlteration">
         <![CDATA[select distinct e.tumorType from Evidence e join e.alterations a where a.alterationId=?]]>
-  </query>
+  </query>-->
 </hibernate-mapping>

@@ -99,14 +99,15 @@ public final class QuestDocAnnotationParser {
     
     public static void main(String[] args) throws IOException {
         VariantConsequenceImporter.main(args);
+        TumorTypeImporter.main(args);
+        PiHelperDrugImporter.main(args);
+        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
+        for (String file : files) {
+            parse(new FileInputStream(file));
+        }
+        ClinicalTrialsImporter.main(args);
         
-//        PiHelperDrugImporter.main(args);
-//        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "txt");
-//        for (String file : files) {
-//            parse(new FileInputStream(file));
-//        }
-        
-        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
+//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }
     
     private static void parse(InputStream is) throws IOException {
@@ -294,7 +295,10 @@ public final class QuestDocAnnotationParser {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
         if (tumorType==null) {
-            tumorType = new TumorType(cancer, cancer, cancer);
+            tumorType = new TumorType();
+            tumorType.setTumorTypeId(cancer);
+            tumorType.setName(cancer);
+            tumorType.setClinicalTrialKeywords(Collections.singleton(cancer));
             tumorTypeBo.save(tumorType);
         }
         
@@ -392,13 +396,13 @@ public final class QuestDocAnnotationParser {
             System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P+" for "+alterations.toString());
         }
         
-        List<int[]> clinicalTrialsLines = extractLines(lines, start+1, end, ONGOING_CLINICAL_TRIALS_P, CANCER_HEADERS_P, 1);
-        if (!clinicalTrialsLines.isEmpty()) {
-            System.out.println("##      Clincial trials for "+alterations.toString());
-            parseClinicalTrials(gene, alterations, tumorType, lines, clinicalTrialsLines.get(0)[0], clinicalTrialsLines.get(0)[1]);
-        } else {
-            System.out.println("##      No Clincial trials for "+alterations.toString());
-        }
+//        List<int[]> clinicalTrialsLines = extractLines(lines, start+1, end, ONGOING_CLINICAL_TRIALS_P, CANCER_HEADERS_P, 1);
+//        if (!clinicalTrialsLines.isEmpty()) {
+//            System.out.println("##      Clincial trials for "+alterations.toString());
+//            parseClinicalTrials(gene, alterations, tumorType, lines, clinicalTrialsLines.get(0)[0], clinicalTrialsLines.get(0)[1]);
+//        } else {
+//            System.out.println("##      No Clincial trials for "+alterations.toString());
+//        }
     }
     
     private static void parseClinicalTrials(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end) {
@@ -410,9 +414,10 @@ public final class QuestDocAnnotationParser {
             Matcher m = p.matcher(lines.get(i));
             if (m.find()) {
                 String nctId = m.group(1);
-                ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByPmid(nctId);
+                ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByNctId(nctId);
                 if (ct==null) {
-                    ct = new ClinicalTrial(nctId);
+                    ct = new ClinicalTrial();
+                    ct.setNctId(nctId);
                     clinicalTrialBo.save(ct);
                 }
                 
@@ -683,9 +688,10 @@ public final class QuestDocAnnotationParser {
                     // support NCT numbers
                     String[] nctIds = pmid.split(", *");
                     for (String nctId : nctIds) {
-                        ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByPmid(nctId);
+                        ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByNctId(nctId);
                         if (ct==null) {
-                            ct = new ClinicalTrial(nctId);
+                            ct = new ClinicalTrial();
+                            ct.setNctId(nctId);
                             clinicalTrialBo.save(ct);
                         }
                         clinicalTrials.add(ct);
