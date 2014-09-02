@@ -9,6 +9,7 @@ package org.mskcc.cbio.oncokb.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -282,11 +283,14 @@ public class VariantAnnotationXMLController {
         }
         
         // specific evs
+        boolean isInvestigational = tagTherapeuticImp.equals("investigational_therapeutic_implications");
         if (!evsSensitivity.get(1).isEmpty() || !evsResisitance.get(1).isEmpty()) {
             for (Evidence ev : evsSensitivity.get(1)) {
                 sb.append(indent).append("    <sensitive_to>\n");
                 exportTherapeuticImplications(ev, sb, indent+"        ");
-                exportClinicalTrials(ev, sb,  indent+"        ");
+                if (isInvestigational) {
+                    exportClinicalTrials(ev, sb,  indent+"        ");
+                }
                 sb.append(indent).append("    </sensitive_to>\n");
             }
             for (Evidence ev : evsResisitance.get(1)) {
@@ -325,6 +329,21 @@ public class VariantAnnotationXMLController {
         
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(Collections.singletonList(tumorType), drugs);
+        Collections.sort(clinicalTrials, new Comparator<ClinicalTrial>() {
+            public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
+                return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
+            }
+            
+            private int phase2int(String phase) {
+                if (phase.matches("Phase [0-4]")) {
+                    return 2*Integer.parseInt(phase.substring(6));
+                }
+                if (phase.matches("Phase [0-4]/Phase [0-4]")) {
+                    return Integer.parseInt(phase.substring(6,7)) + Integer.parseInt(phase.substring(14));
+                }
+                return -1;
+            }
+        });
         for (ClinicalTrial clinicalTrial : clinicalTrials) {
             exportClinicalTrial(clinicalTrial, sb, indent);
         }
