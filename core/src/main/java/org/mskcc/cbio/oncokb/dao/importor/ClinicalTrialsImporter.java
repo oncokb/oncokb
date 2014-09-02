@@ -7,13 +7,17 @@
 package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
@@ -22,6 +26,7 @@ import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -69,41 +74,43 @@ public class ClinicalTrialsImporter {
         trial.setTumorTypes(matched);
     }
     
-    private static ClinicalTrial parseNci(String file) throws DocumentException {        
-        SAXReader reader = new SAXReader();
-        Document doc = reader.read(file);
+    private static ClinicalTrial parseNci(String file) throws ParserConfigurationException, SAXException, IOException {  
         
-//        String phase = doc.selectSingleNode("CTGovProtocol/ProtocolPhase").getText();
-//        if (!phase.equalsIgnoreCase("Phase III") || !phase.equalsIgnoreCase("Phase IV")) return null;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
         
-        String status = doc.selectSingleNode("CTGovProtocol/CurrentProtocolStatus").getText();
+        Document doc = db.parse(file);
+        Element docEle = doc.getDocumentElement();
+        
+        String status = getText(docEle, "CurrentProtocolStatus");
         if (!isTrialOpen(status)) return null;
         
-        String nctId = doc.selectSingleNode("CTGovProtocol/IDInfo/NCTID").getText();
+        String nctId = getText(docEle, "IDInfo/NCTID");
         
         System.out.print(" "+nctId);
         
-        return parseClinicalTrialsGov(nctId);
+        return parseClinicalTrialsGov(nctId, db);
     }
     
-    private static ClinicalTrial parseClinicalTrialsGov(String nctId) throws DocumentException {
-        String url = "http://clinicaltrials.gov/show/"+nctId+"?displayxml=true";
+    private static ClinicalTrial parseClinicalTrialsGov(String nctId, DocumentBuilder db) throws SAXException, IOException {
+        String strUrl = "http://clinicaltrials.gov/show/"+nctId+"?displayxml=true";
         
-        SAXReader reader = new SAXReader();
-        Document doc = reader.read(url);
+        Document doc = db.parse(strUrl);
+        Element docEle = doc.getDocumentElement();
         
-        if (!isLocationUsa(doc)) return null;
+        if (!isLocationUsa(docEle)) return null;
         
         System.out.print(" in US");
         
-        String briefTitle = doc.selectSingleNode("clinical_study/brief_title").getText();
-//        String officialTitle = doc.selectSingleNode("clinical_study/official_title").getText();
-        String briefSummary = doc.selectSingleNode("clinical_study/brief_summary/textblock").getText();
-//        String detailedDesc = doc.selectSingleNode("clinical_study/detailed_description/textblock").getText();
-        String status = doc.selectSingleNode("clinical_study/overall_status").getText();
-        String phase = doc.selectSingleNode("clinical_study/phase").getText();
-        String condition = doc.selectSingleNode("clinical_study/condition").getText();
-        String eligibility = doc.selectSingleNode("clinical_study/eligibility/criteria/textblock").getText();
+        String briefTitle = getText(docEle, "brief_title");
+//        String officialTitle = getText(docEle, "official_title");
+        String briefSummary = getText(docEle, "brief_summary/textblock");
+//        String detailedDesc = getText(docEle, "detailed_description/textblock");
+        String status = getText(docEle, "overall_status");
+        String phase = getText(docEle, "phase");
+        String condition = getText(docEle, "condition");
+        String eligibility = getText(docEle, "eligibility/criteria/textblock");
+        eligibility = replaceUTFcode(eligibility);
         
         if (!isTrialOpen(status)) {
             return null;
@@ -117,18 +124,17 @@ public class ClinicalTrialsImporter {
         trial.setRecuitingStatus(status);
         trial.setDiseaseCondition(condition);
         trial.setEligibilityCriteria(eligibility);
-        trial.setDrugs(parseDrugs(doc));
+        trial.setDrugs(parseDrugs(docEle));
         
         return trial;
     }
     
-    private static Set<Drug> parseDrugs(Document doc) {
-        List<Node> nodes = doc.selectNodes("clinical_study/intervention_browse/mesh_term");
+    private static Set<Drug> parseDrugs(Element docEle) {
+        List<String> drugNames = getTexts(docEle, "intervention_browse/mesh_term");
         Set<Drug> drugs = new HashSet<Drug>();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
 
-        for (Node node : nodes) {
-            String drugName = node.getText();
+        for (String drugName : drugNames) {
             Drug drug = drugBo.guessUnambiguousDrug(drugName);
             if (drug!=null) {
                 drugs.add(drug);
@@ -138,10 +144,10 @@ public class ClinicalTrialsImporter {
         return drugs;
     }
     
-    private static boolean isLocationUsa(Document doc) {
-        List<Node> nodes = doc.selectNodes("clinical_study/location_countries/country");
-        for (Node node : nodes) {
-            if (node.getText().equalsIgnoreCase("United States")) {
+    private static boolean isLocationUsa(Element docEle) {
+        List<String> locs = getTexts(docEle, "location_countries/country");
+        for (String loc : locs) {
+            if (loc.equalsIgnoreCase("United States")) {
                 return true;
             }
         }
@@ -153,6 +159,38 @@ public class ClinicalTrialsImporter {
                 !status.equalsIgnoreCase("Suspended") &&
                 !status.equalsIgnoreCase("Completed") &&
                 !status.equalsIgnoreCase("Closed") &&
+                !status.equalsIgnoreCase("Active, not recruiting") &&
                 !status.equalsIgnoreCase("Withdrawn");
+    }
+    
+    private static String getText(Element el, String path) {
+        return getTexts(el, path).get(0);
+    }
+    
+    private static List<String> getTexts(Element el, String path) {
+        LinkedList<Element> els = new LinkedList<Element>();
+        els.add(el);
+        String[] tags = path.split("/");
+        for (String tag : tags) {
+            int n = els.size();
+            for (int i=0; i<n; i++) {
+                Element e = els.poll();
+                NodeList nl = e.getElementsByTagName(tag);
+                for (int j=0; j<nl.getLength(); j++) {
+                    els.add((Element)nl.item(j));
+                }
+            }
+        }
+        
+        List<String> ret = new ArrayList<String>();
+        for (Element e : els) {
+            ret.add(e.getChildNodes().item(0).getNodeValue());
+        }
+        
+        return ret;
+    }
+    
+    private static String replaceUTFcode(String str) {
+        return str.replaceAll("\\u2265", ">=").replaceAll("\\u2264", ">=");
     }
 }

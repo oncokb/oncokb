@@ -63,7 +63,7 @@ public class VariantAnnotationXMLController {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         StringBuilder sb = new StringBuilder();
-        sb.append("<xml>\n");
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n");
         
         Alteration alt = new Alteration();
         if (alteration!=null) {

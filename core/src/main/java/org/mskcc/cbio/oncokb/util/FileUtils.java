@@ -85,7 +85,7 @@ public class FileUtils {
      * @throws IOException 
      */
     public static List<String> readLinesStream(InputStream is, boolean trim) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF8"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
         List<String> lines = new ArrayList<String>();
         String line;
