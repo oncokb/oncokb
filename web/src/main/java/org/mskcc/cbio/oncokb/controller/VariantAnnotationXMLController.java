@@ -164,7 +164,7 @@ public class VariantAnnotationXMLController {
         }
         
         // find tumor types
-        List<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
+        Set<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
         int nRelevantTumorTypes = sortTumorType(tumorTypes, tumorType);
@@ -258,7 +258,7 @@ public class VariantAnnotationXMLController {
         return sb.toString();
     }
     
-    private void exportTherapeuticImplications(List<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -273,25 +273,25 @@ public class VariantAnnotationXMLController {
             sb.append(indent).append("    <general_statement>\n");
             for (Evidence ev : evsSensitivity.get(0)) {
                 sb.append(indent).append("        <sensitivity>\n");
-                exportTherapeuticImplications(ev, sb, indent+"            ");
+                exportTherapeuticImplications(null, ev, sb, indent+"            ");
                 sb.append(indent).append("        </sensitivity>\n");
             }
             for (Evidence ev : evsResisitance.get(0)) {
                 sb.append(indent).append("        <resistance>\n");
-                exportTherapeuticImplications(ev, sb, indent+"            ");
+                exportTherapeuticImplications(null, ev, sb, indent+"            ");
                 sb.append(indent).append("        </resistance>\n");
             }
             sb.append(indent).append("    </general_statement>\n");
         }
         
         // specific evs
-        boolean isInvestigational = tagTherapeuticImp.equals("investigational_therapeutic_implications");
+        //boolean isInvestigational = tagTherapeuticImp.equals("investigational_therapeutic_implications");
         if (!evsSensitivity.get(1).isEmpty() || !evsResisitance.get(1).isEmpty()) {
             for (Evidence ev : evsSensitivity.get(1)) {
                 sb.append(indent).append("    <sensitive_to>\n");
-                exportTherapeuticImplications(ev, sb, indent+"        ");
-                if (isInvestigational 
-                        && (relevantTumorTypes.size()==1 // no matched tumor types
+                exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent+"        ");
+                if (//isInvestigational &&
+                        (relevantTumorTypes.size()==1 // no matched tumor types
                             ||relevantTumorTypes.contains(ev.getTumorType()))) { // only if relevent to patient's disease
                     List<TumorType> tumorTypes;
                     if (relevantTumorTypes.size()>1 // Patient tumor type mathched to some tumor types -- not only TUMOR_TYPE_ALL_TUMORS
@@ -307,7 +307,7 @@ public class VariantAnnotationXMLController {
             }
             for (Evidence ev : evsResisitance.get(1)) {
                 sb.append(indent).append("    <resistant_to>\n");
-                exportTherapeuticImplications(ev, sb, indent+"        ");
+                exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent+"        ");
                 sb.append(indent).append("    </resistant_to>\n");
             }
         }
@@ -410,7 +410,7 @@ public class VariantAnnotationXMLController {
         sb.append(indent).append("</clinical_trial>\n");
     }
     
-    private void exportTherapeuticImplications(Evidence evidence, StringBuilder sb, String indent) {
+    private void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         for (Treatment treatment : evidence.getTreatments()) {
             sb.append(indent).append("<treatment>\n");
             exportTreatment(treatment, sb, indent+"    ");
@@ -419,6 +419,10 @@ public class VariantAnnotationXMLController {
         
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
         if (levelOfEvidence!=null) {
+            if (levelOfEvidence==LevelOfEvidence.LEVEL_1 &&
+                    !relevantTumorTypes.contains(evidence.getTumorType())) {
+                levelOfEvidence = LevelOfEvidence.LEVEL_2;
+            }
             sb.append(indent).append("<level_of_evidence>\n");
             sb.append(indent).append("    <level>");
             sb.append(levelOfEvidence.getLevel());
@@ -546,7 +550,7 @@ public class VariantAnnotationXMLController {
     
     private static final String TUMOR_TYPE_ALL_TUMORS = "all tumors";
     private static Map<String, List<TumorType>> questTumorTypeMap = null;
-    private static List<TumorType> fromQuestTumorType(String questTumorType) {
+    private static Set<TumorType> fromQuestTumorType(String questTumorType) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (questTumorTypeMap==null) {
             questTumorTypeMap = new HashMap<String, List<TumorType>>();
@@ -559,7 +563,7 @@ public class VariantAnnotationXMLController {
                 VariantAnnotationXMLController.class.getResourceAsStream("/data/quest-tumor-types.txt"));
             } catch (IOException e) {
                 e.printStackTrace();
-                return Collections.singletonList(tumorTypeAll);
+                return Collections.singleton(tumorTypeAll);
             }
             for (String line : lines) {
                 if (line.startsWith("#")) {
@@ -597,7 +601,7 @@ public class VariantAnnotationXMLController {
             ret.add(0, extactMatchedTumorType);
         }
         
-        return new ArrayList<TumorType>(ret);
+        return new LinkedHashSet<TumorType>(ret);
     }
     
     /**
@@ -607,7 +611,7 @@ public class VariantAnnotationXMLController {
      * @return the number of relevant tumor types
      */
     private int sortTumorType(List<TumorType> tumorTypes, String patientTumorType) {
-        List<TumorType> relevantTumorTypes = fromQuestTumorType(patientTumorType);
+        Set<TumorType> relevantTumorTypes = fromQuestTumorType(patientTumorType);
         relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
         tumorTypes.removeAll(relevantTumorTypes); // other tumor types
         tumorTypes.addAll(0, relevantTumorTypes);
