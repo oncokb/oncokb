@@ -19,8 +19,8 @@
     <property name="purpose" type="string">
       <column length="65535" name="purpose"/>
     </property>
-    <property name="recuitingStatus" type="string">
-      <column name="recuiting_status"/>
+    <property name="recruitingStatus" type="string">
+      <column name="recruiting_status"/>
     </property>
     <property name="eligibilityCriteria" type="string">
       <column length="65535" name="eligibility_criteria"/>

@@ -338,7 +338,7 @@ public class VariantAnnotationXMLController {
         }
         
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(relevantTumorTypes, drugs);
+        List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(relevantTumorTypes, drugs, true);
         Collections.sort(clinicalTrials, new Comparator<ClinicalTrial>() {
             public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
                 return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
@@ -355,7 +355,10 @@ public class VariantAnnotationXMLController {
             }
         });
         for (ClinicalTrial clinicalTrial : clinicalTrials) {
-            exportClinicalTrial(clinicalTrial, sb, indent);
+            String phase = clinicalTrial.getPhase().toLowerCase();
+            if (phase.contains("phase 2") || phase.contains("phase 3") || phase.contains("phase 4") || phase.contains("phase 5") ) {
+                exportClinicalTrial(clinicalTrial, sb, indent);
+            }
         }
     }
     
@@ -381,8 +384,8 @@ public class VariantAnnotationXMLController {
         sb.append("</purpose>\n");
 
         sb.append(indent).append("    <recruiting_status>");
-        if (trial.getRecuitingStatus() != null) {
-            sb.append(StringEscapeUtils.escapeXml(trial.getRecuitingStatus()));
+        if (trial.getRecruitingStatus() != null) {
+            sb.append(StringEscapeUtils.escapeXml(trial.getRecruitingStatus()));
         }
         sb.append("</recruiting_status>\n");
 

@@ -26,5 +26,5 @@ public interface ClinicalTrialBo extends GenericBo<ClinicalTrial> {
      * @param drugs
      * @return 
      */
-    List<ClinicalTrial> findClinicalTrialByTumorTypeAndDrug(Collection<TumorType> tumorTypes, Collection<Drug> drugs);
+    List<ClinicalTrial> findClinicalTrialByTumorTypeAndDrug(Collection<TumorType> tumorTypes, Collection<Drug> drugs, boolean openTrialsOnly);
 }

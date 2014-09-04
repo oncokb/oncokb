@@ -17,7 +17,7 @@ public class ClinicalTrial implements java.io.Serializable {
     private String cdrId;
     private String title;
     private String purpose;
-    private String recuitingStatus;
+    private String recruitingStatus;
     private String eligibilityCriteria;
     private String phase;
     private String diseaseCondition;
@@ -69,12 +69,12 @@ public class ClinicalTrial implements java.io.Serializable {
         this.purpose = purpose;
     }
 
-    public String getRecuitingStatus() {
-        return recuitingStatus;
+    public String getRecruitingStatus() {
+        return recruitingStatus;
     }
 
-    public void setRecuitingStatus(String recuitingStatus) {
-        this.recuitingStatus = recuitingStatus;
+    public void setRecruitingStatus(String recruitingStatus) {
+        this.recruitingStatus = recruitingStatus;
     }
 
     public String getEligibilityCriteria() {
@@ -123,6 +123,15 @@ public class ClinicalTrial implements java.io.Serializable {
 
     public void setAlterations(Set<Alteration> alterations) {
         this.alterations = alterations;
+    }
+    
+    public  boolean isOpen() {
+        return !recruitingStatus.equalsIgnoreCase("Terminated") &&
+                !recruitingStatus.equalsIgnoreCase("Suspended") &&
+                !recruitingStatus.equalsIgnoreCase("Completed") &&
+                !recruitingStatus.equalsIgnoreCase("Closed") &&
+                !recruitingStatus.equalsIgnoreCase("Active, not recruiting") &&
+                !recruitingStatus.equalsIgnoreCase("Withdrawn");
     }
 
     @Override

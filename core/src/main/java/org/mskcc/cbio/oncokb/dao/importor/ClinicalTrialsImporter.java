@@ -129,7 +129,7 @@ public class ClinicalTrialsImporter {
         trial.setTitle(briefTitle);
         trial.setPhase(phase);
         trial.setPurpose(briefSummary);
-        trial.setRecuitingStatus(status);
+        trial.setRecruitingStatus(status);
         trial.setDiseaseCondition(condition);
         trial.setEligibilityCriteria(eligibility);
         trial.setDrugs(parseDrugs(docEle));
