@@ -18,9 +18,11 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.ClinicalTrial;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -81,6 +83,7 @@ public class ClinicalTrialsImporter {
         
         Document doc = db.parse(file);
         Element docEle = doc.getDocumentElement();
+        String cdrId = docEle.getAttribute("id");
         
         String status = getText(docEle, "CurrentProtocolStatus");
         if (!isTrialOpen(status)) return null;
@@ -89,7 +92,12 @@ public class ClinicalTrialsImporter {
         
         System.out.print(" "+nctId);
         
-        return parseClinicalTrialsGov(nctId, db);
+        ClinicalTrial clinicalTrial = parseClinicalTrialsGov(nctId, db);
+        if (clinicalTrial!=null) {
+            clinicalTrial.setCdrId(cdrId);
+        }
+        
+        return clinicalTrial;
     }
     
     private static ClinicalTrial parseClinicalTrialsGov(String nctId, DocumentBuilder db) throws SAXException, IOException {
@@ -125,6 +133,7 @@ public class ClinicalTrialsImporter {
         trial.setDiseaseCondition(condition);
         trial.setEligibilityCriteria(eligibility);
         trial.setDrugs(parseDrugs(docEle));
+        trial.setAlterations(parseAlterations(docEle));
         
         return trial;
     }
@@ -136,12 +145,36 @@ public class ClinicalTrialsImporter {
 
         for (String drugName : drugNames) {
             Drug drug = drugBo.guessUnambiguousDrug(drugName);
-            if (drug!=null) {
-                drugs.add(drug);
+            if (drug==null) {
+                drug = new Drug();
+                drug.setDrugName(drugName);
+                drugBo.save(drug);
             }
+            drugs.add(drug);
         }
         
         return drugs;
+    }
+    
+    
+    private static List<Alteration> allAlterations = null;
+    private static Set<Alteration> parseAlterations(Element docEle) {
+        if (allAlterations==null) {
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            allAlterations = alterationBo.findAll();
+        }
+        
+        Set<Alteration> ret = new HashSet<Alteration>();
+        List<String> keywords = getTexts(docEle, "keyword");
+        for (Alteration alteration : allAlterations) {
+            for (String keyword : keywords) {
+                if (keyword.toUpperCase().contains(alteration.getAlteration().toUpperCase())) {
+                    ret.add(alteration);
+                }
+            }
+        }
+        
+        return ret;
     }
     
     private static boolean isLocationUsa(Element docEle) {

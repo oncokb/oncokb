@@ -63,7 +63,8 @@ public class VariantAnnotationXMLController {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml>\n");
+//        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<xml>\n");
         
         Alteration alt = new Alteration();
         if (alteration!=null) {
@@ -163,6 +164,7 @@ public class VariantAnnotationXMLController {
         }
         
         // find tumor types
+        List<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
         int nRelevantTumorTypes = sortTumorType(tumorTypes, tumorType);
@@ -196,7 +198,7 @@ public class VariantAnnotationXMLController {
             // STANDARD_THERAPEUTIC_IMPLICATIONS
             List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, tt);
             List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, tt);
-            exportTherapeuticImplications(stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sb, "    ");
+            exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sb, "    ");
             
             // NCCN_GUIDELINES
             List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.NCCN_GUIDELINES, tt);
@@ -238,7 +240,7 @@ public class VariantAnnotationXMLController {
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
             List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, tt);
             List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, tt);
-            exportTherapeuticImplications(invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sb, "    ");
+            exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sb, "    ");
             
             // CLINICAL_TRIAL
 //            List<Evidence> trialsEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tt);
@@ -256,7 +258,7 @@ public class VariantAnnotationXMLController {
         return sb.toString();
     }
     
-    private void exportTherapeuticImplications(List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private void exportTherapeuticImplications(List<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -288,8 +290,18 @@ public class VariantAnnotationXMLController {
             for (Evidence ev : evsSensitivity.get(1)) {
                 sb.append(indent).append("    <sensitive_to>\n");
                 exportTherapeuticImplications(ev, sb, indent+"        ");
-                if (isInvestigational) {
-                    exportClinicalTrials(ev, sb,  indent+"        ");
+                if (isInvestigational 
+                        && (relevantTumorTypes.size()==1 // no matched tumor types
+                            ||relevantTumorTypes.contains(ev.getTumorType()))) { // only if relevent to patient's disease
+                    List<TumorType> tumorTypes;
+                    if (relevantTumorTypes.size()>1 // Patient tumor type mathched to some tumor types -- not only TUMOR_TYPE_ALL_TUMORS
+                            && ev.getTumorType().getName().equals(TUMOR_TYPE_ALL_TUMORS)) {
+                        tumorTypes = new ArrayList<TumorType>(relevantTumorTypes);
+                        tumorTypes.remove(ev.getTumorType());
+                    } else {
+                        tumorTypes = Collections.singletonList(ev.getTumorType());
+                    }
+                    exportClinicalTrials(ev, tumorTypes, sb,  indent+"        ");
                 }
                 sb.append(indent).append("    </sensitive_to>\n");
             }
@@ -319,16 +331,14 @@ public class VariantAnnotationXMLController {
         return ret;
     }
     
-    private void exportClinicalTrials(Evidence evidence, StringBuilder sb, String indent) {
+    private void exportClinicalTrials(Evidence evidence, List<TumorType> relevantTumorTypes, StringBuilder sb, String indent) {
         Set<Drug> drugs = new HashSet<Drug>();
         for (Treatment treatment : evidence.getTreatments()) {
             drugs.addAll(treatment.getDrugs());
         }
         
-        TumorType tumorType = evidence.getTumorType();
-        
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(Collections.singletonList(tumorType), drugs);
+        List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(relevantTumorTypes, drugs);
         Collections.sort(clinicalTrials, new Comparator<ClinicalTrial>() {
             public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
                 return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
@@ -387,6 +397,12 @@ public class VariantAnnotationXMLController {
             sb.append(StringEscapeUtils.escapeXml(trial.getPhase()));
         }
         sb.append("</phase>\n");
+        
+        for (Alteration alteration : trial.getAlterations()) {
+            sb.append(indent).append("    <biomarker>");
+            sb.append(StringEscapeUtils.escapeXml(alteration.toString()));
+            sb.append("</biomarker>\n");
+        }
 
         sb.append(indent).append("</clinical_trial>\n");
     }

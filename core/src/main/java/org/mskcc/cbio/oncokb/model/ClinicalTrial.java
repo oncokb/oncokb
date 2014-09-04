@@ -2,6 +2,7 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -13,14 +14,16 @@ import java.util.Set;
 public class ClinicalTrial implements java.io.Serializable {
     private Integer trialId;
     private String nctId;
+    private String cdrId;
     private String title;
     private String purpose;
     private String recuitingStatus;
     private String eligibilityCriteria;
     private String phase;
     private String diseaseCondition;
-    private Set<TumorType> tumorTypes;
-    private Set<Drug> drugs;
+    private Set<TumorType> tumorTypes = new HashSet<TumorType>(0);
+    private Set<Drug> drugs = new HashSet<Drug>(0);
+    private Set<Alteration> alterations = new HashSet<Alteration>(0);
     
 
     public ClinicalTrial() {
@@ -40,6 +43,14 @@ public class ClinicalTrial implements java.io.Serializable {
 
     public void setNctId(String nctId) {
         this.nctId = nctId;
+    }
+
+    public String getCdrId() {
+        return cdrId;
+    }
+
+    public void setCdrId(String cdrId) {
+        this.cdrId = cdrId;
     }
 
     public String getTitle() {
@@ -104,6 +115,14 @@ public class ClinicalTrial implements java.io.Serializable {
 
     public void setDrugs(Set<Drug> drugs) {
         this.drugs = drugs;
+    }
+
+    public Set<Alteration> getAlterations() {
+        return alterations;
+    }
+
+    public void setAlterations(Set<Alteration> alterations) {
+        this.alterations = alterations;
     }
 
     @Override
