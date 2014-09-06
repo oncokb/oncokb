@@ -423,14 +423,14 @@ public class VariantAnnotationXMLController {
                     !relevantTumorTypes.contains(evidence.getTumorType())) {
                 levelOfEvidence = LevelOfEvidence.LEVEL_2;
             }
-            sb.append(indent).append("<level_of_evidence>\n");
+            sb.append(indent).append("<level_of_evidence_for_patient_indication>\n");
             sb.append(indent).append("    <level>");
             sb.append(levelOfEvidence.getLevel());
             sb.append("</level>\n");
             sb.append(indent).append("    <description>");
             sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()).trim());
             sb.append("</description>\n");
-            sb.append(indent).append("</level_of_evidence>\n");
+            sb.append(indent).append("</level_of_evidence_for_patient_indication>\n");
         }
         
         sb.append(indent).append("<description>");

@@ -479,11 +479,11 @@ public final class QuestDocAnnotationParser {
             Matcher m = pSensitiveTo.matcher(lines.get(sensitiveLines.get(0)[0]));
             if (!m.matches()) continue;
             
-            String[] drugTxts = m.group(1).trim().replaceAll("\\([^\\)]*\\)", "").split(",");
+            String[] drugTxts = m.group(1).trim().replaceAll("(\\([^\\)]*\\))||(\\[[^\\]]*\\])", "").split(",");
 
             Set<Treatment> treatments = new HashSet<Treatment>();
             for (String drugTxt : drugTxts) {
-                String[] drugNames = drugTxt.split(" \\+");
+                String[] drugNames = drugTxt.split(" ?\\+ ?");
                 
                 Set<Drug> drugs = new HashSet<Drug>();
                 for (String drugName : drugNames) {
