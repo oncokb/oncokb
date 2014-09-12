@@ -63,7 +63,7 @@ public class VariantAnnotationXMLController {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
         StringBuilder sb = new StringBuilder();
-//        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         sb.append("<xml>\n");
         
         Alteration alt = new Alteration();
@@ -167,11 +167,12 @@ public class VariantAnnotationXMLController {
         Set<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
-        int nRelevantTumorTypes = sortTumorType(tumorTypes, tumorType);
+        sortTumorType(tumorTypes, tumorType);
+        Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
         
-        int iTumorTypes = 0;
         for (TumorType tt : tumorTypes) {
-            sb.append("<cancer_type type=\"").append(tt.getName()).append("\" relevant_to_patient_disease=\""+((iTumorTypes++<nRelevantTumorTypes)?"Yes":"No")+"\">\n");
+            boolean isRelevant = relevantTumorTypes.contains(tt);
+            sb.append("<cancer_type type=\"").append(tt.getName()).append("\" relevant_to_patient_disease=\"").append(isRelevant?"Yes":"No").append("\">\n");
             
             // find prevalence evidence blob
             List<Evidence> prevalanceEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PREVALENCE, tt);
@@ -243,12 +244,35 @@ public class VariantAnnotationXMLController {
             exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sb, "    ");
             
             // CLINICAL_TRIAL
-//            List<Evidence> trialsEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.CLINICAL_TRIAL, tt);
-//            for (Evidence ev : trialsEvs) {
-//                for (ClinicalTrial trial : ev.getClinicalTrials()) {
-//                    exportClinicalTrial(trial);
-//                }
-//            }
+            {
+                Set<Drug> drugs = new HashSet<Drug>();
+                for (Evidence ev : stdImpEbsSensitivity) {
+                    for (Treatment treatment : ev.getTreatments()) {
+                        drugs.addAll(treatment.getDrugs());
+                    }
+                }
+                for (Evidence ev : invImpEbsSensitivity) {
+                    for (Treatment treatment : ev.getTreatments()) {
+                        drugs.addAll(treatment.getDrugs());
+                    }
+                }
+
+                List<TumorType> tumorTypesForTrials;
+                if (isRelevant) { // if relevant to pateint disease, find trials that match the tumor type
+                    tumorTypesForTrials = Collections.singletonList(tt);
+                } else if (relevantTumorTypes.size()==1) { // if no relevant disease, find trials that match the tumor type
+                    tumorTypesForTrials = Collections.singletonList(tt);
+                } else { // for irrelevant diseases, find trials that match the relavant tumor types
+                    tumorTypesForTrials = new ArrayList<TumorType>(relevantTumorTypes);
+                }
+
+                ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+                List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(tumorTypesForTrials, drugs, true);
+                clinicalTrials.removeAll(allTrails); // remove duplication
+                allTrails.addAll(clinicalTrials);
+                
+                exportClinicalTrials(clinicalTrials, sb,  "    ");
+            }
             
             sb.append("</cancer_type>\n");
         }
@@ -290,19 +314,6 @@ public class VariantAnnotationXMLController {
             for (Evidence ev : evsSensitivity.get(1)) {
                 sb.append(indent).append("    <sensitive_to>\n");
                 exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent+"        ");
-                if (//isInvestigational &&
-                        (relevantTumorTypes.size()==1 // no matched tumor types
-                            ||relevantTumorTypes.contains(ev.getTumorType()))) { // only if relevent to patient's disease
-                    List<TumorType> tumorTypes;
-                    if (relevantTumorTypes.size()>1 // Patient tumor type mathched to some tumor types -- not only TUMOR_TYPE_ALL_TUMORS
-                            && ev.getTumorType().getName().equals(TUMOR_TYPE_ALL_TUMORS)) {
-                        tumorTypes = new ArrayList<TumorType>(relevantTumorTypes);
-                        tumorTypes.remove(ev.getTumorType());
-                    } else {
-                        tumorTypes = Collections.singletonList(ev.getTumorType());
-                    }
-                    exportClinicalTrials(ev, tumorTypes, sb,  indent+"        ");
-                }
                 sb.append(indent).append("    </sensitive_to>\n");
             }
             for (Evidence ev : evsResisitance.get(1)) {
@@ -331,14 +342,7 @@ public class VariantAnnotationXMLController {
         return ret;
     }
     
-    private void exportClinicalTrials(Evidence evidence, List<TumorType> relevantTumorTypes, StringBuilder sb, String indent) {
-        Set<Drug> drugs = new HashSet<Drug>();
-        for (Treatment treatment : evidence.getTreatments()) {
-            drugs.addAll(treatment.getDrugs());
-        }
-        
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(relevantTumorTypes, drugs, true);
+    private void exportClinicalTrials(List<ClinicalTrial> clinicalTrials, StringBuilder sb, String indent) {
         Collections.sort(clinicalTrials, new Comparator<ClinicalTrial>() {
             public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
                 return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
@@ -610,12 +614,10 @@ public class VariantAnnotationXMLController {
      * @param patientTumorType
      * @return the number of relevant tumor types
      */
-    private int sortTumorType(List<TumorType> tumorTypes, String patientTumorType) {
+    private void sortTumorType(List<TumorType> tumorTypes, String patientTumorType) {
         Set<TumorType> relevantTumorTypes = fromQuestTumorType(patientTumorType);
         relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
         tumorTypes.removeAll(relevantTumorTypes); // other tumor types
         tumorTypes.addAll(0, relevantTumorTypes);
-        
-        return relevantTumorTypes.size();
     }
 }
