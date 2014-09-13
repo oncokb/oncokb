@@ -91,7 +91,9 @@ public class FileUtils {
         String line;
         while ((line = in.readLine()) != null) {
             if (trim) {
-                line = line.replaceAll("^[\uFEFF-\uFFFF]+", "").trim();// trim and remove unicode
+                line = line.replaceAll("^[\uFEFF-\uFFFF]+", ""); // trim and remove unicode
+                line = line.replaceAll("\\[[a-z]\\]", ""); // remove comments from google docs
+                line = line.trim();
             }
             if (!line.isEmpty())
                 lines.add(line);

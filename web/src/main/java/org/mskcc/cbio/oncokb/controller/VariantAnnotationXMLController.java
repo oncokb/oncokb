@@ -438,7 +438,8 @@ public class VariantAnnotationXMLController {
         }
         
         sb.append(indent).append("<description>");
-        sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
+        if (evidence.getDescription()!=null)
+            sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
         sb.append("</description>\n");
         
         exportRefereces(evidence, sb, indent);

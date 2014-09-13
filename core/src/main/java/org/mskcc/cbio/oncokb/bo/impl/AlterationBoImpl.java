@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
@@ -61,6 +63,32 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
             
         //TODO: add activating or inactivating alterations
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.MUTATION_EFFECT);
+        boolean activating = false, inactivating = false;
+        for (Evidence evidence : mutationEffectEvs) {
+            String effect = evidence.getKnownEffect().toLowerCase();
+            
+            if (effect.contains("inactivating")) {
+                inactivating = true;
+            } else if (effect.contains("activating")) {
+                activating = true;
+            }
+        }
+        
+        if (inactivating) {
+            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "inactivating mutations");
+            if (alt!=null) {
+                alterations.add(alt);
+            }
+        }
+        
+        if (activating) {
+            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "activating mutations");
+            if (alt!=null) {
+                alterations.add(alt);
+            }
+        }
         
         return alterations;
     }
