@@ -14,8 +14,6 @@ var tree = (function() {
 	var tree, diagonal, vis, numOfTumorTypes = 0, numOfTissues = 0;
 
 	var searchResult = [];
-
-	//d3.json("flare.json", build);
         
         function initDataAndTree(_treeInfo, _description) {
             var rootName = "Genes",
@@ -24,9 +22,7 @@ var tree = (function() {
             treeData[rootName] = {};
             treeInfo = _treeInfo;
             description.Genes = _description;
-            description.description = [{
-                    evidenceType: "", 
-                    des: ""}];
+            description.description = [{ evidenceType: "", description: ""}];
             
             tree = d3.layout.tree()
             .nodeSize([20, null]);
@@ -56,7 +52,7 @@ var tree = (function() {
             function formatTree(name, tree, description) {
                 var ret = {
                     name: name, 
-                    description: description[name].des || []
+                    description: description[name]["description"] || []
                 };
                 var root = tree[name];
                 var children = [];
@@ -204,12 +200,18 @@ var tree = (function() {
 	      .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
 	      .text(function(d) {
                   if(d["description"].length > 0) {
-                    var qtipText = "<b>" + d["description"][0]["evidenceType"]  + "</b>: " +d["description"][0]["des"];
+                    var qtipText = "";
                     var _position = {};
-                    for(var i = 1, desL = d["description"].length; i < desL; i++) {
-                        qtipText += "<br/><br/>" + "<b>" + d["description"][i]["evidenceType"] + "</b>: " +d["description"][i]["des"];
+                    for(var i = 0, desL = d["description"].length; i < desL; i++) {
+                        for(var _evidence in d["description"][i]){
+                            if(d["description"][i][_evidence] && d["description"][i][_evidence] !== ""){
+                                qtipText += "<b>" + _evidence + "</b>: " + d["description"][i][_evidence] + "<br>";
+                            }
+                        }
+                        if(i+1 !== desL)
+                            qtipText += "<hr>";
                     }
-                    console.log(d);
+                    
                     if((d.children || d._children) && d.depth > 1){
                         _position = {my:'bottom right',at:'top left', viewport: $(window)};
                     }else {
@@ -218,6 +220,7 @@ var tree = (function() {
                     $(this).qtip({
                         content:{text: qtipText},
                         style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey'},
+                        hide: {fixed:true, delay: 100},
                         position: _position
                     });
                 }

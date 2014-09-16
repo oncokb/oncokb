@@ -87,8 +87,19 @@ var DataProxy = (function() {
                 var _datum = _geneDatum[i],
                     _altName = "",
                     _tumorTypeName = "",
-                    _treatmentsName = "";
-
+                    _treatmentsName = "",
+                    _displayAttr = {
+                        evidenceType: "Evidence Type",
+                        description: "Description",
+                        knownEffect: "Known Effect",
+                        levelOfEvidence: "Level Of Evidence"
+                    },
+                    _attrDatum = {};
+                
+                for(var _attr in _displayAttr) {
+                    _attrDatum[_displayAttr[_attr]] = _datum[_attr];
+                }
+                
                 if(_datum.alterations && _datum.alterations.length > 0) {
                     _altName = _datum.alterations[0]['alteration'] || "";
 
@@ -116,55 +127,34 @@ var DataProxy = (function() {
                                 if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty(_treatmentsName)){
                                     description[_geneName][_altName][_tumorTypeName][_treatmentsName] = {};
                                 }
-                                if(!description[_geneName][_altName][_tumorTypeName][_treatmentsName].hasOwnProperty("des")) {
-                                    description[_geneName][_altName][_tumorTypeName][_treatmentsName]["des"] = [];
+                                if(!description[_geneName][_altName][_tumorTypeName][_treatmentsName].hasOwnProperty("description")) {
+                                    description[_geneName][_altName][_tumorTypeName][_treatmentsName]["description"] = [];
                                 }
-                                description[_geneName][_altName][_tumorTypeName][_treatmentsName]["des"].push({
-                                    des: _datum.description || "",
-                                    evidenceType: _datum.evidenceType || ""
-                                });
+                                
+                                description[_geneName][_altName][_tumorTypeName][_treatmentsName]["description"].push(_attrDatum);
                             }
                         }else {
 
-                            if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty("des")) {
-                                description[_geneName][_altName][_tumorTypeName]["des"] = [];
+                            if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty("description")) {
+                                description[_geneName][_altName][_tumorTypeName]["description"] = [];
                             }
-                            description[_geneName][_altName][_tumorTypeName]["des"].push({
-                                des: _datum.description || "",
-                                evidenceType: _datum.evidenceType || ""
-                            });
+                            description[_geneName][_altName][_tumorTypeName]["description"].push(_attrDatum);
                         }
                     }else {
-                        if(!description[_geneName][_altName].hasOwnProperty("des")) {
-                            description[_geneName][_altName]["des"] = [];
+                        if(!description[_geneName][_altName].hasOwnProperty("description")) {
+                            description[_geneName][_altName]["description"] = [];
                         }
-                        description[_geneName][_altName]["des"].push({
-                            des: _datum.description || "",
-                            evidenceType: _datum.evidenceType || ""
-                        });
+                        description[_geneName][_altName]["description"].push(_attrDatum);
                     }
                 }else {
-//                            console.log(_datum);
-                    if(!description[_geneName].hasOwnProperty("des")) {
-                        description[_geneName]["des"] = [];
+                    if(!description[_geneName].hasOwnProperty("description")) {
+                        description[_geneName]["description"] = [];
                     }
-                    description[_geneName]["des"].push({
-                        des: _datum.description || "",
-                        evidenceType: _datum.evidenceType || ""
-                    });
+                    description[_geneName]["description"].push(_attrDatum);
                 }
-
-//                        if(_geneName === "BRAF"){
-//                            console.log("----------");
-//                            console.log("alterations: " + _altName);
-//                            console.log("tumor type: " + _tumorTypeName);
-//                            console.log("treatments: " + _treatmentsName);
-//                            console.log(_datum);
-//                        }
 
                 _datum = null;
             }
-//                    _desDatum = null;
             _geneDatum = null;
         }
     }
