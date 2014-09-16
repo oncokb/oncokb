@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class EvidenceController {
     
-    @RequestMapping(value="/EvidenceBlob.json")
+    @RequestMapping(value="/evidence.json")
     public @ResponseBody List<Evidence> getEvidence(
             @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol) {
@@ -39,11 +39,11 @@ public class EvidenceController {
             gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
         }
         
-        if (gene == null) {
-            return Collections.emptyList();
-        }
-        
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        
+        if (gene == null) {
+            return evidenceBo.findAll();
+        }
         
         return evidenceBo.findEvidencesByGene(gene);
     }
