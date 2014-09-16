@@ -42,4 +42,21 @@ public class ClinicalTrialBoImpl extends GenericBoImpl<ClinicalTrial, ClinicalTr
         }
         return new ArrayList<ClinicalTrial>(trials);
     }
+
+    @Override
+    public List<ClinicalTrial> findClinicalTrialByTumorType(Collection<TumorType> tumorTypes, boolean openTrialsOnly) {
+        Set<ClinicalTrial> trials = new LinkedHashSet<ClinicalTrial>();
+        for (TumorType tumorType : tumorTypes) {
+            if (!openTrialsOnly) {
+                trials.addAll(getDao().findClinicalTrialByTumorType(tumorType));
+            } else {
+                for (ClinicalTrial trial : getDao().findClinicalTrialByTumorType(tumorType)) {
+                    if (trial.isOpen()) {
+                        trials.add(trial);
+                    }
+                }
+            }
+        }
+        return new ArrayList<ClinicalTrial>(trials);    
+    }
 }

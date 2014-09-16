@@ -62,4 +62,7 @@
   <query name="findClinicalTrialByTumorTypeAndDrug">
         <![CDATA[select c from ClinicalTrial c join c.tumorTypes t join c.drugs d where t.tumorTypeId=? and d.drugId=?]]>
   </query>
+  <query name="findClinicalTrialByTumorType">
+        <![CDATA[select c from ClinicalTrial c join c.tumorTypes t where t.tumorTypeId=?]]>
+  </query>
 </hibernate-mapping>

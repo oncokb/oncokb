@@ -8,10 +8,13 @@ package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -152,7 +155,11 @@ public class ClinicalTrialsImporter {
             }
             
             List<String> otherNames = getTexts(el, "other_name");
-            drugs.add(getDrug(name, new HashSet<String>(otherNames)));
+            
+            Map<String, Set<String>> mapNameOtherNames = splitDrugNames(name, otherNames);
+            for (Map.Entry<String, Set<String>> entry : mapNameOtherNames.entrySet()) {
+                drugs.add(getDrug(entry.getKey(), entry.getValue()));
+            }
         }
         
         // from mesh_term
@@ -187,6 +194,32 @@ public class ClinicalTrialsImporter {
         drug.setSynonyms(otherNames);
         drugBo.save(drug);
         return drug;
+    }
+    
+    private static Map<String, Set<String>> splitDrugNames(String drugName, Collection<String> otherNames) {
+        Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+        String[] names = drugName.split(" \\+ ");
+        for (String name : names) {
+            map.put(name, new HashSet<String>());
+        }
+        
+        if (names.length==1) {
+            map.get(names[0]).addAll(otherNames);
+            return map;
+        }
+        
+        for (String otherName : otherNames) {
+            String[] onames = otherName.split(" \\+ ");
+            if (onames.length != names.length) {
+                continue;
+            }
+            
+            for (int i=0; i<onames.length; i++) {
+                map.get(names[i]).add(onames[i]);
+            }
+        }
+        
+        return map;
     }
     
     private static List<Alteration> allAlterations = null;
