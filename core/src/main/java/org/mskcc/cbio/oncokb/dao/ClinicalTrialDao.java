@@ -22,6 +22,13 @@ public interface ClinicalTrialDao extends GenericDao<ClinicalTrial, Integer> {
     /**
      * 
      * @param tumorType
+     * @return 
+     */
+    List<ClinicalTrial> findClinicalTrialByTumorType(TumorType tumorType);
+    
+    /**
+     * 
+     * @param tumorType
      * @param drug
      * @return 
      */

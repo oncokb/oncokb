@@ -24,4 +24,9 @@ public class ClinicalTrialDaoImpl
     public List<ClinicalTrial> findClinicalTrialByTumorTypeAndDrug(TumorType tumorType, Drug drug) {
         return findByNamedQuery("findClinicalTrialByTumorTypeAndDrug", tumorType.getTumorTypeId(), drug.getDrugId());
     }
+
+    @Override
+    public List<ClinicalTrial> findClinicalTrialByTumorType(TumorType tumorType) {
+        return findByNamedQuery("findClinicalTrialByTumorType", tumorType.getTumorTypeId());
+    }
 }
