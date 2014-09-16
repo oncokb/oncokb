@@ -359,11 +359,20 @@ public class VariantAnnotationXMLController {
             }
         });
         for (ClinicalTrial clinicalTrial : clinicalTrials) {
-            String phase = clinicalTrial.getPhase().toLowerCase();
-            if (phase.contains("phase 2") || phase.contains("phase 3") || phase.contains("phase 4") || phase.contains("phase 5") ) {
+            if (//filterByPhase(clinicalTrial) &&
+                    clinicalTrial.isOpen()) { // open trials
                 exportClinicalTrial(clinicalTrial, sb, indent);
             }
         }
+    }
+    
+    private boolean filterByPhase(ClinicalTrial clinicalTrial) {
+        String phase = clinicalTrial.getPhase().toLowerCase();
+        return phase.contains("phase 1") || 
+                phase.contains("phase 2") || 
+                phase.contains("phase 3") || 
+                phase.contains("phase 4") || 
+                phase.contains("phase 5");
     }
     
     private void exportClinicalTrial(ClinicalTrial trial, StringBuilder sb, String indent) {
@@ -409,6 +418,18 @@ public class VariantAnnotationXMLController {
             sb.append(indent).append("    <biomarker>");
             sb.append(StringEscapeUtils.escapeXml(alteration.toString()));
             sb.append("</biomarker>\n");
+        }
+        
+        for (Drug drug : trial.getDrugs()) {
+            sb.append(indent).append("    <intervention>");
+            sb.append(StringEscapeUtils.escapeXml(drug.getDrugName()));
+            sb.append("</intervention>\n");
+        }
+        
+        for (TumorType tumorType : trial.getTumorTypes()) {
+            sb.append(indent).append("    <condition>");
+            sb.append(StringEscapeUtils.escapeXml(tumorType.getName()));
+            sb.append("</condition>\n");
         }
 
         sb.append(indent).append("</clinical_trial>\n");

@@ -8,6 +8,7 @@ package org.mskcc.cbio.oncokb.dao.importor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class ClinicalTrialsImporter {
         List<String> files = FileUtils.getFilesInFolder(NCI_CLINICAL_TRIAL_FOLDER, "xml");
         int n = files.size();
         System.out.println("Found "+n+" trials");
-        for (int i=0; i<n; i++) {
+        for (int i=27020; i<n; i++) {
             String file = files.get(i);
             System.out.print("Process... "+(i+1)+"/"+n);
             ClinicalTrial trial = null;
@@ -89,7 +90,7 @@ public class ClinicalTrialsImporter {
         if (!isTrialOpen(status)) return null;
         
         String nctId = getText(docEle, "IDInfo/NCTID");
-        
+                
         System.out.print(" "+nctId);
         
         ClinicalTrial clinicalTrial = parseClinicalTrialsGov(nctId, db);
@@ -110,19 +111,15 @@ public class ClinicalTrialsImporter {
         
         System.out.print(" in US");
         
-        String briefTitle = getText(docEle, "brief_title");
-//        String officialTitle = getText(docEle, "official_title");
-        String briefSummary = getText(docEle, "brief_summary/textblock");
-//        String detailedDesc = getText(docEle, "detailed_description/textblock");
-        String status = getText(docEle, "overall_status");
-        String phase = getText(docEle, "phase");
-        String condition = getText(docEle, "condition");
-        String eligibility = getText(docEle, "eligibility/criteria/textblock");
+        String briefTitle = getText(docEle, "brief_title").trim();
+//        String officialTitle = getText(docEle, "official_title").trim();
+        String briefSummary = getText(docEle, "brief_summary/textblock").trim();
+//        String detailedDesc = getText(docEle, "detailed_description/textblock").trim();
+        String status = getText(docEle, "overall_status").trim();
+        String phase = getText(docEle, "phase").trim();
+        String condition = getText(docEle, "condition").trim();
+        String eligibility = getText(docEle, "eligibility/criteria/textblock").trim();
         eligibility = replaceUTFcode(eligibility);
-        
-        if (!isTrialOpen(status)) {
-            return null;
-        }
         
         ClinicalTrial trial = new ClinicalTrial();
         trial.setNctId(nctId);
@@ -139,23 +136,58 @@ public class ClinicalTrialsImporter {
     }
     
     private static Set<Drug> parseDrugs(Element docEle) {
-        List<String> drugNames = getTexts(docEle, "intervention_browse/mesh_term");
         Set<Drug> drugs = new HashSet<Drug>();
-        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-
-        for (String drugName : drugNames) {
-            Drug drug = drugBo.guessUnambiguousDrug(drugName);
-            if (drug==null) {
-                drug = new Drug();
-                drug.setDrugName(drugName);
-                drugBo.save(drug);
+        
+        //from intervetion
+        List<Element> elements = getElements(docEle, "intervention");
+        for (Element el : elements) {
+            String type = getText(el, "intervention_type");
+            if (!"Drug".equals(type)) {
+                continue;
             }
-            drugs.add(drug);
+            
+            String name = getText(el, "intervention_name");
+            if (name==null) {
+                continue;
+            }
+            
+            List<String> otherNames = getTexts(el, "other_name");
+            drugs.add(getDrug(name, new HashSet<String>(otherNames)));
+        }
+        
+        // from mesh_term
+        List<String> drugNames = getTexts(docEle, "intervention_browse/mesh_term");
+
+        Set<String> synonyms = Collections.emptySet();
+        for (String drugName : drugNames) {
+            drugs.add(getDrug(drugName, synonyms));
         }
         
         return drugs;
     }
     
+    private static Drug getDrug(String drugName, Set<String> otherNames) {
+        // solve the + problem'
+        
+        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
+        Drug drug = drugBo.guessUnambiguousDrug(drugName);
+        if (drug!=null) {
+            return drug;
+        }
+        
+        for (String otherName : otherNames) {
+            drug = drugBo.guessUnambiguousDrug(otherName);
+            if (drug!=null) {
+                return drug;
+            }
+        }
+        
+        drug = new Drug();
+        drug.setDrugName(drugName);
+        drug.setSynonyms(otherNames);
+        drugBo.save(drug);
+        return drug;
+    }
     
     private static List<Alteration> allAlterations = null;
     private static Set<Alteration> parseAlterations(Element docEle) {
@@ -197,10 +229,11 @@ public class ClinicalTrialsImporter {
     }
     
     private static String getText(Element el, String path) {
-        return getTexts(el, path).get(0);
+        List<String> text = getTexts(el, path);
+        return text.isEmpty()?null:text.get(0);
     }
     
-    private static List<String> getTexts(Element el, String path) {
+    private static List<Element> getElements(Element el, String path) {
         LinkedList<Element> els = new LinkedList<Element>();
         els.add(el);
         String[] tags = path.split("/");
@@ -214,6 +247,11 @@ public class ClinicalTrialsImporter {
                 }
             }
         }
+        return els;
+    }
+    
+    private static List<String> getTexts(Element el, String path) {
+        List<Element> els = getElements(el, path);
         
         List<String> ret = new ArrayList<String>();
         for (Element e : els) {
