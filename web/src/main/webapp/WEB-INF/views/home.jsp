@@ -21,11 +21,11 @@
     <div id="body" class="container">
       <div class="row">
         <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-          <b>CMO Tumor Type Tree</b><br>
+          <b>OncoKB Tree</b><br>
           Please send all comments and suggestions to <a href="mailto:schultz@cbio.mskcc.org?Subject=Oncotree comment" target="_top"><u>schultz@cbio.mskcc.org</u></a><br>
           If you cannot see the tree below in Internet Explorer, please use Firefox or Chrome.
           <br/>
-          Last updated September 9, 2014.
+          Last updated September 16, 2014.
           <span id="summary-info"></span>
         </div>
       </div>
@@ -33,7 +33,7 @@
       <div class="row">
         <div class="col-lg-4 col-md-5 col-sm-6 col-xs-9 has-addon-feedback">
           <div class="input-group" id='tumor_search'>
-            <input type="text" class="form-control" placeholder="Search Tumor Type" />
+            <input type="text" class="form-control" placeholder="Search Term" />
             <span id="searchRemoveIcon" class="form-control-feedback glyphicon glyphicon-remove-circle"></span>
             <span id="searchResult" class="form-control-feedback result"></span>
             <span class="input-group-btn">
@@ -54,6 +54,11 @@
             </button>
           </div>
         </div>
+      </div>
+      
+      <div>
+          <img id='tree_loader' src="resources/img/ajax-loader.gif"/>
+          <div id="tree" class="_hidden"></div>
       </div>
 
       <span id="top-link-block" class="hidden">

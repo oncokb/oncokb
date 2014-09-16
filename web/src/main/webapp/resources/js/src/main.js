@@ -1,12 +1,16 @@
 
 $(document).ready(function(){
-	"use strict";
-
-    tree.init();
-    initEvents();
-    OutJS.backToTop();
-    initQtips();
-
+    "use strict";
+            
+    DataProxy.init(function() {
+        tree.init(DataProxy.getTreeInfo());
+        initEvents();
+        OutJS.backToTop();
+        initQtips();
+        $("#tree_loader").addClass('_hidden');
+        $("#tree").removeClass('_hidden');
+    }); 
+    
     function initEvents() {
     	$('#tumor_search button').click(function() {
 	        OutJS.search();

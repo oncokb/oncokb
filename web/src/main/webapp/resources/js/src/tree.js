@@ -7,67 +7,68 @@ var tree = (function() {
 	    i = 0,
 	    radius = 4.5,
 	    fontSize = '12px',
-	    root;
+	    root,
+            treeInfo = [];
 
 	var tree, diagonal, vis, numOfTumorTypes = 0, numOfTissues = 0;
 
 	var searchResult = [];
 
 	//d3.json("flare.json", build);
+        
+        function initDataAndTree(data) {
+            var rootName = "Genes",
+                treeData = {};
+        
+            treeData[rootName] = {};
+            treeInfo = data;
+            tree = d3.layout.tree()
+            .nodeSize([20, null]);
 
-	function initDataAndTree() {
-		tree = d3.layout.tree()
-	    	.nodeSize([20, null]);
+            diagonal = d3.svg.diagonal()
+                .projection(function(d) { return [d.y, d.x]; });
 
-		diagonal = d3.svg.diagonal()
-		    .projection(function(d) { return [d.y, d.x]; });
+            vis = d3.select("#tree").append("svg:svg")
+                .attr("width", w + m[1] + m[3])
+                .attr("height", h + m[0] + m[2])
+              .append("svg:g")
+                .attr("transform", "translate(" + m[3] + "," + 300 + ")");
 
-		vis = d3.select("#body").append("svg:svg")
-		    .attr("width", w + m[1] + m[3])
-		    .attr("height", h + m[0] + m[2])
-		  .append("svg:g")
-		    .attr("transform", "translate(" + m[3] + "," + 300 + ")");
-                DataProxy.init();
-                
-//		d3.tsv("tumor_tree.txt", function(csv) {
-//			var rootName = "Tissue";
-//			var tree = {};
-//			tree[rootName] = {};
-//		    csv.forEach(function(row){
-//		    	var node = tree[rootName];
-//		    	for (var col in row) {
-//		    		var type = row[col];
-//		    		if (!type) break;
-//		    		if (!(type in node)) {
-//		    			node[type] = {};
-//		    		}
-//		    		node = node[type];
-//		    	}
-//		    });
-//		    
-//		    function formatTree(name, tree) {
-//		    	var ret = {name:name};
-//		    	var root = tree[name];
-//		    	var children = [];
-//		    	for (var child in root) {
-//		    		children.push(formatTree(child, root));
-//		    	}
-//		    	if (children.length===0) {
-//		    		ret["size"] = 4000;
-//		    	} else {
-//		    		ret["children"] = children;
-//		    	}
-//		    	return ret;
-//		    }
-//		    
-//		    var json = formatTree(rootName, tree);
-//		    build(json);
-//
-//
-//			$("#summary-info").text(function() {
-//				return "( " + numOfTumorTypes + " tumor type" + ( numOfTumorTypes === 1 ? "" : "s" ) + " from " + numOfTissues + " tissue" + ( numOfTissues === 1 ? "" : "s" ) + " )";
-//			});
-//		  });
+            for(var i = 0, treeInfoL = treeInfo.length; i < treeInfoL; i++) {
+                var node = treeData[rootName],
+                    treeInfoDatum = treeInfo[i];
+                for (var col in treeInfoDatum) {
+                    var type = treeInfoDatum[col];
+                    if (!type) break;
+                    if (!(type in node)) {
+                            node[type] = {};
+                    }
+                    node = node[type];
+                }
+            }
+
+            function formatTree(name, tree) {
+                var ret = {name:name};
+                var root = tree[name];
+                var children = [];
+                for (var child in root) {
+                        children.push(formatTree(child, root));
+                }
+                if (children.length===0) {
+                        ret["size"] = 4000;
+                } else {
+                        ret["children"] = children;
+                }
+                return ret;
+            }
+
+            var json = formatTree(rootName, treeData);
+            build(json);
+
+
+            $("#summary-info").text(function() {
+                    return "( " + numOfTissues + " gene" + ( numOfTissues === 1 ? "" : "s" ) + " )";
+            });
 	}
 
 	function build(json) {
@@ -127,7 +128,11 @@ var tree = (function() {
 
 	  //Calculate maximum length of selected nodes in different levels
 	  nodes.forEach(function(d) {
-	    var _nameLength = d.name.length * 6 + 50;
+            var _upperL = d.name.replace(/[^A-Z]/g, "").length,
+                _lowerL = d.name.replace(/[^a-z]/g, "").length,
+                _numberL = d.name.replace(/[^0-9]/g, "").length;
+            
+            var _nameLength = _lowerL * 6 + _upperL * 9 + _numberL * 7 + 50;
 
 	    if(d.depth !== 0) {
 	      if (!leftDepth.hasOwnProperty(d.depth)) {
@@ -299,115 +304,115 @@ var tree = (function() {
 	}
 
 	function resizeSVG(rightDepth) {
-		var nodes = tree.nodes(root).reverse(),
-			maxHeight = 0,
-			maxWidth = 0,
-			lastDepth = 0;
+            var nodes = tree.nodes(root).reverse(),
+                maxHeight = 0,
+                maxWidth = 0,
+                lastDepth = 0;
 
-		nodes.forEach(function(d) {
-			if(d.x0 > maxHeight) {
-				maxHeight = d.x0;
-			}
+            nodes.forEach(function(d) {
+                if(d.x0 > maxHeight) {
+                        maxHeight = d.x0;
+                }
 
-			if(d.y0 > maxWidth) {
-				maxWidth = d.y0;
-			}
-		})
+                if(d.y0 > maxWidth) {
+                        maxWidth = d.y0;
+                }
+            });
 
-		maxHeight *= 2;
-		maxHeight += 150;
+            maxHeight *= 2;
+            maxHeight += 450;
 
-		lastDepth = rightDepth[Math.max.apply(Math, (Object.keys(rightDepth)).map(function(item) {return Number(item);}))];
-		maxWidth = maxWidth + 100 + lastDepth;
+            lastDepth = rightDepth[Math.max.apply(Math, (Object.keys(rightDepth)).map(function(item) {return Number(item);}))];
+            maxWidth = maxWidth + 100 + lastDepth;
 
-		if(500 < maxWidth) {
-			d3.select("body").select("svg").attr("width", maxWidth);
-		}else {
-			d3.select("body").select("svg").attr("width", 500);
-		}
+            if(500 < maxWidth) {
+                    d3.select("body").select("svg").attr("width", maxWidth);
+            }else {
+                    d3.select("body").select("svg").attr("width", 500);
+            }
 
-		if(500 < maxHeight) {
-			d3.select("body").select("svg").attr("height", maxHeight);
-		}else {
-			d3.select("body").select("svg").attr("height", 500);
-		}
+            if(500 < maxHeight) {
+                    d3.select("body").select("svg").attr("height", maxHeight);
+            }else {
+                    d3.select("body").select("svg").attr("height", 500);
+            }
 	}
 
 	function searchByNodeName(searchKey) {
-		searchResult.length = 0;
-		root.children.forEach(toggleAll);
-		update(root);
+            searchResult.length = 0;
+            root.children.forEach(toggleAll);
+            update(root);
 
-		if(searchKey !== "") {
-			for(var i = 0, numOfChild = root.children.length; i< numOfChild; i++) {
-				findChildContain(i, searchKey, root.children[i]);
-			}
+            if(searchKey !== "") {
+                for(var i = 0, numOfChild = root.children.length; i< numOfChild; i++) {
+                    findChildContain(i, searchKey, root.children[i]);
+                }
 
-			searchResult.forEach(function(content, index) {
-				var _indexes = content.split('-'),
-					_indexesLength = _indexes.length,
-					_node = root.children[_indexes[0]];
-				
-				for (var i = 1; i < _indexesLength; i++) {
-					if(!_node.children) {
-						toggle(_node);
-					}
-					_node = _node.children[_indexes[i]];
-				}
-			})
-			update(root);
-		}
+                searchResult.forEach(function(content, index) {
+                    var _indexes = content.split('-'),
+                            _indexesLength = _indexes.length,
+                            _node = root.children[_indexes[0]];
 
-		highlightSearchKey(searchKey);
+                    for (var i = 1; i < _indexesLength; i++) {
+                            if(!_node.children) {
+                                    toggle(_node);
+                            }
+                            _node = _node.children[_indexes[i]];
+                    }
+                });
+                update(root);
+            }
 
-		return searchResult;
+            highlightSearchKey(searchKey);
+
+            return searchResult;
 	}
 
 	function highlightSearchKey(searchKey) {
-		d3.select("#body svg").selectAll('text').each(function(d, i) {
-			if(searchKey === '') {
-				d3.select(this).style('fill','black');
-			}else {
-				if(d.name.toLowerCase().indexOf(searchKey) !== -1) {
-					d3.select(this).style('fill','red');
-				}else {
-					d3.select(this).style('fill','black');
-				}
-			}
-		})
+            d3.select("#body svg").selectAll('text').each(function(d, i) {
+                if(searchKey === '') {
+                        d3.select(this).style('fill','black');
+                }else {
+                        if(d.name.toLowerCase().indexOf(searchKey) !== -1) {
+                                d3.select(this).style('fill','red');
+                        }else {
+                                d3.select(this).style('fill','black');
+                        }
+                }
+            });
 	}
 
 	function findChildContain(parentId, searchKey, node) {
-		parentId = String(parentId);
-		if(node._children) {
-			if(node.name.toLowerCase().indexOf(searchKey) !== -1) {
-				searchResult.push(parentId);
-			}
-			for(var i = 0, numOfChild = node._children.length; i< numOfChild; i++) {
-				findChildContain(parentId + "-" + i, searchKey, node._children[i]);
-			}
-		}else {
-			if(node.name.toLowerCase().indexOf(searchKey) !== -1) {
-				searchResult.push(parentId);
-			}
-		}
+            parentId = String(parentId);
+            if(node._children) {
+                if(node.name.toLowerCase().indexOf(searchKey) !== -1) {
+                        searchResult.push(parentId);
+                }
+                for(var i = 0, numOfChild = node._children.length; i< numOfChild; i++) {
+                        findChildContain(parentId + "-" + i, searchKey, node._children[i]);
+                }
+            }else {
+                if(node.name.toLowerCase().indexOf(searchKey) !== -1) {
+                        searchResult.push(parentId);
+                }
+            }
 	}
 
 	function searchLeaf(node) {
-		if(node._children || node.children) {
-			if(node.children) {
-				for (var i = 0, _length = node.children.length; i < _length; i++) {
-					searchLeaf(node.children[i]);
-				}
-			}
-			if(node._children) {
-				for (var i = 0, _length = node._children.length; i < _length; i++) {
-					searchLeaf(node._children[i]);
-				}
-			}
-		}else {
-			numOfTumorTypes++;
-		}
+            if(node._children || node.children) {
+                if(node.children) {
+                        for (var i = 0, _length = node.children.length; i < _length; i++) {
+                                searchLeaf(node.children[i]);
+                        }
+                }
+                if(node._children) {
+                        for (var i = 0, _length = node._children.length; i < _length; i++) {
+                                searchLeaf(node._children[i]);
+                        }
+                }
+            }else {
+                numOfTumorTypes++;
+            }
 	}
 
 	return {
@@ -422,5 +427,5 @@ var tree = (function() {
 		getNumOfTumorTypes: function() {
 			return numOfTumorTypes;
 		}
-	}
+	};
 })();
