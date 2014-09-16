@@ -3,7 +3,7 @@ $(document).ready(function(){
     "use strict";
             
     DataProxy.init(function() {
-        tree.init(DataProxy.getTreeInfo());
+        tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
         initEvents();
         OutJS.backToTop();
         initQtips();
@@ -57,20 +57,20 @@ $(document).ready(function(){
 
     function initQtips() {
     	$('#expand-nodes-btn').qtip({
-	        content:{text: "Expand all branches"},
-	        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey' },
+            content:{text: "Expand all branches"},
+            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey' },
             show: {event: "mouseover"},
             hide: {event: "mouseout"},
             position: {my:'bottom left',at:'top center', viewport: $(window)}
-	    });
+        });
 
-	    $('#collapse-nodes-btn').qtip({
-	        content:{text: "Collapse all branches"},
-	        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey' },
+        $('#collapse-nodes-btn').qtip({
+            content:{text: "Collapse all branches"},
+            style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey' },
             show: {event: "mouseover"},
             hide: {event: "mouseout"},
             position: {my:'bottom left',at:'top center', viewport: $(window)}
-	    });
+        });
     } 
 });
 

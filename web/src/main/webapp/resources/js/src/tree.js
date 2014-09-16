@@ -8,7 +8,8 @@ var tree = (function() {
 	    radius = 4.5,
 	    fontSize = '12px',
 	    root,
-            treeInfo = [];
+            treeInfo = [],
+            description = {};
 
 	var tree, diagonal, vis, numOfTumorTypes = 0, numOfTissues = 0;
 
@@ -16,12 +17,17 @@ var tree = (function() {
 
 	//d3.json("flare.json", build);
         
-        function initDataAndTree(data) {
+        function initDataAndTree(_treeInfo, _description) {
             var rootName = "Genes",
                 treeData = {};
         
             treeData[rootName] = {};
-            treeInfo = data;
+            treeInfo = _treeInfo;
+            description.Genes = _description;
+            description.description = [{
+                    evidenceType: "", 
+                    des: ""}];
+            
             tree = d3.layout.tree()
             .nodeSize([20, null]);
 
@@ -46,26 +52,27 @@ var tree = (function() {
                     node = node[type];
                 }
             }
-
-            function formatTree(name, tree) {
-                var ret = {name:name};
+            
+            function formatTree(name, tree, description) {
+                var ret = {
+                    name: name, 
+                    description: description[name].des || []
+                };
                 var root = tree[name];
                 var children = [];
                 for (var child in root) {
-                        children.push(formatTree(child, root));
+                    children.push(formatTree(child, root,description[name]));
                 }
                 if (children.length===0) {
-                        ret["size"] = 4000;
+                    ret["size"] = 4000;
                 } else {
-                        ret["children"] = children;
+                    ret["children"] = children;
                 }
                 return ret;
             }
-
-            var json = formatTree(rootName, treeData);
+            
+            var json = formatTree(rootName, treeData, description);
             build(json);
-
-
             $("#summary-info").text(function() {
                     return "( " + numOfTissues + " gene" + ( numOfTissues === 1 ? "" : "s" ) + " )";
             });
@@ -177,14 +184,14 @@ var tree = (function() {
 	  });
 
 	  // Update the nodes…
-	  var node = vis.selectAll("g.node")
-	      .data(nodes, function(d) { return d.id || (d.id = ++i); });
+	  var   node = vis.selectAll("g.node")
+                .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
 	  // Enter any new nodes at the parent's previous position.
-	  var nodeEnter = node.enter().append("svg:g")
-	      .attr("class", "node")
-	      .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-	      .on("click", function(d) { toggle(d); update(d); });
+	  var   nodeEnter = node.enter().append("svg:g")
+                .attr("class", "node")
+                .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+                .on("click", function(d) { toggle(d); update(d); });
 
 	  nodeEnter.append("svg:circle")
 	      .attr("r", 1e-6)
@@ -195,7 +202,27 @@ var tree = (function() {
 	      .attr("dy", ".35em")
 	      .attr('font-size', fontSize)
 	      .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-	      .text(function(d) { return d.name; })
+	      .text(function(d) {
+                  if(d["description"].length > 0) {
+                    var qtipText = "<b>" + d["description"][0]["evidenceType"]  + "</b>: " +d["description"][0]["des"];
+                    var _position = {};
+                    for(var i = 1, desL = d["description"].length; i < desL; i++) {
+                        qtipText += "<br/><br/>" + "<b>" + d["description"][i]["evidenceType"] + "</b>: " +d["description"][i]["des"];
+                    }
+                    console.log(d);
+                    if((d.children || d._children) && d.depth > 1){
+                        _position = {my:'bottom right',at:'top left', viewport: $(window)};
+                    }else {
+                        _position = {my:'bottom left',at:'top right', viewport: $(window)};
+                    }
+                    $(this).qtip({
+                        content:{text: qtipText},
+                        style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey'},
+                        position: _position
+                    });
+                }
+                return d.name; })
+                
 	      .style("fill-opacity", 1e-6);
 
 	  // Transition nodes to their new position.

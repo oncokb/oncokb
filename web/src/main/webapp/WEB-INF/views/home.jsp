@@ -21,12 +21,9 @@
     <div id="body" class="container">
       <div class="row">
         <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-          <b>OncoKB Tree</b><br>
-          Please send all comments and suggestions to <a href="mailto:schultz@cbio.mskcc.org?Subject=Oncotree comment" target="_top"><u>schultz@cbio.mskcc.org</u></a><br>
-          If you cannot see the tree below in Internet Explorer, please use Firefox or Chrome.
+          <b>OncoKB Tree</b>
           <br/>
-          Last updated September 16, 2014.
-          <span id="summary-info"></span>
+          <!--<span id="summary-info"></span>-->
         </div>
       </div>
       <br />
@@ -56,7 +53,7 @@
         </div>
       </div>
       
-      <div>
+      <div class="row">
           <img id='tree_loader' src="resources/img/ajax-loader.gif"/>
           <div id="tree" class="_hidden"></div>
       </div>
