@@ -42,11 +42,11 @@
 
         <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12">
           <div>
-            <button type="button" class="btn btn-default active" id='combined-variants-btn'>
-              <span>Combined Variants</span>
-            </button>
-            <button type="button" class="btn btn-default" id='separated-variants-btn'>
+            <button type="button" class="btn btn-default active" id='separated-variants-btn'>
               <span>Separated Variants</span>
+            </button>
+            <button type="button" class="btn btn-default" id='combined-variants-btn'>
+              <span>Combined Variants</span>
             </button>
               
             <div class="btn-group">

@@ -6,7 +6,7 @@ var DataProxy = (function() {
         description = {},
         jsonData = [],
         jsonDataL = 0,
-        treeType = "combined";//Combined || Seperated
+        treeType = "separated";//Combined || Separated
         
     function getDataFunc(callback){
          $.when($.ajax({type: "POST", url: "/evidence.json"}))
