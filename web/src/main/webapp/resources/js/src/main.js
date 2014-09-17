@@ -72,7 +72,6 @@ $(document).ready(function(){
         });
         
         $("#separated-variants-btn").click(function() {
-            console.log("jere");
             if(!$("#separated-variants-btn").hasClass('active')){
                 $("#tree_loader").removeClass('_hidden');
                 $("#tree").addClass('_hidden');
