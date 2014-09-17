@@ -619,6 +619,11 @@ public class VariantAnnotationXMLController {
                 String[] parts = line.split("\t");
                 String questType = parts[0].toLowerCase();
                 TumorType oncokbType = tumorTypeBo.findTumorTypeByName(parts[1]);
+                if (oncokbType==null) {
+                    System.err.println("no "+parts[1]+" as tumor type in oncokb");
+                    continue;
+                }
+                
                 List<TumorType> types = questTumorTypeMap.get(questType);
                 if (types==null) {
                     types = new LinkedList<TumorType>();

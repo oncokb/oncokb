@@ -59,16 +59,24 @@ public final class AlterationUtils {
                 start = Integer.valueOf(m.group(1));
                 end = Integer.valueOf(m.group(2));
                 String v = m.group(3);
-                if (v.equals("mis")) {
-                    consequence = "missense_variant";
-                } else if (v.equals("ins")) {
-                    consequence = "inframe_insertion";
-                } else if (v.equals("del")) {
-                    consequence = "inframe_deletion";
-                } else if (v.equals("fs")) {
-                    consequence = "frameshift_variant";
-                } else if (v.equals("trunc")) {
-                    consequence = "feature_truncation";
+                switch (v) {
+                    case "mis":
+                        consequence = "missense_variant";
+                        break;
+                    case "ins":
+                        consequence = "inframe_insertion";
+                        break;
+                    case "del":
+                        consequence = "inframe_deletion";
+                        break;
+                    case "fs":
+                        consequence = "frameshift_variant";
+                        break;
+                    case "trunc":
+                        consequence = "feature_truncation";
+                        break;
+                    case "mut":
+                        consequence = "any";
                 }
             } else {
                 p = Pattern.compile("([A-Z\\*])([0-9]+)fs.*");

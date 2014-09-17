@@ -8,7 +8,7 @@
       <generator class="identity"/>
     </id>
     <property name="cdrId" type="string">
-      <column name="cdr_id" not-null="true"/>
+      <column name="cdr_id"/>
     </property>
     <property name="nctId" type="string">
       <column name="nci_id" not-null="true"/>
