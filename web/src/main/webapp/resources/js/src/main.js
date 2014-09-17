@@ -16,43 +16,78 @@ $(document).ready(function(){
 	        OutJS.search();
 	    });
 
-	    $('#expand-nodes-btn').click(function() {
-	    	tree.expandAll();
-    		OutJS.backToTop();
-	    });
+        $('#expand-nodes-btn').click(function() {
+            tree.expandAll();
+            OutJS.backToTop();
+        });
 
-	    $('#collapse-nodes-btn').click(function() {
-	    	tree.collapseAll();
-    		OutJS.backToTop();
-	    });
+        $('#collapse-nodes-btn').click(function() {
+            tree.collapseAll();
+            OutJS.backToTop();
+        });
 
-	    $("#searchRemoveIcon").hide();
+        $("#searchRemoveIcon").hide();
 
-	    $("#searchRemoveIcon").hover(function() {
-	    	$(this).css('cursor', 'pointer');
-	    });
+        $("#searchRemoveIcon").hover(function() {
+            $(this).css('cursor', 'pointer');
+        });
 
-	    $("#searchRemoveIcon").hover(function() {
-	    	$(this).css('cursor', 'pointer');
-	    });
+        $("#searchRemoveIcon").hover(function() {
+            $(this).css('cursor', 'pointer');
+        });
 
-	    $("#searchRemoveIcon").click(function() {
-	    	$("#tumor_search input").val("");
-	    	$("#searchRemoveIcon").hide();
-	    	OutJS.search();
-	    	OutJS.backToTop();
-	    });
+        $("#searchRemoveIcon").click(function() {
+            $("#tumor_search input").val("");
+            $("#searchRemoveIcon").hide();
+            OutJS.search();
+            OutJS.backToTop();
+        });
 
-	    $("#tumor_search input").keyup(function () {
-	    	var _content = $(this).val();
-	    	if(_content.length > 0) {
-		  		$("#searchRemoveIcon").show();
-	    	}else {
-	    		$("#searchRemoveIcon").hide();
-	    		OutJS.search();
-	    		OutJS.backToTop();
-	    	}
-		});
+        $("#tumor_search input").keyup(function() {
+            var _content = $(this).val();
+            if(_content.length > 0) {
+                            $("#searchRemoveIcon").show();
+            }else {
+                $("#searchRemoveIcon").hide();
+                OutJS.search();
+                OutJS.backToTop();
+            }
+        });
+        
+        $("#combined-variants-btn").click(function() {
+            if(!$("#combined-variants-btn").hasClass('active')){
+                $("#tree_loader").removeClass('_hidden');
+                $("#tree").addClass('_hidden');
+                setTimeout(function(){
+                    DataProxy.generateDataByTreeType("combined", function(){
+                        $("body svg").remove();
+                        tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
+                        $("#tree_loader").addClass('_hidden');
+                        $("#tree").removeClass('_hidden');
+                        $("#combined-variants-btn").addClass('active');
+                        $("#separated-variants-btn").removeClass('active');
+                    });
+                },200);
+            }
+        });
+        
+        $("#separated-variants-btn").click(function() {
+            console.log("jere");
+            if(!$("#separated-variants-btn").hasClass('active')){
+                $("#tree_loader").removeClass('_hidden');
+                $("#tree").addClass('_hidden');
+                setTimeout(function(){
+                    DataProxy.generateDataByTreeType("separated", function(){
+                        $("body svg").remove();
+                        tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
+                        $("#tree_loader").addClass('_hidden');
+                        $("#tree").removeClass('_hidden');
+                        $("#separated-variants-btn").addClass('active');
+                        $("#combined-variants-btn").removeClass('active');
+                    });
+                }, 200);
+            }
+        });
     }   
 
     function initQtips() {
@@ -114,5 +149,5 @@ var OutJS = (function() {
 	return {
 		search: search,
 		backToTop: backToTop
-	}
+	};
 })();

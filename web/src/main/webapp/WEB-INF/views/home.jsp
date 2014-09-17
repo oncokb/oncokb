@@ -28,7 +28,7 @@
       </div>
       <br />
       <div class="row">
-        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-9 has-addon-feedback">
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
           <div class="input-group" id='tumor_search'>
             <input type="text" class="form-control" placeholder="Search Term" />
             <span id="searchRemoveIcon" class="form-control-feedback glyphicon glyphicon-remove-circle"></span>
@@ -40,15 +40,19 @@
           </div>
         </div>
 
-        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-          <div class="btn-group">
-            <button type="button" class="btn btn-default" id='expand-nodes-btn'>
-              <span class="glyphicon glyphicon-resize-full"></span>
+        <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12">
+          <div>
+            <button type="button" class="btn btn-default active" id='combined-variants-btn'>
+              <span>Combined Variants</span>
             </button>
-
-            <button type="button" class="btn btn-default" id='collapse-nodes-btn'>
-              <span class="glyphicon glyphicon-resize-small"></span>
+            <button type="button" class="btn btn-default" id='separated-variants-btn'>
+              <span>Separated Variants</span>
             </button>
+              
+            <div class="btn-group">
+                <button type="button" class="btn btn-default glyphicon glyphicon-resize-full" id='expand-nodes-btn'></button>
+                <button type="button" class="btn btn-default glyphicon glyphicon-resize-small" id='collapse-nodes-btn'></button>
+            </div>
           </div>
         </div>
       </div>
