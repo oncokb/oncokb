@@ -9,7 +9,7 @@ var DataProxy = (function() {
         treeType = "separated";//Combined || Separated
         
     function getDataFunc(callback){
-         $.when($.ajax({type: "POST", url: "/evidence.json"}))
+         $.when($.ajax({type: "POST", url: "evidence.json"}))
             .done(function(a1){
                 jsonData = a1;
                 jsonDataL = jsonData.length;

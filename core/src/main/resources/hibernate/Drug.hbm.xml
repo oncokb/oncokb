@@ -9,7 +9,7 @@
             <generator class="identity" />
         </id>
         <property name="drugName" type="string">
-            <column name="drug_name" not-null="true" unique="true" />
+            <column name="drug_name" not-null="true"/>
         </property>
         <property name="description" type="string">
             <column name="description" length="65535"/>
