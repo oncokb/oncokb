@@ -8,7 +8,7 @@
       <generator class="identity"/>
     </id>
     <property name="cdrId" type="string">
-      <column name="cdr_id" not-null="true"/>
+      <column name="cdr_id"/>
     </property>
     <property name="nctId" type="string">
       <column name="nci_id" not-null="true"/>
@@ -31,6 +31,15 @@
     <property name="diseaseCondition" type="string">
       <column name="disease_condition"/>
     </property>
+    <property name="lastChangedDate" type="string">
+      <column name="last_changed_date"/>
+    </property>
+    <set name="countries" table="clinical_trial_country" lazy="false">
+        <key>
+            <column name="trial_id" not-null="true" />
+        </key>
+        <element column="country" type="string"></element> 
+    </set>
     <set lazy="false" name="tumorTypes" table="clinical_trial_tumor_type">
       <key>
         <column name="trial_id" not-null="true"/>

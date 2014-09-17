@@ -97,7 +97,7 @@ public final class QuestDocAnnotationParser {
     private static final String QUEST_CURATION_FOLDER = "/Users/jgao/projects/oncokb-data/quest-annotation";
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         VariantConsequenceImporter.main(args);
         TumorTypeImporter.main(args);
         PiHelperDrugImporter.main(args);
@@ -105,7 +105,7 @@ public final class QuestDocAnnotationParser {
         for (String file : files) {
             parse(new FileInputStream(file));
         }
-        ClinicalTrialsImporter.main(args);
+        //ClinicalTrialsImporter.main(args);
         
 //        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }
@@ -127,7 +127,7 @@ public final class QuestDocAnnotationParser {
         
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         
-        Pattern p = Pattern.compile(GENE_P);
+        Pattern p = Pattern.compile(GENE_P, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(lines.get(start));
         m.matches();
         String hugo = m.group(1);
@@ -192,7 +192,7 @@ public final class QuestDocAnnotationParser {
     
     private static void parseMutation(Gene gene, List<String> lines, int start, int end) {
         // mutation
-        Pattern p = Pattern.compile(MUTATION_P);
+        Pattern p = Pattern.compile(MUTATION_P, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(lines.get(start));
         if (!m.matches()) {
             System.err.println("wrong format of mutation line: "+lines.get(0));
@@ -226,7 +226,7 @@ public final class QuestDocAnnotationParser {
         // mutation effect
         String mutationEffectStr = lines.get(start+1);
         
-        p = Pattern.compile(MUTATION_EFFECT_P);
+        p = Pattern.compile(MUTATION_EFFECT_P, Pattern.CASE_INSENSITIVE);
         m = p.matcher(mutationEffectStr);
         if (!m.matches()) {
             System.err.println("wrong format of mutation effect line: "+mutationEffectStr);
@@ -266,7 +266,7 @@ public final class QuestDocAnnotationParser {
     private static Set<String> parseMutationString(String mutationStr) {
         Set<String> ret = new HashSet<String>();
         String[] parts = mutationStr.split(", *");
-        Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)");
+        Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
         for (String part : parts) {
             Matcher m = p.matcher(part);
             if (m.find()) {
@@ -283,7 +283,7 @@ public final class QuestDocAnnotationParser {
     
     private static void parseCancer(Gene gene, Set<Alteration> alterations, List<String> lines, int start, int end) {
         String line = lines.get(start);
-        Pattern p = Pattern.compile(TUMOR_TYPE_P);
+        Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(line);
         if (!m.matches()) {
             System.err.println("wrong format of type type line: "+line);
@@ -409,7 +409,7 @@ public final class QuestDocAnnotationParser {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        Pattern p = Pattern.compile(CLINICAL_TRIALS_P);
+        Pattern p = Pattern.compile(CLINICAL_TRIALS_P, Pattern.CASE_INSENSITIVE);
         for (int i=start; i<end; i++) {
             Matcher m = p.matcher(lines.get(i));
             if (m.find()) {
@@ -460,7 +460,7 @@ public final class QuestDocAnnotationParser {
         
         // specific evidence
         Pattern pSensitiveTo = Pattern.compile(sensitivieP);
-        Pattern pLevel = Pattern.compile(HIGHEST_LEVEL_OF_EVIDENCE);
+        Pattern pLevel = Pattern.compile(HIGHEST_LEVEL_OF_EVIDENCE, Pattern.CASE_INSENSITIVE);
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
         
@@ -535,7 +535,7 @@ public final class QuestDocAnnotationParser {
     private static void parseNCCN(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end) {
         // disease
         String txt = lines.get(start).trim();
-        Pattern p = Pattern.compile(NCCN_DISEASE_P);
+        Pattern p = Pattern.compile(NCCN_DISEASE_P, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(txt);
         if (!m.matches()) {
             System.err.println("Problem with NCCN disease line: "+txt);
@@ -550,7 +550,7 @@ public final class QuestDocAnnotationParser {
         
         // version
         txt = lines.get(start+1).trim();
-        p = Pattern.compile(NCCN_VERSION_P);
+        p = Pattern.compile(NCCN_VERSION_P, Pattern.CASE_INSENSITIVE);
         m = p.matcher(txt);
         String version = null;
         if (!m.matches()) {
@@ -561,7 +561,7 @@ public final class QuestDocAnnotationParser {
         
         // pages
         txt = lines.get(start+2);
-        p = Pattern.compile(NCCN_PAGES_P);
+        p = Pattern.compile(NCCN_PAGES_P, Pattern.CASE_INSENSITIVE);
         m = p.matcher(txt);
         String pages = null;
         if (!m.matches()) {
@@ -572,7 +572,7 @@ public final class QuestDocAnnotationParser {
         
         // Recommendation category
         txt = lines.get(start+3);
-        p = Pattern.compile(NCCN_PAGES_RECOMMENDATION_CATEGORY);
+        p = Pattern.compile(NCCN_PAGES_RECOMMENDATION_CATEGORY, Pattern.CASE_INSENSITIVE);
         m = p.matcher(txt);
         String category = null;
         if (!m.matches()) {
@@ -583,7 +583,7 @@ public final class QuestDocAnnotationParser {
         
         // description
         txt = lines.get(start+4);
-        p = Pattern.compile(NCCN_EVIDENCE_P);
+        p = Pattern.compile(NCCN_EVIDENCE_P, Pattern.CASE_INSENSITIVE);
         m = p.matcher(txt);
         String nccnDescription = null;
         if (!m.matches()) {
@@ -601,16 +601,17 @@ public final class QuestDocAnnotationParser {
         evidence.setAlterations(alterations);
         evidence.setGene(gene);
         evidence.setTumorType(tumorType);
+        evidence.setDescription(nccnDescription);
         
         NccnGuidelineBo nccnGuideLineBo = ApplicationContextSingleton.getNccnGuidelineBo();
         
         NccnGuideline nccnGuideline = new NccnGuideline();
-            nccnGuideline.setDisease(disease);
-            nccnGuideline.setVersion(version);
-            nccnGuideline.setPages(pages);
-            nccnGuideline.setCategory(category);
-            nccnGuideline.setDescription(nccnDescription);
-            nccnGuideLineBo.save(nccnGuideline);
+        nccnGuideline.setDisease(disease);
+        nccnGuideline.setVersion(version);
+        nccnGuideline.setPages(pages);
+        nccnGuideline.setCategory(category);
+        nccnGuideline.setDescription(nccnDescription);
+        nccnGuideLineBo.save(nccnGuideline);
 
         evidence.setNccnGuidelines(Collections.singleton(nccnGuideline));
                 
@@ -678,7 +679,7 @@ public final class QuestDocAnnotationParser {
         Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        Pattern pmidPattern = Pattern.compile("\\(PMIDs?:([^\\);]+).*\\)");
+        Pattern pmidPattern = Pattern.compile("\\(PMIDs?:([^\\);]+).*\\)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(str);
         int start = 0;
         while (m.find(start)) {

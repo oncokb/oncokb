@@ -52,7 +52,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
         if (alteration.getConsequence()!=null) {
             if (matchedAlt==null // only when there is no specific match
-                    && alteration.getProteinStart()!=null) { // only whe 
+                    && alteration.getProteinStart()!=null) {
                 alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd()));
             }
 
@@ -61,6 +61,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd()));
             }
         }
+
+        VariantConsequence anyConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm("any");
+        alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd()));
             
         //TODO: add activating or inactivating alterations
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
