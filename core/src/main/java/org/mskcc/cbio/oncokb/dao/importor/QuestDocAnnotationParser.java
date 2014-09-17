@@ -105,7 +105,7 @@ public final class QuestDocAnnotationParser {
         for (String file : files) {
             parse(new FileInputStream(file));
         }
-        ClinicalTrialsImporter.main(args);
+        //ClinicalTrialsImporter.main(args);
         
 //        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }

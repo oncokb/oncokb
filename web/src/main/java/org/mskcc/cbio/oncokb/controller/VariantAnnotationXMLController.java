@@ -22,7 +22,6 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.TreatmentBo;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
@@ -365,14 +364,23 @@ public class VariantAnnotationXMLController {
                 return -1;
             }
         });
+        
         for (ClinicalTrial clinicalTrial : clinicalTrials) {
-            if (filterClinicalTrialsByPhase(clinicalTrial)) {
+            if (filterClinicalTrials(clinicalTrial)) {
                 exportClinicalTrial(clinicalTrial, sb, indent);
             }
         }
     }
     
-    private boolean filterClinicalTrialsByPhase(ClinicalTrial clinicalTrial) {
+    private boolean filterClinicalTrials(ClinicalTrial clinicalTrial) {
+        if (!clinicalTrial.isInUSA()) {
+            return false;
+        }
+        
+        if (!clinicalTrial.isOpen()) {
+            return false;
+        }
+        
         String phase = clinicalTrial.getPhase().toLowerCase();
         return phase.contains("phase 1") || 
                 phase.contains("phase 2") || 

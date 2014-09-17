@@ -42,8 +42,17 @@ import org.w3c.dom.NodeList;
  */
 public class ClinicalTrialsImporter {
     
+    private static Map<String, ClinicalTrial> allTrials = null;
+    
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-        Set<String> nctIds = getListOfCancerTrialsFromCancerGov();//getListOfCancerTrialsFromClinicalTrialsGov();
+        
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        allTrials = new HashMap<String, ClinicalTrial>();
+        for (ClinicalTrial ct : clinicalTrialBo.findAll()) {
+            allTrials.put(ct.getNctId(), ct);
+        }
+        
+        Set<String> nctIds = getListOfCancerTrialsFromClinicalTrialsGov();//getListOfCancerTrialsFromCancerGov();
         
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = tumorTypeBo.findAll();
@@ -51,12 +60,11 @@ public class ClinicalTrialsImporter {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         int n = nctIds.size();
         int i = 1;
         System.out.println("Found "+n+" trials");
         for (String nctId : nctIds) {
-            System.out.print("Process... "+(i++)+"/"+n);
+            System.out.print("Process... "+(i++)+"/"+n+" "+nctId);
             ClinicalTrial trial = null;
             try {
                 trial = parseClinicalTrialsGov(nctId, db);
@@ -65,7 +73,7 @@ public class ClinicalTrialsImporter {
             }
             if (trial!=null) {
                 matchTumorTypes(trial, tumorTypes);
-                clinicalTrialBo.save(trial);
+                clinicalTrialBo.saveOrUpdate(trial);
             }
             System.out.println();
         }
@@ -91,9 +99,21 @@ public class ClinicalTrialsImporter {
         Document doc = db.parse(strUrl);
         Element docEle = doc.getDocumentElement();
         
-        if (!isLocationUsa(docEle)) return null;
-        
-        System.out.print(" in US");
+        String lastChangedDate = getText(docEle, "lastchanged_date");
+        ClinicalTrial trial = allTrials.get(nctId);
+        if (trial==null) {
+            System.out.print(" new");
+            
+            trial = new ClinicalTrial();
+            trial.setNctId(nctId);
+            allTrials.put(nctId, trial);
+        } else if ( !lastChangedDate.equalsIgnoreCase(trial.getLastChangedDate())) {
+            // updated
+            System.out.print(" updated");
+        } else {
+            // if no update
+            return null;
+        }
         
         String briefTitle = getText(docEle, "brief_title").trim();
 //        String officialTitle = getText(docEle, "official_title").trim();
@@ -105,14 +125,16 @@ public class ClinicalTrialsImporter {
         String eligibility = getText(docEle, "eligibility/criteria/textblock").trim();
         eligibility = replaceUTFcode(eligibility);
         
-        ClinicalTrial trial = new ClinicalTrial();
-        trial.setNctId(nctId);
+        Set<String> countries = new HashSet<String>(getTexts(docEle, "location_countries/country"));
+        
+        trial.setLastChangedDate(lastChangedDate);
         trial.setTitle(briefTitle);
         trial.setPhase(phase);
         trial.setPurpose(briefSummary);
         trial.setRecruitingStatus(status);
         trial.setDiseaseCondition(condition);
         trial.setEligibilityCriteria(eligibility);
+        trial.setCountries(countries);
         trial.setDrugs(parseDrugs(docEle));
         trial.setAlterations(parseAlterations(docEle));
         
@@ -223,24 +245,15 @@ public class ClinicalTrialsImporter {
         return ret;
     }
     
-    private static boolean isLocationUsa(Element docEle) {
-        List<String> locs = getTexts(docEle, "location_countries/country");
-        for (String loc : locs) {
-            if (loc.equalsIgnoreCase("United States")) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private static boolean isTrialOpen(String status) {
-        return !status.equalsIgnoreCase("Terminated") &&
-                !status.equalsIgnoreCase("Suspended") &&
-                !status.equalsIgnoreCase("Completed") &&
-                !status.equalsIgnoreCase("Closed") &&
-                !status.equalsIgnoreCase("Active, not recruiting") &&
-                !status.equalsIgnoreCase("Withdrawn");
-    }
+//    private static boolean isLocationUsa(Element docEle) {
+//        List<String> locs = getTexts(docEle, "location_countries/country");
+//        for (String loc : locs) {
+//            if (loc.equalsIgnoreCase("United States")) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
     
     private static Element getElement(Element el, String path) {
         List<Element> e = getElements(el, path);
@@ -294,17 +307,32 @@ public class ClinicalTrialsImporter {
         for (String url : urls) {
             int pg = 1;
             while (true) {
-                Document doc = db.parse("http://clinicaltrials.gov"+url+"&displayxml=true&pg="+pg);
+                String urlCts = "http://clinicaltrials.gov"+url+"&displayxml=true&pg="+pg;
+                System.out.println(urlCts);
+                Document doc = db.parse(urlCts);
                 Element docEle = doc.getDocumentElement();
                 List<Element> els = getElements(docEle, "clinical_study");
                 if (els.isEmpty()) {
                     break;
                 }
                 for (Element el : els) {
-                    Element e = getElement(el, "status");
-                    if (e!=null && "Y".equals(e.getAttribute("open"))) {
-                        nctIds.add(getText(el, "nci_id"));
+                    String nctId = getText(el, "nct_id");
+                    if (nctId==null) {
+                        continue;
                     }
+                        
+                    String lastChangedDate = getText(el, "last_changed");
+                    ClinicalTrial trial = allTrials.get(nctId);
+                    if (trial == null) {
+//                        Element e = getElement(el, "status");
+//                        if (e!=null && "Y".equals(e.getAttribute("open"))) {
+                            nctIds.add(nctId);
+//                        }
+                    } else 
+                    if (!lastChangedDate.equalsIgnoreCase(trial.getLastChangedDate())) {
+                        nctIds.add(nctId);
+                    }
+                    
                 }
                 pg++;
             }
@@ -331,7 +359,6 @@ public class ClinicalTrialsImporter {
     
     private static Set<String> getListOfCancerTrialsFromCancerGov() throws ParserConfigurationException, SAXException, IOException {
         String nciClinicalTrialFolder = "/Users/jgao/projects/oncokb-data/CTGovProtocol";
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         List<String> files = FileUtils.getFilesInFolder(nciClinicalTrialFolder, "xml");
         int n = files.size();
         Set<String> nctIds = new HashSet<String>();
@@ -355,11 +382,9 @@ public class ClinicalTrialsImporter {
         Element docEle = doc.getDocumentElement();
         String cdrId = docEle.getAttribute("id");
         
-        String status = getText(docEle, "CurrentProtocolStatus");
-        if (!isTrialOpen(status)) return null;
-        
         String nctId = getText(docEle, "IDInfo/NCTID");
                 
         return nctId;
     }
+    
 }

@@ -21,6 +21,8 @@ public class ClinicalTrial implements java.io.Serializable {
     private String eligibilityCriteria;
     private String phase;
     private String diseaseCondition;
+    private String lastChangedDate;
+    private Set<String> countries = new HashSet<String>(0);
     private Set<TumorType> tumorTypes = new HashSet<TumorType>(0);
     private Set<Drug> drugs = new HashSet<Drug>(0);
     private Set<Alteration> alterations = new HashSet<Alteration>(0);
@@ -99,6 +101,26 @@ public class ClinicalTrial implements java.io.Serializable {
 
     public void setDiseaseCondition(String diseaseCondition) {
         this.diseaseCondition = diseaseCondition;
+    }
+
+    public String getLastChangedDate() {
+        return lastChangedDate;
+    }
+
+    public void setLastChangedDate(String lastChangedDate) {
+        this.lastChangedDate = lastChangedDate;
+    }
+
+    public Set<String> getCountries() {
+        return countries;
+    }
+
+    public void setCountries(Set<String> countries) {
+        this.countries = countries;
+    }
+    
+    public boolean isInUSA() {
+        return countries.contains("United States");
     }
 
     public Set<TumorType> getTumorTypes() {
