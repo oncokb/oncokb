@@ -177,8 +177,6 @@ public class ClinicalTrialsImporter {
     }
     
     private static Drug getDrug(String drugName, Set<String> otherNames) {
-        // solve the + problem'
-        
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         Drug drug = drugBo.guessUnambiguousDrug(drugName);
         if (drug!=null) {
