@@ -58,31 +58,34 @@ $(document).ready(function(){
             if(!$("#combined-variants-btn").hasClass('active')){
                 $("#tree_loader").removeClass('_hidden');
                 $("#tree").addClass('_hidden');
-
-                DataProxy.generateDataByTreeType("combined", function(){
-                    $("body svg").remove();
-                    tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
-                    $("#tree_loader").addClass('_hidden');
-                    $("#tree").removeClass('_hidden');
-                    $("#combined-variants-btn").addClass('active');
-                    $("#separated-variants-btn").removeClass('active');
-                });
+                setTimeout(function(){
+                    DataProxy.generateDataByTreeType("combined", function(){
+                        $("body svg").remove();
+                        tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
+                        $("#tree_loader").addClass('_hidden');
+                        $("#tree").removeClass('_hidden');
+                        $("#combined-variants-btn").addClass('active');
+                        $("#separated-variants-btn").removeClass('active');
+                    });
+                },200);
             }
         });
         
         $("#separated-variants-btn").click(function() {
+            console.log("jere");
             if(!$("#separated-variants-btn").hasClass('active')){
                 $("#tree_loader").removeClass('_hidden');
                 $("#tree").addClass('_hidden');
-
-                DataProxy.generateDataByTreeType("separated", function(){
-                    $("body svg").remove();
-                    tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
-                    $("#tree_loader").addClass('_hidden');
-                    $("#tree").removeClass('_hidden');
-                    $("#separated-variants-btn").addClass('active');
-                    $("#combined-variants-btn").removeClass('active');
-                });
+                setTimeout(function(){
+                    DataProxy.generateDataByTreeType("separated", function(){
+                        $("body svg").remove();
+                        tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
+                        $("#tree_loader").addClass('_hidden');
+                        $("#tree").removeClass('_hidden');
+                        $("#separated-variants-btn").addClass('active');
+                        $("#combined-variants-btn").removeClass('active');
+                    });
+                }, 200);
             }
         });
     }   
