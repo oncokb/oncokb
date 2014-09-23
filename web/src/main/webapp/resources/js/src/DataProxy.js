@@ -9,9 +9,21 @@ var DataProxy = (function() {
         treeType = "separated";//Combined || Separated
         
     function getDataFunc(callback){
-         $.when($.ajax({type: "POST", url: "evidence.json"}))
-            .done(function(a1){
-                jsonData = a1;
+         $.when(
+                $.ajax({type: "POST", url: "evidence.json"}),
+                $.ajax({
+                    type: "POST", 
+                    url: "var_annotation",
+                    data: {
+                        alterationType: "MUTATION",
+                        hugoSymbol: "BRAF",
+                        alteration: "V600E"
+                    },
+                    dataType:"xml"
+                }))
+            .done(function(a1, a2){
+                console.log($.xml2json(a2[0]));
+                jsonData = a1[0];
                 jsonDataL = jsonData.length;
                 analysisData(callback);
             });
