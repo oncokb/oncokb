@@ -131,11 +131,7 @@ var MainJS = (function() {
     }   
     
     function getString(_str) {
-        _str = _str.split(".");
-        _str = _str[1].split(")");
-        _str = _str[0].trim();
-        return _str;
-//        return _str.match(/^[^\(eg.[\s]*]([a-zA-Z0-9]*)[^[\s]*\)]$/);
+        return _str.match(/\(eg.\s+([a-zA-Z0-9\s]+)\)/)[1];
     }
     
     function variantSearch() {
@@ -183,7 +179,7 @@ var MainJS = (function() {
 
                     _newE.attr("id", key);
                     _newE.append("<h2> " + displayParts[key]["displayName"] + "</h2>");
-                    _newE.append($("<p/>").text(data[displayParts[key]["objectName"]]["description"]));
+                    _newE.append($("<p/>").html(findRegex(data[displayParts[key]["objectName"]]["description"])));
 
                     $("#variantDisplayResult").append(_newE);
                 }
@@ -251,7 +247,11 @@ var MainJS = (function() {
                             _newE.append("<h4>" + key1 + "</h4>");
                             _newE = displayAttr(datum[key1], _id, _newE, leftMargin+10);
                         }else {
-                            _newE.append("<span><b>" + key1 + ":</b> "+ datum[key1] +"</span>");
+                            var _content = datum[key1];
+                            if(key1 === "description") {
+                                _content = findRegex(_content);
+                            }
+                            _newE.append("<span><b>" + key1 + ":</b> "+ _content +"</span>");
                         }
 
                         element.append(_newE);
@@ -262,6 +262,33 @@ var MainJS = (function() {
             }
         }
                 return element;
+    }
+    
+    function findRegex(str) {
+        var regex = [/PMID:\s*[0-9]+,*\s*[0-9]+/ig, /NCT[0-9]+/ig],
+            links = ["http://www.ncbi.nlm.nih.gov/pubmed/",
+                     "http://clinicaltrials.gov/show/"];
+        for (var j = 0, regexL = regex.length; j < regexL; j++) {
+            var result = str.match(regex[j]);
+            if(result) {
+                for(var i = 0, resultL = result.length; i < resultL; i++) {
+                    var _datum = result[i];
+                    
+                    switch(j) {
+                        case 0:
+                            var _number = _datum.split(":")[1].trim();
+                            _number = _number.replace(/\s+/, "");
+                            str = str.replace(_datum, "<a class='withUnderScore' target='_blank' href='"+ links[j] + _number+"'>" + _datum + "</a>");
+                            break;
+                        default:
+                            str = str.replace(_datum, "<a class='withUnderScore' target='_blank' href='"+ links[j] + _datum+"'>" + _datum + "</a>");
+                            break;
+                    }
+                    
+                }
+            }
+        }
+        return str;
     }
     
     function initQtips() {

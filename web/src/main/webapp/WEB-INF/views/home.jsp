@@ -93,7 +93,7 @@
             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                 <div class="input-group input-group-sm">
                     <span class="input-group-addon"><b>Tumor Type:</b></span>
-                    <input type="text" id="variantTumorType" class="form-control" placeholder="(eg. melanoma)">
+                    <input type="text" id="variantTumorType" class="form-control" placeholder="(eg. lung cancer)">
                 </div>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">

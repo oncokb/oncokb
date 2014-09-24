@@ -106,6 +106,10 @@ a:link, a:visited {
   text-decoration: none;
 }
 
+a.withUnderScore {
+  text-decoration: underline;
+}
+
 a:hover {
   color: #666;
 }
