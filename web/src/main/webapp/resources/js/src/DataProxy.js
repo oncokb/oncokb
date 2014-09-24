@@ -10,24 +10,31 @@ var DataProxy = (function() {
         
     function getDataFunc(callback){
          $.when(
-                $.ajax({type: "POST", url: "evidence.json"}),
-                $.ajax({
-                    type: "POST", 
-                    url: "var_annotation",
-                    data: {
-                        alterationType: "MUTATION",
-                        hugoSymbol: "BRAF",
-                        alteration: "V600E"
-                    },
-                    dataType:"xml"
-                }))
-            .done(function(a1, a2){
-                console.log($.xml2json(a2[0]));
-                jsonData = a1[0];
+                $.ajax({type: "POST", url: "evidence.json"}))
+            .done(function(a1){
+                jsonData = a1;
                 jsonDataL = jsonData.length;
                 analysisData(callback);
             });
     };
+    
+    function generateVariant(params, callback) {
+        var _params = $.extend(true, {}, params);
+        console.log(_params);
+        $.ajax({
+            type: "POST", 
+            url: "var_annotation",
+            data: _params,
+            dataType:"xml"
+        })
+        .success(function(data) {
+            var _variantJson = $.xml2json(data);
+            callback(_variantJson);
+        })
+        .fail(function(data) {
+            callback(null);
+        });
+    }
     
     function analysisData(callback) {
         genes = {},
@@ -256,6 +263,7 @@ var DataProxy = (function() {
             analysisData(callback);
         },
         getTreeInfo: function(){ return treeInfo;},
-        getDescription: function() { return description;}
+        getDescription: function() { return description;},
+        generateVariant: generateVariant
     };
 }());

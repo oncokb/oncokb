@@ -140,3 +140,5 @@ a:hover {
     z-index: 1;
     text-align: right;
 }
+
+.form-control::-webkit-input-placeholder { color: lightgray; }

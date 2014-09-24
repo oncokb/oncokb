@@ -399,7 +399,7 @@ var tree = (function() {
 	}
 
 	function highlightSearchKey(searchKey) {
-            d3.select("#body svg").selectAll('text').each(function(d, i) {
+            d3.select("body svg").selectAll('text').each(function(d, i) {
                 if(searchKey === '') {
                         d3.select(this).style('fill','black');
                 }else {

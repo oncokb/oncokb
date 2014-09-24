@@ -5,64 +5,114 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <link type="text/css" rel="stylesheet" href="resources/css/bootstrap.css?09172014-1"/>
-    <link type="text/css" rel="stylesheet" href="resources/css/style.css?09172014-1"/>
-    <link rel="stylesheet" type="text/css" href="resources/css/jquery.qtip.min.css?09172014-1">
-    <script type="text/javascript" src="resources/js/lib/jquery-1.11.1.min.js?09172014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/bootstrap.js?09172014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/jquery.qtip.min.js?09172014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/jquery.xml2json.js?09172014-1"></script>
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js?09172014-1"></script>
-    <script type="text/javascript" src="resources/js/src/main.js?09172014-1"></script>
-    <script type="text/javascript" src="resources/js/src/DataProxy.js?09172014-1"></script>
-    <script type="text/javascript" src="resources/js/src/tree.js?09172014-1"></script>
+    <link type="text/css" rel="stylesheet" href="resources/css/bootstrap.css?09242014-1"/>
+    <link type="text/css" rel="stylesheet" href="resources/css/style.css?09242014-1"/>
+    <link rel="stylesheet" type="text/css" href="resources/css/jquery.qtip.min.css?09242014-1">
+    <script type="text/javascript" src="resources/js/lib/jquery-1.11.1.min.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/lib/bootstrap.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/lib/jquery.qtip.min.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/lib/jquery.xml2json.js?09242014-1"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/src/main.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/src/DataProxy.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/src/tree.js?09242014-1"></script>
   </head>
 
   <body>
-    <div id="body" class="container">
-      <div class="row">
-        <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
-          <b>OncoKB Tree</b>
-          <br/>
-          <!--<span id="summary-info"></span>-->
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
-          <div class="input-group" id='tumor_search'>
-            <input type="text" class="form-control" placeholder="Search Term" />
-            <span id="searchRemoveIcon" class="form-control-feedback glyphicon glyphicon-remove-circle"></span>
-            <span id="searchResult" class="form-control-feedback result"></span>
-            <span class="input-group-btn">
-              <button type="button" class="btn btn-default">Search</button>
-            </span>
-            
+    <div id="displayTabs" class="container">
+        <ul class="nav nav-tabs" role="tablist">
+            <li id="tab-1"class="active"><a href="#mainTree" data-toggle="tab">Home</a></li>
+            <li id="tab-2"><a href="#variantDisplay" data-toggle="tab">Variants Annotation</a></li>
+        </ul>
+        <div  class="tab-content">
+      <div id="mainTree" class="tab-pane fade in active">
+        <div class="row">
+          <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+            <br/>
+            <b>OncoKB Tree</b>
+            <br/>
           </div>
         </div>
+        <br />
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
+            <div class="input-group" id='tumor_search'>
+              <input type="text" class="form-control" placeholder="Search Term" />
+              <span id="searchRemoveIcon" class="form-control-feedback glyphicon glyphicon-remove-circle"></span>
+              <span id="searchResult" class="form-control-feedback result"></span>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default">Search</button>
+              </span>
 
-        <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12">
-          <div>
-            <button type="button" class="btn btn-default active" id='separated-variants-btn'>
-              <span>Separated Variants</span>
-            </button>
-            <button type="button" class="btn btn-default" id='combined-variants-btn'>
-              <span>Combined Variants</span>
-            </button>
-              
-            <div class="btn-group">
-                <button type="button" class="btn btn-default glyphicon glyphicon-resize-full" id='expand-nodes-btn'></button>
-                <button type="button" class="btn btn-default glyphicon glyphicon-resize-small" id='collapse-nodes-btn'></button>
+            </div>
+          </div>
+
+          <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12">
+            <div>
+              <button type="button" class="btn btn-default active" id='separated-variants-btn'>
+                <span>Separated Variants</span>
+              </button>
+              <button type="button" class="btn btn-default" id='combined-variants-btn'>
+                <span>Combined Variants</span>
+              </button>
+
+              <div class="btn-group">
+                  <button type="button" class="btn btn-default glyphicon glyphicon-resize-full" id='expand-nodes-btn'></button>
+                  <button type="button" class="btn btn-default glyphicon glyphicon-resize-small" id='collapse-nodes-btn'></button>
+              </div>
             </div>
           </div>
         </div>
+         <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
+                  <img id='tree_loader' src="resources/img/ajax-loader.gif"/>
+                  <div id="tree" class="_hidden"></div>
+          </div>
+         </div>
       </div>
-      
-      <div class="row">
-          <img id='tree_loader' src="resources/img/ajax-loader.gif"/>
-          <div id="tree" class="_hidden"></div>
-      </div>
-
+     <div id="variantDisplay" class="tab-pane fade">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h2>Search Criteria</h2>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><b>Gene Name:</b></span>
+                    <input type="text" id="variantGeneName" class="form-control" placeholder="(eg. BRAF)">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><b>Mutation:</b></span>
+                    <input type="text" id="variantMutation" class="form-control" placeholder="(eg. V600E)">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><b>Tumor Type:</b></span>
+                    <input type="text" id="variantTumorType" class="form-control" placeholder="(eg. melanoma)">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="btn-group btn-group-sm">
+                    <button id="searchVariantBtn" type="button" class="btn btn-default">Search</button>
+                    <button id="useExampleBtn" type="button" class="btn btn-default">Use example</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <img id='variant_loader' class="_hidden" src="resources/img/ajax-loader.gif"/>
+            </div>
+            <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                
+            </div>
+        </div>
+    </div>
+        </div>
       <span id="top-link-block" class="hidden">
         <a href="#top" class="well well-sm"  onclick="$('html,body').animate({scrollTop:0, scrollLeft: 0},'slow');return false;">
             <i class="glyphicon glyphicon-chevron-up"></i> Back to Top
