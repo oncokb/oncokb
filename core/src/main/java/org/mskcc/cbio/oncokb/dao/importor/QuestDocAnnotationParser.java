@@ -232,26 +232,27 @@ public final class QuestDocAnnotationParser {
             System.err.println("wrong format of mutation effect line: "+mutationEffectStr);
         } else {
             String effect = m.group(1);
-            if (effect!=null && !effect.isEmpty()) {
-                System.out.println("##    Effect: "+alterations.toString());
-
-                effect = effect.trim();
-
-                // Description of mutation effect
-                List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
-                String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
-
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.MUTATION_EFFECT);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setDescription(descMutationEffectStr);
-                evidence.setKnownEffect(effect);
-                setDocuments(descMutationEffectStr, evidence);
-                
-                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-                evidenceBo.save(evidence);
+            if (effect==null || effect.isEmpty()) {
+                effect = "Unknown";
             }
+            System.out.println("##    Effect: "+alterations.toString());
+
+            effect = effect.trim();
+
+            // Description of mutation effect
+            List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
+            String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
+
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.MUTATION_EFFECT);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setDescription(descMutationEffectStr);
+            evidence.setKnownEffect(effect);
+            setDocuments(descMutationEffectStr, evidence);
+
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            evidenceBo.save(evidence);
         }
         
         // cancers
