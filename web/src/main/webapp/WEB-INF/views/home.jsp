@@ -11,6 +11,7 @@
     <script type="text/javascript" src="resources/js/lib/jquery-1.11.1.min.js?09172014-1"></script>
     <script type="text/javascript" src="resources/js/lib/bootstrap.js?09172014-1"></script>
     <script type="text/javascript" src="resources/js/lib/jquery.qtip.min.js?09172014-1"></script>
+    <script type="text/javascript" src="resources/js/lib/jquery.xml2json.js?09172014-1"></script>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js?09172014-1"></script>
     <script type="text/javascript" src="resources/js/src/main.js?09172014-1"></script>
     <script type="text/javascript" src="resources/js/src/DataProxy.js?09172014-1"></script>
