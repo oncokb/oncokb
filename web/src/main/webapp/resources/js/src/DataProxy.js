@@ -1,6 +1,7 @@
 var DataProxy = (function() {
     
     var genes = {},
+        tumorTypes = [],
         treeInfo = [],
         treeInfoDul = {},
         description = {},
@@ -9,10 +10,12 @@ var DataProxy = (function() {
         treeType = "separated";//Combined || Separated
         
     function getDataFunc(callback){
-         $.when(
-                $.ajax({type: "POST", url: "evidence.json"}))
-            .done(function(a1){
-                jsonData = a1;
+        $.when(
+            $.ajax({type: "POST", url: "evidence.json"}),
+            $.ajax({type: "POST", url: "tumorType.json"}))
+            .done(function(a1, a2){
+                tumorTypes = $.extend(true, [], a2[0]);
+                jsonData = a1[0];
                 jsonDataL = jsonData.length;
                 analysisData(callback);
             });
@@ -20,7 +23,6 @@ var DataProxy = (function() {
     
     function generateVariant(params, callback) {
         var _params = $.extend(true, {}, params);
-        console.log(_params);
         $.ajax({
             type: "POST", 
             url: "var_annotation",
@@ -264,6 +266,7 @@ var DataProxy = (function() {
         },
         getTreeInfo: function(){ return treeInfo;},
         getDescription: function() { return description;},
+        getTumorTypes: function() { return tumorTypes;},
         generateVariant: generateVariant
     };
 }());

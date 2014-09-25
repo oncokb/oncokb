@@ -9,6 +9,7 @@
     <link type="text/css" rel="stylesheet" href="resources/css/style.css?09242014-1"/>
     <link rel="stylesheet" type="text/css" href="resources/css/jquery.qtip.min.css?09242014-1">
     <script type="text/javascript" src="resources/js/lib/jquery-1.11.1.min.js?09242014-1"></script>
+    <script type="text/javascript" src="resources/js/lib/chosen.jquery.js?09242014-1"></script>
     <script type="text/javascript" src="resources/js/lib/bootstrap.js?09242014-1"></script>
     <script type="text/javascript" src="resources/js/lib/jquery.qtip.min.js?09242014-1"></script>
     <script type="text/javascript" src="resources/js/lib/jquery.xml2json.js?09242014-1"></script>
@@ -91,10 +92,9 @@
                 </div>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-addon"><b>Tumor Type:</b></span>
-                    <input type="text" id="variantTumorType" class="form-control" placeholder="(eg. lung cancer)">
-                </div>
+                <select id="tumorTypesDropDown" style="width: 150px" class="chosen-select" data-placeholder="Choose a tumor type (eg. lung cancer)">
+                    <option value=""></option>
+                </select>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                 <div class="btn-group btn-group-sm">

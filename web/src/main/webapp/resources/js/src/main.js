@@ -29,6 +29,7 @@ var MainJS = (function() {
     
     function init() {
         DataProxy.init(function() {
+            initTumorTypes(DataProxy.getTumorTypes());
             tree.init(DataProxy.getTreeInfo(), DataProxy.getDescription());
             initEvents();
             OutJS.backToTop();
@@ -36,6 +37,14 @@ var MainJS = (function() {
             $("#tree_loader").addClass('_hidden');
             $("#tree").removeClass('_hidden');
         }); 
+    }
+    
+    function initTumorTypes(d) {
+        for(var i = 0, tumorTypesL = d.length; i < tumorTypesL; i++) {
+            var datum = d[i];
+            $("#tumorTypesDropDown").append("<option value='"+ datum.name +"'>" + datum.name + "</option>");
+        }
+        $("#tumorTypesDropDown").chosen({width: "100%"});
     }
     
     function initEvents() {
@@ -122,7 +131,7 @@ var MainJS = (function() {
         $("#useExampleBtn").click(function() {
             $("#variantGeneName").val(getString($("#variantGeneName").attr("placeholder")));
             $("#variantMutation").val(getString($("#variantMutation").attr("placeholder")));
-            $("#variantTumorType").val(getString($("#variantTumorType").attr("placeholder")));
+            $("#tumorTypesDropDown").val("lung cancer").trigger("chosen:updated");
             variantSearch();
         });
         
@@ -140,7 +149,7 @@ var MainJS = (function() {
         DataProxy.generateVariant({
             hugoSymbol: $("#variantGeneName").val(),
             alteration: $("#variantMutation").val(),
-            tumorType: $("#variantTumorType").val(),
+            tumorType: $("#tumorTypesDropDown").val(),
             alterationType: "MUTATION"
         }, tab2ClickCallBack);
     }
@@ -169,7 +178,7 @@ var MainJS = (function() {
                     +"<tbody><tr>"
                     +"<td>"+ $("#variantGeneName").val() +"</td>"
                     +"<td>"+ $("#variantMutation").val() +"</td>"
-                    +"<td>"+ $("#variantTumorType").val() +"</td>"
+                    +"<td>"+ $("#tumorTypesDropDown").val() +"</td>"
                     +"</tr></tbody>"
                     +"</table>");
 
