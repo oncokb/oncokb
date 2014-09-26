@@ -256,11 +256,7 @@ var MainJS = (function() {
                             _newE.append("<h4>" + key1 + "</h4>");
                             _newE = displayAttr(datum[key1], _id, _newE, leftMargin+10);
                         }else {
-                            var _content = datum[key1];
-                            if(key1 === "description") {
-                                _content = findRegex(_content);
-                            }
-                            _newE.append("<span><b>" + key1 + ":</b> "+ _content +"</span>");
+                            _newE.append("<span><b>" + key1 + ":</b> "+ findRegex(datum[key1]) +"</span>");
                         }
 
                         element.append(_newE);
@@ -274,20 +270,24 @@ var MainJS = (function() {
     }
     
     function findRegex(str) {
-        var regex = [/PMID:\s*[0-9]+,*\s*[0-9]+/ig, /NCT[0-9]+/ig],
+        var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
             links = ["http://www.ncbi.nlm.nih.gov/pubmed/",
                      "http://clinicaltrials.gov/show/"];
         for (var j = 0, regexL = regex.length; j < regexL; j++) {
             var result = str.match(regex[j]);
+
             if(result) {
-                for(var i = 0, resultL = result.length; i < resultL; i++) {
-                    var _datum = result[i];
+                var uniqueResult = result.filter(function(elem, pos) {
+                        return result.indexOf(elem) == pos;
+                    }); 
+                for(var i = 0, resultL = uniqueResult.length; i < resultL; i++) {
+                    var _datum = uniqueResult[i];
                     
                     switch(j) {
                         case 0:
                             var _number = _datum.split(":")[1].trim();
-                            _number = _number.replace(/\s+/, "");
-                            str = str.replace(_datum, "<a class='withUnderScore' target='_blank' href='"+ links[j] + _number+"'>" + _datum + "</a>");
+                            _number = _number.replace(/\s+/g, "");
+                            str = str.replace(new RegExp(_datum, "g"), "<a class='withUnderScore' target='_blank' href='"+ links[j] + _number+"'>" + _datum + "</a>");
                             break;
                         default:
                             str = str.replace(_datum, "<a class='withUnderScore' target='_blank' href='"+ links[j] + _datum+"'>" + _datum + "</a>");
