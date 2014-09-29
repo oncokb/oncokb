@@ -13,7 +13,8 @@ var appVersion = "09262014-1";
             '../lib/bootstrap',
             '../lib/chosen.jquery',
             '../lib/jquery.qtip.min',
-            '../lib/jquery.xml2json'
+            '../lib/jquery.xml2json',
+            '../lib/underscore-min'
             ],
             function(){
                 require(

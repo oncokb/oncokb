@@ -101,6 +101,18 @@ var JqueryEvents = (function() {
         };
     }
     
+    function iconSet() {
+        $(".iconExpand").click(function() {
+            console.log("these");
+            $(this).css('display', 'none');
+            $(this).parent().find('.iconCollapse').css('display', 'inline-block');
+        });
+        
+        $(".iconCollapse").click(function() {
+            $(this).css('display', 'none');
+            $(this).parent().find('.iconExpand').css('display', 'inline-block');
+        });
+    }
     function initQtips() {
         $('#expand-nodes-btn').qtip({
             content:{text: "Expand all branches"},
@@ -126,6 +138,7 @@ var JqueryEvents = (function() {
     return {
         init: initEvents,
         initQtips: initQtips,
-        getSearchInput: getSearchInput
+        getSearchInput: getSearchInput,
+        iconSet: iconSet
     };
 })();

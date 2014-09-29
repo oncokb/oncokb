@@ -6,8 +6,13 @@ var BootStrapPanelCollapse = function() {
     function init(_params) {
         params = _params.divs;
         styles = _params.styles;
-        initDiv(params.Id, params.parentId);
-        initTitle(params.title);
+        if(params.special) {
+            initSpecialDiv(params.Id, params.parentId);
+            initSpecialTitle(params.title)
+        }else {
+            initDiv(params.Id, params.parentId);
+            initTitle(params.title);
+        }
         if(params.titleAddition) initTitleAddition(params.titleAddition);
         initBodyContent(params.body);
     }
@@ -24,12 +29,24 @@ var BootStrapPanelCollapse = function() {
                 +"<div class='panel-body'></div></div>");
     }
     
+    function initSpecialDiv(Id, parentId) {
+        element.append("<div class='heading'>"
+                +"<a data-toggle='collapse'"
+                +" data-parent='"+ parentId +"' href='#"+ Id +"'><img src='resources/img/add.svg' class='icon iconExpand'></img><img src='resources/img/subtract.svg' class='icon iconCollapse'></img></a></div>"
+                +"<div id='"+ Id +"' class='panel-coollapse collapse'>" 
+                +"<div class='panel-body'></div></div>");
+    }
+    
+    function initSpecialTitle(content) {
+        element.find(".heading a").before("<b>" + content + "</b>");
+    }
+    
     function initTitle(content) {
-        element.find(".panel-title a").text(content);
+        element.find(".panel-heading a").text(content);
     }
     
     function initTitleAddition(content) {
-        element.find(".panel-title").append(content);
+        element.find(".panel-heading a").after(content);
     }
     
     function initBodyContent(content) {

@@ -11,8 +11,28 @@ var VariantsAnnotation = (function() {
             objectName: "variant_effect"
         }
     };
-
+    
+    var summaryTableTitles = [
+            "Treatment Implications", 
+            "Clinical Trials", 
+            "Additional Information", 
+            "FDA Approved Drugs in Tumor Type", 
+            "FDA Approved Drugs in Other Tumor Type"],
+        summaryTableTitlesContent = {
+            "Treatment Implications": [
+                "nccn_guidelines",
+                "standard_therapeutic_implications",
+                "investigational_therapeutic_implications"],
+            "Clinical Trials": ["clinical_trial"], 
+            "Additional Information": ["prevalence", "prognostic_implications"], 
+            "FDA Approved Drugs in Tumor Type": [], 
+            "FDA Approved Drugs in Other Tumor Type": []
+        };
+        //The drug information under clinical trials has information for FDA
+        //Approved drugs
+            
     function initWithData(data) {
+        console.log(data);
         $("#variantDisplayResult").append("<div id='resultSummary'><h2>Result Summary:</h2></div>");
         $("#resultSummary").append("<table class='table'><thead><tr style='background-color: lightgrey;font-weight: bold;'>"
                 +"<td>Gene Name</td>"
@@ -52,43 +72,67 @@ var VariantsAnnotation = (function() {
                 
                 var _em = new BootStrapPanelCollapse();
                 
-                var clinicalTrials = [];
-                
                 _em.init({
                     divs: {
                         Id: "collapse-"+i,
                         parentId: "cancer-type",
                         title: displayProcess(_datum["type"]),
                         titleAddition: _datum["relevant_to_patient_disease"] !== "No" ? "<span style='color: green; font-size:12px; font-weight:bold'><i>&nbsp;&nbsp;&nbsp;RELEVANT</i></span>": "",
-                        body:  "<table class='table table-bordered'><tbody>"
-                                +"<tr><td nowrap><b>Treatment Implications</b></td><td>None.</td></tr>"
-                                +"<tr><td nowrap><b>Clinical Trials</b></td><td>None.</td></tr>"
-                                +"</tbody></table>"
+                        body:  generateSummaryTable(),
+                        special: false
                     },
                     styles: {
                         
                     }
                 });
                 
-                
                 delete _datum.type;
                 delete _datum.relevant_to_patient_disease;
-                if(_datum.hasOwnProperty("clinical_trial")) {
-                    clinicalTrials = $.extend(true, [], _datum.clinical_trial);
-                    delete _datum.clinical_trial;
-                    _em.empty(".panel-body table tr:nth-child(2) td:nth-child(2)");
-                    _em.append(".panel-body table tr:nth-child(2) td:nth-child(2)", displayAttr(clinicalTrials, "cancer-type-" + i, _em.find(".panel-body table tr:nth-child(2) td:nth-child(2)"), 0));
+                
+                for(var m = 0, summaryTableTitlesL = summaryTableTitles.length; m < summaryTableTitlesL; m++) {
+                    var _title = summaryTableTitles[m];
+                    var _attr = summaryTableTitlesContent[_title];
+                    var _data;
+                    var cellIndex = m +1;
+                    
+                    
+                    if(_title === "Clinical Trials") {
+                        _data = [];
+                        _data = _datum["clinical_trial"];
+                    }else {
+                        _data = {};
+                        for(var j = 0, _attrL = _attr.length; j < _attrL; j++) {
+                            if(_datum.hasOwnProperty(_attr[j])) {
+                                _data[_attr[j]] = _datum[_attr[j]];
+                            }
+                        }
+                    }
+                    
+                    if((typeof _data === 'object' && Object.keys(_data).length > 0) || (_data instanceof Array && _data.length > 0)) {
+                        _em.empty(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)");
+                        _em.append(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)", displayAttr(_data, "cancer-type-" + i, _em.find(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)")), key);
+                    }
                 }
-
-                _em.empty(".panel-body table tr:nth-child(1) td:nth-child(2)");
-                _em.append(".panel-body table tr:nth-child(1) td:nth-child(2)", displayAttr(_datum, "cancer-type-" + i, _em.find(".panel-body table tr:nth-child(1) td:nth-child(2)"), 0));
+               
                 _cancerType.append(_em.get());
             }
             $("#variantDisplayResult").append(_cancerType);
             $("#cancer-type").collapse();
         }
     }
-
+    
+    function generateSummaryTable() {
+        var tableDiv = "<table class='table table-bordered'><tbody>";
+        
+        for(var i = 0, summaryTableTitlesL = summaryTableTitles.length; i < summaryTableTitlesL; i++) {
+            tableDiv += "<tr><td><b>" + summaryTableTitles[i] + "</b></td><td>None.</td></tr>";
+        }
+        
+        tableDiv += "</tbody></table>";
+        
+        return tableDiv;
+    }
+    
     function displayProcess(str) {
         var specialUpperCasesWords = ["NCCN"];
         var specialLowerCasesWords = ["of", "for"];
@@ -114,54 +158,135 @@ var VariantsAnnotation = (function() {
         return str;
     }
 
-    function displayAttr(datum, id, element, leftMargin) {
-        if(datum instanceof Array) {
-            for(var i = 0, arrayL = datum.length; i < arrayL; i++) {
-                displayAttr(datum[i], id + "-" + i, element, leftMargin+10);
+    function displayAttr(datum, id, element, key) {
+        var exception = ["eligibility_criteria","purpose"],
+            exceptionL = exception.length;
+        if(key === "investigational_therapeutic_implications" && datum.hasOwnProperty('sensitive_to')) {
+            var formattedDatum = {};
+            if(isArray(datum['sensitive_to'])) {
+                _.each(datum['sensitive_to'], function(value, index) {
+                    var sensitiveName = underTreatment(value, 'treatment');
+                    
+                    formattedDatum[sensitiveName] = {
+                        "Highest level of evidence:": value['level_of_evidence_for_patient_indication']['level'],
+                        "description": value['description']};
+                });
+            }else {
+                var sensitiveName = underTreatment(datum['sensitive_to'], 'treatment');
+
+                formattedDatum[sensitiveName] = {
+                    "Highest level of evidence:": datum['sensitive_to']['level_of_evidence_for_patient_indication']['level'],
+                    "description": datum['sensitive_to']['description']};
             }
+            
+            displayAttr(formattedDatum, id + "-" + i, element, "");
         }else {
-            if(typeof datum === 'object'){
-                for(var key1 in datum) {
-                    if(key1 !== "reference") {
-                        var _id = id + "-" + key1;
-                        var _newE = $(document.createElement('div'));
-
-                        _newE.attr("id", _id);
-                        _newE.css("margin-left", leftMargin+10);
-
-
-                        if(typeof datum[key1] === 'object') {
-                            _newE.append("<h4>" + displayProcess(key1) + "</h4>");
-                            _newE = displayAttr(datum[key1], _id, _newE, leftMargin+10);
-                        }else {
-                            if(key1 === "eligibility_criteria") {
-                                var _em = new BootStrapPanelCollapse();
-                                _em.init({
-                                    divs: {
-                                        Id: _id + "-panel",
-                                        parentId: _id,
-                                        title: displayProcess(key1),
-                                        titleAddition: "",
-                                        body:  findRegex(datum[key1])
-                                    },
-                                    styles: {
-
-                                    }
-                                });
-                                _newE.append(_em.get());
-                            }else{
-                                _newE.append("<span><b>" + displayProcess(key1) + ":</b> "+ findRegex(datum[key1]) +"</span>");
-                            }
-                        }
-
-                        element.append(_newE);
-                    }
+            if(datum instanceof Array) {
+                for(var i = 0, arrayL = datum.length; i < arrayL; i++) {
+                    var _newE = $(document.createElement('div'));
+                    element.append(displayAttr(datum[i], id + "-" + i, _newE, ""));
+                    element.append("<br/><br/>");
                 }
             }else {
-                element.append("<span>" + datum + "<span>");
+                if(typeof datum === 'object'){
+                    for(var key1 in datum) {
+                        if(key1 !== "reference") {
+                            var _id = id + "-" + key1;
+                            var _newE = $(document.createElement('div'));
+
+                            _newE.attr("id", _id);
+                            if(key1 === "eligibility_criteria"){
+                                _newE.css("width", "100%");
+                            }
+                            _newE.css("float", "left");
+                            _newE.css("margin-right", "10px");
+
+
+                            if(typeof datum[key1] === 'object') {
+                                _newE.append("<h4>" + displayProcess(key1) + "</h4>");
+                                _newE = displayAttr(datum[key1], _id, _newE, key1);
+                            }else {
+                                if(exception.indexOf(key1) === -1 && datum[key1] !== "") {
+                                   _newE.append("<span>" + (key1 !== "description"? (key1 !== 'trial_id' ? ("<b>" + displayProcess(key1) + ":</b> " ) : "<br/><b>" + displayProcess(key1) + ":</b> " ) : "") + findRegex(datum[key1]) +"</span>");
+                                }
+                            }
+
+                            element.append(_newE);
+                        }
+                    }
+                    
+                    for(var i = 0; i < exceptionL; i++) {
+                        if(datum.hasOwnProperty(exception[i])) {
+                            var _id = id + "-" + exception[i];
+                            var _newE = $(document.createElement('div'));
+
+                            _newE.attr("id", _id);
+                            _newE.css("width", "100%");
+                            _newE.css("float", "left");
+                            _newE.css("margin-right", "10px");
+
+                            var _em = new BootStrapPanelCollapse();
+                            _em.init({
+                                divs: {
+                                    Id: _id + "-panel",
+                                    parentId: _id,
+                                    title: displayProcess(exception[i]),
+                                    titleAddition: "",
+                                    body:  findRegex(datum[exception[i]]),
+                                    special: true
+                                },
+                                styles: {
+                                    headerH4: {
+                                        'font-size': "16px"
+                                    }
+                                }
+                            });
+                            _newE.append(_em.get());
+                            element.append(_newE);
+                        }
+                    }
+                }else {
+                    element.append("<span>" + datum + "<span>");
+                }
             }
         }
-                return element;
+        return element;
+    }
+    
+    function underTreatment(value, key) {
+        var sensitiveName = "Sensitive to: ";
+                    
+        if(isArray(value[key])) {
+            var _treatmentL = value[key].length;
+            _.each(value[key], function(value1, index1) {
+                sensitiveName = underDrug(value1, 'drug', sensitiveName);
+                sensitiveName += (index1 + 1) === _treatmentL ? "" : " AND ";
+            });
+        }else {
+            sensitiveName = underDrug(value[key], 'drug', sensitiveName);
+        }
+        
+        return sensitiveName;
+    }
+    
+    function underDrug(value, key, sensitiveName) {
+        if(isArray(value[key])) {
+            var _drugL = value[key].length;
+            _.each(value[key], function(value1, index1) {
+                sensitiveName += value1.name + (index1 + 1) === _drugL ? "" : "&";
+            });
+        } else {
+            sensitiveName += value[key].name;
+        }
+        return sensitiveName;
+    }
+    
+    function isArray(array) {
+         if(array instanceof Array) {
+             return true;
+         }else {
+             return false;
+         }
     }
     
     function findRegex(str) {
@@ -213,6 +338,7 @@ var VariantsAnnotation = (function() {
         $("#variant_loader").css('display', 'none');
         if(data) {
             initWithData(data);
+            JqueryEvents.iconSet();
         }else {
             $("#variantDisplayResult").append("<h4>No result found.</h4>");
         }

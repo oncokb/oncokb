@@ -53,6 +53,19 @@ body {
   background-color: lightgray;
 }
 
+#variantDisplayResult table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+#variantDisplayResult .icon {
+    width: 12px;
+}
+#variantDisplayResult .icon.iconCollapse{
+    display: none;
+}
+#variantDisplayResult .icon.iconExpand{
+    display: inline-block;
+}
 rect {
   fill: none;
   pointer-events: all;
