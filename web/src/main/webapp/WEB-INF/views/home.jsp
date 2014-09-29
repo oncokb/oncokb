@@ -5,19 +5,13 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <link type="text/css" rel="stylesheet" href="resources/css/bootstrap.css?09242014-1"/>
-    <link type="text/css" rel="stylesheet" href="resources/css/style.css?09242014-1"/>
-    <link rel="stylesheet" type="text/css" href="resources/css/jquery.qtip.min.css?09242014-1">
-    <script type="text/javascript" src="resources/js/lib/jquery-1.11.1.min.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/chosen.jquery.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/bootstrap.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/jquery.qtip.min.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/lib/jquery.xml2json.js?09242014-1"></script>
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/src/main.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/src/DataProxy.js?09242014-1"></script>
-    <script type="text/javascript" src="resources/js/src/tree.js?09242014-1"></script>
-  </head>
+    <link type="text/css" rel="stylesheet" href="resources/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="resources/css/jquery.qtip.min.css">
+
+    <link type="text/css" rel="stylesheet" href="resources/css/style.css?version=09262014-1"/>
+
+    <script  data-main="resources/js/src/main.js?version=09262014-1" src="resources/js/lib/require.js" type="text/javascript"></script>
+</head>
 
   <body>
     <div id="displayTabs" class="container">

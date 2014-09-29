@@ -1,4 +1,5 @@
 var DataProxy = (function() {
+    "use strict";
     
     var genes = {},
         tumorTypes = [],
