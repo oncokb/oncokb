@@ -32,7 +32,6 @@ var VariantsAnnotation = (function() {
         //Approved drugs
             
     function initWithData(data) {
-        console.log(data);
         $("#variantDisplayResult").append("<div id='resultSummary'><h2>Result Summary:</h2></div>");
         $("#resultSummary").append("<table class='table'><thead><tr style='background-color: lightgrey;font-weight: bold;'>"
                 +"<td>Gene Name</td>"
@@ -157,81 +156,115 @@ var VariantsAnnotation = (function() {
         );
         return str;
     }
-
-    function displayAttr(datum, id, element, key) {
-        var exception = ["eligibility_criteria","purpose"],
-            exceptionL = exception.length;
-        if(key === "investigational_therapeutic_implications" && datum.hasOwnProperty('sensitive_to')) {
+    
+    function displaySpecial(datum, id, element) {
+        for(var key in datum) {
             var formattedDatum = {};
-            if(isArray(datum['sensitive_to'])) {
-                _.each(datum['sensitive_to'], function(value, index) {
-                    var sensitiveName = "Sensitive to: ";
-                        
-                    sensitiveName = underTreatment(value, sensitiveName, ['treatment', 'drug'], ['AND','&']);
-                    
-                    formattedDatum[sensitiveName] = {
-                        "Highest level of evidence:": value['level_of_evidence_for_patient_indication']['level'],
-                        "description": value['description']};
+            if(isArray(datum[key])) {
+                _.each(datum[key], function(value, index) {
+                    var name = key + ": ";
+
+                    name = underTreatment(value, name, ['treatment', 'drug'], ['AND','&']);
+                    formattedDatum = formatDatum(formattedDatum, name, value);
                 });
             }else {
-                var sensitiveName = "Sensitive to: ";
-                
-                sensitiveName = underTreatment(datum['sensitive_to'], sensitiveName, ['treatment', 'drug'], ['/','&']);
-                formattedDatum[sensitiveName] = {
-                    "Highest level of evidence:": datum['sensitive_to']['level_of_evidence_for_patient_indication']['level'],
-                    "description": datum['sensitive_to']['description']};
+                var name = key + ": ";
+
+                name = underTreatment(datum[key], name, ['treatment', 'drug'], ['/','&']);
+                formattedDatum = formatDatum(formattedDatum, name, datum[key]);
             }
-            
-            displayAttr(formattedDatum, id + "-" + i, element, "");
+
+            displayRegular(formattedDatum, id, element);
+        }
+    }
+    
+    function formatDatum(formattedDatum, name, value) {
+        formattedDatum[name] = {};
+        
+        if(value.hasOwnProperty('level_of_evidence_for_patient_indication')) {
+            formattedDatum[name]["Highest level of evidence:"] =  value['level_of_evidence_for_patient_indication']['level'];
+        }
+
+        formattedDatum[name]["description"] = value['description'];
+        return formattedDatum;
+    }
+    
+    function displayRegular(datum, id, element) {
+        var exception = ["eligibility_criteria","purpose"],
+            exceptionL = exception.length;
+    
+        if(datum instanceof Array) {
+            for(var i = 0, arrayL = datum.length; i < arrayL; i++) {
+                var _newE = $(document.createElement('div'));
+                element.append(displayAttr(datum[i], id + "-" + i, _newE, ""));
+            }
         }else {
-            if(datum instanceof Array) {
-                for(var i = 0, arrayL = datum.length; i < arrayL; i++) {
-                    var _newE = $(document.createElement('div'));
-                    element.append(displayAttr(datum[i], id + "-" + i, _newE, ""));
+            if(typeof datum === 'object'){
+                for(var key1 in datum) {
+                    if(key1 !== "reference") {
+                        var _id = id + "-" + key1;
+                        var _newE = $(document.createElement('div'));
+
+                        _newE.attr("id", _id);
+                        if(key1 === "eligibility_criteria"){
+                            _newE.css("width", "100%");
+                        }
+                        _newE.css("float", "left");
+                        _newE.css("margin-right", "10px");
+
+
+                        if(typeof datum[key1] === 'object') {
+                            _newE.append("<h4>" + displayProcess(key1) + "</h4>");
+                            _newE = displayAttr(datum[key1], _id, _newE, key1);
+                        }else {
+                            if(exception.indexOf(key1) === -1 && datum[key1] !== "") {
+                               _newE.append("<span>" + (key1 !== "description"? ("<b>" + displayProcess(key1) + ":</b> " ) : "") + findRegex(datum[key1]) +"</span>");
+                            }
+                        }
+
+                        element.append(_newE);
+                    }
+                }
+
+                for(var i = 0; i < exceptionL; i++) {
+                    if(datum.hasOwnProperty(exception[i])) {
+                        var _newE = createBootStrapPanelCollapse(
+                            element, 
+                            id + "-" + exception[i], 
+                            exception[i], 
+                            datum[exception[i]]);
+
+                        element.append(_newE);
+                    }
                 }
             }else {
-                if(typeof datum === 'object'){
-                    for(var key1 in datum) {
-                        if(key1 !== "reference") {
-                            var _id = id + "-" + key1;
-                            var _newE = $(document.createElement('div'));
-
-                            _newE.attr("id", _id);
-                            if(key1 === "eligibility_criteria"){
-                                _newE.css("width", "100%");
-                            }
-                            _newE.css("float", "left");
-                            _newE.css("margin-right", "10px");
-
-
-                            if(typeof datum[key1] === 'object') {
-                                _newE.append("<h4>" + displayProcess(key1) + "</h4>");
-                                _newE = displayAttr(datum[key1], _id, _newE, key1);
-                            }else {
-                                if(exception.indexOf(key1) === -1 && datum[key1] !== "") {
-                                   _newE.append("<span>" + (key1 !== "description"? ("<b>" + displayProcess(key1) + ":</b> " ) : "") + findRegex(datum[key1]) +"</span>");
-                                }
-                            }
-
-                            element.append(_newE);
-                        }
-                    }
-                    
-                    for(var i = 0; i < exceptionL; i++) {
-                        if(datum.hasOwnProperty(exception[i])) {
-                            var _newE = createBootStrapPanelCollapse(
-                                element, 
-                                id + "-" + exception[i], 
-                                exception[i], 
-                                datum[exception[i]]);
-                                
-                            element.append(_newE);
-                        }
-                    }
-                }else {
-                    element.append("<span>" + datum + "<span>");
-                }
+                element.append("<span>" + datum + "<span>");
             }
+        }
+    }
+    
+    function displayAttr(datum, id, element, key) {
+        var specialItems = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'],
+            itiSpecialItems = ['sensitive_to', 'resistant_to'];
+        
+        if(specialItems.indexOf(key) !== -1) {
+            var specialDatum = {},
+                regularDatum = {};
+            
+            _.each(datum, function(value, key) {
+                if(itiSpecialItems.indexOf(key) === -1) {
+                    regularDatum[key] = value;
+                }else {
+                    specialDatum[key] = value;
+                }
+            });
+            
+            if (Object.keys(specialDatum).length > 0)
+                displaySpecial(specialDatum, id, element);
+            if (Object.keys(regularDatum).length > 0)
+                displayRegular(regularDatum, id, element);
+        }else {
+            displayRegular(datum, id, element);
         }
         return element;
     }
