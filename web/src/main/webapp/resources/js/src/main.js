@@ -1,4 +1,4 @@
-var appVersion = "09262014-1";
+var appVersion = "09302014-1";
 
 (function() {
     "use strict";

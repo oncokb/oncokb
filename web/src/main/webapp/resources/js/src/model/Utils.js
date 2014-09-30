@@ -3,7 +3,7 @@ var Utils = (function() {
 
     function search() {
         var searchKeywards = $('#tumor_search input').val().toLowerCase(),
-            result = tree.search(searchKeywards),
+            result = Tree.search(searchKeywards),
             resutlLength = result.length,
             infoText = (resutlLength === 0 ? "No" : resutlLength) + " result" + (resutlLength <= 1 ? "" :"s" );
 
@@ -14,7 +14,7 @@ var Utils = (function() {
             $("#searchResult").text(infoText);
             $("#searchResult").css('z-index', 2);
             $("#searchResult").show();
-        }
+    }
         result = null;
     }
 

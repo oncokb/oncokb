@@ -49,6 +49,10 @@ body {
     left: 10px; /* padding from the left side of the window */
 }
 
+#searchRemoveIcon {
+    display: none;
+}
+
 #variantDisplayResult .panel-body table td:nth-child(1) {
   background-color: lightgray;
 }
@@ -153,6 +157,7 @@ a:hover {
     line-height: 34px;
     text-align: center;
     color: grey;
+    pointer-events: auto;
 }
 
 .has-addon-feedback .form-control-feedback.result {

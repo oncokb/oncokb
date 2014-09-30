@@ -21,11 +21,7 @@ var JqueryEvents = (function() {
         $("#searchRemoveIcon").hover(function() {
             $(this).css('cursor', 'pointer');
         });
-
-        $("#searchRemoveIcon").hover(function() {
-            $(this).css('cursor', 'pointer');
-        });
-
+        
         $("#searchRemoveIcon").click(function() {
             $("#tumor_search input").val("");
             $("#searchRemoveIcon").hide();
@@ -45,6 +41,7 @@ var JqueryEvents = (function() {
         });
         
         $("#combined-variants-btn").click(function() {
+            $("#searchRemoveIcon").click();
             if(!$("#combined-variants-btn").hasClass('active')){
                 $("#tree_loader").removeClass('_hidden');
                 $("#tree").addClass('_hidden');
@@ -62,6 +59,7 @@ var JqueryEvents = (function() {
         });
         
         $("#separated-variants-btn").click(function() {
+            $("#searchRemoveIcon").click();
             if(!$("#separated-variants-btn").hasClass('active')){
                 $("#tree_loader").removeClass('_hidden');
                 $("#tree").addClass('_hidden');
