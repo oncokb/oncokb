@@ -30,8 +30,10 @@ var VariantsAnnotation = (function() {
         };
         //The drug information under clinical trials has information for FDA
         //Approved drugs
-            
+    
     function initWithData(data) {
+        var approvedDrugs = {};
+    
         $("#variantDisplayResult").append("<div id='resultSummary'><h2>Result Summary:</h2></div>");
         $("#resultSummary").append("<table class='table'><thead><tr style='background-color: lightgrey;font-weight: bold;'>"
                 +"<td>Gene Name</td>"
@@ -56,7 +58,7 @@ var VariantsAnnotation = (function() {
                 $("#variantDisplayResult").append(_newE);
             }
         }
-
+        
         if(data.hasOwnProperty("cancer_type")){
             var _cancerType = $(document.createElement('div')),
                 cancerTypeL = data.cancer_type.length; //faster
@@ -64,12 +66,22 @@ var VariantsAnnotation = (function() {
                 _cancerType.attr("id", "cancer-type");
                 _cancerType.addClass("panel-group");
                 _cancerType.append("<h2>Cancer Type</h2>");
-
+            
             for(var i = 0; i < cancerTypeL; i++) {
-                var _datum = $.extend(true, {}, data["cancer_type"][i]) ;
-
+                var _datum = $.extend(true, {}, data["cancer_type"][i]),
+                    _tumorType = _datum['type'];
                 
-                var _em = new BootStrapPanelCollapse();
+                if(_datum.hasOwnProperty("standard_therapeutic_implications")) {
+                    var drugs = [];
+                    drugs = getApprovedDrug(_datum["standard_therapeutic_implications"], ['sensitive_to','treatment','drug'],drugs);
+                    approvedDrugs[_tumorType] = Utils.removeDuplicates(drugs);
+                }
+            }
+            
+            for(var i = 0; i < cancerTypeL; i++) {
+                var _datum = $.extend(true, {}, data["cancer_type"][i]),
+                    _em = new BootStrapPanelCollapse(),
+                    _tumorType = _datum['type'];
                 
                 _em.init({
                     divs: {
@@ -111,13 +123,39 @@ var VariantsAnnotation = (function() {
                         _em.empty(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)");
                         _em.append(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)", displayAttr(_data, "cancer-type-" + i, _em.find(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)")), key);
                     }
+                    
+                    if(m === summaryTableTitlesL-2 && approvedDrugs.hasOwnProperty(_tumorType)){
+                        _em.empty(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)");
+                        _em.append(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)", approvedDrugs[_tumorType].join(" / "));
+                    }
+                    
+                    if(m === summaryTableTitlesL-1){
+                        var _drugs = $.extend(true, {}, approvedDrugs);
+                        if(_drugs.hasOwnProperty(_tumorType)){ 
+                            delete _drugs[_tumorType];
+                        }
+                        if(Object.keys(_drugs).length > 0) {
+                            _em.empty(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)");
+                            _em.append(".panel-body table tr:nth-child("+ cellIndex +") td:nth-child(2)", objToStr(_drugs));
+                        }
+                    }
                 }
-               
+                
                 _cancerType.append(_em.get());
             }
             $("#variantDisplayResult").append(_cancerType);
             $("#cancer-type").collapse();
         }
+    }
+    
+    function objToStr(obj) {
+        var string = "";
+        for(var key in obj) {
+            for(var i = 0, arrayL = obj[key].length; i < arrayL; i++){
+                string += obj[key][i] + " / " + key + "<br/>";
+            }
+        }
+        return string;
     }
     
     function generateSummaryTable() {
@@ -182,7 +220,7 @@ var VariantsAnnotation = (function() {
         formattedDatum[name] = {};
         
         if(value.hasOwnProperty('level_of_evidence_for_patient_indication')) {
-            formattedDatum[name]["Highest level of evidence:"] =  value['level_of_evidence_for_patient_indication']['level'];
+            formattedDatum[name]["Highest level of evidence"] =  value['level_of_evidence_for_patient_indication']['level'];
         }
 
         formattedDatum[name]["description"] = value['description'];
@@ -297,6 +335,34 @@ var VariantsAnnotation = (function() {
         return _newE;
     }
     
+    function getApprovedDrug(value, keys, drugs) {
+        if(keys.length) {
+            var key = keys[0];
+
+            if(isArray(value[key])) {
+                _.each(value[key], function(value1, index1) {
+                    var _keys = $.extend(true, [], keys);
+                    _keys.shift();
+                    drugs = getApprovedDrug(value1, _keys, drugs);
+                });
+            }else {
+                if(keys.length > 1) {
+                    keys.shift();
+                    drugs = getApprovedDrug(value[key], keys, drugs);
+                }else {
+                    if (value[key].fda_approved === "Yes") {
+                        drugs.push(value[key].name);
+                    }
+                }
+            }
+        }else {
+            if (value.fda_approved === "Yes") {
+                drugs.push(value.name);
+            }
+        }
+        return drugs;
+    }
+    
     function underTreatment(value, sensitiveName, keys, extendLetters) {
         
         if(keys.length === extendLetters.length) {
@@ -331,11 +397,19 @@ var VariantsAnnotation = (function() {
                                 keys,
                                 extendLetters);
                     }else {
-                        sensitiveName += value[key].name;
+                        var _extraInfo = "";
+                        if (value[key].fda_approved === "Yes") {
+                            _extraInfo = "<img src='resources/img/approved.svg' class='icon'></img>";
+                        }
+                        sensitiveName += value[key].name + _extraInfo;
                     }
                 }
             }else {
-                sensitiveName += value.name;
+                var _extraInfo = "";
+                if (value.fda_approved === "Yes") {
+                    _extraInfo = "<img src='resources/img/approved.svg' class='icon'></img>";
+                }
+                sensitiveName += value.name + _extraInfo;
             }
             return sensitiveName;
         }else {

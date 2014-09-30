@@ -28,8 +28,18 @@ var Utils = (function() {
              $('#top-link-block').addClass('hidden');
         }
     }
+    
+    function removeDuplicates(array) {
+        var uniqueNames = [];
+        $.each(array, function(i, el){
+            if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
+        });
+        return uniqueNames;
+    }
+    
     return {
         search: search,
-        backToTop: backToTop
+        backToTop: backToTop,
+        removeDuplicates: removeDuplicates
     };
 })();

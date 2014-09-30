@@ -41,13 +41,13 @@ var appVersion = "09262014-1";
                     ]
                 },
                 model: [
-                    'DataProxy'
+                    'DataProxy',
+                    'Utils'
                 ],
                 view: [
                     'Init', 
                     'JqueryEvents',
                     'Tree',
-                    'Utils',
                     'DocumentEvents',
                     'VariantsAnnotation'
                 ]
