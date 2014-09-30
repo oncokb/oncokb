@@ -165,15 +165,18 @@ var VariantsAnnotation = (function() {
             var formattedDatum = {};
             if(isArray(datum['sensitive_to'])) {
                 _.each(datum['sensitive_to'], function(value, index) {
-                    var sensitiveName = underTreatment(value, 'treatment');
+                    var sensitiveName = "Sensitive to: ";
+                        
+                    sensitiveName = underTreatment(value, sensitiveName, ['treatment', 'drug'], ['AND','&']);
                     
                     formattedDatum[sensitiveName] = {
                         "Highest level of evidence:": value['level_of_evidence_for_patient_indication']['level'],
                         "description": value['description']};
                 });
             }else {
-                var sensitiveName = underTreatment(datum['sensitive_to'], 'treatment');
-
+                var sensitiveName = "Sensitive to: ";
+                
+                sensitiveName = underTreatment(datum['sensitive_to'], sensitiveName, ['treatment', 'drug'], ['/','&']);
                 formattedDatum[sensitiveName] = {
                     "Highest level of evidence:": datum['sensitive_to']['level_of_evidence_for_patient_indication']['level'],
                     "description": datum['sensitive_to']['description']};
@@ -185,7 +188,6 @@ var VariantsAnnotation = (function() {
                 for(var i = 0, arrayL = datum.length; i < arrayL; i++) {
                     var _newE = $(document.createElement('div'));
                     element.append(displayAttr(datum[i], id + "-" + i, _newE, ""));
-                    element.append("<br/><br/>");
                 }
             }else {
                 if(typeof datum === 'object'){
@@ -207,7 +209,7 @@ var VariantsAnnotation = (function() {
                                 _newE = displayAttr(datum[key1], _id, _newE, key1);
                             }else {
                                 if(exception.indexOf(key1) === -1 && datum[key1] !== "") {
-                                   _newE.append("<span>" + (key1 !== "description"? (key1 !== 'trial_id' ? ("<b>" + displayProcess(key1) + ":</b> " ) : "<br/><b>" + displayProcess(key1) + ":</b> " ) : "") + findRegex(datum[key1]) +"</span>");
+                                   _newE.append("<span>" + (key1 !== "description"? ("<b>" + displayProcess(key1) + ":</b> " ) : "") + findRegex(datum[key1]) +"</span>");
                                 }
                             }
 
@@ -217,31 +219,12 @@ var VariantsAnnotation = (function() {
                     
                     for(var i = 0; i < exceptionL; i++) {
                         if(datum.hasOwnProperty(exception[i])) {
-                            var _id = id + "-" + exception[i];
-                            var _newE = $(document.createElement('div'));
-
-                            _newE.attr("id", _id);
-                            _newE.css("width", "100%");
-                            _newE.css("float", "left");
-                            _newE.css("margin-right", "10px");
-
-                            var _em = new BootStrapPanelCollapse();
-                            _em.init({
-                                divs: {
-                                    Id: _id + "-panel",
-                                    parentId: _id,
-                                    title: displayProcess(exception[i]),
-                                    titleAddition: "",
-                                    body:  findRegex(datum[exception[i]]),
-                                    special: true
-                                },
-                                styles: {
-                                    headerH4: {
-                                        'font-size': "16px"
-                                    }
-                                }
-                            });
-                            _newE.append(_em.get());
+                            var _newE = createBootStrapPanelCollapse(
+                                element, 
+                                id + "-" + exception[i], 
+                                exception[i], 
+                                datum[exception[i]]);
+                                
                             element.append(_newE);
                         }
                     }
@@ -253,32 +236,79 @@ var VariantsAnnotation = (function() {
         return element;
     }
     
-    function underTreatment(value, key) {
-        var sensitiveName = "Sensitive to: ";
-                    
-        if(isArray(value[key])) {
-            var _treatmentL = value[key].length;
-            _.each(value[key], function(value1, index1) {
-                sensitiveName = underDrug(value1, 'drug', sensitiveName);
-                sensitiveName += (index1 + 1) === _treatmentL ? "" : " AND ";
-            });
-        }else {
-            sensitiveName = underDrug(value[key], 'drug', sensitiveName);
-        }
-        
-        return sensitiveName;
+    function createBootStrapPanelCollapse(element, Id, title, body) {
+        var _newE = $(document.createElement('div'));
+
+        _newE.attr("id", Id);
+        _newE.css("width", "100%");
+        _newE.css("float", "left");
+        _newE.css("margin-right", "10px");
+
+        var _em = new BootStrapPanelCollapse();
+        _em.init({
+            divs: {
+                Id: Id + "-panel",
+                parentId: Id,
+                title: displayProcess(title),
+                titleAddition: "",
+                body:  findRegex(body),
+                special: true
+            },
+            styles: {
+                headerH4: {
+                    'font-size': "16px"
+                }
+            }
+        });
+        _newE.append(_em.get());
+        return _newE;
     }
     
-    function underDrug(value, key, sensitiveName) {
-        if(isArray(value[key])) {
-            var _drugL = value[key].length;
-            _.each(value[key], function(value1, index1) {
-                sensitiveName += value1.name + (index1 + 1) === _drugL ? "" : "&";
-            });
-        } else {
-            sensitiveName += value[key].name;
+    function underTreatment(value, sensitiveName, keys, extendLetters) {
+        
+        if(keys.length === extendLetters.length) {
+            
+            if(keys.length) {
+                var key = keys[0];
+           
+                if(isArray(value[key])) {
+                    var valueL = value[key].length;
+                    _.each(value[key], function(value1, index1) {
+                        var _keys = $.extend(true, [], keys),
+                            _extendLetters = $.extend(true, [], extendLetters),
+                            shifted =  _extendLetters.shift();
+                            
+                        _keys.shift();
+                        sensitiveName = 
+                            underTreatment(
+                                value1, 
+                                sensitiveName,
+                                _keys,
+                                _extendLetters);
+                        sensitiveName += (index1 + 1) === valueL ? "" : (" "+ shifted +" ");
+                    });
+                }else {
+                    if(keys.length > 1) {
+                        keys.shift();
+                        extendLetters.shift();
+                        sensitiveName = 
+                            underTreatment(
+                                value[key],
+                                sensitiveName,
+                                keys,
+                                extendLetters);
+                    }else {
+                        sensitiveName += value[key].name;
+                    }
+                }
+            }else {
+                sensitiveName += value.name;
+            }
+            return sensitiveName;
+        }else {
+            console.log("Error, length of keys not equal to length of extend letters");
+            return false;
         }
-        return sensitiveName;
     }
     
     function isArray(array) {

@@ -103,7 +103,6 @@ var JqueryEvents = (function() {
     
     function iconSet() {
         $(".iconExpand").click(function() {
-            console.log("these");
             $(this).css('display', 'none');
             $(this).parent().find('.iconCollapse').css('display', 'inline-block');
         });
