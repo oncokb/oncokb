@@ -2,7 +2,7 @@ var DocumentEvents = (function() {
     "use strict";
     
     function init() {
-        keypress();
+//        keypress();
     }
     
     function keypress() {

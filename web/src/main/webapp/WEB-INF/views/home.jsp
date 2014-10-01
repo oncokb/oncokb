@@ -16,11 +16,11 @@
   <body>
     <div id="displayTabs" class="container">
         <ul class="nav nav-tabs" role="tablist">
-            <li id="tab-1"class="active"><a href="#mainTree" data-toggle="tab">Home</a></li>
+            <li id="tab-1"><a href="#mainTree" data-toggle="tab">Home</a></li>
             <li id="tab-2"><a href="#variantDisplay" data-toggle="tab">Variants Annotation</a></li>
         </ul>
         <div  class="tab-content">
-      <div id="mainTree" class="tab-pane fade in active">
+      <div id="mainTree" class="tab-pane fade in">
         <div class="row">
           <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
             <br/>
@@ -65,7 +65,7 @@
           </div>
          </div>
       </div>
-     <div id="variantDisplay" class="tab-pane fade">
+     <div id="variantDisplay" class="tab-pane fade in">
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h2>Search Criteria</h2>

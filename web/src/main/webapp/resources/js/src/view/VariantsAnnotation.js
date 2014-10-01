@@ -471,6 +471,14 @@ var VariantsAnnotation = (function() {
         $("#tumorTypesDropDown").chosen({width: "100%"});
     }
     
+    function init(tumorTypes, params) {
+        initHTML(tumorTypes);
+        if(typeof params !== "undefined" && params) {
+            JqueryEvents.setVarientParams(params);
+            variantSearch(params);
+        }
+    }
+    
     function tab2ClickCallBack(data) {
         $("#variant_loader").css('display', 'none');
         if(data) {
@@ -481,7 +489,7 @@ var VariantsAnnotation = (function() {
         }
     }
     return {
-        init: initHTML,
+        init: init,
         variantSearch: variantSearch
     };
 })();

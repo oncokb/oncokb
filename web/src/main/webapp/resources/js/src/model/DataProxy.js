@@ -10,17 +10,36 @@ var DataProxy = (function() {
         jsonDataL = 0,
         treeType = "separated";//Combined || Separated
         
-    function getDataFunc(callback){
+    function getEvidence(callback){
+        $.when(
+            $.ajax({type: "POST", url: "evidence.json"}))
+            .done(function(a1){
+                jsonData = a1;
+                jsonDataL = jsonData.length;
+                analysisData(callback);
+            });
+    }
+    
+    function getTumorTypes(callback){
+        $.when(
+            $.ajax({type: "POST", url: "tumorType.json"}))
+            .done(function(a1){
+                tumorTypes = $.extend(true, [], a1);
+                callback();
+            });
+    }
+    
+    function init(callback) {
         $.when(
             $.ajax({type: "POST", url: "evidence.json"}),
             $.ajax({type: "POST", url: "tumorType.json"}))
             .done(function(a1, a2){
-                tumorTypes = $.extend(true, [], a2[0]);
                 jsonData = a1[0];
                 jsonDataL = jsonData.length;
+                tumorTypes = $.extend(true, [], a2[0]);
                 analysisData(callback);
             });
-    };
+    }
     
     function generateVariant(params, callback) {
         var _params = $.extend(true, {}, params);
@@ -258,9 +277,13 @@ var DataProxy = (function() {
     }
     
     return {
-        init: function(callback){
-            getDataFunc(callback);
+        initEvidence: function(callback){
+            getEvidence(callback);
         },
+        initTumorTypes: function(callback){
+            getTumorTypes(callback);
+        },
+        init: init,
         generateDataByTreeType: function(_treeType, callback) {
             treeType = _treeType;
             analysisData(callback);

@@ -81,15 +81,23 @@ var JqueryEvents = (function() {
         });
         
         $("#useExampleBtn").click(function() {
-            $("#variantGeneName").val(getString($("#variantGeneName").attr("placeholder")));
-            $("#variantMutation").val(getString($("#variantMutation").attr("placeholder")));
-            $("#tumorTypesDropDown").val("lung cancer").trigger("chosen:updated");
+            setVarientParams({
+                hugoSymbol : getString($("#variantGeneName").attr("placeholder")),
+                alteration : getString($("#variantMutation").attr("placeholder")),
+                tumorType : 'lung cancer'
+            });
             VariantsAnnotation.variantSearch(getSearchInput());
         });
         
         $("#displayTabs").tab();
     }
 
+    function setVarientParams(keywords) {
+        $("#variantGeneName").val(keywords.hugoSymbol !== "undefined" ? keywords.hugoSymbol : "");
+        $("#variantMutation").val(keywords.alteration !== "undefined" ? keywords.alteration : "");
+        $("#tumorTypesDropDown").val(keywords.tumorType !== "undefined" ? keywords.tumorType : "").trigger("chosen:updated");
+    }
+    
     function getSearchInput() {
         return {
             hugoSymbol: $("#variantGeneName").val(),
@@ -136,6 +144,7 @@ var JqueryEvents = (function() {
         init: initEvents,
         initQtips: initQtips,
         getSearchInput: getSearchInput,
-        iconSet: iconSet
+        iconSet: iconSet,
+        setVarientParams: setVarientParams
     };
 })();
