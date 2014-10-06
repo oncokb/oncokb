@@ -1,6 +1,8 @@
 var DataProxy = (function() {
+    "use strict";
     
     var genes = {},
+        tumorTypes = [],
         treeInfo = [],
         treeInfoDul = {},
         description = {},
@@ -8,26 +10,53 @@ var DataProxy = (function() {
         jsonDataL = 0,
         treeType = "separated";//Combined || Separated
         
-    function getDataFunc(callback){
-         $.when(
-                $.ajax({type: "POST", url: "evidence.json"}),
-                $.ajax({
-                    type: "POST", 
-                    url: "var_annotation",
-                    data: {
-                        alterationType: "MUTATION",
-                        hugoSymbol: "BRAF",
-                        alteration: "V600E"
-                    },
-                    dataType:"xml"
-                }))
-            .done(function(a1, a2){
-                console.log($.xml2json(a2[0]));
-                jsonData = a1[0];
+    function getEvidence(callback){
+        $.when(
+            $.ajax({type: "POST", url: "evidence.json"}))
+            .done(function(a1){
+                jsonData = a1;
                 jsonDataL = jsonData.length;
                 analysisData(callback);
             });
-    };
+    }
+    
+    function getTumorTypes(callback){
+        $.when(
+            $.ajax({type: "POST", url: "tumorType.json"}))
+            .done(function(a1){
+                tumorTypes = $.extend(true, [], a1);
+                callback();
+            });
+    }
+    
+    function init(callback) {
+        $.when(
+            $.ajax({type: "POST", url: "evidence.json"}),
+            $.ajax({type: "POST", url: "tumorType.json"}))
+            .done(function(a1, a2){
+                jsonData = a1[0];
+                jsonDataL = jsonData.length;
+                tumorTypes = $.extend(true, [], a2[0]);
+                analysisData(callback);
+            });
+    }
+    
+    function generateVariant(params, callback) {
+        var _params = $.extend(true, {}, params);
+        $.ajax({
+            type: "POST", 
+            url: "var_annotation",
+            data: _params,
+            dataType:"xml"
+        })
+        .success(function(data) {
+            var _variantJson = $.xml2json(data);
+            callback(_variantJson);
+        })
+        .fail(function(data) {
+            callback(null);
+        });
+    }
     
     function analysisData(callback) {
         genes = {},
@@ -248,14 +277,20 @@ var DataProxy = (function() {
     }
     
     return {
-        init: function(callback){
-            getDataFunc(callback);
+        initEvidence: function(callback){
+            getEvidence(callback);
         },
+        initTumorTypes: function(callback){
+            getTumorTypes(callback);
+        },
+        init: init,
         generateDataByTreeType: function(_treeType, callback) {
             treeType = _treeType;
             analysisData(callback);
         },
         getTreeInfo: function(){ return treeInfo;},
-        getDescription: function() { return description;}
+        getDescription: function() { return description;},
+        getTumorTypes: function() { return tumorTypes;},
+        generateVariant: generateVariant
     };
 }());

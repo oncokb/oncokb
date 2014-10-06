@@ -49,6 +49,27 @@ body {
     left: 10px; /* padding from the left side of the window */
 }
 
+#searchRemoveIcon {
+    display: none;
+}
+
+#variantDisplayResult .panel-body table td:nth-child(1) {
+  background-color: lightgray;
+}
+
+#variantDisplayResult table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+#variantDisplayResult .icon {
+    width: 12px;
+}
+#variantDisplayResult .icon.iconCollapse{
+    display: none;
+}
+#variantDisplayResult .icon.iconExpand{
+    display: inline-block;
+}
 rect {
   fill: none;
   pointer-events: all;
@@ -106,6 +127,10 @@ a:link, a:visited {
   text-decoration: none;
 }
 
+a.withUnderScore {
+  text-decoration: underline;
+}
+
 a:hover {
   color: #666;
 }
@@ -132,6 +157,7 @@ a:hover {
     line-height: 34px;
     text-align: center;
     color: grey;
+    pointer-events: auto;
 }
 
 .has-addon-feedback .form-control-feedback.result {
@@ -140,3 +166,5 @@ a:hover {
     z-index: 1;
     text-align: right;
 }
+
+.form-control::-webkit-input-placeholder { color: lightgray; }
