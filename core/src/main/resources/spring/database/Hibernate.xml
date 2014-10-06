@@ -15,7 +15,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                                 <prop key="hibernate.connection.useUnicode">true</prop>
                                 <prop key="hibernate.connection.characterEncoding">utf8</prop>
                                 <prop key="hibernate.connection.charSet">utf8</prop> 
-                                <!--<prop key="hibernate.hbm2ddl.auto">update</prop>-->
+                                <!--<prop key="hibernate.hbm2ddl.auto">create</prop>-->
     		</props>
     	</property>
     	
