@@ -307,7 +307,17 @@ public class ClinicalTrialsImporter {
             while (true) {
                 String urlCts = "http://clinicaltrials.gov"+url+"&displayxml=true&pg="+pg;
                 System.out.println(urlCts);
-                Document doc = db.parse(urlCts);
+                Document doc = null;
+                for (int iTry=0; iTry<10 && doc==null; iTry++) {
+                    try {
+                        doc = db.parse(urlCts);
+                    } catch (IOException e) {
+                        //e.printStackTrace();
+                    }
+                }
+                if (doc==null) {
+                    doc = db.parse(urlCts);
+                }
                 Element docEle = doc.getDocumentElement();
                 List<Element> els = getElements(docEle, "clinical_study");
                 if (els.isEmpty()) {

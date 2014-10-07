@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +45,8 @@ import org.mskcc.cbio.oncokb.util.NcbiEUtils;
  */
 public final class QuestDocAnnotationParser {
     private static final String GENE_P = "Gene: ?(.+)";
-    private static final String GENE_BACKGROUND_P = "^Background:? *";
+    private static final String SUMMARY_P = "Summary:? *";
+    private static final String GENE_BACKGROUND_P = "Background:? *";
         
     private static final String MUTATION_P = "Mutations?: ?(.+)";
     private static final String MUTATION_EFFECT_P = "Mutation effect: ?([^\\(]+)(\\(PMIDs?:.+\\))?";
@@ -61,6 +63,7 @@ public final class QuestDocAnnotationParser {
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P = "Investigational therapeutic implications for drug sensitivity:?";
     private static final String INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P = "Investigational therapeutic implications for drug resistance:?";
     private static final String SENSITIVE_TO_P = "Sensitive to: ?(.+)";
+    private static final String APPROVED_INDICATION_P = "Approved indications: ?(.*)";
     private static final String RESISTANT_TO_P = "Resistant to: ?(.+)";
     private static final String HIGHEST_LEVEL_OF_EVIDENCE = "Highest level of evidence: ?(.*)";
     private static final String DESCRIPTION_OF_EVIDENCE_P = "Description of evidence:? ?(.*)";
@@ -105,7 +108,7 @@ public final class QuestDocAnnotationParser {
         for (String file : files) {
             parse(new FileInputStream(file));
         }
-        //ClinicalTrialsImporter.main(args);
+        ClinicalTrialsImporter.main(args);
         
 //        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }
@@ -141,11 +144,73 @@ public final class QuestDocAnnotationParser {
             geneBo.save(gene);
         }
         
+        // summary
+        int[] summaryBgLines = parseSummary(gene, lines, start, end);
+        
         // background
         int[] geneBgLines = parseGeneBackground(gene, lines, start, end);
         
         // mutations
         parseMutations(gene, lines, geneBgLines[1], end);
+    }
+    
+    private static int[] parseSummary(Gene gene, List<String> lines, int start, int end) {
+        List<int[]> summaryLines = extractLines(lines, start, end, SUMMARY_P, GENE_BACKGROUND_P, 1);
+        if (summaryLines.size()!=1) {
+            System.err.println("No summary for "+gene.getHugoSymbol());
+            return null;
+        }
+        
+        System.out.println("##  Summary");
+        
+        int sSummary = summaryLines.get(0)[0];
+        int eSummary = summaryLines.get(0)[1];
+        
+        // gene summary
+        List<int[]> geneSummaryLines = extractLines(lines, sSummary, eSummary, SUMMARY_P, TUMOR_TYPE_P, 1);
+        String geneSummary = joinLines(lines, geneSummaryLines.get(0)[0]+1, geneSummaryLines.get(0)[1]);
+        Evidence evidence = new Evidence();
+        evidence.setEvidenceType(EvidenceType.GENE_SUMMARY);
+        evidence.setGene(gene);
+        evidence.setDescription(geneSummary);
+        setDocuments(geneSummary, evidence);
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        evidenceBo.save(evidence);
+        
+        // tumor types
+        List<int[]> cancerSummaryLines = extractLines(lines, geneSummaryLines.get(0)[1], eSummary, TUMOR_TYPE_P, TUMOR_TYPE_P, -1);
+        for (int[] cancerLine : cancerSummaryLines) {
+            String line = lines.get(cancerLine[0]);
+            Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
+            Matcher m = p.matcher(line);
+            if (!m.matches()) {
+                System.err.println("wrong format of type type line: "+line);
+            }
+            String cancer = m.group(1).trim();
+
+            System.out.println("##    Cancer type: " + cancer);
+
+            TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
+            TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
+            if (tumorType==null) {
+                tumorType = new TumorType();
+                tumorType.setTumorTypeId(cancer);
+                tumorType.setName(cancer);
+                tumorType.setClinicalTrialKeywords(Collections.singleton(cancer));
+                tumorTypeBo.save(tumorType);
+            }
+
+            String cancerSummary = joinLines(lines, cancerLine[0]+1, cancerLine[1]);
+            evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
+            evidence.setDescription(cancerSummary);
+            setDocuments(cancerSummary, evidence);
+            evidenceBo.save(evidence);
+        }
+        
+        return summaryLines.get(0);
     }
     
     private static int[] parseGeneBackground(Gene gene, List<String> lines, int start, int end) {
@@ -461,7 +526,6 @@ public final class QuestDocAnnotationParser {
         
         // specific evidence
         Pattern pSensitiveTo = Pattern.compile(sensitivieP);
-        Pattern pLevel = Pattern.compile(HIGHEST_LEVEL_OF_EVIDENCE, Pattern.CASE_INSENSITIVE);
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
         
@@ -472,6 +536,17 @@ public final class QuestDocAnnotationParser {
             evidence.setGene(gene);
             evidence.setTumorType(tumorType);
             evidence.setKnownEffect(knownEffectOfEvidence);
+            
+            // approved indications
+            Set<String> appovedIndications = new HashSet<String>();
+            Pattern pApprovedFor = Pattern.compile(APPROVED_INDICATION_P, Pattern.CASE_INSENSITIVE);
+            List<int[]> approvedForLines = extractLines(lines, drugLine[0], drugLine[1], APPROVED_INDICATION_P, 1);
+            if (!approvedForLines.isEmpty()) {
+                Matcher m = pApprovedFor.matcher(lines.get(approvedForLines.get(0)[0]));
+                if (m.matches())  {
+                    appovedIndications = new HashSet<String>(Arrays.asList(m.group(1).trim().split(";")));
+                }
+            }
             
             // sensitive to
             List<int[]> sensitiveLines = extractLines(lines, drugLine[0], drugLine[1], sensitivieP, 1);
@@ -499,6 +574,8 @@ public final class QuestDocAnnotationParser {
                 
                 Treatment treatment = new Treatment();
                 treatment.setDrugs(drugs);
+                treatment.setApprovedIndications(appovedIndications);
+                
                 treatmentBo.save(treatment);
                 
                 treatments.add(treatment);
@@ -506,6 +583,7 @@ public final class QuestDocAnnotationParser {
             evidence.setTreatments(treatments);
             
             // highest level of evidence
+            Pattern pLevel = Pattern.compile(HIGHEST_LEVEL_OF_EVIDENCE, Pattern.CASE_INSENSITIVE);
             List<int[]> levelLines = extractLines(lines, drugLine[0], drugLine[1], HIGHEST_LEVEL_OF_EVIDENCE, 1);
             if (!levelLines.isEmpty()) {
                 m = pLevel.matcher(lines.get(levelLines.get(0)[0]));

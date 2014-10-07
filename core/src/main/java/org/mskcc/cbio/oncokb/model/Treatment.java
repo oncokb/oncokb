@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -13,7 +14,8 @@ public class Treatment implements java.io.Serializable {
 
 
     private Integer treatmentId;
-    private Set<Drug> drugs;
+    private Set<Drug> drugs = new HashSet<Drug>(0);
+    private Set<String> approvedIndications = new HashSet<String>(0);
 
     public Treatment() {
     }
@@ -32,6 +34,14 @@ public class Treatment implements java.io.Serializable {
 
     public void setDrugs(Set<Drug> drugs) {
         this.drugs = drugs;
+    }
+
+    public Set<String> getApprovedIndications() {
+        return approvedIndications;
+    }
+
+    public void setApprovedIndications(Set<String> approvedIndications) {
+        this.approvedIndications = approvedIndications;
     }
 
     @Override

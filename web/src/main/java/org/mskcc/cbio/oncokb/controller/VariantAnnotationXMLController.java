@@ -92,6 +92,9 @@ public class VariantAnnotationXMLController {
             return sb.toString();
         }
         
+        sb.append("<annotation_summary>");
+        sb.append("</annotation_summary>\n");
+        
         // gene background
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_BACKGROUND);
@@ -469,6 +472,11 @@ public class VariantAnnotationXMLController {
             sb.append(indent).append("    <description>");
             sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()).trim());
             sb.append("</description>\n");
+            if (levelOfEvidence==LevelOfEvidence.LEVEL_1 || 
+                    levelOfEvidence==LevelOfEvidence.LEVEL_2) {
+                sb.append(indent).append("<approved_indication>");
+                sb.append("</approved_indication>\n");
+            }
             sb.append(indent).append("</level_of_evidence_for_patient_indication>\n");
         }
         
