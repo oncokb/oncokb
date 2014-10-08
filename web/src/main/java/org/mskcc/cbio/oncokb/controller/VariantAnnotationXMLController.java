@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,11 +93,35 @@ public class VariantAnnotationXMLController {
             return sb.toString();
         }
         
-        sb.append("<annotation_summary>");
-        sb.append("</annotation_summary>\n");
+        Set<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
+        
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        
+        // summary
+        {
+            sb.append("<annotation_summary>");
+            List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_SUMMARY);
+            if (!geneSummaryEvs.isEmpty()) {
+                Evidence ev = geneSummaryEvs.get(0);
+                String geneSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+                sb.append(geneSummary);
+            }
+            List<Evidence> cancerSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
+            Map<TumorType, Evidence> mapTumorTypeSummaryEvs = new LinkedHashMap<TumorType, Evidence>();
+            for (Evidence ev : cancerSummaryEvs) {
+                mapTumorTypeSummaryEvs.put(ev.getTumorType(), ev);
+            }
+            if (!Collections.disjoint(relevantTumorTypes, mapTumorTypeSummaryEvs.entrySet())) { // if matched tumor is found
+                mapTumorTypeSummaryEvs.keySet().retainAll(relevantTumorTypes);
+            }
+            for (Evidence ev : mapTumorTypeSummaryEvs.values()) {
+                String cancerSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+                sb.append(" ").append(cancerSummary);
+            }
+            sb.append("</annotation_summary>\n");
+        }
         
         // gene background
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_BACKGROUND);
         if (!geneBgEvs.isEmpty()) {
             Evidence ev = geneBgEvs.get(0);
@@ -167,7 +192,6 @@ public class VariantAnnotationXMLController {
         }
         
         // find tumor types
-        Set<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
         sortTumorType(tumorTypes, tumorType);
