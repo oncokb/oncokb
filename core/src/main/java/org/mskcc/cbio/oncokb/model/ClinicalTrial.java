@@ -25,6 +25,7 @@ public class ClinicalTrial implements java.io.Serializable {
     private Set<String> countries = new HashSet<String>(0);
     private Set<TumorType> tumorTypes = new HashSet<TumorType>(0);
     private Set<Drug> drugs = new HashSet<Drug>(0);
+    private Set<Gene> genes = new HashSet<Gene>(0);
     private Set<Alteration> alterations = new HashSet<Alteration>(0);
     
 
@@ -137,6 +138,14 @@ public class ClinicalTrial implements java.io.Serializable {
 
     public void setDrugs(Set<Drug> drugs) {
         this.drugs = drugs;
+    }
+
+    public Set<Gene> getGenes() {
+        return genes;
+    }
+
+    public void setGenes(Set<Gene> genes) {
+        this.genes = genes;
     }
 
     public Set<Alteration> getAlterations() {
