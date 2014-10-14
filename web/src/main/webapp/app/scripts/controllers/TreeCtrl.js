@@ -1,18 +1,29 @@
+var treeEvidence = [];
+
 oncokbApp.controller('TreeCtrl', [
-    '$scope', 
+    '$scope',
+    '$location',
     'Evidence', 
     'AnalysisEvidence', 
-    function ($scope, Evidence, AnalysisEvidence) {
+    function ($scope, $location, Evidence, AnalysisEvidence) {
 
     'use strict';
-    $scope.treeType = 'separated';
-    $scope.rendering = true;
-    $scope.searchKeywords = '';
-    $scope.searchResult = '';
 
-    Evidence.getFromFile().success(function(data) {
-    	drawTree(data);
-    });
+    $scope.init = function() {
+        $scope.treeType = 'separated';
+        $scope.rendering = true;
+        $scope.searchKeywords = '';
+        $scope.searchResult = '';
+
+        if(treeEvidence.length === 0) {
+            Evidence.getFromServer().success(function(data) {
+                treeEvidence = angular.copy(data);
+                drawTree(data);
+            });
+        }else {
+            drawTree(treeEvidence);
+        }
+    }
 
     function drawTree(data) {
         var processed = AnalysisEvidence.init($scope.treeType, data) ;
@@ -63,7 +74,20 @@ oncokbApp.controller('TreeCtrl', [
     }
 
     $scope.collapseAll = function() {
-         Tree.collapseAll();
+        Tree.collapseAll();
+    }
+
+    $scope.tabIsActive = function(route) {
+        if( route instanceof Array) {
+            for (var i = route.length - 1; i >= 0; i--) {
+                if(route[i] === $location.path()) {
+                    return true;
+                }
+            };
+            return false;
+        }else {
+            return route === $location.path();
+        }
     }
     // var callback = function(data) {
     // 	jsonData = data;

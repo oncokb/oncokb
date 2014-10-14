@@ -1,4 +1,4 @@
-<div id="variantDisplay" class="tab-pane fade in">
+<div id="variantDisplay" class="tab-pane fade in" ng-init="init()">
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <h2>Search Criteria</h2>
@@ -9,32 +9,55 @@
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
             <div class="input-group input-group-sm">
                 <span class="input-group-addon"><b>Gene Name:</b></span>
-                <input type="text" id="variantGeneName" class="form-control" placeholder="(eg. BRAF)">
+                <input type="text" ng-model="geneName" id="variantGeneName" class="form-control" placeholder="(eg. BRAF)">
             </div>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
             <div class="input-group input-group-sm">
                 <span class="input-group-addon"><b>Mutation:</b></span>
-                <input type="text" id="variantMutation" class="form-control" placeholder="(eg. V600E)">
+                <input type="text" ng-model="mutation" id="variantMutation" class="form-control" placeholder="(eg. V600E)">
             </div>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-            <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType.name for tumorType in tumorTypes'>
+            <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType.name for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
             </select>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
             <div class="btn-group btn-group-sm">
                 <button id="searchVariantBtn" type="button" class="btn btn-default">Search</button>
-                <button id="useExampleBtn" type="button" class="btn btn-default">Use example</button>
+                <button id="useExampleBtn" type="button" ng-click="useExample()" class="btn btn-default">Use example</button>
             </div>
         </div>
     </div>
+    <br/>
     <div class="row">
         <div>
-            <img id='variant_loader' class="_hidden" src="images/ajax-loader.gif"/>
+            <img id='variant_loader' ng-show='rendering' src="images/ajax-loader.gif"/>
         </div>
         <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            
+            <table class='table' ng-show="cancerType.length">
+                <thead>
+                    <tr style='background-color: lightgrey;font-weight: bold;'>
+                        <td>Gene Name</td>
+                        <td>Mutation</td>
+                        <td>Tumor Type</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{geneName}}</td>
+                        <td>{{mutation}}</td>
+                        <td>{{selectedTumorType.name}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div ng-repeat="(key, content) in displayParts">
+            <div id="{{key}}">
+            <h2>{{content.displayName}}</h2>
+            <p>{{annotation[content.objectName].description}}</p>
+            </div>
         </div>
     </div>
 </div>

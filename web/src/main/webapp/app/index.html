@@ -20,11 +20,11 @@
     <![endif]-->
 
     <!-- Add your site or application content here -->
-    <div id="displayTabs" class="container">
+    <div id="displayTabs" class="container" ng-controller='TreeCtrl'>
       <div class="header">
         <ul class="nav nav-tabs" role="tablist">
-            <li id="tab-1" class="active"><a ng-href="#/tree">Home</a></li>
-            <li id="tab-2"><a ng-href="#/variant">Variants Annotation</a></li>
+            <li id="tab-1" ng-class="{active:tabIsActive(['/tree', '/'])}"><a ng-href="#/tree">Home</a></li>
+            <li id="tab-2" ng-class="{active:tabIsActive('/variant')}"}><a ng-href="#/variant">Variants Annotation</a></li>
         </ul>
       </div>
       <div ng-view=""></div>
@@ -81,6 +81,7 @@
     <script src="components/d3/d3.min.js"></script>
     <script src="components/angular-chosen/angular-chosen.js"></script>
     <script src="components/angular-chosen-localytics/chosen.js"></script>
+    <script src="components/xml2json/xml2json.js"></script>
     <!-- endbower -->
 
     <script src="components/chosen/chosen.jquery.js"></script>
@@ -92,6 +93,7 @@
     <script src="scripts/view/Tree.js"></script>
     <script src="scripts/controllers/TreeCtrl.js"></script>
     <script src="scripts/controllers/VariantCtrl.js"></script>
+    <script src="scripts/filters/Filter.js"></script>
     <!-- endbuild -->
         
 </body>

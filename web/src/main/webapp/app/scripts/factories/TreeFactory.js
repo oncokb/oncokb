@@ -1,7 +1,7 @@
 oncokbApp.factory('Evidence', ['$http', function ($http) {
 	'use strict';
 
-    function getFromServe() {
+    function getFromServer() {
     	return $http.get('evidence.json');
     }
 
@@ -10,7 +10,7 @@ oncokbApp.factory('Evidence', ['$http', function ($http) {
     }
 
     return {
-    	getFromServe: getFromServe,
+    	getFromServer: getFromServer,
         getFromFile: getFromFile
     };
 }]);

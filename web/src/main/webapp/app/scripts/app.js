@@ -25,6 +25,10 @@ var oncokbApp = angular
        templateUrl: 'views/tree.html',
        controller: 'TreeCtrl'
      })
+     .when('/tree', {
+       templateUrl: 'views/tree.html',
+       controller: 'TreeCtrl'
+     })
      .when('/variant', {
        templateUrl: 'views/variant.html',
        controller: 'VariantCtrl'
