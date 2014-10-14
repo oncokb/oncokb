@@ -95,7 +95,7 @@ var JqueryEvents = (function() {
     function setVarientParams(keywords) {
         $("#variantGeneName").val(keywords.hugoSymbol !== "undefined" ? keywords.hugoSymbol : "");
         $("#variantMutation").val(keywords.alteration !== "undefined" ? keywords.alteration : "");
-        $("#tumorTypesDropDown").val(keywords.tumorType !== "undefined" ? keywords.tumorType : "").trigger("chosen:updated");
+        $("#tumorTypesDropDown").val(keywords.tumorType !== "undefined" ? keywords.tumorType.toLowerCase() : "").trigger("chosen:updated");
     }
     
     function getSearchInput() {

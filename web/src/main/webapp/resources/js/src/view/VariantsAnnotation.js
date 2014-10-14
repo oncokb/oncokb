@@ -466,7 +466,7 @@ var VariantsAnnotation = (function() {
     function initHTML(d) {
         for(var i = 0, tumorTypesL = d.length; i < tumorTypesL; i++) {
             var datum = d[i];
-            $("#tumorTypesDropDown").append("<option value='"+ datum.name +"'>" + datum.name + "</option>");
+            $("#tumorTypesDropDown").append("<option value='"+ datum.name.toLowerCase() +"'>" + datum.name + "</option>");
         }
         $("#tumorTypesDropDown").chosen({width: "100%"});
     }
