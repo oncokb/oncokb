@@ -1,0 +1,40 @@
+<div id="variantDisplay" class="tab-pane fade in">
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h2>Search Criteria</h2>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon"><b>Gene Name:</b></span>
+                <input type="text" id="variantGeneName" class="form-control" placeholder="(eg. BRAF)">
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon"><b>Mutation:</b></span>
+                <input type="text" id="variantMutation" class="form-control" placeholder="(eg. V600E)">
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType.name for tumorType in tumorTypes'>
+            </select>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <div class="btn-group btn-group-sm">
+                <button id="searchVariantBtn" type="button" class="btn btn-default">Search</button>
+                <button id="useExampleBtn" type="button" class="btn btn-default">Use example</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div>
+            <img id='variant_loader' class="_hidden" src="images/ajax-loader.gif"/>
+        </div>
+        <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            
+        </div>
+    </div>
+</div>

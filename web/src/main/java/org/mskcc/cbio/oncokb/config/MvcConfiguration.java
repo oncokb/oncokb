@@ -17,14 +17,20 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter{
 	@Bean
 	public ViewResolver getViewResolver(){
 		InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-		resolver.setPrefix("/WEB-INF/views/");
-		resolver.setSuffix(".jsp");
+		resolver.setPrefix("/app/");
+		resolver.setSuffix(".html");
 		return resolver;
 	}
 	
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
+		registry.addResourceHandler("/app/**").addResourceLocations("/app/");
+		registry.addResourceHandler("/components/**").addResourceLocations("/app/components/");
+		registry.addResourceHandler("/images/**").addResourceLocations("/app/images/");
+		registry.addResourceHandler("/scripts/**").addResourceLocations("/app/scripts/");
+		registry.addResourceHandler("/styles/**").addResourceLocations("/app/styles/");
+		registry.addResourceHandler("/views/**").addResourceLocations("/app/views/");
+		registry.addResourceHandler("/data/**").addResourceLocations("/app/data/");
 	}
 
 	
