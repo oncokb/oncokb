@@ -8,9 +8,9 @@
     <link type="text/css" rel="stylesheet" href="resources/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="resources/css/jquery.qtip.min.css">
 
-    <link type="text/css" rel="stylesheet" href="resources/css/style.css?version=09302014-1"/>
+    <link type="text/css" rel="stylesheet" href="resources/css/style.css?version=10142014-1"/>
 
-    <script  data-main="resources/js/src/main.js?version=09302014-1" src="resources/js/lib/require.js" type="text/javascript"></script>
+    <script  data-main="resources/js/src/main.js?version=10142014-1" src="resources/js/lib/require.js" type="text/javascript"></script>
 </head>
 
   <body>
