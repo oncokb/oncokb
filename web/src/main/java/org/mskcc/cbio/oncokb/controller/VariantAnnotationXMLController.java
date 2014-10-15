@@ -191,6 +191,9 @@ public class VariantAnnotationXMLController {
             sb.append("</variant_effect>\n");
         }
         
+        // find all drugs
+        List<Drug> drugs = evidenceBo.findDrugsByAlterations(alterations);
+        
         // find tumor types
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
@@ -275,17 +278,17 @@ public class VariantAnnotationXMLController {
             
             // CLINICAL_TRIAL
             {
-                Set<Drug> drugs = new HashSet<Drug>();
-                for (Evidence ev : stdImpEbsSensitivity) {
-                    for (Treatment treatment : ev.getTreatments()) {
-                        drugs.addAll(treatment.getDrugs());
-                    }
-                }
-                for (Evidence ev : invImpEbsSensitivity) {
-                    for (Treatment treatment : ev.getTreatments()) {
-                        drugs.addAll(treatment.getDrugs());
-                    }
-                }
+//                Set<Drug> drugs = new HashSet<Drug>();
+//                for (Evidence ev : stdImpEbsSensitivity) {
+//                    for (Treatment treatment : ev.getTreatments()) {
+//                        drugs.addAll(treatment.getDrugs());
+//                    }
+//                }
+//                for (Evidence ev : invImpEbsSensitivity) {
+//                    for (Treatment treatment : ev.getTreatments()) {
+//                        drugs.addAll(treatment.getDrugs());
+//                    }
+//                }
 
                 List<TumorType> tumorTypesForTrials;
                 if (isRelevant) { // if relevant to pateint disease, find trials that match the tumor type
@@ -293,15 +296,17 @@ public class VariantAnnotationXMLController {
                 } else if (relevantTumorTypes.size()==1) { // if no relevant disease, find trials that match the tumor type
                     tumorTypesForTrials = Collections.singletonList(tt);
                 } else { // for irrelevant diseases, find trials that match the relavant tumor types
-                    tumorTypesForTrials = new ArrayList<TumorType>(relevantTumorTypes);
+                    tumorTypesForTrials = null;
                 }
 
-                ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-                List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(tumorTypesForTrials, drugs, true);
-                clinicalTrials.removeAll(allTrails); // remove duplication
-                allTrails.addAll(clinicalTrials);
-                
-                exportClinicalTrials(clinicalTrials, sbTumorType,  "    ");
+                if (tumorTypesForTrials!=null) {
+                    ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(tumorTypesForTrials, drugs, true);
+                    clinicalTrials.removeAll(allTrails); // remove duplication
+                    allTrails.addAll(clinicalTrials);
+
+                    exportClinicalTrials(clinicalTrials, sbTumorType,  "    ");
+                }
             }
             
             if (sbTumorType.length()>nEmp) {

@@ -7,6 +7,7 @@ package org.mskcc.cbio.oncokb.bo;
 import java.util.Collection;
 import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -55,4 +56,11 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @return 
      */
     List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType);
+    
+    /**
+     * 
+     * @param alterations
+     * @return 
+     */
+    List<Drug> findDrugsByAlterations(Collection<Alteration> alterations);
 }

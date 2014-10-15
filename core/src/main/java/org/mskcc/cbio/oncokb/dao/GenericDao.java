@@ -80,6 +80,15 @@ public interface GenericDao<T, ID extends Serializable> {
     
     /**
      * 
+     * @param <C>
+     * @param queryName
+     * @param values
+     * @return 
+     */
+    <C> List<C> findByNamedQueryOfAnyType(String queryName, Object... values);
+    
+    /**
+     * 
      * @param t 
      */
     void save(T t);
