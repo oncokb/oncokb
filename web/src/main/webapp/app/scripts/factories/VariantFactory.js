@@ -1,4 +1,4 @@
-oncokbApp.factory('TumorType', ['$http',  function ($http) {
+angular.module('webappApp').factory('TumorType', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -9,13 +9,21 @@ oncokbApp.factory('TumorType', ['$http',  function ($http) {
         return $http.get('data/tumorType.json');
     }
 
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
+angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http) {
+    'use strict';
     function getAnnotation(params) {
         var _params = angular.copy(params),
-            _url = "var_annotation?";
+            _url = 'var_annotation?';
 
         for(var _key in _params) {
             if(typeof _params[_key] !== 'undefined' && _params[_key] && _params[_key] !== '') {
-                _url += _key + "=" + _params[_key] + "&";
+                _url += _key + '=' + _params[_key] + '&';
             }
         }
         _url = _url.substring(0, _url.length - 1);
@@ -25,25 +33,19 @@ oncokbApp.factory('TumorType', ['$http',  function ($http) {
 
     function postAnnotation(params) {
         return $http({
-            url: "var_annotation", 
-            method: "POST",
+            url: 'var_annotation', 
+            method: 'POST',
             params: params
         });
     }
 
-    function annotationFromFile(params) {
+    function annotationFromFile() {
         return $http.get('data/annotation.xml');
     }
 
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile,
         getAnnotation: getAnnotation,
         postAnnotation: postAnnotation,
         annotationFromFile: annotationFromFile
     };
-}]);
-
-oncokbApp.factory(('SearchVariant'), ['$http', function($http) {
-
 }]);

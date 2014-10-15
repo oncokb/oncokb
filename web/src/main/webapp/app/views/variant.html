@@ -34,8 +34,10 @@
         <div>
             <img id='variant_loader' ng-show='rendering' src="images/ajax-loader.gif"/>
         </div>
+    </div>
+    <div class="row" ng-show="annotation">
         <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <table class='table' ng-show="cancerType.length">
+            <table class='table'>
                 <thead>
                     <tr style='background-color: lightgrey;font-weight: bold;'>
                         <td>Gene Name</td>
@@ -52,12 +54,78 @@
                 </tbody>
             </table>
         </div>
-
-        <div ng-repeat="(key, content) in displayParts">
-            <div id="{{key}}">
-            <h2>{{content.displayName}}</h2>
-            <p>{{annotation[content.objectName].description}}</p>
+    </div>
+    <div class="row" ng-show="annotation">
+        <div  class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div ng-repeat="(key, value) in displayParts">
+                <div id="{{key}}">
+                    <h2>{{value.displayName}}</h2>
+                    <p ng-bind-html="findRegex(annotation[value.objectName].description)"></p>
+                </div>
             </div>
+        </div>
+        <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h2>Cancer Type</h2>
+
+            <accordion close-others="oneAtATime">
+                <accordion-group ng-repeat="cancerType in annotation.cancer_type">
+                <accordion-heading>
+                    {{cancerType.type}}&nbsp;&nbsp;&nbsp;<span ng-if="cancerType.relevant_to_patient_disease && cancerType.relevant_to_patient_disease.toLowerCase() === 'yes'" style='color: green; font-size:12px; font-weight:bold'><i>RELEVANT</i></span>
+                </accordion-heading>
+                <table class='table table-bordered'>
+                    <tbody>
+                        <tr ng-repeat="summaryTitle in summaryTableTitles">
+                            <td>{{summaryTitle}}</td>
+                            <td>
+                                <!--Generate multiple contents in one td cell-->
+                                <div ng-if='cancerType.hasOwnProperty(content)' ng-repeat="content in summaryTableTitlesContent[summaryTitle]">
+                                    <h4>{{displayProcess(content)}}</h4>
+                                    <!--Repeat by content attributes(sensitive_to, resistant_to)-->
+                                    <div ng-if="specialAttr.indexOf(content) !== -1" ng-repeat="(key, value) in cancerType[content]">
+
+                                        <!--Repeat by number of content attribute(first sensitive_to, second sensitive_to....)-->
+                                        <div ng-repeat="senitive in value">
+
+                                            <!--Repeat by treament numbers-->
+                                            <div ng-repeat="treament in senitive.treatment">
+
+                                                <!--Repeat by drug numbers-->
+                                                <div ng-repeat="drug in treament.drug">
+                                                    <h5 ng-if="key === 'sensitive_to'"><b>{{drug.name}}</b></h5>
+                                                    <h5 ng-if="key !== 'sensitive_to'"><b>{{displayProcess(key) + ": " + drug.name}}</b></h5>
+                                                    <p ng-if="senitive.level_of_evidence_for_patient_indication.level" ng-bind-html="findRegex(senitive.description + '<br/>Highest Level of Evidence: ' + senitive.level_of_evidence_for_patient_indication.level)"></p>
+                                                    <p ng-if="!senitive.level_of_evidence_for_patient_indication.level" ng-bind-html="findRegex(senitive.description)"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div ng-if="content === 'nccn_guidelines'" ng-repeat="nccn in cancerType[content]">
+                                    <p ng-bind-html="generateNCCN(nccn)"></p>
+                                    </div>
+
+                                    <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]">
+                                        <span ng-bind-html="generateTrial(trial)"></span>
+                                        <span>PURPOSE</span><img  ng-click="isCollapsed.purpose = !isCollapsed.purpose" src='images/add.svg' class='icon'></img>
+                                        <div collapse="isCollapsed.purpose">
+                                            <div class="well well-lg">{{trial.purpose}}</div>
+                                        </div>
+                                        <span>ELIGIBILITY CRITERIA</span><img  ng-click="isCollapsed.eligibility_criteria = !isCollapsed.eligibility_criteria" src='images/add.svg' class='icon'></img>
+                                        <div collapse="isCollapsed.eligibility_criteria">
+                                            <div class="well well-lg">{{trial.eligibility_criteria}}</div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-if="content !== 'nccn_guidelines' && content !== 'clinical_trial' && content !== specialAttr.indexOf(content) === -1">
+                                    <p ng-bind-html="findRegex(cancerType[content].description)"></p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                </accordion-group>
+            </accordion>
         </div>
     </div>
 </div>
