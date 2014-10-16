@@ -197,13 +197,24 @@ var Tree = (function() {
             .attr("dy", ".35em")
             .attr('font-size', fontSize)
             .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-//            .attr("qtip")
-//            .attr("data-content", "Test!")
-//            .attr("data-my", "bottom right")
-//            .attr("data-at", "top left")
-//            .attr("data-class", "top left")
+            // .attr("tooltip", function(d) {
+            //     var qtipText = "";
+            //     if(d["description"].length > 0) {
+            //         for(var i = 0, desL = d["description"].length; i < desL; i++) {
+            //             for(var _evidence in d["description"][i]){
+            //                 if(d["description"][i][_evidence] && d["description"][i][_evidence] !== ""){
+            //                     qtipText += "<b>" + _evidence + "</b>: " + d["description"][i][_evidence] + "<br>";
+            //                 }
+            //             }
+            //             if(i+1 !== desL)
+            //                 qtipText += "<hr>";
+            //         }
+            //     }
+
+            //     return qtipText;
+            // })
             .text(function(d) {
-                if(d["description"].length > 0) {
+              if(d["description"].length > 0) {
                   var qtipText = "";
                   var _position = {};
                   for(var i = 0, desL = d["description"].length; i < desL; i++) {
@@ -216,18 +227,18 @@ var Tree = (function() {
                           qtipText += "<hr>";
                   }
 
-                 if((d.children || d._children) && d.depth > 1){
-                     _position = {my:'bottom right',at:'top left', viewport:  angular.element(window)};
-                 }else {
-                     _position = {my:'bottom left',at:'top right', viewport:  angular.element(window)};
-                 }
-                 angular.element(this).qtip({
-                     content:{text: qtipText},
-                     style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey'},
-                     hide: {fixed:true, delay: 100},
-                     position: _position
-                 });
-              }
+                  if((d.children || d._children) && d.depth > 1){
+                      _position = {my:'bottom right',at:'top left', viewport: $(window)};
+                  }else {
+                      _position = {my:'bottom left',at:'top right', viewport: $(window)};
+                  }
+                  $(this).qtip({
+                      content:{text: qtipText},
+                      style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey'},
+                      hide: {fixed:true, delay: 100},
+                      position: _position
+                  });
+              } 
               return d.name; })
 
             .style("fill-opacity", 1e-6);
