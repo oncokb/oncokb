@@ -12,6 +12,7 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="components/_components/jquery.qtip.min.css">
     <!-- endbuild -->
   </head>
   <body ng-app="webappApp">
@@ -20,7 +21,7 @@
     <![endif]-->
 
     <!-- Add your site or application content here -->
-    <div id="displayTabs" class="container" ng-controller='TreeCtrl'>
+    <div id="displayTabs" class="container" ng-controller='TreeCtrl' >
       <div class="header">
         <ul class="nav nav-tabs" role="tablist">
             <li id="tab-1" ng-class="{active:tabIsActive(['/tree', '/'])}"><a ng-href="#/tree">Home</a></li>
@@ -85,6 +86,7 @@
     <!-- endbower -->
 
     <script src="components/chosen/chosen.jquery.js"></script>
+    <script src="components/_components/jquery.qtip.min.js"></script>
 
     <!-- build:js({.tmp,app}) scripts/scripts.js -->
     <script src="scripts/app.js"></script>

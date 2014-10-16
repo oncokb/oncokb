@@ -216,17 +216,17 @@ var Tree = (function() {
                           qtipText += "<hr>";
                   }
 
-//                  if((d.children || d._children) && d.depth > 1){
-//                      _position = {my:'bottom right',at:'top left', viewport: $(window)};
-//                  }else {
-//                      _position = {my:'bottom left',at:'top right', viewport: $(window)};
-//                  }
-//                  $(this).qtip({
-//                      content:{text: qtipText},
-//                      style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey'},
-//                      hide: {fixed:true, delay: 100},
-//                      position: _position
-//                  });
+                 if((d.children || d._children) && d.depth > 1){
+                     _position = {my:'bottom right',at:'top left', viewport:  angular.element(window)};
+                 }else {
+                     _position = {my:'bottom left',at:'top right', viewport:  angular.element(window)};
+                 }
+                 angular.element(this).qtip({
+                     content:{text: qtipText},
+                     style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-grey'},
+                     hide: {fixed:true, delay: 100},
+                     position: _position
+                 });
               }
               return d.name; })
 

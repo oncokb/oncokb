@@ -3,9 +3,10 @@ var treeEvidence = [];
 angular.module('webappApp').controller('TreeCtrl', [
     '$scope',
     '$location',
+    '$timeout',
     'Evidence', 
     'AnalysisEvidence', 
-    function ($scope, $location, Evidence, AnalysisEvidence) {
+    function ($scope, $location, $timeout, Evidence, AnalysisEvidence) {
 
     'use strict';
 
@@ -22,7 +23,9 @@ angular.module('webappApp').controller('TreeCtrl', [
                 drawTree(data);
             });
         }else {
-            drawTree(treeEvidence);
+            $timeout(function(){
+                drawTree(treeEvidence);
+            }, 100);
         }
     };
 

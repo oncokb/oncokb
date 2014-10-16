@@ -51,6 +51,7 @@ angular.module('webappApp')
 
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
+            // TumorType.getFromFile().success(function(data) {
 	  		TumorType.getFromServer().success(function(data) {
 	  			$scope.tumorTypes = data;
                 if($location.url() !== $location.path()) {
