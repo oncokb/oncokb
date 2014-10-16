@@ -16,7 +16,8 @@ angular.module('webappApp').controller('TreeCtrl', [
         $scope.searchResult = '';
 
         if(treeEvidence.length === 0) {
-            Evidence.getFromFile().success(function(data) {
+            // Evidence.getFromFile().success(function(data) {
+            Evidence.getFromServer().success(function(data) {
                 treeEvidence = angular.copy(data);
                 drawTree(data);
             });

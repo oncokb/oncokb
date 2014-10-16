@@ -1,10 +1,11 @@
 angular.module('webappApp')
   	.controller('VariantCtrl', [
         '$scope', 
-        '$filter', 
+        '$filter',
+        '$location',
         'TumorType', 
         'SearchVariant', 
-        function ($scope, $filter, TumorType, SearchVariant) {
+        function ($scope, $filter, $location, TumorType, SearchVariant) {
 
         'use strict';
 
@@ -17,13 +18,9 @@ angular.module('webappApp')
             //Control UI-Bootstrap angularjs, open one at a time
             $scope.oneAtATime = true;
 
-            //Control collapses
-            $scope.isCollapsed = {
-                purpose: true,
-                eligibility_criteria: true
-            };
+            $scope.isCollapsed = {};
 
-	    	$scope.displayParts = {
+            $scope.displayParts = {
 		        geneAnnotation: {
 		            displayName: 'Gene Annotation',
 		            objectName: 'gene_annotation'
@@ -54,21 +51,59 @@ angular.module('webappApp')
 
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
-	  		TumorType.getFromFile().success(function(data) {
+	  		TumorType.getFromServer().success(function(data) {
 	  			$scope.tumorTypes = data;
+                if($location.url() !== $location.path()) {
+                    var urlVars = $location.search();
+                    $scope.rendering = true;
+                    if(urlVars.hasOwnProperty('hugoSymbol')){
+                        $scope.geneName = urlVars.hugoSymbol;
+                    }
+                    if(urlVars.hasOwnProperty('alteration')){
+                        $scope.mutation = urlVars.alteration;
+                    }
+                    if(urlVars.hasOwnProperty('tumorType')){
+                        $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', urlVars['tumorType'].toLowerCase() || '')];
+                    }
+                    $scope.search();
+                }
 		    });
-
 	  	};
     	
+        $scope.fdaApproved = function(drug) {
+            if (typeof drug.fda_approved === 'string' && drug.fda_approved.toLowerCase() === 'yes'){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        $scope.setCollapsed = function(trial, attr) {
+            $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
+        };
+
+        $scope.getCollapseIcon = function(trial, attr) {
+            if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr] ) {
+                return "images/add.svg";
+            }else{
+                return "images/subtract.svg";
+            }
+        }
+
         $scope.generateTrial = function(trial) {
             var str = '';
             var purposeStr = '';
+
+            if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
+                $scope.isCollapsed[trial.trial_id] = {
+                    purpose: true,
+                    eligibility_criteria: true
+                };
+            }
 
             str += trial.hasOwnProperty('trial_id')?('TRIAL ID: ' + $scope.findRegex(trial.trial_id) + (trial.hasOwnProperty('phase')?(' / ' + trial.phase): '') + '<br/>'):'';
             str += trial.hasOwnProperty('title')?('TITLE: ' + trial.title + '<br/>'):'';
             
             // str += trial.hasOwnProperty('description')?('<br>' + $scope.findRegex(trial.description) + '<br/>'):'';
-
             return str;
         };
 
@@ -179,14 +214,23 @@ angular.module('webappApp')
         };
 
     	$scope.search = function() {
-    		var params = {
-    			'hugoSymbol': $scope.geneName,
-    			'alteration': $scope.mutation,
-    			'tumorType': $scope.selectedTumorType.name,
-            	'alterationType': 'MUTATION'
-    		};
+    		var params = {'alterationType': 'MUTATION'};
+            var paramsContent = {
+                'hugoSymbol': 'geneName',
+                'alteration': 'mutation'
+            }
 
-    		SearchVariant.annotationFromFile(params).success(function(data) {
+            for (var key in paramsContent) {
+                if($scope.hasOwnProperty(paramsContent[key])) {
+                    params[key] = $scope[paramsContent[key]];
+                }
+            }
+            if($scope.hasOwnProperty('selectedTumorType')) {
+                params['tumorType'] = $scope.selectedTumorType.name;
+            }                
+
+    		// SearchVariant.annotationFromFile(params).success(function(data) {
+            SearchVariant.postAnnotation(params).success(function(data) {
     			var annotation = {};
 
     			annotation = xml2json.parser(data).xml;
@@ -197,7 +241,6 @@ angular.module('webappApp')
 
                 $scope.annotation = annotation;
     			$scope.rendering = false;
-                console.log(annotation);
     		});
     	};
 

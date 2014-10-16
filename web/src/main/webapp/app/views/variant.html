@@ -24,7 +24,7 @@
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
             <div class="btn-group btn-group-sm">
-                <button id="searchVariantBtn" type="button" class="btn btn-default">Search</button>
+                <button id="searchVariantBtn" type="button" ng-click="search()" class="btn btn-default">Search</button>
                 <button id="useExampleBtn" type="button" ng-click="useExample()" class="btn btn-default">Use example</button>
             </div>
         </div>
@@ -55,16 +55,16 @@
             </table>
         </div>
     </div>
-    <div class="row" ng-show="annotation">
+    <div class="row">
         <div  class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div ng-repeat="(key, value) in displayParts">
+            <div ng-repeat="(key, value) in displayParts" ng-show="annotation[value.objectName]">
                 <div id="{{key}}">
                     <h2>{{value.displayName}}</h2>
                     <p ng-bind-html="findRegex(annotation[value.objectName].description)"></p>
                 </div>
             </div>
         </div>
-        <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12"  ng-show="annotation.cancer_type">
             <h2>Cancer Type</h2>
 
             <accordion close-others="oneAtATime">
@@ -75,7 +75,7 @@
                 <table class='table table-bordered'>
                     <tbody>
                         <tr ng-repeat="summaryTitle in summaryTableTitles">
-                            <td>{{summaryTitle}}</td>
+                            <td><h5>{{summaryTitle}}</h5></td>
                             <td>
                                 <!--Generate multiple contents in one td cell-->
                                 <div ng-if='cancerType.hasOwnProperty(content)' ng-repeat="content in summaryTableTitlesContent[summaryTitle]">
@@ -91,8 +91,12 @@
 
                                                 <!--Repeat by drug numbers-->
                                                 <div ng-repeat="drug in treament.drug">
-                                                    <h5 ng-if="key === 'sensitive_to'"><b>{{drug.name}}</b></h5>
-                                                    <h5 ng-if="key !== 'sensitive_to'"><b>{{displayProcess(key) + ": " + drug.name}}</b></h5>
+                                                    <h5><b>
+                                                    <span ng-if="key === 'sensitive_to'">{{drug.name}}</span>
+                                                    <span ng-if="key !== 'sensitive_to'">{{displayProcess(key) + ": " + drug.name}}</span>
+                                                    </b>
+                                                    <img ng-if="fdaApproved(drug)" src='images/approved.svg' class='icon'></img>
+                                                    </h5>
                                                     <p ng-if="senitive.level_of_evidence_for_patient_indication.level" ng-bind-html="findRegex(senitive.description + '<br/>Highest Level of Evidence: ' + senitive.level_of_evidence_for_patient_indication.level)"></p>
                                                     <p ng-if="!senitive.level_of_evidence_for_patient_indication.level" ng-bind-html="findRegex(senitive.description)"></p>
                                                 </div>
@@ -103,14 +107,14 @@
                                     <p ng-bind-html="generateNCCN(nccn)"></p>
                                     </div>
 
-                                    <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]">
+                                    <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]" class="annotationClinicalTrial">
                                         <span ng-bind-html="generateTrial(trial)"></span>
-                                        <span>PURPOSE</span><img  ng-click="isCollapsed.purpose = !isCollapsed.purpose" src='images/add.svg' class='icon'></img>
-                                        <div collapse="isCollapsed.purpose">
+                                        <span>PURPOSE</span><img  ng-click="setCollapsed(trial, 'purpose')" ng-src="{{getCollapseIcon(trial, 'purpose')}}" class='icon'></img>
+                                        <div collapse="isCollapsed[trial.trial_id]['purpose']">
                                             <div class="well well-lg">{{trial.purpose}}</div>
                                         </div>
-                                        <span>ELIGIBILITY CRITERIA</span><img  ng-click="isCollapsed.eligibility_criteria = !isCollapsed.eligibility_criteria" src='images/add.svg' class='icon'></img>
-                                        <div collapse="isCollapsed.eligibility_criteria">
+                                        <span>ELIGIBILITY CRITERIA</span><img  ng-click="setCollapsed(trial, 'eligibility_criteria')" ng-src="{{getCollapseIcon(trial, 'eligibility_criteria')}}" class='icon'></img>
+                                        <div collapse="isCollapsed[trial.trial_id]['eligibility_criteria']">
                                             <div class="well well-lg">{{trial.eligibility_criteria}}</div>
                                         </div>
                                     </div>
