@@ -168,7 +168,7 @@ public final class QuestDocAnnotationParser {
         int eSummary = summaryLines.get(0)[1];
         
         // gene summary
-        List<int[]> geneSummaryLines = extractLines(lines, sSummary, eSummary, SUMMARY_P, TUMOR_TYPE_P, 1);
+        List<int[]> geneSummaryLines = extractLines(lines, sSummary, eSummary, SUMMARY_P, 1);
         String geneSummary = joinLines(lines, geneSummaryLines.get(0)[0]+1, geneSummaryLines.get(0)[1]);
         Evidence evidence = new Evidence();
         evidence.setEvidenceType(EvidenceType.GENE_SUMMARY);
@@ -178,38 +178,38 @@ public final class QuestDocAnnotationParser {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         evidenceBo.save(evidence);
         
-        // tumor types
-        List<int[]> cancerSummaryLines = extractLines(lines, geneSummaryLines.get(0)[1], eSummary, TUMOR_TYPE_P, TUMOR_TYPE_P, -1);
-        for (int[] cancerLine : cancerSummaryLines) {
-            String line = lines.get(cancerLine[0]);
-            Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
-            Matcher m = p.matcher(line);
-            if (!m.matches()) {
-                System.err.println("wrong format of type type line: "+line);
-            }
-            String cancer = m.group(1).trim();
-
-            System.out.println("##    Cancer type: " + cancer);
-
-            TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
-            TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
-            if (tumorType==null) {
-                tumorType = new TumorType();
-                tumorType.setTumorTypeId(cancer);
-                tumorType.setName(cancer);
-                tumorType.setClinicalTrialKeywords(Collections.singleton(cancer));
-                tumorTypeBo.save(tumorType);
-            }
-
-            String cancerSummary = joinLines(lines, cancerLine[0]+1, cancerLine[1]);
-            evidence = new Evidence();
-            evidence.setEvidenceType(EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
-            evidence.setGene(gene);
-            evidence.setTumorType(tumorType);
-            evidence.setDescription(cancerSummary);
-            setDocuments(cancerSummary, evidence);
-            evidenceBo.save(evidence);
-        }
+//        // tumor types
+//        List<int[]> cancerSummaryLines = extractLines(lines, geneSummaryLines.get(0)[1], eSummary, TUMOR_TYPE_P, TUMOR_TYPE_P, -1);
+//        for (int[] cancerLine : cancerSummaryLines) {
+//            String line = lines.get(cancerLine[0]);
+//            Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
+//            Matcher m = p.matcher(line);
+//            if (!m.matches()) {
+//                System.err.println("wrong format of type type line: "+line);
+//            }
+//            String cancer = m.group(1).trim();
+//
+//            System.out.println("##    Cancer type: " + cancer);
+//
+//            TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
+//            TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
+//            if (tumorType==null) {
+//                tumorType = new TumorType();
+//                tumorType.setTumorTypeId(cancer);
+//                tumorType.setName(cancer);
+//                tumorType.setClinicalTrialKeywords(Collections.singleton(cancer));
+//                tumorTypeBo.save(tumorType);
+//            }
+//
+//            String cancerSummary = joinLines(lines, cancerLine[0]+1, cancerLine[1]);
+//            evidence = new Evidence();
+//            evidence.setEvidenceType(EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
+//            evidence.setGene(gene);
+//            evidence.setTumorType(tumorType);
+//            evidence.setDescription(cancerSummary);
+//            setDocuments(cancerSummary, evidence);
+//            evidenceBo.save(evidence);
+//        }
         
         return summaryLines.get(0);
     }
