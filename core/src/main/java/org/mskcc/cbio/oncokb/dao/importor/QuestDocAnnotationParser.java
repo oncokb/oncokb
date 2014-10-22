@@ -278,12 +278,13 @@ public final class QuestDocAnnotationParser {
         for (Map.Entry<String,String> mutation : mutations.entrySet()) {
             String proteinChange = mutation.getKey();
             String displayName = mutation.getValue();
-            Alteration alteration = alterationBo.findAlteration(gene, type, displayName);
+            Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
             if (alteration==null) {
                 alteration = new Alteration();
                 alteration.setGene(gene);
                 alteration.setAlterationType(type);
-                alteration.setAlteration(displayName);
+                alteration.setAlteration(proteinChange);
+                alteration.setName(displayName);
                 AlterationUtils.annotateAlteration(alteration, proteinChange);
                 alterationBo.save(alteration);
             }

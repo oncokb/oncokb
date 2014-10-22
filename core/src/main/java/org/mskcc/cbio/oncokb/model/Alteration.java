@@ -13,6 +13,7 @@ public class Alteration implements java.io.Serializable {
      private VariantConsequence consequence;
      
      private String alteration;
+     private String name;
      private String refResidues;
      private Integer proteinStart;
      private Integer proteinEnd;
@@ -48,6 +49,14 @@ public class Alteration implements java.io.Serializable {
     
     public void setAlteration(String alteration) {
         this.alteration = alteration;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     
     public AlterationType getAlterationType() {
