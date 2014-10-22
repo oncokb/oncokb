@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -264,11 +266,7 @@ public final class QuestDocAnnotationParser {
             System.err.println("wrong format of mutation line: "+lines.get(0));
         }
         
-        String mutationStr = m.group(1);
-        if (mutationStr.contains("[")) {
-            mutationStr = mutationStr.substring(0, mutationStr.indexOf("["));
-        }
-        mutationStr = mutationStr.trim();
+        String mutationStr = m.group(1).trim();
         
         System.out.println("##  Mutation: "+mutationStr);
         
@@ -276,14 +274,17 @@ public final class QuestDocAnnotationParser {
         AlterationType type = AlterationType.MUTATION; //TODO: cna and fution
         
         Set<Alteration> alterations = new HashSet<Alteration>();
-        for (String mutation : parseMutationString(mutationStr)) {
-            Alteration alteration = alterationBo.findAlteration(gene, type, mutation);
+        Map<String,String> mutations = parseMutationString(mutationStr);
+        for (Map.Entry<String,String> mutation : mutations.entrySet()) {
+            String proteinChange = mutation.getKey();
+            String displayName = mutation.getValue();
+            Alteration alteration = alterationBo.findAlteration(gene, type, displayName);
             if (alteration==null) {
                 alteration = new Alteration();
                 alteration.setGene(gene);
                 alteration.setAlterationType(type);
-                alteration.setAlteration(mutation);
-                AlterationUtils.annotateAlteration(alteration);
+                alteration.setAlteration(displayName);
+                AlterationUtils.annotateAlteration(alteration, proteinChange);
                 alterationBo.save(alteration);
             }
             alterations.add(alteration);
@@ -342,19 +343,31 @@ public final class QuestDocAnnotationParser {
         }
     }
     
-    private static Set<String> parseMutationString(String mutationStr) {
-        Set<String> ret = new HashSet<String>();
+    private static Map<String, String> parseMutationString(String mutationStr) {
+        Map<String, String> ret = new HashMap<String, String>();
         String[] parts = mutationStr.split(", *");
+        
         Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
         for (String part : parts) {
-            Matcher m = p.matcher(part);
+            String proteinChange, displayName;
+            if (part.contains("[")) {
+                int l = part.indexOf("[");
+                int r = part.indexOf("]");
+                proteinChange = part.substring(0, l).trim();
+                displayName = part.substring(l, r).trim();
+            } else {
+                proteinChange = part;
+                displayName = part;
+            }
+            
+            Matcher m = p.matcher(proteinChange);
             if (m.find()) {
                 String ref = m.group(1);
                 for (String var : m.group(2).split("/")) {
-                    ret.add(ref+var);
+                    ret.put(ref+var, displayName);
                 }
             } else {
-                ret.add(part);
+                ret.put(part, displayName);
             }
         }
         return ret;

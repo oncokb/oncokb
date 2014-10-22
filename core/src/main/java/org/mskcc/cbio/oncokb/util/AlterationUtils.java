@@ -21,20 +21,19 @@ public final class AlterationUtils {
         throw new AssertionError();
     }
     
-    public static void annotateAlteration(Alteration alteration) {
+    public static void annotateAlteration(Alteration alteration, String proteinChange) {
         String consequence = "N/A";
         String ref = null;
         String var = null;
         Integer start = -1;
         Integer end = 100000;
         
-        String alt = alteration.getAlteration();
-        if (alt.startsWith("p.")) {
-            alt = alt.substring(2);
+        if (proteinChange.startsWith("p.")) {
+            proteinChange = proteinChange.substring(2);
         }
         
         Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*]?)");
-        Matcher m = p.matcher(alt);
+        Matcher m = p.matcher(proteinChange);
         if (m.matches()) {
             ref = m.group(1);
             start = Integer.valueOf(m.group(2));
@@ -54,7 +53,7 @@ public final class AlterationUtils {
             }
         } else {
             p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
-            m = p.matcher(alt);
+            m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
                 end = Integer.valueOf(m.group(2));
@@ -80,7 +79,7 @@ public final class AlterationUtils {
                 }
             } else {
                 p = Pattern.compile("([A-Z\\*])([0-9]+)fs.*");
-                m = p.matcher(alt);
+                m = p.matcher(proteinChange);
                 if (m.matches()) {
                     ref = m.group(1);
                     start = Integer.valueOf(m.group(2));
@@ -92,7 +91,7 @@ public final class AlterationUtils {
         }
         
         // truncating
-        if (alt.toLowerCase().matches("truncating mutations?")) {
+        if (proteinChange.toLowerCase().matches("truncating mutations?")) {
             consequence = "feature_truncation";
         }
         

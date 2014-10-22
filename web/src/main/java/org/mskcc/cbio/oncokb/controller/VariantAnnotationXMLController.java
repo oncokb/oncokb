@@ -164,7 +164,7 @@ public class VariantAnnotationXMLController {
         alt.setProteinStart(proteinStart);
         alt.setProteinEnd(proteinEnd);
         
-        AlterationUtils.annotateAlteration(alt);
+        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
