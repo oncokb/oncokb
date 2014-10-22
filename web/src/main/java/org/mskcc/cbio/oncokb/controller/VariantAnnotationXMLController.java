@@ -106,18 +106,18 @@ public class VariantAnnotationXMLController {
                 String geneSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
                 sb.append(geneSummary);
             }
-            List<Evidence> cancerSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
-            Map<TumorType, Evidence> mapTumorTypeSummaryEvs = new LinkedHashMap<TumorType, Evidence>();
-            for (Evidence ev : cancerSummaryEvs) {
-                mapTumorTypeSummaryEvs.put(ev.getTumorType(), ev);
-            }
-            if (!Collections.disjoint(relevantTumorTypes, mapTumorTypeSummaryEvs.entrySet())) { // if matched tumor is found
-                mapTumorTypeSummaryEvs.keySet().retainAll(relevantTumorTypes);
-            }
-            for (Evidence ev : mapTumorTypeSummaryEvs.values()) {
-                String cancerSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
-                sb.append(" ").append(cancerSummary);
-            }
+//            List<Evidence> cancerSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
+//            Map<TumorType, Evidence> mapTumorTypeSummaryEvs = new LinkedHashMap<TumorType, Evidence>();
+//            for (Evidence ev : cancerSummaryEvs) {
+//                mapTumorTypeSummaryEvs.put(ev.getTumorType(), ev);
+//            }
+//            if (!Collections.disjoint(relevantTumorTypes, mapTumorTypeSummaryEvs.entrySet())) { // if matched tumor is found
+//                mapTumorTypeSummaryEvs.keySet().retainAll(relevantTumorTypes);
+//            }
+//            for (Evidence ev : mapTumorTypeSummaryEvs.values()) {
+//                String cancerSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+//                sb.append(" ").append(cancerSummary);
+//            }
             sb.append("</annotation_summary>\n");
         }
         
