@@ -17,6 +17,7 @@ public class Alteration implements java.io.Serializable {
      private Integer proteinStart;
      private Integer proteinEnd;
      private String variantResidues;
+     private Boolean oncogenic;
 
     public Alteration() {
     }
@@ -98,7 +99,15 @@ public class Alteration implements java.io.Serializable {
         this.variantResidues = variantResidues;
     }
 
-     @Override
+    public Boolean getOncogenic() {
+        return oncogenic;
+    }
+
+    public void setOncogenic(Boolean oncogenic) {
+        this.oncogenic = oncogenic;
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 83 * hash + (this.gene != null ? this.gene.hashCode() : 0);

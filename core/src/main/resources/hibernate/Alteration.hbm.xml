@@ -46,6 +46,10 @@
         <property name="variantResidues" type="string">
           <column name="variant_residues"/>
         </property>
+        
+        <property name="oncogenic" type="boolean">
+            <column name="oncogenic" not-null="true"/>
+        </property>
     </class>
     
     <query name="findAlterationsByGene">

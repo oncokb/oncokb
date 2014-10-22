@@ -45,10 +45,11 @@ import org.mskcc.cbio.oncokb.util.NcbiEUtils;
  */
 public final class QuestDocAnnotationParser {
     private static final String GENE_P = "Gene: ?(.+)";
-    private static final String SUMMARY_P = "Summary:? *";
+    private static final String SUMMARY_P = "Summary statement:? *";
     private static final String GENE_BACKGROUND_P = "Background:? *";
         
     private static final String MUTATION_P = "Mutations?: ?(.+)";
+    private static final String MUTATION_ONCOGENIC_P = "Oncogenic?: ?((YES)|(NO)) *";
     private static final String MUTATION_EFFECT_P = "Mutation effect: ?([^\\(]+)(\\(PMIDs?:.+\\))?";
     private static final String MUTATION_EFFECT_DESCRIPTION_P = "^Description of mutation effect:? *";
     
@@ -288,13 +289,25 @@ public final class QuestDocAnnotationParser {
             alterations.add(alteration);
         }
         
+        // oncogenic
+        String oncogenicStr = lines.get(start+1);
+         p = Pattern.compile(MUTATION_ONCOGENIC_P, Pattern.CASE_INSENSITIVE);
+         if (!m.matches()) {
+            throw new RuntimeException("wrong format of oncogenic line: "+oncogenicStr);
+        } else {
+             Boolean oncogenic = m.group(1).equalsIgnoreCase("YES");
+             for (Alteration alt : alterations) {
+                 alt.setOncogenic(oncogenic);
+             }
+         }
+        
         // mutation effect
-        String mutationEffectStr = lines.get(start+1);
+        String mutationEffectStr = lines.get(start+2);
         
         p = Pattern.compile(MUTATION_EFFECT_P, Pattern.CASE_INSENSITIVE);
         m = p.matcher(mutationEffectStr);
         if (!m.matches()) {
-            System.err.println("wrong format of mutation effect line: "+mutationEffectStr);
+            throw new RuntimeException("wrong format of mutation effect line: "+mutationEffectStr);
         } else {
             String effect = m.group(1);
             if (effect==null || effect.isEmpty()) {
@@ -305,7 +318,7 @@ public final class QuestDocAnnotationParser {
             effect = effect.trim();
 
             // Description of mutation effect
-            List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
+            List<int[]> mutationEffectDescLine = extractLines(lines, start+3, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
             String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
 
             Evidence evidence = new Evidence();
