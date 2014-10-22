@@ -49,3 +49,15 @@ angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http)
         annotationFromFile: annotationFromFile
     };
 }]);
+
+angular.module('webappApp').factory('GenerateDoc', ['$http',  function ($http) {
+    'use strict';
+
+    function getDoc() {
+        return $http.get('generateGoogleDoc');
+    }
+
+    return {
+        getDoc: getDoc
+    };
+}]);

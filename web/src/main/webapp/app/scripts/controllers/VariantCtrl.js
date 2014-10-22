@@ -4,8 +4,9 @@ angular.module('webappApp')
         '$filter',
         '$location',
         'TumorType', 
-        'SearchVariant', 
-        function ($scope, $filter, $location, TumorType, SearchVariant) {
+        'SearchVariant',
+        'GenerateDoc',
+        function ($scope, $filter, $location, TumorType, SearchVariant, GenerateDoc) {
 
         'use strict';
 
@@ -244,7 +245,13 @@ angular.module('webappApp')
     			$scope.rendering = false;
     		});
     	};
-
+        
+        $scope.generateReport = function() {
+            GenerateDoc.getDoc().success(function() {
+                console.log("success generate document");
+            });
+        };
+        
     	$scope.useExample = function() {
     		$scope.rendering = true;
     		$scope.geneName = 'BRAF';
