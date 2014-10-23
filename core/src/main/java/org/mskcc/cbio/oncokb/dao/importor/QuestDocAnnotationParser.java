@@ -270,7 +270,18 @@ public final class QuestDocAnnotationParser {
         System.out.println("##  Mutation: "+mutationStr);
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        AlterationType type = AlterationType.MUTATION; //TODO: cna and fution
+        AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
+        
+        // oncogenic
+        String oncogenicStr = lines.get(start+1);
+        p = Pattern.compile(MUTATION_ONCOGENIC_P, Pattern.CASE_INSENSITIVE);
+        m = p.matcher(oncogenicStr);
+        Boolean oncogenic = Boolean.FALSE;
+        if (!m.matches()) {
+            System.err.println("wrong format of oncogenic line: "+oncogenicStr);
+        } else {
+            oncogenic = m.group(1).equalsIgnoreCase("YES");
+        }
         
         Set<Alteration> alterations = new HashSet<Alteration>();
         Map<String,String> mutations = parseMutationString(mutationStr);
@@ -284,27 +295,15 @@ public final class QuestDocAnnotationParser {
                 alteration.setAlterationType(type);
                 alteration.setAlteration(proteinChange);
                 alteration.setName(displayName);
-                alteration.setOncogenic(Boolean.FALSE);
+                alteration.setOncogenic(oncogenic);
                 AlterationUtils.annotateAlteration(alteration, proteinChange);
+                alterationBo.save(alteration);
+            }
+            
+            if (oncogenic && !alteration.getOncogenic()) {
+                alterationBo.update(alteration);
             }
             alterations.add(alteration);
-        }
-        
-        // oncogenic
-        String oncogenicStr = lines.get(start+1);
-        p = Pattern.compile(MUTATION_ONCOGENIC_P, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(oncogenicStr);
-        if (!m.matches()) {
-            System.err.println("wrong format of oncogenic line: "+oncogenicStr);
-        } else {
-            Boolean oncogenic = m.group(1).equalsIgnoreCase("YES");
-            for (Alteration alteration : alterations) {
-                alteration.setOncogenic(oncogenic);
-            }
-        }
-        
-        for (Alteration alteration : alterations) {
-            alterationBo.save(alteration);
         }
         
         // mutation effect
