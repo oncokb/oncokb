@@ -726,8 +726,10 @@ public class VariantAnnotationXMLController {
         sb.append(" for ")
                 .append(tumorType==null?"":(tumorType+" "))
                 .append("patients with ")
-                .append(alterationsToString(alterations))
-                .append(" mutations");
+                .append(alterationsToString(alterations));
+        if (sb.indexOf("mutations", sb.length()-9)!=-1) {
+                sb.append(" mutations");
+        }
         
         return sb.toString();
     }

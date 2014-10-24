@@ -111,7 +111,7 @@ public final class QuestDocAnnotationParser {
         for (String file : files) {
             parse(new FileInputStream(file));
         }
-        ClinicalTrialsImporter.main(args);
+//        ClinicalTrialsImporter.main(args);
         
 //        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }
@@ -349,16 +349,20 @@ public final class QuestDocAnnotationParser {
     
     private static Map<String, String> parseMutationString(String mutationStr) {
         Map<String, String> ret = new HashMap<String, String>();
+        
+        mutationStr = mutationStr.replaceAll("\\([^\\)]+\\)", ""); // remove comments first
+        
         String[] parts = mutationStr.split(", *");
         
         Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
         for (String part : parts) {
             String proteinChange, displayName;
+            part = part.trim();
             if (part.contains("[")) {
                 int l = part.indexOf("[");
                 int r = part.indexOf("]");
                 proteinChange = part.substring(0, l).trim();
-                displayName = part.substring(l, r).trim();
+                displayName = part.substring(l+1, r).trim();
             } else {
                 proteinChange = part;
                 displayName = part;
@@ -368,7 +372,7 @@ public final class QuestDocAnnotationParser {
             if (m.find()) {
                 String ref = m.group(1);
                 for (String var : m.group(2).split("/")) {
-                    ret.put(ref+var, displayName);
+                    ret.put(ref+var, ref+var);
                 }
             } else {
                 ret.put(part, displayName);
