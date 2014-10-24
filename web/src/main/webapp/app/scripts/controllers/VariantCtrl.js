@@ -247,7 +247,32 @@ angular.module('webappApp')
     	};
         
         $scope.generateReport = function() {
-            GenerateDoc.getDoc().success(function() {
+            var params = {
+                "patientName": "LNAME322",
+                "specimen": "",
+                "clientNum": "",
+                "overallInterpretation": "",
+                "diagnosis": "LUNG CANCER",
+                "tumorTissueType": "LUNG",
+                "specimenSource": "",
+                "blockId": "",
+                "stage": "",
+                "grade": "",
+                "geneName": "BRAF",
+                "mutation": "V600E",
+                "alterType": "IN-FRAME DELETION",
+                "mutationFreq": "23%",
+                "tumorTypeDrugs": "YES",
+                "nonTumorTypeDrugs": "NO",
+                "hasClinicalTrial": "YES",
+                "treatment": "[{ 'NCCN Guidelines': {Disease: Non-Small Cell}]",
+                "fdaApprovedInOtherTumor": "",
+                "clinicalTrials": "",
+                "background": "",
+                "companionDiagnostics": ""
+            };
+            
+            GenerateDoc.getDoc(params).success(function() {
                 console.log("success generate document");
             });
         };

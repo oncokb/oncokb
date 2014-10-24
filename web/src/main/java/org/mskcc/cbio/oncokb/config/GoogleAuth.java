@@ -5,7 +5,6 @@
  */
 package org.mskcc.cbio.oncokb.config;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -39,11 +38,11 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class GoogleAuth {
     /** Email of the Service Account */
-    private static final String SERVICE_ACCOUNT_EMAIL = "184231070809-bs0vrb773cdue7m15e2r93ifrsqr1aav@developer.gserviceaccount.com";
+    private static final String SERVICE_ACCOUNT_EMAIL = "184231070809-f51uf3d89ljd78ssvss5eoidhtca4fhp@developer.gserviceaccount.com";
 
     /** Path to the Service Account's Private Key file */
-    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/Users/zhangh2/Downloads/OncoKB Report-714d54c4ffed.p12";
-
+    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/Users/zhangh2/Downloads/OncoKB Report-7c732673acd9.p12";
+    private static final String JSON = "/Users/zhangh2/Downloads/OncoKB Report-bf846c5e21ed.json";
     /**
      * Build and returns a Drive service object authorized with the service accounts.
      *
@@ -54,20 +53,30 @@ public class GoogleAuth {
      */
     public static Drive getDriveService() throws GeneralSecurityException,
         IOException, URISyntaxException {
-      HttpTransport httpTransport = new NetHttpTransport();
-      JacksonFactory jsonFactory = new JacksonFactory();
-      GoogleCredential credential = new GoogleCredential.Builder()
-          .setTransport(httpTransport)
-          .setJsonFactory(jsonFactory)
-          .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-          .setServiceAccountScopes(DriveScopes.all())
-          .setServiceAccountPrivateKeyFromP12File(
+        HttpTransport httpTransport = new NetHttpTransport();
+        JacksonFactory jsonFactory = new JacksonFactory();
+        String [] SCOPESArray= {
+            DriveScopes.DRIVE, 
+            DriveScopes.DRIVE_APPDATA, 
+            DriveScopes.DRIVE_FILE,
+            DriveScopes.DRIVE_APPS_READONLY,
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email"
+        };
+        final List SCOPES = Arrays.asList(SCOPESArray);
+        GoogleCredential credential = new GoogleCredential.Builder()
+            .setTransport(httpTransport)
+            .setJsonFactory(jsonFactory)
+            .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
+            .setServiceAccountScopes(DriveScopes.all())
+            .setServiceAccountPrivateKeyFromP12File(
               new java.io.File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
           .build();
-      Drive service = new Drive.Builder(httpTransport, jsonFactory, null)
-          .setHttpRequestInitializer(credential).build();
-      
-      return service;
+        credential.refreshToken();
+        Drive service = new Drive.Builder(httpTransport, jsonFactory, null)
+                .setApplicationName("Oncoreport")
+                .setHttpRequestInitializer(credential).build();
+        return service;
     }
     
     public static SpreadsheetService createSpreedSheetService() throws GeneralSecurityException, IOException, ServiceException {
@@ -77,7 +86,7 @@ public class GoogleAuth {
         String username = "jackson.zhang.828@gmail.com";
         String password = "gmail_privatespace";
         final List SCOPES = Arrays.asList(SCOPESArray); 
-        Credential credential = new GoogleCredential.Builder()
+        GoogleCredential credential = new GoogleCredential.Builder()
           .setTransport(httpTransport)
           .setJsonFactory(jsonFactory)
           .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
