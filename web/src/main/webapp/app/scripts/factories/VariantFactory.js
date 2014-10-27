@@ -52,13 +52,18 @@ angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http)
 
 angular.module('webappApp').factory('GenerateDoc', ['$http',  function ($http) {
     'use strict';
-
+    var transform = function(data){
+        return $.param(data);
+    }
+    
     function getDoc(params) {
-        return $http({
-            url: 'generateGoogleDoc',
-            method: 'POST',
-            params: {reportContent: JSON.stringify(params)}
-        });
+        return $http.post(
+            '/generateGoogleDoc', 
+            {'reportContent':JSON.stringify(params)},
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
     }
 
     return {

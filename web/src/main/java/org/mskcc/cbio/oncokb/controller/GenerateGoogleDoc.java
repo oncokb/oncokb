@@ -34,6 +34,7 @@ import org.mskcc.cbio.oncokb.config.GoogleAuth;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -65,7 +66,7 @@ public class GenerateGoogleDoc {
         }
     }
     
-    @RequestMapping(value="/generateGoogleDoc")
+    @RequestMapping(value="/generateGoogleDoc", method = POST)
     public @ResponseBody String generateGoogleDoc(
             @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException{
         try {
@@ -75,9 +76,10 @@ public class GenerateGoogleDoc {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
             Date date = new Date();
             String dateString = dateFormat.format(date);
+            String fileName = result.get("geneName") + "_" + result.get("mutation") + "_" + result.get("alterType");
             Drive driveService = GoogleAuth.getDriveService();
             File file = new File();
-            file.setTitle("New File - " + dateString);
+            file.setTitle(fileName);
             file.setParents(Arrays.asList(new ParentReference().setId("0BzBfo69g8fP6eXoydVRrdHJBbE0")));
             file.setDescription("New File created from server");
             file = driveService.files().copy("1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM", file).execute();
@@ -152,9 +154,7 @@ public class GenerateGoogleDoc {
             
             if(!value.equals("")) {
                 String key = pairs.getKey().toString().toLowerCase();
-                System.out.println(key);
                 listEntry.getCustomElements().setValueLocal(key, value);
-                System.out.println(key + " = " + value);
             }
             it.remove(); // avoids a ConcurrentModificationException
         }
