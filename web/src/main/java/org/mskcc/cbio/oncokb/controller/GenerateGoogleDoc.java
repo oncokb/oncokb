@@ -31,7 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.mskcc.cbio.oncokb.config.GoogleAuth;
-
+import org.json.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -67,24 +67,29 @@ public class GenerateGoogleDoc {
     }
     
     @RequestMapping(value="/generateGoogleDoc", method = POST)
-    public @ResponseBody String generateGoogleDoc(
+    public @ResponseBody Boolean generateGoogleDoc(
             @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException{
+        Boolean responseFlag = false;
         try {
-            HashMap<String,Object> result =
-            new ObjectMapper().readValue(reportContent, HashMap.class);
-            
+            JSONObject jsonObj = new JSONObject(reportContent);
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
             Date date = new Date();
             String dateString = dateFormat.format(date);
-            String fileName = result.get("geneName") + "_" + result.get("mutation") + "_" + result.get("alterType");
+            String fileName = jsonObj.getString("geneName") + "_" + jsonObj.getString("mutation") + "_" + jsonObj.getString("alterType");
             Drive driveService = GoogleAuth.getDriveService();
+            System.out.println("Got drive service");
             File file = new File();
             file.setTitle(fileName);
             file.setParents(Arrays.asList(new ParentReference().setId("0BzBfo69g8fP6eXoydVRrdHJBbE0")));
             file.setDescription("New File created from server");
+            System.out.println("Copying file");
             file = driveService.files().copy("1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM", file).execute();
-            changeFileContent(file.getId(), file.getTitle(), result);
+            System.out.println("Successfully copied file. Start to change file content");
+            changeFileContent(file.getId(), file.getTitle(), jsonObj);
+            System.out.println("Successfully changed file content. Start to add new record");
             addNewRecord(file.getId(), file.getTitle(), "zhx", dateString);
+            System.out.println("Successfully added new record");
+            responseFlag = true;
         } catch (GoogleJsonResponseException e) {
             GoogleJsonError error = e.getDetails();
 
@@ -103,7 +108,7 @@ public class GenerateGoogleDoc {
         } catch (URISyntaxException e) {
             System.out.println("An URISyntaxException occurred: " + e);
         }
-        return "Success";
+        return responseFlag;
     }
     
     public static void addNewRecord(String reportDataFileId, String reportName, String user, String date) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
@@ -132,7 +137,7 @@ public class GenerateGoogleDoc {
         service.insert(listFeedUrl, row);
     }
     
-    public static void changeFileContent(String fileId, String fileName, HashMap<String,Object> content) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    public static void changeFileContent(String fileId, String fileName, JSONObject content) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
         
         SpreadsheetService service = GoogleAuth.createSpreedSheetService();
@@ -147,17 +152,17 @@ public class GenerateGoogleDoc {
         URL listFeedUrl = worksheet.getListFeedUrl();
         ListFeed listFeed = service.getFeed(listFeedUrl, ListFeed.class);
         ListEntry listEntry  = listFeed.getEntries().get(0);
-        Iterator it = content.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry)it.next();
-            String value = pairs.getValue().toString();
-            
-            if(!value.equals("")) {
-                String key = pairs.getKey().toString().toLowerCase();
-                listEntry.getCustomElements().setValueLocal(key, value);
+        
+        Iterator<String> keys = content.keys();
+        System.out.println("Successfully get all entries. Start to change content");
+        while(keys.hasNext()){
+            String key = keys.next();
+            if(!content.get(key).toString().equals("")) {
+                listEntry.getCustomElements().setValueLocal(key, content.get(key).toString());
             }
-            it.remove(); // avoids a ConcurrentModificationException
         }
+        System.out.print("Updating...");
         listEntry.update();
+        System.out.println("Done.");
     }
 }

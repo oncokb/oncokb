@@ -289,13 +289,15 @@ angular.module('webappApp')
             params.alterType = $scope.selectedTumorType.name;
             
             if($scope.relevantCancerType) {
-                // console.log($scope.relevantCancerType);
-                params.treatment = constructTreatment();
+                var _treatment = constructfdaInfo();
+                params.treatment = _treatment.length > 0 ? _treatment : "";
                 var _fdaInfo = constructfdaInfo();
-                params.fdaApprovedInTumor = _fdaInfo.approved;
-                params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved;
-                params.clinicalTrials = constructClinicalTrial();
-                params.additionalInfo = constructAdditionalInfo();
+                params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
+                params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
+                var _clinicalTrail = constructClinicalTrial();
+                params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
+                var _additionalInfo = constructAdditionalInfo();
+                params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
             }
             // console.log(params);
             return params;
@@ -498,12 +500,14 @@ angular.module('webappApp')
                 key = "CLINICAL TRIALS MATCED FOR GENE AND DISEASE";
 
                 for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                    var _subDatum = {};
-                    _subDatum[_datum[i].trial_id + ", " + _datum[i].phase] = '';
-                    _subDatum.title = _datum[i].title;
-                    _subDatum.purpose = _datum[i].purpose;
-                    _subDatum.description = _datum[i].description;
-                    value.push(_subDatum);
+                    if(/phase 3|phase 4/i.test(_datum[i].phase)) {
+                        var _subDatum = {};
+                        _subDatum.trial = _datum[i].trial_id + ", " + _datum[i].phase;
+                        _subDatum.title = _datum[i].title;
+                        _subDatum.purpose = removeCharsInDescription(_datum[i].purpose);
+                        _subDatum.description = removeCharsInDescription(_datum[i].description);
+                        value.push(_subDatum);
+                    }
                 }
                 
                 object[key] = value;
@@ -514,7 +518,7 @@ angular.module('webappApp')
                 value = [];
                 object = {};
                 key = "INVESTIGATIONAL THERAPEUTIC IMPLICATIONS";
-                value.push({'description': cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description});
+                value.push({'description': removeCharsInDescription(cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description)});
                 object[key] = value;
                 clincialTrials.push(object);
 
@@ -544,7 +548,7 @@ angular.module('webappApp')
                 value = [];
                 key = 'BACKGROUND';
                 object = {};
-                value.push({'description': $scope.annotation.gene_annotation});
+                value.push({'description': removeCharsInDescription($scope.annotation.gene_annotation.description)});
                 object[key] = value;
                 additionalInfo.push(object);
             }
@@ -553,7 +557,7 @@ angular.module('webappApp')
                 value = [];
                 key = 'MUTATION PREVALENCE';
                 object = {};
-                value.push({'description': cancerTypeInfo.prevalence});
+                value.push({'description': removeCharsInDescription(cancerTypeInfo.prevalence.description)});
                 object[key] = value;
                 additionalInfo.push(object);
             }
@@ -564,12 +568,20 @@ angular.module('webappApp')
                 object = {};
                 value.push({
                     'effect': $scope.annotation.variant_effect.effect,
-                    'description': $scope.annotation.variant_effect.description
+                    'description': removeCharsInDescription($scope.annotation.variant_effect.description)
                 });
                 object[key] = value;
                 additionalInfo.push(object);
             }
             return additionalInfo;
+        }
+
+        function removeCharsInDescription(str) {
+            if(typeof str !== 'undefined') {
+                return str.replace(/(\r\n|\n|\r)/gm,'');
+            }else {
+                return '';
+            }
         }
 
         function formatDatum(value, key) {
