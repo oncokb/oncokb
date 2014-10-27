@@ -13,10 +13,12 @@ public class Alteration implements java.io.Serializable {
      private VariantConsequence consequence;
      
      private String alteration;
+     private String name;
      private String refResidues;
      private Integer proteinStart;
      private Integer proteinEnd;
      private String variantResidues;
+     private Boolean oncogenic;
 
     public Alteration() {
     }
@@ -47,6 +49,14 @@ public class Alteration implements java.io.Serializable {
     
     public void setAlteration(String alteration) {
         this.alteration = alteration;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     
     public AlterationType getAlterationType() {
@@ -98,7 +108,15 @@ public class Alteration implements java.io.Serializable {
         this.variantResidues = variantResidues;
     }
 
-     @Override
+    public Boolean getOncogenic() {
+        return oncogenic;
+    }
+
+    public void setOncogenic(Boolean oncogenic) {
+        this.oncogenic = oncogenic;
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 83 * hash + (this.gene != null ? this.gene.hashCode() : 0);

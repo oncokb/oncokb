@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +51,7 @@ public final class QuestDocAnnotationParser {
     private static final String GENE_BACKGROUND_P = "Background:? *";
         
     private static final String MUTATION_P = "Mutations?: ?(.+)";
+    private static final String MUTATION_ONCOGENIC_P = "Oncogenic?: ?([^ ]+) *";
     private static final String MUTATION_EFFECT_P = "Mutation effect: ?([^\\(]+)(\\(PMIDs?:.+\\))?";
     private static final String MUTATION_EFFECT_DESCRIPTION_P = "^Description of mutation effect:? *";
     
@@ -76,7 +79,7 @@ public final class QuestDocAnnotationParser {
     private static final String NCCN_PAGES_RECOMMENDATION_CATEGORY = "Recommendation category: ?(.+)";
     private static final String NCCN_EVIDENCE_P = "Description of evidence:? ?";
     
-    private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?$";
+    private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?";
     private static final String CLINICAL_TRIALS_P = "(NCT[0-9]+)";
     
     private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "Interacting gene alterations$";
@@ -108,7 +111,7 @@ public final class QuestDocAnnotationParser {
         for (String file : files) {
             parse(new FileInputStream(file));
         }
-        ClinicalTrialsImporter.main(args);
+//        ClinicalTrialsImporter.main(args);
         
 //        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
     }
@@ -123,7 +126,7 @@ public final class QuestDocAnnotationParser {
     
     private static void parseGene(List<String> lines, int start, int end) throws IOException {
         if (!lines.get(start).startsWith("Gene: ")) {
-            System.err.println("Gene line should start with Gene: ");
+            throw new RuntimeException("Gene line should start with Gene: ");
         }
         
         System.out.println("##"+lines.get(start));
@@ -139,7 +142,7 @@ public final class QuestDocAnnotationParser {
             System.out.println("Could not find gene "+hugo+". Loading from MyGene.Info...");
             gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
             if (gene == null) {
-                System.err.println("Could not find gene "+hugo+" either.");
+                throw new RuntimeException("Could not find gene "+hugo+" either.");
             }
             geneBo.save(gene);
         }
@@ -157,8 +160,7 @@ public final class QuestDocAnnotationParser {
     private static int[] parseSummary(Gene gene, List<String> lines, int start, int end) {
         List<int[]> summaryLines = extractLines(lines, start, end, SUMMARY_P, GENE_BACKGROUND_P, 1);
         if (summaryLines.size()!=1) {
-            System.err.println("No summary for "+gene.getHugoSymbol());
-            return null;
+            throw new RuntimeException("No summary for "+gene.getHugoSymbol());
         }
         
         System.out.println("##  Summary");
@@ -167,7 +169,7 @@ public final class QuestDocAnnotationParser {
         int eSummary = summaryLines.get(0)[1];
         
         // gene summary
-        List<int[]> geneSummaryLines = extractLines(lines, sSummary, eSummary, SUMMARY_P, TUMOR_TYPE_P, 1);
+        List<int[]> geneSummaryLines = extractLines(lines, sSummary, eSummary, SUMMARY_P, 1);
         String geneSummary = joinLines(lines, geneSummaryLines.get(0)[0]+1, geneSummaryLines.get(0)[1]);
         Evidence evidence = new Evidence();
         evidence.setEvidenceType(EvidenceType.GENE_SUMMARY);
@@ -177,38 +179,38 @@ public final class QuestDocAnnotationParser {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         evidenceBo.save(evidence);
         
-        // tumor types
-        List<int[]> cancerSummaryLines = extractLines(lines, geneSummaryLines.get(0)[1], eSummary, TUMOR_TYPE_P, TUMOR_TYPE_P, -1);
-        for (int[] cancerLine : cancerSummaryLines) {
-            String line = lines.get(cancerLine[0]);
-            Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
-            Matcher m = p.matcher(line);
-            if (!m.matches()) {
-                System.err.println("wrong format of type type line: "+line);
-            }
-            String cancer = m.group(1).trim();
-
-            System.out.println("##    Cancer type: " + cancer);
-
-            TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
-            TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
-            if (tumorType==null) {
-                tumorType = new TumorType();
-                tumorType.setTumorTypeId(cancer);
-                tumorType.setName(cancer);
-                tumorType.setClinicalTrialKeywords(Collections.singleton(cancer));
-                tumorTypeBo.save(tumorType);
-            }
-
-            String cancerSummary = joinLines(lines, cancerLine[0]+1, cancerLine[1]);
-            evidence = new Evidence();
-            evidence.setEvidenceType(EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
-            evidence.setGene(gene);
-            evidence.setTumorType(tumorType);
-            evidence.setDescription(cancerSummary);
-            setDocuments(cancerSummary, evidence);
-            evidenceBo.save(evidence);
-        }
+//        // tumor types
+//        List<int[]> cancerSummaryLines = extractLines(lines, geneSummaryLines.get(0)[1], eSummary, TUMOR_TYPE_P, TUMOR_TYPE_P, -1);
+//        for (int[] cancerLine : cancerSummaryLines) {
+//            String line = lines.get(cancerLine[0]);
+//            Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
+//            Matcher m = p.matcher(line);
+//            if (!m.matches()) {
+//                throw new RuntimeException("wrong format of type type line: "+line);
+//            }
+//            String cancer = m.group(1).trim();
+//
+//            System.out.println("##    Cancer type: " + cancer);
+//
+//            TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
+//            TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
+//            if (tumorType==null) {
+//                tumorType = new TumorType();
+//                tumorType.setTumorTypeId(cancer);
+//                tumorType.setName(cancer);
+//                tumorType.setClinicalTrialKeywords(Collections.singleton(cancer));
+//                tumorTypeBo.save(tumorType);
+//            }
+//
+//            String cancerSummary = joinLines(lines, cancerLine[0]+1, cancerLine[1]);
+//            evidence = new Evidence();
+//            evidence.setEvidenceType(EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
+//            evidence.setGene(gene);
+//            evidence.setTumorType(tumorType);
+//            evidence.setDescription(cancerSummary);
+//            setDocuments(cancerSummary, evidence);
+//            evidenceBo.save(evidence);
+//        }
         
         return summaryLines.get(0);
     }
@@ -216,7 +218,7 @@ public final class QuestDocAnnotationParser {
     private static int[] parseGeneBackground(Gene gene, List<String> lines, int start, int end) {
         List<int[]> backgroundLines = extractLines(lines, start, end, GENE_BACKGROUND_P, MUTATION_P, 1);
         if (backgroundLines.size()!=1) {
-            System.err.println("There should be one background section for gene: "+gene.getHugoSymbol());
+            throw new RuntimeException("There should be one background section for gene: "+gene.getHugoSymbol());
         }
         
         System.out.println("##  Background");
@@ -260,36 +262,52 @@ public final class QuestDocAnnotationParser {
         Pattern p = Pattern.compile(MUTATION_P, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(lines.get(start));
         if (!m.matches()) {
-            System.err.println("wrong format of mutation line: "+lines.get(0));
+            throw new RuntimeException("wrong format of mutation line: "+lines.get(0));
         }
         
-        String mutationStr = m.group(1);
-        if (mutationStr.contains("[")) {
-            mutationStr = mutationStr.substring(0, mutationStr.indexOf("["));
-        }
-        mutationStr = mutationStr.trim();
+        String mutationStr = m.group(1).trim();
         
         System.out.println("##  Mutation: "+mutationStr);
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        AlterationType type = AlterationType.MUTATION; //TODO: cna and fution
+        AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
+        
+        // oncogenic
+        String oncogenicStr = lines.get(start+1);
+        p = Pattern.compile(MUTATION_ONCOGENIC_P, Pattern.CASE_INSENSITIVE);
+        m = p.matcher(oncogenicStr);
+        Boolean oncogenic = Boolean.FALSE;
+        if (!m.matches()) {
+            System.err.println("wrong format of oncogenic line: "+oncogenicStr);
+        } else {
+            oncogenic = m.group(1).equalsIgnoreCase("YES");
+        }
         
         Set<Alteration> alterations = new HashSet<Alteration>();
-        for (String mutation : parseMutationString(mutationStr)) {
-            Alteration alteration = alterationBo.findAlteration(gene, type, mutation);
+        Map<String,String> mutations = parseMutationString(mutationStr);
+        for (Map.Entry<String,String> mutation : mutations.entrySet()) {
+            String proteinChange = mutation.getKey();
+            String displayName = mutation.getValue();
+            Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
             if (alteration==null) {
                 alteration = new Alteration();
                 alteration.setGene(gene);
                 alteration.setAlterationType(type);
-                alteration.setAlteration(mutation);
-                AlterationUtils.annotateAlteration(alteration);
+                alteration.setAlteration(proteinChange);
+                alteration.setName(displayName);
+                alteration.setOncogenic(oncogenic);
+                AlterationUtils.annotateAlteration(alteration, proteinChange);
                 alterationBo.save(alteration);
+            }
+            
+            if (oncogenic && !alteration.getOncogenic()) {
+                alterationBo.update(alteration);
             }
             alterations.add(alteration);
         }
         
         // mutation effect
-        String mutationEffectStr = lines.get(start+1);
+        String mutationEffectStr = lines.get(start+2);
         
         p = Pattern.compile(MUTATION_EFFECT_P, Pattern.CASE_INSENSITIVE);
         m = p.matcher(mutationEffectStr);
@@ -305,7 +323,7 @@ public final class QuestDocAnnotationParser {
             effect = effect.trim();
 
             // Description of mutation effect
-            List<int[]> mutationEffectDescLine = extractLines(lines, start+2, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
+            List<int[]> mutationEffectDescLine = extractLines(lines, start+3, end, MUTATION_EFFECT_DESCRIPTION_P, TUMOR_TYPE_P, 1);
             String descMutationEffectStr = joinLines(lines, mutationEffectDescLine.get(0)[0]+1, mutationEffectDescLine.get(0)[1]);
 
             Evidence evidence = new Evidence();
@@ -329,19 +347,35 @@ public final class QuestDocAnnotationParser {
         }
     }
     
-    private static Set<String> parseMutationString(String mutationStr) {
-        Set<String> ret = new HashSet<String>();
+    private static Map<String, String> parseMutationString(String mutationStr) {
+        Map<String, String> ret = new HashMap<String, String>();
+        
+        mutationStr = mutationStr.replaceAll("\\([^\\)]+\\)", ""); // remove comments first
+        
         String[] parts = mutationStr.split(", *");
+        
         Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
         for (String part : parts) {
-            Matcher m = p.matcher(part);
+            String proteinChange, displayName;
+            part = part.trim();
+            if (part.contains("[")) {
+                int l = part.indexOf("[");
+                int r = part.indexOf("]");
+                proteinChange = part.substring(0, l).trim();
+                displayName = part.substring(l+1, r).trim();
+            } else {
+                proteinChange = part;
+                displayName = part;
+            }
+            
+            Matcher m = p.matcher(proteinChange);
             if (m.find()) {
                 String ref = m.group(1);
                 for (String var : m.group(2).split("/")) {
-                    ret.add(ref+var);
+                    ret.put(ref+var, ref+var);
                 }
             } else {
-                ret.add(part);
+                ret.put(part, displayName);
             }
         }
         return ret;
@@ -352,7 +386,7 @@ public final class QuestDocAnnotationParser {
         Pattern p = Pattern.compile(TUMOR_TYPE_P, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(line);
         if (!m.matches()) {
-            System.err.println("wrong format of type type line: "+line);
+            throw new RuntimeException("wrong format of tumor type line: "+line);
         }
         String cancer = m.group(1).trim();
         
@@ -613,62 +647,64 @@ public final class QuestDocAnnotationParser {
     
     private static void parseNCCN(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end) {
         // disease
-        String txt = lines.get(start).trim();
-        Pattern p = Pattern.compile(NCCN_DISEASE_P, Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(txt);
-        if (!m.matches()) {
-            System.err.println("Problem with NCCN disease line: "+txt);
-            return;
-        }
-        
-        String disease = m.group(1);
-        
-        if (disease == null) {
-            return;
+        String disease = null;
+        List<int[]> line = extractLines(lines, start, end, NCCN_DISEASE_P, 1);
+        if (line.isEmpty()) {
+            throw new RuntimeException("Problem with NCCN disease line");
+        } else {
+            Pattern p = Pattern.compile(NCCN_DISEASE_P, Pattern.CASE_INSENSITIVE);
+            Matcher m = p.matcher(lines.get(line.get(0)[0]));
+            if (m.matches())  {
+                disease = m.group(1);
+            }
         }
         
         // version
-        txt = lines.get(start+1).trim();
-        p = Pattern.compile(NCCN_VERSION_P, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(txt);
         String version = null;
-        if (!m.matches()) {
-            System.err.println("Problem with NCCN version line: "+txt);
+        line = extractLines(lines, start, end, NCCN_VERSION_P, 1);
+        if (line.isEmpty()) {
+            System.err.println("Problem with NCCN version line");
         } else {
-            version = m.group(1);
+            Pattern p = Pattern.compile(NCCN_VERSION_P, Pattern.CASE_INSENSITIVE);
+            Matcher m = p.matcher(lines.get(line.get(0)[0]));
+            if (m.matches())  {
+                version = m.group(1);
+            }
         }
         
         // pages
-        txt = lines.get(start+2);
-        p = Pattern.compile(NCCN_PAGES_P, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(txt);
         String pages = null;
-        if (!m.matches()) {
-            System.err.println("Problem with NCCN pages line: "+txt);
+        line = extractLines(lines, start, end, NCCN_PAGES_P, 1);
+        if (line.isEmpty()) {
+            System.err.println("Problem with NCCN pages line");
         } else {
-            pages = m.group(1);
+            Pattern p = Pattern.compile(NCCN_PAGES_P, Pattern.CASE_INSENSITIVE);
+            Matcher m = p.matcher(lines.get(line.get(0)[0]));
+            if (m.matches())  {
+                pages = m.group(1);
+            }
         }
         
         // Recommendation category
-        txt = lines.get(start+3);
-        p = Pattern.compile(NCCN_PAGES_RECOMMENDATION_CATEGORY, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(txt);
         String category = null;
-        if (!m.matches()) {
-            System.err.println("Problem with NCCN category line: "+txt);
+        line = extractLines(lines, start, end, NCCN_PAGES_RECOMMENDATION_CATEGORY, 1);
+        if (line.isEmpty()) {
+            System.err.println("Problem with NCCN category line");
         } else {
-            category = m.group(1);
+            Pattern p = Pattern.compile(NCCN_PAGES_RECOMMENDATION_CATEGORY, Pattern.CASE_INSENSITIVE);
+            Matcher m = p.matcher(lines.get(line.get(0)[0]));
+            if (m.matches())  {
+                category = m.group(1);
+            }
         }
         
         // description
-        txt = lines.get(start+4);
-        p = Pattern.compile(NCCN_EVIDENCE_P, Pattern.CASE_INSENSITIVE);
-        m = p.matcher(txt);
         String nccnDescription = null;
-        if (!m.matches()) {
-            System.err.println("Problem with NCCN description line: "+txt);
+        line = extractLines(lines, start, end, NCCN_EVIDENCE_P, 1);
+        if (line.isEmpty()) {
+            System.err.println("Problem with NCCN description line");
         } else {
-            String desc = joinLines(lines, start+5, end).trim();
+            String desc = joinLines(lines, line.get(0)[0]+1, end).trim();
             if (!desc.isEmpty()) {
                 nccnDescription = desc;
             }

@@ -18,7 +18,13 @@
                 </column>
             </property>
         <!--</properties>-->
-        
+
+        <property name="name" type="string">
+            <column name="name" length="300" not-null="true">
+                <comment>exon 19 deletion</comment>
+            </column>
+        </property>
+
         <property name="alterationType" column="alteration_type">
             <type name="org.hibernate.type.EnumType">
                <param name="enumClass">org.mskcc.cbio.oncokb.model.AlterationType</param>
@@ -45,6 +51,10 @@
         
         <property name="variantResidues" type="string">
           <column name="variant_residues"/>
+        </property>
+        
+        <property name="oncogenic" type="boolean">
+            <column name="oncogenic" not-null="true"/>
         </property>
     </class>
     

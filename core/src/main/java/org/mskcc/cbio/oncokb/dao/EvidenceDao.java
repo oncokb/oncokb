@@ -54,4 +54,13 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return 
      */
     List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType);
+    
+    /**
+     * 
+     * @param gene
+     * @param evidenceType
+     * @param tumorType
+     * @return 
+     */
+    List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType, TumorType tumorType);
 }

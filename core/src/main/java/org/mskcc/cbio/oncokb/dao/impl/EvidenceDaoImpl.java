@@ -44,4 +44,9 @@ public class EvidenceDaoImpl
     public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType) {
         return findByNamedQuery("findEvidencesByGeneAndEvidenceType", gene, evidenceType);
     }
+
+    @Override
+    public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType, TumorType tumorType) {
+        return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndTumorType", gene, evidenceType);
+    }
 }

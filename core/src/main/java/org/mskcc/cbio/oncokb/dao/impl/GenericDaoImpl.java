@@ -86,6 +86,11 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     public List<T> findByNamedQuery(String queryName, Object... values) {
         return getHibernateTemplate().findByNamedQuery(queryName, values);
     }
+    
+    @Override
+    public <C> List<C> findByNamedQueryOfAnyType(String queryName, Object... values) {
+        return (List<C>)getHibernateTemplate().findByNamedQuery(queryName, values);
+    }
 
     @Override
     public void save(T t)

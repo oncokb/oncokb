@@ -75,25 +75,28 @@
     </set>
   </class>
   <query name="findEvidencesByAlteration">
-        select e from Evidence e join e.alterations a where a.alterationId=?
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=?]]>
   </query>
   <query name="findEvidencesByAlterationAndEvidenceType">
-        select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?]]>
   </query>
   <query name="findEvidencesByAlterationAndEvidenceTypeAndTumorType">
-        select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?]]>
   </query>
   <query name="findEvidencesByGene">
-        select e from Evidence e where e.gene=?
+        <![CDATA[select e from Evidence e where e.gene=?]]>
   </query>
   <query name="findEvidencesByGeneAndEvidenceType">
-        select e from Evidence e where e.gene=? and e.evidenceType=?
+        <![CDATA[select e from Evidence e where e.gene=? and e.evidenceType=?]]>
+  </query>
+  <query name="findEvidencesByGeneAndEvidenceTypeAndTumorType">
+        <![CDATA[select e from Evidence e where e.gene=? and e.evidenceType=? and e.tumorType=?]]>
   </query>
   <query name="findEvidencesByTumorType">
-        select e from Evidence e where e.tumorType=?
+        <![CDATA[select e from Evidence e where e.tumorType=?]]>
   </query>
   <query name="findEvidencesByGeneAndTumorType">
-        select e from Evidence e join e.alterations a where e.gene=? and e.tumorType=?
+        <![CDATA[select e from Evidence e join e.alterations a where e.gene=? and e.tumorType=?]]>
   </query>
   <query name="findTumorTypesWithEvidencesForAlteration">
         <![CDATA[select distinct e.tumorType from Evidence e join e.alterations a where a.alterationId=?]]>

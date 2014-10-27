@@ -79,7 +79,7 @@ public class AlterationActivityEvidenceImporter {
                 alteration.setGene(gene);
                 alteration.setAlterationType(type);
                 alteration.setAlteration(alt);
-                AlterationUtils.annotateAlteration(alteration);
+                AlterationUtils.annotateAlteration(alteration, alt);
                 
                 alterationBo.save(alteration);
             }
