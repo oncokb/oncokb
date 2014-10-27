@@ -127,26 +127,6 @@
 	  <groupId>com.google.api-client</groupId>
 	  <artifactId>google-api-client</artifactId>
 	  <version>1.19.0</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>com.google.apis</groupId>
-	  <artifactId>google-api-services-drive</artifactId>
-	  <version>v2-rev100-1.17.0-rc</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>com.google.gdata</groupId>
-	  <artifactId>core</artifactId>
-	  <version>1.47.1</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>org.json</groupId>
-	  <artifactId>json</artifactId>
-	  <version>20140107</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>com.google.code.gson</groupId>
-	  <artifactId>gson</artifactId>
-	  <version>2.3</version>
 	  <type>jar</type>
 	 </dependency>
 	 <dependency>
@@ -154,6 +134,23 @@
 	  <artifactId>google-http-client-jackson</artifactId>
 	  <version>1.19.0</version>
 	  <type>jar</type>
+	 </dependency>
+	 <dependency>
+	  <groupId>com.google.apis</groupId>
+	  <artifactId>google-api-services-drive</artifactId>
+	  <version>v2-rev100-1.17.0-rc</version>
+	  <type>jar</type>
+	 </dependency>
+	 <dependency>
+	  <groupId>com.google.gdata</groupId>
+	  <artifactId>core</artifactId>
+	  <version>1.47.1</version>
+	  <type>jar</type>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.json</groupId>
+	  <artifactId>json</artifactId>
+	  <version>20140107</version>
 	 </dependency>
 	</dependencies>
 
