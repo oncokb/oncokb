@@ -1,0 +1,19 @@
+{
+  "name": "angular-chosen",
+  "main": "angular-chosen.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "homepage": "https://github.com/iiome/angular-chosen",
+  "_release": "e9fa4962f7",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "e9fa4962f76604311ba04d669adb97603bf29367"
+  },
+  "_source": "git://github.com/iiome/angular-chosen.git",
+  "_target": "*",
+  "_originalSource": "angular-chosen"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "xml2json",
+  "main": "xml2json.js",
+  "version": "1.1.1",
+  "homepage": "https://github.com/ron-liu/xml2json",
+  "authors": [
+    "Thomas Frank"
+  ],
+  "description": "xml to json parser",
+  "keywords": [
+    "xml2json",
+    "xml",
+    "json"
+  ],
+  "license": "GPLV2",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "1.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.1.1",
+    "commit": "116f763d05b00b54703ecece27bfdbe82ece450e"
+  },
+  "_source": "git://github.com/ron-liu/xml2json.git",
+  "_target": "~1.1.1",
+  "_originalSource": "xml2json",
+  "_direct": true
+}
