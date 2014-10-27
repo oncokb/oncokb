@@ -24,18 +24,18 @@
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
             <div class="btn-group btn-group-sm">
-                <button id="searchVariantBtn" type="button" ng-click="search()" class="btn btn-default">Search</button>
-                <button id="useExampleBtn" type="button" ng-click="useExample()" class="btn btn-default">Use example</button>
-                <button id="generateReport" type="button" ng-click="generateReport()" class="btn btn-default">Generate report</button>
+                <button id="searchVariantBtn" type="button" ng-disabled="rendering" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><img ng-show="rendering" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
+                <button id="useExampleBtn" type="button" ng-disabled="rendering" ng-click="useExample()" class="btn btn-default"><span ng-hide="rendering">Use Example</span><img ng-show="rendering" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
+                <button id="generateReport" type="button" ng-disabled="generaingReport" ng-show="annotation" ng-click="generateReport()" class="btn btn-default"><span ng-hide="generaingReport">Generate Report</span><img ng-show="generaingReport" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
             </div>
         </div>
     </div>
     <br/>
-    <div class="row">
+    <!-- <div class="row">
         <div>
             <img id='variant_loader' ng-show='rendering' src="images/ajax-loader.gif"/>
         </div>
-    </div>
+    </div> -->
     <div class="row" ng-show="annotation">
         <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <table class='table'>

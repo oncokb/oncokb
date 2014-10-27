@@ -3,10 +3,11 @@ angular.module('webappApp')
         '$scope', 
         '$filter',
         '$location',
+        '$timeout',
         'TumorType', 
         'SearchVariant',
         'GenerateDoc',
-        function ($scope, $filter, $location, TumorType, SearchVariant, GenerateDoc) {
+        function ($scope, $filter, $location, $timeout, TumorType, SearchVariant, GenerateDoc) {
 
         'use strict';
 
@@ -15,6 +16,7 @@ angular.module('webappApp')
         $scope.init = function () {
 
             $scope.rendering = false;
+            $scope.generaingReport =false;
 
             //Control UI-Bootstrap angularjs, open one at a time
             $scope.oneAtATime = true;
@@ -199,6 +201,7 @@ angular.module('webappApp')
         };
 
         $scope.search = function() {
+            $scope.rendering = true;
             var params = {'alterationType': 'MUTATION'};
             var paramsContent = {
                 'hugoSymbol': 'geneName',
@@ -239,15 +242,18 @@ angular.module('webappApp')
         };
         
         $scope.generateReport = function() {
+            $scope.generaingReport =true;
             var params = generateReportData();
             
-            GenerateDoc.getDoc(params).success(function() {
-                console.log("success generate document");
+            // $timeout(function() {
+            //     $scope.generaingReport =false;
+            // }, 1000)
+            GenerateDoc.getDoc(params).success(function(data) {
+                $scope.generaingReport =false;
             });
         };
         
         $scope.useExample = function() {
-            $scope.rendering = true;
             $scope.geneName = 'BRAF';
             $scope.mutation = 'V600E';
             $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', 'melanoma')];
