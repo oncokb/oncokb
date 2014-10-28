@@ -58,7 +58,7 @@ angular.module('webappApp').factory('GenerateDoc', ['$http',  function ($http) {
     
     function getDoc(params) {
         return $http.post(
-            '/generateGoogleDoc', 
+            'generateGoogleDoc', 
             {'reportContent':JSON.stringify(params)},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},

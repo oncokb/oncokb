@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -41,8 +42,8 @@ public class GoogleAuth {
     private static final String SERVICE_ACCOUNT_EMAIL = "184231070809-f51uf3d89ljd78ssvss5eoidhtca4fhp@developer.gserviceaccount.com";
 
     /** Path to the Service Account's Private Key file */
-    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/Users/zhangh2/Downloads/OncoKB Report-7c732673acd9.p12";
-    private static final String JSON = "/Users/zhangh2/Downloads/OncoKB Report-bf846c5e21ed.json";
+    private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/OncoKB-Report-7c732673acd9.p12";
+    private static File file;
     /**
      * Build and returns a Drive service object authorized with the service accounts.
      *
@@ -50,7 +51,7 @@ public class GoogleAuth {
      * @throws java.security.GeneralSecurityException
      * @throws java.io.IOException
      * @throws java.net.URISyntaxException
-     */
+     */       
     public static Drive getDriveService() throws GeneralSecurityException,
         IOException, URISyntaxException {
         HttpTransport httpTransport = new NetHttpTransport();
@@ -69,14 +70,18 @@ public class GoogleAuth {
             .setJsonFactory(jsonFactory)
             .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
             .setServiceAccountScopes(DriveScopes.all())
-            .setServiceAccountPrivateKeyFromP12File(
-              new java.io.File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
+            .setServiceAccountPrivateKeyFromP12File(file)
           .build();
         credential.refreshToken();
         Drive service = new Drive.Builder(httpTransport, jsonFactory, null)
                 .setApplicationName("Oncoreport")
                 .setHttpRequestInitializer(credential).build();
         return service;
+    }
+    
+    public GoogleAuth() throws IOException {
+        URL url = this.getClass().getResource(SERVICE_ACCOUNT_PKCS12_FILE_PATH);
+        file =new java.io.File(url.getPath());
     }
     
     public static SpreadsheetService createSpreedSheetService() throws GeneralSecurityException, IOException, ServiceException {
@@ -91,8 +96,7 @@ public class GoogleAuth {
           .setJsonFactory(jsonFactory)
           .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
           .setServiceAccountScopes(SCOPES)
-          .setServiceAccountPrivateKeyFromP12File(
-              new java.io.File(SERVICE_ACCOUNT_PKCS12_FILE_PATH))
+          .setServiceAccountPrivateKeyFromP12File(file)
           .build();
       
         SpreadsheetService service =

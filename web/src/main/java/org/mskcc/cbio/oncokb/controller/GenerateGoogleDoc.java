@@ -71,6 +71,7 @@ public class GenerateGoogleDoc {
             @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException{
         Boolean responseFlag = false;
         try {
+            GoogleAuth google = new GoogleAuth();
             JSONObject jsonObj = new JSONObject(reportContent);
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
             Date date = new Date();
