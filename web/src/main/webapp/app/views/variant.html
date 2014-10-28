@@ -61,7 +61,7 @@
             <div ng-repeat="(key, value) in displayParts" ng-show="annotation[value.objectName]">
                 <div id="{{key}}">
                     <h2>{{value.displayName}}</h2>
-                    <p ng-bind-html="findRegex(annotation[value.objectName].description)"></p>
+                    <p ng-bind-html="findRegex(annotation[value.objectName].description) || findRegex(annotation[value.objectName])"></p>
                 </div>
             </div>
         </div>
