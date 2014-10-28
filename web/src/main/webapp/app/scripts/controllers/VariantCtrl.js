@@ -253,13 +253,13 @@ angular.module('webappApp')
             //     $scope.generaingReport =false;
             // }, 1000)
             GenerateDoc.getDoc(params).success(function(data) {
-                $scope.generaingReport =false;
+                 $scope.generaingReport =false;
             });
         };
         
         $scope.useExample = function() {
             $scope.geneName = 'BRAF';
-            $scope.mutation = 'V600E';
+            $scope.mutation = 'V600D';
             $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', 'melanoma')];
             $scope.search();
         };
@@ -363,17 +363,27 @@ angular.module('webappApp')
 
             if(cancerTypeInfo.nccn_guidelines) {
                 var _datum = cancerTypeInfo.nccn_guidelines;
-
+                var versions = {};
+                
                 value = [];
                 object = {};
                 key = "NCCN GUIDELINES";
-
                 for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                    var _subDatum = {};
-                    _subDatum.cancer_type = $scope.tumorType;
-                    _subDatum.version = _datum[i].version;
-                    _subDatum.description = _datum[i].description;
-                    value.push(_subDatum);
+                    if(!versions.hasOwnProperty(_datum[i].version)) {
+                        versions[_datum[i].version] = {};
+                    }
+                }
+                
+                for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
+                    versions[_datum[i].version].description = _datum[i].description;
+                    versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category] = _datum[i].description;
+                }
+                
+                for(var versionKey in versions) {
+                    var version = versions[versionKey];
+                    version.version = versionKey;
+                    version.cancer_type = $scope.selectedTumorType.name;
+                    value.push(version);
                 }
                 
                 object[key] = value;
@@ -397,7 +407,7 @@ angular.module('webappApp')
                 object[key] = value;
                 treatment.push(object);
             }
-
+            
             return treatment;
         }
 
@@ -562,15 +572,17 @@ angular.module('webappApp')
                 clincialTrials.push(object);
             }
 
-            if(cancerTypeInfo.investigational_therapeutic_implications && cancerTypeInfo.investigational_therapeutic_implications.general_statement) {
+            if(cancerTypeInfo.investigational_therapeutic_implications) {
                 var hasdrugs = false;
-                value = [];
-                object = {};
-                key = "INVESTIGATIONAL THERAPEUTIC IMPLICATIONS";
-                value.push({'description': removeCharsInDescription(cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description)});
-                object[key] = value;
-                clincialTrials.push(object);
-
+                if(cancerTypeInfo.investigational_therapeutic_implications.general_statement) {
+                    value = [];
+                    object = {};
+                    key = "INVESTIGATIONAL THERAPEUTIC IMPLICATIONS";
+                    value.push({'description': removeCharsInDescription(cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description)});
+                    object[key] = value;
+                    clincialTrials.push(object);
+                }
+                
                 for (var j = 0; j < attrsToDisplay.length; j++) {
                     if(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]]) {
                         object = {};
@@ -579,12 +591,12 @@ angular.module('webappApp')
                         }else {
                             object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', $scope.displayProcess(attrsToDisplay[j]) + ': ');
                         }
-                        if(Object.keys(object).length) {
+                        if(Object.keys(object).length > 0) {
                             hasdrugs = true;
                         }
                         for(var _key in object) {
                             var _object = {};
-                            _object[_key] = object[_key]
+                            _object[_key] = object[_key];
                             clincialTrials.push(_object);
                             _object = null;
                         }
@@ -592,7 +604,16 @@ angular.module('webappApp')
                 }
 
                 if(!hasdrugs) {
-                    clincialTrials.push({'no_evidence': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
+                    if(!cancerTypeInfo.investigational_therapeutic_implications.general_statement) {
+                        value = [];
+                        object = {};
+                        key = "INVESTIGATIONAL THERAPEUTIC IMPLICATIONS";
+                        value.push({'description': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
+                        object[key] = value;
+                        clincialTrials.push(object);
+                    }else {
+                        clincialTrials.push({'no_evidence': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
+                    }
                 }
 
                 object = {};
