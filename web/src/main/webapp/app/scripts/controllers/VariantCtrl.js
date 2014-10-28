@@ -213,11 +213,11 @@ angular.module('webappApp')
             }
 
             for (var key in paramsContent) {
-                if($scope.hasOwnProperty(paramsContent[key])) {
+                if($scope.hasOwnProperty(paramsContent[key]) && $scope[paramsContent[key]] && $scope[paramsContent[key]] !== '') {
                     params[key] = $scope[paramsContent[key]];
                 }
             }
-            if($scope.hasOwnProperty('selectedTumorType')) {
+            if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType && $scope.selectedTumorType !== '') {
                 params['tumorType'] = $scope.selectedTumorType.name;
             }                
 
@@ -234,27 +234,39 @@ angular.module('webappApp')
                 $scope.annotation = annotation;
                 $scope.rendering = false;
                 if($scope.annotation.cancer_type) {
+                    var hasRelevant = false;
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
                         if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
                             $scope.relevantCancerType = _cancerType;
+                            hasRelevant = true;
                             break;
                         }
+                    }
+                    if(!hasRelevant) {
+                        $scope.relevantCancerType = null;
                     }
                 }
             });
         };
         
         $scope.generateReport = function() {
-            $scope.generaingReport =true;
-            var params = generateReportData();
+            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
+                $scope.generaingReport =true;
+                var params = generateReportData();
 
-            // $timeout(function() {
-            //     $scope.generaingReport =false;
-            // }, 1000)
-            GenerateDoc.getDoc(params).success(function(data) {
-                 $scope.generaingReport =false;
-            });
+                // $timeout(function() {
+                //     $scope.generaingReport =false;
+                // }, 1000)
+                GenerateDoc.getDoc(params).success(function(data) {
+                     $scope.generaingReport =false;
+                     if(!data) {
+                         alert('Failed, please try again.');
+                     }
+                });
+            }else {
+                alert('No relevant cancer type can be found. Please recheck your gene name, mutation and selected tumor type.');
+            }
         };
         
         $scope.useExample = function() {
@@ -298,7 +310,7 @@ angular.module('webappApp')
                 '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
             params.geneName = $scope.geneName;
             params.mutation = $scope.mutation;
-            params.alterType = $scope.selectedTumorType.name;
+            params.alterType = $scope.selectedTumorType.name || '';
             
             if($scope.relevantCancerType) {
                 var _treatment = constructTreatment();
@@ -382,7 +394,7 @@ angular.module('webappApp')
                 for(var versionKey in versions) {
                     var version = versions[versionKey];
                     version.version = versionKey;
-                    version.cancer_type = $scope.selectedTumorType.name;
+                    version.cancer_type = $scope.selectedTumorType.name || '';
                     value.push(version);
                 }
                 
