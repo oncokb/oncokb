@@ -1,0 +1,187 @@
+$icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/";
+// bower:scss
+@import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+@import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
+@import "../components/bootstrap-chosen/bootstrap-chosen.scss";
+// endbower
+
+#chart, #header, #footer {
+  position: absolute;
+  top: 0;
+}
+
+#header, #footer {
+  z-index: 1;
+  display: block;
+  font-size: 20px;
+  font-weight: 300;
+  text-shadow: 0 1px 0 #fff;
+}
+
+#header.inverted, #footer.inverted {
+  color: #fff;
+  text-shadow: 0 1px 4px #000;
+}
+
+#header {
+  top: 80px;
+  left: 140px;
+  width: 1000px;
+}
+
+#footer {
+  top: 680px;
+  right: 140px;
+  text-align: right;
+}
+
+#top-link-block.affix-top {
+    position: absolute; /* allows it to "slide" up into view */
+    bottom: -82px; /* negative of the offset - height of link element */
+    left: 10px; /* padding from the left side of the window */
+}
+#top-link-block.affix {
+    position: fixed; /* keeps it on the bottom once in view */
+    bottom: 18px; /* height of link element */
+    left: 10px; /* padding from the left side of the window */
+}
+
+#searchRemoveIcon:hover{
+    cursor: pointer;
+}
+
+#variantDisplayResult .panel-body table td:nth-child(1) {
+    background-color: lightgray;
+}
+
+#variantDisplayResult table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+#variantDisplayResult .icon {
+    width: 12px;
+}
+#variantDisplayResult .icon.iconCollapse{
+    display: none;
+}
+#variantDisplayResult .icon.iconExpand{
+    display: inline-block;
+}
+#tumorTypesDropDown {
+  width: 100%;
+}
+
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+pre {
+  font-size: 18px;
+}
+
+line {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+path.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.container {
+  margin-left: 50px;
+  margin-top: 20px;
+}
+
+.node circle {
+  cursor: pointer;
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.string, .regexp {
+  color: #f39;
+}
+
+.keyword {
+  color: #00c;
+}
+
+.comment {
+  color: #777;
+  font-style: oblique;
+}
+
+.number {
+  color: #369;
+}
+
+.class, .special {
+  color: #1181B8;
+}
+
+a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+a.withUnderScore {
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #666;
+}
+
+._hidden {
+  display: none;
+}
+
+.hint {
+  position: absolute;
+  right: 0;
+  width: 1280px;
+  font-size: 12px;
+  color: #999;
+}
+
+.has-addon-feedback .form-control-feedback {
+    position: absolute;
+    top: 1px;
+    right: 70px;
+    width: 34px;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    color: grey;
+    pointer-events: auto;
+}
+
+.has-addon-feedback .form-control-feedback.result {
+    right: 100px;
+    width: 80px;
+    text-align: right;
+}
+.has-addon-feedback .form-control-feedback.upper {
+    z-index: 2;
+}
+.has-addon-feedback .form-control-feedback.lower {
+    z-index: 1;
+}
+
+.form-control::-webkit-input-placeholder { color: lightgray; }
+
+.annotationClinicalTrial {
+  margin-bottom: 10px;
+}
+
+//Change bootstrap-chosen style
+.chosen-container-single .chosen-single {
+  height: 30px;
+  line-height: 30px;
+  width: 100%;
+}

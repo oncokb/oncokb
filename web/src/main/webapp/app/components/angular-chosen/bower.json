@@ -1,0 +1,10 @@
+{
+  "name": "angular-chosen",
+  "version": "0.1.2",
+  "main": "angular-chosen.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ]
+}

@@ -1,0 +1,135 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', '-g', 'scss' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.32
+4 verbose cache add [ 'scss', null ]
+5 verbose cache add name=undefined spec="scss" args=["scss",null]
+6 verbose parsed url { protocol: null,
+6 verbose parsed url   slashes: null,
+6 verbose parsed url   auth: null,
+6 verbose parsed url   host: null,
+6 verbose parsed url   port: null,
+6 verbose parsed url   hostname: null,
+6 verbose parsed url   hash: null,
+6 verbose parsed url   search: null,
+6 verbose parsed url   query: null,
+6 verbose parsed url   pathname: 'scss',
+6 verbose parsed url   path: 'scss',
+6 verbose parsed url   href: 'scss' }
+7 silly lockFile 02d10287-scss scss
+8 verbose lock scss /Users/zhangh2/.npm/02d10287-scss.lock
+9 silly lockFile 02d10287-scss scss
+10 silly lockFile 02d10287-scss scss
+11 verbose addNamed [ 'scss', '' ]
+12 verbose addNamed [ null, '*' ]
+13 silly lockFile 3dec410b-scss scss@
+14 verbose lock scss@ /Users/zhangh2/.npm/3dec410b-scss.lock
+15 silly addNameRange { name: 'scss', range: '*', hasData: false }
+16 verbose request where is /scss
+17 verbose request registry https://registry.npmjs.org/
+18 verbose request id d9fad97f66bfcf2a
+19 verbose url raw /scss
+20 verbose url resolving [ 'https://registry.npmjs.org/', './scss' ]
+21 verbose url resolved https://registry.npmjs.org/scss
+22 verbose request where is https://registry.npmjs.org/scss
+23 info trying registry request attempt 1 at 11:18:15
+24 http GET https://registry.npmjs.org/scss
+25 http 200 https://registry.npmjs.org/scss
+26 silly registry.get cb [ 200,
+26 silly registry.get   { date: 'Wed, 08 Oct 2014 15:18:16 GMT',
+26 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+26 silly registry.get     etag: '"CJT1IHMUJSVX26ZFI83KP1DJW"',
+26 silly registry.get     'content-type': 'application/json',
+26 silly registry.get     'cache-control': 'max-age=60',
+26 silly registry.get     'content-length': '4540',
+26 silly registry.get     'accept-ranges': 'bytes',
+26 silly registry.get     via: '1.1 varnish',
+26 silly registry.get     age: '0',
+26 silly registry.get     'x-served-by': 'cache-iad2124-IAD',
+26 silly registry.get     'x-cache': 'MISS',
+26 silly registry.get     'x-cache-hits': '0',
+26 silly registry.get     'x-timer': 'S1412781496.659974,VS0,VE87',
+26 silly registry.get     vary: 'Accept',
+26 silly registry.get     'keep-alive': 'timeout=10, max=50',
+26 silly registry.get     connection: 'Keep-Alive' } ]
+27 silly addNameRange number 2 { name: 'scss', range: '*', hasData: true }
+28 silly addNameRange versions [ 'scss',
+28 silly addNameRange   [ '0.1.0', '0.1.1', '0.2.0', '0.2.2', '0.2.3', '0.2.4' ] ]
+29 verbose addNamed [ 'scss', '0.2.4' ]
+30 verbose addNamed [ '0.2.4', '0.2.4' ]
+31 silly lockFile b93db9ac-scss-0-2-4 scss@0.2.4
+32 verbose lock scss@0.2.4 /Users/zhangh2/.npm/b93db9ac-scss-0-2-4.lock
+33 silly lockFile 9d05ca01-ry-npmjs-org-scss-scss-0-2-4-tgz https://registry.npmjs.org/scss/-/scss-0.2.4.tgz
+34 verbose lock https://registry.npmjs.org/scss/-/scss-0.2.4.tgz /Users/zhangh2/.npm/9d05ca01-ry-npmjs-org-scss-scss-0-2-4-tgz.lock
+35 verbose addRemoteTarball [ 'https://registry.npmjs.org/scss/-/scss-0.2.4.tgz',
+35 verbose addRemoteTarball   '040d903ed37c5d4fa4ad33ae1fd389ac12a4e065' ]
+36 info retry fetch attempt 1 at 11:18:16
+37 verbose fetch to= /var/folders/vc/pz8htqs54vscynv9snksm64ddkvx23/T/npm-85516-DgZ6S4lZ/registry.npmjs.org/scss/-/scss-0.2.4.tgz
+38 http GET https://registry.npmjs.org/scss/-/scss-0.2.4.tgz
+39 http 200 https://registry.npmjs.org/scss/-/scss-0.2.4.tgz
+40 silly lockFile 9d05ca01-ry-npmjs-org-scss-scss-0-2-4-tgz https://registry.npmjs.org/scss/-/scss-0.2.4.tgz
+41 silly lockFile 9d05ca01-ry-npmjs-org-scss-scss-0-2-4-tgz https://registry.npmjs.org/scss/-/scss-0.2.4.tgz
+42 silly lockFile b93db9ac-scss-0-2-4 scss@0.2.4
+43 silly lockFile b93db9ac-scss-0-2-4 scss@0.2.4
+44 silly lockFile 3dec410b-scss scss@
+45 silly lockFile 3dec410b-scss scss@
+46 silly resolved [ { name: 'scss',
+46 silly resolved     description: 'JavaScript Implementation of SCSS (Sassy CSS)',
+46 silly resolved     version: '0.2.4',
+46 silly resolved     contributors: [ [Object] ],
+46 silly resolved     main: './src/index.js',
+46 silly resolved     engines: { node: '>= 0.2.0' },
+46 silly resolved     dependencies: { ometa: '0.2.2' },
+46 silly resolved     _npmUser: { name: 'bmavity', email: 'brian@brianmavity.com' },
+46 silly resolved     _id: 'scss@0.2.4',
+46 silly resolved     devDependencies: {},
+46 silly resolved     _engineSupported: true,
+46 silly resolved     _npmVersion: '1.0.106',
+46 silly resolved     _nodeVersion: 'v0.6.4',
+46 silly resolved     _defaultsLoaded: true,
+46 silly resolved     dist:
+46 silly resolved      { shasum: '040d903ed37c5d4fa4ad33ae1fd389ac12a4e065',
+46 silly resolved        tarball: 'http://registry.npmjs.org/scss/-/scss-0.2.4.tgz' },
+46 silly resolved     maintainers: [ [Object] ],
+46 silly resolved     directories: {},
+46 silly resolved     _shasum: '040d903ed37c5d4fa4ad33ae1fd389ac12a4e065',
+46 silly resolved     _from: 'scss@',
+46 silly resolved     _resolved: 'https://registry.npmjs.org/scss/-/scss-0.2.4.tgz' } ]
+47 info install scss@0.2.4 into /usr/local/lib
+48 info installOne scss@0.2.4
+49 verbose lib/node_modules/scss unbuild
+50 verbose tar unpack /Users/zhangh2/.npm/scss/0.2.4/package.tgz
+51 silly lockFile e931949b--usr-local-lib-node-modules-scss tar:///usr/local/lib/node_modules/scss
+52 verbose lock tar:///usr/local/lib/node_modules/scss /Users/zhangh2/.npm/e931949b--usr-local-lib-node-modules-scss.lock
+53 silly lockFile fe4f9545-angh2-npm-scss-0-2-4-package-tgz tar:///Users/zhangh2/.npm/scss/0.2.4/package.tgz
+54 verbose lock tar:///Users/zhangh2/.npm/scss/0.2.4/package.tgz /Users/zhangh2/.npm/fe4f9545-angh2-npm-scss-0-2-4-package-tgz.lock
+55 silly gunzTarPerm modes [ '755', '644' ]
+56 error Error: EACCES, mkdir '/usr/local/lib/node_modules/scss'
+56 error  { [Error: EACCES, mkdir '/usr/local/lib/node_modules/scss']
+56 error   errno: 3,
+56 error   code: 'EACCES',
+56 error   path: '/usr/local/lib/node_modules/scss',
+56 error   fstream_type: 'Directory',
+56 error   fstream_path: '/usr/local/lib/node_modules/scss',
+56 error   fstream_class: 'DirWriter',
+56 error   fstream_stack:
+56 error    [ '/usr/local/lib/node_modules/npm/node_modules/fstream/lib/dir-writer.js:36:23',
+56 error      '/usr/local/lib/node_modules/npm/node_modules/mkdirp/index.js:46:53',
+56 error      'Object.oncomplete (fs.js:107:15)' ] }
+57 error Please try running this command again as root/Administrator.
+58 error System Darwin 13.3.0
+59 error command "node" "/usr/local/bin/npm" "install" "-g" "scss"
+60 error cwd /Users/zhangh2/repos/oncokb/web/src/main/webapp/app/styles
+61 error node -v v0.10.32
+62 error npm -v 1.4.28
+63 error path /usr/local/lib/node_modules/scss
+64 error fstream_path /usr/local/lib/node_modules/scss
+65 error fstream_type Directory
+66 error fstream_class DirWriter
+67 error code EACCES
+68 error errno 3
+69 error stack Error: EACCES, mkdir '/usr/local/lib/node_modules/scss'
+70 error fstream_stack /usr/local/lib/node_modules/npm/node_modules/fstream/lib/dir-writer.js:36:23
+70 error fstream_stack /usr/local/lib/node_modules/npm/node_modules/mkdirp/index.js:46:53
+70 error fstream_stack Object.oncomplete (fs.js:107:15)
+71 verbose exit [ 3, true ]
