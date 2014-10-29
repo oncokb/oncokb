@@ -1,4 +1,5 @@
 var treeEvidence = [];
+var processedData;
 
 angular.module('webappApp').controller('TreeCtrl', [
     '$scope',
@@ -30,12 +31,15 @@ angular.module('webappApp').controller('TreeCtrl', [
     };
 
     function drawTree(data) {
-        var processed = AnalysisEvidence.init($scope.treeType, data) ;
+        if(typeof processedData === 'undefined' || processedData) {
+            processedData = AnalysisEvidence.init($scope.treeType, data);
+        }
+        
         $scope.rendering = true;
-        $scope.genes = processed.genes;
-        $scope.descriptions = processed.descriptions;
+        $scope.genes = processedData.genes;
+        $scope.descriptions = processedData.descriptions;
 
-        Tree.init( processed.treeInfo, $scope.descriptions);
+        Tree.init( processedData.treeInfo, $scope.descriptions);
         
         $scope.rendering = false;
     }
