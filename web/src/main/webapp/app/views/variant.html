@@ -15,12 +15,11 @@
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
             <div class="input-group input-group-sm">
                 <span class="input-group-addon"><b>Mutation:</b></span>
-                <input type="text" ng-model="mutation" id="variantMutation" class="form-control" placeholder="(eg. V600D)">
+                <input type="text" ng-model="mutation" id="variantMutation" class="form-control" placeholder="(eg. V600E)">
             </div>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-            <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType.name for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. melanoma)">
-            <option value=""></option>
+            <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType.name for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
             </select>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">

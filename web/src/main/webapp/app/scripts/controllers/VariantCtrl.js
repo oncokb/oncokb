@@ -4,10 +4,12 @@ angular.module('webappApp')
         '$filter',
         '$location',
         '$timeout',
+        '$rootScope',
+        'dialogs',
         'TumorType', 
         'SearchVariant',
         'GenerateDoc',
-        function ($scope, $filter, $location, $timeout, TumorType, SearchVariant, GenerateDoc) {
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, TumorType, SearchVariant, GenerateDoc) {
 
         'use strict';
 
@@ -252,23 +254,41 @@ angular.module('webappApp')
         
         $scope.generateReport = function() {
             if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
-                $scope.generaingReport =true;
-                var params = generateReportData();
-
-                // $timeout(function() {
-                //     $scope.generaingReport =false;
-                // }, 1000)
-                GenerateDoc.getDoc(params).success(function(data) {
-                     $scope.generaingReport =false;
-                     if(!data) {
-                         alert('Failed, please try again.');
-                     }
+                var dlg = dialogs.create('/views/emailDialog.html','emailDialogCtrl', 'Test string');
+                dlg.result.then(function(data){
+                    if(typeof data !== 'undefined' && data && data !== '') {
+                        $scope.generaingReport =true;
+                        dlg = dialogs.wait('Please wait...');
+                        generating();
+                        var params = generateReportData();
+                        params.email = data;
+    //                    $timeout(function() {
+    //                        $scope.generaingReport =false;
+    //                    }, 5000)
+                        GenerateDoc.getDoc(params).success(function(data) {
+                             $scope.generaingReport =false;
+                        });
+                    }
+                },function(){
+                  console.log('Did not do anything.');
                 });
             }else {
                 alert('No relevant cancer type can be found. Please recheck your gene name, mutation and selected tumor type.');
             }
         };
-        
+
+        function generating() {
+            $timeout(function(){
+                if($scope.generaingReport){
+                    $rootScope.$broadcast('dialogs.wait.progress', {msg: 'Please wait...'});
+                    generating();
+                }else{
+                    $rootScope.$broadcast('dialogs.wait.complete');
+                    dialogs.notify('Request finished', 'The request has been added. Your will received an email when your report(s) is ready. Thank you.');
+                }
+            },500);
+        }
+
         $scope.useExample = function() {
             $scope.geneName = 'BRAF';
             $scope.mutation = 'V600D';
@@ -278,6 +298,7 @@ angular.module('webappApp')
         
         function generateReportData() {
             var params = {
+                "email": "",
                 "patientName": "",
                 "specimen": "",
                 "clientNum": "",
@@ -376,7 +397,7 @@ angular.module('webappApp')
             if(cancerTypeInfo.nccn_guidelines) {
                 var _datum = cancerTypeInfo.nccn_guidelines;
                 var versions = {};
-                
+
                 value = [];
                 object = {};
                 key = "NCCN GUIDELINES";
@@ -385,7 +406,7 @@ angular.module('webappApp')
                         versions[_datum[i].version] = {};
                     }
                 }
-                
+
                 for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                     versions[_datum[i].version].description = _datum[i].description;
                     versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category] = _datum[i].description;
@@ -419,7 +440,7 @@ angular.module('webappApp')
                 object[key] = value;
                 treatment.push(object);
             }
-            
+
             return treatment;
         }
 
