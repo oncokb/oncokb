@@ -88,7 +88,7 @@ public class GenerateGoogleDoc {
             System.out.println("Successfully copied file. Start to change file content");
             changeFileContent(file.getId(), file.getTitle(), jsonObj);
             System.out.println("Successfully changed file content. Start to add new record");
-            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString);
+            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString, jsonObj.get("email").toString());
             System.out.println("Successfully added new record");
             responseFlag = true;
         } catch (GoogleJsonResponseException e) {
@@ -112,7 +112,7 @@ public class GenerateGoogleDoc {
         return responseFlag;
     }
     
-    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         String REPORTS_INFO_SHEET_ID = "1fsixOxg-o-_UwZvInU99791ITyYhs4nz8s35_qJmw8o";
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
         
@@ -133,6 +133,8 @@ public class GenerateGoogleDoc {
         row.getCustomElements().setValueLocal("reportname", reportName);
         row.getCustomElements().setValueLocal("user", user);
         row.getCustomElements().setValueLocal("requestdate", date);
+        row.getCustomElements().setValueLocal("email", email);
+        row.getCustomElements().setValueLocal("sendreminder", "No");
 
         // Send the new row to the API for insertion.
         service.insert(listFeedUrl, row);

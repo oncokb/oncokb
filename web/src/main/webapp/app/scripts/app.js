@@ -17,9 +17,10 @@ var oncokbApp = angular
    'ngSanitize',
    'ngTouch',
    'ui.bootstrap',
-   'localytics.directives'
+   'localytics.directives',
+   'dialogs.main'
  ])
- .config(function ($routeProvider) {
+ .config(function ($routeProvider, dialogsProvider) {
    $routeProvider
      .when('/', {
        templateUrl: 'views/tree.html',
@@ -39,4 +40,9 @@ var oncokbApp = angular
      .otherwise({
        redirectTo: '/'
      });
+
+  dialogsProvider.useBackdrop(true);
+  dialogsProvider.useEscClose(true);
+  dialogsProvider.useCopy(false);
+  dialogsProvider.setSize('md');
  });
