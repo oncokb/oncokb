@@ -18,7 +18,8 @@ var oncokbApp = angular
    'ngTouch',
    'ui.bootstrap',
    'localytics.directives',
-   'dialogs.main'
+   'dialogs.main',
+   'dialogs.default-translations'
  ])
  .config(function ($routeProvider, dialogsProvider) {
    $routeProvider
