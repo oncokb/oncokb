@@ -42,17 +42,16 @@ angular.module('webappApp')
         
             $scope.summaryTableTitles = [
                 'Treatment Implications', 
-                'Clinical Trials', 
-                'Additional Information', 
+                'Clinical Trials',
                 'FDA Approved Drugs in Tumor Type', 
-                'FDA Approved Drugs in Other Tumor Type'];
+                'FDA Approved Drugs in Other Tumor Type',
+                'Additional Information'];
                 
             $scope.summaryTableTitlesContent = {
                 'Treatment Implications': [
                     'nccn_guidelines',
-                    'standard_therapeutic_implications',
-                    'investigational_therapeutic_implications'],
-                'Clinical Trials': ['clinical_trial'], 
+                    'standard_therapeutic_implications'],
+                'Clinical Trials': ['clinical_trial', 'investigational_therapeutic_implications'], 
                 'Additional Information': ['prevalence', 'prognostic_implications'], 
                 'FDA Approved Drugs in Tumor Type': [], 
                 'FDA Approved Drugs in Other Tumor Type': []
@@ -388,7 +387,7 @@ angular.module('webappApp')
                 cancerTypeInfo = $scope.relevantCancerType;
 
             if($scope.annotation.annotation_summary) {
-                key = $scope.geneName + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
+                key = $scope.geneName + + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
                 value.push({'description': $scope.annotation.annotation_summary});
                 object[key] = value;
                 treatment.push(object);
