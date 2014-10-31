@@ -594,7 +594,7 @@ angular.module('webappApp')
 
                 value = [];
                 object = {};
-                key = "CLINICAL TRIALS MATCED FOR GENE AND DISEASE";
+                key = "CLINICAL TRIALS MATCHED FOR GENE AND DISEASE";
 
                 for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                     if(/phase 3|phase 4/i.test(_datum[i].phase)) {
