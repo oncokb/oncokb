@@ -13,7 +13,7 @@ angular.module('webappApp')
 
         'use strict';
 
-        var changedAttr = ['nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
+        var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
         
         $scope.init = function () {
 
