@@ -185,3 +185,27 @@ a:hover {
   line-height: 30px;
   width: 100%;
 }
+
+//Make sure the chosen dropdown always 100% no matter how the bower size changes
+#tumorTypesDropDown_chosen {
+  width: 100% !important;
+}
+
+.halfSizeButton {
+  width: 50%;
+}
+.oneThirdSizeButton {
+  width: 33.33333%
+}
+.oneFifthSizeButton {
+  width: 20%
+}
+.twoFifthSizeButton {
+  width: 40%
+}
+.threeFifthSizeButton {
+  width: 60%
+}
+#variantCriteria>div {
+  margin-bottom: 5px;
+}

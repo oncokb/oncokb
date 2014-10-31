@@ -258,13 +258,14 @@ angular.module('webappApp')
                 dlg.result.then(function(data){
                     if(typeof data !== 'undefined' && data && data !== '') {
                         $scope.generaingReport =true;
-                        dlg = dialogs.wait('Please wait...');
+                        dlg = dialogs.wait('Sending request','Please wait...');
                         generating();
                         var params = generateReportData();
                         params.email = data;
-    //                    $timeout(function() {
-    //                        $scope.generaingReport =false;
-    //                    }, 5000)
+                        // $timeout(function() {
+                        //     console.log(params);
+                        //     $scope.generaingReport =false;
+                        // }, 2000)
                         GenerateDoc.getDoc(params).success(function(data) {
                              $scope.generaingReport =false;
                         });
@@ -280,7 +281,6 @@ angular.module('webappApp')
         function generating() {
             $timeout(function(){
                 if($scope.generaingReport){
-                    $rootScope.$broadcast('dialogs.wait.progress', {msg: 'Please wait...'});
                     generating();
                 }else{
                     $rootScope.$broadcast('dialogs.wait.complete');
@@ -388,7 +388,7 @@ angular.module('webappApp')
                 cancerTypeInfo = $scope.relevantCancerType;
 
             if($scope.annotation.annotation_summary) {
-                key = $scope.geneName + " SUMMARY";
+                key = $scope.geneName + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
                 value.push({'description': $scope.annotation.annotation_summary});
                 object[key] = value;
                 treatment.push(object);
@@ -422,7 +422,7 @@ angular.module('webappApp')
                 object[key] = value;
                 treatment.push(object);
             }
-
+            
             if(cancerTypeInfo.standard_therapeutic_implications && cancerTypeInfo.standard_therapeutic_implications.general_statement) {
                 value = [];
                 object = {};
@@ -431,7 +431,7 @@ angular.module('webappApp')
                 object[key] = value;
                 treatment.push(object);
             }
-            
+
             if(cancerTypeInfo.prognostic_implications) {
                 value = [];
                 key = "PROGNOSTIC IMPLICATIONS";
@@ -488,30 +488,36 @@ angular.module('webappApp')
                 }
 
                 if(_subDatum.level_of_evidence_for_patient_indication 
-                    && _subDatum.level_of_evidence_for_patient_indication.level
-                    && Number(_subDatum.level_of_evidence_for_patient_indication.level) < 4) {
+                    && _subDatum.level_of_evidence_for_patient_indication.level) {
                     
-                    if(_subDatum.treatment) {
-                        for (var i = 0; i < _subDatum.treatment.length; i++) {
-                            var _treatment = _subDatum.treatment[i];
-                            if(_treatment.drug) {
-                                for (var j = 0; j < _treatment.drug.length; j++) {
-                                    var _drug = _treatment.drug[j];
-                                        _key+=_drug.name + " + ";
-                                };
+                    if(     (isNaN(_subDatum.level_of_evidence_for_patient_indication.level) 
+                            && /2a|2b/g.test(_subDatum.level_of_evidence_for_patient_indication.level))
+                        ||  (!isNaN(_subDatum.level_of_evidence_for_patient_indication.level)
+                            && (Number(_subDatum.level_of_evidence_for_patient_indication.level) < 4))
+                        ) {
+
+                        if(_subDatum.treatment) {
+                            for (var i = 0; i < _subDatum.treatment.length; i++) {
+                                var _treatment = _subDatum.treatment[i];
+                                if(_treatment.drug) {
+                                    for (var j = 0; j < _treatment.drug.length; j++) {
+                                        var _drug = _treatment.drug[j];
+                                            _key+=_drug.name + " + ";
+                                    };
+                                }
                             }
                         }
-                    }
 
-                    _key = _key.substr(0, _key.length-3);
+                        _key = _key.substr(0, _key.length-3);
 
-                    if(object.hasOwnProperty(_key)) {
-                        console.log('key duplicated: ' + _key);
-                    }else {
-                        object[_key] = {
-                            'level of evidence': _subDatum.level_of_evidence_for_patient_indication.level,
-                            'description': _subDatum.description
-                        };
+                        if(object.hasOwnProperty(_key)) {
+                            console.log('key duplicated: ' + _key);
+                        }else {
+                            object[_key] = {
+                                'level of evidence': _subDatum.level_of_evidence_for_patient_indication.level,
+                                'description': _subDatum.description
+                            };
+                        }
                     }
                 }
             }
@@ -650,12 +656,13 @@ angular.module('webappApp')
                 }
 
                 object = {};
-                key = 'LEVEL OF EVIDENCE';
+                key = 'LEVELS OF EVIDENCE';
                 value =  [
-                    {'level 1': 'This alteration has been used as an eligibility criterion for clinical trials of this agent or class of agents.'},
-                    {'level 2': 'There is clinical evidence for an association between this biomarker and response/resistance to this agent of class of agents in another tumor type only.'},
-                    {'level 3': 'There is limited clinical evidence (early or conflicting data) for an association between this alteration and response/resistance to this agent or class of agents.'},
-                    {'level 4': 'There is preclinical evidence linking unapproved biomarker to response.'},
+                    {'level 1': 'FDA-approved biomarker in approved indication.'},
+                    {'level 2a': 'FDA-approved biomarker in unapproved indication with NCCN-guideline listing.'},
+                    {'level 2b': 'FDA-approved biomarker in unapproved indication.'},
+                    {'level 3': 'Clinical evidence linking unapproved biomarker to response'},
+                    {'level 4': 'Preclinical evidence linking unapproved biomarker to response.'}
                 ];
                 object[key] = value;
                 clincialTrials.push(object);
@@ -704,7 +711,9 @@ angular.module('webappApp')
 
         function removeCharsInDescription(str) {
             if(typeof str !== 'undefined') {
-                return str.replace(/(\r\n|\n|\r)/gm,'');
+                str = str.replace(/(\r\n|\n|\r)/gm,'');
+                str = str.replace(/(\s\s*)/g,' ');
+                return str;
             }else {
                 return '';
             }
