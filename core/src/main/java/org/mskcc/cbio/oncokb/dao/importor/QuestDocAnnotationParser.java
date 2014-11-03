@@ -514,41 +514,37 @@ public final class QuestDocAnnotationParser {
             System.out.println("##      No "+INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P+" for "+alterations.toString());
         }
         
-//        List<int[]> clinicalTrialsLines = extractLines(lines, start+1, end, ONGOING_CLINICAL_TRIALS_P, CANCER_HEADERS_P, 1);
-//        if (!clinicalTrialsLines.isEmpty()) {
-//            System.out.println("##      Clincial trials for "+alterations.toString());
-//            parseClinicalTrials(gene, alterations, tumorType, lines, clinicalTrialsLines.get(0)[0], clinicalTrialsLines.get(0)[1]);
-//        } else {
-//            System.out.println("##      No Clincial trials for "+alterations.toString());
-//        }
+        List<int[]> clinicalTrialsLines = extractLines(lines, start+1, end, ONGOING_CLINICAL_TRIALS_P, CANCER_HEADERS_P, 1);
+        if (!clinicalTrialsLines.isEmpty()) {
+            System.out.println("##      Clincial trials for "+alterations.toString());
+            parseClinicalTrials(gene, alterations, tumorType, lines, clinicalTrialsLines.get(0)[0], clinicalTrialsLines.get(0)[1]);
+        } else {
+            System.out.println("##      No Clincial trials for "+alterations.toString());
+        }
     }
     
     private static void parseClinicalTrials(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end) {
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         Pattern p = Pattern.compile(CLINICAL_TRIALS_P, Pattern.CASE_INSENSITIVE);
+        Set<String> nctIds = new HashSet<String>();
         for (int i=start; i<end; i++) {
             Matcher m = p.matcher(lines.get(i));
             if (m.find()) {
                 String nctId = m.group(1);
-                ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByNctId(nctId);
-                if (ct==null) {
-                    ct = new ClinicalTrial();
-                    ct.setNctId(nctId);
-                    clinicalTrialBo.save(ct);
-                }
-                
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.CLINICAL_TRIAL);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setTumorType(tumorType);
-                evidence.setClinicalTrials(Collections.singleton(ct));
-                evidenceBo.save(evidence);
+                nctIds.add(nctId);
             }
         }
-        
+        try {
+            List<ClinicalTrial> trials = ClinicalTrialsImporter.importTrials(nctIds);
+            for (ClinicalTrial trial : trials) {
+                trial.getAlterations().addAll(alterations);
+                trial.getTumorTypes().add(tumorType);
+                trial.getGenes().add(gene);
+                clinicalTrialBo.saveOrUpdate(trial);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     private static void parseTherapeuticImplcations(Gene gene, Set<Alteration> alterations, TumorType tumorType, List<String> lines, int start, int end,
