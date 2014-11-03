@@ -218,7 +218,7 @@ public class VariantAnnotationXMLController {
                                     .append(" mutations is unknown. ");
                         } else {
                             // if there is no FDA approved drugs for the gene at all
-                            sb.append("There is not FDA approved drugs for ")
+                            sb.append("There is not FDA approved or NCCN recommended treatments specifically for ")
                                     .append(tumorType)
                                     .append(" patients with ")
                                     .append(hugoSymbol)
@@ -560,7 +560,7 @@ public class VariantAnnotationXMLController {
         if (levelOfEvidence!=null) {
             if (levelOfEvidence==LevelOfEvidence.LEVEL_1 &&
                     !relevantTumorTypes.contains(evidence.getTumorType())) {
-                levelOfEvidence = LevelOfEvidence.LEVEL_2;
+                levelOfEvidence = LevelOfEvidence.LEVEL_2B;
             }
             sb.append(indent).append("<level_of_evidence_for_patient_indication>\n");
             sb.append(indent).append("    <level>");
@@ -570,7 +570,8 @@ public class VariantAnnotationXMLController {
             sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()).trim());
             sb.append("</description>\n");
             if (levelOfEvidence==LevelOfEvidence.LEVEL_1 || 
-                    levelOfEvidence==LevelOfEvidence.LEVEL_2) {
+                    levelOfEvidence==LevelOfEvidence.LEVEL_2A || 
+                    levelOfEvidence==LevelOfEvidence.LEVEL_2B) {
                 sb.append(indent).append("<approved_indication>");
                 sb.append("</approved_indication>\n");
             }

@@ -15,6 +15,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 
 /**
  *
@@ -101,5 +103,23 @@ public class FileUtils {
         in.close();
         
         return lines;
+    }
+    
+    public static List<String> readLinesDocStream(InputStream is, boolean trim) throws IOException {
+        XWPFDocument document=new XWPFDocument(is);
+        XWPFWordExtractor extractor = new XWPFWordExtractor(document);
+        List<String> ret = new ArrayList<String>();
+        String [] lines = extractor.getText().split("\n");
+        for(String line : lines){
+            if (trim) {
+                line = line.replaceAll("^[\uFEFF-\uFFFF]+", ""); // trim and remove unicode
+                line = line.replaceAll("\\[[a-z]\\]", ""); // remove comments from google docs
+                line = line.trim();
+            }
+            if (!line.isEmpty()) {
+                ret.add(line);
+            }
+        }
+        return ret;
     }
 }
