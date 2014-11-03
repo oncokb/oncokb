@@ -130,7 +130,7 @@ public class VariantAnnotationXMLController {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         // find all drugs
-        List<Drug> drugs = evidenceBo.findDrugsByAlterations(alterations);
+        //List<Drug> drugs = evidenceBo.findDrugsByAlterations(alterations);
         
         // find tumor types
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
@@ -369,7 +369,7 @@ public class VariantAnnotationXMLController {
 
                 if (tumorTypesForTrials!=null) {
                     ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndDrug(tumorTypesForTrials, drugs, true);
+                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(tumorTypesForTrials, alterations, true);
                     clinicalTrials.removeAll(allTrails); // remove duplication
                     allTrails.addAll(clinicalTrials);
 
