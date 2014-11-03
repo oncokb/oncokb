@@ -822,7 +822,11 @@ public final class QuestDocAnnotationParser {
     private static String joinLines(List<String> lines, int start, int end) {
         StringBuilder sb = new StringBuilder();
         for (int i=start; i<end; i++) {
-            sb.append(lines.get(i)).append("\n");
+            String line = lines.get(i);
+            if (line.startsWith("DO NOT IMPORT")) {
+                break;
+            }
+            sb.append(line).append("\n");
         }
         return sb.toString();
     }
