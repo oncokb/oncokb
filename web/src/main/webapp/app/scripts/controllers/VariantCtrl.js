@@ -236,21 +236,68 @@ angular.module('webappApp')
                 $scope.annotation = annotation;
                 $scope.rendering = false;
                 if($scope.annotation.cancer_type) {
-                    var hasRelevant = false;
+                    var relevantCancerType = [];
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
                         if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
-                            $scope.relevantCancerType = _cancerType;
-                            hasRelevant = true;
-                            break;
+                            relevantCancerType.push(_cancerType);
                         }
                     }
-                    if(!hasRelevant) {
+                    if(relevantCancerType.length > 1) {
+                        var obj1 = relevantCancerType[0];
+                        
+                        for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
+                            obj1 = deepmerge(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
+                        }
+                        
+                        $scope.relevantCancerType = obj1;
+                    }else if(relevantCancerType.length === 1){
+                        $scope.relevantCancerType = relevantCancerType[0];
+                    }else {
                         $scope.relevantCancerType = null;
                     }
                 }
             });
         };
+        
+        //This original function comes fromhttps://github.com/nrf110/deepmerge
+        //Made changed for using in current project
+        //ct1: cancer type of target; ct2: cancer type of source
+        function deepmerge(target, src, ct1, ct2) {
+            var array = Array.isArray(src);
+            var dst = array && [] || {};
+
+            if (array) {
+                target = target || [];
+                dst = dst.concat(target);
+                src.forEach(function(e, i) {
+                    dst.push(e);
+                });
+            } else {
+                if (target && typeof target === 'object') {
+                    Object.keys(target).forEach(function (key) {
+                        dst[key] = target[key];
+                    });
+                }
+                Object.keys(src).forEach(function (key) {
+                    if (typeof src[key] !== 'object' || !src[key]) {
+                        if(!Array.isArray(dst[key])) {
+                            var _tmp = dst[key];
+                            dst[key] = [{'value':_tmp, 'cancer_type': ct1}];
+                        }
+                        dst[key].push({'value':src[key], 'cancer_type': ct2} );
+                    }
+                    else {
+                        if (!target[key]) {
+                            dst[key] = src[key];
+                        } else {
+                            dst[key] = deepmerge(target[key], src[key], ct1, ct2);
+                        }
+                    }
+                });
+            }
+            return dst;
+        }
         
         $scope.generateReport = function() {
 //            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
@@ -262,12 +309,12 @@ angular.module('webappApp')
                         generating();
                         var params = generateReportData();
                         params.email = data;
-                        // $timeout(function() {
-                        //     console.log(params);
-                        //     $scope.generaingReport =false;
-                        // }, 2000)
+//                         $timeout(function() {
+//                             console.log(params);
+//                             $scope.generaingReport =false;
+//                         }, 2000)
                         GenerateDoc.getDoc(params).success(function(data) {
-                             $scope.generaingReport =false;
+                            $scope.generaingReport =false;
                         });
                     }
                 },function(){
@@ -490,11 +537,11 @@ angular.module('webappApp')
                 if(_subDatum.level_of_evidence_for_patient_indication 
                     && _subDatum.level_of_evidence_for_patient_indication.level) {
                     
-                    if(     (isNaN(_subDatum.level_of_evidence_for_patient_indication.level) 
-                            && /2a|2b/g.test(_subDatum.level_of_evidence_for_patient_indication.level))
-                        ||  (!isNaN(_subDatum.level_of_evidence_for_patient_indication.level)
-                            && (Number(_subDatum.level_of_evidence_for_patient_indication.level) < 4))
-                        ) {
+//                    if(     (isNaN(_subDatum.level_of_evidence_for_patient_indication.level) 
+//                            && /2a|2b/g.test(_subDatum.level_of_evidence_for_patient_indication.level))
+//                        ||  (!isNaN(_subDatum.level_of_evidence_for_patient_indication.level)
+//                            && (Number(_subDatum.level_of_evidence_for_patient_indication.level) < 4))
+//                        ) {
 
                         if(_subDatum.treatment) {
                             for (var i = 0; i < _subDatum.treatment.length; i++) {
@@ -513,13 +560,13 @@ angular.module('webappApp')
                         if(object.hasOwnProperty(_key)) {
                             console.log('key duplicated: ' + _key);
                         }else {
-                            object[_key] = {
+                            object[_key] = [{
                                 'level of evidence': _subDatum.level_of_evidence_for_patient_indication.level,
                                 'description': _subDatum.description
-                            };
+                            }];
                         }
                     }
-                }
+//                }
             }
             return object;
         }
@@ -599,14 +646,14 @@ angular.module('webappApp')
                 key = "CLINICAL TRIALS MATCHED FOR GENE AND DISEASE";
 
                 for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                    if(/phase 3|phase 4/i.test(_datum[i].phase)) {
+//                    if(/phase 3|phase 4/i.test(_datum[i].phase)) {
                         var _subDatum = {};
                         _subDatum.trial = _datum[i].trial_id + ", " + _datum[i].phase;
                         _subDatum.title = _datum[i].title;
                         _subDatum.purpose = removeCharsInDescription(_datum[i].purpose);
                         _subDatum.description = removeCharsInDescription(_datum[i].description);
                         value.push(_subDatum);
-                    }
+//                    }
                 }
                 
                 object[key] = value;
@@ -619,8 +666,8 @@ angular.module('webappApp')
                     value = [];
                     object = {};
                     key = "INVESTIGATIONAL THERAPEUTIC IMPLICATIONS";
-                    value.push({'description': removeCharsInDescription(cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description)});
-                    object[key] = value;
+                    object[key] = addRecord({'array': ['cancer_type', 'value'], 'object':'description'}, cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description, value);
+                
                     clincialTrials.push(object);
                 }
                 
@@ -671,7 +718,24 @@ angular.module('webappApp')
             }
             return clincialTrials;
         }
-
+        
+        function addRecord(keys, value, array) {
+            if(Array.isArray(value)) {
+                value.forEach(function(e, i) {
+                    var _obj = {};
+                    keys.array.forEach(function(e1, i1) {
+                        _obj[e1] = removeCharsInDescription(e[e1]);
+                    });
+                    array.push(_obj);
+                });
+            }else {
+                var _obj = {};
+                _obj[keys.object] = removeCharsInDescription(value);
+                array.push(_obj);
+            }
+            return array;
+        }
+        
         function constructAdditionalInfo() {
             var additionalInfo = [],
                 key = '',
@@ -692,8 +756,7 @@ angular.module('webappApp')
                 value = [];
                 key = 'MUTATION PREVALENCE';
                 object = {};
-                value.push({'description': removeCharsInDescription(cancerTypeInfo.prevalence.description)});
-                object[key] = value;
+                object[key] = addRecord({'array': ['cancer_type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description, value);
                 additionalInfo.push(object);
             }
 
