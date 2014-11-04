@@ -46,13 +46,16 @@ public class ClinicalTrialsImporter {
     
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         
+        Set<String> nctIds = getListOfCancerTrialsFromClinicalTrialsGov();//getListOfCancerTrialsFromCancerGov();
+        importTrials(nctIds);
+    }
+    
+    static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         allTrials = new HashMap<String, ClinicalTrial>();
         for (ClinicalTrial ct : clinicalTrialBo.findAll()) {
             allTrials.put(ct.getNctId(), ct);
         }
-        
-        Set<String> nctIds = getListOfCancerTrialsFromClinicalTrialsGov();//getListOfCancerTrialsFromCancerGov();
         
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = tumorTypeBo.findAll();
@@ -60,6 +63,7 @@ public class ClinicalTrialsImporter {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         
+        List<ClinicalTrial> trials = new ArrayList<ClinicalTrial>();
         int n = nctIds.size();
         int i = 1;
         System.out.println("Found "+n+" trials");
@@ -74,10 +78,12 @@ public class ClinicalTrialsImporter {
             if (trial!=null) {
                 matchTumorTypes(trial, tumorTypes);
                 clinicalTrialBo.saveOrUpdate(trial);
+                trials.add(trial);
             }
             System.out.println();
         }
         
+        return trials;
     }
     
     private static void matchTumorTypes(ClinicalTrial trial, List<TumorType> tumorTypes) {
@@ -112,7 +118,7 @@ public class ClinicalTrialsImporter {
             System.out.print(" updated");
         } else {
             // if no update
-            return null;
+            return trial;
         }
         
         String briefTitle = getText(docEle, "brief_title").trim();

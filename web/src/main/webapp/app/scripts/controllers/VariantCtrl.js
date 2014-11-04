@@ -290,7 +290,7 @@ angular.module('webappApp')
 
         $scope.useExample = function() {
             $scope.geneName = 'BRAF';
-            $scope.mutation = 'V600D';
+            $scope.mutation = 'V600E';
             $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', 'melanoma')];
             $scope.search();
         };
@@ -471,7 +471,7 @@ angular.module('webappApp')
                 if(typeof tumorType !== "undefined" && tumorType !== "") {
                     _key += " in " + tumorType;
                 }
-                object[_key] = {'description': _subDatum.description};
+                object[_key] = [{'description': _subDatum.description}];
             }
 
             return object;

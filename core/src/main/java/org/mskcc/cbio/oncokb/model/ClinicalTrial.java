@@ -157,7 +157,8 @@ public class ClinicalTrial implements java.io.Serializable {
     }
     
     public  boolean isOpen() {
-        return !recruitingStatus.equalsIgnoreCase("Terminated") &&
+        return recruitingStatus!=null &&
+                !recruitingStatus.equalsIgnoreCase("Terminated") &&
                 !recruitingStatus.equalsIgnoreCase("Suspended") &&
                 !recruitingStatus.equalsIgnoreCase("Completed") &&
                 !recruitingStatus.equalsIgnoreCase("Closed") &&
