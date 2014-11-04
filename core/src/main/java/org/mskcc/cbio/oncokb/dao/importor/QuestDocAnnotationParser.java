@@ -82,7 +82,7 @@ public final class QuestDocAnnotationParser {
     private static final String ONGOING_CLINICAL_TRIALS_P = "Ongoing clinical trials:?";
     private static final String CLINICAL_TRIALS_P = "(NCT[0-9]+)";
     
-    private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "Interacting gene alterations$";
+    private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "Interacting gene alterations";
     
     private static final String[] CANCER_HEADERS_P = new String[] {
         PREVALENCE_P,
@@ -93,7 +93,8 @@ public final class QuestDocAnnotationParser {
         INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY_P,
         INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P,
         ONGOING_CLINICAL_TRIALS_P,
-        INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P
+        INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P,
+        "DO NOT IMPORT.*"
     };
     
     private QuestDocAnnotationParser() {
@@ -106,14 +107,13 @@ public final class QuestDocAnnotationParser {
     public static void main(String[] args) throws Exception {
         VariantConsequenceImporter.main(args);
         TumorTypeImporter.main(args);
-//        PiHelperDrugImporter.main(args);
+        PiHelperDrugImporter.main(args);
         List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "docx");
         for (String file : files) {
             parse(new FileInputStream(file));
         }
-//        ClinicalTrialsImporter.main(args);
         
-//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/EGFR.txt"));
+//        parse(new FileInputStream(QUEST_CURATION_FOLDER+"/GNA11.docx"));
     }
     
     private static void parse(InputStream is) throws IOException {
@@ -784,7 +784,7 @@ public final class QuestDocAnnotationParser {
         while (s<end && e<end) {
             // find start line
             s = e;
-            while (s<end && !lines.get(s).matches(startLinePatten)) {
+            while (s<end && !lines.get(s).toUpperCase().matches(startLinePatten.toUpperCase())) {
                 s++;
             }
 
@@ -808,7 +808,7 @@ public final class QuestDocAnnotationParser {
     
     private static boolean matchAnyPattern(String s, String[] patterns) {
         for (String p : patterns) {
-            if (s.matches(p)) {
+            if (s.toUpperCase().matches(p.toUpperCase())) {
                 return true;
             }
         }
@@ -828,6 +828,7 @@ public final class QuestDocAnnotationParser {
     }
     
     private static void setDocuments(String str, Evidence evidence) {
+        if (str==null) return;
         Set<Article> docs = new HashSet<Article>();
         Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
