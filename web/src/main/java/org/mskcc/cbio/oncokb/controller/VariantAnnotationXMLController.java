@@ -738,7 +738,7 @@ public class VariantAnnotationXMLController {
             map.put(level, new ArrayList<Evidence>());
         }
         for (Evidence ev : evidences) {
-            if (ev==null || ev.getTreatments().isEmpty()) continue;
+            if (ev.getLevelOfEvidence()==null || ev.getTreatments().isEmpty()) continue;
             map.get(ev.getLevelOfEvidence()).add(ev);
         }
         return map;
