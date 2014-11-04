@@ -252,7 +252,7 @@ angular.module('webappApp')
         };
         
         $scope.generateReport = function() {
-            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
+//            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
                 var dlg = dialogs.create('/views/emailDialog.html','emailDialogCtrl', 'Test string');
                 dlg.result.then(function(data){
                     if(typeof data !== 'undefined' && data && data !== '') {
@@ -272,9 +272,9 @@ angular.module('webappApp')
                 },function(){
                   console.log('Did not do anything.');
                 });
-            }else {
-                alert('No relevant cancer type can be found. Please recheck your gene name, mutation and selected tumor type.');
-            }
+//            }else {
+//                alert('No relevant cancer type can be found. Please recheck your gene name, mutation and selected tumor type.');
+//            }
         };
 
         function generating() {
@@ -330,19 +330,19 @@ angular.module('webappApp')
                 '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
             params.geneName = $scope.geneName;
             params.mutation = $scope.mutation;
-            params.alterType = $scope.selectedTumorType.name || '';
+            params.alterType = ($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:'';
             
-            if($scope.relevantCancerType) {
-                var _treatment = constructTreatment();
-                params.treatment = _treatment.length > 0 ? _treatment : "";
-                var _fdaInfo = constructfdaInfo();
-                params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
-                params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
-                var _clinicalTrail = constructClinicalTrial();
-                params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
-                var _additionalInfo = constructAdditionalInfo();
-                params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
-            }
+//            if($scope.relevantCancerType) {
+            var _treatment = constructTreatment();
+            params.treatment = _treatment.length > 0 ? _treatment : "";
+            var _fdaInfo = constructfdaInfo();
+            params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
+            params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
+            var _clinicalTrail = constructClinicalTrial();
+            params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
+            var _additionalInfo = constructAdditionalInfo();
+            params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
+//            }
             // console.log(params);
             return params;
         }
@@ -384,7 +384,7 @@ angular.module('webappApp')
                 key = '',
                 value = [],
                 object = {},
-                cancerTypeInfo = $scope.relevantCancerType;
+                cancerTypeInfo = $scope.relevantCancerType || {};
 
             if($scope.annotation.annotation_summary) {
                 key = $scope.geneName + + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
@@ -414,7 +414,7 @@ angular.module('webappApp')
                 for(var versionKey in versions) {
                     var version = versions[versionKey];
                     version.version = versionKey;
-                    version.cancer_type = $scope.selectedTumorType.name || '';
+                    version.cancer_type = ($scope.selectedTumorType && $scope.selectedTumorType.name)? $scope.selectedTumorType.name : '';
                     value.push(version);
                 }
                 
@@ -527,7 +527,7 @@ angular.module('webappApp')
             var fdaApproved = [],
                 fdaNonApproved = [],
                 object = {},
-                cancerTypeInfo = $scope.relevantCancerType,
+                cancerTypeInfo = $scope.relevantCancerType || {},
                 attrsToDisplay = ['sensitive_to', 'resistant_to'];
 
             if(cancerTypeInfo.standard_therapeutic_implications) {
@@ -552,30 +552,32 @@ angular.module('webappApp')
                 }
             }
 
-            object = {};
-
-            for (var i = 0; i < $scope.annotation.cancer_type.length; i++) {
-                if($scope.annotation.cancer_type[i].type !== $scope.relevantCancerType.type) {
-                    if($scope.annotation.cancer_type[i].standard_therapeutic_implications) {
-                        for (var j = 0; j < attrsToDisplay.length; j++) {
-                            if($scope.annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]]) {
-                                var _datum = $scope.annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]];
-                                if(attrsToDisplay[j] === 'sensitive_to') {
-                                    object = findApprovedDrug(_datum, object, $scope.annotation.cancer_type[i].type);
-                                }else {
-                                    object = findApprovedDrug(_datum, object, $scope.annotation.cancer_type[i].type, $scope.displayProcess(attrsToDisplay[j]) + ': ');
+            if($scope.annotation.cancer_type) {
+                object = {};
+            
+                for (var i = 0; i < $scope.annotation.cancer_type.length; i++) {
+                    if($scope.annotation.cancer_type[i].type !== $scope.relevantCancerType.type) {
+                        if($scope.annotation.cancer_type[i].standard_therapeutic_implications) {
+                            for (var j = 0; j < attrsToDisplay.length; j++) {
+                                if($scope.annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]]) {
+                                    var _datum = $scope.annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]];
+                                    if(attrsToDisplay[j] === 'sensitive_to') {
+                                        object = findApprovedDrug(_datum, object, $scope.annotation.cancer_type[i].type);
+                                    }else {
+                                        object = findApprovedDrug(_datum, object, $scope.annotation.cancer_type[i].type, $scope.displayProcess(attrsToDisplay[j]) + ': ');
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            for(var _key in object) {
-                var _object = {};
-                _object[_key] = object[_key]
-                fdaNonApproved.push(_object);
-                _object = null;
+                for(var _key in object) {
+                    var _object = {};
+                    _object[_key] = object[_key]
+                    fdaNonApproved.push(_object);
+                    _object = null;
+                }
             }
             return {'approved': fdaApproved, 'nonApproved': fdaNonApproved};
         }
@@ -585,7 +587,7 @@ angular.module('webappApp')
                 key = '',
                 value = [],
                 object = {},
-                cancerTypeInfo = $scope.relevantCancerType,
+                cancerTypeInfo = $scope.relevantCancerType || {},
                 attrsToDisplay = ['sensitive_to', 'resistant_to'];
 
             if(cancerTypeInfo.clinical_trial) {
@@ -674,7 +676,7 @@ angular.module('webappApp')
                 key = '',
                 value = [],
                 object = {},
-                cancerTypeInfo = $scope.relevantCancerType;
+                cancerTypeInfo = $scope.relevantCancerType || {};
 
             if($scope.annotation.gene_annotation) {
                 value = [];
@@ -699,8 +701,8 @@ angular.module('webappApp')
                 key = 'MUTATION EFFECT';
                 object = {};
                 value.push({
-                    'effect': $scope.annotation.variant_effect.effect,
-                    'description': removeCharsInDescription($scope.annotation.variant_effect.description)
+                    'effect': $scope.annotation.variant_effect.effect || '',
+                    'description': $scope.annotation.variant_effect.description? removeCharsInDescription($scope.annotation.variant_effect.description) : ''
                 });
                 object[key] = value;
                 additionalInfo.push(object);
