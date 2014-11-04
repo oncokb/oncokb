@@ -472,7 +472,7 @@ angular.module('webappApp')
                 if(typeof tumorType !== "undefined" && tumorType !== "") {
                     _key += " in " + tumorType;
                 }
-                object[_key] = {'description': _subDatum.description};
+                object[_key] = [{'description': _subDatum.description}];
             }
 
             return object;
