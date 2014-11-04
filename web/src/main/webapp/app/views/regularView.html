@@ -6,7 +6,7 @@
         </div>
     </div>
 </div>
-<div id="variantDisplayResult"  ng-show="annotation.cancer_type">
+<div class="variantDisplayResult"  ng-show="annotation.cancer_type">
     <h2>Cancer Type</h2>
 
     <accordion close-others="oneAtATime">
@@ -14,7 +14,7 @@
         <accordion-heading>
             {{cancerType.type}}&nbsp;&nbsp;&nbsp;<span ng-if="cancerType.relevant_to_patient_disease && cancerType.relevant_to_patient_disease.toLowerCase() === 'yes'" style='color: green; font-size:12px; font-weight:bold'><i>RELEVANT</i></span>
         </accordion-heading>
-        <table class='table table-bordered'>
+        <table class='table table-bordered colorFirstCol'>
             <tbody>
                 <tr ng-repeat="summaryTitle in summaryTableTitles">
                     <td><h5>{{summaryTitle}}</h5></td>

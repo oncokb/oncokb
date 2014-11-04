@@ -50,21 +50,28 @@ $icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/"
     cursor: pointer;
 }
 
-#variantDisplayResult .panel-body table td:nth-child(1) {
+table.colorFirstCol td:nth-child(1) {
+    background-color: lightgray;
+}
+table.colorHeader thead tr{
     background-color: lightgray;
 }
 
-#variantDisplayResult table td:nth-child(1) {
+.variantDisplayResult {
+  margin: 10px 0;
+}
+
+.variantDisplayResult table td:nth-child(1) {
     white-space: nowrap;
 }
 
-#variantDisplayResult .icon {
+.variantDisplayResult .icon {
     width: 12px;
 }
-#variantDisplayResult .icon.iconCollapse{
+.variantDisplayResult .icon.iconCollapse{
     display: none;
 }
-#variantDisplayResult .icon.iconExpand{
+.variantDisplayResult .icon.iconExpand{
     display: inline-block;
 }
 #tumorTypesDropDown {
@@ -186,6 +193,14 @@ a:hover {
   width: 100%;
 }
 
+//Change bootstrap default color
+
+.table-bordered, .table-bordered > thead > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > tfoot > tr > td{
+  border: 1px solid black;
+}
+
+
+
 //Make sure the chosen dropdown always 100% no matter how the bower size changes
 #tumorTypesDropDown_chosen {
   width: 100% !important;
@@ -205,6 +220,30 @@ a:hover {
 }
 .threeFifthSizeButton {
   width: 60%
+}
+.alignCenter {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.logo {
+  width: 100%;
+  height:50px;
+  position:relative;
+  display:inline-block;
+  overflow:hidden;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.logo > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-height: 50px;
+}
+.greyB {
+  background-color: lightgray;
+  font-weight: bold;
 }
 #variantCriteria>div {
   margin-bottom: 5px;

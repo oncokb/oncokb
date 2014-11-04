@@ -45,7 +45,16 @@ angular.module('webappApp')
                 'Clinical Trials',
                 'FDA Approved Drugs in Tumor Type', 
                 'FDA Approved Drugs in Other Tumor Type',
-                'Additional Information'];
+                'Additional Information'
+            ];
+
+            $scope.reportMatchedParams = [
+                'treatment', 
+                'clinicalTrials',
+                'fdaApprovedInTumor', 
+                'fdaApprovedInOtherTumor',
+                'additionalInfo'
+            ];
                 
             $scope.summaryTableTitlesContent = {
                 'Treatment Implications': [
@@ -183,7 +192,7 @@ angular.module('webappApp')
                     if(result) {
                         var uniqueResult = result.filter(function(elem, pos) {
                             return result.indexOf(elem) === pos;
-                        }); 
+                        });
                         for(var i = 0, resultL = uniqueResult.length; i < resultL; i++) {
                             var _datum = uniqueResult[i];
                             
@@ -235,68 +244,23 @@ angular.module('webappApp')
                 $scope.annotation = annotation;
                 $scope.rendering = false;
                 if($scope.annotation.cancer_type) {
-                    var relevantCancerType = [];
+                    var hasRelevant = false;
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
                         if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
-                            relevantCancerType.push(_cancerType);
+                            $scope.relevantCancerType = _cancerType;
+                            hasRelevant = true;
+                            break;
                         }
                     }
-                    if(relevantCancerType.length > 1) {
-                        var obj1 = relevantCancerType[0];
-                        
-                        for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
-                            obj1 = deepmerge(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
-                        }
-                        
-                        $scope.relevantCancerType = obj1;
-                    }else if(relevantCancerType.length === 1){
-                        $scope.relevantCancerType = relevantCancerType[0];
-                    }else {
+                    if(!hasRelevant) {
                         $scope.relevantCancerType = null;
                     }
                 }
+
+                $scope.reportParams = generateReportData();
             });
         };
-        
-        //This original function comes fromhttps://github.com/nrf110/deepmerge
-        //Made changed for using in current project
-        //ct1: cancer type of target; ct2: cancer type of source
-        function deepmerge(target, src, ct1, ct2) {
-            var array = Array.isArray(src);
-            var dst = array && [] || {};
-
-            if (array) {
-                target = target || [];
-                dst = dst.concat(target);
-                src.forEach(function(e, i) {
-                    dst.push(e);
-                });
-            } else {
-                if (target && typeof target === 'object') {
-                    Object.keys(target).forEach(function (key) {
-                        dst[key] = target[key];
-                    });
-                }
-                Object.keys(src).forEach(function (key) {
-                    if (typeof src[key] !== 'object' || !src[key]) {
-                        if(!Array.isArray(dst[key])) {
-                            var _tmp = dst[key];
-                            dst[key] = [{'value':_tmp, 'cancer_type': ct1}];
-                        }
-                        dst[key].push({'value':src[key], 'cancer_type': ct2} );
-                    }
-                    else {
-                        if (!target[key]) {
-                            dst[key] = src[key];
-                        } else {
-                            dst[key] = deepmerge(target[key], src[key], ct1, ct2);
-                        }
-                    }
-                });
-            }
-            return dst;
-        }
         
         $scope.generateReport = function() {
 //            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
@@ -306,14 +270,14 @@ angular.module('webappApp')
                         $scope.generaingReport =true;
                         dlg = dialogs.wait('Sending request','Please wait...');
                         generating();
-                        var params = generateReportData();
+                        var params = $scope.reportParams;
                         params.email = data;
-//                         $timeout(function() {
-//                             console.log(params);
-//                             $scope.generaingReport =false;
-//                         }, 2000)
+                        // $timeout(function() {
+                        //     console.log(params);
+                        //     $scope.generaingReport =false;
+                        // }, 2000)
                         GenerateDoc.getDoc(params).success(function(data) {
-                            $scope.generaingReport =false;
+                             $scope.generaingReport =false;
                         });
                     }
                 },function(){
@@ -380,15 +344,15 @@ angular.module('webappApp')
             params.alterType = ($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:'';
             
 //            if($scope.relevantCancerType) {
-            var _treatment = constructTreatment();
-            params.treatment = _treatment.length > 0 ? _treatment : "";
-            var _fdaInfo = constructfdaInfo();
-            params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
-            params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
-            var _clinicalTrail = constructClinicalTrial();
-            params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
-            var _additionalInfo = constructAdditionalInfo();
-            params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
+                var _treatment = constructTreatment();
+                params.treatment = _treatment.length > 0 ? _treatment : "";
+                var _fdaInfo = constructfdaInfo();
+                params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
+                params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
+                var _clinicalTrail = constructClinicalTrial();
+                params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
+                var _additionalInfo = constructAdditionalInfo();
+                params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
 //            }
             // console.log(params);
             return params;
@@ -434,7 +398,7 @@ angular.module('webappApp')
                 cancerTypeInfo = $scope.relevantCancerType || {};
 
             if($scope.annotation.annotation_summary) {
-                key = $scope.geneName + + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
+                key = $scope.geneName + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
                 value.push({'description': $scope.annotation.annotation_summary});
                 object[key] = value;
                 treatment.push(object);
@@ -566,7 +530,7 @@ angular.module('webappApp')
                         }
                     }
 //                }
-            }
+                }
             return object;
         }
 
@@ -601,7 +565,7 @@ angular.module('webappApp')
 
             if($scope.annotation.cancer_type && $scope.relevantCancerType && $scope.relevantCancerType.type) {
                 object = {};
-            
+
                 for (var i = 0; i < $scope.annotation.cancer_type.length; i++) {
                     if($scope.annotation.cancer_type[i].type !== $scope.relevantCancerType.type) {
                         if($scope.annotation.cancer_type[i].standard_therapeutic_implications) {
@@ -717,7 +681,7 @@ angular.module('webappApp')
             }
             return clincialTrials;
         }
-        
+
         function addRecord(keys, value, array) {
             if(Array.isArray(value)) {
                 value.forEach(function(e, i) {
