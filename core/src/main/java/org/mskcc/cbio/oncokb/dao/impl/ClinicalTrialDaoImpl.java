@@ -4,6 +4,7 @@ package org.mskcc.cbio.oncokb.dao.impl;
 
 import java.util.List;
 import org.mskcc.cbio.oncokb.dao.ClinicalTrialDao;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.ClinicalTrial;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -28,5 +29,10 @@ public class ClinicalTrialDaoImpl
     @Override
     public List<ClinicalTrial> findClinicalTrialByTumorType(TumorType tumorType) {
         return findByNamedQuery("findClinicalTrialByTumorType", tumorType.getTumorTypeId());
+    }
+
+    @Override
+    public List<ClinicalTrial> findClinicalTrialByTumorTypeAndAlteration(TumorType tumorType, Alteration alteration) {
+        return findByNamedQuery("findClinicalTrialByTumorTypeAndAlteration", tumorType.getTumorTypeId(), alteration.getAlterationId());
     }
 }

@@ -291,7 +291,7 @@ angular.module('webappApp')
 
         $scope.useExample = function() {
             $scope.geneName = 'BRAF';
-            $scope.mutation = 'V600D';
+            $scope.mutation = 'V600E';
             $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', 'melanoma')];
             $scope.search();
         };
