@@ -553,7 +553,7 @@ angular.module('webappApp')
                 }
             }
 
-            if($scope.annotation.cancer_type) {
+            if($scope.annotation.cancer_type && $scope.relevantCancerType && $scope.relevantCancerType.type) {
                 object = {};
             
                 for (var i = 0; i < $scope.annotation.cancer_type.length; i++) {
