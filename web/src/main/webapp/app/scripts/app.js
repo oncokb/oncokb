@@ -19,7 +19,8 @@ var oncokbApp = angular
    'ui.bootstrap',
    'localytics.directives',
    'dialogs.main',
-   'dialogs.default-translations'
+   'dialogs.default-translations',
+   'RecursionHelper'
  ])
  .config(function ($routeProvider, dialogsProvider) {
    $routeProvider

@@ -16,15 +16,15 @@ angular.module('webappApp')
       	summaryTableTitles: '=',
       	summaryTableTitlesContent: '=',
       	specialAttr: '=',
-		displayProcess: '=',
-		findRegex: '=',
-		setCollapsed: '=',
-		getCollapseIcon: '=',
-		isCollapsed: '=',
-		generateTrial: '=',
-		fdaApproved: '=',
-		generateNccn: '=',
-		displayParts: '='
+    		displayProcess: '=',
+    		findRegex: '=',
+    		setCollapsed: '=',
+    		getCollapseIcon: '=',
+    		isCollapsed: '=',
+    		generateTrial: '=',
+    		fdaApproved: '=',
+    		generateNccn: '=',
+    		displayParts: '='
       }
     };
   });

@@ -45,7 +45,16 @@ angular.module('webappApp')
                 'Clinical Trials',
                 'FDA Approved Drugs in Tumor Type', 
                 'FDA Approved Drugs in Other Tumor Type',
-                'Additional Information'];
+                'Additional Information'
+            ];
+
+            $scope.reportMatchedParams = [
+                'treatment', 
+                'clinicalTrials',
+                'fdaApprovedInTumor', 
+                'fdaApprovedInOtherTumor',
+                'additionalInfo'
+            ];
                 
             $scope.summaryTableTitlesContent = {
                 'Treatment Implications': [
@@ -145,7 +154,7 @@ angular.module('webappApp')
                 return false;
             }
         };
-    
+
         $scope.displayProcess = function(str) {
             var specialUpperCasesWords = ['NCCN'];
             var specialLowerCasesWords = ['of', 'for'];
@@ -183,7 +192,7 @@ angular.module('webappApp')
                     if(result) {
                         var uniqueResult = result.filter(function(elem, pos) {
                             return result.indexOf(elem) === pos;
-                        }); 
+                        });
                         for(var i = 0, resultL = uniqueResult.length; i < resultL; i++) {
                             var _datum = uniqueResult[i];
                             
@@ -244,11 +253,10 @@ angular.module('webappApp')
                     }
                     if(relevantCancerType.length > 1) {
                         var obj1 = relevantCancerType[0];
-                        
+
                         for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
                             obj1 = deepmerge(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
                         }
-                        
                         $scope.relevantCancerType = obj1;
                     }else if(relevantCancerType.length === 1){
                         $scope.relevantCancerType = relevantCancerType[0];
@@ -256,9 +264,110 @@ angular.module('webappApp')
                         $scope.relevantCancerType = null;
                     }
                 }
+
+                $scope.reportParams = generateReportData();
+                $scope.reportViewData = reportViewData($scope.reportParams);
             });
         };
+
+        function upperFirstLetter(str){
+            str = str.replace('_', ' ');
+            return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
+        }
         
+        function reportViewData(params) {
+            params.overallInterpretation = lineBreakToHtml(params.overallInterpretation);
+            params = constructData(params);
+            return params;
+        }
+
+        function isObject(obj) {
+            return angular.isObject(obj) && !angular.isArray(obj);
+        }
+        
+        function isArray(obj) {
+            return angular.isArray(obj);
+        }
+        
+        function isString(obj) {
+            return angular.isString(obj);
+        }
+        
+        function bottomObject(obj) {
+           var flag = true;
+           if(obj && typeof obj === 'object') {
+             for(var key in obj) {
+               if(typeof obj[key] !== 'string') {
+                 flag = false;
+                 break;
+               }
+             }
+           }else {
+             flag = false;
+           }
+           return flag;
+        }
+        function objToArray(obj) {
+            var delayAttrs = ['description'];
+            var prioAttrs = ['trial','cancer_type','version'];
+
+            if (!(obj instanceof Object)) {
+              return obj;
+            }
+
+            
+            var keys = Object.keys(obj).filter(function(item) {
+                return item !== '$$hashKey';
+            }).sort(function(a,b) {
+                        if( delayAttrs.indexOf(a) !== -1){
+                            return 1;
+                        }else if (delayAttrs.indexOf(b) !== -1) {
+                            return -1;
+                        }else if (prioAttrs.indexOf(a) !== -1) {
+                            return -1;
+                        }else if(prioAttrs.indexOf(b) !== -1) {
+                            return 1;
+                        }else {
+                            if(a < b) {
+                                return -1;
+                            }else {
+                                return 1;
+                            }
+                        }
+                    });
+            
+                var returnArray = keys.map(function (key) {
+                        var _obj = {};
+                        
+                        _obj.key = upperFirstLetter(key);
+                        _obj.value = $scope.findRegex(obj[key]);
+                        return _obj;
+                    });
+                return returnArray;
+                
+        }
+
+        function constructData(data) {
+            for(var key in data) {
+                var datum = data[key];
+                if(isArray(datum)) {
+                    datum = constructData(datum);
+                }else if(isObject(datum) && !bottomObject(datum)) {
+                    datum = constructData(datum);
+                }else if(isObject(datum) && bottomObject(datum)) {
+                    datum = objToArray(datum);
+                }else {
+                    datum = $scope.findRegex(datum);
+                }
+                data[key] = datum;
+            }
+            
+            return data;
+        }
+
+        function googleDocData(params) {
+            return params;
+        }
         //This original function comes fromhttps://github.com/nrf110/deepmerge
         //Made changed for using in current project
         //ct1: cancer type of target; ct2: cancer type of source
@@ -306,7 +415,7 @@ angular.module('webappApp')
                         $scope.generaingReport =true;
                         dlg = dialogs.wait('Sending request','Please wait...');
                         generating();
-                        var params = generateReportData();
+                        var params = googleDocData($scope.reportParams);
                         params.email = data;
 //                         $timeout(function() {
 //                             console.log(params);
@@ -377,18 +486,18 @@ angular.module('webappApp')
                 '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
             params.geneName = $scope.geneName;
             params.mutation = $scope.mutation;
-            params.alterType = ($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:'';
-            
+            params.diagnosis = ($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:'';
+            params.tumorTissueType = params.diagnosis;
 //            if($scope.relevantCancerType) {
-            var _treatment = constructTreatment();
-            params.treatment = _treatment.length > 0 ? _treatment : "";
-            var _fdaInfo = constructfdaInfo();
-            params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
-            params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
-            var _clinicalTrail = constructClinicalTrial();
-            params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
-            var _additionalInfo = constructAdditionalInfo();
-            params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
+                var _treatment = constructTreatment();
+                params.treatment = _treatment.length > 0 ? _treatment : "";
+                var _fdaInfo = constructfdaInfo();
+                params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
+                params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
+                var _clinicalTrail = constructClinicalTrial();
+                params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
+                var _additionalInfo = constructAdditionalInfo();
+                params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";;
 //            }
             // console.log(params);
             return params;
@@ -434,7 +543,7 @@ angular.module('webappApp')
                 cancerTypeInfo = $scope.relevantCancerType || {};
 
             if($scope.annotation.annotation_summary) {
-                key = $scope.geneName + + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
+                key = $scope.geneName + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
                 value.push({'description': $scope.annotation.annotation_summary});
                 object[key] = value;
                 treatment.push(object);
@@ -566,7 +675,7 @@ angular.module('webappApp')
                         }
                     }
 //                }
-            }
+                }
             return object;
         }
 
@@ -601,7 +710,7 @@ angular.module('webappApp')
 
             if($scope.annotation.cancer_type && $scope.relevantCancerType && $scope.relevantCancerType.type) {
                 object = {};
-            
+
                 for (var i = 0; i < $scope.annotation.cancer_type.length; i++) {
                     if($scope.annotation.cancer_type[i].type !== $scope.relevantCancerType.type) {
                         if($scope.annotation.cancer_type[i].standard_therapeutic_implications) {
@@ -717,7 +826,7 @@ angular.module('webappApp')
             }
             return clincialTrials;
         }
-        
+
         function addRecord(keys, value, array) {
             if(Array.isArray(value)) {
                 value.forEach(function(e, i) {
@@ -781,6 +890,11 @@ angular.module('webappApp')
             }else {
                 return '';
             }
+        }
+
+        function lineBreakToHtml(str) {
+            str = str.replace(/(\r\n|\n|\r)/gm, '<br/>');
+            return str;
         }
 
         function formatDatum(value, key) {
