@@ -6,7 +6,7 @@
     </div>
 
     <!-- Overall interpretation-->
-    <report-info one-cell="true" title="OVERALL INTERPRETATION" content="stringProcess(data.overallInterpretation)"></report-info>
+    <report-info one-cell="true" title="OVERALL INTERPRETATION" content="data.overallInterpretation"></report-info>
 
 
     <!-- Clinician provided information-->
@@ -14,21 +14,21 @@
     <table class="table table-bordered">
         <tr>
             <td class='greyB'>Diagnosis</td>
-            <td colspan="5">{{(data.diagnosis && data.diagnosis !== "") ? data.diagnosis : 'None.'}}</td>
+            <td colspan="5">{{(data.diagnosis && data.diagnosis !== "") ? data.diagnosis : ''}}</td>
         </tr>
         <tr>
             <td class='greyB'>Tumor-Tissue Type</td>
-            <td colspan="2">{{(data.tumorTissueType && data.tumorTissueType !== "") ? data.tumorTissueType : 'None.'}}</td>
+            <td colspan="2">{{(data.tumorTissueType && data.tumorTissueType !== "") ? data.tumorTissueType : ''}}</td>
             <td class='greyB'>Specimen Source</td>
-            <td colspan="2">{{(data.specimenSource && data.specimenSource !== "") ? data.specimenSource : 'None.'}}</td>
+            <td colspan="2">{{(data.specimenSource && data.specimenSource !== "") ? data.specimenSource : ''}}</td>
         </tr>
         <tr>
             <td class='greyB'>Block/Specimen ID:</td>
-            <td>{{(data.blockId && data.blockId !== "") ? data.blockId : 'None.'}}</td>
+            <td>{{(data.blockId && data.blockId !== "") ? data.blockId : ''}}</td>
             <td class='greyB'>Stage at Presentation</td>
-            <td>{{(data.stage && data.stage !== "") ? data.stage : 'None.'}}</td>
+            <td>{{(data.stage && data.stage !== "") ? data.stage : ''}}</td>
             <td class='greyB'>Grade</td>
-            <td>{{(data.grade && data.grade !== "") ? data.grade : 'None.'}}</td>
+            <td>{{(data.grade && data.grade !== "") ? data.grade : ''}}</td>
         </tr>
     </table>
 
@@ -47,7 +47,7 @@
         </thead>
         <tbody>
             <tr>
-                <td ng-repeat="(key,value) in resultSummaryInfoHeader">{{(data[resultSummaryInfoContent[key]] && data[resultSummaryInfoContent[key]] !== "") ? data[resultSummaryInfoContent[key]] : 'None.'}}</td>
+                <td ng-repeat="(key,value) in resultSummaryInfoHeader">{{(data[resultSummaryInfoContent[key]] && data[resultSummaryInfoContent[key]] !== "") ? data[resultSummaryInfoContent[key]] : ''}}</td>
             </tr>
         </tbody>
     </table>
@@ -65,29 +65,10 @@
             <tr ng-repeat="title in titles">
                 <td><h5>{{title}}</h5></td>
                 <td>
-                    <div ng-if="data[params[$index]] !== ''" ng-repeat="datum in data[params[$index]]">
-                        <div ng-if="isObject(datum)">
-                            <div ng-repeat="(key, value) in datum">
-                                <div ng-if="isArray(value)">
-                                    <h5><b>{{key}}</b></h5>
-                                    <div ng-repeat="subDatum in value">
-                                        <span ng-if="isObject(subDatum) && value1 !== ''" ng-repeat="value1 in subDatum | sortObject" ng-bind-html="show(value1.$key, value1.$value)">
-                                        </span>
-                                    </div>
-                                </div>
-                                <div ng-if="isObject(value)">
-                                    <h5><b>{{key}}</b></h5>
-                                    <span ng-repeat="value2 in value | sortObject" ng-bind-html="show(value2.$key, value2.$value)">
-                                    </span>
-                                </div>
-                                <div ng-if="isString(value)">
-                                    <span>{{value}}<br/></span>
-                                </div>
-                                <br/>
-                            </div>
-                        </div>
+                    <div ng-if="data[params[$index]] !== ''">
+                        <report-view-recursion-cell data="data[params[$index]]" depth="depth"></report-view-recursion-cell >
                     </div>
-                    <span ng-if="data[params[$index]] === ''">None.</span>
+                    <span ng-if="data[params[$index]] === ''"></span>
                 </td>
             </tr>
         </tbody>

@@ -23,14 +23,6 @@ angular.module('webappApp')
                   '<div ng-if="'+oneCell+'" style="width:100%; float:left; '+ (border?'border: 1px solid black;padding: 5px 8px;':'') +'min-height: 30px" ng-bind-html='+content+'></div>' +
                   '</div>';
           element.replaceWith(htmlText);
-        },
-        link: function(scope, element, attrs) {
-          console.log(attrs);
-          console.log(scope);
-          scope.stringProcess = function(str) {
-            str = str.replace(/(\r\n|\n|\r)/gm, '<br/>');
-            return str;
-          };
         }
     };
   });

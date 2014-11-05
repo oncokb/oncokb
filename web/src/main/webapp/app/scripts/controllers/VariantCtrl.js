@@ -154,7 +154,7 @@ angular.module('webappApp')
                 return false;
             }
         };
-    
+
         $scope.displayProcess = function(str) {
             var specialUpperCasesWords = ['NCCN'];
             var specialLowerCasesWords = ['of', 'for'];
@@ -244,23 +244,168 @@ angular.module('webappApp')
                 $scope.annotation = annotation;
                 $scope.rendering = false;
                 if($scope.annotation.cancer_type) {
-                    var hasRelevant = false;
+                    var relevantCancerType = [];
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
                         if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
-                            $scope.relevantCancerType = _cancerType;
-                            hasRelevant = true;
-                            break;
+                            relevantCancerType.push(_cancerType);
                         }
                     }
-                    if(!hasRelevant) {
+                    if(relevantCancerType.length > 1) {
+                        var obj1 = relevantCancerType[0];
+
+                        for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
+                            obj1 = deepmerge(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
+                        }
+                        $scope.relevantCancerType = obj1;
+                    }else if(relevantCancerType.length === 1){
+                        $scope.relevantCancerType = relevantCancerType[0];
+                    }else {
                         $scope.relevantCancerType = null;
                     }
                 }
 
                 $scope.reportParams = generateReportData();
+                $scope.reportViewData = reportViewData($scope.reportParams);
             });
         };
+
+        function upperFirstLetter(str){
+            str = str.replace('_', ' ');
+            return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
+        }
+        
+        function reportViewData(params) {
+            params.overallInterpretation = lineBreakToHtml(params.overallInterpretation);
+            params = constructData(params);
+            return params;
+        }
+
+        function isObject(obj) {
+            return angular.isObject(obj) && !angular.isArray(obj);
+        }
+        
+        function isArray(obj) {
+            return angular.isArray(obj);
+        }
+        
+        function isString(obj) {
+            return angular.isString(obj);
+        }
+        
+        function bottomObject(obj) {
+           var flag = true;
+           if(obj && typeof obj === 'object') {
+             for(var key in obj) {
+               if(typeof obj[key] !== 'string') {
+                 flag = false;
+                 break;
+               }
+             }
+           }else {
+             flag = false;
+           }
+           return flag;
+        }
+        function objToArray(obj) {
+            var delayAttrs = ['description'];
+            var prioAttrs = ['trial','cancer_type','version'];
+
+            if (!(obj instanceof Object)) {
+              return obj;
+            }
+
+            
+            var keys = Object.keys(obj).filter(function(item) {
+                return item !== '$$hashKey';
+            }).sort(function(a,b) {
+                        if( delayAttrs.indexOf(a) !== -1){
+                            return 1;
+                        }else if (delayAttrs.indexOf(b) !== -1) {
+                            return -1;
+                        }else if (prioAttrs.indexOf(a) !== -1) {
+                            return -1;
+                        }else if(prioAttrs.indexOf(b) !== -1) {
+                            return 1;
+                        }else {
+                            if(a < b) {
+                                return -1;
+                            }else {
+                                return 1;
+                            }
+                        }
+                    });
+            
+                var returnArray = keys.map(function (key) {
+                        var _obj = {};
+                        
+                        _obj.key = upperFirstLetter(key);
+                        _obj.value = $scope.findRegex(obj[key]);
+                        return _obj;
+                    });
+                return returnArray;
+                
+        }
+
+        function constructData(data) {
+            for(var key in data) {
+                var datum = data[key];
+                if(isArray(datum)) {
+                    datum = constructData(datum);
+                }else if(isObject(datum) && !bottomObject(datum)) {
+                    datum = constructData(datum);
+                }else if(isObject(datum) && bottomObject(datum)) {
+                    datum = objToArray(datum);
+                }else {
+                    datum = $scope.findRegex(datum);
+                }
+                data[key] = datum;
+            }
+            
+            return data;
+        }
+
+        function googleDocData(params) {
+            return params;
+        }
+        //This original function comes fromhttps://github.com/nrf110/deepmerge
+        //Made changed for using in current project
+        //ct1: cancer type of target; ct2: cancer type of source
+        function deepmerge(target, src, ct1, ct2) {
+            var array = Array.isArray(src);
+            var dst = array && [] || {};
+
+            if (array) {
+                target = target || [];
+                dst = dst.concat(target);
+                src.forEach(function(e, i) {
+                    dst.push(e);
+                });
+            } else {
+                if (target && typeof target === 'object') {
+                    Object.keys(target).forEach(function (key) {
+                        dst[key] = target[key];
+                    });
+                }
+                Object.keys(src).forEach(function (key) {
+                    if (typeof src[key] !== 'object' || !src[key]) {
+                        if(!Array.isArray(dst[key])) {
+                            var _tmp = dst[key];
+                            dst[key] = [{'value':_tmp, 'cancer_type': ct1}];
+                        }
+                        dst[key].push({'value':src[key], 'cancer_type': ct2} );
+                    }
+                    else {
+                        if (!target[key]) {
+                            dst[key] = src[key];
+                        } else {
+                            dst[key] = deepmerge(target[key], src[key], ct1, ct2);
+                        }
+                    }
+                });
+            }
+            return dst;
+        }
         
         $scope.generateReport = function() {
 //            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
@@ -270,15 +415,15 @@ angular.module('webappApp')
                         $scope.generaingReport =true;
                         dlg = dialogs.wait('Sending request','Please wait...');
                         generating();
-                        var params = $scope.reportParams;
+                        var params = googleDocData($scope.reportParams);
                         params.email = data;
-                        // $timeout(function() {
-                        //     console.log(params);
-                        //     $scope.generaingReport =false;
-                        // }, 2000)
-                        GenerateDoc.getDoc(params).success(function(data) {
-                             $scope.generaingReport =false;
-                        });
+                        $timeout(function() {
+                            console.log(params);
+                            $scope.generaingReport =false;
+                        }, 2000)
+                        // GenerateDoc.getDoc(params).success(function(data) {
+                        //      $scope.generaingReport =false;
+                        // });
                     }
                 },function(){
                   console.log('Did not do anything.');
@@ -341,8 +486,8 @@ angular.module('webappApp')
                 '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
             params.geneName = $scope.geneName;
             params.mutation = $scope.mutation;
-            params.alterType = ($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:'';
-            
+            params.diagnosis = ($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:'';
+            params.tumorTissueType = params.diagnosis;
 //            if($scope.relevantCancerType) {
                 var _treatment = constructTreatment();
                 params.treatment = _treatment.length > 0 ? _treatment : "";
@@ -745,6 +890,11 @@ angular.module('webappApp')
             }else {
                 return '';
             }
+        }
+
+        function lineBreakToHtml(str) {
+            str = str.replace(/(\r\n|\n|\r)/gm, '<br/>');
+            return str;
         }
 
         function formatDatum(value, key) {
