@@ -73,7 +73,6 @@ angular.module('webappApp')
                 $scope.tumorTypes = data;
                 if($location.url() !== $location.path()) {
                     var urlVars = $location.search();
-                    $scope.rendering = true;
                     if(urlVars.hasOwnProperty('hugoSymbol')){
                         $scope.geneName = urlVars.hugoSymbol;
                     }
@@ -220,7 +219,7 @@ angular.module('webappApp')
             var paramsContent = {
                 'hugoSymbol': 'geneName',
                 'alteration': 'mutation'
-            }
+            };
 
             for (var key in paramsContent) {
                 if($scope.hasOwnProperty(paramsContent[key]) && $scope[paramsContent[key]] && $scope[paramsContent[key]] !== '') {
@@ -232,7 +231,7 @@ angular.module('webappApp')
             }                
 
             // SearchVariant.annotationFromFile(params).success(function(data) {
-            SearchVariant.postAnnotation(params).success(function(data) {
+            SearchVariant.getAnnotation(params).success(function(data) {
                 var annotation = {};
 
                 annotation = xml2json.parser(data).xml;
