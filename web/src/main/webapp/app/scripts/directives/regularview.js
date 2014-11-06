@@ -9,7 +9,7 @@
 angular.module('webappApp')
   .directive('regularView', function () {
     return {
-      templateUrl: '/views/regularView.html',
+      templateUrl: 'views/regularView.html',
       restrict: 'E',
       scope: {
       	annotation: '=',

@@ -9,7 +9,7 @@
 angular.module('webappApp')
   .directive('reportViewRecursionCell', function (RecursionHelper) {
     return {
-      	templateUrl: '/views/reportViewRecursionCellTemp.html',
+      	templateUrl: 'views/reportViewRecursionCellTemp.html',
       	restrict: 'E',
     	scope: {
     		data: '=',

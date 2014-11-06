@@ -31,7 +31,7 @@ angular.module('webappApp')
               'EZ QUEST DIAGNOSTICS/NICHOLS SJC, 33608 ORTEGA HWY, SAN JUAN CAPISTRANO, CA 92675-2042 Laboratory Director: JON NAKAMOTO, MD PHD, CLIA: 05D0643352'];
             }
         return {
-            templateUrl: '/views/reportView.html',
+            templateUrl: 'views/reportView.html',
             restrict: 'E',
             link:link,
             scope: {
