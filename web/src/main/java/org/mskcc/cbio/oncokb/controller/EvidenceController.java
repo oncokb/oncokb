@@ -38,16 +38,23 @@ public class EvidenceController {
             @RequestParam(value="type", required=false) String evidenceType) {
         
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+        String requestparams = "";
         
         Gene gene = null; 
         if (entrezGeneId!=null) {
             gene = geneBo.findGeneByEntrezGeneId(entrezGeneId);
+            requestparams += entrezGeneId;
         } else if (hugoSymbol!=null) {
             gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
+            requestparams += hugoSymbol;
         }
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         List<Alteration> alteration = new ArrayList<Alteration>();
+        
+        if(alt != null) {
+            requestparams += alt;
+        }
         if (alt != null && gene != null) {
             Alteration alterationDatum = alterationBo.findAlteration(gene, AlterationType.MUTATION, alt);
             if(alterationDatum != null) {
@@ -80,7 +87,11 @@ public class EvidenceController {
                 return evidenceBo.findEvidencesByGene(gene);
             }
         }else {
-            return evidenceBo.findAll();
+            if(requestparams.equals("")) {
+                return evidenceBo.findAll();
+            }else {
+                return Collections.emptyList();
+            }
         }
     }
 }
