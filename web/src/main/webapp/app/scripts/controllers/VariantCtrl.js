@@ -408,7 +408,7 @@ angular.module('webappApp')
         
         $scope.generateReport = function() {
 //            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
-                var dlg = dialogs.create('/views/emailDialog.html','emailDialogCtrl', 'Test string');
+                var dlg = dialogs.create('views/emailDialog.html','emailDialogCtrl', 'Test string');
                 dlg.result.then(function(data){
                     if(typeof data !== 'undefined' && data && data !== '') {
                         $scope.generaingReport =true;
