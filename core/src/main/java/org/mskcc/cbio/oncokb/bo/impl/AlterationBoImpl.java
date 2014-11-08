@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.bo.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
@@ -67,7 +68,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             
         //TODO: add activating or inactivating alterations
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.MUTATION_EFFECT);
+        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
         boolean activating = false, inactivating = false;
         for (Evidence evidence : mutationEffectEvs) {
             String effect = evidence.getKnownEffect().toLowerCase();

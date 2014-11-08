@@ -142,7 +142,7 @@ public class VariantAnnotationXMLController {
         exportSummary(gene, alterations, alteration, relevantTumorTypes, tumorType, sb);
         
         // gene background
-        List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_BACKGROUND);
+        List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
         if (!geneBgEvs.isEmpty()) {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");
@@ -158,7 +158,7 @@ public class VariantAnnotationXMLController {
             return sb.toString();
         }
         
-        List<Evidence> mutationEffectEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.MUTATION_EFFECT);
+        List<Evidence> mutationEffectEbs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
         for (Evidence ev : mutationEffectEbs) {
             sb.append("<variant_effect>\n");
             sb.append("    <effect>");
@@ -184,7 +184,7 @@ public class VariantAnnotationXMLController {
             int nEmp = sbTumorType.length();
             
             // find prevalence evidence blob
-            List<Evidence> prevalanceEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PREVALENCE, Collections.singleton(tt));
+            List<Evidence> prevalanceEbs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(tt));
             for (Evidence ev : prevalanceEbs) {
                 sbTumorType.append("    <prevalence>\n");
                 sbTumorType.append("        <description>");
@@ -195,7 +195,7 @@ public class VariantAnnotationXMLController {
             }
             
             // find prognostic implication evidence blob
-            List<Evidence> prognosticEbs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.PROGNOSTIC_IMPLICATION, Collections.singleton(tt));
+            List<Evidence> prognosticEbs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(tt));
             for (Evidence ev : prognosticEbs) {
                 sbTumorType.append("    <prognostic_implications>\n");
                 sbTumorType.append("        <description>");
@@ -206,12 +206,12 @@ public class VariantAnnotationXMLController {
             }
             
             // STANDARD_THERAPEUTIC_IMPLICATIONS
-            List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, Collections.singleton(tt));
-            List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, Collections.singleton(tt));
+            List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt));
+            List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt));
             exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ");
             
             // NCCN_GUIDELINES
-            List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.NCCN_GUIDELINES, Collections.singleton(tt));
+            List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.NCCN_GUIDELINES), Collections.singleton(tt));
             Set<NccnGuideline> nccnGuidelines = new LinkedHashSet<NccnGuideline>();
             for (Evidence ev : nccnEvs) {
                 nccnGuidelines.addAll(ev.getNccnGuidelines());
@@ -248,8 +248,8 @@ public class VariantAnnotationXMLController {
             }
             
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
-            List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, Collections.singleton(tt));
-            List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, Collections.singleton(tt));
+            List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(tt));
+            List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(tt));
             exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sbTumorType, "    ");
             
             // CLINICAL_TRIAL
@@ -299,7 +299,7 @@ public class VariantAnnotationXMLController {
     private void exportSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType, StringBuilder sb) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         sb.append("<annotation_summary>");
-        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_SUMMARY);
+        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
             Evidence ev = geneSummaryEvs.get(0);
             String geneSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
@@ -340,7 +340,7 @@ public class VariantAnnotationXMLController {
                         .append(" mutation oncogenic. ");
             }
 
-            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
+            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
             if (!evidencesResistence.isEmpty()) {
                 // if resistance evidence is available in any tumor type
                 sb.append("It confers resistance to ")
@@ -349,7 +349,7 @@ public class VariantAnnotationXMLController {
             }
 
             Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
-                    evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, relevantTumorTypes)
+                    evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), relevantTumorTypes)
             );
             if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                 // if there are FDA approved drugs in the patient tumor type with the variant
@@ -359,7 +359,7 @@ public class VariantAnnotationXMLController {
             } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                 // if there are NCCN guidelines in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> otherEvidencesByLevel = groupEvidencesByLevel(
-                        evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)
+                        evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
                 );
                 if (!otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                     // FDA approved drugs in other tumor type with the variant
@@ -373,7 +373,7 @@ public class VariantAnnotationXMLController {
             } else {
                 // no FDA or NCCN in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> evidencesByLevelOtherTumorType = groupEvidencesByLevel(
-                        evidenceBo.findEvidencesByAlteration(alterations, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)
+                        evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
                 );
                 if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                     // if there are FDA approved drugs in other tumor types with the variant
@@ -394,7 +394,7 @@ public class VariantAnnotationXMLController {
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
-                            evidenceBo.findEvidencesByGene(gene, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)
+                            evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
                     );
                     if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                         // if there are FDA approved drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 

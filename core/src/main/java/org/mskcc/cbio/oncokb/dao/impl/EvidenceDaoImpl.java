@@ -26,11 +26,13 @@ public class EvidenceDaoImpl
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType) {
+        if (evidenceType==null) return findEvidencesByAlteration(alteration);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType);
     }
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType, TumorType tumorType) {
+        if (tumorType==null) return findEvidencesByAlteration(alteration, evidenceType);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndTumorType", alteration.getAlterationId(), evidenceType, tumorType);
     }
 
@@ -42,11 +44,13 @@ public class EvidenceDaoImpl
 
     @Override
     public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType) {
+        if (evidenceType==null) return findEvidencesByGene(gene);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceType", gene, evidenceType);
     }
 
     @Override
     public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType, TumorType tumorType) {
+        if (tumorType==null) return findEvidencesByGene(gene, evidenceType);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndTumorType", gene, evidenceType);
     }
 }
