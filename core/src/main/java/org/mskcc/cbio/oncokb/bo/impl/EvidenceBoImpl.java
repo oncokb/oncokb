@@ -32,44 +32,61 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         for (Alteration alteration : alterations) {
             set.addAll(getDao().findEvidencesByAlteration(alteration));
         }
-        return new ArrayList<Evidence>(set);
-    }
+        return new ArrayList<Evidence>(set);    }
     
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, EvidenceType evidenceType) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
-            set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType));
-        }
-        return new ArrayList<Evidence>(set);
-    }
-    
-    @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, EvidenceType evidenceType, Collection<TumorType> tumorTypes) {
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-        for (Alteration alteration : alterations) {
-            for (TumorType tumorType : tumorTypes) {
-                set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+            for (EvidenceType evidenceType : evidenceTypes) {
+                set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType));
             }
         }
         return new ArrayList<Evidence>(set);
     }
     
     @Override
-    public List<Evidence> findEvidencesByGene(Gene gene) {
-        return getDao().findEvidencesByGene(gene);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType) {
-        return getDao().findEvidencesByGene(gene, evidenceType);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType, Collection<TumorType> tumorTypes) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
-        for (TumorType tumorType : tumorTypes) {
-            set.addAll(getDao().findEvidencesByGene(gene, evidenceType, tumorType));
+        for (Alteration alteration : alterations) {
+            for (TumorType tumorType : tumorTypes) {
+                for (EvidenceType evidenceType : evidenceTypes) {
+                    set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+                }
+            }
+        }
+        return new ArrayList<Evidence>(set);
+    }
+    
+    @Override
+    public List<Evidence> findEvidencesByGene(Collection<Gene> genes) {
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+        for (Gene gene : genes) {
+            set.addAll(getDao().findEvidencesByGene(gene));
+        }
+        return new ArrayList<Evidence>(set);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes) {
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+        for (Gene gene : genes) {
+            for (EvidenceType evidenceType : evidenceTypes) {
+                set.addAll(getDao().findEvidencesByGene(gene, evidenceType));
+            }
+        }
+        return new ArrayList<Evidence>(set);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+        for (Gene gene : genes) {
+            for (EvidenceType evidenceType : evidenceTypes) {
+                for (TumorType tumorType : tumorTypes) {
+                    set.addAll(getDao().findEvidencesByGene(gene, evidenceType, tumorType));
+                }
+            }
         }
         return new ArrayList<Evidence>(set);
     }
