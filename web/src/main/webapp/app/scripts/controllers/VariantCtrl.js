@@ -67,7 +67,9 @@ angular.module('webappApp')
             };
 
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
-
+            
+            $scope.reportViewActive = $scope.hasSelectedTumorType();
+            $scope.regularViewActive = !$scope.hasSelectedTumorType();
             // TumorType.getFromFile().success(function(data) {
             TumorType.getFromServer().success(function(data) {
                 $scope.tumorTypes = data;
@@ -94,7 +96,15 @@ angular.module('webappApp')
                 return false;
             }
         };
-
+        
+        $scope.hasSelectedTumorType = function() {
+            if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType && $scope.selectedTumorType !== '') {
+                return true;
+            }else {
+                return false;
+            }
+        }
+        
         $scope.setCollapsed = function(trial, attr) {
             $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
         };
@@ -214,7 +224,10 @@ angular.module('webappApp')
         };
 
         $scope.search = function() {
+            var hasSelectedTumorType = $scope.hasSelectedTumorType();
             $scope.rendering = true;
+            $scope.reportViewActive = hasSelectedTumorType;
+            $scope.regularViewActive = !hasSelectedTumorType;
             var params = {'alterationType': 'MUTATION'};
             var paramsContent = {
                 'hugoSymbol': 'geneName',
@@ -226,7 +239,7 @@ angular.module('webappApp')
                     params[key] = $scope[paramsContent[key]];
                 }
             }
-            if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType && $scope.selectedTumorType !== '') {
+            if(hasSelectedTumorType) {
                 params['tumorType'] = $scope.selectedTumorType.name;
             }                
 

@@ -38,6 +38,7 @@ public class EvidenceController {
             @RequestParam(value="evidenceType", required=false) String evidenceType) {
         
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         List<Gene> genes = new ArrayList<Gene>(); 
         if (entrezGeneId!=null) {
@@ -50,6 +51,8 @@ public class EvidenceController {
                 Gene gene = geneBo.findGeneByHugoSymbol(symbol);
                 genes.add(gene);
             }
+        } else {
+            return evidenceBo.findAll();
         }
         
         if (genes.isEmpty()) {
@@ -65,7 +68,6 @@ public class EvidenceController {
             }
         }
         
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         if (alteration==null) {
             genes.removeAll(Collections.singleton(null));
