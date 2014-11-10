@@ -5,9 +5,10 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -65,7 +66,7 @@ public class EvidenceController {
         }
         
         
-        List<Evidence> evidences = new ArrayList<Evidence>();
+        Set<Evidence> evidences = new HashSet<Evidence>();
         List<Gene> geneCopies = new ArrayList<Gene>(genes);
         geneCopies.removeAll(Collections.singleton(null));
         if (evienceTypes == null) {
@@ -95,6 +96,6 @@ public class EvidenceController {
             }
         }
         
-        return evidences;
+        return new ArrayList<Evidence>(evidences);
     }
 }
