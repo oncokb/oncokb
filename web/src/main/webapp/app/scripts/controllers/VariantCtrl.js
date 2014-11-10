@@ -68,8 +68,8 @@ angular.module('webappApp')
 
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
             
-            $scope.reportViewActive = hasSelectedTumorType();
-            $scope.regularViewActive = !hasSelectedTumorType();
+            $scope.reportViewActive = $scope.hasSelectedTumorType();
+            $scope.regularViewActive = !$scope.hasSelectedTumorType();
             // TumorType.getFromFile().success(function(data) {
             TumorType.getFromServer().success(function(data) {
                 $scope.tumorTypes = data;
@@ -97,7 +97,7 @@ angular.module('webappApp')
             }
         };
         
-        function hasSelectedTumorType() {
+        $scope.hasSelectedTumorType = function() {
             if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType && $scope.selectedTumorType !== '') {
                 return true;
             }else {
@@ -224,7 +224,7 @@ angular.module('webappApp')
         };
 
         $scope.search = function() {
-            var hasSelectedTumorType = hasSelectedTumorType();
+            var hasSelectedTumorType = $scope.hasSelectedTumorType();
             $scope.rendering = true;
             $scope.reportViewActive = hasSelectedTumorType;
             $scope.regularViewActive = !hasSelectedTumorType;
