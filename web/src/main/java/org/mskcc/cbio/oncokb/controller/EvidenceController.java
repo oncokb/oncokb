@@ -5,9 +5,10 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -55,10 +56,6 @@ public class EvidenceController {
             return evidenceBo.findAll();
         }
         
-        if (genes.isEmpty()) {
-            return Collections.emptyList();
-        }
-        
         List<EvidenceType> evienceTypes = null;
         if (evidenceType!=null) {
             evienceTypes = new ArrayList<EvidenceType>();
@@ -69,33 +66,36 @@ public class EvidenceController {
         }
         
         
-        if (alteration==null) {
-            genes.removeAll(Collections.singleton(null));
-            if (evienceTypes == null) {
-                return evidenceBo.findEvidencesByGene(genes);
-            } else {
-                return evidenceBo.findEvidencesByGene(genes, evienceTypes);
-            }
+        Set<Evidence> evidences = new HashSet<Evidence>();
+        List<Gene> geneCopies = new ArrayList<Gene>(genes);
+        geneCopies.removeAll(Collections.singleton(null));
+        if (evienceTypes == null) {
+            evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies));
+        } else {
+            evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies, evienceTypes));
         }
         
-        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        List<Alteration> alterations = new ArrayList<Alteration>();
-        String[] strAlts = alteration.split(",");
-        int n = strAlts.length;
-        for (int i=0; i<n; i++) {
-            if (genes.get(i)!=null) {
-                Alteration alt = alterationBo.findAlteration(genes.get(i), AlterationType.MUTATION, strAlts[i]);
-                if (alt!=null) {
-                    alterations.add(alt);
+        if (alteration!=null) {
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            List<Alteration> alterations = new ArrayList<Alteration>();
+            String[] strAlts = alteration.split(",");
+            int n = strAlts.length;
+            for (int i=0; i<n; i++) {
+                if (genes.get(i)!=null) {
+                    Alteration alt = alterationBo.findAlteration(genes.get(i), AlterationType.MUTATION, strAlts[i]);
+                    if (alt!=null) {
+                        alterations.add(alt);
+                    }
                 }
             }
+        
+            if (evienceTypes == null) {
+                evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations));
+            } else {
+                evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, evienceTypes));
+            }
         }
         
-        if (evienceTypes == null) {
-            return evidenceBo.findEvidencesByAlteration(alterations);
-        } else {
-            return evidenceBo.findEvidencesByAlteration(alterations, evienceTypes);
-        }
-        
+        return new ArrayList<Evidence>(evidences);
     }
 }

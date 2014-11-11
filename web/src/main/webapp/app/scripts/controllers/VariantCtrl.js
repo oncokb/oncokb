@@ -288,9 +288,10 @@ angular.module('webappApp')
         }
         
         function reportViewData(params) {
-            params.overallInterpretation = lineBreakToHtml(params.overallInterpretation);
-            params = constructData(params);
-            return params;
+            var _parmas = angular.copy(params);
+            _parmas.overallInterpretation = processOverallInterpretation(_parmas.overallInterpretation);
+            _parmas = constructData(_parmas);
+            return _parmas;
         }
 
         function isObject(obj) {
@@ -493,7 +494,7 @@ angular.module('webappApp')
 
             // console.log($scope.annotation);
 
-            params.overallInterpretation = ($scope.geneName + ' SUMMARY\n' + 
+            params.overallInterpretation = ($scope.geneName + ' ' + $scope.mutation + ' SUMMARY\n' + 
                 $scope.annotation.annotation_summary + 
                 '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
             params.geneName = $scope.geneName;
@@ -555,7 +556,7 @@ angular.module('webappApp')
                 cancerTypeInfo = $scope.relevantCancerType || {};
 
             if($scope.annotation.annotation_summary) {
-                key = $scope.geneName + ' ' + $scope.mutation.toUpperCase() + " SUMMARY";
+                key = $scope.geneName + ' ' + $scope.mutation + " SUMMARY";
                 value.push({'description': $scope.annotation.annotation_summary});
                 object[key] = value;
                 treatment.push(object);
@@ -564,7 +565,7 @@ angular.module('webappApp')
             if(cancerTypeInfo.nccn_guidelines) {
                 var _datum = cancerTypeInfo.nccn_guidelines;
                 var versions = {};
-
+                
                 value = [];
                 object = {};
                 key = "NCCN GUIDELINES";
@@ -575,14 +576,12 @@ angular.module('webappApp')
                 }
 
                 for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                    versions[_datum[i].version].description = _datum[i].description;
                     versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category] = _datum[i].description;
                 }
                 
                 for(var versionKey in versions) {
                     var version = versions[versionKey];
-                    version.version = versionKey;
-                    version.cancer_type = ($scope.selectedTumorType && $scope.selectedTumorType.name)? $scope.selectedTumorType.name : '';
+                    version.nccn_special = 'Version: ' + versionKey + (($scope.selectedTumorType && $scope.selectedTumorType.name)? (', Cancer type: ' + $scope.selectedTumorType.name) : '');
                     value.push(version);
                 }
                 
@@ -631,6 +630,8 @@ angular.module('webappApp')
                                 }
                             };
                         }
+                        _key = _key.substr(0, _key.length-3);
+                        _key += " & ";
                     }
                 }
 
@@ -672,6 +673,8 @@ angular.module('webappApp')
                                             _key+=_drug.name + " + ";
                                     };
                                 }
+                                _key = _key.substr(0, _key.length-3);
+                                _key += " & ";
                             }
                         }
 
@@ -770,7 +773,6 @@ angular.module('webappApp')
                         var _subDatum = {};
                         _subDatum.trial = _datum[i].trial_id + ", " + _datum[i].phase;
                         _subDatum.title = _datum[i].title;
-                        _subDatum.purpose = removeCharsInDescription(_datum[i].purpose);
                         _subDatum.description = removeCharsInDescription(_datum[i].description);
                         value.push(_subDatum);
 //                    }
@@ -903,7 +905,18 @@ angular.module('webappApp')
                 return '';
             }
         }
-
+        
+        function processOverallInterpretation(str) {
+            var content = str.split(/[\n\r]/g);
+            for(var i=0; i< content.length; i++) {
+                if(i%2 === 0) {
+                    content[i]='<b>' + content[i] + '</b>';
+                }
+            }
+            str = content.join('<br/>');
+            return str;
+        }
+        
         function lineBreakToHtml(str) {
             str = str.replace(/(\r\n|\n|\r)/gm, '<br/>');
             return str;
