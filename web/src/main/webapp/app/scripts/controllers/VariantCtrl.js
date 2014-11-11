@@ -246,8 +246,7 @@ angular.module('webappApp')
             // SearchVariant.annotationFromFile(params).success(function(data) {
             SearchVariant.getAnnotation(params).success(function(data) {
                 var annotation = {};
-
-                annotation = xml2json.parser(data).xml;
+                annotation = processData(xml2json.parser(data).xml);
 
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
@@ -281,6 +280,23 @@ angular.module('webappApp')
                 $scope.reportViewData = reportViewData($scope.reportParams);
             });
         };
+
+        function processData(object){
+            if(isArray(object)) {
+                object.forEach(function(e, i){
+                    e = processData(e);
+                });
+            }else if(isObject(object)) {
+                for(var key in object) {
+                    object[key] = processData(object[key]);
+                }
+            }else if(isString(object)) {
+                object = S(object).decodeHTMLEntities().s;
+            }else {
+
+            }
+            return object;
+        }
 
         function upperFirstLetter(str){
             str = str.replace('_', ' ');
@@ -565,7 +581,7 @@ angular.module('webappApp')
             if(cancerTypeInfo.nccn_guidelines) {
                 var _datum = cancerTypeInfo.nccn_guidelines;
                 var versions = {};
-                
+
                 value = [];
                 object = {};
                 key = "NCCN GUIDELINES";
@@ -905,7 +921,7 @@ angular.module('webappApp')
                 return '';
             }
         }
-        
+
         function processOverallInterpretation(str) {
             var content = str.split(/[\n\r]/g);
             for(var i=0; i< content.length; i++) {

@@ -9,7 +9,7 @@
  */
 angular.module('webappApp')
   .controller('ReportgeneratorCtrl', ['$scope', '$timeout' ,'FileUploader', 'SearchVariant', 'GenerateDoc', function($scope, $timeout, FileUploader, SearchVariant, GenerateDoc) {
-	var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
+    var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
         
         $scope.init = function() {
             $scope.sheets = {
@@ -24,12 +24,12 @@ angular.module('webappApp')
             };
             $scope.regerating = false;
             $scope.generateIndex = -1;
-	};
+    };
         
-	$scope.generate = function() {
-		var worker = [],
+    $scope.generate = function() {
+        var worker = [],
                     i = -1;
-		for(var sheet in $scope.sheets.arr) {
+        for(var sheet in $scope.sheets.arr) {
                     $scope.sheets.arr[sheet].forEach(function(e, i) {
                         var datum = {};
                         for(var key in e) {
@@ -39,21 +39,21 @@ angular.module('webappApp')
                         }
                         worker.push(datum);
                     });
-		}
+        }
             $scope.workers = worker;
             generateReports();
-	};
+    };
 
-	$scope.validate = function(key, content) {
+    $scope.validate = function(key, content) {
 
-		if(/{tumor|cancer}\stype/i.test(key)){
+        if(/{tumor|cancer}\stype/i.test(key)){
 
-		}else if(key.toLowerCase().indexOf('alteration') !== -1){
-			content = alterationProcee(content);
-		}
+        }else if(key.toLowerCase().indexOf('alteration') !== -1){
+            content = alterationProcee(content);
+        }
 
-		return content;
-	};
+        return content;
+    };
         
         function generateReports() {
             console.log("run ---");
@@ -71,18 +71,18 @@ angular.module('webappApp')
             }, 500);
         }
         
-	function alterationProcee(alteration) {
-		if(alteration.indexOf('p.') === 0) {
-			alteration = alteration.slice(2);
-		}
+    function alterationProcee(alteration) {
+        if(alteration.indexOf('p.') === 0) {
+            alteration = alteration.slice(2);
+        }
 
-		if(alteration.indexOf('Ter')) {
-			alteration = alteration.replace('Ter', '*');
-		}
-		return alteration;
-	}
+        if(alteration.indexOf('Ter')) {
+            alteration = alteration.replace('Ter', '*');
+        }
+        return alteration;
+    }
 
-	function formatDatum(value, key) {
+    function formatDatum(value, key) {
         if(isArray(value) || (!isArray(value) && isObject(value) && changedAttr.indexOf(key) !== -1)) {
             if(!isArray(value) && isObject(value) && changedAttr.indexOf(key) !== -1) {
                 value = [value];
@@ -161,15 +161,15 @@ angular.module('webappApp')
         
         return params;
     }
-	function getAnnotation(gene, alteration, tumorType) {
-	 	var params = {
-	 		'alterationType': 'MUTATION',
-	 		'hugoSymbol': gene,
+    function getAnnotation(gene, alteration, tumorType) {
+        var params = {
+            'alterationType': 'MUTATION',
+            'hugoSymbol': gene,
             'alteration': alteration,
             'tumorType': tumorType
-	 	};
+        };
 
-//		SearchVariant.annotationFromFile(params).success(function(data) {
+//      SearchVariant.annotationFromFile(params).success(function(data) {
          SearchVariant.getAnnotation(params).success(function(data) {
             var annotation = {};
 
@@ -179,7 +179,7 @@ angular.module('webappApp')
                 annotation[key] = formatDatum(annotation[key], key);
             }
 
-           	if(annotation.cancer_type) {
+            if(annotation.cancer_type) {
                 var relevantCancerTypeArray = [];
                 var relevantCancerType;
 
@@ -212,8 +212,8 @@ angular.module('webappApp')
                 generateReports();
             });
         });
-	}
-	function removeCharsInDescription(str) {
+    }
+    function removeCharsInDescription(str) {
         if(typeof str !== 'undefined') {
             str = str.replace(/(\r\n|\n|\r)/gm,'');
             str = str.replace(/(\s\s*)/g,' ');
@@ -592,57 +592,57 @@ angular.module('webappApp')
     uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
         console.info('onWhenAddingFileFailed', item, filter, options);
     };
-    uploader.onAfterAddingFile 	= function(fileItem) {
+    uploader.onAfterAddingFile  = function(fileItem) {
         console.info('onAfterAddingFile', fileItem);
         var reader = new FileReader();
-	    reader.onload = function(e) {
-    	  	var data = e.target.result;
+        reader.onload = function(e) {
+            var data = e.target.result;
 
-	      	/* if binary string, read with type 'binary' */
-	      	var workbook = XLSX.read(data, {type: 'binary'});
-	      	var fileValue = {};
-	      	var fileAttrs = {};
+            /* if binary string, read with type 'binary' */
+            var workbook = XLSX.read(data, {type: 'binary'});
+            var fileValue = {};
+            var fileAttrs = {};
                 var totalRecord = 0;
-	      	for (var i=0, workbookSheetsNum = workbook.SheetNames.length; i < workbookSheetsNum; i++) {
-	      		var attrL = 0,
-	      			sheetName = workbook.SheetNames[i];
-      			
-	      		var json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[i]]);
-	      		
-      			fileValue[sheetName] = [];
-      			fileAttrs[sheetName] = ['gene', 'alteration', 'tumorType'];
-      			json.forEach(function(e,i){
-	      			var datum = {
-	      				gene: '',
-	      				alteration: '',
-	      				tumorType: ''
-	      			};
+            for (var i=0, workbookSheetsNum = workbook.SheetNames.length; i < workbookSheetsNum; i++) {
+                var attrL = 0,
+                    sheetName = workbook.SheetNames[i];
+                
+                var json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[i]]);
+                
+                fileValue[sheetName] = [];
+                fileAttrs[sheetName] = ['gene', 'alteration', 'tumorType'];
+                json.forEach(function(e,i){
+                    var datum = {
+                        gene: '',
+                        alteration: '',
+                        tumorType: ''
+                    };
 
-	      			for(var key in e) {
-	      				if (e.hasOwnProperty(key)) {
-		      				if(/gene/i.test(key)) {
-		      					datum.gene = e[key];
-		      				}else if(/alteration/i.test(key)) {
-		      					datum.alteration = e[key];
-		      				}else if(/tumor/i.test(key)) {
-		      					datum.tumorType = e[key];
-		      				}
-		      			}
-	      			}
-	      			fileValue[sheetName].push(datum);
-	      		});
+                    for(var key in e) {
+                        if (e.hasOwnProperty(key)) {
+                            if(/gene/i.test(key)) {
+                                datum.gene = e[key];
+                            }else if(/alteration/i.test(key)) {
+                                datum.alteration = e[key];
+                            }else if(/tumor/i.test(key)) {
+                                datum.tumorType = e[key];
+                            }
+                        }
+                    }
+                    fileValue[sheetName].push(datum);
+                });
                         totalRecord += fileValue[sheetName].length;
-	      	}
-	      	$scope.sheets.length = workbookSheetsNum;
-	      	$scope.sheets.attr = fileAttrs;
-	      	$scope.sheets.arr = fileValue;
+            }
+            $scope.sheets.length = workbookSheetsNum;
+            $scope.sheets.attr = fileAttrs;
+            $scope.sheets.arr = fileValue;
                 $scope.progress.dynamic = 0;
                 $scope.progress.value = 0;
                 $scope.progress.max = totalRecord;
-	      	$scope.$apply();
-	      	/* DO SOMETHING WITH workbook HERE */
-	    };
-	    reader.readAsBinaryString(fileItem._file);
+            $scope.$apply();
+            /* DO SOMETHING WITH workbook HERE */
+        };
+        reader.readAsBinaryString(fileItem._file);
     };
     uploader.onAfterAddingAll = function(addedFileItems) {
         console.info('onAfterAddingAll', addedFileItems);

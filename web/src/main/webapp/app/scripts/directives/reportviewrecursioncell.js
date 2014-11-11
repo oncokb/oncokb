@@ -59,7 +59,7 @@ angular.module('webappApp')
 	  			scope.show = function(key, value) {
 	  				var disabledKey = ['description', 'trial', 'title', 'nccn special'],
   					str = '';
-                                
+
 	  				if(disabledKey.indexOf(key.toLowerCase()) === -1) {
 	  					str += key + ': ' + value;
 	  				}else {
