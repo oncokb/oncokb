@@ -142,7 +142,7 @@ angular.module('webappApp')
 
         // console.log($scope.annotation);
 
-        params.overallInterpretation = (geneName + ' SUMMARY\n' + 
+        params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
             '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
         params.geneName = geneName;
@@ -159,9 +159,6 @@ angular.module('webappApp')
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";
         
-        if(params.clinicalTrials !== '') {
-            console.log(params);
-        }
         return params;
     }
 	function getAnnotation(gene, alteration, tumorType) {
@@ -234,7 +231,7 @@ angular.module('webappApp')
             cancerTypeInfo = relevantCancerType || {};
 
         if(annotation.annotation_summary) {
-            key = geneName + ' ' + mutation.toUpperCase() + " SUMMARY";
+            key = geneName + ' ' + mutation + " SUMMARY";
             value.push({'description': annotation.annotation_summary});
             object[key] = value;
             treatment.push(object);
@@ -254,14 +251,12 @@ angular.module('webappApp')
             }
 
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                versions[_datum[i].version].description = _datum[i].description;
                 versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category] = _datum[i].description;
             }
             
             for(var versionKey in versions) {
                 var version = versions[versionKey];
-                version.version = versionKey;
-                version.cancer_type = tumorType;
+                version.version.nccn_special = 'Version: ' + versionKey + ', Cancer type: ' + tumorType;
                 value.push(version);
             }
             
@@ -310,6 +305,8 @@ angular.module('webappApp')
                             }
                         };
                     }
+                    _key = _key.substr(0, _key.length-3);
+                    _key += " & ";
                 }
             }
 
@@ -346,6 +343,9 @@ angular.module('webappApp')
                                 };
                             }
                         }
+                        
+                        _key = _key.substr(0, _key.length-3);
+                        _key += " & ";
                     }
 
                     _key = _key.substr(0, _key.length-3);
@@ -466,7 +466,6 @@ angular.module('webappApp')
                     var _subDatum = {};
                     _subDatum.trial = _datum[i].trial_id + ", " + _datum[i].phase;
                     _subDatum.title = _datum[i].title;
-                    _subDatum.purpose = removeCharsInDescription(_datum[i].purpose);
                     _subDatum.description = removeCharsInDescription(_datum[i].description);
                     value.push(_subDatum);
             }
@@ -641,7 +640,6 @@ angular.module('webappApp')
                 $scope.progress.value = 0;
                 $scope.progress.max = totalRecord;
 	      	$scope.$apply();
-	      	console.log($scope.sheets);
 	      	/* DO SOMETHING WITH workbook HERE */
 	    };
 	    reader.readAsBinaryString(fileItem._file);
