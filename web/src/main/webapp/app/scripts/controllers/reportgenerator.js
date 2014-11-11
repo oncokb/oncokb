@@ -10,22 +10,34 @@
 angular.module('webappApp')
   .controller('ReportgeneratorCtrl', ['$scope', '$timeout' ,'FileUploader', 'SearchVariant', 'GenerateDoc', function($scope, $timeout, FileUploader, SearchVariant, GenerateDoc) {
     var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
-        
-        $scope.init = function() {
-            $scope.sheets = {
-                    length: 0,
-                    attr: ['sheet1'],
-                    arr: {}
-            };
-            $scope.progress = {
-                value: 0,
-                dynamic: 0,
-                max: 0
-            };
-            $scope.regerating = false;
-            $scope.generateIndex = -1;
+    var specialKeyChars = '#$%';
+    
+    $scope.init = function() {
+        initParams();
     };
+    
+    function initParams() {
+        $scope.sheets = {
+                length: 0,
+                attr: ['sheet1'],
+                arr: {}
+        };
+        $scope.progress = {
+            value: 0,
+            dynamic: 0,
+            max: 0
+        };
+        //if file selected
+        $scope.fileSelected = false;
         
+        //one worker running
+        $scope.generating = false;
+        
+        //all workering running
+        $scope.working = false;
+        $scope.generateIndex = -1;
+    }
+    
     $scope.generate = function() {
         var worker = [],
                     i = -1;
@@ -41,6 +53,11 @@ angular.module('webappApp')
                     });
         }
             $scope.workers = worker;
+            $scope.working = true;
+            $scope.progress.value = 0.5;
+            $scope.progress.dynamic = 0;
+            $scope.progress.max = worker.length;
+            $scope.generateIndex = -1;
             generateReports();
     };
 
@@ -58,12 +75,14 @@ angular.module('webappApp')
         function generateReports() {
             console.log("run ---");
             $timeout(function () {
-                if(!$scope.regerating) {
+                if(!$scope.generating) {
                     $scope.generateIndex++; 
                     if ($scope.generateIndex < $scope.workers.length) { 
                         var worker = $scope.workers[$scope.generateIndex];
-                        $scope.regerating = true;
+                        $scope.generating = true;
                         getAnnotation(alterationProcee(worker.gene), alterationProcee(worker.alteration), alterationProcee(worker.tumorType));
+                    }else {
+                        $scope.working = false;
                     }
                 }else {
                     generateReports();
@@ -206,7 +225,7 @@ angular.module('webappApp')
             reportParams.email = 'jackson.zhang.828@gmail.com';
             
             GenerateDoc.getDoc(reportParams).success(function(data) {
-                $scope.regerating = false;
+                $scope.generating = false;
                 $scope.progress.dynamic += 1;
                 $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
                 generateReports();
@@ -256,7 +275,7 @@ angular.module('webappApp')
             
             for(var versionKey in versions) {
                 var version = versions[versionKey];
-                version.version.nccn_special = 'Version: ' + versionKey + ', Cancer type: ' + tumorType;
+                version.nccn_special = 'Version: ' + versionKey + ', Cancer type: ' + tumorType;
                 value.push(version);
             }
             
@@ -351,13 +370,13 @@ angular.module('webappApp')
                     _key = _key.substr(0, _key.length-3);
 
                     if(object.hasOwnProperty(_key)) {
-                        console.log('key duplicated: ' + _key);
-                    }else {
-                        object[_key] = [{
-                            'level of evidence': _subDatum.level_of_evidence_for_patient_indication.level,
-                            'description': _subDatum.description
-                        }];
+                        _key+=specialKeyChars;
                     }
+                    object[_key] = [{
+                        'level of evidence': _subDatum.level_of_evidence_for_patient_indication.level,
+                        'description': _subDatum.description
+                    }];
+                    
                 }
             }
         return object;
@@ -497,8 +516,9 @@ angular.module('webappApp')
                         hasdrugs = true;
                     }
                     for(var _key in object) {
-                        var _object = {};
-                        _object[_key] = object[_key];
+                        var _object = {},
+                            _newKey = _key.replace(specialKeyChars, '');
+                        _object[_newKey] = object[_key];
                         clincialTrials.push(_object);
                         _object = null;
                     }
@@ -587,6 +607,17 @@ angular.module('webappApp')
         }
         return additionalInfo;
     }
+    
+    $scope.deleteItem = deleteItem;
+    
+    function deleteItem(sheetName, sheetArrDatum) {
+        $scope.sheets.arr[sheetName].forEach(function(e, i) {
+            if(e.id === sheetArrDatum.id) {
+                $scope.sheets.arr[sheetName].splice(i,1);
+            }
+        });
+    }
+    
     var uploader = $scope.uploader = new FileUploader();
 
     uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
@@ -594,6 +625,7 @@ angular.module('webappApp')
     };
     uploader.onAfterAddingFile  = function(fileItem) {
         console.info('onAfterAddingFile', fileItem);
+        initParams();
         var reader = new FileReader();
         reader.onload = function(e) {
             var data = e.target.result;
@@ -613,9 +645,10 @@ angular.module('webappApp')
                 fileAttrs[sheetName] = ['gene', 'alteration', 'tumorType'];
                 json.forEach(function(e,i){
                     var datum = {
-                        gene: '',
-                        alteration: '',
-                        tumorType: ''
+                        'id': sheetName + '-' + i,
+                        'gene': '',
+                        'alteration': '',
+                        'tumorType': ''
                     };
 
                     for(var key in e) {
@@ -639,6 +672,7 @@ angular.module('webappApp')
                 $scope.progress.dynamic = 0;
                 $scope.progress.value = 0;
                 $scope.progress.max = totalRecord;
+            $scope.fileSelected = true;
             $scope.$apply();
             /* DO SOMETHING WITH workbook HERE */
         };
