@@ -1,0 +1,33 @@
+{
+  "name": "jszip",
+  "version": "2.4.0",
+  "homepage": "http://stuartk.com/jszip",
+  "authors": [
+    "Stuart Knightley <stuart@stuartk.com>"
+  ],
+  "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
+  "main": "dist/jszip.js",
+  "keywords": [
+    "zip",
+    "deflate",
+    "inflate"
+  ],
+  "license": "MIT or GPLv3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "2.4.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.4.0",
+    "commit": "54efacd6a198ade6a2b04d08612cce7b7a13957f"
+  },
+  "_source": "git://github.com/Stuk/jszip.git",
+  "_target": "~2.4.0",
+  "_originalSource": "Stuk/jszip",
+  "_direct": true
+}
