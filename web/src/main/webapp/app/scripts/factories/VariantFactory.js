@@ -27,7 +27,6 @@ angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http)
             }
         }
         _url = _url.substring(0, _url.length - 1);
-        console.log(_url);
         return $http.get(_url);
     }
 
