@@ -167,7 +167,8 @@ public class VariantAnnotationXMLController {
             }
             sb.append("</effect>\n");
             sb.append("    <description>");
-            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+            if (ev.getDescription()!=null)
+                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
             sb.append("</description>\n");
             if (ev!=null) {
                 exportRefereces(ev, sb, "    ");
