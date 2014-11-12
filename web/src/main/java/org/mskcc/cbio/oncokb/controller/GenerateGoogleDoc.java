@@ -76,7 +76,7 @@ public class GenerateGoogleDoc {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
             Date date = new Date();
             String dateString = dateFormat.format(date);
-            String fileName = jsonObj.getString("geneName") + "_" + jsonObj.getString("mutation") + "_" + jsonObj.getString("alterType");
+            String fileName = jsonObj.getString("geneName") + "_" + jsonObj.getString("mutation") + "_" + jsonObj.getString("diagnosis");
             Drive driveService = GoogleAuth.getDriveService();
             System.out.println("Got drive service");
             File file = new File();

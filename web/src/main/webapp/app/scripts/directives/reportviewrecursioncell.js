@@ -48,7 +48,6 @@ angular.module('webappApp')
 		           return flag;
 		        };
 	  			scope.multiObject = function(obj) {
-	  				console.log(obj);
 	  				var flag = false;
 	  				if(obj && typeof obj === 'object' && Object.keys(obj).length === 2 && Object.keys(obj).indexOf('value') !== -1 && Object.keys(obj).indexOf('cancer_type') !== -1) {
 	  					flag = true;
@@ -58,9 +57,9 @@ angular.module('webappApp')
 	  				return flag;
 	  			};
 	  			scope.show = function(key, value) {
-	  				var disabledKey = ['description', 'trial'],
+	  				var disabledKey = ['description', 'trial', 'title', 'nccn special'],
   					str = '';
-
+                                
 	  				if(disabledKey.indexOf(key.toLowerCase()) === -1) {
 	  					str += key + ': ' + value;
 	  				}else {
