@@ -327,7 +327,7 @@ angular.module('webappApp')
            var flag = true;
            if(obj && typeof obj === 'object') {
              for(var key in obj) {
-               if(typeof obj[key] !== 'string') {
+               if(typeof obj[key] !== 'string' && typeof obj[key] !== 'number') {
                  flag = false;
                  break;
                }
@@ -337,44 +337,63 @@ angular.module('webappApp')
            }
            return flag;
         }
+
         function objToArray(obj) {
             var delayAttrs = ['description'];
-            var prioAttrs = ['trial','cancer_type','version'];
-
-            if (!(obj instanceof Object)) {
+            var priorAttrs = ['trial','nccn_special','recommendation category 1 / 2A / 2 / 2A / 2A'];
+            
+            if (!angular.isObject(obj)) {
               return obj;
             }
 
-            
             var keys = Object.keys(obj).filter(function(item) {
                 return item !== '$$hashKey';
             }).sort(function(a,b) {
-                        if( delayAttrs.indexOf(a) !== -1){
-                            return 1;
-                        }else if (delayAttrs.indexOf(b) !== -1) {
-                            return -1;
-                        }else if (prioAttrs.indexOf(a) !== -1) {
-                            return -1;
-                        }else if(prioAttrs.indexOf(b) !== -1) {
+                var delayIndexOfA = delayAttrs.indexOf(a),
+                    delayIndexOfB = delayAttrs.indexOf(b),
+                    priorIndexOfA = priorAttrs.indexOf(a),
+                    priorIndexOfB = priorAttrs.indexOf(b);
+
+                if(priorIndexOfA !== -1 && priorIndexOfB !== -1) {
+                    if(priorIndexOfA <= priorIndexOfB) {
+                        return -1;
+                    }else {
+                        return 1;
+                    }
+                }else if(priorIndexOfA !== -1) {
+                    return -1;
+                }else if(priorIndexOfB !== -1) {
+                    return 1;
+                }else {
+                    if(delayIndexOfA !== -1 && delayIndexOfB !== -1) {
+                        if(delayIndexOfA <= delayIndexOfB) {
                             return 1;
                         }else {
-                            if(a < b) {
-                                return -1;
-                            }else {
-                                return 1;
-                            }
+                            return -1;
                         }
-                    });
+                    }else if(delayIndexOfA !== -1) {
+                        return 1;
+                    }else if(delayIndexOfB !== -1) {
+                        return -1;
+                    }else {
+                        if(a < b) {
+                            return -1;
+                        }else {
+                            return 1;
+                        }
+                    }
+                }
+            });
             
-                var returnArray = keys.map(function (key) {
-                        var _obj = {};
-                        
-                        _obj.key = upperFirstLetter(key);
-                        _obj.value = $scope.findRegex(obj[key]);
-                        return _obj;
-                    });
-                return returnArray;
-                
+            var returnArray = keys.map(function (key) {
+                    var _obj = {};
+                    
+                    _obj.key = upperFirstLetter(key).toString();
+                    _obj.value = $scope.findRegex(obj[key]).toString();
+                    return _obj;
+                });
+
+            return returnArray;
         }
 
         function constructData(data) {

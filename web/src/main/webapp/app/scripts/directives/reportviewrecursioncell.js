@@ -57,10 +57,10 @@ angular.module('webappApp')
 	  				return flag;
 	  			};
 	  			scope.show = function(key, value) {
-	  				var disabledKey = ['description', 'trial', 'title', 'nccn special'],
+	  				var disabledKey = ['description', 'trial', 'title', 'nccn special', 'effect'],
   					str = '';
-
-	  				if(disabledKey.indexOf(key.toLowerCase()) === -1) {
+  					
+  					if(disabledKey.indexOf(key.toLowerCase()) === -1) {
 	  					str += key + ': ' + value;
 	  				}else {
 	  					str += value;

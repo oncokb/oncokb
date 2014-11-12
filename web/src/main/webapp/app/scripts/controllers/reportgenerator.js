@@ -174,12 +174,12 @@ angular.module('webappApp')
             var reportParams = ReportDataService.init(params.hugoSymbol, params.alteration, params.tumorType, relevantCancerType,annotation);
             reportParams.email = 'jackson.zhang.828@gmail.com';
             
-            GenerateDoc.getDoc(reportParams).success(function(data) {
+             GenerateDoc.getDoc(reportParams).success(function(data) {
                 $scope.generating = false;
                 $scope.progress.dynamic += 1;
                 $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
                 generateReports();
-            });
+             });
         });
     }
     

@@ -11,7 +11,7 @@ angular.module('webappApp')
   .factory('GenerateReportDataService', function () {
     var specialKeyChars = '#$%';
     
-    function generateReportData(geneName, alteration, tumorType, relevantCancerType,annotation) {
+    function generateReportData(geneName, alteration, tumorType, relevantCancerType, annotation) {
         var params = {
             "email": "",
             "patientName": "",
@@ -88,9 +88,9 @@ angular.module('webappApp')
             }
 
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category] = _datum[i].description;
+                versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category.toString().trim()] = _datum[i].description;
             }
-            
+
             for(var versionKey in versions) {
                 var version = versions[versionKey];
                 version.nccn_special = 'Version: ' + versionKey + ', Cancer type: ' + tumorType;
@@ -125,7 +125,8 @@ angular.module('webappApp')
     function findApprovedDrug(datum, object, tumorType, key) {
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
-                _key = '';
+                _key = '',
+                _obj = {};
 
             if(typeof key !== 'undefined') {
                 _key = key;
@@ -152,7 +153,13 @@ angular.module('webappApp')
             if(typeof tumorType !== "undefined" && tumorType !== "") {
                 _key += " in " + tumorType;
             }
-            object[_key] = [{'description': _subDatum.description}];
+            if(_subDatum.level_of_evidence_for_patient_indication && _subDatum.level_of_evidence_for_patient_indication.level) {
+                _obj['level of evidence'] = _subDatum.level_of_evidence_for_patient_indication.level;
+            }
+            if(_subDatum.description) {
+                _obj.description = _subDatum.description;
+            }
+            object[_key] = [_obj];
         }
 
         return object;
@@ -179,10 +186,10 @@ angular.module('webappApp')
                                         _key+=_drug.name + " + ";
                                 };
                             }
+
+                            _key = _key.substr(0, _key.length-3);
+                            _key += " & ";
                         }
-                        
-                        _key = _key.substr(0, _key.length-3);
-                        _key += " & ";
                     }
 
                     _key = _key.substr(0, _key.length-3);
@@ -300,8 +307,18 @@ angular.module('webappApp')
             key = "CLINICAL TRIALS MATCHED FOR GENE AND DISEASE";
 
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                    var _subDatum = {};
-                    _subDatum.trial = _datum[i].trial_id + ", " + _datum[i].phase;
+                    var _subDatum = {},
+                        _phase = _datum[i].phase || '';
+
+                    if(_phase.indexOf('/') !== -1) {
+                        var _phases = _phase.split('/');
+                        _phases.forEach(function(e, i, array){
+                            array[i] = e.replace(/phase/gi, '').trim();
+                        });
+                         
+                        _phase = 'Phase ' + _phases.sort().join('/');
+                    }
+                    _subDatum.trial = _datum[i].trial_id + (_phase!==''?(', ' + _phase):'');
                     _subDatum.title = _datum[i].title;
                     _subDatum.description = removeCharsInDescription(_datum[i].description);
                     value.push(_subDatum);
