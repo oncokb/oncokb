@@ -1,6 +1,6 @@
 <div nv-file-drop="" uploader="uploader" filters="queueLimit, customFilter" ng-init="init()">
 
-	<div class="row">
+    <div class="row">
 
         <div class="col-md-3">
 
@@ -23,24 +23,24 @@
             <h3>Upload File Info</h3>
             <p>Number of Sheets: {{ sheets.length }}</p>
             <div ng-repeat="(key, value) in sheets.arr">
-            	<h5>{{key}}</h5>
-            	<table class="table">
-	                <thead>
-	                    <tr>
-	                    	<th ng-repeat="title in sheets.attr[key]">
-	                        	{{title}}
-	                        </th>
+                <h5>{{key}}</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="title in sheets.attr[key]">
+                                {{title}}
+                            </th>
                                 <th></th>
-	                    </tr>
-	                </thead>
-	                <tbody>
-                    	<tr ng-repeat="datum in value" ng-switch on="key">
-                    		<td ng-repeat="columnKey in sheets.attr[key]">{{datum[columnKey]}}
-                    		</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="datum in value" ng-switch on="key">
+                            <td ng-repeat="columnKey in sheets.attr[key]">{{datum[columnKey]}}
+                            </td>
                                 <td><span class="glyphicon glyphicon-remove" ng-click="deleteItem(key, datum)"></span></td>
-	                    </tr>
-	                </tbody>
-	            </table>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             
 
