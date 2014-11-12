@@ -1,21 +1,23 @@
 angular.module('webappApp')
     .controller('VariantCtrl', [
-        '$scope', 
+        '$scope',
         '$filter',
         '$location',
         '$timeout',
         '$rootScope',
         'dialogs',
-        'TumorType', 
+        'Gene',
+        'Alteration',
+        'TumorType',
         'SearchVariant',
         'GenerateDoc',
         'GenerateReportDataService',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, TumorType, SearchVariant, GenerateDoc, ReportDataService) {
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, Gene, Alteration, TumorType, SearchVariant, GenerateDoc, ReportDataService) {
 
         'use strict';
 
         var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
-        
+        var numOfLocks = 2;
         $scope.init = function () {
 
             $scope.rendering = false;
@@ -42,17 +44,17 @@ angular.module('webappApp')
             };
         
             $scope.summaryTableTitles = [
-                'Treatment Implications', 
+                'Treatment Implications',
                 'Clinical Trials',
-                'FDA Approved Drugs in Tumor Type', 
+                'FDA Approved Drugs in Tumor Type',
                 'FDA Approved Drugs in Other Tumor Type',
                 'Additional Information'
             ];
 
             $scope.reportMatchedParams = [
-                'treatment', 
+                'treatment',
                 'clinicalTrials',
-                'fdaApprovedInTumor', 
+                'fdaApprovedInTumor',
                 'fdaApprovedInOtherTumor',
                 'additionalInfo'
             ];
@@ -63,33 +65,62 @@ angular.module('webappApp')
                     'standard_therapeutic_implications'],
                 'Clinical Trials': ['clinical_trial', 'investigational_therapeutic_implications'], 
                 'Additional Information': ['prevalence', 'prognostic_implications'], 
-                'FDA Approved Drugs in Tumor Type': [], 
+                'FDA Approved Drugs in Tumor Type': [],
                 'FDA Approved Drugs in Other Tumor Type': []
             };
 
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
-            $scope.reportViewActive = $scope.hasSelectedTumorType();
-            $scope.regularViewActive = !$scope.hasSelectedTumorType();
-            // TumorType.getFromFile().success(function(data) {
-            TumorType.getFromServer().success(function(data) {
+
+//            Gene.getFromFile().success(function(data) {
+             Gene.getFromServer().success(function(data) {
+                $scope.genes = data;
+                numOfLocks--;
+            });
+
+//            Alteration.getFromFile().success(function(data) {
+             Alteration.getFromServer().success(function(data) {
+                $scope.alterations = data;
+                numOfLocks--;
+            });
+
+//            TumorType.getFromFile().success(function(data) {
+             TumorType.getFromServer().success(function(data) {
                 $scope.tumorTypes = data;
-                if($location.url() !== $location.path()) {
-                    var urlVars = $location.search();
-                    if(urlVars.hasOwnProperty('hugoSymbol')){
-                        $scope.geneName = urlVars.hugoSymbol;
-                    }
-                    if(urlVars.hasOwnProperty('alteration')){
-                        $scope.mutation = urlVars.alteration;
-                    }
-                    if(urlVars.hasOwnProperty('tumorType')){
-                        $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', urlVars['tumorType'].toLowerCase() || '')];
-                    }
-                    $scope.search();
-                }
+                checkUrl();
             });
         };
         
+        function checkUrl() {
+            $timeout(function(){
+                if(numOfLocks === 0) {
+                    if($location.url() !== $location.path()) {
+                        var urlVars = $location.search();
+                        if(urlVars.hasOwnProperty('hugoSymbol')){
+                            $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'hugoSymbol', urlVars.hugoSymbol || '')];
+                        }
+                        if(urlVars.hasOwnProperty('alteration')){
+                            $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'alteration', urlVars.alteration || '')];
+                        }
+                        if(urlVars.hasOwnProperty('tumorType')){
+                            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', urlVars['tumorType'] || '')];
+                        }
+                        $scope.search();
+                    }
+                }else {
+                    checkUrl();
+                }
+            }, 200);
+        }
+
+        $scope.isSearchable = function() {
+            if($scope.gene && $scope.alteration && $scope.gene.hugoSymbol !== '' && $scope.alteration.name !== '') {
+                return true;
+            }else {
+                return false;
+            }
+        }
+
         $scope.fdaApproved = function(drug) {
             if (typeof drug.fda_approved === 'string' && drug.fda_approved.toLowerCase() === 'yes'){
                 return true;
@@ -231,13 +262,13 @@ angular.module('webappApp')
             $scope.regularViewActive = !hasSelectedTumorType;
             var params = {'alterationType': 'MUTATION'};
             var paramsContent = {
-                'hugoSymbol': 'geneName',
-                'alteration': 'mutation'
+                'hugoSymbol': $scope.gene.hugoSymbol || '',
+                'alteration': $scope.alteration.name || ''
             };
 
             for (var key in paramsContent) {
-                if($scope.hasOwnProperty(paramsContent[key]) && $scope[paramsContent[key]] && $scope[paramsContent[key]] !== '') {
-                    params[key] = $scope[paramsContent[key]];
+                if(paramsContent[key] !== '') {
+                    params[key] = paramsContent[key];
                 }
             }
             if(hasSelectedTumorType) {
@@ -277,7 +308,7 @@ angular.module('webappApp')
                     }
                 }
                 
-                $scope.reportParams = ReportDataService.init($scope.geneName, $scope.mutation, (($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:''), $scope.relevantCancerType, $scope.annotation);
+                $scope.reportParams = ReportDataService.init($scope.gene.hugoSymbol, $scope.alteration.name, (($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:''), $scope.relevantCancerType, $scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
             });
         };
@@ -494,8 +525,8 @@ angular.module('webappApp')
         }
 
         $scope.useExample = function() {
-            $scope.geneName = 'BRAF';
-            $scope.mutation = 'V600E';
+            $scope.gene= $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'hugoSymbol', 'BRAF')];
+            $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'name', 'V600E')];
             $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', 'melanoma')];
             $scope.search();
         };

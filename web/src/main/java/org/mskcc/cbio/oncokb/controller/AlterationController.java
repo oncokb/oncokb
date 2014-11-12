@@ -43,7 +43,7 @@ public class AlterationController {
         }
         
         if (genes.isEmpty()) {
-            return Collections.emptyList();
+            genes.addAll(geneBo.findAll());
         }
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();

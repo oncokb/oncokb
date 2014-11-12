@@ -86,7 +86,7 @@ angular.module('webappApp')
                     versions[_datum[i].version] = {};
                 }
             }
-
+            
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                 versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category.toString().trim()] = _datum[i].description;
             }
