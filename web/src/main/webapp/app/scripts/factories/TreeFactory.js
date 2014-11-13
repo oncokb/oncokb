@@ -1,16 +1,16 @@
 angular.module('webappApp').factory('Evidence', ['$http', function ($http) {
-	'use strict';
+    'use strict';
 
     function getFromServer() {
-    	return $http.get('evidence.json');
+        return $http.get('evidence.json');
     }
 
     function getFromFile() {
-    	return $http.get('data/evidence.json');
+        return $http.get('data/evidence.json');
     }
 
     return {
-    	getFromServer: getFromServer,
+        getFromServer: getFromServer,
         getFromFile: getFromFile
     };
 }]);

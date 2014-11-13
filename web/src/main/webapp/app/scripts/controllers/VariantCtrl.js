@@ -6,13 +6,9 @@ angular.module('webappApp')
         '$timeout',
         '$rootScope',
         'dialogs',
-        'Gene',
-        'Alteration',
-        'TumorType',
-        'SearchVariant',
-        'GenerateDoc',
+        'DatabaseConnector',
         'GenerateReportDataService',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, Gene, Alteration, TumorType, SearchVariant, GenerateDoc, ReportDataService) {
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService) {
 
         'use strict';
 
@@ -71,24 +67,21 @@ angular.module('webappApp')
 
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
+            if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
+                $scope.genes = angular.copy(OncoKB.global.genes);
+                $scope.alterations = angular.copy(OncoKB.global.alterations);
+                $scope.tumorTypes = angular.copy(OncoKB.global.tumorTypes);
+            }else {
+                DatabaseConnector.getGeneAlterationTumortype(function(data){
+                    OncoKB.global.genes = angular.copy(data.genes);
+                    OncoKB.global.alterations = angular.copy(data.alterations);
+                    OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
-//            Gene.getFromFile().success(function(data) {
-             Gene.getFromServer().success(function(data) {
-                $scope.genes = data;
-                numOfLocks--;
-            });
-
-//            Alteration.getFromFile().success(function(data) {
-             Alteration.getFromServer().success(function(data) {
-                $scope.alterations = data;
-                numOfLocks--;
-            });
-
-//            TumorType.getFromFile().success(function(data) {
-             TumorType.getFromServer().success(function(data) {
-                $scope.tumorTypes = data;
-                checkUrl();
-            });
+                    $scope.genes = data.genes;
+                    $scope.alterations = data.alterations;
+                    $scope.tumorTypes = data.tumorTypes;
+                });
+            }
         };
         
         function checkUrl() {
@@ -275,8 +268,7 @@ angular.module('webappApp')
                 params['tumorType'] = $scope.selectedTumorType.name;
             }
 
-            // SearchVariant.annotationFromFile(params).success(function(data) {
-            SearchVariant.getAnnotation(params).success(function(data) {
+            DatabaseConnector.searchAnnotation(function(data) {
                 var annotation = {};
                 annotation = processData(xml2json.parser(data).xml);
 
@@ -312,7 +304,7 @@ angular.module('webappApp')
                 
                 $scope.reportParams = ReportDataService.init($scope.gene.hugoSymbol, $scope.alteration.name, (($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:''), $scope.relevantCancerType, $scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
-            });
+            }, params);
         };
 
         function processData(object){
@@ -490,29 +482,21 @@ angular.module('webappApp')
         }
         
         $scope.generateReport = function() {
-//            if(typeof $scope.relevantCancerType !== 'undefined' && $scope.relevantCancerType && $scope.relevantCancerType !== '') {
-                var dlg = dialogs.create('views/emailDialog.html','emailDialogCtrl', 'Test string');
-                dlg.result.then(function(data){
-                    if(typeof data !== 'undefined' && data && data !== '') {
-                        $scope.generaingReport =true;
-                        dlg = dialogs.wait('Sending request','Please wait...');
-                        generating();
-                        var params = googleDocData($scope.reportParams);
-                        params.email = data;
-//                         $timeout(function() {
-//                             console.log(params);
-//                             $scope.generaingReport =false;
-//                         }, 2000)
-                        GenerateDoc.getDoc(params).success(function(data) {
-                            $scope.generaingReport =false;
-                        });
-                    }
-                },function(){
-                  console.log('Did not do anything.');
-                });
-//            }else {
-//                alert('No relevant cancer type can be found. Please recheck your gene name, mutation and selected tumor type.');
-//            }
+            var dlg = dialogs.create('views/emailDialog.html','emailDialogCtrl', 'Test string');
+            dlg.result.then(function(data){
+                if(typeof data !== 'undefined' && data && data !== '') {
+                    $scope.generaingReport =true;
+                    dlg = dialogs.wait('Sending request','Please wait...');
+                    generating();
+                    var params = googleDocData($scope.reportParams);
+                    params.email = data;
+                    DatabaseConnector.googleDoc(function(data) {
+                        $scope.generaingReport =false;
+                    }, params);
+                }
+            },function(){
+              console.log('Did not do anything.');
+            });
         };
 
         function generating() {

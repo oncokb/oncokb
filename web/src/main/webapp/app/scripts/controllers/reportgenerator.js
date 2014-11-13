@@ -8,13 +8,60 @@
  * Controller of the webappApp
  */
 angular.module('webappApp')
-  .controller('ReportgeneratorCtrl', ['$scope', '$timeout' ,'FileUploader', 'SearchVariant', 'GenerateDoc', 'GenerateReportDataService', function($scope, $timeout, FileUploader, SearchVariant, GenerateDoc, ReportDataService) {
+  .controller('ReportgeneratorCtrl', [
+    '$scope',
+    '$timeout' ,
+    'FileUploader',
+    'dialogs',
+    'DatabaseConnector',
+    'GenerateReportDataService', function(
+        $scope,
+        $timeout,
+        FileUploader,
+        dialogs,
+        DatabaseConnector,
+        ReportDataService) {
     var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
+    var uploader; //$scope.uploader -- selected file handler
     
-    $scope.init = function() {
-        initParams();
+    $scope.init = initParams;
+    
+    $scope.generate = function() {
+        var worker = [],
+                    i = -1;
+        for(var sheet in $scope.sheets.arr) {
+            $scope.sheets.arr[sheet].forEach(function(e, i) {
+                var datum = {};
+                for(var key in e) {
+                    if(e.hasOwnProperty(key) && key !== '$$hashkey') {
+                        datum[key] = e[key];
+                    }
+                }
+                worker.push(datum);
+            });
+        }
+        $scope.workers = worker;
+        $scope.working = true;
+        $scope.progress.value = 0.5;
+        $scope.progress.dynamic = 0;
+        $scope.progress.max = worker.length;
+        $scope.generateIndex = -1;
+        generateReports();
     };
-    
+
+    $scope.validate = function(key, content) {
+
+        if(/{tumor|cancer}\stype/i.test(key)){
+
+        }else if(key.toLowerCase().indexOf('alteration') !== -1){
+            content = alterationProcee(content);
+        }
+
+        return content;
+    };
+
+    $scope.deleteItem = deleteItem;
+
     function initParams() {
         $scope.sheets = {
                 length: 0,
@@ -35,59 +82,41 @@ angular.module('webappApp')
         //all workering running
         $scope.working = false;
         $scope.generateIndex = -1;
+
+        if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
+            $scope.genes = angular.copy(OncoKB.global.genes);
+            $scope.alterations = angular.copy(OncoKB.global.alterations);
+            $scope.tumorTypes = angular.copy(OncoKB.global.tumorTypes);
+        }else {
+            DatabaseConnector.getGeneAlterationTumortype(function(data){
+                OncoKB.global.genes = angular.copy(data.genes);
+                OncoKB.global.alterations = angular.copy(data.alterations);
+                OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
+
+                $scope.genes = data.genes;
+                $scope.alterations = data.alterations;
+                $scope.tumorTypes = data.tumorTypes;
+            });
+        }
     }
-    
-    $scope.generate = function() {
-        var worker = [],
-                    i = -1;
-        for(var sheet in $scope.sheets.arr) {
-                    $scope.sheets.arr[sheet].forEach(function(e, i) {
-                        var datum = {};
-                        for(var key in e) {
-                            if(e.hasOwnProperty(key) && key !== '$$hashkey') {
-                                datum[key] = e[key];
-                            }
-                        }
-                        worker.push(datum);
-                    });
-        }
-            $scope.workers = worker;
-            $scope.working = true;
-            $scope.progress.value = 0.5;
-            $scope.progress.dynamic = 0;
-            $scope.progress.max = worker.length;
-            $scope.generateIndex = -1;
-            generateReports();
-    };
 
-    $scope.validate = function(key, content) {
-
-        if(/{tumor|cancer}\stype/i.test(key)){
-
-        }else if(key.toLowerCase().indexOf('alteration') !== -1){
-            content = alterationProcee(content);
-        }
-
-        return content;
-    };
-        
-        function generateReports() {
-            console.log("run ---");
-            $timeout(function () {
-                if(!$scope.generating) {
-                    $scope.generateIndex++; 
-                    if ($scope.generateIndex < $scope.workers.length) { 
-                        var worker = $scope.workers[$scope.generateIndex];
-                        $scope.generating = true;
-                        getAnnotation(alterationProcee(worker.gene), alterationProcee(worker.alteration), alterationProcee(worker.tumorType));
-                    }else {
-                        $scope.working = false;
-                    }
+    function generateReports() {
+        console.log("run ---");
+        $timeout(function () {
+            if(!$scope.generating) {
+                $scope.generateIndex++; 
+                if ($scope.generateIndex < $scope.workers.length) { 
+                    var worker = $scope.workers[$scope.generateIndex];
+                    $scope.generating = true;
+                    getAnnotation(alterationProcee(worker.gene), alterationProcee(worker.alteration), alterationProcee(worker.tumorType));
                 }else {
-                    generateReports();
+                    $scope.working = false;
                 }
-            }, 500);
-        }
+            }else {
+                generateReports();
+            }
+        }, 500);
+    }
         
     function alterationProcee(alteration) {
         if(alteration.indexOf('p.') === 0) {
@@ -138,8 +167,7 @@ angular.module('webappApp')
             'tumorType': tumorType
         };
 
-//      SearchVariant.annotationFromFile(params).success(function(data) {
-         SearchVariant.getAnnotation(params).success(function(data) {
+        DatabaseConnector.searchAnnotation(function(data){
             var annotation = {};
 
             annotation = xml2json.parser(data).xml;
@@ -174,17 +202,15 @@ angular.module('webappApp')
             var reportParams = ReportDataService.init(params.hugoSymbol, params.alteration, params.tumorType, relevantCancerType,annotation);
             reportParams.email = 'jackson.zhang.828@gmail.com';
             
-             GenerateDoc.getDoc(reportParams).success(function(data) {
+            DatabaseConnector.googleDoc(function(){
                 $scope.generating = false;
                 $scope.progress.dynamic += 1;
                 $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
                 generateReports();
-             });
-        });
+            }, reportParams);
+        }, params);
     }
-    
-    $scope.deleteItem = deleteItem;
-    
+
     function deleteItem(sheetName, sheetArrDatum) {
         $scope.sheets.arr[sheetName].forEach(function(e, i) {
             if(e.id === sheetArrDatum.id) {
@@ -192,16 +218,10 @@ angular.module('webappApp')
             }
         });
     }
-    
-    var uploader = $scope.uploader = new FileUploader();
 
-    uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
-        console.info('onWhenAddingFileFailed', item, filter, options);
-    };
-    uploader.onAfterAddingFile  = function(fileItem) {
-        console.info('onAfterAddingFile', fileItem);
-        initParams();
+    function readXLSXfile(file) {
         var reader = new FileReader();
+
         reader.onload = function(e) {
             var data = e.target.result;
 
@@ -209,7 +229,8 @@ angular.module('webappApp')
             var workbook = XLSX.read(data, {type: 'binary'});
             var fileValue = {};
             var fileAttrs = {};
-                var totalRecord = 0;
+            var totalRecord = 0;
+
             for (var i=0, workbookSheetsNum = workbook.SheetNames.length; i < workbookSheetsNum; i++) {
                 var attrL = 0,
                     sheetName = workbook.SheetNames[i];
@@ -239,19 +260,35 @@ angular.module('webappApp')
                     }
                     fileValue[sheetName].push(datum);
                 });
-                        totalRecord += fileValue[sheetName].length;
+                totalRecord += fileValue[sheetName].length;
             }
             $scope.sheets.length = workbookSheetsNum;
             $scope.sheets.attr = fileAttrs;
             $scope.sheets.arr = fileValue;
-                $scope.progress.dynamic = 0;
-                $scope.progress.value = 0;
-                $scope.progress.max = totalRecord;
+            $scope.progress.dynamic = 0;
+            $scope.progress.value = 0;
+            $scope.progress.max = totalRecord;
             $scope.fileSelected = true;
             $scope.$apply();
-            /* DO SOMETHING WITH workbook HERE */
         };
-        reader.readAsBinaryString(fileItem._file);
+
+        reader.readAsBinaryString(file._file);
+    }
+
+    uploader = $scope.uploader = new FileUploader();
+
+    uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
+        console.info('onWhenAddingFileFailed', item, filter, options);
+    };
+    uploader.onAfterAddingFile  = function(fileItem) {
+        console.info('onAfterAddingFile', fileItem);
+        initParams();
+        if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            readXLSXfile(fileItem);
+        }else {
+            dialogs.error('Error', 'Do not support the type of selected file, only XLSX file supported.')
+            uploader.removeFromQueue(fileItem);
+        }
     };
     uploader.onAfterAddingAll = function(addedFileItems) {
         console.info('onAfterAddingAll', addedFileItems);
