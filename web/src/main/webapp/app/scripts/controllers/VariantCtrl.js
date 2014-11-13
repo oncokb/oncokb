@@ -273,7 +273,7 @@ angular.module('webappApp')
             }
             if(hasSelectedTumorType) {
                 params['tumorType'] = $scope.selectedTumorType.name;
-            }                
+            }
 
             // SearchVariant.annotationFromFile(params).success(function(data) {
             SearchVariant.getAnnotation(params).success(function(data) {
