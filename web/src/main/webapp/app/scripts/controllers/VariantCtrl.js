@@ -306,6 +306,8 @@ angular.module('webappApp')
                     }else {
                         $scope.relevantCancerType = null;
                     }
+                }else {
+                    $scope.relevantCancerType = null;
                 }
                 
                 $scope.reportParams = ReportDataService.init($scope.gene.hugoSymbol, $scope.alteration.name, (($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:''), $scope.relevantCancerType, $scope.annotation);
