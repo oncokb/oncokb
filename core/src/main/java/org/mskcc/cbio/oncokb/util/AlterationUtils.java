@@ -32,6 +32,12 @@ public final class AlterationUtils {
             proteinChange = proteinChange.substring(2);
         }
         
+        if (proteinChange.indexOf("[")!=-1) {
+            proteinChange = proteinChange.substring(0, proteinChange.indexOf("["));
+        }
+        
+        proteinChange = proteinChange.trim();
+        
         Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*]?)");
         Matcher m = p.matcher(proteinChange);
         if (m.matches()) {
