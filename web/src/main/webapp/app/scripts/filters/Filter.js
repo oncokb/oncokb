@@ -1,8 +1,14 @@
 angular.module('webappApp').filter('getIndexByObjectNameInArray', function() {
 	'use strict';
-    return function(array, attr, name) {
+    return function(array, name, attr) {
         for (var i = 0, arrayL = array.length; i < arrayL; i++) {
-        	if(array[i][attr].toUpperCase() === name.toUpperCase()) {
+        	var _datum;
+        	if(typeof attr !== 'undefined' && attr) {
+        		_datum = array[i][attr];
+        	}else {
+        		_datum = array[i];
+        	}
+        	if(_datum.toUpperCase() === name.toUpperCase()) {
                 return i;
             }
         }

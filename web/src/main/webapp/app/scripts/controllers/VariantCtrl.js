@@ -68,35 +68,51 @@ angular.module('webappApp')
             $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
             if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
-                $scope.genes = angular.copy(OncoKB.global.genes);
-                $scope.alterations = angular.copy(OncoKB.global.alterations);
-                $scope.tumorTypes = angular.copy(OncoKB.global.tumorTypes);
+                $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
+                // $scope.alterations = getUnique(angular.copy(OncoKB.global.alterations), 'name');
+                $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
             }else {
                 DatabaseConnector.getGeneAlterationTumortype(function(data){
                     OncoKB.global.genes = angular.copy(data.genes);
                     OncoKB.global.alterations = angular.copy(data.alterations);
                     OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
-                    $scope.genes = data.genes;
-                    $scope.alterations = data.alterations;
-                    $scope.tumorTypes = data.tumorTypes;
+                    $scope.genes = getUnique(data.genes, 'hugoSymbol');
+                    // $scope.alterations = getUnique(data.alterations, 'name');
+                    $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
                 });
             }
         };
         
+        function getUnique(data, attr) {
+            var unique = [];
+
+            if(angular.isArray(data)){
+                data.forEach(function(e, i) {
+                    if(unique.indexOf(e[attr]) === -1) {
+                        unique.push(e[attr]);
+                    }
+                });
+                return unique.sort();
+            }else {
+                return null;
+            }
+        }
+
         function checkUrl() {
             $timeout(function(){
                 if(numOfLocks === 0) {
                     if($location.url() !== $location.path()) {
                         var urlVars = $location.search();
                         if(urlVars.hasOwnProperty('hugoSymbol')){
-                            $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'hugoSymbol', urlVars.hugoSymbol || '')];
+                            $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, urlVars.hugoSymbol || '')];
                         }
                         if(urlVars.hasOwnProperty('alteration')){
-                            $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'alteration', urlVars.alteration || '')];
+                            // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, urlVars.alteration || '')];
+                            $scope.alteration = urlVars.alteration;
                         }
                         if(urlVars.hasOwnProperty('tumorType')){
-                            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', urlVars['tumorType'] || '')];
+                            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, urlVars.tumorType || '')];
                         }
                         $scope.search();
                     }
@@ -107,7 +123,7 @@ angular.module('webappApp')
         }
 
         $scope.isSearchable = function() {
-            if($scope.gene && $scope.alteration && $scope.gene.hugoSymbol !== '' && $scope.alteration.name !== '') {
+            if($scope.gene && $scope.alteration) {
                 return true;
             }else {
                 return false;
@@ -255,8 +271,8 @@ angular.module('webappApp')
             $scope.regularViewActive = !hasSelectedTumorType;
             var params = {'alterationType': 'MUTATION'};
             var paramsContent = {
-                'hugoSymbol': $scope.gene.hugoSymbol || '',
-                'alteration': $scope.alteration.name || ''
+                'hugoSymbol': $scope.gene || '',
+                'alteration': $scope.alteration || ''
             };
 
             for (var key in paramsContent) {
@@ -265,7 +281,7 @@ angular.module('webappApp')
                 }
             }
             if(hasSelectedTumorType) {
-                params['tumorType'] = $scope.selectedTumorType.name;
+                params['tumorType'] = $scope.selectedTumorType;
             }
 
             DatabaseConnector.searchAnnotation(function(data) {
@@ -302,7 +318,7 @@ angular.module('webappApp')
                     $scope.relevantCancerType = null;
                 }
                 
-                $scope.reportParams = ReportDataService.init($scope.gene.hugoSymbol, $scope.alteration.name, (($scope.selectedTumorType && $scope.selectedTumorType.name)?$scope.selectedTumorType.name:''), $scope.relevantCancerType, $scope.annotation);
+                $scope.reportParams = ReportDataService.init($scope.gene, $scope.alteration, $scope.selectedTumorType, $scope.relevantCancerType, $scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
             }, params);
         };
@@ -511,9 +527,10 @@ angular.module('webappApp')
         }
 
         $scope.useExample = function() {
-            $scope.gene= $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'hugoSymbol', 'BRAF')];
-            $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'name', 'V600E')];
-            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'name', 'melanoma')];
+            $scope.gene= $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'BRAF')];
+            // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'V600E')];
+            $scope.alteration = 'V600E';
+            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'melanoma')];
             $scope.search();
         };
 
