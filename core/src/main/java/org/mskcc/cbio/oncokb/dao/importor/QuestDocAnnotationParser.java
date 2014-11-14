@@ -393,7 +393,7 @@ public final class QuestDocAnnotationParser {
                     ret.put(ref+var, ref+var);
                 }
             } else {
-                ret.put(part, displayName);
+                ret.put(proteinChange, displayName);
             }
         }
         return ret;
