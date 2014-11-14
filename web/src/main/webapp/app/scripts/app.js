@@ -20,7 +20,8 @@ var oncokbApp = angular
    'localytics.directives',
    'dialogs.main',
    'dialogs.default-translations',
-   'RecursionHelper'
+   'RecursionHelper',
+   'angularFileUpload'
  ])
  .config(function ($routeProvider, dialogsProvider) {
    $routeProvider
@@ -36,9 +37,10 @@ var oncokbApp = angular
        templateUrl: 'views/variant.html',
        controller: 'VariantCtrl'
      })
-     // .when('/', {
-     //   templateUrl: 'home.html'
-     // })
+     .when('/reportGenerator', {
+       templateUrl: 'views/reportgenerator.html',
+       controller: 'ReportgeneratorCtrl'
+     })
      .otherwise({
        redirectTo: '/'
      });
