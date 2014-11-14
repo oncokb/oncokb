@@ -1,13 +1,10 @@
-var treeEvidence = [];
-var processedData;
-
 angular.module('webappApp').controller('TreeCtrl', [
     '$scope',
     '$location',
     '$timeout',
-    'Evidence', 
+    'DatabaseConnector', 
     'AnalysisEvidence', 
-    function ($scope, $location, $timeout, Evidence, AnalysisEvidence) {
+    function ($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence) {
 
     'use strict';
 
@@ -17,29 +14,29 @@ angular.module('webappApp').controller('TreeCtrl', [
         $scope.searchKeywords = '';
         $scope.searchResult = '';
 
-        if(treeEvidence.length === 0) {
-            // Evidence.getFromFile().success(function(data) {
-            Evidence.getFromServer().success(function(data) {
-                treeEvidence = angular.copy(data);
+        if(OncoKB.global.treeEvidence && OncoKB.global.treeEvidence.length > 0) {
+            //Add timeout for letting page change to tab first instead of stucking on previous tab
+            $timeout(function(){
+                drawTree(OncoKB.global.treeEvidence);
+            }, 100);
+        }else {
+            DatabaseConnector.getAllEvidence(function(data) {
+                OncoKB.global.treeEvidence = data;
                 drawTree(data);
             });
-        }else {
-            $timeout(function(){
-                drawTree(treeEvidence);
-            }, 100);
         }
     };
 
     function drawTree(data) {
-        if(typeof processedData === 'undefined' || processedData) {
-            processedData = AnalysisEvidence.init($scope.treeType, data);
+        if(typeof OncoKB.tree.processedData === 'undefined' || OncoKB.tree.processedData) {
+            OncoKB.tree.processedData = AnalysisEvidence.init($scope.treeType, data);
         }
         
         $scope.rendering = true;
-        $scope.genes = processedData.genes;
-        $scope.descriptions = processedData.descriptions;
+        $scope.genes = OncoKB.tree.processedData.genes;
+        $scope.descriptions = OncoKB.tree.processedData.descriptions;
 
-        Tree.init( processedData.treeInfo, $scope.descriptions);
+        Tree.init(OncoKB.tree.processedData.treeInfo, $scope.descriptions);
         
         $scope.rendering = false;
     }

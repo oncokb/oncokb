@@ -7,16 +7,14 @@
     <br />
     <div class="row" id='variantCriteria'>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-            <div class="input-group input-group-sm">
-                <span class="input-group-addon"><b>Gene Name:</b></span>
-                <input type="text" ng-model="geneName" id="variantGeneName" style='width:100%' class="form-control" placeholder="(eg. BRAF)">
-            </div>
+            <select chosen ng-model='gene' id="variantGeneNameDropDown" ng-options='gene.hugoSymbol for gene in genes' allow-single-deselect="true" data-placeholder="Choose a gene (eg. BRAF)">
+            <option value=""></option>
+            </select>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-            <div class="input-group input-group-sm">
-                <span class="input-group-addon"><b>Mutation:</b></span>
-                <input type="text" ng-model="mutation" id="variantMutation" style='width:100%' class="form-control" placeholder="(eg. V600E)">
-            </div>
+            <select chosen ng-model='alteration' id="variantMutationDropDown" ng-options='alteration.name for alteration in alterations' allow-single-deselect="true" data-placeholder="Choose a mutation (eg. V600E)">
+            <option value=""></option>
+            </select>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
             <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType.name for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
@@ -25,7 +23,7 @@
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
             <div class="btn-group btn-group-sm" style='width:100%'>
-                <button ng-class="{'halfSizeButton': !annotation, 'oneThirdSizeButton': annotation}" id="searchVariantBtn" type="button" ng-disabled="rendering" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><img ng-show="rendering" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
+                <button ng-class="{'halfSizeButton': !annotation, 'oneThirdSizeButton': annotation}" id="searchVariantBtn" type="button" ng-disabled="rendering || !isSearchable()" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><img ng-show="rendering" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
                 <button ng-class="{'halfSizeButton': !annotation, 'oneThirdSizeButton': annotation}" id="useExampleBtn" type="button" ng-disabled="rendering" ng-click="useExample()" class="btn btn-default"><span ng-hide="rendering">Example</span><img ng-show="rendering" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
                 <button ng-class="{'oneThirdSizeButton': true}" id="generateReport" type="button" ng-disabled="generaingReport" ng-show="annotation" ng-click="generateReport()" class="btn btn-default"><span ng-hide="generaingReport">Report</span><img ng-show="generaingReport" src="http://www.bba-reman.com/images/fbloader.gif"/></button>
             </div>
@@ -43,8 +41,8 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{geneName}}</td>
-                        <td>{{mutation}}</td>
+                        <td>{{gene.hugoSymbol}}</td>
+                        <td>{{alteration.name}}</td>
                         <td>{{selectedTumorType.name}}</td>
                     </tr>
                 </tbody>

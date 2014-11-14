@@ -15,6 +15,40 @@ angular.module('webappApp').factory('TumorType', ['$http',  function ($http) {
     };
 }]);
 
+angular.module('webappApp').factory('Gene', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('gene.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/gene.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
+angular.module('webappApp').factory('Alteration', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('alteration.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/alteration.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
 angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {

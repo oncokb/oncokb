@@ -74,9 +74,6 @@ table.colorHeader thead tr{
 .variantDisplayResult .icon.iconExpand{
     display: inline-block;
 }
-#tumorTypesDropDown {
-  width: 100%;
-}
 
 rect {
   fill: none;
@@ -203,6 +200,13 @@ a:hover {
 
 //Make sure the chosen dropdown always 100% no matter how the bower size changes
 #tumorTypesDropDown_chosen {
+  width: 100% !important;
+}
+#variantGeneNameDropDown_chosen {
+  width: 100% !important;
+}
+
+#variantMutationDropDown_chosen {
   width: 100% !important;
 }
 
