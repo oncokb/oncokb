@@ -23,6 +23,7 @@ angular.module('webappApp')
         ReportDataService) {
     var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
     var uploader; //$scope.uploader -- selected file handler
+    var noMatchSeperator = '(Not exists)';
     
     $scope.init = initParams;
     
@@ -34,7 +35,7 @@ angular.module('webappApp')
                 var datum = {};
                 for(var key in e) {
                     if(e.hasOwnProperty(key) && key !== '$$hashkey') {
-                        datum[key] = e[key];
+                        datum[key] = e[key].replace(noMatchSeperator, '').trim();
                     }
                 }
                 worker.push(datum);
@@ -47,17 +48,6 @@ angular.module('webappApp')
         $scope.progress.max = worker.length;
         $scope.generateIndex = -1;
         generateReports();
-    };
-
-    $scope.validate = function(key, content) {
-
-        if(/{tumor|cancer}\stype/i.test(key)){
-
-        }else if(key.toLowerCase().indexOf('alteration') !== -1){
-            content = alterationProcee(content);
-        }
-
-        return content;
     };
 
     $scope.deleteItem = deleteItem;
@@ -84,19 +74,34 @@ angular.module('webappApp')
         $scope.generateIndex = -1;
 
         if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
-            $scope.genes = angular.copy(OncoKB.global.genes);
-            $scope.alterations = angular.copy(OncoKB.global.alterations);
-            $scope.tumorTypes = angular.copy(OncoKB.global.tumorTypes);
+            $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
+            $scope.alterations = getUnique(angular.copy(OncoKB.global.alterations), 'name');
+            $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
         }else {
             DatabaseConnector.getGeneAlterationTumortype(function(data){
                 OncoKB.global.genes = angular.copy(data.genes);
                 OncoKB.global.alterations = angular.copy(data.alterations);
                 OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
-                $scope.genes = data.genes;
-                $scope.alterations = data.alterations;
-                $scope.tumorTypes = data.tumorTypes;
+                $scope.genes = getUnique(data.genes, 'hugoSymbol');
+                $scope.alterations = getUnique(data.alterations, 'name');
+                $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
             });
+        }
+    }
+
+    function getUnique(data, attr) {
+        var unique = [];
+
+        if(angular.isArray(data)){
+            data.forEach(function(e, i) {
+                if(unique.indexOf(e[attr]) === -1) {
+                    unique.push(e[attr]);
+                }
+            });
+            return unique.sort();
+        }else {
+            return null;
         }
     }
 
@@ -108,7 +113,7 @@ angular.module('webappApp')
                 if ($scope.generateIndex < $scope.workers.length) { 
                     var worker = $scope.workers[$scope.generateIndex];
                     $scope.generating = true;
-                    getAnnotation(alterationProcee(worker.gene), alterationProcee(worker.alteration), alterationProcee(worker.tumorType));
+                    getAnnotation(worker.gene, worker.alteration, worker.tumorType);
                 }else {
                     $scope.working = false;
                 }
@@ -118,8 +123,8 @@ angular.module('webappApp')
         }, 500);
     }
         
-    function alterationProcee(alteration) {
-        if(alteration.indexOf('p.') === 0) {
+    function trimAlteration(alteration) {
+        if(S(alteration).startsWith('p.')) {
             alteration = alteration.slice(2);
         }
 
@@ -219,6 +224,37 @@ angular.module('webappApp')
         });
     }
 
+    function check(datum, checkV, attr) {
+        var similarity = [],
+            same = false;
+
+        for (var i = 0, length = $scope[checkV].length; i < length; i++) {
+            var _datum;
+
+            if(typeof attr !== 'undefined' && attr) {
+                _datum = $scope[checkV][i][attr];
+            }else {
+                _datum = $scope[checkV][i];
+            }
+           
+
+            if(datum.toString().toUpperCase() === _datum.toString().toUpperCase()) {
+                datum = _datum;
+                same = true;
+                break;
+            }else {
+                var lavenshtein = new Levenshtein(datum, _datum);
+                similarity.push(lavenshtein.distance);
+            }
+        }
+
+        if(same) {
+            return datum;
+        }else {
+            return datum + ' ' + noMatchSeperator;
+        }
+    }
+
     function readXLSXfile(file) {
         var reader = new FileReader();
 
@@ -250,11 +286,14 @@ angular.module('webappApp')
                     for(var key in e) {
                         if (e.hasOwnProperty(key)) {
                             if(/gene/i.test(key)) {
-                                datum.gene = e[key];
+                                var _gene = check(e[key], 'genes');
+                                datum.gene = _gene;
                             }else if(/alteration/i.test(key)) {
-                                datum.alteration = e[key];
+                                var _alteration = check(trimAlteration(e[key]), 'alterations');
+                                datum.alteration = _alteration;
                             }else if(/tumor/i.test(key)) {
-                                datum.tumorType = e[key];
+                                var _tumorType = check(e[key], 'tumorTypes');
+                                datum.tumorType = _tumorType;
                             }
                         }
                     }
