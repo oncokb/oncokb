@@ -50,7 +50,7 @@ angular.module('webappApp')
         params.treatment = _treatment.length > 0 ? _treatment : "";
         var _fdaInfo = constructfdaInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
-        params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.approved : "";
+        params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.nonApproved : "";
         var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
@@ -86,7 +86,7 @@ angular.module('webappApp')
                     versions[_datum[i].version] = {};
                 }
             }
-
+            
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                 versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category.toString().trim()] = _datum[i].description;
             }
@@ -150,14 +150,14 @@ angular.module('webappApp')
 
             _key = _key.substr(0, _key.length-3);
 
-            if(typeof tumorType !== "undefined" && tumorType !== "") {
-                _key += " in " + tumorType;
-            }
             if(_subDatum.level_of_evidence_for_patient_indication && _subDatum.level_of_evidence_for_patient_indication.level) {
                 _obj['level of evidence'] = _subDatum.level_of_evidence_for_patient_indication.level;
             }
             if(_subDatum.description) {
                 _obj.description = _subDatum.description;
+            }
+            if(typeof tumorType !== "undefined" && tumorType !== "") {
+                _obj.cancer_type = tumorType;
             }
             object[_key] = [_obj];
         }
@@ -260,7 +260,7 @@ angular.module('webappApp')
                 }
             }
         }
-
+        
         if(annotation.cancer_type && relevantCancerType && relevantCancerType.type) {
             object = {};
 
@@ -283,7 +283,7 @@ angular.module('webappApp')
 
             for(var _key in object) {
                 var _object = {};
-                _object[_key] = object[_key]
+                _object[_key] = object[_key];
                 fdaNonApproved.push(_object);
                 _object = null;
             }

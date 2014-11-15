@@ -8,6 +8,21 @@
  *
  * Main module of the application.
  */
+var OncoKB = {};
+
+//Global variables
+OncoKB.global = {};
+//OncoKB.global.genes
+//OncoKB.global.alterations
+//OncoKB.global.tumorTypes
+//OncoKB.global.treeEvidence
+//OncoKB.global.processedData
+
+//Variables for tree tab
+OncoKB.tree = {};
+//processedData
+
+
 var oncokbApp = angular
  .module('webappApp', [
    'ngAnimate',

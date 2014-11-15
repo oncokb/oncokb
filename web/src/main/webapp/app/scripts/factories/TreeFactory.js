@@ -1,16 +1,16 @@
 angular.module('webappApp').factory('Evidence', ['$http', function ($http) {
-	'use strict';
+    'use strict';
 
     function getFromServer() {
-    	return $http.get('evidence.json');
+        return $http.get('evidence.json');
     }
 
     function getFromFile() {
-    	return $http.get('data/evidence.json');
+        return $http.get('data/evidence.json');
     }
 
     return {
-    	getFromServer: getFromServer,
+        getFromServer: getFromServer,
         getFromFile: getFromFile
     };
 }]);
@@ -31,7 +31,7 @@ angular.module('webappApp').factory('AnalysisEvidence', function() {
             treeType = type;
         }
         if(typeof data !== 'undefined') {
-            jsonData = angular.copy(data);
+            jsonData = data;
             jsonDataL = jsonData.length;
         }
 
@@ -48,52 +48,47 @@ angular.module('webappApp').factory('AnalysisEvidence', function() {
         };
     }
     
-    function initTreeTreatments(_datum, treeInfodatum) {
-        var _treeInfodatum = angular.copy(treeInfodatum);
-
-        for(var j = 0, treatmentsL = _datum.treatments.length; j < treatmentsL; j++) {
-            var _treatmentName = _datum.treatments[j].drugs[0].drugName || '';
+    function initTreeTreatments(datum, treeInfodatum) {
+        for(var j = 0, treatmentsL = datum.treatments.length; j < treatmentsL; j++) {
+            var _treatmentName = datum.treatments[j].drugs[0].drugName || '';
             var _datumName = '';
 
-            for(var m = 1, _drugsL = _datum.treatments[j].drugs.length; m < _drugsL; m++) {
-                _treatmentName += ',' + _datum.treatments[j].drugs[m].drugName;
+            for(var m = 1, _drugsL = datum.treatments[j].drugs.length; m < _drugsL; m++) {
+                _treatmentName += ',' + datum.treatments[j].drugs[m].drugName;
             }
-            _treeInfodatum.treatment = _treatmentName;
-            for( var _key in _treeInfodatum) {
-                _datumName += _treeInfodatum[_key] + ',';
+            treeInfodatum.treatment = _treatmentName;
+            for( var _key in treeInfodatum) {
+                _datumName += treeInfodatum[_key] + ',';
             }
-            treeInfoDul[_datumName] = _treeInfodatum;
+            treeInfoDul[_datumName] = treeInfodatum;
         }
-        return _treeInfodatum;
+        return treeInfodatum;
     }
 
-    function initTreeAlteration(_datum, _treeInfo) {
-        var _datumName = '',
-            _treeInfoDatum = angular.copy(_treeInfo);
+    function initTreeAlteration(datum, treeInfo) {
+        var _datumName = '';
 
-        if( _datum.tumorType &&
-            _datum.tumorType.name) {
-            _treeInfoDatum.tumorType = _datum.tumorType.name;
+        if( datum.tumorType &&
+            datum.tumorType.name) {
+            treeInfo.tumorType = datum.tumorType.name;
             
-            if( _datum.treatments &&
-                _datum.treatments.length > 0) {
-                initTreeTreatments(_datum, _treeInfoDatum);
+            if( datum.treatments &&
+                datum.treatments.length > 0) {
+                initTreeTreatments(datum, treeInfo);
             }else {
-                for( var _key in _treeInfoDatum) {
-                    _datumName += _treeInfoDatum[_key] + ',';
+                for( var _key in treeInfo) {
+                    _datumName += treeInfo[_key] + ',';
                 }
-                treeInfoDul[_datumName] = _treeInfoDatum;
+                treeInfoDul[_datumName] = treeInfo;
                 _key = null;
             }
         }else {
-            for( var _key in _treeInfoDatum) {
-                _datumName += _treeInfoDatum[_key] + ',';
+            for( var _key in treeInfo) {
+                _datumName += treeInfo[_key] + ',';
             }
-            treeInfoDul[_datumName] = _treeInfoDatum;
+            treeInfoDul[_datumName] = treeInfo;
             _key = null;
         }
-        _datumName = null;
-        _treeInfoDatum = null;
     }
         
     function generateTreeInfo() {
@@ -204,19 +199,17 @@ angular.module('webappApp').factory('AnalysisEvidence', function() {
 
                 _datum = null;
             }
-            _geneDatum = null;
+            // _geneDatum = null;
         }
     }
     
     function initDesTreatments(datum, attrDatum, _geneName, _altName, _tumorTypeName) {
-        var _treatmentsName = '',
-            _datum = angular.copy(datum),
-            _attrDatum = angular.copy(attrDatum);
+        var _treatmentsName = '';
 
-        for(var j = 0, _treatmentsL = _datum.treatments.length; j < _treatmentsL; j++){
-            _treatmentsName = _datum.treatments[j].drugs[0].drugName || '';
-            for(var m = 1, _drugsL = _datum.treatments[j].drugs.length; m < _drugsL; m++) {
-                _treatmentsName += ',' + _datum.treatments[j].drugs[m].drugName;
+        for(var j = 0, _treatmentsL = datum.treatments.length; j < _treatmentsL; j++){
+            _treatmentsName = datum.treatments[j].drugs[0].drugName || '';
+            for(var m = 1, _drugsL = datum.treatments[j].drugs.length; m < _drugsL; m++) {
+                _treatmentsName += ',' + datum.treatments[j].drugs[m].drugName;
             }
             if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty(_treatmentsName)){
                 description[_geneName][_altName][_tumorTypeName][_treatmentsName] = {};
@@ -225,29 +218,28 @@ angular.module('webappApp').factory('AnalysisEvidence', function() {
                 description[_geneName][_altName][_tumorTypeName][_treatmentsName].description = [];
             }
 
-            description[_geneName][_altName][_tumorTypeName][_treatmentsName].description.push(_attrDatum);
+            description[_geneName][_altName][_tumorTypeName][_treatmentsName].description.push(attrDatum);
         }
     }
     
     function initDesTumorType(datum, attrDatum, _geneName, _altName) {
-        var _datum = angular.copy(datum),
-            _attrDatum = angular.copy(attrDatum),
-            _tumorTypeName = _datum.tumorType.name;
+        var _tumorTypeName = datum.tumorType.name;
         
         if(!description[_geneName][_altName].hasOwnProperty(_tumorTypeName)){
             description[_geneName][_altName][_tumorTypeName] = {};
         }
 
-        if(_datum.treatments && _datum.treatments.length > 0) {
-            initDesTreatments(_datum, _attrDatum, _geneName, _altName, _tumorTypeName);
+        if(datum.treatments && datum.treatments.length > 0) {
+            initDesTreatments(datum, attrDatum, _geneName, _altName, _tumorTypeName);
         }else {
 
             if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty('description')) {
                 description[_geneName][_altName][_tumorTypeName].description = [];
             }
-            description[_geneName][_altName][_tumorTypeName].description.push(_attrDatum);
+            description[_geneName][_altName][_tumorTypeName].description.push(attrDatum);
         }
     }
+    
     function initDesAlterations(_datum, _attrDatum, _geneName, _altName) {
         if(!description[_geneName].hasOwnProperty(_altName)){
             description[_geneName][_altName] = {};
