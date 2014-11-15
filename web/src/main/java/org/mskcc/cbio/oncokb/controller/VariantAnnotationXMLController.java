@@ -139,7 +139,7 @@ public class VariantAnnotationXMLController {
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
         
         // summary
-        exportSummary(gene, alterations, alteration, relevantTumorTypes, tumorType, sb);
+        exportSummary(gene, alterations, gene+" "+alteration+" mutation", relevantTumorTypes, tumorType, sb);
         
         // gene background
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
@@ -334,11 +334,11 @@ public class VariantAnnotationXMLController {
             if (oncogenic) {
                 sb.append("The ")
                         .append(queryAlteration)
-                        .append(" mutation is known to be oncogenic. ");
+                        .append(" is known to be oncogenic. ");
             } else {
                 sb.append("It is not known whether the ")
                         .append(queryAlteration)
-                        .append(" mutation oncogenic. ");
+                        .append(" is oncogenic. ");
             }
 
             List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
@@ -387,7 +387,7 @@ public class VariantAnnotationXMLController {
                             .append(gene.getHugoSymbol())
                             .append(" ")
                             .append(queryAlteration)
-                            .append(" mutation is not known. ");
+                            .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
                     sb.append("While NCCN recommend drugs ")
@@ -399,7 +399,7 @@ public class VariantAnnotationXMLController {
                             .append(gene.getHugoSymbol())
                             .append(" ")
                             .append(queryAlteration)
-                            .append(" mutation is not known. ");
+                            .append(" is not known. ");
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
@@ -414,7 +414,7 @@ public class VariantAnnotationXMLController {
                                 .append(gene.getHugoSymbol())
                                 .append(" ")
                                 .append(queryAlteration)
-                                .append(" mutations is not known. ");
+                                .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
                         sb.append("While NCCN recommend ")
@@ -424,7 +424,7 @@ public class VariantAnnotationXMLController {
                                 .append(gene.getHugoSymbol())
                                 .append(" ")
                                 .append(queryAlteration)
-                                .append(" mutations is not known. ");
+                                .append(" is not known. ");
                     } else {
                         // if there is no FDA or NCCN drugs for the gene at all
                         sb.append("There are no FDA approved or NCCN recommended treatments specifically for ")
@@ -433,7 +433,7 @@ public class VariantAnnotationXMLController {
                                 .append(gene.getHugoSymbol())
                                 .append(" ")
                                 .append(queryAlteration)
-                                .append(" mutations. ");
+                                .append(". ");
                     }
                 }
             }
@@ -839,7 +839,9 @@ public class VariantAnnotationXMLController {
             list.add(entry.getKey()+" "+listToString(new ArrayList<String>(entry.getValue())));
         }
         
-        return listToString(list);
+        String gene = alterations.iterator().next().getGene().getHugoSymbol();
+        
+        return gene + " " + listToString(list) + "mutation" + (list.size()>1?"s":"");
     }
     
     /**
