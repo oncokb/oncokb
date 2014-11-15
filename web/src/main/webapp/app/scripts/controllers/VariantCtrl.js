@@ -41,17 +41,17 @@ angular.module('webappApp')
         
             $scope.summaryTableTitles = [
                 'Treatment Implications',
-                'Clinical Trials',
                 'FDA Approved Drugs in Tumor Type',
                 'FDA Approved Drugs in Other Tumor Type',
+                'Clinical Trials',
                 'Additional Information'
             ];
 
             $scope.reportMatchedParams = [
                 'treatment',
-                'clinicalTrials',
                 'fdaApprovedInTumor',
                 'fdaApprovedInOtherTumor',
+                'clinicalTrials',
                 'additionalInfo'
             ];
                 
