@@ -531,16 +531,18 @@ public class VariantAnnotationXMLController {
             return false;
         }
         
-        if (!clinicalTrial.isOpen()) {
-            return false;
-        }
+//        if (!clinicalTrial.isOpen()) {
+//            return false;
+//        }
+//        
+//        String phase = clinicalTrial.getPhase().toLowerCase();
+//        return phase.contains("phase 1") || 
+//                phase.contains("phase 2") || 
+//                phase.contains("phase 3") || 
+//                phase.contains("phase 4") || 
+//                phase.contains("phase 5");
         
-        String phase = clinicalTrial.getPhase().toLowerCase();
-        return phase.contains("phase 1") || 
-                phase.contains("phase 2") || 
-                phase.contains("phase 3") || 
-                phase.contains("phase 4") || 
-                phase.contains("phase 5");
+        return true;
     }
     
     private void exportClinicalTrial(ClinicalTrial trial, StringBuilder sb, String indent) {
