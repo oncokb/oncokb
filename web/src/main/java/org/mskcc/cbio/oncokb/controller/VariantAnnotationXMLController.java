@@ -383,7 +383,11 @@ public class VariantAnnotationXMLController {
                             .append(", ")
                             .append(" the clinical utility in ")
                             .append(queryTumorType==null?"other":queryTumorType)
-                            .append(" patients is not known. ");
+                            .append(" patients with ")
+                            .append(gene.getHugoSymbol())
+                            .append(" ")
+                            .append(queryAlteration)
+                            .append(" mutation is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
                     sb.append("While NCCN recommend drugs ")
@@ -391,7 +395,11 @@ public class VariantAnnotationXMLController {
                             .append(", ")
                             .append(" the clinical utility in ")
                             .append(queryTumorType==null?"other":queryTumorType)
-                            .append(" patients is not known. ");
+                            .append(" patients with ")
+                            .append(gene.getHugoSymbol())
+                            .append(" ")
+                            .append(queryAlteration)
+                            .append(" mutation is not known. ");
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
