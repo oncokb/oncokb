@@ -175,7 +175,7 @@ angular.module('webappApp')
         DatabaseConnector.searchAnnotation(function(data){
             var annotation = {};
 
-            annotation = xml2json.parser(data).xml;
+            annotation = processData(xml2json.parser(data).xml);
 
             for(var key in annotation) {
                 annotation[key] = formatDatum(annotation[key], key);
@@ -216,6 +216,23 @@ angular.module('webappApp')
         }, params);
     }
 
+    function processData(object) {
+        if(isArray(object)) {
+            object.forEach(function(e, i){
+                e = processData(e);
+            });
+        }else if(isObject(object)) {
+            for(var key in object) {
+                object[key] = processData(object[key]);
+            }
+        }else if(isString(object)) {
+            object = S(object).decodeHTMLEntities().s;
+        }else {
+
+        }
+        return object;
+    }
+    
     function deleteItem(sheetName, sheetArrDatum) {
         $scope.sheets.arr[sheetName].forEach(function(e, i) {
             if(e.id === sheetArrDatum.id) {

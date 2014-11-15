@@ -13,7 +13,7 @@ angular.module('webappApp')
         'use strict';
 
         var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
-        var numOfLocks = 2;
+        
         $scope.init = function () {
 
             $scope.rendering = false;
@@ -41,17 +41,17 @@ angular.module('webappApp')
         
             $scope.summaryTableTitles = [
                 'Treatment Implications',
-                'Clinical Trials',
                 'FDA Approved Drugs in Tumor Type',
                 'FDA Approved Drugs in Other Tumor Type',
+                'Clinical Trials',
                 'Additional Information'
             ];
 
             $scope.reportMatchedParams = [
                 'treatment',
-                'clinicalTrials',
                 'fdaApprovedInTumor',
                 'fdaApprovedInOtherTumor',
+                'clinicalTrials',
                 'additionalInfo'
             ];
                 
@@ -80,6 +80,7 @@ angular.module('webappApp')
                     $scope.genes = getUnique(data.genes, 'hugoSymbol');
                     // $scope.alterations = getUnique(data.alterations, 'name');
                     $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
+                    checkUrl();
                 });
             }
         };
@@ -101,23 +102,19 @@ angular.module('webappApp')
 
         function checkUrl() {
             $timeout(function(){
-                if(numOfLocks === 0) {
-                    if($location.url() !== $location.path()) {
-                        var urlVars = $location.search();
-                        if(urlVars.hasOwnProperty('hugoSymbol')){
-                            $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, urlVars.hugoSymbol || '')];
-                        }
-                        if(urlVars.hasOwnProperty('alteration')){
-                            // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, urlVars.alteration || '')];
-                            $scope.alteration = urlVars.alteration;
-                        }
-                        if(urlVars.hasOwnProperty('tumorType')){
-                            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, urlVars.tumorType || '')];
-                        }
-                        $scope.search();
+                if($location.url() !== $location.path()) {
+                    var urlVars = $location.search();
+                    if(urlVars.hasOwnProperty('hugoSymbol')){
+                        $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, urlVars.hugoSymbol || '')];
                     }
-                }else {
-                    checkUrl();
+                    if(urlVars.hasOwnProperty('alteration')){
+                        // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, urlVars.alteration || '')];
+                        $scope.alteration = urlVars.alteration;
+                    }
+                    if(urlVars.hasOwnProperty('tumorType')){
+                        $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, urlVars.tumorType || '')];
+                    }
+                    $scope.search();
                 }
             }, 200);
         }
