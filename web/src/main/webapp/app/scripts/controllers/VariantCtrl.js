@@ -453,7 +453,7 @@ angular.module('webappApp')
             var returnArray = keys.map(function (key) {
                     var _obj = {};
                     
-                    _obj.key = upperFirstLetter(key).toString();
+                    _obj.key = key;
                     _obj.value = $scope.findRegex(obj[key]).toString();
                     return _obj;
                 });

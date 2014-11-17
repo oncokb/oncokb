@@ -119,7 +119,7 @@ angular.module('webappApp')
       if(dataFromFile) {
         callback('');
       }else {
-        GenerateDoc.getDoc().success(function(data) {
+        GenerateDoc.getDoc(params).success(function(data) {
           callback(data);
         });
       }
