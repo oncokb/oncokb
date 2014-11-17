@@ -118,7 +118,32 @@ angular.module('webappApp')
                 }
             }, 200);
         }
-
+        
+        //Retru whether URL changed
+        function changeUrl(params) {
+            var location = $location.search(),
+                same = true;
+            
+            
+            for(var key in params) {
+                if(!location.hasOwnProperty(key)) {
+                    same = false;
+                    break;
+                }else{
+                    if(location[key] !== params[key]) {
+                        same = false;
+                        break;
+                    }
+                }
+            }
+            if(!same) {
+                $location.search(params).replace();
+                return true;
+            }else {
+                return false;
+            }
+        }
+        
         $scope.isSearchable = function() {
             if($scope.gene && $scope.alteration) {
                 return true;
@@ -260,7 +285,7 @@ angular.module('webappApp')
             }
             return str;
         };
-
+        
         $scope.search = function() {
             var hasSelectedTumorType = $scope.hasSelectedTumorType();
             $scope.rendering = true;
@@ -280,7 +305,9 @@ angular.module('webappApp')
             if(hasSelectedTumorType) {
                 params['tumorType'] = $scope.selectedTumorType;
             }
-
+            
+            changeUrl(params);
+            
             DatabaseConnector.searchAnnotation(function(data) {
                 var annotation = {};
                 annotation = processData(xml2json.parser(data).xml);
@@ -314,7 +341,7 @@ angular.module('webappApp')
                 }else {
                     $scope.relevantCancerType = null;
                 }
-                
+
                 $scope.reportParams = ReportDataService.init($scope.gene, $scope.alteration, $scope.selectedTumorType, $scope.relevantCancerType, $scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
             }, params);

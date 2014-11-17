@@ -50,7 +50,8 @@ var oncokbApp = angular
      })
      .when('/variant', {
        templateUrl: 'views/variant.html',
-       controller: 'VariantCtrl'
+       controller: 'VariantCtrl',
+       reloadOnSearch: false
      })
      .when('/reportGenerator', {
        templateUrl: 'views/reportgenerator.html',
