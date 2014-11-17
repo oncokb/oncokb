@@ -1,0 +1,38 @@
+{
+  "name": "webapp",
+  "version": "2.0.0",
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "angular": "~1.2.0",
+    "json3": "~3.3.1",
+    "es5-shim": "~3.1.0",
+    "bootstrap-sass-official": "~3.2.0",
+    "angular-resource": "~1.2.0",
+    "angular-cookies": "~1.2.0",
+    "angular-sanitize": "~1.2.0",
+    "angular-animate": "~1.2.0",
+    "angular-touch": "~1.2.0",
+    "angular-route": "~1.2.0",
+    "angular-bootstrap": "~0.11.2",
+    "d3": "~3.4.12",
+    "angular-chosen": "*",
+    "bootstrap-chosen": "*",
+    "angular-chosen-localytics": "~1.0.6",
+    "xml2json": "~1.1.1",
+    "angular-dialog-service": "~5.2.5",
+    "deepmerge": "~0.2.9",
+    "angular-recursion": "~1.0.5",
+    "angular-file-upload": "~1.1.5",
+    "jszip": "Stuk/jszip#~2.4.0",
+    "js-xlsx": "~0.7.11",
+    "stringjs": "~2.2.0",
+    "levenshtein": "~1.0.5",
+    "oridomi": "~1.1.5",
+    "fontawesome": "~4.2.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.0",
+    "angular-scenario": "~1.2.0"
+  },
+  "appPath": "app"
+}

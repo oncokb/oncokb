@@ -28,6 +28,5 @@
   },
   "_source": "git://github.com/Stuk/jszip.git",
   "_target": "~2.4.0",
-  "_originalSource": "Stuk/jszip",
-  "_direct": true
+  "_originalSource": "Stuk/jszip"
 }

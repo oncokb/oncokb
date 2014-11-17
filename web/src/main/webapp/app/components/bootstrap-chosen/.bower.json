@@ -21,11 +21,11 @@
   "ignore": [
     "example.*"
   ],
-  "_release": "3537817bdc",
+  "_release": "61ed40742c",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "3537817bdc98fa29c9053097ed2903aabad071cf"
+    "commit": "61ed40742c2de26c53110955dc5ad0ed40cd417f"
   },
   "_source": "git://github.com/alxlit/bootstrap-chosen.git",
   "_target": "*",
