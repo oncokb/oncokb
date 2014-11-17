@@ -28,58 +28,101 @@ angular.module('webappApp')
     var numOfLocks = {},
         data = {};
 
+    //When running locally, set this to true, all servlet will read data from relative files.
+    var dataFromFile = false;
+
     function getAllGene(callback, timestamp) {
-      // Gene.getFromFile().success(function(data) {
-      Gene.getFromServer().success(function(data) {
-        if (timestamp) {
-          numOfLocks[timestamp]--;
-        }
-        callback(data);
-      });
+      if(dataFromFile) {
+        Gene.getFromFile().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }else {
+        Gene.getFromServer().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }
     }
 
     function getAllAlteration(callback, timestamp) {
-      // Alteration.getFromFile().success(function(data) {
-      Alteration.getFromServer().success(function(data) {
-        if (timestamp) {
-          numOfLocks[timestamp]--;
-        }
-        callback(data);
-      });
+      if(dataFromFile) {
+        Alteration.getFromFile().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }else {
+        Alteration.getFromServer().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }
     }
 
     function getAllTumorType(callback, timestamp) {
-      // TumorType.getFromFile().success(function(data) {
-      TumorType.getFromServer().success(function(data) {
-        if (timestamp) {
-          numOfLocks[timestamp]--;
-        }
-        callback(data);
-      });
+      if(dataFromFile) {
+        TumorType.getFromFile().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }else {
+        TumorType.getFromServer().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }
     }
 
     function getAllEvidence(callback, timestamp) {
-      // Evidence.getFromFile().success(function(data) {
-      Evidence.getFromServer().success(function(data) {
-        if (timestamp) {
-          numOfLocks[timestamp]--;
-        }
-        callback(data);
-      });
+      if(dataFromFile) {
+        Evidence.getFromFile().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }else {
+        Evidence.getFromServer().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }
     }
 
     function searchVariant(callback, params) {
-
-      // SearchVariant.annotationFromFile(params).success(function(data) {
-      SearchVariant.getAnnotation(params).success(function(data) {
-        callback(data);
-      });
+      if(dataFromFile) {
+        SearchVariant.annotationFromFile(params).success(function(data) {
+          callback(data);
+        });
+      }else {
+        SearchVariant.getAnnotation(params).success(function(data) {
+          callback(data);
+        });
+      }
     }
 
     function generateGoogleDoc(callback, params) {
-      GenerateDoc.getDoc(params).success(function(data) {
-        callback(data);
-      });
+      if(dataFromFile) {
+        callback('');
+      }else {
+        GenerateDoc.getDoc().success(function(data) {
+          callback(data);
+        });
+      }
     }
 
     function timeout(callback, timestamp) {
