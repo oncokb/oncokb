@@ -8,10 +8,12 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -349,8 +351,11 @@ public class VariantAnnotationXMLController {
                         .append(" ");
             }
 
+            Set<EvidenceType> sensitivityEvidenceTypes = 
+                    EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
+                            EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
             Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
-                    evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), relevantTumorTypes)
+                    evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypes)
             );
             if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                 // if there are FDA approved drugs in the patient tumor type with the variant
@@ -359,22 +364,22 @@ public class VariantAnnotationXMLController {
                         .append(". ");
             } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                 // if there are NCCN guidelines in the patient tumor type with the variant
-                Map<LevelOfEvidence, List<Evidence>> otherEvidencesByLevel = groupEvidencesByLevel(
-                        evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
-                );
-                if (!otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
-                    // FDA approved drugs in other tumor type with the variant
-                    sb.append("There are FDA approved drugs ")
-                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1), queryAlteration))
-                        .append(". ");
-                }
+//                Map<LevelOfEvidence, List<Evidence>> otherEvidencesByLevel = groupEvidencesByLevel(
+//                        evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes)
+//                );
+//                if (!otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
+//                    // FDA approved drugs in other tumor type with the variant
+//                    sb.append("There are FDA approved drugs ")
+//                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1), queryAlteration))
+//                        .append(". ");
+//                }
                 sb.append("NCCN guidelines recommend ")
-                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_2A), queryAlteration))
+                        .append(treatmentsToStringbyTumorType(evidencesByLevel.get(LevelOfEvidence.LEVEL_2A), queryAlteration))
                         .append(". ");
             } else {
                 // no FDA or NCCN in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> evidencesByLevelOtherTumorType = groupEvidencesByLevel(
-                        evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
+                        evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes)
                 );
                 if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                     // if there are FDA approved drugs in other tumor types with the variant
@@ -403,7 +408,7 @@ public class VariantAnnotationXMLController {
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
-                            evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
+                            evidenceBo.findEvidencesByGene(Collections.singleton(gene), sensitivityEvidenceTypes)
                     );
                     if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                         // if there are FDA approved drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
