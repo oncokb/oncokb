@@ -28,6 +28,5 @@
   },
   "_source": "git://github.com/ron-liu/xml2json.git",
   "_target": "~1.1.1",
-  "_originalSource": "xml2json",
-  "_direct": true
+  "_originalSource": "xml2json"
 }

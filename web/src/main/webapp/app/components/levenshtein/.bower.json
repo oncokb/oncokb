@@ -19,6 +19,5 @@
   },
   "_source": "git://github.com/gf3/Levenshtein.git",
   "_target": "~1.0.5",
-  "_originalSource": "levenshtein",
-  "_direct": true
+  "_originalSource": "levenshtein"
 }

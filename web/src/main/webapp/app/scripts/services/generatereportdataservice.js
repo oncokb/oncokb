@@ -55,7 +55,7 @@ angular.module('webappApp')
         params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";
-        
+        console.log(params);
         return params;
     }
 
@@ -88,7 +88,7 @@ angular.module('webappApp')
             }
             
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                versions[_datum[i].version]['recommendation category ' + _datum[i].recommendation_category.toString().trim()] = _datum[i].description;
+                versions[_datum[i].version]['recommendation category'] = _datum[i].description;
             }
 
             for(var versionKey in versions) {
@@ -126,7 +126,8 @@ angular.module('webappApp')
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
                 _key = '',
-                _obj = {};
+                _obj = {},
+                _level;
 
             if(typeof key !== 'undefined') {
                 _key = key;
@@ -151,13 +152,14 @@ angular.module('webappApp')
             _key = _key.substr(0, _key.length-3);
 
             if(_subDatum.level_of_evidence_for_patient_indication && _subDatum.level_of_evidence_for_patient_indication.level) {
-                _obj['level of evidence'] = _subDatum.level_of_evidence_for_patient_indication.level;
+                _level = _subDatum.level_of_evidence_for_patient_indication.level;
+                _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
             if(_subDatum.description) {
                 _obj.description = _subDatum.description;
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
-                _obj.cancer_type = tumorType;
+                _obj['Cancer Type']= tumorType;
             }
             object[_key] = [_obj];
         }
@@ -168,7 +170,8 @@ angular.module('webappApp')
     function findByLevelEvidence(datum, object, tumorType, key) {
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
-                _key = '';
+                _key = '',
+                _level;
 
             if(typeof key !== 'undefined') {
                 _key = key;
@@ -197,9 +200,10 @@ angular.module('webappApp')
                     if(object.hasOwnProperty(_key)) {
                         _key+=specialKeyChars;
                     }
+                    _level = _subDatum.level_of_evidence_for_patient_indication.level;
                     object[_key] = [{
-                        'level of evidence': _subDatum.level_of_evidence_for_patient_indication.level,
-                        'description': _subDatum.description
+                        'Level of evidence': isNaN(_level)?_level.toUpperCase():_level,
+                        'Description': _subDatum.description
                     }];
                     
                 }
@@ -248,12 +252,12 @@ angular.module('webappApp')
                     if(attrsToDisplay[i] === 'sensitive_to') {
                         object = findApprovedDrug(_datum, object);
                     }else {
-                        object = findApprovedDrug(_datum, object, '', displayProcess(attrsToDisplay[i]) + ': ');
+                        object = findApprovedDrug(_datum, object, '', attrsToDisplay[i] + ': ');
                     }
 
                     for(var _key in object) {
                         var _object = {};
-                        _object[_key] = object[_key]
+                        _object[_key] = object[_key];
                         fdaApproved.push(_object);
                         _object = null;
                     }
@@ -273,7 +277,7 @@ angular.module('webappApp')
                                 if(attrsToDisplay[j] === 'sensitive_to') {
                                     object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type);
                                 }else {
-                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type, displayProcess(attrsToDisplay[j]) + ': ');
+                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type, attrsToDisplay[j] + ': ');
                                 }
                             }
                         }
@@ -308,9 +312,9 @@ angular.module('webappApp')
 
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                     var _subDatum = {},
-                        _phase = _datum[i].phase || '';
+                        _phase = _datum[i].phase.toString().trim() || '';
 
-                    if(_phase.indexOf('/') !== -1) {
+                    if(_phase.indexOf('/') !== -1 && _phase !== 'N/A') {
                         var _phases = _phase.split('/');
                         _phases.forEach(function(e, i, array){
                             array[i] = e.replace(/phase/gi, '').trim();
@@ -334,9 +338,11 @@ angular.module('webappApp')
                 value = [];
                 object = {};
                 key = "INVESTIGATIONAL THERAPEUTIC IMPLICATIONS";
-                object[key] = addRecord({'array': ['cancer_type', 'value'], 'object':'description'}, cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description, value);
+                object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description, value);
             
                 clincialTrials.push(object);
+            }else if(Object.keys(cancerTypeInfo.investigational_therapeutic_implications).length > 0){
+                clincialTrials.push({"INVESTIGATIONAL THERAPEUTIC IMPLICATIONS": []});
             }
             
             for (var j = 0; j < attrsToDisplay.length; j++) {
@@ -345,7 +351,7 @@ angular.module('webappApp')
                     if(attrsToDisplay[j] === 'sensitive_to') {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object);
                     }else {
-                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', displayProcess(attrsToDisplay[j]) + ': ');
+                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', attrsToDisplay[j] + ': ');
                     }
                     if(Object.keys(object).length > 0) {
                         hasdrugs = true;
@@ -377,8 +383,8 @@ angular.module('webappApp')
             key = 'LEVELS OF EVIDENCE';
             value =  [
                 {'level 1': 'FDA-approved biomarker in approved indication.'},
-                {'level 2a': 'FDA-approved biomarker in unapproved indication with NCCN-guideline listing.'},
-                {'level 2b': 'FDA-approved biomarker in unapproved indication.'},
+                {'level 2A': 'FDA-approved biomarker in unapproved indication with NCCN-guideline listing.'},
+                {'level 2B': 'FDA-approved biomarker in unapproved indication.'},
                 {'level 3': 'Clinical evidence linking unapproved biomarker to response'},
                 {'level 4': 'Preclinical evidence linking unapproved biomarker to response.'}
             ];
@@ -425,7 +431,7 @@ angular.module('webappApp')
             value = [];
             key = 'MUTATION PREVALENCE';
             object = {};
-            object[key] = addRecord({'array': ['cancer_type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description, value);
+            object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description, value);
             additionalInfo.push(object);
         }
 

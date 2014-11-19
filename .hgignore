@@ -6,4 +6,7 @@ target
 .settings
 nb-configuration.xml
 database.properties
-
+web/node_modules$
+web/dist/
+web/.sass-cache$
+web/.tmp$
