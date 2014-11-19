@@ -18,7 +18,7 @@ module.exports = function (grunt) {
   // Configurable paths for the application
   var appConfig = {
     app: require('./bower.json').appPath || 'app',
-    dist: 'dist'
+    dist: require('./bower.json').distPath || 'dist'
   };
 
   // Define the configuration for all the tasks
@@ -78,8 +78,8 @@ module.exports = function (grunt) {
             return [
               connect.static('.tmp'),
               connect().use(
-                '/app/components',
-                connect.static('./app/components')
+                '<%= yeoman.app %>/components',
+                connect.static('<%= yeoman.app %>/components')
               ),
               connect.static(appConfig.app)
             ];
@@ -94,8 +94,8 @@ module.exports = function (grunt) {
               connect.static('.tmp'),
               connect.static('test'),
               connect().use(
-                '/app/components',
-                connect.static('./app/components')
+                '<%= yeoman.app %>/components',
+                connect.static('<%= yeoman.app %>/components')
               ),
               connect.static(appConfig.app)
             ];
@@ -183,7 +183,7 @@ module.exports = function (grunt) {
         imagesDir: '<%= yeoman.app %>/images',
         javascriptsDir: '<%= yeoman.app %>/scripts',
         fontsDir: '<%= yeoman.app %>/styles/fonts',
-        importPath: './app/components',
+        importPath: '<%= yeoman.app %>/components',
         httpImagesPath: '/images',
         httpGeneratedImagesPath: '/images/generated',
         httpFontsPath: '/styles/fonts',
@@ -398,7 +398,7 @@ module.exports = function (grunt) {
               match: ['/*.js', '/*.css']
           },
           files: {
-              src: ['app/index.html']
+              src: ['<%= yeoman.app %>/index.html']
           }
       }
     }
