@@ -55,7 +55,7 @@ angular.module('webappApp')
         params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";
-        console.log(params);
+        
         return params;
     }
 
