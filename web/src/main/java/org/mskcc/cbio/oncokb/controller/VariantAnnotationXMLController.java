@@ -8,10 +8,12 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -139,7 +141,7 @@ public class VariantAnnotationXMLController {
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
         
         // summary
-        exportSummary(gene, alterations, alteration, relevantTumorTypes, tumorType, sb);
+        exportSummary(gene, alterations, gene+" "+alteration+" mutation", relevantTumorTypes, tumorType, sb);
         
         // gene background
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
@@ -334,11 +336,11 @@ public class VariantAnnotationXMLController {
             if (oncogenic) {
                 sb.append("The ")
                         .append(queryAlteration)
-                        .append(" mutation is known to be oncogenic. ");
+                        .append(" is known to be oncogenic. ");
             } else {
                 sb.append("It is not known whether the ")
                         .append(queryAlteration)
-                        .append(" mutation oncogenic. ");
+                        .append(" is oncogenic. ");
             }
 
             List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
@@ -349,8 +351,11 @@ public class VariantAnnotationXMLController {
                         .append(" ");
             }
 
+            Set<EvidenceType> sensitivityEvidenceTypes = 
+                    EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
+                            EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
             Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
-                    evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), relevantTumorTypes)
+                    evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypes)
             );
             if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                 // if there are FDA approved drugs in the patient tumor type with the variant
@@ -359,22 +364,22 @@ public class VariantAnnotationXMLController {
                         .append(". ");
             } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                 // if there are NCCN guidelines in the patient tumor type with the variant
-                Map<LevelOfEvidence, List<Evidence>> otherEvidencesByLevel = groupEvidencesByLevel(
-                        evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
-                );
-                if (!otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
-                    // FDA approved drugs in other tumor type with the variant
-                    sb.append("There are FDA approved drugs ")
-                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1), queryAlteration))
-                        .append(". ");
-                }
+//                Map<LevelOfEvidence, List<Evidence>> otherEvidencesByLevel = groupEvidencesByLevel(
+//                        evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes)
+//                );
+//                if (!otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
+//                    // FDA approved drugs in other tumor type with the variant
+//                    sb.append("There are FDA approved drugs ")
+//                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1), queryAlteration))
+//                        .append(". ");
+//                }
                 sb.append("NCCN guidelines recommend ")
-                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_2A), queryAlteration))
+                        .append(treatmentsToStringbyTumorType(evidencesByLevel.get(LevelOfEvidence.LEVEL_2A), queryAlteration))
                         .append(". ");
             } else {
                 // no FDA or NCCN in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> evidencesByLevelOtherTumorType = groupEvidencesByLevel(
-                        evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
+                        evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes)
                 );
                 if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                     // if there are FDA approved drugs in other tumor types with the variant
@@ -383,7 +388,11 @@ public class VariantAnnotationXMLController {
                             .append(", ")
                             .append(" the clinical utility in ")
                             .append(queryTumorType==null?"other":queryTumorType)
-                            .append(" patients is not known. ");
+                            .append(" patients with ")
+                            .append(gene.getHugoSymbol())
+                            .append(" ")
+                            .append(queryAlteration)
+                            .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
                     sb.append("While NCCN recommend drugs ")
@@ -391,11 +400,15 @@ public class VariantAnnotationXMLController {
                             .append(", ")
                             .append(" the clinical utility in ")
                             .append(queryTumorType==null?"other":queryTumorType)
-                            .append(" patients is not known. ");
+                            .append(" patients with ")
+                            .append(gene.getHugoSymbol())
+                            .append(" ")
+                            .append(queryAlteration)
+                            .append(" is not known. ");
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
-                            evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY))
+                            evidenceBo.findEvidencesByGene(Collections.singleton(gene), sensitivityEvidenceTypes)
                     );
                     if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                         // if there are FDA approved drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
@@ -406,7 +419,7 @@ public class VariantAnnotationXMLController {
                                 .append(gene.getHugoSymbol())
                                 .append(" ")
                                 .append(queryAlteration)
-                                .append(" mutations is not known. ");
+                                .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
                         sb.append("While NCCN recommend ")
@@ -416,7 +429,7 @@ public class VariantAnnotationXMLController {
                                 .append(gene.getHugoSymbol())
                                 .append(" ")
                                 .append(queryAlteration)
-                                .append(" mutations is not known. ");
+                                .append(" is not known. ");
                     } else {
                         // if there is no FDA or NCCN drugs for the gene at all
                         sb.append("There are no FDA approved or NCCN recommended treatments specifically for ")
@@ -425,7 +438,7 @@ public class VariantAnnotationXMLController {
                                 .append(gene.getHugoSymbol())
                                 .append(" ")
                                 .append(queryAlteration)
-                                .append(" mutations. ");
+                                .append(". ");
                     }
                 }
             }
@@ -523,16 +536,18 @@ public class VariantAnnotationXMLController {
             return false;
         }
         
-        if (!clinicalTrial.isOpen()) {
-            return false;
-        }
+//        if (!clinicalTrial.isOpen()) {
+//            return false;
+//        }
+//        
+//        String phase = clinicalTrial.getPhase().toLowerCase();
+//        return phase.contains("phase 1") || 
+//                phase.contains("phase 2") || 
+//                phase.contains("phase 3") || 
+//                phase.contains("phase 4") || 
+//                phase.contains("phase 5");
         
-        String phase = clinicalTrial.getPhase().toLowerCase();
-        return phase.contains("phase 1") || 
-                phase.contains("phase 2") || 
-                phase.contains("phase 3") || 
-                phase.contains("phase 4") || 
-                phase.contains("phase 5");
+        return true;
     }
     
     private void exportClinicalTrial(ClinicalTrial trial, StringBuilder sb, String indent) {
@@ -831,7 +846,9 @@ public class VariantAnnotationXMLController {
             list.add(entry.getKey()+" "+listToString(new ArrayList<String>(entry.getValue())));
         }
         
-        return listToString(list);
+        String gene = alterations.iterator().next().getGene().getHugoSymbol();
+        
+        return gene + " " + listToString(list) + "mutation" + (list.size()>1?"s":"");
     }
     
     /**
