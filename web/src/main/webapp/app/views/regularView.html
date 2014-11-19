@@ -23,26 +23,15 @@
                         <div ng-if='cancerType.hasOwnProperty(content)' ng-repeat="content in summaryTableTitlesContent[summaryTitle]">
                             <h4>{{displayProcess(content)}}</h4>
                             <!--Repeat by content attributes(sensitive_to, resistant_to)-->
+                            <p ng-if="hasGeneralStatement(cancerType[content])">{{cancerType[content].general_statement.sensitivity.description}}</p>
+                            
+                            <!--show investigational/standared therapy-->
                             <div ng-if="specialAttr.indexOf(content) !== -1" ng-repeat="(key, value) in cancerType[content]">
 
                                 <!--Repeat by number of content attribute(first sensitive_to, second sensitive_to....)-->
-                                <div ng-repeat="senitive in value">
-
-                                    <!--Repeat by treament numbers-->
-                                    <div ng-repeat="treament in senitive.treatment">
-
-                                        <!--Repeat by drug numbers-->
-                                        <div ng-repeat="drug in treament.drug">
-                                            <h5><b>
-                                            <span ng-if="key === 'sensitive_to'">{{drug.name}}</span>
-                                            <span ng-if="key !== 'sensitive_to'">{{displayProcess(key) + ": " + drug.name}}</span>
-                                            </b>
-                                            <img ng-if="fdaApproved(drug)" src='images/approved.svg' class='icon'></img>
-                                            </h5>
-                                            <p ng-if="senitive.level_of_evidence_for_patient_indication.level" ng-bind-html="findRegex(senitive.description + '<br/>Highest Level of Evidence: ' + senitive.level_of_evidence_for_patient_indication.level)"></p>
-                                            <p ng-if="!senitive.level_of_evidence_for_patient_indication.level" ng-bind-html="findRegex(senitive.description)"></p>
-                                        </div>
-                                    </div>
+                                <div ng-if="key!=='general_statement'" ng-repeat="senitive in value">
+                                    <h5 ng-bind-html="getDrugHeader(key, senitive)"></h5>
+                                    <p ng-bind-html="getDrugBody(senitive)"></p>
                                 </div>
                             </div>
                             <div ng-if="content === 'nccn_guidelines'" ng-repeat="nccn in cancerType[content]">

@@ -150,7 +150,12 @@ angular.module('webappApp')
             }
 
             _key = _key.substr(0, _key.length-3);
-
+            
+            
+            while(object.hasOwnProperty(_key)) {
+                _key+=specialKeyChars;
+            }
+                    
             if(_subDatum.level_of_evidence_for_patient_indication && _subDatum.level_of_evidence_for_patient_indication.level) {
                 _level = _subDatum.level_of_evidence_for_patient_indication.level;
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
@@ -171,43 +176,46 @@ angular.module('webappApp')
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
                 _key = '',
+                _obj = {},
                 _level;
 
             if(typeof key !== 'undefined') {
                 _key = key;
             }
-
-            if(_subDatum.level_of_evidence_for_patient_indication 
-                && _subDatum.level_of_evidence_for_patient_indication.level) {
-
-                    if(_subDatum.treatment) {
-                        for (var i = 0; i < _subDatum.treatment.length; i++) {
-                            var _treatment = _subDatum.treatment[i];
-                            if(_treatment.drug) {
-                                for (var j = 0; j < _treatment.drug.length; j++) {
-                                    var _drug = _treatment.drug[j];
-                                        _key+=_drug.name + " + ";
-                                };
-                            }
-
-                            _key = _key.substr(0, _key.length-3);
-                            _key += " & ";
-                        }
+            
+            if(_subDatum.treatment) {
+                for (var i = 0; i < _subDatum.treatment.length; i++) {
+                    var _treatment = _subDatum.treatment[i];
+                    if(_treatment.drug) {
+                        for (var j = 0; j < _treatment.drug.length; j++) {
+                            var _drug = _treatment.drug[j];
+                                _key+=_drug.name + " + ";
+                        };
                     }
 
                     _key = _key.substr(0, _key.length-3);
-
-                    if(object.hasOwnProperty(_key)) {
-                        _key+=specialKeyChars;
-                    }
-                    _level = _subDatum.level_of_evidence_for_patient_indication.level;
-                    object[_key] = [{
-                        'Level of evidence': isNaN(_level)?_level.toUpperCase():_level,
-                        'Description': _subDatum.description
-                    }];
-                    
+                    _key += " & ";
                 }
             }
+
+            _key = _key.substr(0, _key.length-3);
+
+            while(object.hasOwnProperty(_key)) {
+                _key+=specialKeyChars;
+            }
+
+            if(_subDatum.level_of_evidence_for_patient_indication && _subDatum.level_of_evidence_for_patient_indication.level) {
+                _level = _subDatum.level_of_evidence_for_patient_indication.level;
+                _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
+            }
+            if(_subDatum.description) {
+                _obj.description = _subDatum.description;
+            }
+            if(typeof tumorType !== "undefined" && tumorType !== "") {
+                _obj['Cancer Type']= tumorType;
+            }
+            object[_key] = [_obj];
+        }
         return object;
     }
 
@@ -252,7 +260,7 @@ angular.module('webappApp')
                     if(attrsToDisplay[i] === 'sensitive_to') {
                         object = findApprovedDrug(_datum, object);
                     }else {
-                        object = findApprovedDrug(_datum, object, '', attrsToDisplay[i] + ': ');
+                        object = findApprovedDrug(_datum, object, '', displayProcess(attrsToDisplay[i]) + ': ');
                     }
 
                     for(var _key in object) {
@@ -351,7 +359,7 @@ angular.module('webappApp')
                     if(attrsToDisplay[j] === 'sensitive_to') {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object);
                     }else {
-                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', attrsToDisplay[j] + ': ');
+                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', displayProcess(attrsToDisplay[i]) + ': ');
                     }
                     if(Object.keys(object).length > 0) {
                         hasdrugs = true;
