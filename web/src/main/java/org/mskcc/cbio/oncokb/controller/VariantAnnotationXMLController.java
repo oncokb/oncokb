@@ -389,8 +389,6 @@ public class VariantAnnotationXMLController {
                             .append(" the clinical utility in ")
                             .append(queryTumorType==null?"other":queryTumorType)
                             .append(" patients with ")
-                            .append(gene.getHugoSymbol())
-                            .append(" ")
                             .append(queryAlteration)
                             .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
@@ -401,8 +399,6 @@ public class VariantAnnotationXMLController {
                             .append(" the clinical utility in ")
                             .append(queryTumorType==null?"other":queryTumorType)
                             .append(" patients with ")
-                            .append(gene.getHugoSymbol())
-                            .append(" ")
                             .append(queryAlteration)
                             .append(" is not known. ");
                 } else {
@@ -416,8 +412,6 @@ public class VariantAnnotationXMLController {
                                 .append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1), null))
                                 .append(", ")
                                 .append(" the clinical utility for patients with ")
-                                .append(gene.getHugoSymbol())
-                                .append(" ")
                                 .append(queryAlteration)
                                 .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
@@ -426,8 +420,6 @@ public class VariantAnnotationXMLController {
                                 .append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null))
                                 .append(", ")
                                 .append(" the clinical utility for patients with ")
-                                .append(gene.getHugoSymbol())
-                                .append(" ")
                                 .append(queryAlteration)
                                 .append(" is not known. ");
                     } else {
@@ -435,8 +427,6 @@ public class VariantAnnotationXMLController {
                         sb.append("There are no FDA approved or NCCN recommended treatments specifically for ")
                                 .append(queryTumorType)
                                 .append(" patients with ")
-                                .append(gene.getHugoSymbol())
-                                .append(" ")
                                 .append(queryAlteration)
                                 .append(". ");
                     }
@@ -801,11 +791,14 @@ public class VariantAnnotationXMLController {
                 .append(tumorType==null?"":(tumorType+" "))
                 .append("patients with ")
                 .append(alteration==null?alterationsToString(alterations):alteration);
-        if (sb.indexOf("mutations", sb.length()-9)!=-1) {
-                sb.append(" mutations");
+        
+        String ret = sb.toString();
+        String retLow = ret.toLowerCase();
+        if (retLow.endsWith("mutation")||retLow.endsWith("mutations")) {
+            return ret;
         }
         
-        return sb.toString();
+        return ret + " mutations";
     }
     
     private String listToString(List<String> list) {
@@ -848,9 +841,14 @@ public class VariantAnnotationXMLController {
         
         String gene = alterations.iterator().next().getGene().getHugoSymbol();
         
-        return gene + " " + listToString(list) + "mutation" + (list.size()>1?"s":"");
+        String ret = gene + " " + listToString(list);
+        String retLow = ret.toLowerCase();
+        if (retLow.endsWith("mutation")||retLow.endsWith("mutations")) {
+            return ret;
+        }
+        
+        return ret + " mutation" + (list.size()>1?"s":"");
     }
-    
     /**
      * 
      * @param tumorTypes
