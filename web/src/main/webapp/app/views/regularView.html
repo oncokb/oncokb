@@ -35,7 +35,7 @@
                                 </div>
                             </div>
                             <div ng-if="content === 'nccn_guidelines'" ng-repeat="nccn in cancerType[content]">
-                            <p ng-bind-html="generateNccn(nccn)"></p>
+                            <p ng-bind-html="generateNCCN(nccn)"></p>
                             </div>
 
                             <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]" class="annotationClinicalTrial">

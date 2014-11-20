@@ -13,7 +13,7 @@ angular.module('webappApp')
           $scope.depth = 0;
           $scope.hideQuestHeader = true;
           $scope.resultSummaryInfoHeader = ['Gene Name', 'Mutation', 
-            'ALteration Type', 'Mutation Frequency',
+            'Alteration Type', 'Mutation Frequency',
             'Tumor Type Drugs', 'Non-Tumor Type Drugs', 
             'Clinical Trails'];
 

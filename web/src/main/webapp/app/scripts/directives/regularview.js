@@ -56,7 +56,45 @@ angular.module('webappApp')
                 }else {
                     return false;
                 }
-            }
+            };
+            $scope.generateNCCN = function(nccn) {
+                var str = '<i>';
+
+                str += nccn.hasOwnProperty('disease')?('Disease: ' + nccn.disease):'';
+                str += nccn.hasOwnProperty('version')?(' Version: ' + nccn.version):'';
+                str += nccn.hasOwnProperty('pages')?(' Pages: ' + nccn.pages):'';
+
+                str += '</i>';
+                str += nccn.hasOwnProperty('description')?('<br>' + $scope.findRegex(nccn.description) + '<br/>'):'';
+
+                return str;
+            };
+            $scope.generateTrial = function(trial) {
+                var str = '';
+                var purposeStr = '';
+
+                if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
+                    $scope.isCollapsed[trial.trial_id] = {
+                        purpose: true,
+                        eligibility_criteria: true
+                    };
+                }
+
+                str += trial.hasOwnProperty('trial_id')?('TRIAL ID: ' + $scope.findRegex(trial.trial_id) + (trial.hasOwnProperty('phase')?(' / ' + trial.phase): '') + '<br/>'):'';
+                str += trial.hasOwnProperty('title')?('TITLE: ' + trial.title + '<br/>'):'';
+
+                // str += trial.hasOwnProperty('description')?('<br>' + $scope.findRegex(trial.description) + '<br/>'):'';
+                return str;
+            };
+
+            $scope.getCollapseIcon = function(trial, attr) {
+                if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr] ) {
+                    return "images/add.svg";
+                }else{
+                    return "images/subtract.svg";
+                }
+            };
+        
             function hasEvidenceLevel(data) {
                 if(typeof data === 'object' 
                         && data.hasOwnProperty('level_of_evidence_for_patient_indication')
@@ -80,11 +118,8 @@ angular.module('webappApp')
                 displayProcess: '=',
                 findRegex: '=',
                 setCollapsed: '=',
-                getCollapseIcon: '=',
                 isCollapsed: '=',
-                generateTrial: '=',
                 fdaApproved: '=',
-                generateNccn: '=',
                 displayParts: '='
             }
         };
