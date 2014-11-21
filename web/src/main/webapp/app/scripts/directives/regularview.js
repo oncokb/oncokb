@@ -47,7 +47,7 @@ angular.module('webappApp')
                 if(hasEvidenceLevel(data)) {
                     body += 'Highest Level of Evidence: ' + data.level_of_evidence_for_patient_indication.level + '<br/>';
                 }
-                body += data.hasOwnProperty('description')?$scope.findRegex(data.description):'';
+                body += (data.hasOwnProperty('description') && angular.isString(data.description))?$scope.findRegex(data.description):'';
                 return body;
             };
             $scope.hasGeneralStatement = function(data) {
@@ -60,12 +60,12 @@ angular.module('webappApp')
             $scope.generateNCCN = function(nccn) {
                 var str = '<i>';
 
-                str += nccn.hasOwnProperty('disease')?('Disease: ' + nccn.disease):'';
-                str += nccn.hasOwnProperty('version')?(' Version: ' + nccn.version):'';
-                str += nccn.hasOwnProperty('pages')?(' Pages: ' + nccn.pages):'';
+                str += (nccn.hasOwnProperty('disease') && angular.isString(nccn.disease))?('Disease: ' + nccn.disease):'';
+                str += (nccn.hasOwnProperty('version') && angular.isString(nccn.version))?(' Version: ' + nccn.version):'';
+                str += (nccn.hasOwnProperty('pages') && angular.isString(nccn.pages))?(' Pages: ' + nccn.pages):'';
 
                 str += '</i>';
-                str += nccn.hasOwnProperty('description')?('<br>' + $scope.findRegex(nccn.description) + '<br/>'):'';
+                str += (nccn.hasOwnProperty('description') && angular.isString(nccn.description))?('<br>' + $scope.findRegex(nccn.description) + '<br/>'):'';
 
                 return str;
             };

@@ -88,7 +88,9 @@ angular.module('webappApp')
             }
             
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
-                versions[_datum[i].version]['recommendation category'] = _datum[i].description;
+                if(checkDescription(_datum[i])) {
+                    versions[_datum[i].version]['recommendation category'] = _datum[i].description;
+                }
             }
 
             for(var versionKey in versions) {
@@ -101,7 +103,7 @@ angular.module('webappApp')
             treatment.push(object);
         }
         
-        if(cancerTypeInfo.standard_therapeutic_implications && cancerTypeInfo.standard_therapeutic_implications.general_statement) {
+        if(cancerTypeInfo.standard_therapeutic_implications && cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)) {
             value = [];
             object = {};
             key = "STANDARD THERAPEUTIC IMPLICATIONS";
@@ -110,7 +112,7 @@ angular.module('webappApp')
             treatment.push(object);
         }
 
-        if(cancerTypeInfo.prognostic_implications) {
+        if(cancerTypeInfo.prognostic_implications && checkDescription(cancerTypeInfo.prognostic_implications)) {
             value = [];
             key = "PROGNOSTIC IMPLICATIONS";
             object = {};
@@ -208,7 +210,7 @@ angular.module('webappApp')
                 _level = _subDatum.level_of_evidence_for_patient_indication.level;
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
-            if(_subDatum.description) {
+            if(checkDescription(_subDatum)) {
                 _obj.description = _subDatum.description;
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
@@ -332,7 +334,9 @@ angular.module('webappApp')
                     }
                     _subDatum.trial = _datum[i].trial_id + (_phase!==''?(', ' + _phase):'');
                     _subDatum.title = _datum[i].title;
-                    _subDatum.description = removeCharsInDescription(_datum[i].description);
+                    if(checkDescription(_subDatum)) {
+                        _subDatum.description = removeCharsInDescription(_datum[i].description);
+                    }
                     value.push(_subDatum);
             }
             
@@ -359,7 +363,7 @@ angular.module('webappApp')
                     if(attrsToDisplay[j] === 'sensitive_to') {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object);
                     }else {
-                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', displayProcess(attrsToDisplay[i]) + ': ');
+                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', displayProcess(attrsToDisplay[j]) + ': ');
                     }
                     if(Object.keys(object).length > 0) {
                         hasdrugs = true;
@@ -419,6 +423,14 @@ angular.module('webappApp')
         return array;
     }
     
+    function checkDescription(datum) {
+        if(datum && datum.hasOwnProperty('description') && angular.isString(datum.description)) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
     function constructAdditionalInfo(annotation, geneName, mutation, tumorType, relevantCancerType) {
         var additionalInfo = [],
             key = '',
@@ -426,7 +438,7 @@ angular.module('webappApp')
             object = {},
             cancerTypeInfo = relevantCancerType || {};
 
-        if(annotation.gene_annotation) {
+        if(annotation.gene_annotation && checkDescription(annotation.gene_annotation)) {
             value = [];
             key = 'BACKGROUND';
             object = {};
