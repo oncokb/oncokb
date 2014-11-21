@@ -142,12 +142,12 @@ angular.module('webappApp')
                         for (var j = 0; j < _treatment.drug.length; j++) {
                             var _drug = _treatment.drug[j];
                             if(_drug.fda_approved === 'Yes') {
-                                _key+=_drug.name + " + ";
+                                _key+=_drug.name + ' + ';
                             }
                         };
                     }
                     _key = _key.substr(0, _key.length-3);
-                    _key += " & ";
+                    _key += ', ';
                 }
             }
 
@@ -191,12 +191,12 @@ angular.module('webappApp')
                     if(_treatment.drug) {
                         for (var j = 0; j < _treatment.drug.length; j++) {
                             var _drug = _treatment.drug[j];
-                                _key+=_drug.name + " + ";
+                                _key+=_drug.name + ' + ';
                         };
                     }
 
                     _key = _key.substr(0, _key.length-3);
-                    _key += " & ";
+                    _key += ', ';
                 }
             }
 
