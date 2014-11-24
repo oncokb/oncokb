@@ -23,7 +23,7 @@ public class PiHelperDrugImporter {
         throw new AssertionError();
     }
     
-    private static final String DRUG_FILE = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/drugs.tsv";
+    private static final String DRUG_FILE = "/Users/jgao/projects/cbio-portal-data/reference-data/pihelper/drugs.tsv";
     
     public static void main(String[] args) throws IOException {
         List<String> lines = FileUtils.readTrimedLinesStream(
