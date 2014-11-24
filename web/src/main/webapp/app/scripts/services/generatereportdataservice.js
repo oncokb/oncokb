@@ -151,7 +151,7 @@ angular.module('webappApp')
                 }
             }
 
-            _key = _key.substr(0, _key.length-3);
+            _key = _key.substr(0, _key.length-2);
             
             
             while(object.hasOwnProperty(_key)) {
@@ -200,7 +200,7 @@ angular.module('webappApp')
                 }
             }
 
-            _key = _key.substr(0, _key.length-3);
+            _key = _key.substr(0, _key.length-2);
 
             while(object.hasOwnProperty(_key)) {
                 _key+=specialKeyChars;
