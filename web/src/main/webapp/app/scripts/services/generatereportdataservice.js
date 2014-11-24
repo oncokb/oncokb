@@ -162,7 +162,7 @@ angular.module('webappApp')
                 _level = _subDatum.level_of_evidence_for_patient_indication.level;
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
-            if(_subDatum.description) {
+            if(checkDescription(_subDatum)) {
                 _obj.description = _subDatum.description;
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {

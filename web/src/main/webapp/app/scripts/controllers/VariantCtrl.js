@@ -272,7 +272,7 @@ angular.module('webappApp')
             DatabaseConnector.searchAnnotation(function(data) {
                 var annotation = {};
                 annotation = processData(xml2json.parser(data).xml);
-
+                
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
                 }
