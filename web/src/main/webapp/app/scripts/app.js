@@ -38,7 +38,7 @@ var oncokbApp = angular
    'RecursionHelper',
    'angularFileUpload'
  ])
- .config(function ($routeProvider, dialogsProvider) {
+ .config(function ($routeProvider, dialogsProvider, $animateProvider) {
    $routeProvider
      .when('/', {
        templateUrl: 'views/tree.html',
@@ -65,4 +65,6 @@ var oncokbApp = angular
   dialogsProvider.useEscClose(true);
   dialogsProvider.useCopy(false);
   dialogsProvider.setSize('md');
+
+  $animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
  });

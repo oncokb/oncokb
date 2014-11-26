@@ -50,7 +50,7 @@
                     <progressbar class="progress-striped active" value="progress.value" type="info"><span style="color: black"><i>{{progress.dynamic}} / {{progress.max}}</i></span></progressbar>
                 </div>
                 <button type="button" class="btn btn-success btn-s pull-right" ng-disabled="working" ng-click="generate()" ng-disabled="!sheets.length">
-                    <span ng-hide="working"><span class="glyphicon glyphicon-upload"></span> Generate all reports</span><img ng-show="working" src="http://www.bba-reman.com/images/fbloader.gif"/>
+                    <span ng-hide="working"><span class="glyphicon glyphicon-upload"></span> Generate all reports</span><i ng-show="working" class="fa fa-spinner fa-spin"></i>
                 </button>
             </div>
 

@@ -54,7 +54,7 @@ angular.module('webappApp')
                 'clinicalTrials',
                 'additionalInfo'
             ];
-                
+
             $scope.summaryTableTitlesContent = {
                 'Treatment Implications': [
                     'nccn_guidelines',
@@ -172,45 +172,6 @@ angular.module('webappApp')
             $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
         };
 
-        $scope.getCollapseIcon = function(trial, attr) {
-            if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr] ) {
-                return "images/add.svg";
-            }else{
-                return "images/subtract.svg";
-            }
-        };
-
-        $scope.generateTrial = function(trial) {
-            var str = '';
-            var purposeStr = '';
-
-            if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
-                $scope.isCollapsed[trial.trial_id] = {
-                    purpose: true,
-                    eligibility_criteria: true
-                };
-            }
-
-            str += trial.hasOwnProperty('trial_id')?('TRIAL ID: ' + $scope.findRegex(trial.trial_id) + (trial.hasOwnProperty('phase')?(' / ' + trial.phase): '') + '<br/>'):'';
-            str += trial.hasOwnProperty('title')?('TITLE: ' + trial.title + '<br/>'):'';
-            
-            // str += trial.hasOwnProperty('description')?('<br>' + $scope.findRegex(trial.description) + '<br/>'):'';
-            return str;
-        };
-
-        $scope.generateNCCN = function(nccn) {
-            var str = '<i>';
-
-            str += nccn.hasOwnProperty('disease')?('Disease: ' + nccn.disease):'';
-            str += nccn.hasOwnProperty('version')?(' Version: ' + nccn.version):'';
-            str += nccn.hasOwnProperty('pages')?(' Pages: ' + nccn.pages):'';
-
-            str += '</i>';
-            str += nccn.hasOwnProperty('description')?('<br>' + $scope.findRegex(nccn.description) + '<br/>'):'';
-
-            return str;
-        };
-
         $scope.isArray = function(_var) {
             if(_var instanceof Array) {
                 return true;
@@ -311,7 +272,7 @@ angular.module('webappApp')
             DatabaseConnector.searchAnnotation(function(data) {
                 var annotation = {};
                 annotation = processData(xml2json.parser(data).xml);
-
+                
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
                 }
@@ -343,6 +304,7 @@ angular.module('webappApp')
                 }
 
                 $scope.reportParams = ReportDataService.init($scope.gene, $scope.alteration, $scope.selectedTumorType, $scope.relevantCancerType, $scope.annotation);
+//                $scope.regularViewData = regularViewData($scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
             }, params);
         };
@@ -375,6 +337,77 @@ angular.module('webappApp')
             _parmas = constructData(_parmas);
             return _parmas;
         }
+        
+//        function regularViewData(annotation) {
+//            
+//            if(annotation.hasOwnProperty('cancer_type')) {
+//                annotation.cancer_type.forEach(function(e, i){
+//                    var obj = {};
+//                    
+//                    obj['Treatment Implications'] = {
+//                        'nccn_guidelines' : e.nccn_guidelines || '',
+//                        'prognostic_implications': e.prognostic_implications || ''
+//                    };
+//                    
+//                    obj['FDA Approved Drugs in Tumor Type'] = {};
+//                    if(e.hasOwnProperty('standard_therapeutic_implications')){
+//                        if(e.standard_therapeutic_implications.hasOwnProperty('general_statement')) {
+//                            obj['Treatment Implications'].standard_therapeutic_implications = e.standard_therapeutic_implications.general_statement;
+//                            delete e.standard_therapeutic_implications.general_statement;
+//                        }
+//                        obj['FDA Approved Drugs in Tumor Type']['drugs'] = {};
+//                        for(var key in e.standard_therapeutic_implications) {
+//                            if(e.standard_therapeutic_implications.hasOwnProperty(key)){
+//                                obj['FDA Approved Drugs in Tumor Type']['drugs'][key]= e.standard_therapeutic_implications[key];
+//                            }
+//                        }
+//                        if(Object.keys(obj['FDA Approved Drugs in Tumor Type']['drugs']).length > 0) {
+//                            obj['FDA Approved Drugs in Tumor Type']['type'] = e.type || '';
+//                        }
+//                        delete e.standard_therapeutic_implications;
+//                    }
+//                    delete e.nccn_guidelines;
+//                    delete e.prognostic_implications;
+//                    
+//                    obj['Clinical Trials'] = {
+//                        'clinical_trial' : e.clinical_trial || '',
+//                        'investigational_therapeutic_implications': e.investigational_therapeutic_implications || ''
+//                    };
+//                    
+//                    delete e.clinical_trial;
+//                    delete e.investigational_therapeutic_implications;
+//                    
+//                    obj['type'] = e.type || '';
+//                    obj['relevant_to_patient_disease'] = e.relevant_to_patient_disease || '';
+//                    
+//                    delete e.type;
+//                    delete e.relevant_to_patient_disease;
+//                    
+//                    //Add rest info to  Additional Information section
+//                    obj['Additional Information'] = {};
+//                    for(var key in e) {
+//                        if(e.hasOwnProperty(key)) {
+//                            obj['Additional Information'][key] = e[key];
+//                            delete e[key];
+//                        }
+//                    }
+//                    annotation.cancer_type[i] = obj;
+//                });
+//                
+//                annotation.cancer_type.forEach(function(e, i){
+//                    e['FDA Approved Drugs in Other Tumor Type'] = [];
+//                    annotation.cancer_type.forEach(function(e1, i1){
+//                        if(i !== i1) {
+//                            if(e1['FDA Approved Drugs in Tumor Type'].hasOwnProperty('type')) {
+//                                e['FDA Approved Drugs in Other Tumor Type'].push(e1['FDA Approved Drugs in Tumor Type']);
+//                            }
+//                        }
+//                    });
+//                });
+//            }
+//            console.log(annotation);
+//            return annotation;
+//        }
 
         function isObject(obj) {
             return angular.isObject(obj) && !angular.isArray(obj);
