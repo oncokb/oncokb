@@ -141,7 +141,7 @@ public class VariantAnnotationXMLController {
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
         
         // summary
-        exportSummary(gene, alterations, gene+" "+alteration+" mutation", relevantTumorTypes, tumorType, sb);
+        exportSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, gene+" "+alteration+" mutation", relevantTumorTypes, tumorType, sb);
         
         // gene background
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
@@ -187,24 +187,35 @@ public class VariantAnnotationXMLController {
             int nEmp = sbTumorType.length();
             
             // find prevalence evidence blob
-            List<Evidence> prevalanceEbs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(tt));
-            for (Evidence ev : prevalanceEbs) {
+            Set<Evidence> prevalanceEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(tt)));
+            if (!prevalanceEbs.isEmpty()) {
                 sbTumorType.append("    <prevalence>\n");
-                sbTumorType.append("        <description>");
-                sbTumorType.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+                sbTumorType.append("        <description>\n");
+                for (Evidence ev : prevalanceEbs) {
+                    sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(ev.getDescription()).trim()).append("\n");
+                }
+                
                 sbTumorType.append("</description>\n");
-                exportRefereces(ev, sbTumorType, "        ");
+                for (Evidence ev : prevalanceEbs) {
+                    exportRefereces(ev, sbTumorType, "        ");
+                }
                 sbTumorType.append("    </prevalence>\n");
             }
             
+            
             // find prognostic implication evidence blob
-            List<Evidence> prognosticEbs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(tt));
-            for (Evidence ev : prognosticEbs) {
+            Set<Evidence> prognosticEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(tt)));
+            if (!prognosticEbs.isEmpty()) {
                 sbTumorType.append("    <prognostic_implications>\n");
-                sbTumorType.append("        <description>");
-                sbTumorType.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
-                sbTumorType.append("</description>\n");
-                exportRefereces(ev, sbTumorType, "        ");
+                sbTumorType.append("        <description>\n");
+                for (Evidence ev : prognosticEbs) {
+                    sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(ev.getDescription()).trim()).append("\n");
+                }
+                    sbTumorType.append("</description>\n");
+
+                for (Evidence ev : prognosticEbs) {
+                    exportRefereces(ev, sbTumorType, "        ");
+                }
                 sbTumorType.append("    </prognostic_implications>\n");
             }
             

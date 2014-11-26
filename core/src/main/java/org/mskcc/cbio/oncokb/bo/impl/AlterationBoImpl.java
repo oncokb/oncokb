@@ -53,6 +53,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
         if (alteration.getConsequence()!=null) {
             if (matchedAlt==null // only when there is no specific match
+                    && !alteration.getConsequence().getTerm().equals("missense_variant")
                     && alteration.getProteinStart()!=null) {
                 alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd()));
             }
