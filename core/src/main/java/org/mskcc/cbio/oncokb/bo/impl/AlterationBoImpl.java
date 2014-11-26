@@ -52,10 +52,19 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.add(matchedAlt);
         }
         if (alteration.getConsequence()!=null) {
+            // we need to develop better way to match mutation
             if (matchedAlt==null // only when there is no specific match
-                    && !alteration.getConsequence().getTerm().equals("missense_variant")
                     && alteration.getProteinStart()!=null) {
-                alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd()));
+                List<Alteration> alts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd());
+                if (!alteration.getConsequence().getTerm().equals("missense_variant")) {
+                    alterations.addAll(alts);
+                } else {
+                    for (Alteration alt : alts) {
+                        if (!alt.getAlteration().matches("[A-Z][0-9]+[A-Z]")) {
+                            alterations.add(alt);
+                        }
+                    }
+                }
             }
 
             if (alteration.getConsequence().getIsGenerallyTruncating()) {
