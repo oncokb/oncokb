@@ -69,7 +69,7 @@ angular.module('webappApp')
 
         if(annotation.annotation_summary) {
             key = geneName + ' ' + mutation + " SUMMARY";
-            value.push({'description': annotation.annotation_summary});
+            value.push({'description': annotation.annotation_summary.toString().trim()});
             object[key] = value;
             treatment.push(object);
         }
@@ -89,7 +89,7 @@ angular.module('webappApp')
             
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                 if(checkDescription(_datum[i])) {
-                    versions[_datum[i].version]['recommendation category'] = _datum[i].description;
+                    versions[_datum[i].version]['recommendation category'] = _datum[i].description.toString().trim();
                 }
             }
 
@@ -107,7 +107,7 @@ angular.module('webappApp')
             value = [];
             object = {};
             key = "STANDARD THERAPEUTIC IMPLICATIONS";
-            value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
+            value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description.toString().trim()});
             object[key] = value;
             treatment.push(object);
         }
@@ -116,7 +116,7 @@ angular.module('webappApp')
             value = [];
             key = "PROGNOSTIC IMPLICATIONS";
             object = {};
-            value.push({'description': cancerTypeInfo.prognostic_implications.description});
+            value.push({'description': cancerTypeInfo.prognostic_implications.description.toString().trim()});
             object[key] = value;
             treatment.push(object);
         }
@@ -163,7 +163,7 @@ angular.module('webappApp')
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
             if(checkDescription(_subDatum)) {
-                _obj.description = _subDatum.description;
+                _obj.description = _subDatum.description.toString().trim();
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
                 _obj['Cancer Type']= tumorType;
@@ -211,7 +211,7 @@ angular.module('webappApp')
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
             if(checkDescription(_subDatum)) {
-                _obj.description = _subDatum.description;
+                _obj.description = _subDatum.description.toString().trim();
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
                 _obj['Cancer Type']= tumorType;
@@ -451,7 +451,7 @@ angular.module('webappApp')
             value = [];
             key = 'MUTATION PREVALENCE';
             object = {};
-            object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description, value);
+            object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description.toString().trim(), value);
             additionalInfo.push(object);
         }
 
