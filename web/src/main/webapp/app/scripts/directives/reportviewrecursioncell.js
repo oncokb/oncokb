@@ -57,7 +57,7 @@ angular.module('webappApp')
 	  				return flag;
 	  			};
 	  			scope.show = function(key, value) {
-	  				var disabledKey = ['description', 'trial', 'title', 'nccn_special', 'effect', 'recommendation category'],
+	  				var disabledKey = ['description', 'trial', 'title', 'nccn_special', 'effect', 'recommendation category', 'value'],
   					str = '';
   					
   					if(disabledKey.indexOf(key.toLowerCase()) === -1) {

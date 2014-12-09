@@ -38,7 +38,7 @@ angular.module('webappApp')
             "additionalInfo": "",
             "companionDiagnostics": ""
         };
-
+        
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
             '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
@@ -69,7 +69,7 @@ angular.module('webappApp')
 
         if(annotation.annotation_summary) {
             key = geneName + ' ' + mutation + " SUMMARY";
-            value.push({'description': annotation.annotation_summary.toString().trim()});
+            value.push({'description': annotation.annotation_summary});
             object[key] = value;
             treatment.push(object);
         }
@@ -89,7 +89,7 @@ angular.module('webappApp')
             
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                 if(checkDescription(_datum[i])) {
-                    versions[_datum[i].version]['recommendation category'] = _datum[i].description.toString().trim();
+                    versions[_datum[i].version]['recommendation category'] = _datum[i].description;
                 }
             }
 
@@ -107,16 +107,16 @@ angular.module('webappApp')
             value = [];
             object = {};
             key = "STANDARD THERAPEUTIC IMPLICATIONS";
-            value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description.toString().trim()});
+            value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
             object[key] = value;
             treatment.push(object);
         }
-
+        
         if(cancerTypeInfo.prognostic_implications && checkDescription(cancerTypeInfo.prognostic_implications)) {
             value = [];
             key = "PROGNOSTIC IMPLICATIONS";
             object = {};
-            value.push({'description': cancerTypeInfo.prognostic_implications.description.toString().trim()});
+            value.push({'description': cancerTypeInfo.prognostic_implications.description});
             object[key] = value;
             treatment.push(object);
         }
@@ -163,7 +163,7 @@ angular.module('webappApp')
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
             if(checkDescription(_subDatum)) {
-                _obj.description = _subDatum.description.toString().trim();
+                _obj.description = _subDatum.description;
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
                 _obj['Cancer Type']= tumorType;
@@ -211,7 +211,7 @@ angular.module('webappApp')
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
             if(checkDescription(_subDatum)) {
-                _obj.description = _subDatum.description.toString().trim();
+                _obj.description = _subDatum.description;
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
                 _obj['Cancer Type']= tumorType;
@@ -311,7 +311,7 @@ angular.module('webappApp')
             value = [],
             object = {},
             cancerTypeInfo = relevantCancerType || {},
-            attrsToDisplay = ['sensitive_to', 'resistant_to'];
+            attrsToDisplay = ['resistant_to', 'sensitive_to'];
 
         if(cancerTypeInfo.clinical_trial) {
             var _datum = cancerTypeInfo.clinical_trial;
@@ -322,7 +322,7 @@ angular.module('webappApp')
 
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                     var _subDatum = {},
-                        _phase = _datum[i].phase.toString().trim() || '';
+                        _phase = _datum[i].phase || '';
 
                     if(_phase.indexOf('/') !== -1 && _phase !== 'N/A') {
                         var _phases = _phase.split('/');
@@ -424,7 +424,7 @@ angular.module('webappApp')
     }
     
     function checkDescription(datum) {
-        if(datum && datum.hasOwnProperty('description') && angular.isString(datum.description)) {
+        if(datum && datum.hasOwnProperty('description') && (angular.isString(datum.description) || datum.description instanceof Array)) {
             return true;
         }else {
             return false;
@@ -451,7 +451,7 @@ angular.module('webappApp')
             value = [];
             key = 'MUTATION PREVALENCE';
             object = {};
-            object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description.toString().trim(), value);
+            object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description, value);
             additionalInfo.push(object);
         }
 

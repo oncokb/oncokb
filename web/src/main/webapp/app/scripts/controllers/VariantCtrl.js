@@ -538,9 +538,9 @@ angular.module('webappApp')
                     if (typeof src[key] !== 'object' || !src[key]) {
                         if(!Array.isArray(dst[key])) {
                             var _tmp = dst[key];
-                            dst[key] = [{'value':_tmp, 'cancer_type': ct1}];
+                            dst[key] = [{'value':_tmp.toString().trim(), 'Cancer type': ct1}];
                         }
-                        dst[key].push({'value':src[key], 'cancer_type': ct2} );
+                        dst[key].push({'value':src[key].toString().trim(), 'Cancer type': ct2} );
                     }
                     else {
                         if (!target[key]) {
