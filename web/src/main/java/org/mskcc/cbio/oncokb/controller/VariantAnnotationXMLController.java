@@ -852,7 +852,12 @@ public class VariantAnnotationXMLController {
         
         String gene = alterations.iterator().next().getGene().getHugoSymbol();
         
-        String ret = gene + " " + listToString(list);
+        String ret = listToString(list);
+        
+        if(!ret.startsWith(gene)) {
+            ret =  gene + " " + ret;
+        }
+        
         String retLow = ret.toLowerCase();
         if (retLow.endsWith("mutation")||retLow.endsWith("mutations")) {
             return ret;

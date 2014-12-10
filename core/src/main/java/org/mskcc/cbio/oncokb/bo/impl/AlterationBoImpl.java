@@ -81,12 +81,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
         boolean activating = false, inactivating = false;
         for (Evidence evidence : mutationEffectEvs) {
-            String effect = evidence.getKnownEffect().toLowerCase();
-            
-            if (effect.contains("inactivating")) {
-                inactivating = true;
-            } else if (effect.contains("activating")) {
-                activating = true;
+            String effect = evidence.getKnownEffect();
+            if(effect != null) {
+                effect = effect.toLowerCase();
+                if (effect.contains("inactivating")) {
+                    inactivating = true;
+                } else if (effect.contains("activating")) {
+                    activating = true;
+                }
             }
         }
         

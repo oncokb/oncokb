@@ -104,19 +104,27 @@ angular.module('webappApp')
         }
         
         if(cancerTypeInfo.standard_therapeutic_implications && cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)) {
+            var description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
             value = [];
             object = {};
             key = "STANDARD THERAPEUTIC IMPLICATIONS";
+            if(typeof description === 'string') {
+                description = description.trim();
+            }
             value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
             object[key] = value;
             treatment.push(object);
         }
         
         if(cancerTypeInfo.prognostic_implications && checkDescription(cancerTypeInfo.prognostic_implications)) {
+            var description = cancerTypeInfo.prognostic_implications.description;
             value = [];
             key = "PROGNOSTIC IMPLICATIONS";
             object = {};
-            value.push({'description': cancerTypeInfo.prognostic_implications.description});
+            if(typeof description === 'string') {
+                description = description.trim();
+            }
+            value.push({'description': description});
             object[key] = value;
             treatment.push(object);
         }
