@@ -479,6 +479,7 @@ angular.module('webappApp')
 
     function removeCharsInDescription(str) {
         if(typeof str !== 'undefined') {
+            str = str.trim();
             str = str.replace(/(\r\n|\n|\r)/gm,'');
             str = str.replace(/(\s\s*)/g,' ');
             return str;
