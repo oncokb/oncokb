@@ -8,7 +8,6 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -442,6 +441,8 @@ public class VariantAnnotationXMLController {
                                 .append(". ");
                     }
                 }
+                    
+                sb.append("Please refer to the clinical trials section. ");
             }
         }
 
@@ -789,7 +790,7 @@ public class VariantAnnotationXMLController {
         for (Evidence ev : evidences) {
             for (Treatment t : ev.getTreatments()) {
                 for (Drug drug : t.getDrugs()) {
-                    drugs.add(drug.getDrugName());
+                    drugs.add(drug.getDrugName().toLowerCase());
                 }
             }
             alterations.addAll(ev.getAlterations());
