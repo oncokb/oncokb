@@ -19,7 +19,6 @@
     "angular-chosen-localytics": "~1.0.6",
     "xml2json": "~1.1.1",
     "angular-dialog-service": "~5.2.5",
-    "deepmerge": "~0.2.9",
     "angular-recursion": "~1.0.5",
     "angular-file-upload": "~1.1.5",
     "jszip": "Stuk/jszip#~2.4.0",

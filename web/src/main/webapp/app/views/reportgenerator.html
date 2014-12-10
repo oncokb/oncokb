@@ -37,7 +37,12 @@
                         <tr ng-repeat="datum in value" ng-switch on="key">
                             <td ng-repeat="columnKey in sheets.attr[key]">{{datum[columnKey]}}
                             </td>
-                                <td><span class="glyphicon glyphicon-remove" ng-click="deleteItem(key, datum)"></span></td>
+                            <td>
+                                <i ng-show="datum.generated===1 && !datum.generating" class="fa fa-check" ></i>
+                                <i ng-show="datum.generating && datum.generated===0" class="fa fa-spinner fa-spin"></i>
+                                <span style="color: red" ng-show="!datum.generating && datum.generated===-1">Failed</span>
+                                <i ng-show="datum.generated===0 && !datum.generating && !working" class="fa fa-trash-o" ng-click="deleteItem(key, datum)"></i>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

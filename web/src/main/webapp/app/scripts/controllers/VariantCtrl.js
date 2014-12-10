@@ -8,7 +8,8 @@ angular.module('webappApp')
         'dialogs',
         'DatabaseConnector',
         'GenerateReportDataService',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService) {
+        'DeepMerge',
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService, DeepMerge) {
 
         'use strict';
 
@@ -269,16 +270,23 @@ angular.module('webappApp')
             
             changeUrl(params);
             
-            DatabaseConnector.searchAnnotation(function(data) {
-                var annotation = {};
+            DatabaseConnector.searchAnnotation(params, function(data) {
+                searchAnnotationCallback('success', data);
+            }, function(){
+                searchAnnotationCallback('fail');
+            });
+        };
+        
+        function searchAnnotationCallback(status, data) {
+            var annotation = {};
+            if(status === 'success') {
                 annotation = processData(xml2json.parser(data).xml);
-                
+
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
                 }
-
+                
                 $scope.annotation = annotation;
-                $scope.rendering = false;
                 if($scope.annotation.cancer_type) {
                     var relevantCancerType = [];
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
@@ -291,7 +299,7 @@ angular.module('webappApp')
                         var obj1 = relevantCancerType[0];
 
                         for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
-                            obj1 = deepmerge(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
+                            obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
                         }
                         $scope.relevantCancerType = obj1;
                     }else if(relevantCancerType.length === 1){
@@ -304,11 +312,12 @@ angular.module('webappApp')
                 }
 
                 $scope.reportParams = ReportDataService.init($scope.gene, $scope.alteration, $scope.selectedTumorType, $scope.relevantCancerType, $scope.annotation);
-//                $scope.regularViewData = regularViewData($scope.annotation);
+    //                $scope.regularViewData = regularViewData($scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
-            }, params);
-        };
-
+            }
+            $scope.rendering = false;
+        }
+        
         function processData(object){
             if(isArray(object)) {
                 object.forEach(function(e, i){
@@ -515,44 +524,6 @@ angular.module('webappApp')
         function googleDocData(params) {
             return params;
         }
-        //This original function comes fromhttps://github.com/nrf110/deepmerge
-        //Made changed for using in current project
-        //ct1: cancer type of target; ct2: cancer type of source
-        function deepmerge(target, src, ct1, ct2) {
-            var array = Array.isArray(src);
-            var dst = array && [] || {};
-
-            if (array) {
-                target = target || [];
-                dst = dst.concat(target);
-                src.forEach(function(e, i) {
-                    dst.push(e);
-                });
-            } else {
-                if (target && typeof target === 'object') {
-                    Object.keys(target).forEach(function (key) {
-                        dst[key] = target[key];
-                    });
-                }
-                Object.keys(src).forEach(function (key) {
-                    if (typeof src[key] !== 'object' || !src[key]) {
-                        if(!Array.isArray(dst[key])) {
-                            var _tmp = dst[key];
-                            dst[key] = [{'value':_tmp.toString().trim(), 'Cancer type': ct1}];
-                        }
-                        dst[key].push({'value':src[key].toString().trim(), 'Cancer type': ct2} );
-                    }
-                    else {
-                        if (!target[key]) {
-                            dst[key] = src[key];
-                        } else {
-                            dst[key] = deepmerge(target[key], src[key], ct1, ct2);
-                        }
-                    }
-                });
-            }
-            return dst;
-        }
         
         $scope.generateReport = function() {
             var dlg = dialogs.create('views/emailDialog.html','emailDialogCtrl', 'Test string');
@@ -563,9 +534,11 @@ angular.module('webappApp')
                     generating();
                     var params = googleDocData($scope.reportParams);
                     params.email = data;
-                    DatabaseConnector.googleDoc(function(data) {
+                    DatabaseConnector.googleDoc(params, function() {
                         $scope.generaingReport =false;
-                    }, params);
+                    }, function() {
+                        $scope.generaingReport =false;
+                    });
                 }
             },function(){
               console.log('Did not do anything.');

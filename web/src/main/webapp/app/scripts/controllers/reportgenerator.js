@@ -14,13 +14,16 @@ angular.module('webappApp')
     'FileUploader',
     'dialogs',
     'DatabaseConnector',
-    'GenerateReportDataService', function(
+    'GenerateReportDataService',
+    'DeepMerge',
+    function(
         $scope,
         $timeout,
         FileUploader,
         dialogs,
         DatabaseConnector,
-        ReportDataService) {
+        ReportDataService,
+        DeepMerge) {
     var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
     var uploader; //$scope.uploader -- selected file handler
     var noMatchSeperator = '(Not exists)';
@@ -29,15 +32,18 @@ angular.module('webappApp')
     
     $scope.generate = function() {
         var worker = [],
-                    i = -1;
+                    i = -1,
+            workerKeys = ['gene', 'alteration', 'tumorType'];
         for(var sheet in $scope.sheets.arr) {
             $scope.sheets.arr[sheet].forEach(function(e, i) {
                 var datum = {};
-                for(var key in e) {
-                    if(e.hasOwnProperty(key) && key !== '$$hashkey') {
-                        datum[key] = e[key].replace(noMatchSeperator, '').trim();
+                workerKeys.forEach(function(e1, i1) {
+                    if(e.hasOwnProperty(e1)) {
+                        datum[e1] = e[e1].replace(noMatchSeperator, '').trim();
                     }
-                }
+                });
+                datum.sheet = sheet;
+                datum.id = i;
                 worker.push(datum);
             });
         }
@@ -112,8 +118,9 @@ angular.module('webappApp')
                 $scope.generateIndex++; 
                 if ($scope.generateIndex < $scope.workers.length) { 
                     var worker = $scope.workers[$scope.generateIndex];
+                    $scope.sheets.arr[worker.sheet][worker.id].generating = true;
                     $scope.generating = true;
-                    getAnnotation(worker.gene, worker.alteration, worker.tumorType);
+                    getAnnotation(worker);
                 }else {
                     $scope.working = false;
                 }
@@ -164,17 +171,24 @@ angular.module('webappApp')
         return angular.isString(obj);
     }
 
-    function getAnnotation(gene, alteration, tumorType) {
+    function getAnnotation(worker) {
         var params = {
             'alterationType': 'MUTATION',
-            'hugoSymbol': gene,
-            'alteration': alteration,
-            'tumorType': tumorType
+            'hugoSymbol': worker.gene,
+            'alteration': worker.alteration,
+            'tumorType': worker.tumorType
         };
 
-        DatabaseConnector.searchAnnotation(function(data){
-            var annotation = {};
-
+        DatabaseConnector.searchAnnotation(params, function(data){
+            searchAnnotation('success', data, worker);
+        }, function(){
+            searchAnnotation('fail');
+        });
+    }
+    
+    function searchAnnotation(status, data, worker) {
+        var annotation = {};
+        if(status === 'success') {
             annotation = processData(xml2json.parser(data).xml);
 
             for(var key in annotation) {
@@ -195,7 +209,7 @@ angular.module('webappApp')
                     relevantCancerType = relevantCancerTypeArray[0];
 
                     for(var i=1, relevantL=relevantCancerTypeArray.length; i < relevantL; i++) {
-                        relevantCancerType = deepmerge(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.type, relevantCancerTypeArray[i].type);
+                        relevantCancerType = DeepMerge.init(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.type, relevantCancerTypeArray[i].type);
                     }
                 }else if(relevantCancerTypeArray.length === 1){
                     relevantCancerType = relevantCancerTypeArray[0];
@@ -204,18 +218,33 @@ angular.module('webappApp')
                 }
             }
 
-            var reportParams = ReportDataService.init(params.hugoSymbol, params.alteration, params.tumorType, relevantCancerType,annotation);
+            var reportParams = ReportDataService.init(worker.gene, worker.alteration, worker.tumorType, relevantCancerType,annotation);
             reportParams.email = 'jackson.zhang.828@gmail.com';
-            
-            DatabaseConnector.googleDoc(function(){
-                $scope.generating = false;
-                $scope.progress.dynamic += 1;
-                $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
-                generateReports();
-            }, reportParams);
-        }, params);
-    }
 
+            DatabaseConnector.googleDoc(reportParams, function(){
+                googleDocCallback(worker, 'success');
+            }, function(){
+                googleDocCallback(worker, 'fail');
+            });
+        }else {
+            $scope.generating = false;
+            $scope.progress.dynamic += 1;
+            $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+            $scope.sheets.arr[worker.sheet][worker.id].generating = false;
+            $scope.sheets.arr[worker.sheet][worker.id].generated = -1;
+            generateReports();
+        }
+    }
+        
+    function googleDocCallback(worker, status) {
+        $scope.generating = false;
+        $scope.progress.dynamic += 1;
+        $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+        $scope.sheets.arr[worker.sheet][worker.id].generating = false;
+        $scope.sheets.arr[worker.sheet][worker.id].generated = status==='success'?1:-1;
+        generateReports();
+    }
+    
     function processData(object) {
         if(isArray(object)) {
             object.forEach(function(e, i){
@@ -297,7 +326,9 @@ angular.module('webappApp')
                         'id': sheetName + '-' + i,
                         'gene': '',
                         'alteration': '',
-                        'tumorType': ''
+                        'tumorType': '',
+                        'generated': 0, //0: hasn't been generated 1: successfully generated -1: unsuccessfully generated
+                        'generating': false
                     };
 
                     for(var key in e) {

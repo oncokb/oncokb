@@ -10,3 +10,4 @@ web/node_modules$
 web/dist/
 web/.sass-cache$
 web/.tmp$
+test$
