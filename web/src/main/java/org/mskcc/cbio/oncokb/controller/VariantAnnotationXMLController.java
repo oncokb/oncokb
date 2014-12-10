@@ -534,10 +534,10 @@ public class VariantAnnotationXMLController {
     }
     
     private boolean filterClinicalTrials(ClinicalTrial clinicalTrial) {
-        if (!clinicalTrial.isInUSA()) {
-            return false;
-        }
-        
+//        if (!clinicalTrial.isInUSA()) {
+//            return false;
+//        }
+//        
 //        if (!clinicalTrial.isOpen()) {
 //            return false;
 //        }
