@@ -43,22 +43,28 @@ import org.w3c.dom.NodeList;
 public class ClinicalTrialsImporter {
     
     private static Map<String, ClinicalTrial> allTrials = null;
+    private static void setAllTrials() {
+        if (allTrials==null) {
+            ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+            allTrials = new HashMap<String, ClinicalTrial>();
+            for (ClinicalTrial ct : clinicalTrialBo.findAll()) {
+                allTrials.put(ct.getNctId(), ct);
+            }
+        }
+    }
     
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         
         Set<String> nctIds = getListOfCancerTrialsFromClinicalTrialsGov();//getListOfCancerTrialsFromCancerGov();
-        importTrials(nctIds);
-    }
-    
-    static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        allTrials = new HashMap<String, ClinicalTrial>();
-        for (ClinicalTrial ct : clinicalTrialBo.findAll()) {
-            allTrials.put(ct.getNctId(), ct);
-        }
+        List<ClinicalTrial> trials = importTrials(nctIds);
         
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         List<TumorType> tumorTypes = tumorTypeBo.findAll();
+        matchTumorTypes(trials, tumorTypes);
+    }
+    
+    static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
+        setAllTrials();
         
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -76,8 +82,6 @@ public class ClinicalTrialsImporter {
                 e.printStackTrace();
             }
             if (trial!=null) {
-                matchTumorTypes(trial, tumorTypes);
-                clinicalTrialBo.saveOrUpdate(trial);
                 trials.add(trial);
             }
             System.out.println();
@@ -86,20 +90,26 @@ public class ClinicalTrialsImporter {
         return trials;
     }
     
-    private static void matchTumorTypes(ClinicalTrial trial, List<TumorType> tumorTypes) {
-        String condition = trial.getDiseaseCondition().toLowerCase();
-        Set<TumorType> matched = new HashSet<TumorType>();
-        for (TumorType tumorType : tumorTypes) {
-            for (String keyword : tumorType.getClinicalTrialKeywords()) {
-                if (condition.contains(keyword.toLowerCase())) {
-                    matched.add(tumorType);
+    static void matchTumorTypes(List<ClinicalTrial> trials, List<TumorType> tumorTypes) {
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        for (ClinicalTrial trial : trials) {
+            String condition = trial.getDiseaseCondition().toLowerCase();
+            Set<TumorType> matched = new HashSet<TumorType>();
+            for (TumorType tumorType : tumorTypes) {
+                for (String keyword : tumorType.getClinicalTrialKeywords()) {
+                    if (condition.contains(keyword.toLowerCase())) {
+                        matched.add(tumorType);
+                    }
                 }
             }
+            trial.setTumorTypes(matched);
+            clinicalTrialBo.saveOrUpdate(trial);
         }
-        trial.setTumorTypes(matched);
     }
     
     private static ClinicalTrial parseClinicalTrialsGov(String nctId, DocumentBuilder db) throws SAXException, IOException {
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        
         String strUrl = "http://clinicaltrials.gov/show/"+nctId+"?displayxml=true";
         
         Document doc = db.parse(strUrl);
@@ -143,6 +153,8 @@ public class ClinicalTrialsImporter {
         trial.setCountries(countries);
         trial.setDrugs(parseDrugs(docEle));
         trial.setAlterations(parseAlterations(docEle));
+        
+        clinicalTrialBo.saveOrUpdate(trial);
         
         return trial;
     }
