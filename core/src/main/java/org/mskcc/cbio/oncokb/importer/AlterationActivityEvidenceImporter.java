@@ -1,5 +1,5 @@
 
-package org.mskcc.cbio.oncokb.dao.importor;
+package org.mskcc.cbio.oncokb.importer;
 
 import java.io.IOException;
 import java.util.Arrays;

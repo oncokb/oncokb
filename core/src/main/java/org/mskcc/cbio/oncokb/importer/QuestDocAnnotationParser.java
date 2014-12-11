@@ -1,5 +1,5 @@
 
-package org.mskcc.cbio.oncokb.dao.importor;
+package org.mskcc.cbio.oncokb.importer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -83,6 +83,8 @@ public final class QuestDocAnnotationParser {
     private static final String CLINICAL_TRIALS_P = "(NCT[0-9]+)";
     
     private static final String INVESTIGATIONAL_INTERACTING_GENE_ALTERATIONS_P = "Interacting gene alterations";
+    
+    private static final String DO_NOT_IMPORT = "DO NOT IMPORT";
     
     private static final String[] CANCER_HEADERS_P = new String[] {
         PREVALENCE_P,
@@ -407,6 +409,11 @@ public final class QuestDocAnnotationParser {
             throw new RuntimeException("wrong format of tumor type line: "+line);
         }
         String cancer = m.group(1).trim();
+        
+        if (cancer.endsWith(DO_NOT_IMPORT)) {
+            System.out.println("##    Cancer type: " + cancer+ " -- skip");
+            return;
+        }
         
         System.out.println("##    Cancer type: " + cancer);
         

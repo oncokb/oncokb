@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.mskcc.cbio.oncokb.dao.importor;
+package org.mskcc.cbio.oncokb.importer;
 
 import java.io.IOException;
 import java.util.ArrayList;
