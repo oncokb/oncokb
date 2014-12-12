@@ -230,8 +230,7 @@ public final class QuestDocAnnotationParser {
         StringBuilder sb = new StringBuilder();
         for (int i=s+1; i<e; i++) {
             if (!lines.get(i).startsWith("cBioPortal link:") &&
-                    !lines.get(i).startsWith("COSMIC link:") &&
-                    !lines.get(i).startsWith("Mutations")) {
+                    !lines.get(i).startsWith("COSMIC link:")) {
                 sb.append(lines.get(i)).append("\n");
             }
         }
