@@ -134,6 +134,21 @@ angular.module('webappApp')
                 });
       }
     }
+    
+    function createGoogleFolder(params, success, fail) {
+      if(dataFromFile) {
+        success('');
+      }else {
+        GenerateDoc
+            .createFolder(params)
+                .success(function(data) {
+                    success(data);
+                })
+                .error(function(){
+                    fail();
+                });
+      }
+    }
 
     function timeout(callback, timestamp) {
       $timeout(function(){
@@ -166,6 +181,7 @@ angular.module('webappApp')
       },
       'getAllEvidence': getAllEvidence,
       'searchAnnotation': searchVariant,
-      'googleDoc': generateGoogleDoc
+      'googleDoc': generateGoogleDoc,
+      'createGoogleFolder': createGoogleFolder
     };
   }]);

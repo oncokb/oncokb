@@ -5,17 +5,28 @@
         <div class="col-md-3">
 
             <h3>Select file</h3>
-
+            
             <div ng-show="uploader.isHTML5">
                 <!-- 3. nv-file-over uploader="link" over-class="className" -->
                 <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
                     Drop your file in here. <br/>(xlsx file only)
                 </div>
             </div>
-
+            <input type="file" nv-file-select="" uploader="uploader" />
+            
+            <br/>
+            <form ng-show="fileSelected" class="form-inline">
+                <div class="input-group input-group-sm" style='width:100%' >
+                    <span class="input-group-addon"><b>Email:</b></span>
+                    <input type="text" ng-model="sheets.email" id="email" class="form-control">
+                </div>
+                <div ng-repeat="(key, value) in sheets.arr" class="input-group input-group-sm" style='width:100%'>
+                    <span class="input-group-addon"><b>Folder name for {{key}}:</b></span>
+                    <input type="text" id="folderName-{{$index}}" ng-model="sheets.folder[key].name" class="form-control" placeholder="(optional)">
+                </div>
+            </form>
             <!-- Example: nv-file-select="" uploader="{Object}" options="{Object}" filters="{String}" -->
             
-            <input type="file" nv-file-select="" uploader="uploader" />
         </div>
 
             <div ng-show="fileSelected" class="col-md-9" style="margin-bottom: 40px">

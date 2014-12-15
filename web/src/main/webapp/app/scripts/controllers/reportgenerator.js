@@ -62,7 +62,9 @@ angular.module('webappApp')
         $scope.sheets = {
                 length: 0,
                 attr: ['sheet1'],
-                arr: {}
+                arr: {},
+                folder: {},
+                email: 'jackson.zhang.828@gmail.com'
         };
         $scope.progress = {
             value: 0,
@@ -219,13 +221,44 @@ angular.module('webappApp')
             }
 
             var reportParams = ReportDataService.init(worker.gene, worker.alteration, worker.tumorType, relevantCancerType,annotation);
-            reportParams.email = 'jackson.zhang.828@gmail.com';
-
-            DatabaseConnector.googleDoc(reportParams, function(){
-                googleDocCallback(worker, 'success');
-            }, function(){
-                googleDocCallback(worker, 'fail');
-            });
+            
+            //Check email
+            if($scope.sheets.email && $scope.sheets.email !== '') {
+                reportParams.email = $scope.sheets.email;
+            }else {
+                reportParams.email = 'jackson.zhang.828@gmail.com';
+            }
+            
+            //Check folder name
+            if($scope.sheets.folder.hasOwnProperty(worker.sheet) 
+                    && $scope.sheets.folder[worker.sheet].hasOwnProperty('name') 
+                    && $scope.sheets.folder[worker.sheet].name 
+                    && $scope.sheets.folder[worker.sheet].name !== '') {
+                reportParams.folderName = $scope.sheets.folder[worker.sheet].name;
+            }
+            
+            //Check folder ID
+            if($scope.sheets.folder.hasOwnProperty(worker.sheet) 
+                    && $scope.sheets.folder[worker.sheet].hasOwnProperty('id') 
+                    && $scope.sheets.folder[worker.sheet].id 
+                    && $scope.sheets.folder[worker.sheet].id !== '') {
+                reportParams.folderId = $scope.sheets.folder[worker.sheet].id;
+            }
+            
+            if(reportParams.hasOwnProperty('folderName')
+                    && reportParams.folderName
+                    && reportParams.folderName !== ''
+                    && !reportParams.hasOwnProperty('folderId')) {
+                DatabaseConnector.createGoogleFolder({'folderName': reportParams.folderName}, function(data){
+                    if(data !== '') {
+                        $scope.sheets.folder[worker.sheet].id = data;
+                        reportParams.folderId = $scope.sheets.folder[worker.sheet].id;
+                        generateGoogleDoc(reportParams, worker);
+                    }
+                });
+            }else {
+                generateGoogleDoc(reportParams, worker);
+            }
         }else {
             $scope.generating = false;
             $scope.progress.dynamic += 1;
@@ -234,6 +267,14 @@ angular.module('webappApp')
             $scope.sheets.arr[worker.sheet][worker.id].generated = -1;
             generateReports();
         }
+    }
+    
+    function generateGoogleDoc(reportParams, worker) {
+        DatabaseConnector.googleDoc(reportParams, function(){
+            googleDocCallback(worker, 'success');
+        }, function(){
+            googleDocCallback(worker, 'fail');
+        });
     }
         
     function googleDocCallback(worker, status) {
