@@ -92,7 +92,7 @@ public class GenerateGoogleDoc {
             System.out.println("Successfully copied file. Start to change file content");
             changeFileContent(file.getId(), file.getTitle(), jsonObj);
             System.out.println("Successfully changed file content. Start to add new record");
-            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString, jsonObj.get("email").toString(),jsonObj.has("folderId")?jsonObj.get("folderId").toString():null);
+            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString, jsonObj.get("email").toString(),jsonObj.has("folderId")?jsonObj.get("folderId").toString():null,jsonObj.has("folderId")?jsonObj.get("folderName").toString():null);
             System.out.println("Successfully added new record");
             responseFlag = true;
         } catch (GoogleJsonResponseException e) {
@@ -116,7 +116,7 @@ public class GenerateGoogleDoc {
         return responseFlag;
     }
     
-    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
         
         SpreadsheetService service = GoogleAuth.createSpreedSheetService();
@@ -140,6 +140,9 @@ public class GenerateGoogleDoc {
         row.getCustomElements().setValueLocal("sendreminder", "No");
         if(folderId != null) {
             row.getCustomElements().setValueLocal("folderid", folderId);
+        }
+        if(folderName != null) {
+            row.getCustomElements().setValueLocal("foldername", folderName);
         }
 
         // Send the new row to the API for insertion.
