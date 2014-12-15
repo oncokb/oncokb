@@ -387,6 +387,7 @@ var Tree = (function() {
         searchResult.length = 0;
         root.children.forEach(toggleAll);
         update(root);
+        searchKey = searchKey.toLowerCase();
 
         if(searchKey !== "") {
             for(var i = 0, numOfChild = root.children.length; i< numOfChild; i++) {

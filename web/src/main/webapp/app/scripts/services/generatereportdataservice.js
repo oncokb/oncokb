@@ -132,7 +132,7 @@ angular.module('webappApp')
         return treatment;
     }
 
-    function findApprovedDrug(datum, object, tumorType, key) {
+    function findApprovedDrug(datum, object, tumorType, key, valueExtend) {
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
                 _key = '',
@@ -161,6 +161,9 @@ angular.module('webappApp')
 
             _key = _key.substr(0, _key.length-2);
             
+            if(valueExtend !== undefined) {
+                _key += valueExtend;
+            }
             
             while(object.hasOwnProperty(_key)) {
                 _key+=specialKeyChars;
@@ -182,7 +185,7 @@ angular.module('webappApp')
         return object;
     }
 
-    function findByLevelEvidence(datum, object, tumorType, key) {
+    function findByLevelEvidence(datum, object, tumorType, key, valueExtend) {
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
                 _key = '',
@@ -209,7 +212,11 @@ angular.module('webappApp')
             }
 
             _key = _key.substr(0, _key.length-2);
-
+            
+            if(valueExtend !== undefined) {
+                _key += valueExtend;
+            }
+            
             while(object.hasOwnProperty(_key)) {
                 _key+=specialKeyChars;
             }
@@ -231,7 +238,7 @@ angular.module('webappApp')
 
     function displayProcess(str) {
         var specialUpperCasesWords = ['NCCN'];
-        var specialLowerCasesWords = ['of', 'for'];
+        var specialLowerCasesWords = ['of', 'for', 'to'];
 
         str = str.replace(/_/g, ' ');
         str = str.replace(
@@ -269,6 +276,8 @@ angular.module('webappApp')
                     object = {};
                     if(attrsToDisplay[i] === 'sensitive_to') {
                         object = findApprovedDrug(_datum, object);
+                    }else if(attrsToDisplay[j] === 'resistant_to'){
+                        object = findByLevelEvidence(_datum, object, '', '', " (Resistance)");
                     }else {
                         object = findApprovedDrug(_datum, object, '', displayProcess(attrsToDisplay[i]) + ': ');
                     }
@@ -294,6 +303,8 @@ angular.module('webappApp')
                                 var _datum = annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]];
                                 if(attrsToDisplay[j] === 'sensitive_to') {
                                     object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type);
+                                }else if(attrsToDisplay[j] === 'resistant_to'){
+                                    object = findByLevelEvidence(_datum, object, '', '', " (Resistance)");
                                 }else {
                                     object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type, attrsToDisplay[j] + ': ');
                                 }
@@ -370,6 +381,8 @@ angular.module('webappApp')
                     object = {};
                     if(attrsToDisplay[j] === 'sensitive_to') {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object);
+                    }else if(attrsToDisplay[j] === 'resistant_to'){
+                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', '', " (Resistance)");
                     }else {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', displayProcess(attrsToDisplay[j]) + ': ');
                     }
