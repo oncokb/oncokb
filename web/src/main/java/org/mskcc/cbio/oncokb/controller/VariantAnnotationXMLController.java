@@ -802,7 +802,7 @@ public class VariantAnnotationXMLController {
         sb.append(" for ")
                 .append(tumorType==null?"":(tumorType+" "))
                 .append("patients with ")
-                .append(alteration==null?alterationsToString(alterations):alteration);
+                .append(alteration==null?(alterations.size()>2?"specific mutations":alterationsToString(alterations)):alteration);
         
         String ret = sb.toString();
         String retLow = ret.toLowerCase();
