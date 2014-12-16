@@ -31,33 +31,65 @@ angular.module('webappApp')
     $scope.init = initParams;
     
     $scope.generate = function() {
-        var worker = [],
+        if(checkEmail()) {
+            generate(getWorkers());
+        }
+    };
+
+    $scope.deleteItem = deleteItem;
+
+    $scope.regenerate = function() {
+        if(checkEmail()) {
+            generate(getWorkers('regenerate'));
+        }
+    };
+    
+    function generate(workers) {
+        $scope.workers = workers;
+        $scope.working = true;
+        $scope.progress.value = 0.5;
+        $scope.progress.dynamic = 0;
+        $scope.progress.max = workers.length;
+        $scope.generateIndex = -1;
+        generateReports();
+    }
+    
+    function getWorkers(flag) {
+        var workers = [],
                     i = -1,
             workerKeys = ['gene', 'alteration', 'tumorType'];
         for(var sheet in $scope.sheets.arr) {
             $scope.sheets.arr[sheet].forEach(function(e, i) {
                 var datum = {};
-                workerKeys.forEach(function(e1, i1) {
-                    if(e.hasOwnProperty(e1)) {
-                        datum[e1] = e[e1].replace(noMatchSeperator, '').trim();
+                    workerKeys.forEach(function(e1, i1) {
+                        if(e.hasOwnProperty(e1)) {
+                            datum[e1] = e[e1].replace(noMatchSeperator, '').trim();
+                        }
+                    });
+                    datum.sheet = sheet;
+                    datum.id = i;
+                    
+                if(typeof flag === 'string' && flag==='regenerate') {
+                    if(Number(e.generated) === -1) {
+                        workers.push(datum);
                     }
-                });
-                datum.sheet = sheet;
-                datum.id = i;
-                worker.push(datum);
+                }else {
+                    workers.push(datum);
+                }
             });
         }
-        $scope.workers = worker;
-        $scope.working = true;
-        $scope.progress.value = 0.5;
-        $scope.progress.dynamic = 0;
-        $scope.progress.max = worker.length;
-        $scope.generateIndex = -1;
-        generateReports();
-    };
-
-    $scope.deleteItem = deleteItem;
-
+        return workers;
+    }
+    
+    function checkEmail() {
+        if($scope.sheets.email === '') {
+            dialogs.notify('','Please check your email address.');
+            return false;
+        }else {
+            return true;
+        }
+    }
+    
     function initParams() {
         $scope.sheets = {
                 length: 0,
@@ -80,6 +112,8 @@ angular.module('webappApp')
         //all workering running
         $scope.working = false;
         $scope.generateIndex = -1;
+        
+        $scope.hasFailed = false;
 
         if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
             $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
@@ -114,7 +148,6 @@ angular.module('webappApp')
     }
 
     function generateReports() {
-        console.log("run ---");
         $timeout(function () {
             if(!$scope.generating) {
                 $scope.generateIndex++; 
@@ -265,6 +298,7 @@ angular.module('webappApp')
             $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
             $scope.sheets.arr[worker.sheet][worker.id].generating = false;
             $scope.sheets.arr[worker.sheet][worker.id].generated = -1;
+            $scope.hasFailed = true;
             generateReports();
         }
     }
@@ -283,6 +317,9 @@ angular.module('webappApp')
         $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
         $scope.sheets.arr[worker.sheet][worker.id].generating = false;
         $scope.sheets.arr[worker.sheet][worker.id].generated = status==='success'?1:-1;
+        if(!$scope.hasFailed) {
+            $scope.hasFailed = status==='success'?false:true;
+        }
         generateReports();
     }
     
