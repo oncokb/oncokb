@@ -67,10 +67,10 @@
                 <tr ng-repeat="title in titles">
                     <td><h5>{{title}}</h5></td>
                     <td>
-                        <div ng-if="data[params[$index]] !== ''">
+                        <div ng-if="data[params[$index]] !== 'None.'">
                             <report-view-recursion-cell data="data[params[$index]]" depth="depth"></report-view-recursion-cell >
                         </div>
-                        <span ng-if="data[params[$index]] === ''"></span>
+                        <span ng-if="data[params[$index]] === 'None.'">None.</span>
                     </td>
                 </tr>
             </tbody>

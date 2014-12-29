@@ -41,20 +41,20 @@ angular.module('webappApp')
         
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
-            '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
+            '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || 'None.';
         params.geneName = geneName;
         params.mutation = alteration;
         params.diagnosis = tumorType;
         params.tumorTissueType = params.diagnosis;
         var _treatment = constructTreatment(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.treatment = _treatment.length > 0 ? _treatment : "";
+        params.treatment = _treatment.length > 0 ? _treatment : "None.";
         var _fdaInfo = constructfdaInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
-        params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.nonApproved : "";
+        params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "None.";
+        params.fdaApprovedInOtherTumor = _fdaInfo.approvedInOther.length > 0 ? _fdaInfo.approvedInOther : "None.";
         var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
+        params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "None.";
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";
+        params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "None.";
         
         return params;
     }
@@ -263,7 +263,7 @@ angular.module('webappApp')
 
     function constructfdaInfo(annotation, geneName, mutation, tumorType, relevantCancerType) {
         var fdaApproved = [],
-            fdaNonApproved = [],
+            fdaApprovedInOther = [],
             object = {},
             cancerTypeInfo = relevantCancerType || {},
             attrsToDisplay = ['sensitive_to', 'resistant_to'];
@@ -296,7 +296,7 @@ angular.module('webappApp')
             object = {};
 
             for (var i = 0; i < annotation.cancer_type.length; i++) {
-                if(annotation.cancer_type[i].type !== relevantCancerType.type) {
+                if(isNRCT(relevantCancerType.type, annotation.cancer_type[i].type)) {
                     if(annotation.cancer_type[i].standard_therapeutic_implications) {
                         for (var j = 0; j < attrsToDisplay.length; j++) {
                             if(annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]]) {
@@ -317,13 +317,41 @@ angular.module('webappApp')
             for(var _key in object) {
                 var _object = {};
                 _object[_key] = object[_key];
-                fdaNonApproved.push(_object);
+                
+                for(var i = 0; i < _object[_key].length; i++ ) {
+                    delete _object[_key][i]['Level of evidence'];
+                    delete _object[_key][i]['description'];
+                }
+                
+                fdaApprovedInOther.push(_object);
                 _object = null;
             }
         }
-        return {'approved': fdaApproved, 'nonApproved': fdaNonApproved};
+        return {'approved': fdaApproved, 'approvedInOther': fdaApprovedInOther};
     }
-
+    
+    //Is not relevant cancer type
+    function isNRCT(relevent, type) {
+        if(typeof relevent === 'object') {
+            if(relevent instanceof Array) {
+                for(var i=0; i<relevent.length; i++) {
+                    if(relevent[i]['Cancer type'] === type) {
+                        return false;
+                    }
+                }
+                return true;
+            }else {
+                if(relevent.type === type) {
+                    return false;
+                }else {
+                    return true;
+                }
+            }
+        }else {
+            return null;
+        }
+    }
+    
     function constructClinicalTrial(annotation, geneName, mutation, tumorType, relevantCancerType) {
         var clincialTrials = [],
             key = '',
