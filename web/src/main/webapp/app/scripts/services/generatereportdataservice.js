@@ -26,17 +26,17 @@ angular.module('webappApp')
             "grade": "",
             "geneName": "",
             "mutation": "",
-            "alterType": "",
-            "mutationFreq": "",
-            "tumorTypeDrugs": "",
-            "nonTumorTypeDrugs": "",
-            "hasClinicalTrial": "",
-            "treatment": "",
-            "fdaApprovedInTumor": "",
-            "fdaApprovedInOtherTumor": "",
-            "clinicalTrials": "",
-            "additionalInfo": "",
-            "companionDiagnostics": ""
+            "alterType": "N/A",
+            "mutationFreq": "N/A",
+            "tumorTypeDrugs": "N/A",
+            "nonTumorTypeDrugs": "N/A",
+            "hasClinicalTrial": "N/A",
+            "treatment": "None.",
+            "fdaApprovedInTumor": "None.",
+            "fdaApprovedInOtherTumor": "None.",
+            "clinicalTrials": "None.",
+            "additionalInfo": "None.",
+            "companionDiagnostics": "None."
         };
         
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
@@ -121,8 +121,23 @@ angular.module('webappApp')
             value = [];
             key = "PROGNOSTIC IMPLICATIONS";
             object = {};
-            if(typeof description === 'string') {
+            if(angular.isString(description)) {
                 description = description.trim();
+            }else {
+                if(angular.isArray(description)){
+                    var str = [];
+                    description.forEach(function(e,i){
+                        if(e['Cancer type'].toString().toLowerCase() === 'all tumors' && str.length > 0) {
+                            str.unshift(e.value.toString().trim());
+                        }else {
+                            str.push(e.value.toString().trim());
+                        }
+                    });
+                    description = str.join(' ');
+                }else{
+                    description = '';
+                    console.log('PROGNOSTIC IMPLICATIONS --- not string --- not array');
+                }
             }
             value.push({'description': description});
             object[key] = value;
