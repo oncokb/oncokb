@@ -20,10 +20,10 @@ angular.module('webappApp')
             "overallInterpretation": "",
             "diagnosis": "",
             "tumorTissueType": "",
-            "specimenSource": "",
-            "blockId": "",
-            "stage": "",
-            "grade": "",
+            "specimenSource": "None.",
+            "blockId": "None.",
+            "stage": "None.",
+            "grade": "None.",
             "geneName": "",
             "mutation": "",
             "alterType": "N/A",
@@ -31,6 +31,8 @@ angular.module('webappApp')
             "tumorTypeDrugs": "N/A",
             "nonTumorTypeDrugs": "N/A",
             "hasClinicalTrial": "N/A",
+            'additionalMutations': 'None.',
+            'interactingMutations': 'None.',
             "treatment": "None.",
             "fdaApprovedInTumor": "None.",
             "fdaApprovedInOtherTumor": "None.",
@@ -48,14 +50,43 @@ angular.module('webappApp')
         params.tumorTissueType = params.diagnosis;
         var _treatment = constructTreatment(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.treatment = _treatment.length > 0 ? _treatment : "None.";
+        
         var _fdaInfo = constructfdaInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "None.";
-        params.fdaApprovedInOtherTumor = _fdaInfo.approvedInOther.length > 0 ? _fdaInfo.approvedInOther : "None.";
+        if(_fdaInfo.approved.length > 0) {
+            params.tumorTypeDrugs = 'YES';
+            params.fdaApprovedInTumor = _fdaInfo.approved;
+        }else {
+            params.tumorTypeDrugs = 'NO';
+            params.fdaApprovedInTumor = 'None.';
+        }
+        if(_fdaInfo.approvedInOther.length > 0) {
+            params.nonTumorTypeDrugs = 'YES';
+            params.fdaApprovedInOtherTumor = _fdaInfo.approvedInOther;
+        }else {
+            params.nonTumorTypeDrugs = 'NO';
+            params.fdaApprovedInOtherTumor = 'None.';
+        }
+        
         var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "None.";
+        params.hasClinicalTrial = 'NO';
+        if(_clinicalTrail.length > 0) {
+            for(var i =0; i < _clinicalTrail.length; i++) {
+                if(_clinicalTrail[i].hasOwnProperty('CLINICAL TRIALS MATCHED FOR GENE AND DISEASE')
+                    && _clinicalTrail[i]['CLINICAL TRIALS MATCHED FOR GENE AND DISEASE'].length > 0) {
+                    params.hasClinicalTrial = 'YES';
+                    break;
+                }
+            }
+            params.clinicalTrials = _clinicalTrail;
+        }else {
+            params.clinicalTrials = 'None.';
+        }
+        
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
         params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "None.";
         
+        //Set the alteration type to MUTATION, need to change after type available
+        params.alterType = 'MUTATION';
         return params;
     }
 
