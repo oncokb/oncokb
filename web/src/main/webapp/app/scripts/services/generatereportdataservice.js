@@ -40,7 +40,7 @@ angular.module('webappApp')
             "additionalInfo": "None.",
             "companionDiagnostics": "None."
         };
-        
+        console.log(annotation);
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
             '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || 'None.';
@@ -338,21 +338,21 @@ angular.module('webappApp')
             }
         }
         
-        if(annotation.cancer_type && relevantCancerType && relevantCancerType.type) {
+        if(annotation.cancer_type && relevantCancerType && relevantCancerType.$type) {
             object = {};
 
             for (var i = 0; i < annotation.cancer_type.length; i++) {
-                if(isNRCT(relevantCancerType.type, annotation.cancer_type[i].type)) {
+                if(isNRCT(relevantCancerType.$type, annotation.cancer_type[i].$type)) {
                     if(annotation.cancer_type[i].standard_therapeutic_implications) {
                         for (var j = 0; j < attrsToDisplay.length; j++) {
                             if(annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]]) {
                                 var _datum = annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]];
                                 if(attrsToDisplay[j] === 'sensitive_to') {
-                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type);
+                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].$type);
                                 }else if(attrsToDisplay[j] === 'resistant_to'){
                                     object = findByLevelEvidence(_datum, object, '', '', " (Resistance)");
                                 }else {
-                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type, attrsToDisplay[j] + ': ');
+                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].$type, attrsToDisplay[j] + ': ');
                                 }
                             }
                         }

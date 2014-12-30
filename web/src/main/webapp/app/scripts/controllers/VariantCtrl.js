@@ -9,7 +9,8 @@ angular.module('webappApp')
         'DatabaseConnector',
         'GenerateReportDataService',
         'DeepMerge',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService, DeepMerge) {
+        'x2js',
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService, DeepMerge, x2js) {
 
         'use strict';
 
@@ -280,8 +281,7 @@ angular.module('webappApp')
         function searchAnnotationCallback(status, data) {
             var annotation = {};
             if(status === 'success') {
-                annotation = processData(xml2json.parser(data).xml);
-
+                annotation = processData(x2js.xml_str2json(data).xml);
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
                 }
@@ -291,7 +291,7 @@ angular.module('webappApp')
                     var relevantCancerType = [];
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
-                        if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
+                        if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
                             relevantCancerType.push(_cancerType);
                         }
                     }
@@ -299,7 +299,7 @@ angular.module('webappApp')
                         var obj1 = relevantCancerType[0];
 
                         for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
-                            obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
+                            obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
                         }
                         $scope.relevantCancerType = obj1;
                     }else if(relevantCancerType.length === 1){

@@ -244,7 +244,7 @@ angular.module('webappApp')
                     relevantCancerType = relevantCancerTypeArray[0];
 
                     for(var i=1, relevantL=relevantCancerTypeArray.length; i < relevantL; i++) {
-                        relevantCancerType = DeepMerge.init(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.type, relevantCancerTypeArray[i].type);
+                        relevantCancerType = DeepMerge.init(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.$type, relevantCancerTypeArray[i].$type);
                     }
                 }else if(relevantCancerTypeArray.length === 1){
                     relevantCancerType = relevantCancerTypeArray[0];
