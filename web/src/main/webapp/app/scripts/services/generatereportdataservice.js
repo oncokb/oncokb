@@ -40,7 +40,7 @@ angular.module('webappApp')
             "additionalInfo": "None.",
             "companionDiagnostics": "None."
         };
-        console.log(annotation);
+        
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
             '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || 'None.';

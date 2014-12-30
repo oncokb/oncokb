@@ -14,7 +14,7 @@ angular.module('webappApp')
 
         'use strict';
 
-        var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
+        var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug', 'reference'];
         
         $scope.init = function () {
 
@@ -297,7 +297,7 @@ angular.module('webappApp')
                     }
                     if(relevantCancerType.length > 1) {
                         var obj1 = relevantCancerType[0];
-
+                        
                         for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
                             obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
                         }
