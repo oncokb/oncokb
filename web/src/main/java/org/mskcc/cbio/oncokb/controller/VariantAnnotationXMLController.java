@@ -396,9 +396,9 @@ public class VariantAnnotationXMLController {
                     sb.append("While there are FDA approved drugs ")
                             .append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1), queryAlteration))
                             .append(", ")
-                            .append(" the clinical utility in ")
+                            .append(" the clinical utility for these agents in patients with ")
                             .append(queryTumorType==null?"other":queryTumorType)
-                            .append(" patients with ")
+                            .append(" with ")
                             .append(queryAlteration)
                             .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
@@ -406,9 +406,9 @@ public class VariantAnnotationXMLController {
                     sb.append("While NCCN recommend drugs ")
                             .append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A), queryAlteration))
                             .append(", ")
-                            .append(" the clinical utility in ")
+                            .append(" the clinical utility for these agents in patients with ")
                             .append(queryTumorType==null?"other":queryTumorType)
-                            .append(" patients with ")
+                            .append(" with ")
                             .append(queryAlteration)
                             .append(" is not known. ");
                 } else {
@@ -797,20 +797,42 @@ public class VariantAnnotationXMLController {
         }
         
         StringBuilder sb = new StringBuilder();
-        sb.append(listToString(new ArrayList<String>(drugs)));
+        sb.append(listToieString(new ArrayList<String>(drugs)));
         
         sb.append(" for ")
-                .append(tumorType==null?"":(tumorType+" "))
                 .append("patients with ")
-                .append(alteration==null?(alterations.size()>2?"specific mutations":alterationsToString(alterations)):alteration);
+                .append(tumorType==null?"":(tumorType+" "))
+                .append(alteration==null?(alterations.size()>2?"specific mutations":("with mutated " + alterationsToString(alterations))):("with mutated " + alteration));
         
         String ret = sb.toString();
         String retLow = ret.toLowerCase();
-        if (retLow.endsWith("mutation")||retLow.endsWith("mutations")) {
-            return ret;
+        if (retLow.endsWith(" mutation")) {
+            return ret.substring(0, ret.lastIndexOf(" mutation"));
         }
         
-        return ret + " mutations";
+        return ret;
+    }
+    
+    private String listToieString(List<String> list) {
+        if (list.isEmpty()) {
+            return "";
+        }
+        
+        int n = list.size();
+        StringBuilder sb = new StringBuilder();
+        sb.append("(ie, ")
+                .append(list.get(0));
+        if (n==1) {
+            return sb.toString();
+        }
+        
+        for (int i=1; i<n-1; i++) {
+            sb.append(", ").append(list.get(i));
+        }
+        
+        sb.append(" and ").append(list.get(n-1)).append(")");
+        
+        return sb.toString();
     }
     
     private String listToString(List<String> list) {
