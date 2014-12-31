@@ -41,6 +41,25 @@ angular.module('webappApp')
             "companionDiagnostics": "None."
         };
         
+        var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
+        params.hasClinicalTrial = 'NO';
+        if(_clinicalTrail.length > 0) {
+            for(var i =0; i < _clinicalTrail.length; i++) {
+                if(_clinicalTrail[i].hasOwnProperty('CLINICAL TRIALS MATCHED FOR GENE AND DISEASE')
+                    && _clinicalTrail[i]['CLINICAL TRIALS MATCHED FOR GENE AND DISEASE'].length > 0) {
+                    params.hasClinicalTrial = 'YES';
+                    break;
+                }
+            }
+            params.clinicalTrials = _clinicalTrail;
+        }else {
+            params.clinicalTrials = 'None.';
+        }
+        
+        if(params.hasClinicalTrial === 'NO') {
+            annotation.annotation_summary = annotation.annotation_summary.toString().replace('Please refer to the clinical trials section.', '');
+        }
+        
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
             '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || 'None.';
@@ -65,21 +84,6 @@ angular.module('webappApp')
         }else {
             params.nonTumorTypeDrugs = 'NO';
             params.fdaApprovedInOtherTumor = 'None.';
-        }
-        
-        var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.hasClinicalTrial = 'NO';
-        if(_clinicalTrail.length > 0) {
-            for(var i =0; i < _clinicalTrail.length; i++) {
-                if(_clinicalTrail[i].hasOwnProperty('CLINICAL TRIALS MATCHED FOR GENE AND DISEASE')
-                    && _clinicalTrail[i]['CLINICAL TRIALS MATCHED FOR GENE AND DISEASE'].length > 0) {
-                    params.hasClinicalTrial = 'YES';
-                    break;
-                }
-            }
-            params.clinicalTrials = _clinicalTrail;
-        }else {
-            params.clinicalTrials = 'None.';
         }
         
         var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
