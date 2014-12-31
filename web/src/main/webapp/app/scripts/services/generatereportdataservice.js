@@ -489,11 +489,11 @@ angular.module('webappApp')
             object = {};
             key = 'LEVELS OF EVIDENCE';
             value =  [
-                {'level 1': 'FDA-approved biomarker in approved indication.'},
-                {'level 2A': 'FDA-approved biomarker in unapproved indication with NCCN-guideline listing.'},
-                {'level 2B': 'FDA-approved biomarker in unapproved indication.'},
-                {'level 3': 'Clinical evidence linking unapproved biomarker to response'},
-                {'level 4': 'Preclinical evidence linking unapproved biomarker to response.'}
+                {'level 1': 'FDA-approved biomarker and drug association in this indication.'},
+                {'level 2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.'},
+                {'level 2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.'},
+                {'level 3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'},
+                {'level 4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'}
             ];
             object[key] = value;
             clincialTrials.push(object);
