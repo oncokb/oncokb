@@ -558,13 +558,12 @@ public final class QuestDocAnnotationParser {
         System.out.println("##      "+evidenceType+" for "+alterations.toString()+" "+tumorType.getName());
         
         List<int[]> drugLines = extractLines(lines, start+1, end, sensitivieP, sensitivieP, -1);
-        if (drugLines.isEmpty()) return;
         
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         {
             // general description
-            String desc = joinLines(lines, start+1, drugLines.get(0)[0]).trim();
+            String desc = joinLines(lines, start+1, drugLines.isEmpty()?end:drugLines.get(0)[0]).trim();
             if (!desc.isEmpty()) {
                 Evidence evidence = new Evidence();
                 evidence.setEvidenceType(evidenceType);
