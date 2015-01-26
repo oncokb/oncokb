@@ -16,6 +16,8 @@ angular.module('webappApp')
     'DatabaseConnector',
     'GenerateReportDataService',
     'DeepMerge',
+    'x2js',
+    'FindRegex',
     function(
         $scope,
         $timeout,
@@ -23,7 +25,9 @@ angular.module('webappApp')
         dialogs,
         DatabaseConnector,
         ReportDataService,
-        DeepMerge) {
+        DeepMerge,
+        x2js,
+        FindRegex) {
     var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
     var uploader; //$scope.uploader -- selected file handler
     var noMatchSeperator = '(Not exists)';
@@ -106,6 +110,10 @@ angular.module('webappApp')
         //if file selected
         $scope.fileSelected = false;
         
+        //default file type is xlsx
+        $scope.isXML = false;
+        $scope.isXLSX = false;
+        
         //one worker running
         $scope.generating = false;
         
@@ -130,6 +138,20 @@ angular.module('webappApp')
                 $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
             });
         }
+        $scope.summaryTableTitles = [
+            'Treatment Implications',
+            'FDA Approved Drugs in Tumor Type',
+            'FDA Approved Drugs in Other Tumor Type',
+            'Clinical Trials',
+            'Additional Information'
+        ];
+        $scope.reportMatchedParams = [
+            'treatment',
+            'fdaApprovedInTumor',
+            'fdaApprovedInOtherTumor',
+            'clinicalTrials',
+            'additionalInfo'
+        ];
     }
 
     function getUnique(data, attr) {
@@ -205,7 +227,22 @@ angular.module('webappApp')
     function isString(obj) {
         return angular.isString(obj);
     }
-
+    
+    function bottomObject(obj) {
+        var flag = true;
+        if(obj && typeof obj === 'object') {
+          for(var key in obj) {
+            if(typeof obj[key] !== 'string' && typeof obj[key] !== 'number') {
+              flag = false;
+              break;
+            }
+          }
+        }else {
+          flag = false;
+        }
+        return flag;
+     }
+        
     function getAnnotation(worker) {
         var params = {
             'alterationType': 'MUTATION',
@@ -224,8 +261,7 @@ angular.module('webappApp')
     function searchAnnotation(status, data, worker) {
         var annotation = {};
         if(status === 'success') {
-            annotation = processData(xml2json.parser(data).xml);
-
+            annotation = processData(x2js.xml_str2json(data).xml);
             for(var key in annotation) {
                 annotation[key] = formatDatum(annotation[key], key);
             }
@@ -236,7 +272,7 @@ angular.module('webappApp')
 
                 for(var i=0, cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
                     var _cancerType = annotation.cancer_type[i];
-                    if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
+                    if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
                         relevantCancerTypeArray.push(_cancerType);
                     }
                 }
@@ -433,13 +469,152 @@ angular.module('webappApp')
             $scope.progress.dynamic = 0;
             $scope.progress.value = 0;
             $scope.progress.max = totalRecord;
-            $scope.fileSelected = true;
+            $scope.isXLSX = true;
             $scope.$apply();
         };
 
         reader.readAsBinaryString(file._file);
     }
+    
+     function readXMLfile(file) {
+        var reader = new FileReader();
 
+        reader.onload = function(e) {
+            var full = x2js.xml_str2json(e.target.result);
+            var annotation = processData(full.document.sample.test.variant.allele.transcript);
+            var relevantCancerType = {};
+            for(var key in annotation) {
+                annotation[key] = formatDatum(annotation[key], key);
+            }
+            if(annotation.cancer_type) {
+                var relevantCancerType = [];
+                for(var i=0, cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
+                    var _cancerType = annotation.cancer_type[i];
+                    if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
+                        relevantCancerType.push(_cancerType);
+                    }
+                }
+                if(relevantCancerType.length > 1) {
+                    var obj1 = relevantCancerType[0];
+
+                    for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
+                        obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
+                    }
+                    relevantCancerType = obj1;
+                }else if(relevantCancerType.length === 1){
+                    relevantCancerType = relevantCancerType[0];
+                }else {
+                    relevantCancerType = null;
+                }
+            }else {
+                relevantCancerType = null;
+            }
+
+            var reportParams = ReportDataService.init(annotation.hgnc_symbol, annotation.hgvs_p_short, full.document.sample.diagnosis, relevantCancerType, annotation);
+//                $scope.regularViewData = regularViewData($scope.annotation);
+            $scope.reportViewData = reportViewData(reportParams);
+            $scope.isXML = true;
+            $scope.$apply();
+        };
+
+        reader.readAsBinaryString(file._file);
+    }
+    
+    function reportViewData(params) {
+        var _parmas = angular.copy(params);
+        _parmas.overallInterpretation = processOverallInterpretation(_parmas.overallInterpretation);
+        _parmas = constructData(_parmas);
+        return _parmas;
+    }
+    
+    function constructData(data) {
+        for(var key in data) {
+            var datum = data[key];
+            if(isArray(datum)) {
+                datum = constructData(datum);
+            }else if(isObject(datum) && !bottomObject(datum)) {
+                datum = constructData(datum);
+            }else if(isObject(datum) && bottomObject(datum)) {
+                datum = objToArray(datum);
+            }else {
+                datum = FindRegex.get(datum);
+            }
+            data[key] = datum;
+        }
+
+        return data;
+    }
+        
+    function objToArray(obj) {
+        var delayAttrs = ['description'];
+        var priorAttrs = ['trial','nccn_special','recommendation category 1 / 2A / 2 / 2A / 2A'];
+
+        if (!angular.isObject(obj)) {
+          return obj;
+        }
+
+        var keys = Object.keys(obj).filter(function(item) {
+            return item !== '$$hashKey';
+        }).sort(function(a,b) {
+            var delayIndexOfA = delayAttrs.indexOf(a),
+                delayIndexOfB = delayAttrs.indexOf(b),
+                priorIndexOfA = priorAttrs.indexOf(a),
+                priorIndexOfB = priorAttrs.indexOf(b);
+
+            if(priorIndexOfA !== -1 && priorIndexOfB !== -1) {
+                if(priorIndexOfA <= priorIndexOfB) {
+                    return -1;
+                }else {
+                    return 1;
+                }
+            }else if(priorIndexOfA !== -1) {
+                return -1;
+            }else if(priorIndexOfB !== -1) {
+                return 1;
+            }else {
+                if(delayIndexOfA !== -1 && delayIndexOfB !== -1) {
+                    if(delayIndexOfA <= delayIndexOfB) {
+                        return 1;
+                    }else {
+                        return -1;
+                    }
+                }else if(delayIndexOfA !== -1) {
+                    return 1;
+                }else if(delayIndexOfB !== -1) {
+                    return -1;
+                }else {
+                    if(a < b) {
+                        return -1;
+                    }else {
+                        return 1;
+                    }
+                }
+            }
+        });
+
+        var returnArray = keys.map(function (key) {
+                var _obj = {};
+
+                _obj.key = key;
+                _obj.value = FindRegex.get(obj[key]).toString();
+                return _obj;
+            });
+
+        return returnArray;
+    }
+
+    
+    function processOverallInterpretation(str) {
+        var content = str.split(/[\n\r]/g);
+        for(var i=0; i< content.length; i++) {
+            if(i%2 === 0) {
+                content[i]='<b>' + content[i] + '</b>';
+            }
+        }
+        str = content.join('<br/>');
+        return str;
+    }
+        
     uploader = $scope.uploader = new FileUploader();
 
     uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
@@ -448,10 +623,13 @@ angular.module('webappApp')
     uploader.onAfterAddingFile  = function(fileItem) {
         console.info('onAfterAddingFile', fileItem);
         initParams();
+        $scope.fileSelected = true;
         if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             readXLSXfile(fileItem);
+        }else if(fileItem.file.type === 'text/xml'){
+            readXMLfile(fileItem);
         }else {
-            dialogs.error('Error', 'Do not support the type of selected file, only XLSX file supported.')
+            dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.')
             uploader.removeFromQueue(fileItem);
         }
     };

@@ -9,13 +9,13 @@
             <div ng-show="uploader.isHTML5">
                 <!-- 3. nv-file-over uploader="link" over-class="className" -->
                 <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
-                    Drop your file in here. <br/>(xlsx file only)
+                    Drop your file in here. <br/>(xlsx file or quest annotated xml file only)
                 </div>
             </div>
             <input type="file" nv-file-select="" uploader="uploader" />
             
             <br/>
-            <form ng-show="fileSelected" class="form-inline">
+            <form ng-if="fileSelected && isXLSX" class="form-inline">
                 <div class="input-group input-group-sm" style='width:100%' >
                     <span class="input-group-addon"><b>Email:</b></span>
                     <input type="text" ng-model="sheets.email" id="email" class="form-control">
@@ -28,8 +28,8 @@
             <!-- Example: nv-file-select="" uploader="{Object}" options="{Object}" filters="{String}" -->
             
         </div>
-
-            <div ng-show="fileSelected" class="col-md-8" style="margin-bottom: 40px">
+        
+        <div ng-if="fileSelected && isXLSX" class="col-md-8" style="margin-bottom: 40px">
 
             <h3>Upload File Info</h3>
             <p>Number of Sheets: {{ sheets.length }}</p>
@@ -74,6 +74,8 @@
             </div>
 
         </div>
-
+        <div ng-if="fileSelected && isXML" class="col-md-12">
+            <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
+        </div>
     </div>
 </div>

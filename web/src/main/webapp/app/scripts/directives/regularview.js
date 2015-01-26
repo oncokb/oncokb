@@ -7,7 +7,7 @@
  * # regularView
  */
 angular.module('webappApp')
-    .directive('regularView', function () {
+    .directive('regularView', ['FindRegex', function (FindRegex) {
         function link($scope) {
             $scope.getDrugHeader = function(key, data) {
                 var header = '';
@@ -47,7 +47,7 @@ angular.module('webappApp')
                 if(hasEvidenceLevel(data)) {
                     body += 'Highest Level of Evidence: ' + data.level_of_evidence_for_patient_indication.level + '<br/>';
                 }
-                body += (data.hasOwnProperty('description') && angular.isString(data.description))?$scope.findRegex(data.description):'';
+                body += (data.hasOwnProperty('description') && angular.isString(data.description))?FindRegex.get(data.description):'';
                 return body;
             };
             $scope.hasGeneralStatement = function(data) {
@@ -65,7 +65,7 @@ angular.module('webappApp')
                 str += (nccn.hasOwnProperty('pages') && angular.isString(nccn.pages))?(' Pages: ' + nccn.pages):'';
 
                 str += '</i>';
-                str += (nccn.hasOwnProperty('description') && angular.isString(nccn.description))?('<br>' + $scope.findRegex(nccn.description) + '<br/>'):'';
+                str += (nccn.hasOwnProperty('description') && angular.isString(nccn.description))?('<br>' + FindRegex.get(nccn.description) + '<br/>'):'';
 
                 return str;
             };
@@ -80,10 +80,10 @@ angular.module('webappApp')
                     };
                 }
 
-                str += trial.hasOwnProperty('trial_id')?('TRIAL ID: ' + $scope.findRegex(trial.trial_id) + (trial.hasOwnProperty('phase')?(' / ' + trial.phase): '') + '<br/>'):'';
+                str += trial.hasOwnProperty('trial_id')?('TRIAL ID: ' + FindRegex.get(trial.trial_id) + (trial.hasOwnProperty('phase')?(' / ' + trial.phase): '') + '<br/>'):'';
                 str += trial.hasOwnProperty('title')?('TITLE: ' + trial.title + '<br/>'):'';
 
-                // str += trial.hasOwnProperty('description')?('<br>' + $scope.findRegex(trial.description) + '<br/>'):'';
+                // str += trial.hasOwnProperty('description')?('<br>' + FindRegex.get(trial.description) + '<br/>'):'';
                 return str;
             };
 
@@ -116,11 +116,10 @@ angular.module('webappApp')
                 summaryTableTitlesContent: '=',
                 specialAttr: '=',
                 displayProcess: '=',
-                findRegex: '=',
                 setCollapsed: '=',
                 isCollapsed: '=',
                 fdaApproved: '=',
                 displayParts: '='
             }
         };
-    });
+    }]);
