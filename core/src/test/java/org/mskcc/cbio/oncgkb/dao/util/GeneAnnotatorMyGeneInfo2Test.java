@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncogkb.dao.util;
+package org.mskcc.cbio.oncgkb.dao.util;
 
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
 import java.io.IOException;
