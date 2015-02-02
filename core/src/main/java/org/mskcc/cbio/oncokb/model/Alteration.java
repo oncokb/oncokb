@@ -109,6 +109,9 @@ public class Alteration implements java.io.Serializable {
     }
 
     public Boolean getOncogenic() {
+        if (oncogenic==null) {
+            return false;
+        }
         return oncogenic;
     }
 

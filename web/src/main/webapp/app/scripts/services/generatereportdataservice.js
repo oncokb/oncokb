@@ -20,42 +20,77 @@ angular.module('webappApp')
             "overallInterpretation": "",
             "diagnosis": "",
             "tumorTissueType": "",
-            "specimenSource": "",
-            "blockId": "",
-            "stage": "",
-            "grade": "",
+            "specimenSource": "None.",
+            "blockId": "None.",
+            "stage": "None.",
+            "grade": "None.",
             "geneName": "",
             "mutation": "",
-            "alterType": "",
-            "mutationFreq": "",
-            "tumorTypeDrugs": "",
-            "nonTumorTypeDrugs": "",
-            "hasClinicalTrial": "",
-            "treatment": "",
-            "fdaApprovedInTumor": "",
-            "fdaApprovedInOtherTumor": "",
-            "clinicalTrials": "",
-            "additionalInfo": "",
-            "companionDiagnostics": ""
+            "alterType": "N/A",
+            "mutationFreq": "N/A",
+            "tumorTypeDrugs": "N/A",
+            "nonTumorTypeDrugs": "N/A",
+            "hasClinicalTrial": "N/A",
+            'additionalMutations': 'None.',
+            'interactingMutations': 'None.',
+            "treatment": "None.",
+            "fdaApprovedInTumor": "None.",
+            "fdaApprovedInOtherTumor": "None.",
+            "clinicalTrials": "None.",
+            "additionalInfo": "None.",
+            "companionDiagnostics": "None."
         };
-
+        
+        var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
+        params.hasClinicalTrial = 'NO';
+        if(_clinicalTrail.length > 0) {
+            for(var i =0; i < _clinicalTrail.length; i++) {
+                if(_clinicalTrail[i].hasOwnProperty('CLINICAL TRIALS MATCHED FOR GENE AND DISEASE')
+                    && _clinicalTrail[i]['CLINICAL TRIALS MATCHED FOR GENE AND DISEASE'].length > 0) {
+                    params.hasClinicalTrial = 'YES';
+                    break;
+                }
+            }
+            params.clinicalTrials = _clinicalTrail;
+        }else {
+            params.clinicalTrials = 'None.';
+        }
+        
+        if(params.hasClinicalTrial === 'NO') {
+            annotation.annotation_summary = annotation.annotation_summary.toString().replace('Please refer to the clinical trials section.', '');
+        }
+        
         params.overallInterpretation = (geneName + ' ' + alteration + ' SUMMARY\n' + 
             annotation.annotation_summary + 
-            '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || '';
+            '\nOTHER GENES\nNo additional somatic mutations were detected in this patient sample in the other sequenced gene regions.') || 'None.';
         params.geneName = geneName;
         params.mutation = alteration;
         params.diagnosis = tumorType;
         params.tumorTissueType = params.diagnosis;
         var _treatment = constructTreatment(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.treatment = _treatment.length > 0 ? _treatment : "";
-        var _fdaInfo = constructfdaInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.fdaApprovedInTumor = _fdaInfo.approved.length > 0 ? _fdaInfo.approved : "";
-        params.fdaApprovedInOtherTumor = _fdaInfo.nonApproved.length > 0 ? _fdaInfo.nonApproved : "";
-        var _clinicalTrail = constructClinicalTrial(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.clinicalTrials = _clinicalTrail.length > 0 ? _clinicalTrail : "";
-        var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
-        params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "";
+        params.treatment = _treatment.length > 0 ? _treatment : "None.";
         
+        var _fdaInfo = constructfdaInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
+        if(_fdaInfo.approved.length > 0) {
+            params.tumorTypeDrugs = 'YES';
+            params.fdaApprovedInTumor = _fdaInfo.approved;
+        }else {
+            params.tumorTypeDrugs = 'NO';
+            params.fdaApprovedInTumor = 'None.';
+        }
+        if(_fdaInfo.approvedInOther.length > 0) {
+            params.nonTumorTypeDrugs = 'YES';
+            params.fdaApprovedInOtherTumor = _fdaInfo.approvedInOther;
+        }else {
+            params.nonTumorTypeDrugs = 'NO';
+            params.fdaApprovedInOtherTumor = 'None.';
+        }
+        
+        var _additionalInfo = constructAdditionalInfo(annotation, geneName, alteration, tumorType, relevantCancerType);
+        params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : "None.";
+        
+        //Set the alteration type to MUTATION, need to change after type available
+        params.alterType = 'MUTATION';
         return params;
     }
 
@@ -104,19 +139,42 @@ angular.module('webappApp')
         }
         
         if(cancerTypeInfo.standard_therapeutic_implications && cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)) {
+            var description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
             value = [];
             object = {};
             key = "STANDARD THERAPEUTIC IMPLICATIONS";
+            if(typeof description === 'string') {
+                description = description.trim();
+            }
             value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
             object[key] = value;
             treatment.push(object);
         }
-
+        
         if(cancerTypeInfo.prognostic_implications && checkDescription(cancerTypeInfo.prognostic_implications)) {
+            var description = cancerTypeInfo.prognostic_implications.description;
             value = [];
             key = "PROGNOSTIC IMPLICATIONS";
             object = {};
-            value.push({'description': cancerTypeInfo.prognostic_implications.description});
+            if(angular.isString(description)) {
+                description = description.trim();
+            }else {
+                if(angular.isArray(description)){
+                    var str = [];
+                    description.forEach(function(e,i){
+                        if(e['Cancer type'].toString().toLowerCase() === 'all tumors' && str.length > 0) {
+                            str.unshift(e.value.toString().trim());
+                        }else {
+                            str.push(e.value.toString().trim());
+                        }
+                    });
+                    description = str.join(' ');
+                }else{
+                    description = '';
+                    console.log('PROGNOSTIC IMPLICATIONS --- not string --- not array');
+                }
+            }
+            value.push({'description': description});
             object[key] = value;
             treatment.push(object);
         }
@@ -124,7 +182,7 @@ angular.module('webappApp')
         return treatment;
     }
 
-    function findApprovedDrug(datum, object, tumorType, key) {
+    function findApprovedDrug(datum, object, tumorType, key, valueExtend) {
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
                 _key = '',
@@ -151,8 +209,11 @@ angular.module('webappApp')
                 }
             }
 
-            _key = _key.substr(0, _key.length-3);
+            _key = _key.substr(0, _key.length-2);
             
+            if(valueExtend !== undefined) {
+                _key += valueExtend;
+            }
             
             while(object.hasOwnProperty(_key)) {
                 _key+=specialKeyChars;
@@ -162,7 +223,7 @@ angular.module('webappApp')
                 _level = _subDatum.level_of_evidence_for_patient_indication.level;
                 _obj['Level of evidence'] = isNaN(_level)?_level.toUpperCase():_level;
             }
-            if(_subDatum.description) {
+            if(checkDescription(_subDatum)) {
                 _obj.description = _subDatum.description;
             }
             if(typeof tumorType !== "undefined" && tumorType !== "") {
@@ -174,7 +235,7 @@ angular.module('webappApp')
         return object;
     }
 
-    function findByLevelEvidence(datum, object, tumorType, key) {
+    function findByLevelEvidence(datum, object, tumorType, key, valueExtend) {
         for(var m=0, datumL = datum.length; m < datumL; m++) {
             var _subDatum = datum[m],
                 _key = '',
@@ -200,8 +261,12 @@ angular.module('webappApp')
                 }
             }
 
-            _key = _key.substr(0, _key.length-3);
-
+            _key = _key.substr(0, _key.length-2);
+            
+            if(valueExtend !== undefined) {
+                _key += valueExtend;
+            }
+            
             while(object.hasOwnProperty(_key)) {
                 _key+=specialKeyChars;
             }
@@ -223,7 +288,7 @@ angular.module('webappApp')
 
     function displayProcess(str) {
         var specialUpperCasesWords = ['NCCN'];
-        var specialLowerCasesWords = ['of', 'for'];
+        var specialLowerCasesWords = ['of', 'for', 'to'];
 
         str = str.replace(/_/g, ' ');
         str = str.replace(
@@ -248,7 +313,7 @@ angular.module('webappApp')
 
     function constructfdaInfo(annotation, geneName, mutation, tumorType, relevantCancerType) {
         var fdaApproved = [],
-            fdaNonApproved = [],
+            fdaApprovedInOther = [],
             object = {},
             cancerTypeInfo = relevantCancerType || {},
             attrsToDisplay = ['sensitive_to', 'resistant_to'];
@@ -261,6 +326,8 @@ angular.module('webappApp')
                     object = {};
                     if(attrsToDisplay[i] === 'sensitive_to') {
                         object = findApprovedDrug(_datum, object);
+                    }else if(attrsToDisplay[j] === 'resistant_to'){
+                        object = findByLevelEvidence(_datum, object, '', '', " (Resistance)");
                     }else {
                         object = findApprovedDrug(_datum, object, '', displayProcess(attrsToDisplay[i]) + ': ');
                     }
@@ -275,19 +342,21 @@ angular.module('webappApp')
             }
         }
         
-        if(annotation.cancer_type && relevantCancerType && relevantCancerType.type) {
+        if(annotation.cancer_type && relevantCancerType && relevantCancerType.$type) {
             object = {};
 
             for (var i = 0; i < annotation.cancer_type.length; i++) {
-                if(annotation.cancer_type[i].type !== relevantCancerType.type) {
+                if(isNRCT(relevantCancerType.$type, annotation.cancer_type[i].$type)) {
                     if(annotation.cancer_type[i].standard_therapeutic_implications) {
                         for (var j = 0; j < attrsToDisplay.length; j++) {
                             if(annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]]) {
                                 var _datum = annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]];
                                 if(attrsToDisplay[j] === 'sensitive_to') {
-                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type);
+                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].$type);
+                                }else if(attrsToDisplay[j] === 'resistant_to'){
+                                    object = findByLevelEvidence(_datum, object, '', '', " (Resistance)");
                                 }else {
-                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].type, attrsToDisplay[j] + ': ');
+                                    object = findApprovedDrug(_datum, object, annotation.cancer_type[i].$type, attrsToDisplay[j] + ': ');
                                 }
                             }
                         }
@@ -298,20 +367,48 @@ angular.module('webappApp')
             for(var _key in object) {
                 var _object = {};
                 _object[_key] = object[_key];
-                fdaNonApproved.push(_object);
+                
+                for(var i = 0; i < _object[_key].length; i++ ) {
+                    delete _object[_key][i]['Level of evidence'];
+                    delete _object[_key][i]['description'];
+                }
+                
+                fdaApprovedInOther.push(_object);
                 _object = null;
             }
         }
-        return {'approved': fdaApproved, 'nonApproved': fdaNonApproved};
+        return {'approved': fdaApproved, 'approvedInOther': fdaApprovedInOther};
     }
-
+    
+    //Is not relevant cancer type
+    function isNRCT(relevent, type) {
+        if(typeof relevent === 'object') {
+            if(relevent instanceof Array) {
+                for(var i=0; i<relevent.length; i++) {
+                    if(relevent[i]['Cancer type'] === type) {
+                        return false;
+                    }
+                }
+                return true;
+            }else {
+                if(relevent.type === type) {
+                    return false;
+                }else {
+                    return true;
+                }
+            }
+        }else {
+            return null;
+        }
+    }
+    
     function constructClinicalTrial(annotation, geneName, mutation, tumorType, relevantCancerType) {
         var clincialTrials = [],
             key = '',
             value = [],
             object = {},
             cancerTypeInfo = relevantCancerType || {},
-            attrsToDisplay = ['sensitive_to', 'resistant_to'];
+            attrsToDisplay = ['resistant_to', 'sensitive_to'];
 
         if(cancerTypeInfo.clinical_trial) {
             var _datum = cancerTypeInfo.clinical_trial;
@@ -322,7 +419,7 @@ angular.module('webappApp')
 
             for(var i=0, _datumL = _datum.length; i < _datumL; i++) {
                     var _subDatum = {},
-                        _phase = _datum[i].phase.toString().trim() || '';
+                        _phase = _datum[i].phase || '';
 
                     if(_phase.indexOf('/') !== -1 && _phase !== 'N/A') {
                         var _phases = _phase.split('/');
@@ -362,6 +459,8 @@ angular.module('webappApp')
                     object = {};
                     if(attrsToDisplay[j] === 'sensitive_to') {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object);
+                    }else if(attrsToDisplay[j] === 'resistant_to'){
+                        object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', '', " (Resistance)");
                     }else {
                         object = findByLevelEvidence(cancerTypeInfo.investigational_therapeutic_implications[attrsToDisplay[j]], object, '', displayProcess(attrsToDisplay[j]) + ': ');
                     }
@@ -394,11 +493,11 @@ angular.module('webappApp')
             object = {};
             key = 'LEVELS OF EVIDENCE';
             value =  [
-                {'level 1': 'FDA-approved biomarker in approved indication.'},
-                {'level 2A': 'FDA-approved biomarker in unapproved indication with NCCN-guideline listing.'},
-                {'level 2B': 'FDA-approved biomarker in unapproved indication.'},
-                {'level 3': 'Clinical evidence linking unapproved biomarker to response'},
-                {'level 4': 'Preclinical evidence linking unapproved biomarker to response.'}
+                {'level 1': 'FDA-approved biomarker and drug association in this indication.'},
+                {'level 2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.'},
+                {'level 2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.'},
+                {'level 3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'},
+                {'level 4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'}
             ];
             object[key] = value;
             clincialTrials.push(object);
@@ -424,7 +523,7 @@ angular.module('webappApp')
     }
     
     function checkDescription(datum) {
-        if(datum && datum.hasOwnProperty('description') && angular.isString(datum.description)) {
+        if(datum && datum.hasOwnProperty('description') && (angular.isString(datum.description) || datum.description instanceof Array)) {
             return true;
         }else {
             return false;
@@ -471,6 +570,7 @@ angular.module('webappApp')
 
     function removeCharsInDescription(str) {
         if(typeof str !== 'undefined') {
+            str = str.trim();
             str = str.replace(/(\r\n|\n|\r)/gm,'');
             str = str.replace(/(\s\s*)/g,' ');
             return str;

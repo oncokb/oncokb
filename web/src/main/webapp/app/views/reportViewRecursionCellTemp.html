@@ -1,5 +1,5 @@
 <div ng-repeat="(key, datum) in data">
-        <h5 ng-if="depth===2"><b>{{key}}</b></h5>
+    <h5 ng-if="depth===2" ng-bind-html="keyProcess(key)"></h5>
         <div ng-if="isArray(datum)">
             <report-view-recursion-cell data="datum" depth="depth"></report-view-recursion-cell>
         </div>

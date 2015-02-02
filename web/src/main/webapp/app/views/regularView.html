@@ -12,7 +12,7 @@
     <accordion close-others="oneAtATime">
         <accordion-group ng-repeat="cancerType in annotation.cancer_type">
         <accordion-heading>
-            {{cancerType.type}}&nbsp;&nbsp;&nbsp;<span ng-if="cancerType.relevant_to_patient_disease && cancerType.relevant_to_patient_disease.toLowerCase() === 'yes'" style='color: green; font-size:12px; font-weight:bold'><i>RELEVANT</i></span>
+            {{cancerType.$type}}&nbsp;&nbsp;&nbsp;<span ng-if="cancerType.$relevant_to_patient_disease && cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes'" style='color: green; font-size:12px; font-weight:bold'><i>RELEVANT</i></span>
         </accordion-heading>
         <table class='table table-bordered colorFirstCol'>
             <tbody>

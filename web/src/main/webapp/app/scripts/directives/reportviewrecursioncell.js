@@ -25,53 +25,60 @@ angular.module('webappApp')
                 // you can also pass an object with 
                 // a 'pre'- and 'post'-link function.
                 scope.isObject = function(obj) {
-	  				return angular.isObject(obj) && !angular.isArray(obj);
-	  			};
-	  			scope.isArray = function(obj) {
-	  				return angular.isArray(obj);
-	  			};
-	  			scope.isString = function(obj) {
-	  				return angular.isString(obj);
-	  			};
-	  			scope.bottomObject = function(obj) {
-		           	var flag = true;
-		           	if(obj && typeof obj === 'object') {
-		             	for(var key in obj) {
-		               		if(typeof obj[key] !== 'string') {
-		                 		flag = false;
-		                 		break;
-		               		}
-		             	}
-		           	}else {
-		             	flag = false;
-		           	}
-		           return flag;
-		        };
-	  			scope.multiObject = function(obj) {
-	  				var flag = false;
-	  				if(obj && typeof obj === 'object' && Object.keys(obj).length === 2 && Object.keys(obj).indexOf('value') !== -1 && Object.keys(obj).indexOf('Cancer type') !== -1) {
-	  					flag = true;
-	  				}else {
-	  					flag = false;
-	  				}
-	  				return flag;
-	  			};
-	  			scope.show = function(key, value) {
-	  				var disabledKey = ['description', 'trial', 'title', 'nccn_special', 'effect', 'recommendation category'],
-  					str = '';
-  					
-  					if(disabledKey.indexOf(key.toLowerCase()) === -1) {
-	  					str += key + ': ' + value;
-	  				}else {
-	  					str += value;
-	  				}
-	  				str += '<br/>';
-	  				return str;
-	  			};
-	  			function upperFirstLetter(str){
-		  			str = str.replace('_', ' ');
-		  			return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
-		  		}
+                    return angular.isObject(obj) && !angular.isArray(obj);
+                };
+                scope.isArray = function(obj) {
+                    return angular.isArray(obj);
+                };
+                scope.isString = function(obj) {
+                    return angular.isString(obj);
+                };
+                scope.bottomObject = function(obj) {
+                    var flag = true;
+                    if(obj && typeof obj === 'object') {
+                    for(var key in obj) {
+                        if(typeof obj[key] !== 'string') {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    }else {
+                        flag = false;
+                    }
+                    return flag;
+                };
+                scope.keyProcess = function(key) {
+                    if(key.indexOf('(Resistance)') !== -1) {
+                        key = key.replace('(Resistance)', '<span class="resistance-title">(Resistance)</span>');
+                    }
+                    key = '<b>' + key + '</b>';
+                    return key;
+                };
+                scope.multiObject = function(obj) {
+                        var flag = false;
+                        if(obj && typeof obj === 'object' && Object.keys(obj).length === 2 && Object.keys(obj).indexOf('value') !== -1 && Object.keys(obj).indexOf('Cancer type') !== -1) {
+                                flag = true;
+                        }else {
+                                flag = false;
+                        }
+                        return flag;
+                };
+                scope.show = function(key, value) {
+                        var disabledKey = ['description', 'trial', 'title', 'nccn_special', 'effect', 'recommendation category', 'value'],
+                        str = '';
+
+                        if(disabledKey.indexOf(key.toLowerCase()) === -1) {
+                                str += key + ': ' + value;
+                        }else {
+                                str += value;
+                        }
+                        str += '<br/>';
+                        return str;
+                };
+                function upperFirstLetter(str){
+                        str = str.replace('_', ' ');
+                        return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
+                }
             });
         }
     };

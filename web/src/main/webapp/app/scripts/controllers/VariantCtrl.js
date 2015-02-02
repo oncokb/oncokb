@@ -8,11 +8,14 @@ angular.module('webappApp')
         'dialogs',
         'DatabaseConnector',
         'GenerateReportDataService',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService) {
+        'DeepMerge',
+        'x2js',
+        'FindRegex',
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService, DeepMerge, x2js, FindRegex) {
 
         'use strict';
 
-        var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
+        var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug', 'reference'];
         
         $scope.init = function () {
 
@@ -212,40 +215,6 @@ angular.module('webappApp')
             );
             return str;
         };
-
-        $scope.findRegex = function(str) {
-
-            if(typeof str === 'string' && str !== '') {
-                var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
-                    links = ['http://www.ncbi.nlm.nih.gov/pubmed/',
-                             'http://clinicaltrials.gov/show/'];
-                for (var j = 0, regexL = regex.length; j < regexL; j++) {
-                    var result = str.match(regex[j]);
-
-                    if(result) {
-                        var uniqueResult = result.filter(function(elem, pos) {
-                            return result.indexOf(elem) === pos;
-                        });
-                        for(var i = 0, resultL = uniqueResult.length; i < resultL; i++) {
-                            var _datum = uniqueResult[i];
-                            
-                            switch(j) {
-                                case 0:
-                                    var _number = _datum.split(':')[1].trim();
-                                    _number = _number.replace(/\s+/g, '');
-                                    str = str.replace(new RegExp(_datum, 'g'), '<a class="withUnderScore" target="_blank" href="'+ links[j] + _number+'">' + _datum + '</a>');
-                                    break;
-                                default:
-                                    str = str.replace(_datum, '<a class="withUnderScore" target="_blank" href="'+ links[j] + _datum+'">' + _datum + '</a>');
-                                    break;
-                            }
-                            
-                        }
-                    }
-                }
-            }
-            return str;
-        };
         
         $scope.search = function() {
             var hasSelectedTumorType = $scope.hasSelectedTumorType();
@@ -269,29 +238,35 @@ angular.module('webappApp')
             
             changeUrl(params);
             
-            DatabaseConnector.searchAnnotation(function(data) {
-                var annotation = {};
-                annotation = processData(xml2json.parser(data).xml);
-
+            DatabaseConnector.searchAnnotation(params, function(data) {
+                searchAnnotationCallback('success', data);
+            }, function(){
+                searchAnnotationCallback('fail');
+            });
+        };
+        
+        function searchAnnotationCallback(status, data) {
+            var annotation = {};
+            if(status === 'success') {
+                annotation = processData(x2js.xml_str2json(data).xml);
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
                 }
-
+                
                 $scope.annotation = annotation;
-                $scope.rendering = false;
                 if($scope.annotation.cancer_type) {
                     var relevantCancerType = [];
                     for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
-                        if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
+                        if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
                             relevantCancerType.push(_cancerType);
                         }
                     }
                     if(relevantCancerType.length > 1) {
                         var obj1 = relevantCancerType[0];
-
+                        
                         for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
-                            obj1 = deepmerge(obj1, relevantCancerType[i], obj1.type, relevantCancerType[i].type);
+                            obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
                         }
                         $scope.relevantCancerType = obj1;
                     }else if(relevantCancerType.length === 1){
@@ -304,11 +279,12 @@ angular.module('webappApp')
                 }
 
                 $scope.reportParams = ReportDataService.init($scope.gene, $scope.alteration, $scope.selectedTumorType, $scope.relevantCancerType, $scope.annotation);
-//                $scope.regularViewData = regularViewData($scope.annotation);
+    //                $scope.regularViewData = regularViewData($scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
-            }, params);
-        };
-
+            }
+            $scope.rendering = false;
+        }
+        
         function processData(object){
             if(isArray(object)) {
                 object.forEach(function(e, i){
@@ -487,7 +463,7 @@ angular.module('webappApp')
                     var _obj = {};
                     
                     _obj.key = key;
-                    _obj.value = $scope.findRegex(obj[key]).toString();
+                    _obj.value = FindRegex.get(obj[key]).toString();
                     return _obj;
                 });
 
@@ -504,7 +480,7 @@ angular.module('webappApp')
                 }else if(isObject(datum) && bottomObject(datum)) {
                     datum = objToArray(datum);
                 }else {
-                    datum = $scope.findRegex(datum);
+                    datum = FindRegex.get(datum);
                 }
                 data[key] = datum;
             }
@@ -514,44 +490,6 @@ angular.module('webappApp')
 
         function googleDocData(params) {
             return params;
-        }
-        //This original function comes fromhttps://github.com/nrf110/deepmerge
-        //Made changed for using in current project
-        //ct1: cancer type of target; ct2: cancer type of source
-        function deepmerge(target, src, ct1, ct2) {
-            var array = Array.isArray(src);
-            var dst = array && [] || {};
-
-            if (array) {
-                target = target || [];
-                dst = dst.concat(target);
-                src.forEach(function(e, i) {
-                    dst.push(e);
-                });
-            } else {
-                if (target && typeof target === 'object') {
-                    Object.keys(target).forEach(function (key) {
-                        dst[key] = target[key];
-                    });
-                }
-                Object.keys(src).forEach(function (key) {
-                    if (typeof src[key] !== 'object' || !src[key]) {
-                        if(!Array.isArray(dst[key])) {
-                            var _tmp = dst[key];
-                            dst[key] = [{'value':_tmp, 'cancer_type': ct1}];
-                        }
-                        dst[key].push({'value':src[key], 'cancer_type': ct2} );
-                    }
-                    else {
-                        if (!target[key]) {
-                            dst[key] = src[key];
-                        } else {
-                            dst[key] = deepmerge(target[key], src[key], ct1, ct2);
-                        }
-                    }
-                });
-            }
-            return dst;
         }
         
         $scope.generateReport = function() {
@@ -563,9 +501,11 @@ angular.module('webappApp')
                     generating();
                     var params = googleDocData($scope.reportParams);
                     params.email = data;
-                    DatabaseConnector.googleDoc(function(data) {
+                    DatabaseConnector.googleDoc(params, function() {
                         $scope.generaingReport =false;
-                    }, params);
+                    }, function() {
+                        $scope.generaingReport =false;
+                    });
                 }
             },function(){
               console.log('Did not do anything.');

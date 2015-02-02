@@ -179,7 +179,9 @@ a:hover {
 .annotationClinicalTrial {
   margin-bottom: 10px;
 }
-
+.resistance-title {
+    color: red;
+}
 h5 {
     margin-bottom: 0;
 }
@@ -271,4 +273,11 @@ h5 {
 }
 #questHeaderSwither div.fa {
   margin-left: 5px;
+}
+#rg-rfr-btn {
+    margin-left: 5px;
+}
+
+.qtip hr {
+    margin: 5px 0;
 }

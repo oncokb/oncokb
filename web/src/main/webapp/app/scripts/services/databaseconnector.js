@@ -103,25 +103,50 @@ angular.module('webappApp')
       }
     }
 
-    function searchVariant(callback, params) {
+    function searchVariant(params, success, fail) {
       if(dataFromFile) {
         SearchVariant.annotationFromFile(params).success(function(data) {
-          callback(data);
+          success(data);
         });
       }else {
-        SearchVariant.getAnnotation(params).success(function(data) {
-          callback(data);
-        });
+        SearchVariant
+            .getAnnotation(params)
+                .success(function(data) {
+                    success(data);
+                })
+                .error(function(){
+                    fail();
+                });
       }
     }
 
-    function generateGoogleDoc(callback, params) {
+    function generateGoogleDoc(params, success, fail) {
       if(dataFromFile) {
-        callback('');
+        success('');
       }else {
-        GenerateDoc.getDoc(params).success(function(data) {
-          callback(data);
-        });
+        GenerateDoc
+            .getDoc(params)
+                .success(function(data) {
+                    success(data);
+                })
+                .error(function(){
+                    fail();
+                });
+      }
+    }
+    
+    function createGoogleFolder(params, success, fail) {
+      if(dataFromFile) {
+        success('');
+      }else {
+        GenerateDoc
+            .createFolder(params)
+                .success(function(data) {
+                    success(data);
+                })
+                .error(function(){
+                    fail();
+                });
       }
     }
 
@@ -156,6 +181,7 @@ angular.module('webappApp')
       },
       'getAllEvidence': getAllEvidence,
       'searchAnnotation': searchVariant,
-      'googleDoc': generateGoogleDoc
+      'googleDoc': generateGoogleDoc,
+      'createGoogleFolder': createGoogleFolder
     };
   }]);

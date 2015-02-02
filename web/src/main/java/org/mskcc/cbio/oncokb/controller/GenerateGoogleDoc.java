@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
- * @author jgao
+ * @author zhangh2
  */
 @Controller
 public class GenerateGoogleDoc {
@@ -66,6 +66,10 @@ public class GenerateGoogleDoc {
         }
     }
     
+    private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6eXoydVRrdHJBbE0";
+    private static final String  REPORT_DATA_TEMPLATE = "1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM";
+    private static final String REPORTS_INFO_SHEET_ID = "1fsixOxg-o-_UwZvInU99791ITyYhs4nz8s35_qJmw8o";
+        
     @RequestMapping(value="/generateGoogleDoc", method = POST)
     public @ResponseBody Boolean generateGoogleDoc(
             @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException{
@@ -76,19 +80,19 @@ public class GenerateGoogleDoc {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
             Date date = new Date();
             String dateString = dateFormat.format(date);
-            String fileName = jsonObj.getString("geneName") + "_" + jsonObj.getString("mutation") + "_" + jsonObj.getString("diagnosis");
             Drive driveService = GoogleAuth.getDriveService();
             System.out.println("Got drive service");
+            String fileName = jsonObj.getString("geneName") + "_" + jsonObj.getString("mutation") + "_" + jsonObj.getString("diagnosis");
             File file = new File();
             file.setTitle(fileName);
-            file.setParents(Arrays.asList(new ParentReference().setId("0BzBfo69g8fP6eXoydVRrdHJBbE0")));
+            file.setParents(Arrays.asList(new ParentReference().setId(REPORT_PARENT_FOLDER)));
             file.setDescription("New File created from server");
             System.out.println("Copying file");
-            file = driveService.files().copy("1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM", file).execute();
+            file = driveService.files().copy(REPORT_DATA_TEMPLATE, file).execute();
             System.out.println("Successfully copied file. Start to change file content");
             changeFileContent(file.getId(), file.getTitle(), jsonObj);
             System.out.println("Successfully changed file content. Start to add new record");
-            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString, jsonObj.get("email").toString());
+            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString, jsonObj.get("email").toString(),jsonObj.has("folderId")?jsonObj.get("folderId").toString():null,jsonObj.has("folderId")?jsonObj.get("folderName").toString():null);
             System.out.println("Successfully added new record");
             responseFlag = true;
         } catch (GoogleJsonResponseException e) {
@@ -112,8 +116,7 @@ public class GenerateGoogleDoc {
         return responseFlag;
     }
     
-    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
-        String REPORTS_INFO_SHEET_ID = "1fsixOxg-o-_UwZvInU99791ITyYhs4nz8s35_qJmw8o";
+    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
         
         SpreadsheetService service = GoogleAuth.createSpreedSheetService();
@@ -135,6 +138,12 @@ public class GenerateGoogleDoc {
         row.getCustomElements().setValueLocal("requestdate", date);
         row.getCustomElements().setValueLocal("email", email);
         row.getCustomElements().setValueLocal("sendreminder", "No");
+        if(folderId != null) {
+            row.getCustomElements().setValueLocal("folderid", folderId);
+        }
+        if(folderName != null) {
+            row.getCustomElements().setValueLocal("foldername", folderName);
+        }
 
         // Send the new row to the API for insertion.
         service.insert(listFeedUrl, row);

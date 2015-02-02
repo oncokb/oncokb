@@ -43,7 +43,6 @@ angular.module('webappApp')
                 data: '=reportParams',
                 titles: '=summaryTableTitles',
                 params: '=reportMatchedParams',
-                findRegex: '=',
                 sortObject: '='
             }
         };

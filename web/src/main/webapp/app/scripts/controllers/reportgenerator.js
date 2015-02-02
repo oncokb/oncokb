@@ -14,13 +14,20 @@ angular.module('webappApp')
     'FileUploader',
     'dialogs',
     'DatabaseConnector',
-    'GenerateReportDataService', function(
+    'GenerateReportDataService',
+    'DeepMerge',
+    'x2js',
+    'FindRegex',
+    function(
         $scope,
         $timeout,
         FileUploader,
         dialogs,
         DatabaseConnector,
-        ReportDataService) {
+        ReportDataService,
+        DeepMerge,
+        x2js,
+        FindRegex) {
     var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
     var uploader; //$scope.uploader -- selected file handler
     var noMatchSeperator = '(Not exists)';
@@ -28,35 +35,72 @@ angular.module('webappApp')
     $scope.init = initParams;
     
     $scope.generate = function() {
-        var worker = [],
-                    i = -1;
-        for(var sheet in $scope.sheets.arr) {
-            $scope.sheets.arr[sheet].forEach(function(e, i) {
-                var datum = {};
-                for(var key in e) {
-                    if(e.hasOwnProperty(key) && key !== '$$hashkey') {
-                        datum[key] = e[key].replace(noMatchSeperator, '').trim();
-                    }
-                }
-                worker.push(datum);
-            });
+        if(checkEmail()) {
+            generate(getWorkers());
         }
-        $scope.workers = worker;
-        $scope.working = true;
-        $scope.progress.value = 0.5;
-        $scope.progress.dynamic = 0;
-        $scope.progress.max = worker.length;
-        $scope.generateIndex = -1;
-        generateReports();
     };
 
     $scope.deleteItem = deleteItem;
 
+    $scope.regenerate = function() {
+        if(checkEmail()) {
+            generate(getWorkers('regenerate'));
+        }
+    };
+    
+    function generate(workers) {
+        $scope.workers = workers;
+        $scope.working = true;
+        $scope.progress.value = 0.5;
+        $scope.progress.dynamic = 0;
+        $scope.progress.max = workers.length;
+        $scope.generateIndex = -1;
+        generateReports();
+    }
+    
+    function getWorkers(flag) {
+        var workers = [],
+                    i = -1,
+            workerKeys = ['gene', 'alteration', 'tumorType'];
+        for(var sheet in $scope.sheets.arr) {
+            $scope.sheets.arr[sheet].forEach(function(e, i) {
+                var datum = {};
+                    workerKeys.forEach(function(e1, i1) {
+                        if(e.hasOwnProperty(e1)) {
+                            datum[e1] = e[e1].replace(noMatchSeperator, '').trim();
+                        }
+                    });
+                    datum.sheet = sheet;
+                    datum.id = i;
+                    
+                if(typeof flag === 'string' && flag==='regenerate') {
+                    if(Number(e.generated) === -1) {
+                        workers.push(datum);
+                    }
+                }else {
+                    workers.push(datum);
+                }
+            });
+        }
+        return workers;
+    }
+    
+    function checkEmail() {
+        if($scope.sheets.email === '') {
+            dialogs.notify('','Please check your email address.');
+            return false;
+        }else {
+            return true;
+        }
+    }
+    
     function initParams() {
         $scope.sheets = {
                 length: 0,
                 attr: ['sheet1'],
-                arr: {}
+                arr: {},
+                folder: {},
+                email: 'jackson.zhang.828@gmail.com'
         };
         $scope.progress = {
             value: 0,
@@ -66,12 +110,18 @@ angular.module('webappApp')
         //if file selected
         $scope.fileSelected = false;
         
+        //default file type is xlsx
+        $scope.isXML = false;
+        $scope.isXLSX = false;
+        
         //one worker running
         $scope.generating = false;
         
         //all workering running
         $scope.working = false;
         $scope.generateIndex = -1;
+        
+        $scope.hasFailed = false;
 
         if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
             $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
@@ -88,6 +138,20 @@ angular.module('webappApp')
                 $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
             });
         }
+        $scope.summaryTableTitles = [
+            'Treatment Implications',
+            'FDA Approved Drugs in Tumor Type',
+            'FDA Approved Drugs in Other Tumor Type',
+            'Clinical Trials',
+            'Additional Information'
+        ];
+        $scope.reportMatchedParams = [
+            'treatment',
+            'fdaApprovedInTumor',
+            'fdaApprovedInOtherTumor',
+            'clinicalTrials',
+            'additionalInfo'
+        ];
     }
 
     function getUnique(data, attr) {
@@ -106,14 +170,14 @@ angular.module('webappApp')
     }
 
     function generateReports() {
-        console.log("run ---");
         $timeout(function () {
             if(!$scope.generating) {
                 $scope.generateIndex++; 
                 if ($scope.generateIndex < $scope.workers.length) { 
                     var worker = $scope.workers[$scope.generateIndex];
+                    $scope.sheets.arr[worker.sheet][worker.id].generating = true;
                     $scope.generating = true;
-                    getAnnotation(worker.gene, worker.alteration, worker.tumorType);
+                    getAnnotation(worker);
                 }else {
                     $scope.working = false;
                 }
@@ -163,20 +227,41 @@ angular.module('webappApp')
     function isString(obj) {
         return angular.isString(obj);
     }
-
-    function getAnnotation(gene, alteration, tumorType) {
+    
+    function bottomObject(obj) {
+        var flag = true;
+        if(obj && typeof obj === 'object') {
+          for(var key in obj) {
+            if(typeof obj[key] !== 'string' && typeof obj[key] !== 'number') {
+              flag = false;
+              break;
+            }
+          }
+        }else {
+          flag = false;
+        }
+        return flag;
+     }
+        
+    function getAnnotation(worker) {
         var params = {
             'alterationType': 'MUTATION',
-            'hugoSymbol': gene,
-            'alteration': alteration,
-            'tumorType': tumorType
+            'hugoSymbol': worker.gene,
+            'alteration': worker.alteration,
+            'tumorType': worker.tumorType
         };
 
-        DatabaseConnector.searchAnnotation(function(data){
-            var annotation = {};
-
-            annotation = processData(xml2json.parser(data).xml);
-
+        DatabaseConnector.searchAnnotation(params, function(data){
+            searchAnnotation('success', data, worker);
+        }, function(){
+            searchAnnotation('fail');
+        });
+    }
+    
+    function searchAnnotation(status, data, worker) {
+        var annotation = {};
+        if(status === 'success') {
+            annotation = processData(x2js.xml_str2json(data).xml);
             for(var key in annotation) {
                 annotation[key] = formatDatum(annotation[key], key);
             }
@@ -187,7 +272,7 @@ angular.module('webappApp')
 
                 for(var i=0, cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
                     var _cancerType = annotation.cancer_type[i];
-                    if(_cancerType.relevant_to_patient_disease.toLowerCase() === 'yes') {
+                    if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
                         relevantCancerTypeArray.push(_cancerType);
                     }
                 }
@@ -195,7 +280,7 @@ angular.module('webappApp')
                     relevantCancerType = relevantCancerTypeArray[0];
 
                     for(var i=1, relevantL=relevantCancerTypeArray.length; i < relevantL; i++) {
-                        relevantCancerType = deepmerge(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.type, relevantCancerTypeArray[i].type);
+                        relevantCancerType = DeepMerge.init(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.$type, relevantCancerTypeArray[i].$type);
                     }
                 }else if(relevantCancerTypeArray.length === 1){
                     relevantCancerType = relevantCancerTypeArray[0];
@@ -204,18 +289,76 @@ angular.module('webappApp')
                 }
             }
 
-            var reportParams = ReportDataService.init(params.hugoSymbol, params.alteration, params.tumorType, relevantCancerType,annotation);
-            reportParams.email = 'jackson.zhang.828@gmail.com';
+            var reportParams = ReportDataService.init(worker.gene, worker.alteration, worker.tumorType, relevantCancerType,annotation);
             
-            DatabaseConnector.googleDoc(function(){
-                $scope.generating = false;
-                $scope.progress.dynamic += 1;
-                $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
-                generateReports();
-            }, reportParams);
-        }, params);
+            //Check email
+            if($scope.sheets.email && $scope.sheets.email !== '') {
+                reportParams.email = $scope.sheets.email;
+            }else {
+                reportParams.email = 'jackson.zhang.828@gmail.com';
+            }
+            
+            //Check folder name
+            if($scope.sheets.folder.hasOwnProperty(worker.sheet) 
+                    && $scope.sheets.folder[worker.sheet].hasOwnProperty('name') 
+                    && $scope.sheets.folder[worker.sheet].name 
+                    && $scope.sheets.folder[worker.sheet].name !== '') {
+                reportParams.folderName = $scope.sheets.folder[worker.sheet].name;
+            }
+            
+            //Check folder ID
+            if($scope.sheets.folder.hasOwnProperty(worker.sheet) 
+                    && $scope.sheets.folder[worker.sheet].hasOwnProperty('id') 
+                    && $scope.sheets.folder[worker.sheet].id 
+                    && $scope.sheets.folder[worker.sheet].id !== '') {
+                reportParams.folderId = $scope.sheets.folder[worker.sheet].id;
+            }
+            
+            if(reportParams.hasOwnProperty('folderName')
+                    && reportParams.folderName
+                    && reportParams.folderName !== ''
+                    && !reportParams.hasOwnProperty('folderId')) {
+                DatabaseConnector.createGoogleFolder({'folderName': reportParams.folderName}, function(data){
+                    if(data !== '') {
+                        $scope.sheets.folder[worker.sheet].id = data;
+                        reportParams.folderId = $scope.sheets.folder[worker.sheet].id;
+                        generateGoogleDoc(reportParams, worker);
+                    }
+                });
+            }else {
+                generateGoogleDoc(reportParams, worker);
+            }
+        }else {
+            $scope.generating = false;
+            $scope.progress.dynamic += 1;
+            $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+            $scope.sheets.arr[worker.sheet][worker.id].generating = false;
+            $scope.sheets.arr[worker.sheet][worker.id].generated = -1;
+            $scope.hasFailed = true;
+            generateReports();
+        }
     }
-
+    
+    function generateGoogleDoc(reportParams, worker) {
+        DatabaseConnector.googleDoc(reportParams, function(){
+            googleDocCallback(worker, 'success');
+        }, function(){
+            googleDocCallback(worker, 'fail');
+        });
+    }
+        
+    function googleDocCallback(worker, status) {
+        $scope.generating = false;
+        $scope.progress.dynamic += 1;
+        $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+        $scope.sheets.arr[worker.sheet][worker.id].generating = false;
+        $scope.sheets.arr[worker.sheet][worker.id].generated = status==='success'?1:-1;
+        if(!$scope.hasFailed) {
+            $scope.hasFailed = status==='success'?false:true;
+        }
+        generateReports();
+    }
+    
     function processData(object) {
         if(isArray(object)) {
             object.forEach(function(e, i){
@@ -297,7 +440,9 @@ angular.module('webappApp')
                         'id': sheetName + '-' + i,
                         'gene': '',
                         'alteration': '',
-                        'tumorType': ''
+                        'tumorType': '',
+                        'generated': 0, //0: hasn't been generated 1: successfully generated -1: unsuccessfully generated
+                        'generating': false
                     };
 
                     for(var key in e) {
@@ -324,13 +469,152 @@ angular.module('webappApp')
             $scope.progress.dynamic = 0;
             $scope.progress.value = 0;
             $scope.progress.max = totalRecord;
-            $scope.fileSelected = true;
+            $scope.isXLSX = true;
             $scope.$apply();
         };
 
         reader.readAsBinaryString(file._file);
     }
+    
+     function readXMLfile(file) {
+        var reader = new FileReader();
 
+        reader.onload = function(e) {
+            var full = x2js.xml_str2json(e.target.result);
+            var annotation = processData(full.document.sample.test.variant.allele.transcript);
+            var relevantCancerType = {};
+            for(var key in annotation) {
+                annotation[key] = formatDatum(annotation[key], key);
+            }
+            if(annotation.cancer_type) {
+                var relevantCancerType = [];
+                for(var i=0, cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
+                    var _cancerType = annotation.cancer_type[i];
+                    if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
+                        relevantCancerType.push(_cancerType);
+                    }
+                }
+                if(relevantCancerType.length > 1) {
+                    var obj1 = relevantCancerType[0];
+
+                    for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
+                        obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
+                    }
+                    relevantCancerType = obj1;
+                }else if(relevantCancerType.length === 1){
+                    relevantCancerType = relevantCancerType[0];
+                }else {
+                    relevantCancerType = null;
+                }
+            }else {
+                relevantCancerType = null;
+            }
+
+            var reportParams = ReportDataService.init(annotation.hgnc_symbol, annotation.hgvs_p_short, full.document.sample.diagnosis, relevantCancerType, annotation);
+//                $scope.regularViewData = regularViewData($scope.annotation);
+            $scope.reportViewData = reportViewData(reportParams);
+            $scope.isXML = true;
+            $scope.$apply();
+        };
+
+        reader.readAsBinaryString(file._file);
+    }
+    
+    function reportViewData(params) {
+        var _parmas = angular.copy(params);
+        _parmas.overallInterpretation = processOverallInterpretation(_parmas.overallInterpretation);
+        _parmas = constructData(_parmas);
+        return _parmas;
+    }
+    
+    function constructData(data) {
+        for(var key in data) {
+            var datum = data[key];
+            if(isArray(datum)) {
+                datum = constructData(datum);
+            }else if(isObject(datum) && !bottomObject(datum)) {
+                datum = constructData(datum);
+            }else if(isObject(datum) && bottomObject(datum)) {
+                datum = objToArray(datum);
+            }else {
+                datum = FindRegex.get(datum);
+            }
+            data[key] = datum;
+        }
+
+        return data;
+    }
+        
+    function objToArray(obj) {
+        var delayAttrs = ['description'];
+        var priorAttrs = ['trial','nccn_special','recommendation category 1 / 2A / 2 / 2A / 2A'];
+
+        if (!angular.isObject(obj)) {
+          return obj;
+        }
+
+        var keys = Object.keys(obj).filter(function(item) {
+            return item !== '$$hashKey';
+        }).sort(function(a,b) {
+            var delayIndexOfA = delayAttrs.indexOf(a),
+                delayIndexOfB = delayAttrs.indexOf(b),
+                priorIndexOfA = priorAttrs.indexOf(a),
+                priorIndexOfB = priorAttrs.indexOf(b);
+
+            if(priorIndexOfA !== -1 && priorIndexOfB !== -1) {
+                if(priorIndexOfA <= priorIndexOfB) {
+                    return -1;
+                }else {
+                    return 1;
+                }
+            }else if(priorIndexOfA !== -1) {
+                return -1;
+            }else if(priorIndexOfB !== -1) {
+                return 1;
+            }else {
+                if(delayIndexOfA !== -1 && delayIndexOfB !== -1) {
+                    if(delayIndexOfA <= delayIndexOfB) {
+                        return 1;
+                    }else {
+                        return -1;
+                    }
+                }else if(delayIndexOfA !== -1) {
+                    return 1;
+                }else if(delayIndexOfB !== -1) {
+                    return -1;
+                }else {
+                    if(a < b) {
+                        return -1;
+                    }else {
+                        return 1;
+                    }
+                }
+            }
+        });
+
+        var returnArray = keys.map(function (key) {
+                var _obj = {};
+
+                _obj.key = key;
+                _obj.value = FindRegex.get(obj[key]).toString();
+                return _obj;
+            });
+
+        return returnArray;
+    }
+
+    
+    function processOverallInterpretation(str) {
+        var content = str.split(/[\n\r]/g);
+        for(var i=0; i< content.length; i++) {
+            if(i%2 === 0) {
+                content[i]='<b>' + content[i] + '</b>';
+            }
+        }
+        str = content.join('<br/>');
+        return str;
+    }
+        
     uploader = $scope.uploader = new FileUploader();
 
     uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
@@ -339,10 +623,13 @@ angular.module('webappApp')
     uploader.onAfterAddingFile  = function(fileItem) {
         console.info('onAfterAddingFile', fileItem);
         initParams();
+        $scope.fileSelected = true;
         if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             readXLSXfile(fileItem);
+        }else if(fileItem.file.type === 'text/xml'){
+            readXMLfile(fileItem);
         }else {
-            dialogs.error('Error', 'Do not support the type of selected file, only XLSX file supported.')
+            dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.')
             uploader.removeFromQueue(fileItem);
         }
     };

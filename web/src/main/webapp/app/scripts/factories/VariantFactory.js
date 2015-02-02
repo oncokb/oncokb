@@ -87,7 +87,7 @@ angular.module('webappApp').factory('GenerateDoc', ['$http',  function ($http) {
     'use strict';
     var transform = function(data){
         return $.param(data);
-    }
+    };
     
     function getDoc(params) {
         return $http.post(
@@ -98,8 +98,18 @@ angular.module('webappApp').factory('GenerateDoc', ['$http',  function ($http) {
                 transformRequest: transform
             });
     }
-
+    
+    function createFolder(params) {
+        return $http.post(
+            'createGoogleFolder',
+            params,
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
+    }
     return {
-        getDoc: getDoc
+        getDoc: getDoc,
+        createFolder: createFolder
     };
 }]);

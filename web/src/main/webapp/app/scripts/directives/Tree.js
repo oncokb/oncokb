@@ -218,13 +218,20 @@ var Tree = (function() {
                   var qtipText = "";
                   var _position = {};
                   for(var i = 0, desL = d["description"].length; i < desL; i++) {
-                      for(var _evidence in d["description"][i]){
-                          if(d["description"][i][_evidence] && d["description"][i][_evidence] !== ""){
-                              qtipText += "<b>" + _evidence + "</b>: " + d["description"][i][_evidence] + "<br>";
-                          }
+                      if(d["description"][i].hasOwnProperty('Evidence Type')){
+                          
+                            switch(d["description"][i]['Evidence Type']) {
+                                case 'MUTATION_EFFECT':
+                                    qtipText += "<b>Mutation Effect: " + d["description"][i]['Known Effect'] + "</b><br>" + d["description"][i]['Description'] + "<br>";
+                                    break;
+                                default:
+                                    qtipText += "<b>" + upperFirstLetter(d["description"][i]['Evidence Type']) + "</b><br>" + d["description"][i]['Description'] + "<br>";
+                                    break;
+                        }
                       }
+                      
                       if(i+1 !== desL)
-                          qtipText += "<hr>";
+                          qtipText += "<hr/>";
                   }
 
                   if((d.children || d._children) && d.depth > 1){
@@ -306,6 +313,13 @@ var Tree = (function() {
         resizeSVG(rightDepth);
     }
 
+    function upperFirstLetter(str){
+        var a = str.split(/[_\s]/).map(function(datum){
+            return datum.charAt(0).toUpperCase() + datum.substr(1).toLowerCase();
+        });
+        return a.join(' ');
+    }
+    
     // Toggle children.
     function toggle(d) {
       if (d.children) {
@@ -387,6 +401,7 @@ var Tree = (function() {
         searchResult.length = 0;
         root.children.forEach(toggleAll);
         update(root);
+        searchKey = searchKey.toLowerCase();
 
         if(searchKey !== "") {
             for(var i = 0, numOfChild = root.children.length; i< numOfChild; i++) {
