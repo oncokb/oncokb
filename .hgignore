@@ -10,3 +10,7 @@ web/node_modules$
 web/dist/
 web/.sass-cache$
 web/.tmp$
+test$
+shutdown.sh
+buildAndStartup.sh
+gruntBuildAndCopy.sh

@@ -1,4 +1,4 @@
-angular.module('webappApp').factory('TumorType', ['$http',  function ($http) {
+angular.module('oncokb').factory('TumorType', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -15,7 +15,7 @@ angular.module('webappApp').factory('TumorType', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('webappApp').factory('Gene', ['$http',  function ($http) {
+angular.module('oncokb').factory('Gene', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -32,7 +32,7 @@ angular.module('webappApp').factory('Gene', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('webappApp').factory('Alteration', ['$http',  function ($http) {
+angular.module('oncokb').factory('Alteration', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -49,7 +49,7 @@ angular.module('webappApp').factory('Alteration', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http) {
+angular.module('oncokb').factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {
         var _params = angular.copy(params),
@@ -83,7 +83,7 @@ angular.module('webappApp').factory(('SearchVariant'), ['$http', function($http)
     };
 }]);
 
-angular.module('webappApp').factory('GenerateDoc', ['$http',  function ($http) {
+angular.module('oncokb').factory('GenerateDoc', ['$http',  function ($http) {
     'use strict';
     var transform = function(data){
         return $.param(data);

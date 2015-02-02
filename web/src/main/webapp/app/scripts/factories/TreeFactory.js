@@ -1,4 +1,4 @@
-angular.module('webappApp').factory('Evidence', ['$http', function ($http) {
+angular.module('oncokb').factory('Evidence', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -15,7 +15,7 @@ angular.module('webappApp').factory('Evidence', ['$http', function ($http) {
     };
 }]);
 
-angular.module('webappApp').factory('AnalysisEvidence', function() {
+angular.module('oncokb').factory('AnalysisEvidence', function() {
     'use strict';
 
     var genes = {},

@@ -2,11 +2,11 @@
 
 /**
  * @ngdoc directive
- * @name webappApp.directive:reportView
+ * @name oncokb.directive:reportView
  * @description
  * # reportView
  */
-angular.module('webappApp')
+angular.module('oncokb')
     .directive('reportView', function ($animate) {
 
         function link($scope, $element, $attrs) {
@@ -48,7 +48,7 @@ angular.module('webappApp')
         };
     });
 
-angular.module('webappApp')
+angular.module('oncokb')
 .animation('.hide-animation', function () {
   return {
     beforeAddClass : function(element, className, done) {

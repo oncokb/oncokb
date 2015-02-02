@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc service
- * @name webappApp.GenerateReportDataService
+ * @name oncokb.GenerateReportDataService
  * @description
  * # GenerateReportDataService
- * Factory in the webappApp.
+ * Factory in the oncokb.
  */
-angular.module('webappApp')
+angular.module('oncokb')
   .factory('FindRegex', function () {
     function get(str) {
         if(typeof str === 'string' && str !== '') {

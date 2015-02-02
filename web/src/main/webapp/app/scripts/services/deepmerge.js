@@ -2,16 +2,16 @@
 
 /**
  * @ngdoc service
- * @name webappApp.deepMerge
+ * @name oncokb.deepMerge
  * @description
  * # deepMerge
- * Service in the webappApp.
+ * Service in the oncokb.
  * This original function comes fromhttps://github.com/nrf110/deepmerge
  * Made changed for adjusting duplicates entries
  * ct1: cancer type of target; ct2: cancer type of source
  */
 
-angular.module('webappApp')
+angular.module('oncokb')
   .service('DeepMerge', function DeepMerge() {
         function deepMerge(target, src, ct1, ct2) {
             var array = Array.isArray(src);

@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name webappApp.controller:ReportgeneratorCtrl
+ * @name oncokb.controller:ReportgeneratorCtrl
  * @description
  * # ReportgeneratorCtrl
- * Controller of the webappApp
+ * Controller of the oncokb
  */
-angular.module('webappApp')
+angular.module('oncokb')
   .controller('ReportgeneratorCtrl', [
     '$scope',
     '$timeout' ,

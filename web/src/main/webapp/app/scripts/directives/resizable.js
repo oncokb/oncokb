@@ -2,11 +2,11 @@
 
 /**
  * @ngdoc directive
- * @name webappApp.directive:resizable
+ * @name oncokb.directive:resizable
  * @description
  * # resizable
  */
-angular.module('webappApp')
+angular.module('oncokb')
   .directive('resizable', function () {
     return {
       template: '<div></div>',

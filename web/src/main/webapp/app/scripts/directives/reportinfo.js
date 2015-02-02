@@ -2,11 +2,11 @@
 
 /**
  * @ngdoc directive
- * @name webappApp.directive:reportInfo
+ * @name oncokb.directive:reportInfo
  * @description
  * # reportInfo
  */
-angular.module('webappApp')
+angular.module('oncokb')
   .directive('reportInfo', function () {
   	return {
       	restrict: 'E',

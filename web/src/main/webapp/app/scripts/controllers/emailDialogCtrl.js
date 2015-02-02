@@ -1,4 +1,4 @@
-angular.module('webappApp')
+angular.module('oncokb')
   .controller('emailDialogCtrl',function($scope,$modalInstance,data){
   $scope.user = {email : ''};
 

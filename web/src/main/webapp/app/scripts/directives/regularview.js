@@ -2,11 +2,11 @@
 
 /**
  * @ngdoc directive
- * @name webappApp.directive:regularView
+ * @name oncokb.directive:regularView
  * @description
  * # regularView
  */
-angular.module('webappApp')
+angular.module('oncokb')
     .directive('regularView', ['FindRegex', function (FindRegex) {
         function link($scope) {
             $scope.getDrugHeader = function(key, data) {

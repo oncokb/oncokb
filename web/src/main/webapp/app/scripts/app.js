@@ -2,9 +2,9 @@
 
 /**
  * @ngdoc overview
- * @name webappApp
+ * @name oncokb
  * @description
- * # webappApp
+ * # oncokb
  *
  * Main module of the application.
  */
@@ -24,7 +24,7 @@ OncoKB.tree = {};
 
 
 var oncokbApp = angular
- .module('webappApp', [
+ .module('oncokb', [
    'ngAnimate',
    'ngCookies',
    'ngResource',
@@ -39,6 +39,13 @@ var oncokbApp = angular
    'angularFileUpload',
    'xml'
  ])
+ .value('config',{
+  clientId: '19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com',
+  scopes: [
+    'https://www.googleapis.com/auth/drive.file'
+  ]
+ })
+ .constant('gapi', window.gapi)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider) {
    $routeProvider
      .when('/', {
@@ -57,6 +64,10 @@ var oncokbApp = angular
      .when('/reportGenerator', {
        templateUrl: 'views/reportgenerator.html',
        controller: 'ReportgeneratorCtrl'
+     })
+     .when('/curate', {
+       templateUrl: 'views/curate.html',
+       controller: 'CurateCtrl'
      })
      .otherwise({
        redirectTo: '/'
@@ -84,3 +95,58 @@ var oncokbApp = angular
     attributePrefix : '$'
     };
  });
+/**
+ * Set up handlers for various authorization issues that may arise if the access token
+ * is revoked or expired.
+ */
+// .run(['$rootScope', '$location', 'storage', function ($rootScope, $location, storage) {
+//   // Error loading the document, likely due revoked access. Redirect back to home/install page
+//   $rootScope.$on('$routeChangeError', function () {
+//     $location.url('/install?target=' + encodeURIComponent($location.url()));
+//   });
+
+//   // Token expired, refresh
+//   $rootScope.$on('todos.token_refresh_required', function () {
+//     storage.requireAuth(true).then(function () {
+//       // no-op
+//     }, function () {
+//       $location.url('/install?target=' + encodeURIComponent($location.url()));
+//     });
+//   });
+// }]);
+/**
+ * Loads the document. Used to inject the collaborative document
+ * into the main controller.
+ *
+ * @param $route
+ * @param storage
+ * @returns {*}
+ */
+oncokbApp.loadFile = function ($route, storage) {
+  var id = $route.current.params.fileId;
+  var userId = $route.current.params.user;
+  return storage.requireAuth(true, userId).then(function () {
+    return storage.getDocument(id);
+  });
+};
+oncokbApp.loadFile.$inject = ['$route', 'storage'];
+
+
+/**
+ * Bootstrap the app
+ */
+// gapi.load('auth:client:drive-share:drive-realtime', function () {
+//   gapi.auth.init();
+
+//   // Register our Todo class
+//   app.Todo.prototype.title = gapi.drive.realtime.custom.collaborativeField('title');
+//   app.Todo.prototype.completed = gapi.drive.realtime.custom.collaborativeField('completed');
+
+//   gapi.drive.realtime.custom.registerType(app.Todo, 'todo');
+//   gapi.drive.realtime.custom.setInitializer(app.Todo, app.Todo.prototype.initialize);
+//   gapi.drive.realtime.custom.setOnLoaded(app.Todo, app.Todo.prototype.setup);
+
+//   $(document).ready(function () {
+//     angular.bootstrap(document, ['todos']);
+//   });
+// });

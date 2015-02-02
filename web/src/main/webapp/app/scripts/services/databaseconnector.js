@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc service
- * @name webappApp.DatabaseConnector
+ * @name oncokb.DatabaseConnector
  * @description
  * # DatabaseConnector
- * Factory in the webappApp.
+ * Factory in the oncokb.
  */
-angular.module('webappApp')
+angular.module('oncokb')
   .factory('DatabaseConnector', [
     '$timeout',
     'Gene',
@@ -29,7 +29,7 @@ angular.module('webappApp')
         data = {};
 
     //When running locally, set this to true, all servlet will read data from relative files.
-    var dataFromFile = false;
+    var dataFromFile = true;
 
     function getAllGene(callback, timestamp) {
       if(dataFromFile) {

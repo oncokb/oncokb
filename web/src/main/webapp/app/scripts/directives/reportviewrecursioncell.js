@@ -2,11 +2,11 @@
 
 /**
  * @ngdoc directive
- * @name webappApp.directive:reportViewRecursionCell
+ * @name oncokb.directive:reportViewRecursionCell
  * @description
  * # reportViewRecursionCell
  */
-angular.module('webappApp')
+angular.module('oncokb')
   .directive('reportViewRecursionCell', function (RecursionHelper) {
     return {
       	templateUrl: 'views/reportViewRecursionCellTemp.html',
