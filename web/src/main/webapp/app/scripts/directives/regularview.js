@@ -94,7 +94,9 @@ angular.module('oncokb')
                     return "images/subtract.svg";
                 }
             };
-        
+            
+            $scope.findRegex = FindRegex.get;
+
             function hasEvidenceLevel(data) {
                 if(typeof data === 'object' 
                         && data.hasOwnProperty('level_of_evidence_for_patient_indication')

@@ -37,13 +37,79 @@ angular.module('oncokb')
      * @returns {angular.$q.promise}
      */
     this.getDocument = function (id) {
-      if (this.id === id) {
-        return $q.when(this.document);
-      } else if (this.document) {
-        this.closeDocument();
-      }
-      return this.load(id);
-    };
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+            $rootScope.$digest();
+        };
+        gapi.client.load('drive', 'v2', function() {
+            gapi.client.drive.files.get({
+              'fileId' : id
+            }).execute(onComplete);
+        });
+        return deferred.promise;
+    }
+
+    /**
+     * Retrieve a list of File resources.
+     *
+     * @param {Function} callback Function to call when the request is complete.
+     */
+    this.retrieveAllFiles = function() {
+        var retrievePageOfFiles = function(request, result) {
+            request.execute(function(resp) {
+              result = result.concat(resp.items);
+              console.log(result);
+              var nextPageToken = resp.nextPageToken;
+              if (nextPageToken) {
+                request = gapi.client.drive.files.list({
+                  'pageToken': nextPageToken
+                });
+                retrievePageOfFiles(request, result);
+              } else {
+                deferred.resolve(result);
+              }
+            });
+        }
+        
+        var deferred = $q.defer();
+        gapi.client.load('drive', 'v2', function() {
+            var initialRequest = gapi.client.drive.files.list();
+            retrievePageOfFiles(initialRequest, []);
+            return deferred.promise;
+        });
+    }
+
+    this.downloadFile = function(file) {
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+        };
+        if (file.exportLinks['text/html']) {
+            var accessToken = gapi.auth.getToken().access_token;
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', file.exportLinks['text/html']);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+            xhr.onload = function() {
+                onComplete(xhr.responseText);
+            };
+            xhr.onerror = function() {
+                onComplete(null);
+            };
+            xhr.send();
+        } else {
+            onComplete(null);
+        }
+        return deferred.promise;
+    }
 
     /**
      * Creates a new document.
@@ -167,5 +233,54 @@ angular.module('oncokb')
       this.document = document;
       this.id = id;
     };
+
+    this.updateFile = function(fileId, fileMetadata, fileData) {
+        var boundary = '-------314159265358979323846';
+        var delimiter = "\r\n--" + boundary + "\r\n";
+        var close_delim = "\r\n--" + boundary + "--";
+
+        var reader = new FileReader();
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+        };
+
+        reader.readAsBinaryString(fileData);
+        reader.onload = function(e) {
+            var contentType = fileData.type || 'application/octet-stream';
+            // Updating the metadata is optional and you can instead use the value from drive.files.get.
+            var base64Data = btoa(reader.result);
+            var multipartRequestBody =
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                JSON.stringify(fileMetadata) +
+                delimiter +
+                'Content-Type: ' + contentType + '\r\n' +
+                'Content-Transfer-Encoding: base64\r\n' +
+                '\r\n' +
+                base64Data +
+                close_delim;
+
+            var request = gapi.client.request({
+                'path': '/upload/drive/v2/files/' + fileId,
+                'method': 'PUT',
+                'params': {'uploadType': 'multipart', 'alt': 'json'},
+                'headers': {
+                  'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+                },
+                'body': multipartRequestBody});
+            // if (!callback) {
+            //     callback = function(file) {
+            //         console.log(file)
+            //     };
+            // }
+            request.execute(onComplete);
+        }
+        return deferred.promise;
+    }
   }]
 );

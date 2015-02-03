@@ -42,6 +42,7 @@ var oncokbApp = angular
  .value('config',{
   clientId: '19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com',
   scopes: [
+    'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/drive.file'
   ]
  })

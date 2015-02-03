@@ -215,7 +215,7 @@ angular.module('oncokb')
             );
             return str;
         };
-        
+
         $scope.search = function() {
             var hasSelectedTumorType = $scope.hasSelectedTumorType();
             $scope.rendering = true;
