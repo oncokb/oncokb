@@ -50,6 +50,11 @@ $icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/"
     cursor: pointer;
 }
 
+//Google login button
+#signInButton {
+  margin-top: 7px !important;
+}
+
 table.colorFirstCol td:nth-child(1) {
     background-color: lightgray;
 }

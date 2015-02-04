@@ -4,7 +4,9 @@ angular.module('oncokb').controller('TreeCtrl', [
     '$timeout',
     'DatabaseConnector', 
     'AnalysisEvidence', 
-    function ($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence) {
+    'storage',
+
+    function ($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence, storage) {
 
     'use strict';
 
@@ -26,7 +28,7 @@ angular.module('oncokb').controller('TreeCtrl', [
             });
         }
     };
-
+            
     function drawTree(data) {
         if(typeof OncoKB.tree.processedData === 'undefined' || OncoKB.tree.processedData) {
             OncoKB.tree.processedData = AnalysisEvidence.init($scope.treeType, data);

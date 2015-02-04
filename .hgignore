@@ -14,3 +14,4 @@ test$
 shutdown.sh
 buildAndStartup.sh
 gruntBuildAndCopy.sh
+web/src/main/webapp/app/components

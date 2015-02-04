@@ -27,7 +27,8 @@
     "oridomi": "~1.1.5",
     "fontawesome": "~4.2.0",
     "angular-xml": "~2.0.0",
-    "jspdf": "~1.0.272"
+    "jspdf": "~1.0.272",
+    "angular-contenteditable": "~0.3.7"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",

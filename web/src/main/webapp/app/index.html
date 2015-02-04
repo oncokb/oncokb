@@ -1,6 +1,6 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <meta charset="UTF-8">
     <title></title>
     <meta name="description" content="">
@@ -14,40 +14,62 @@
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
-    <link rel="stylesheet" href="styles/main.css?rel=1422899517935">
-    <link rel="stylesheet" href="components/_components/jquery.qtip.min.css?rel=1422899517935">
+    <link rel="stylesheet" href="styles/main.css?rel=1423090081942">
+    <link rel="stylesheet" href="components/_components/jquery.qtip.min.css?rel=1423090081942">
     <!-- endbuild -->
-  </head>
-  <body ng-app="oncokb">
+</head>
+<body>
     <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
+      <![endif]-->
 
-    <!-- Add your site or application content here -->
-    <div id="displayTabs" ng-controller="TreeCtrl">
-         <nav class="navbar navbar-default" role="navigation">
-          <!-- Brand and toggle get grouped for better mobile display -->
-          <div class="container">
-              <div class="navbar-header">
+      <!-- Add your site or application content here -->
+    <div id="displayTabs">
+        <nav class="navbar navbar-default" role="navigation" ng-controller="NavCtrl" ng-init="init()">
+        <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="container">
+                <div class="navbar-header">
 
-                <button type="button" class="navbar-toggle" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand">OncoKB</a>
-              </div>
-            
-              <!-- Collect the nav links, forms, and other content for toggling -->
-              <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
-              
-                <ul class="nav navbar-nav">
-                    <li ng-class="{active:tabIsActive(['/tree', '/'])}"><a ng-href="#/tree">Tree</a></li>
-                    <li ng-class="{active:tabIsActive('/variant')}"}><a ng-href="#/variant">Variants Annotation</a></li>
-                </ul>
-              </div><!-- /.navbar-collapse -->
-              </div>
+                    <button type="button" class="navbar-toggle" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand">OncoKB</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
+
+                    <ul class="nav navbar-nav">
+                        <li ng-class="{active:tabIsActive(['/tree', '/'])}"><a ng-href="#/tree">Tree</a></li>
+                        <li ng-class="{active:tabIsActive('/variant')}"}><a ng-href="#/variant">Variants Annotation</a></li>
+                        <li ng-if="signedIn" ng-class="{active:tabIsActive('/curate')}"}><a ng-href="#/curate">Curate Annotation</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <!-- <span ng-if="!signedIn"><i class="fa fa-google fa-lg"></i> Login with Google</span>
+                            <span ng-if="signedIn">Welcome</span> -->
+                            
+                            <span ng-if="signedIn" style="float: left">
+                                <div  style="float: left; margin: 5px">
+                                    <span>{{user.email}}</span><br/>
+                                    <span style="float: right" ng-click="signOut()">Logout</span>
+                                </div>
+                                <img style="float: left" ng-if="user.avatar !== ''" ng-src="{{user.avatar}}">
+                            </span>
+                            <span ng-show="!signedIn" id="googleSignIn">
+                                <span id="signInButton">
+                                </span>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    
+                </div><!-- /.navbar-collapse -->
+            </div>
         </nav>
 
         <div ng-view="" class="container"></div>
@@ -71,7 +93,7 @@
             <i class="glyphicon glyphicon-chevron-up"></i> Back to Top
         </a>
       </span>
-    </div> -->
+  </div> -->
 
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID
@@ -79,19 +101,19 @@
        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-       })(window,document,'script','//www.google-analytics.com/analytics.js?rel=1422899517935','ga');
+       })(window,document,'script','//www.google-analytics.com/analytics.js?rel=1423090081941','ga');
 
        ga('create', 'UA-XXXXX-X');
        ga('send', 'pageview');
-    </script> -->
-    <!-- build:js(.) scripts/oldieshim.js -->
+   </script> -->
+   <!-- build:js(.) scripts/oldieshim.js -->
     <!--[if lt IE 9]>
-    <script src="bower_components/es5-shim/es5-shim.js?rel=1422899517935"></script>
-    <script src="bower_components/json3/lib/json3.js?rel=1422899517935"></script>
+    <script src="bower_components/es5-shim/es5-shim.js?rel=1423090081941"></script>
+    <script src="bower_components/json3/lib/json3.js?rel=1423090081941"></script>
     <![endif]-->
     <!-- endbuild -->
 
-         <!-- build:js(.) scripts/vendor.js -->
+    <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
     <script src="components/es5-shim/es5-shim.js"></script>
     <script src="components/jquery/dist/jquery.js"></script>
@@ -132,36 +154,38 @@
     <script src="components/x2js/xml2json.min.js"></script>
     <script src="components/angular-xml/angular-xml.js"></script>
     <script src="components/jspdf/dist/jspdf.min.js"></script>
+    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
     <!-- endbower -->
 
-    <script src="components/d3/d3.min.js?rel=1422899517935"></script>
-    <script src="components/chosen/chosen.jquery.js?rel=1422899517935"></script>
-    <script src="components/_components/jquery.qtip.min.js?rel=1422899517935"></script>
-    <script src="//apis.google.com/js/client.js?rel=1422899517935"></script>
-    <script src="//apis.google.com/js/api.js?rel=1422899517935"></script>
-    <!-- <script src="https://apis.google.com/js/platform.js?rel=1422899517935"></script>
-    <script src="scripts/realtime-client-utils.js?rel=1422899517935"></script> -->
+    <script src="components/d3/d3.min.js?rel=1423090081941"></script>
+    <script src="components/chosen/chosen.jquery.js?rel=1423090081941"></script>
+    <script src="components/_components/jquery.qtip.min.js?rel=1423090081941"></script>
+    <script src="//apis.google.com/js/api.js?rel=1423090081941"></script>
+    <script src="https://apis.google.com/js/client:platform.js?rel=1423090081941"></script>
+    <!-- <script src="https://apis.google.com/js/platform.js?rel=1423090081941"></script>
+    <script src="scripts/realtime-client-utils.js?rel=1423090081941"></script> -->
 
     <!-- build:js({.tmp,app}) scripts/scripts.js -->
-    <script src="scripts/app.js?rel=1422899517935"></script>
-    <script src="scripts/factories/TreeFactory.js?rel=1422899517935"></script>
-    <script src="scripts/factories/VariantFactory.js?rel=1422899517935"></script>
-    <script src="scripts/directives/Tree.js?rel=1422899517935"></script>
-    <script src="scripts/controllers/TreeCtrl.js?rel=1422899517935"></script>
-    <script src="scripts/controllers/VariantCtrl.js?rel=1422899517935"></script>
-    <script src="scripts/controllers/emailDialogCtrl.js?rel=1422899517935"></script>
-    <script src="scripts/filters/Filter.js?rel=1422899517935"></script>
-    <script src="scripts/directives/regularview.js?rel=1422899517935"></script>
-    <script src="scripts/directives/reportview.js?rel=1422899517935"></script>
-    <script src="scripts/directives/reportinfo.js?rel=1422899517935"></script>
-    <script src="scripts/directives/reportviewrecursioncell.js?rel=1422899517935"></script>
-    <script src="scripts/controllers/reportgenerator.js?rel=1422899517935"></script>
-    <script src="scripts/services/generatereportdataservice.js?rel=1422899517935"></script>
-    <script src="scripts/services/databaseconnector.js?rel=1422899517935"></script>
-    <script src="scripts/services/deepmerge.js?rel=1422899517935"></script>
-    <script src="scripts/services/findregex.js?rel=1422899517935"></script>
-    <script src="scripts/controllers/curate.js?rel=1422899517935"></script>
-    <script src="scripts/services/storage.js?rel=1422899517935"></script>
+    <script src="scripts/app.js?rel=1423090081941"></script>
+    <script src="scripts/factories/TreeFactory.js?rel=1423090081941"></script>
+    <script src="scripts/factories/VariantFactory.js?rel=1423090081941"></script>
+    <script src="scripts/directives/Tree.js?rel=1423090081941"></script>
+    <script src="scripts/controllers/TreeCtrl.js?rel=1423090081941"></script>
+    <script src="scripts/controllers/VariantCtrl.js?rel=1423090081941"></script>
+    <script src="scripts/controllers/emailDialogCtrl.js?rel=1423090081941"></script>
+    <script src="scripts/filters/Filter.js?rel=1423090081941"></script>
+    <script src="scripts/directives/regularview.js?rel=1423090081941"></script>
+    <script src="scripts/directives/reportview.js?rel=1423090081941"></script>
+    <script src="scripts/directives/reportinfo.js?rel=1423090081941"></script>
+    <script src="scripts/directives/reportviewrecursioncell.js?rel=1423090081941"></script>
+    <script src="scripts/controllers/reportgenerator.js?rel=1423090081941"></script>
+    <script src="scripts/services/generatereportdataservice.js?rel=1423090081941"></script>
+    <script src="scripts/services/databaseconnector.js?rel=1423090081941"></script>
+    <script src="scripts/services/deepmerge.js?rel=1423090081941"></script>
+    <script src="scripts/services/findregex.js?rel=1423090081941"></script>
+    <script src="scripts/controllers/curate.js?rel=1423090081941"></script>
+    <script src="scripts/services/storage.js?rel=1423090081941"></script>
+    <script src="scripts/controllers/nav.js?rel=1423090081941"></script>
     <!-- endbuild -->
 </body>
 </html>

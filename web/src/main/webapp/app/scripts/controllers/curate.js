@@ -8,9 +8,76 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('CurateCtrl', ['$scope', '$location', 'storage',
-        function ($scope, $location, storage) {
+    .controller('CurateCtrl', ['$scope', '$location', '$routeParams', 'storage',
+        function ($scope, $location, $routeParams, storage) {
+            $scope.createDoc = function() {
+                if($scope.newDocName) {
+                    storage.requireAuth().then(function () {
+                        storage.createDocument($scope.newDocName.toString()).then(function (file) {
+                            $location.url('/curate/' + file.id + '/');
+                        });
+                    }, function () {
+                        $location.url('/curate');
+                    });
+                }
+            };
+
+            $scope.getDocs = function() {
+                storage.requireAuth(true).then(function(){
+                    storage.retrieveAllFiles().then(function(result){
+                        console.log('Documents', result);
+                        $scope._documents = result;
+                        getDocumentFromList(0, []);
+                    });
+                });
+            };
+
+            $scope.curateDoc = function() {
+                console.log($scope);
+                console.log($scope.selectedDoc);
+                console.log('selected file id', $scope.selectedDoc.id);
+                $location.url('/curate/' + $scope.selectedDoc.id + '/');
+            };
+
+            $scope.documents = [];
+            $scope.getDocs();
+
+            function getDocumentFromList(index, documents) {
+                if($scope._documents && $scope._documents.length > index) {
+                    storage.getDocument($scope._documents[index].id).then(function(file){
+                        console.log(file);
+                        if(file.editable) {
+                            documents.push(file);
+                        }
+                        getDocumentFromList(++index, documents);
+                    });
+                }else {
+                    $scope.documents = documents;
+                }
+            }
+        }]
+    )
+    .controller('CurateEditCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument',
+        function ($scope, $location, $routeParams, storage, realtimeDocument) {
+            $scope.fileId = $routeParams.fileId;
+            $scope.realtimeDocument = realtimeDocument;
+            $scope.gene = '';
+            $scope.newGene = '';
+
+            if($routeParams.fileId) {
+                var model = realtimeDocument.getModel();
+                if(!model.getRoot().get('gene')) {
+                    var gene = model.create('Gene');
+                    model.getRoot().set('gene', gene);
+                    $scope.gene = model.getRoot().get('gene');
+                }else {
+                    $scope.gene = model.getRoot().get('gene');
+                }
+
+                console.log($scope.gene);
+            }
             $scope.authorize = function(){
+                console.log($routeParams);
                 console.log('---enter---');
                     storage.requireAuth(false).then(function () {
                     var target = $location.search().target;
@@ -29,6 +96,20 @@ angular.module('oncokb')
                         // $location.url('/curate');
                     }
                 });
+            };
+
+            $scope.addGene = function() {
+                if (this.newGene && this.newGene.name) {
+                    realtimeDocument.getModel().beginCompoundOperation();
+                    var gene = realtimeDocument.getModel().create(Oncokb.Gene, this.newGene);
+                    this.newTodo = '';
+                    this.gene = gene;
+                    realtimeDocument.getModel().endCompoundOperation();
+                }
+            };
+
+            $scope.addMutation = function() {
+
             };
         }]
     )

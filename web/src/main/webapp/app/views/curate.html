@@ -1,7 +1,30 @@
-<div>
-      <button id="authorizeButton" ng-click="authorize()" class="btn btn-default">Authorize Button</button>
-    
-      <div bind-compiled-html="curateFile"></div>
+<div ng-init="newDocName===''">
+    <div class="row">
+        <div class="col-md-6 col-lg-6 ">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon"><b>File name:</b></span>
+                <input type="text" ng-model="newDocName" style='width:100%' class="form-control" placeholder="(eg. BRAF)">
+                <span id="createButton" ng-disabled="newDocName" ng-click="createDoc()" class="input-group-addon">Create New Document</span>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-6">
+            <select chosen ng-model='selectedDoc' id='annotationDropdown' ng-options='document.title for document in documents' allow-single-deselect="true" data-placeholder="Choose document you can modify" style="width:300px">
+                  <option value=""></option>
+            </select>
+            <!-- <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
+                  <option value=""></option>
+            </select> -->
+            <button id="curateButton" ng-click="curateDoc()" class="btn btn-default">Curate Doucment</button>
+        </div>
+    </div>
+
+    <div ng-if="gene">
+        <h2>Gene: <input type="text" ng-model="gene.name"/></h2>
+        <h3>Summary:</h3>
+        <p contenteditable="true" ng-model="gene.summary"></p>
+        <h3>Background:</h3>
+        <p contenteditable="true" ng-model="gene.background"></p>
+    </div>
       <!-- <p>These text areas are on the same page. You can also <a target="_blank" href="#">open them on separate users'
       browsers</a> and they will remain synchronized.</p> -->
 

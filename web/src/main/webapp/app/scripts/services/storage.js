@@ -55,6 +55,21 @@ angular.module('oncokb')
     }
 
     /**
+     * Ensure the document is loaded.
+     *
+     * @param id
+     * @returns {angular.$q.promise}
+     */
+    this.getRealtimeDocument = function (id) {
+        if (this.id === id) {
+            return $q.when(this.document);
+        } else if (this.document) {
+            this.closeDocument();
+        }
+        return this.load(id);
+    }
+
+    /**
      * Retrieve a list of File resources.
      *
      * @param {Function} callback Function to call when the request is complete.
@@ -63,25 +78,27 @@ angular.module('oncokb')
         var retrievePageOfFiles = function(request, result) {
             request.execute(function(resp) {
               result = result.concat(resp.items);
-              console.log(result);
               var nextPageToken = resp.nextPageToken;
               if (nextPageToken) {
-                request = gapi.client.drive.files.list({
-                  'pageToken': nextPageToken
+                request = gapi.client.drive.children.list({
+                    'folderId' : config.folderId,
+                    'pageToken': nextPageToken
                 });
                 retrievePageOfFiles(request, result);
               } else {
                 deferred.resolve(result);
               }
             });
-        }
+        };
         
         var deferred = $q.defer();
         gapi.client.load('drive', 'v2', function() {
-            var initialRequest = gapi.client.drive.files.list();
+            var initialRequest = gapi.client.drive.children.list({
+                    'folderId' : config.folderId
+                });
             retrievePageOfFiles(initialRequest, []);
-            return deferred.promise;
         });
+        return deferred.promise;
     }
 
     this.downloadFile = function(file) {
@@ -120,6 +137,7 @@ angular.module('oncokb')
     this.createDocument = function (title) {
       var deferred = $q.defer();
       var onComplete = function (result) {
+      console.log('Completes', result);
         if (result && !result.error) {
           deferred.resolve(result);
         } else {
@@ -127,15 +145,30 @@ angular.module('oncokb')
         }
         $rootScope.$digest();
       };
+      console.log('Start create file');
       gapi.client.request({
         'path': '/drive/v2/files',
-        'method': 'GET',
+        'method': 'POST',
         'body': JSON.stringify({
-          title: title,
-          mimeType: 'application/vnd.google-apps.drive-sdk'
+          'title': title,
+          'parents': [{
+            'id': config.folderId
+          }],
+          'mimeType': 'application/vnd.google-apps.drive-sdk'
         })
       }).execute(onComplete);
       return deferred.promise;
+    };
+
+    this.checkToken = function() {
+        var token = gapi.auth.getToken();
+        var now = Date.now() / 1000;
+
+        if (token && ((token.expires_at - now) > (60))) {
+            return true;
+        } else {
+            return false;
+        }
     };
 
     /**
@@ -185,34 +218,34 @@ angular.module('oncokb')
      * @returns {angular.$q.promise}
      */
     this.load = function (id) {
-      // var deferred = $q.defer();
-      // var initialize = function (model) {
-      //   model.getRoot().set('todos', model.createList());
-      // };
-      // var onLoad = function (document) {
-      //   this.setDocument(id, document);
-      //   deferred.resolve(document);
-      //   $rootScope.$digest();
-      // }.bind(this);
-      // var onError = function (error) {
-      //   if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
-      //     $rootScope.$emit('todos.token_refresh_required');
-      //   } else if (error.type === gapi.drive.realtime.ErrorType.CLIENT_ERROR) {
-      //     $rootScope.$emit('todos.client_error');
-      //   } else if (error.type === gapi.drive.realtime.ErrorType.NOT_FOUND) {
-      //     deferred.reject(error);
-      //     $rootScope.$emit('todos.not_found', id);
-      //   }
-      //   $rootScope.$digest();
-      // };
-      // 
-      gapi.client.load('drive', 'v2', function() {
-        gapi.client.drive.files.get({
-          'fileId' : id
-        }).execute();
-      });
-      // gapi.drive.realtime.load(id, onLoad, initialize, onError);
-      // return deferred.promise;
+      var deferred = $q.defer();
+      var initialize = function (model) {
+        // model.getRoot().set('gene', OncoKB.Gene);
+      };
+      var onLoad = function (document) {
+        this.setDocument(id, document);
+        deferred.resolve(document);
+        $rootScope.$digest();
+      }.bind(this);
+      var onError = function (error) {
+        if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
+          $rootScope.$emit('todos.token_refresh_required');
+        } else if (error.type === gapi.drive.realtime.ErrorType.CLIENT_ERROR) {
+          $rootScope.$emit('todos.client_error');
+        } else if (error.type === gapi.drive.realtime.ErrorType.NOT_FOUND) {
+          deferred.reject(error);
+          $rootScope.$emit('todos.not_found', id);
+        }
+        $rootScope.$digest();
+      };
+      
+      // gapi.client.load('drive', 'v2', function() {
+      //   gapi.client.drive.files.get({
+      //     'fileId' : id
+      //   }).execute();
+      // });
+      gapi.drive.realtime.load(id, onLoad, initialize, onError);
+      return deferred.promise;
     };
 
     /**

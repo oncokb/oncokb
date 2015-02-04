@@ -22,6 +22,95 @@ OncoKB.global = {};
 OncoKB.tree = {};
 //processedData
 
+OncoKB.config = {
+    clientId: '19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com',
+    scopes: [
+        'https://www.googleapis.com/auth/plus.login',
+        'https://www.googleapis.com/auth/plus.profile.emails.read',
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.install'
+    ],
+    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'
+}
+
+//Google Realtime data module for annotation curation
+//Gene is the main entry
+OncoKB.Gene = function () {
+};
+
+OncoKB.Mutation = function() {
+
+};
+
+OncoKB.Curator = function() {
+
+};
+
+/**
+ * Initializer for constructing via the realtime API
+ * @param  {string} gene_name [description]
+ * @return {[type]}           [description]
+ */
+OncoKB.Gene.prototype.initialize = function (gene_name) {
+    var model = gapi.drive.realtime.custom.getModel(this);
+    this.name = model.createString(gene_name);
+    this.summary = model.createString('');
+    this.background = model.createString('');
+    this.mutations = model.createList();
+    this.curators = model.createList();
+};
+
+/**
+ * [initialize description]
+ * @param  {[type]} mutation_name [description]
+ * @return {[type]}               [description]
+ */
+OncoKB.Mutation.prototype.initialize = function (mutation_name) {
+    var model = gapi.drive.realtime.custom.getModel(this);
+    this.name = model.createString(mutation_name);
+    this.oncogenic = model.createString('');
+    this.description = model.createString('');
+}
+
+/**
+ * [initialize description]
+ * @param  {[type]} mutation_name [description]
+ * @return {[type]}               [description]
+ */
+OncoKB.Curator.prototype.initialize = function () {
+    var model = gapi.drive.realtime.custom.getModel(this);
+    this.name = model.createString('');
+    this.email = model.createString('');
+}
+
+/**
+ * Adds a "text" property to collaborative strings for ng-model compatibility
+ * after a model is created or loaded.
+ */
+// OncoKB.Gene.prototype.setup = function() {
+//     Object.defineProperty(this.name, 'text', {
+//         set: this.name.setText,
+//         get: this.name.getText
+//     });
+// };
+
+// OncoKB.Mutation.prototype.setup = function() {
+//     Object.defineProperty(this.name, 'text', {
+//         set: this.name.setText,
+//         get: this.name.getText
+//     });
+// };
+
+OncoKB.loadFile = function ($route, storage) {
+    var id = $route.current.params.fileId;
+    var userId = $route.current.params.user;
+        return storage.requireAuth(true, userId).then(function () {
+        return storage.getRealtimeDocument(id);
+    });
+};
+
+OncoKB.loadFile.$inject = ['$route', 'storage'];
 
 var oncokbApp = angular
  .module('oncokb', [
@@ -37,42 +126,44 @@ var oncokbApp = angular
    'dialogs.default-translations',
    'RecursionHelper',
    'angularFileUpload',
-   'xml'
+   'xml',
+   'contenteditable'
  ])
- .value('config',{
-  clientId: '19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com',
-  scopes: [
-    'https://www.googleapis.com/auth/drive',
-    'https://www.googleapis.com/auth/drive.file'
-  ]
- })
+ .value('config', OncoKB.config)
  .constant('gapi', window.gapi)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider) {
-   $routeProvider
-     .when('/', {
-       templateUrl: 'views/tree.html',
-       controller: 'TreeCtrl'
-     })
-     .when('/tree', {
-       templateUrl: 'views/tree.html',
-       controller: 'TreeCtrl'
-     })
-     .when('/variant', {
-       templateUrl: 'views/variant.html',
-       controller: 'VariantCtrl',
-       reloadOnSearch: false
-     })
-     .when('/reportGenerator', {
-       templateUrl: 'views/reportgenerator.html',
-       controller: 'ReportgeneratorCtrl'
-     })
-     .when('/curate', {
-       templateUrl: 'views/curate.html',
-       controller: 'CurateCtrl'
-     })
-     .otherwise({
-       redirectTo: '/'
-     });
+    $routeProvider
+        .when('/', {
+           templateUrl: 'views/tree.html',
+           controller: 'TreeCtrl'
+        })
+        .when('/tree', {
+            templateUrl: 'views/tree.html',
+            controller: 'TreeCtrl'
+        })
+        .when('/variant', {
+            templateUrl: 'views/variant.html',
+            controller: 'VariantCtrl',
+            reloadOnSearch: false
+        })
+        .when('/reportGenerator', {
+            templateUrl: 'views/reportgenerator.html',
+            controller: 'ReportgeneratorCtrl'
+        })
+        .when('/curate', {
+            templateUrl: 'views/curate.html',
+            controller: 'CurateCtrl'
+        })
+        .when('/curate/:fileId', {
+            templateUrl: 'views/curate.html',
+            controller: 'CurateEditCtrl',
+            resolve: {
+              realtimeDocument: OncoKB.loadFile
+            }
+        })
+        .otherwise({
+            redirectTo: '/'
+        });
 
   dialogsProvider.useBackdrop(true);
   dialogsProvider.useEscClose(true);
@@ -96,58 +187,60 @@ var oncokbApp = angular
     attributePrefix : '$'
     };
  });
+
 /**
  * Set up handlers for various authorization issues that may arise if the access token
  * is revoked or expired.
  */
-// .run(['$rootScope', '$location', 'storage', function ($rootScope, $location, storage) {
-//   // Error loading the document, likely due revoked access. Redirect back to home/install page
-//   $rootScope.$on('$routeChangeError', function () {
-//     $location.url('/install?target=' + encodeURIComponent($location.url()));
-//   });
+angular.module('oncokb').run(['$rootScope', '$location', 'storage', function ($rootScope, $location, storage) {
+    // Error loading the document, likely due revoked access. Redirect back to home/install page
+    $rootScope.$on('$routeChangeError', function () {
+        $location.url('/');
+    });
 
-//   // Token expired, refresh
-//   $rootScope.$on('todos.token_refresh_required', function () {
-//     storage.requireAuth(true).then(function () {
-//       // no-op
-//     }, function () {
-//       $location.url('/install?target=' + encodeURIComponent($location.url()));
-//     });
-//   });
-// }]);
-/**
- * Loads the document. Used to inject the collaborative document
- * into the main controller.
- *
- * @param $route
- * @param storage
- * @returns {*}
- */
-oncokbApp.loadFile = function ($route, storage) {
-  var id = $route.current.params.fileId;
-  var userId = $route.current.params.user;
-  return storage.requireAuth(true, userId).then(function () {
-    return storage.getDocument(id);
-  });
-};
-oncokbApp.loadFile.$inject = ['$route', 'storage'];
-
+    // Token expired, refresh
+    $rootScope.$on('oncokb.token_refresh_required', function () {
+        storage.requireAuth(true).then(function () {
+            // no-op
+        }, function () {
+            $location.url('/curate');
+        });
+    });
+}]);
 
 /**
  * Bootstrap the app
  */
-// gapi.load('auth:client:drive-share:drive-realtime', function () {
-//   gapi.auth.init();
+gapi.load('auth:client:drive-share:drive-realtime', function () {
+    gapi.auth.init();
 
-//   // Register our Todo class
-//   app.Todo.prototype.title = gapi.drive.realtime.custom.collaborativeField('title');
-//   app.Todo.prototype.completed = gapi.drive.realtime.custom.collaborativeField('completed');
+    // Register our class
+    OncoKB.Gene.prototype.name = gapi.drive.realtime.custom.collaborativeField('gene_name');
+    OncoKB.Gene.prototype.summary = gapi.drive.realtime.custom.collaborativeField('gene_summary');
+    OncoKB.Gene.prototype.background = gapi.drive.realtime.custom.collaborativeField('gene_background');
+    OncoKB.Gene.prototype.mutations = gapi.drive.realtime.custom.collaborativeField('mutations');
+    OncoKB.Gene.prototype.curators = gapi.drive.realtime.custom.collaborativeField('curators');
 
-//   gapi.drive.realtime.custom.registerType(app.Todo, 'todo');
-//   gapi.drive.realtime.custom.setInitializer(app.Todo, app.Todo.prototype.initialize);
-//   gapi.drive.realtime.custom.setOnLoaded(app.Todo, app.Todo.prototype.setup);
+    OncoKB.Mutation.prototype.name = gapi.drive.realtime.custom.collaborativeField('curator_name');
+    OncoKB.Mutation.prototype.oncogenic = gapi.drive.realtime.custom.collaborativeField('mutation_oncogenic');
+    OncoKB.Mutation.prototype.background = gapi.drive.realtime.custom.collaborativeField('mutation_background');
 
-//   $(document).ready(function () {
-//     angular.bootstrap(document, ['todos']);
-//   });
-// });
+    OncoKB.Curator.prototype.name = gapi.drive.realtime.custom.collaborativeField('curator_name');
+    OncoKB.Curator.prototype.email = gapi.drive.realtime.custom.collaborativeField('curator_email');
+
+    gapi.drive.realtime.custom.registerType(OncoKB.Gene, 'Gene');
+    gapi.drive.realtime.custom.registerType(OncoKB.Mutation, 'Mutation');
+    gapi.drive.realtime.custom.registerType(OncoKB.Curator, 'Curator');
+
+    gapi.drive.realtime.custom.setInitializer(OncoKB.Gene, OncoKB.Gene.prototype.initialize);
+    gapi.drive.realtime.custom.setInitializer(OncoKB.Mutation, OncoKB.Mutation.prototype.initialize);
+    gapi.drive.realtime.custom.setInitializer(OncoKB.Curator, OncoKB.Curator.prototype.initialize);
+
+    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Gene, function() {});
+    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Mutation, function() {});
+    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Curator, function() {});
+
+    angular.element(document).ready(function() {
+        angular.bootstrap(document, ['oncokb']);
+    });
+});

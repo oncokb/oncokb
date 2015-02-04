@@ -481,6 +481,7 @@ angular.module('oncokb')
 
         reader.onload = function(e) {
             var full = x2js.xml_str2json(e.target.result);
+            console.log(full);
             var annotation = processData(full.document.sample.test.variant.allele.transcript);
             var relevantCancerType = {};
             for(var key in annotation) {
