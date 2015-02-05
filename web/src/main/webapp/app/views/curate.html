@@ -1,39 +1,76 @@
 <div ng-init="newDocName===''">
-    <div class="row">
-        <div class="col-md-6 col-lg-6 ">
-            <div class="input-group input-group-sm">
-                <span class="input-group-addon"><b>File name:</b></span>
-                <input type="text" ng-model="newDocName" style='width:100%' class="form-control" placeholder="(eg. BRAF)">
-                <span id="createButton" ng-disabled="newDocName" ng-click="createDoc()" class="input-group-addon">Create New Document</span>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-6">
-            <select chosen ng-model='selectedDoc' id='annotationDropdown' ng-options='document.title for document in documents' allow-single-deselect="true" data-placeholder="Choose document you can modify" style="width:300px">
-                  <option value=""></option>
-            </select>
-            <!-- <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
-                  <option value=""></option>
-            </select> -->
-            <button id="curateButton" ng-click="curateDoc()" class="btn btn-default">Curate Doucment</button>
-        </div>
-    </div>
+		<div class="row">
+				<div class="col-md-6 col-lg-6 ">
+						<div class="input-group input-group-sm">
+								<span class="input-group-addon"><b>File name:</b></span>
+								<input type="text" ng-model="newDocName" style='width:100%' class="form-control" placeholder="(eg. BRAF)">
+								<span id="createButton" ng-disabled="newDocName" ng-click="createDoc()" class="input-group-addon">Create New Document</span>
+						</div>
+				</div>
+				<div class="col-md-6 col-lg-6">
+						<div class="input-group input-group-sm">
+						<select chosen ng-model='selectedDoc' id='annotationDropdown' ng-options='document.title for document in documents' allow-single-deselect="true" data-placeholder="Choose document you can modify" style="width:300px">
+									<option value=""></option>
+						</select>
+						<!-- <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
+									<option value=""></option>
+						</select> -->
+						<button id="curateButton" ng-click="curateDoc()" class="btn btn-default">Curate Doucment</button>
+						</div>
+				</div>
+		</div>
 
-    <div ng-if="gene">
-        <h2>Gene: <input type="text" ng-model="gene.name"/></h2>
-        <h3>Summary:</h3>
-        <p contenteditable="true" ng-model="gene.summary"></p>
-        <h3>Background:</h3>
-        <p contenteditable="true" ng-model="gene.background"></p>
-    </div>
-      <!-- <p>These text areas are on the same page. You can also <a target="_blank" href="#">open them on separate users'
-      browsers</a> and they will remain synchronized.</p> -->
+		<div ng-if="gene">
+			<div id="gene">
+				<h2>Gene: <span contenteditable="true" ng-model="gene.name"/></span></h2>
+				<h3>Summary:</h3>
+				<p contenteditable="true" ng-model="gene.summary"></p>
+				<h3>Background:</h3>
+				<p contenteditable="true" ng-model="gene.background"></p>
+				<p>
+					<span>cBioPortal link: <a href="www.cbioportal.org/public-portal/ln?q=BRAF" target="_blank">www.cbioportal.org/public-portal/ln?q={{gene.name}}</a></span><br/>
+					<span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln=BRAF" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name}}</a></span>
+				</p>
+			</div>
+			<div id="mutation">
+				<accordion close-others="oneAtATime">
+			        <accordion-group ng-repeat="mutation in gene.mutations.asArray()">
+				        <accordion-heading>
+				            Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
+				        </accordion-heading>
+				        <p>
+				        	<strong>Oncogenic:</strong>
+				        	<div ng-repeat="checkbox in checkboxes['oncogenic']">
+								<input
+							  		id="box{{$index}}"
+								    type="checkbox"
+								    value="{{checkbox}}"
+								    ng-click="toggleSelection(checkbox)"
+							  	>
+					        	<label for="box{{$index}}">{{checkbox}}
+								</label>
+							</div>
+			        </accordion-group>
+			    </accordion>
+			</div>
+			<div id="mutation-form" class="input-group input-group-sm">
+				<input type="text" class="form-control" ng-model="newMutation.name" placeholder="Mutation name" />
+				<span class="input-group-btn">
+					<button type="button" class="btn btn-default" ng-disabled="!(!!newMutation.name)" ng-click="addMutation()">
+						<i class="fa fa-plus"></i> Add Mutation
+					</button>
+				</span>
+			</div>
+		</div>
+			<!-- <p>These text areas are on the same page. You can also <a target="_blank" href="#">open them on separate users'
+			browsers</a> and they will remain synchronized.</p> -->
 
-      <!-- Text areas that will be used as our collaborative controls. -->
-      <!-- <textarea id="editor1" rows="15" cols="50" disabled="true"></textarea>
-      <textarea id="editor2" rows="15" cols="50" disabled="true"></textarea>
-      <br /> -->
+			<!-- Text areas that will be used as our collaborative controls. -->
+			<!-- <textarea id="editor1" rows="15" cols="50" disabled="true"></textarea>
+			<textarea id="editor2" rows="15" cols="50" disabled="true"></textarea>
+			<br /> -->
 
-      <!-- Undo and redo buttons. -->
-      <!-- <button id="undoButton" disabled>Undo</button>
-      <button id="redoButton" disabled>Redo</button> -->
+			<!-- Undo and redo buttons. -->
+			<!-- <button id="undoButton" disabled>Undo</button>
+			<button id="redoButton" disabled>Redo</button> -->
 </div>

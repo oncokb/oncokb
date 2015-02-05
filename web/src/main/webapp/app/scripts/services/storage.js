@@ -81,6 +81,38 @@ angular.module('oncokb')
               var nextPageToken = resp.nextPageToken;
               if (nextPageToken) {
                 request = gapi.client.drive.children.list({
+                    'q' : config.folderId + ' in parents',
+                    'pageToken': nextPageToken
+                });
+                retrievePageOfFiles(request, result);
+              } else {
+                deferred.resolve(result);
+              }
+            });
+        };
+        
+        var deferred = $q.defer();
+        gapi.client.load('drive', 'v2', function() {
+            var initialRequest = gapi.client.drive.files.list({
+                    'q' : '"' + config.folderId + '" in parents'
+                });
+            retrievePageOfFiles(initialRequest, []);
+        });
+        return deferred.promise;
+    }
+
+    /**
+     * Retrieve a list of File resources.
+     *
+     * @param {Function} callback Function to call when the request is complete.
+     */
+    this.retrieveAllChildrenFiles = function() {
+        var retrievePageOfFiles = function(request, result) {
+            request.execute(function(resp) {
+              result = result.concat(resp.items);
+              var nextPageToken = resp.nextPageToken;
+              if (nextPageToken) {
+                request = gapi.client.drive.children.list({
                     'folderId' : config.folderId,
                     'pageToken': nextPageToken
                 });

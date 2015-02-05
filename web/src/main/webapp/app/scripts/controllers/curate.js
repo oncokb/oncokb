@@ -26,8 +26,9 @@ angular.module('oncokb')
                 storage.requireAuth(true).then(function(){
                     storage.retrieveAllFiles().then(function(result){
                         console.log('Documents', result);
-                        $scope._documents = result;
-                        getDocumentFromList(0, []);
+                        $scope.documents = result;
+                        // $scope._documents = result;
+                        // getDocumentFromList(0, []);
                     });
                 });
             };
@@ -62,7 +63,12 @@ angular.module('oncokb')
             $scope.fileId = $routeParams.fileId;
             $scope.realtimeDocument = realtimeDocument;
             $scope.gene = '';
-            $scope.newGene = '';
+            $scope.newGene = {};
+            $scope.newMutation = {};
+            $scope.newTumor = {};
+            $scope.checkboxes = {
+                'oncogenic': ['YES', 'NO']
+            };
 
             if($routeParams.fileId) {
                 var model = realtimeDocument.getModel();
@@ -102,14 +108,22 @@ angular.module('oncokb')
                 if (this.newGene && this.newGene.name) {
                     realtimeDocument.getModel().beginCompoundOperation();
                     var gene = realtimeDocument.getModel().create(Oncokb.Gene, this.newGene);
-                    this.newTodo = '';
+                    this.newGene = {};
                     this.gene = gene;
                     realtimeDocument.getModel().endCompoundOperation();
                 }
             };
 
             $scope.addMutation = function() {
-
+                // console.log(this.newMutation);
+                if (this.gene && this.newMutation && this.newMutation.name) {
+                    realtimeDocument.getModel().beginCompoundOperation();
+                    var mutation = realtimeDocument.getModel().create(OncoKB.Mutation, this.newMutation.name);
+                    this.newMutation = {};
+                    this.gene.mutations.push(mutation);
+                    realtimeDocument.getModel().endCompoundOperation();
+                    console.log(this.gene);
+                }
             };
         }]
     )
