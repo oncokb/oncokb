@@ -54,6 +54,24 @@ angular.module('oncokb')
         return deferred.promise;
     }
 
+    this.getUserInfo = function (userId) {
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+            $rootScope.$digest();
+        };
+        gapi.client.load('plus','v1', function(){
+            gapi.client.plus.people.get({
+                'userId' : userId
+            }).execute(onComplete);
+        });
+        return deferred.promise;
+    }
+
     /**
      * Ensure the document is loaded.
      *

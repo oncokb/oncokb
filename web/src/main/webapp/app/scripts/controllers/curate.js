@@ -66,10 +66,13 @@ angular.module('oncokb')
             $scope.newGene = {};
             $scope.newMutation = {};
             $scope.newTumor = {};
+            $scope.collaborators = {};
             $scope.checkboxes = {
                 'oncogenic': ['YES', 'NO', 'N/A']
             };
-
+            $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
+            $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
+            
             if($routeParams.fileId) {
                 var model = realtimeDocument.getModel();
                 if(!model.getRoot().get('gene')) {
@@ -79,7 +82,7 @@ angular.module('oncokb')
                 }else {
                     $scope.gene = model.getRoot().get('gene');
                 }
-
+                displayAllCollaborators($scope.realtimeDocument);
                 console.log($scope.gene);
             }
             $scope.authorize = function(){
@@ -128,6 +131,7 @@ angular.module('oncokb')
 
             $scope.checkScope = function() {
                 console.log($scope.gene.mutations.asArray());
+                console.log($scope.collaborators);
             };
 
             $scope.remove = function(index, $event) {
@@ -136,9 +140,49 @@ angular.module('oncokb')
                 $scope.gene.mutations.remove(index);
             };
 
-            $scope.$watch('gene', function(newValue, oldValue, scope) {
-                console.log(this.gene);
-            });
+            function displayCollaboratorEvent(evt) {
+              console.log(evt);
+              switch (evt.type) {
+                case 'collaborator_left':
+                  removeCollaborator(evt.collaborator);
+                  break;
+                case 'collaborator_joined':
+                  addCollaborator(evt.collaborator);
+                  break;
+                default:
+                  console.info('Unknown event:', evt);
+                  break;
+              }
+              $scope.$apply($scope.collaborators);
+            }
+
+            function addCollaborator(user) {
+              if(!$scope.collaborators.hasOwnProperty(user.userId)) {
+                $scope.collaborators[user.sessionId] = {};
+              }
+              $scope.collaborators[user.sessionId] = user;
+            }
+
+            function removeCollaborator(user) {
+              if(!$scope.collaborators.hasOwnProperty(user.sessionId)) {
+                console.log('Unknown collaborator:', user);
+              }else {
+                delete $scope.collaborators[user.sessionId];
+              }
+            }
+
+            function displayAllCollaborators(document) {
+              var collaborators = document.getCollaborators();
+              var collaboratorCount = collaborators.length;
+
+              for (var i = 0; i < collaboratorCount; i++) {
+                var user = collaborators[i];
+                if(!$scope.collaborators.hasOwnProperty(user.userId)) {
+                  $scope.collaborators[user.sessionId] = {};
+                }
+                $scope.collaborators[user.sessionId] = user;
+              }
+            }
         }]
     )
     .directive("bindCompiledHtml", function($compile, $timeout) {

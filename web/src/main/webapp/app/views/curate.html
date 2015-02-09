@@ -23,7 +23,11 @@
 
 		<div ng-if="gene">
 			<div id="gene">
-				<h2>Gene: <span contenteditable="true" ng-model="gene.name"/></span></h2>
+				<h2>Gene: <span contenteditable="true" ng-model="gene.name"/></span>
+				<span ng-repeat="collaborator in collaborators">
+					<img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
+					<!-- <span class="curateCollaboratorName" ng-style="curateCollaboratorName={'border-bottom-color': 'collaborator.color'}">{{collaborator.displayName}}</span> -->
+				</span></h2>
 				<h3>Summary:</h3>
 				<p contenteditable="true" ng-model="gene.summary"></p>
 				<h3>Background:</h3>
