@@ -67,7 +67,7 @@ angular.module('oncokb')
             $scope.newMutation = {};
             $scope.newTumor = {};
             $scope.checkboxes = {
-                'oncogenic': ['YES', 'NO']
+                'oncogenic': ['YES', 'NO', 'N/A']
             };
 
             if($routeParams.fileId) {

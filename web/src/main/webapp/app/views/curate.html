@@ -34,13 +34,16 @@
 			</div>
 			<div id="mutation">
 				<accordion close-others="oneAtATime">
-			        <accordion-group ng-repeat="mutation in gene.mutations.asArray()">
-				        <accordion-heading>
-				            Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
+		        	<accordion-group ng-repeat="mutation in gene.mutations.asArray()">
+			        	<accordion-heading>
+				        	Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
+				        	<i deleteItem="mutation" class="fa fa-trash-o pull-right"></i>
+				            
 				        </accordion-heading>
 				        <p>
+				        	<i class="fa fa-trash-o"></i>
 				        	<strong>Oncogenic:</strong>
-				        	<div ng-repeat="checkbox in checkboxes['oncogenic']">
+				        	<span ng-repeat="checkbox in checkboxes['oncogenic']">
 								<input
 							  		id="box{{$index}}"
 								    type="checkbox"
@@ -49,7 +52,8 @@
 							  	>
 					        	<label for="box{{$index}}">{{checkbox}}
 								</label>
-							</div>
+							</span>
+						</p>
 			        </accordion-group>
 			    </accordion>
 			</div>
