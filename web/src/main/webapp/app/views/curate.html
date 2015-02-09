@@ -24,10 +24,25 @@
 		<div ng-if="gene">
 			<div id="gene">
 				<h2>Gene: <span contenteditable="true" ng-model="gene.name"/></span>
-				<span ng-repeat="collaborator in collaborators">
-					<img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
-					<!-- <span class="curateCollaboratorName" ng-style="curateCollaboratorName={'border-bottom-color': 'collaborator.color'}">{{collaborator.displayName}}</span> -->
-				</span></h2>
+					<span ng-repeat="collaborator in collaborators">
+						<img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
+						<!-- <span class="curateCollaboratorName" ng-style="curateCollaboratorName={'border-bottom-color': 'collaborator.color'}">{{collaborator.displayName}}</span> -->
+					</span>
+					<span class="btn-group pull-right" role="group">
+						<button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
+  						<button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
+					</span>
+				</h2>
+				<p ng-if="gene.curators && gene.curators.asArray().length > 0">
+					<!-- Use to delete curators-->
+					<!-- <span  ng-repeat="curator in gene.curators.asArray()">
+						<i ng-click="removeCurator($index)" class="fa fa-trash-o pull-right"></i>
+						<span>{{curator.name.text}}</span>
+						<span>{{curator.email.text}}</span>
+					</span> -->
+					<span><strong>Curator name: <span ng-bind="curatorsName()"></span></strong></span><br/>
+					<span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
+				</p>
 				<h3>Summary:</h3>
 				<p contenteditable="true" ng-model="gene.summary"></p>
 				<h3>Background:</h3>
@@ -41,7 +56,7 @@
 				<accordion close-others="oneAtATime">
 		        	<accordion-group ng-repeat="mutation in gene.mutations.asArray()">
 			        	<accordion-heading>
-				        	Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
+				        	Mutation: <span contenteditable="true" ng-model="mutation.name"/></span>
 				        	<i ng-click="remove($index, $event)" class="fa fa-trash-o pull-right"></i>
 				            
 				        </accordion-heading>

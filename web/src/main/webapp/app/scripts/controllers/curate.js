@@ -58,8 +58,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('CurateEditCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument',
-        function ($scope, $location, $routeParams, storage, realtimeDocument) {
+    .controller('CurateEditCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user',
+        function ($scope, $location, $routeParams, storage, realtimeDocument, User) {
             $scope.fileId = $routeParams.fileId;
             $scope.realtimeDocument = realtimeDocument;
             $scope.gene = '';
@@ -70,24 +70,31 @@ angular.module('oncokb')
             $scope.checkboxes = {
                 'oncogenic': ['YES', 'NO', 'N/A']
             };
-            $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
-            $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
             
+            print(realtimeDocument);
+
             if($routeParams.fileId) {
                 var model = realtimeDocument.getModel();
                 if(!model.getRoot().get('gene')) {
+                  storage.getDocument($routeParams.fileId).then(function(file){
                     var gene = model.create('Gene');
                     model.getRoot().set('gene', gene);
                     $scope.gene = model.getRoot().get('gene');
+                    $scope.gene.name = file.title;
+                    $scope.model =  model;
+                    afterCreateGeneModel();
+                  });
                 }else {
-                    $scope.gene = model.getRoot().get('gene');
+                  $scope.gene = model.getRoot().get('gene');
+                  $scope.model =  model;
+                  afterCreateGeneModel();
                 }
-                displayAllCollaborators($scope.realtimeDocument);
-                console.log($scope.gene);
+            }else {
+              $scope.model = '';
             }
+
             $scope.authorize = function(){
-                console.log($routeParams);
-                console.log('---enter---');
+                print($routeParams);
                     storage.requireAuth(false).then(function () {
                     var target = $location.search().target;
                     if (target) {
@@ -97,12 +104,7 @@ angular.module('oncokb')
                             storage.downloadFile(file).then(function(text) {
                                 $scope.curateFile = text;
                             });
-                            // var blob = new Blob(['<h1 class="c3 c10 c20"><a name="h.rvs6zqrchald"></a><span class="c0 c5 c23">Gene: PTCH1</span></h1><p class="c3"><span class="c0">Curator name: Dmitriy Zamarin</span></p><p class="c3"><span class="c0">Curator email: zamarind@mskcc.org</span></p>'], {type: 'text/html'});
-                            // storage.updateFile(file.id, file, blob).then(function(result){
-                            //     console.log(result);
-                            // });
                         });
-                        // $location.url('/curate');
                     }
                 });
             };
@@ -118,7 +120,6 @@ angular.module('oncokb')
             };
 
             $scope.addMutation = function() {
-                // console.log(this.newMutation);
                 if (this.gene && this.newMutation && this.newMutation.name) {
                     realtimeDocument.getModel().beginCompoundOperation();
                     var mutation = realtimeDocument.getModel().create(OncoKB.Mutation, this.newMutation.name);
@@ -130,8 +131,8 @@ angular.module('oncokb')
             };
 
             $scope.checkScope = function() {
-                console.log($scope.gene.mutations.asArray());
-                console.log($scope.collaborators);
+                print($scope.gene.mutations.asArray());
+                print($scope.collaborators);
             };
 
             $scope.remove = function(index, $event) {
@@ -140,8 +141,65 @@ angular.module('oncokb')
                 $scope.gene.mutations.remove(index);
             };
 
+            $scope.redo = function() {
+              $scope.model.redo();
+            };
+
+            $scope.undo = function() {
+              $scope.model.undo();
+            };
+
+            $scope.curatorsName = function() {
+              return this.gene.curators.asArray().map(function(d){return d.name}).join(', ');
+            };
+
+            $scope.curatorsEmail = function() {
+              return this.gene.curators.asArray().map(function(d){return d.email}).join(', ');
+            };
+
+            $scope.removeCurator = function(index) {
+              $scope.gene.curators.remove(index);
+            }
+            function bindDocEvents() {
+              $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
+              $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
+              $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
+              $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChanged);
+            }
+
+            function afterCreateGeneModel() {
+              displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
+            }
+
+            function valueChanged(evt) {
+              if($scope.gene) {
+                var hasCurator = false;
+                if($scope.gene.curators && angular.isArray($scope.gene.curators.asArray()) && $scope.gene.curators.asArray().length > 0) {
+                  var _array = $scope.gene.curators.asArray();
+                  for(var i=0; i<_array.length; i++) {
+                    if(_array[i].email.text === User.email) {
+                      hasCurator = true;
+                      break;
+                    }
+                  }
+
+                  if(!hasCurator) {
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    var _curator = realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
+                    $scope.gene.curators.push(_curator);
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
+                  }
+                }else {
+                  $scope.realtimeDocument.getModel().beginCompoundOperation();
+                  var _curator = realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
+                  $scope.gene.curators.push(_curator);
+                  $scope.realtimeDocument.getModel().endCompoundOperation();
+                }
+              }
+            }
+
             function displayCollaboratorEvent(evt) {
-              console.log(evt);
+              print(evt);
               switch (evt.type) {
                 case 'collaborator_left':
                   removeCollaborator(evt.collaborator);
@@ -161,6 +219,7 @@ angular.module('oncokb')
                 $scope.collaborators[user.sessionId] = {};
               }
               $scope.collaborators[user.sessionId] = user;
+              print(user);
             }
 
             function removeCollaborator(user) {
@@ -171,17 +230,51 @@ angular.module('oncokb')
               }
             }
 
-            function displayAllCollaborators(document) {
+            function displayAllCollaborators(document, callback) {
               var collaborators = document.getCollaborators();
               var collaboratorCount = collaborators.length;
-
+              var _user = {};
               for (var i = 0; i < collaboratorCount; i++) {
                 var user = collaborators[i];
                 if(!$scope.collaborators.hasOwnProperty(user.userId)) {
                   $scope.collaborators[user.sessionId] = {};
                 }
                 $scope.collaborators[user.sessionId] = user;
+                if(user.isMe) {
+                  _user = user;
+                }
               }
+
+              if(User.email === 'N/A') {
+                storage.getUserInfo(_user.userId).then(function(userInfo){
+                  User.name = userInfo.displayName;
+                  User.email = angular.isArray(userInfo.emails)?(userInfo.emails.length>0?userInfo.emails[0].value:'N/A'):userInfo.emails;
+                  callback();
+                });
+              }else {
+                callback();
+              }
+            }
+
+            function onUndoStateChanged(evt) {
+              console.info(evt);
+
+              if (evt.canUndo) {
+                $scope.canUndo = true;
+              }else {
+                $scope.canUndo = false;
+              }
+              if (evt.canRedo) {
+                $scope.canRedo = true;
+              }else {
+                $scope.canRedo = false;
+              }
+            }
+
+            function print(item) {
+              console.log('\n---------------------------------');
+              console.log(item);
+              console.log('---------------------------------\n');
             }
         }]
     )

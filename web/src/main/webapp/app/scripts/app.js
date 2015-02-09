@@ -87,10 +87,10 @@ OncoKB.Gene.prototype.initialize = function (name) {
  * @param  {[type]} mutation_name [description]
  * @return {[type]}               [description]
  */
-OncoKB.Curator.prototype.initialize = function () {
+OncoKB.Curator.prototype.initialize = function (name, email) {
     var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString('');
-    this.email = model.createString('');
+    this.name = model.createString(name);
+    this.email = model.createString(email);
 }
 
 /**
@@ -101,18 +101,11 @@ OncoKB.Curator.prototype.initialize = function () {
 OncoKB.Mutation.prototype.initialize = function (name) {
     var model = gapi.drive.realtime.custom.getModel(this);
     this.name = model.createString(name);
-    this.oncogenic = '';
+    this.oncogenic = model.createString('');
     this.effect = model.createString('');
     this.description = model.createString('');
     this.tumors = model.createList();
 }
-
-OncoKB.Mutation.prototype.setup = function() {
-    Object.defineProperty(this.name, 'text', {
-        set: this.name.setText,
-        get: this.name.getText
-    });
-};
 
 /**
  * Therapeutic Implications
@@ -229,6 +222,10 @@ var oncokbApp = angular
    'contenteditable'
  ])
  .value('config', OncoKB.config)
+ .value('user', {
+    name: 'N/A',
+    email: 'N/A'
+ })
  .constant('gapi', window.gapi)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider) {
     $routeProvider
@@ -320,9 +317,11 @@ gapi.load('auth:client:drive-share:drive-realtime', function () {
     OncoKB.Gene.prototype.mutations = gapi.drive.realtime.custom.collaborativeField('mutations');
     OncoKB.Gene.prototype.curators = gapi.drive.realtime.custom.collaborativeField('curators');
 
-    OncoKB.Mutation.prototype.name = gapi.drive.realtime.custom.collaborativeField('curator_name');
+    OncoKB.Mutation.prototype.name = gapi.drive.realtime.custom.collaborativeField('mutation_name');
     OncoKB.Mutation.prototype.oncogenic = gapi.drive.realtime.custom.collaborativeField('mutation_oncogenic');
-    OncoKB.Mutation.prototype.background = gapi.drive.realtime.custom.collaborativeField('mutation_background');
+    OncoKB.Mutation.prototype.effect = gapi.drive.realtime.custom.collaborativeField('mutation_effect');
+    OncoKB.Mutation.prototype.description = gapi.drive.realtime.custom.collaborativeField('mutation_description');
+    OncoKB.Mutation.prototype.tumors = gapi.drive.realtime.custom.collaborativeField('tumors');
 
     OncoKB.Curator.prototype.name = gapi.drive.realtime.custom.collaborativeField('curator_name');
     OncoKB.Curator.prototype.email = gapi.drive.realtime.custom.collaborativeField('curator_email');
@@ -346,7 +345,7 @@ gapi.load('auth:client:drive-share:drive-realtime', function () {
     gapi.drive.realtime.custom.setInitializer(OncoKB.Tumor, OncoKB.Tumor.prototype.initialize);
 
     gapi.drive.realtime.custom.setOnLoaded(OncoKB.Gene, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Mutation, function() {});
+    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Mutation, OncoKB.Mutation.prototype.setup);
     gapi.drive.realtime.custom.setOnLoaded(OncoKB.Curator, function() {});
     gapi.drive.realtime.custom.setOnLoaded(OncoKB.InteractAlts, function() {});
     gapi.drive.realtime.custom.setOnLoaded(OncoKB.NCCN, function() {});

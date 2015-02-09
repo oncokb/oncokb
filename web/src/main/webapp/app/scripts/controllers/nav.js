@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokb')
-.controller('NavCtrl', function ($scope, $location, config, gapi) {
+.controller('NavCtrl', function ($scope, $location, config, gapi, user) {
     $scope.signinCallback = function(result) {
         console.log('auto signedIn result',result);
     };
@@ -76,6 +76,7 @@ angular.module('oncokb')
             for (var i = 0; i < userInfo.emails.length; i++) {
                 if(userInfo.emails[i].type === 'account'){
                     $scope.user.email = userInfo.emails[i].value;
+                    user.email = angular.copy($scope.user.email);
                     break;
                 }
             }
@@ -83,6 +84,10 @@ angular.module('oncokb')
         if(userInfo.image && userInfo.image.url) {
             $scope.user.avatar = userInfo.image.url;
         }
+        if(userInfo.displayName) {
+            user.name = angular.copy(userInfo.displayName);
+        }
+        
         $scope.$apply();
     }
      
