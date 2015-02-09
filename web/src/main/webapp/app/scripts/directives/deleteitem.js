@@ -11,8 +11,6 @@ angular.module('oncokb')
     return {
       restrict: 'A',
       link: function postLink(scope, element, attrs) {
-        console.log(scope);
-        console.log(attrs);
       }
     };
   });

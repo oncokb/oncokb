@@ -1,4 +1,5 @@
 <div ng-init="newDocName===''">
+	<button class="btn btn-default" ng-click="checkScope()">Check scope</button>
 		<div class="row">
 				<div class="col-md-6 col-lg-6 ">
 						<div class="input-group input-group-sm">
@@ -37,18 +38,17 @@
 		        	<accordion-group ng-repeat="mutation in gene.mutations.asArray()">
 			        	<accordion-heading>
 				        	Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
-				        	<i deleteItem="mutation" class="fa fa-trash-o pull-right"></i>
+				        	<i ng-click="remove($index, $event)" class="fa fa-trash-o pull-right"></i>
 				            
 				        </accordion-heading>
 				        <p>
-				        	<i class="fa fa-trash-o"></i>
 				        	<strong>Oncogenic:</strong>
 				        	<span ng-repeat="checkbox in checkboxes['oncogenic']">
 								<input
 							  		id="box{{$index}}"
-								    type="checkbox"
-								    value="{{checkbox}}"
-								    ng-click="toggleSelection(checkbox)"
+								    type="radio"
+								    ng-model="mutation.oncogenic"
+								    value="{{checkbox==='N/A'?'':checkbox}}"
 							  	>
 					        	<label for="box{{$index}}">{{checkbox}}
 								</label>

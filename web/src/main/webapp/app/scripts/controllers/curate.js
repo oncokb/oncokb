@@ -125,6 +125,20 @@ angular.module('oncokb')
                     console.log(this.gene);
                 }
             };
+
+            $scope.checkScope = function() {
+                console.log($scope.gene.mutations.asArray());
+            };
+
+            $scope.remove = function(index, $event) {
+                if ($event.stopPropagation) $event.stopPropagation();
+                if ($event.preventDefault) $event.preventDefault();
+                $scope.gene.mutations.remove(index);
+            };
+
+            $scope.$watch('gene', function(newValue, oldValue, scope) {
+                console.log(this.gene);
+            });
         }]
     )
     .directive("bindCompiledHtml", function($compile, $timeout) {
