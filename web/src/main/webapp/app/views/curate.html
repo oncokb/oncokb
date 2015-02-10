@@ -23,7 +23,7 @@
 
 		<div ng-if="gene">
 			<div id="gene">
-				<h2>Gene: <span contenteditable="true" ng-model="gene.name"/></span>
+				<h2>Gene: <span contenteditable="true" ng-model="gene.name.text"/></span>
 					<span ng-repeat="collaborator in collaborators">
 						<img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
 						<!-- <span class="curateCollaboratorName" ng-style="curateCollaboratorName={'border-bottom-color': 'collaborator.color'}">{{collaborator.displayName}}</span> -->
@@ -44,29 +44,29 @@
 					<span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
 				</p>
 				<h3>Summary:</h3>
-				<p contenteditable="true" ng-model="gene.summary"></p>
+				<p contenteditable="true" ng-model="gene.summary.text"></p>
 				<h3>Background:</h3>
-				<p contenteditable="true" ng-model="gene.background"></p>
+				<p contenteditable="true" ng-model="gene.background.text"></p>
 				<p>
-					<span>cBioPortal link: <a href="www.cbioportal.org/public-portal/ln?q=BRAF" target="_blank">www.cbioportal.org/public-portal/ln?q={{gene.name}}</a></span><br/>
-					<span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln=BRAF" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name}}</a></span>
+					<span>cBioPortal link: <a href="www.cbioportal.org/public-portal/ln?q=BRAF" target="_blank">www.cbioportal.org/public-portal/ln?q={{gene.name.text}}</a></span><br/>
+					<span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln=BRAF" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
 				</p>
 			</div>
 			<div id="mutation">
 				<accordion close-others="oneAtATime">
 		        	<accordion-group ng-repeat="mutation in gene.mutations.asArray()">
 			        	<accordion-heading>
-				        	Mutation: <span contenteditable="true" ng-model="mutation.name"/></span>
+				        	Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
 				        	<i ng-click="remove($index, $event)" class="fa fa-trash-o pull-right"></i>
 				            
 				        </accordion-heading>
 				        <p>
-				        	<strong>Oncogenic:</strong>
+				        	<strong>{{mutation.oncogenic.display}}:</strong>
 				        	<span ng-repeat="checkbox in checkboxes['oncogenic']">
 								<input
 							  		id="box{{$index}}"
 								    type="radio"
-								    ng-model="mutation.oncogenic"
+								    ng-model="mutation.oncogenic.text"
 								    value="{{checkbox==='N/A'?'':checkbox}}"
 							  	>
 					        	<label for="box{{$index}}">{{checkbox}}

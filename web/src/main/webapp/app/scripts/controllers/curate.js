@@ -70,7 +70,7 @@ angular.module('oncokb')
             $scope.checkboxes = {
                 'oncogenic': ['YES', 'NO', 'N/A']
             };
-            
+
             print(realtimeDocument);
 
             if($routeParams.fileId) {
@@ -79,8 +79,8 @@ angular.module('oncokb')
                   storage.getDocument($routeParams.fileId).then(function(file){
                     var gene = model.create('Gene');
                     model.getRoot().set('gene', gene);
-                    $scope.gene = model.getRoot().get('gene');
-                    $scope.gene.name = file.title;
+                    $scope.gene = gene;
+                    $scope.gene.name.setText(file.title);
                     $scope.model =  model;
                     afterCreateGeneModel();
                   });
@@ -121,16 +121,18 @@ angular.module('oncokb')
 
             $scope.addMutation = function() {
                 if (this.gene && this.newMutation && this.newMutation.name) {
+                    var _mutation = '';
                     realtimeDocument.getModel().beginCompoundOperation();
-                    var mutation = realtimeDocument.getModel().create(OncoKB.Mutation, this.newMutation.name);
-                    this.newMutation = {};
-                    this.gene.mutations.push(mutation);
+                    _mutation = realtimeDocument.getModel().create(OncoKB.Mutation);
+                    _mutation.name.setText(this.newMutation.name);
+                    this.gene.mutations.push(_mutation);
                     realtimeDocument.getModel().endCompoundOperation();
-                    console.log(this.gene);
+                    this.newMutation = {};
                 }
             };
 
             $scope.checkScope = function() {
+                print($scope.gene);
                 print($scope.gene.mutations.asArray());
                 print($scope.collaborators);
             };
@@ -159,7 +161,8 @@ angular.module('oncokb')
 
             $scope.removeCurator = function(index) {
               $scope.gene.curators.remove(index);
-            }
+            };
+
             function bindDocEvents() {
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);

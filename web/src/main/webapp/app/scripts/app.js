@@ -34,165 +34,230 @@ OncoKB.config = {
     folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'
 }
 
-//Google Realtime data module for annotation curation
-//Gene is the main entry
-OncoKB.Gene = function () {
-
+OncoKB.curateInfo = {
+    'Gene': {
+        'name': {
+            type: 'string'
+        },
+        'summary': {
+            type: 'string',
+            display: 'Summary'
+        },
+        'background': {
+            type: 'string',
+            display: 'Background'
+        },
+        'mutations': {
+            type: 'list'
+        },
+        'curators': {
+            type: 'list'
+        }
+    },
+    'Mutation': {
+        'name': {
+            type: 'string'
+        },
+        'oncogenic': {
+            type: 'string',
+            display: 'Oncogenic'
+        },
+        'effect': {
+            type: 'string',
+            display: 'Mutation Effect'
+        },
+        'description': {
+            type: 'string',
+            display: 'Description of mutation effect'
+        },
+        'tumors': {
+            type: 'list'
+        }
+    },
+    'Curator': {
+        'name': {
+            type: 'string'
+        },
+        'email': {
+            type: 'string'
+        }
+    },
+    'NCCN': {
+        'disease': {
+            type: 'string',
+            display: 'Diease'
+        },
+        'version': {
+            type: 'string',
+            display: 'Version'
+        },
+        'pages': {
+            type: 'string',
+            display: 'Pages'
+        },
+        'category': {
+            type: 'string',
+            display: 'Recommendation category'
+        },
+        'description': {
+            type: 'string',
+            display: 'Description of evidence'
+        }
+    },
+    'Tumor': {
+        'name': {
+            type: 'string'
+        },
+        'prevalence': {
+            type: 'string',
+            display: 'Prevalence'
+        },
+        'progImp': {
+            type: 'string',
+            display: 'Prognostic implications'
+        },
+        'trials': {
+            type: 'list'
+        },
+        'TI': {
+            type: 'list'
+        },
+        'nccn': {
+            type: 'NCCN'
+        },
+        'interactAlts': {
+            type: 'InteractAlts'
+        }
+    },
+    'TI': {
+        'name': {
+            type: 'string'
+        },
+        'types': {
+        },
+        'treatments': {
+            type: 'list'
+        },
+        'description': {
+            type: 'string',
+            display: 'Description of evidence'
+        }
+    },
+    'InteractAlts': {
+        'alterations': {
+            type: 'string',
+            display: 'Alterations'
+        },
+        'description': {
+            type: 'string',
+            display: 'Description of evidence'
+        }
+    },
+    'Treatment': {
+        'name': {
+            type: 'string'
+        },
+        'level': {
+            type: 'string',
+            display: 'Highest level of evidence'
+        },
+        'indication': {
+            type: 'string',
+            display: 'Drugs'
+        },
+        'description': {
+            type: 'string',
+            display: 'Description of evidence'
+        },
+        'trials': {
+            type: 'list'
+        }
+    }
 };
 
-OncoKB.Mutation = function() {
-
+OncoKB.setUp = function(object) {
+    if(OncoKB.curateInfo.hasOwnProperty(object.attr)){
+        for(var key1 in OncoKB.curateInfo[object.attr]){
+            if(OncoKB.curateInfo[object.attr][key1].hasOwnProperty('display')) {
+                object[key1].display = OncoKB.curateInfo[object.attr][key1].display;
+            }
+            if(object[key1].type === 'EditableString') {
+                Object.defineProperty(object[key1], 'text', {
+                    set: object[key1].setText,
+                    get: object[key1].getText
+                });
+            }
+        }
+    }
 };
 
-OncoKB.Tumor = function() {
+OncoKB.initialize = function() {
+    var nonSetUp = ['TI'];
+    var keys = _.keys(OncoKB.curateInfo);
+    var keysL = keys.length;
 
+    for (var i = 0; i < keysL; i++) {
+        var _key = keys[i];
+        var _keys = _.keys(OncoKB.curateInfo[_key]);
+        var _keysL = _keys.length;
+
+        //Google Realtime data module for annotation curation
+        //Gene is the main entry
+        OncoKB[_key] = function() {};
+
+        OncoKB[_key].prototype.attr = _key;
+
+        OncoKB[_key].prototype.setUp = function() {
+            OncoKB.setUp(this);
+        };
+
+        OncoKB[_key].prototype.initialize = function () {
+            var model = gapi.drive.realtime.custom.getModel(this);
+            var id = this.attr;
+            var atrrs = _.keys(OncoKB.curateInfo[id]);
+            var atrrsL = _keys.length;
+            for(var j = 0; j < atrrsL; j++) {
+                var __key = atrrs[j];
+                if(__key === 'types' && id === 'TI') {
+                    this.types = model.createMap({'status': '', 'type': ''});
+                }else {
+                    if(OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
+                        switch (OncoKB.curateInfo[id][__key].type) {
+                            case 'string':
+                                this[__key] = model.createString('');
+                                break;
+                            case 'list':
+                                this[__key] = model.createList();
+                                break;
+                            default:
+                                this[__key] = model.create(OncoKB.curateInfo[id][__key].type);
+                                break;
+                        }
+                    }
+                }
+            }
+            this.setUp();
+        }
+
+        //Register every field of OncoKB into document
+        for(var j=0; j<_keysL; j++) {
+            OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
+        }
+
+        //Register custom type
+        gapi.drive.realtime.custom.registerType(OncoKB[_key], _key);
+
+        //Set realtime API initialize function for each type, this function only runs one time when create new data model
+        gapi.drive.realtime.custom.setInitializer(OncoKB[_key], OncoKB[_key].prototype.initialize);
+
+        //Set on loaded function, this function will be loaded everyone the document been pulled from google drive
+        if(nonSetUp.indexOf(_key) !== -1) {
+            gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key]);
+        }else {
+            gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key], OncoKB[_key].prototype.setUp);
+        }
+    }
 };
-
-OncoKB.Curator = function() {
-
-};
-
-OncoKB.TI = function() {
-
-};
-
-OncoKB.NCCN = function() {
-
-};
-
-OncoKB.InteractAlts = function() {
-
-};
-
-OncoKB.Treatment = function() {
-
-};
-
-/**
- * Initializer for constructing via the realtime API
- * @param  {string} gene_name [description]
- * @return {[type]}           [description]
- */
-OncoKB.Gene.prototype.initialize = function (name) {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString(name);
-    this.summary = model.createString('');
-    this.background = model.createString('');
-    this.mutations = model.createList();
-    this.curators = model.createList();
-};
-
-/**
- * [initialize description]
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.Curator.prototype.initialize = function (name, email) {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString(name);
-    this.email = model.createString(email);
-}
-
-/**
- * [initialize description]
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.Mutation.prototype.initialize = function (name) {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString(name);
-    this.oncogenic = model.createString('');
-    this.effect = model.createString('');
-    this.description = model.createString('');
-    this.tumors = model.createList();
-}
-
-/**
- * Therapeutic Implications
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.InteractAlts.prototype.initialize = function () {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.alterations = model.createString('');
-    this.description = model.createString('');
-}
-
-/**
- * Therapeutic Implications
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.NCCN.prototype.initialize = function () {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.disease = model.createList();
-    this.version = model.createString('');
-    this.pages = model.createList();
-    this.category = model.createString(''); //Recommendation category
-    this.description = model.createString('');
-}
-
-/**
- * Therapeutic Implications
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.Treatment.prototype.initialize = function (name, types) {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString(name);
-    this.types = model.createMap({'status': types.status, 'type': types.type});
-    this.level = model.createString('');
-    this.indication = model.createString('');
-    this.trials = model.createList();
-    this.description = model.createString(''); //Prognostic implication
-}
-
-/**
- * Therapeutic Implications
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.TI.prototype.initialize = function (name, types) {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString(name);
-    this.types = model.createMap({'status': '', 'type': ''});
-    this.treatments = model.createList();
-    this.description = model.createString(''); //Prognostic implication
-}
-
-/**
- * [initialize description]
- * @param  {[type]} mutation_name [description]
- * @return {[type]}               [description]
- */
-OncoKB.Tumor.prototype.initialize = function (name) {
-    var model = gapi.drive.realtime.custom.getModel(this);
-    this.name = model.createString(mutation_name);
-    this.prevalence = model.createString('');
-    this.progImp = model.createString(''); //Prognostic implication
-    this.TI = model.createList(); //Standard therapeutic implications for drug sensitivity
-    this.nccn = model.create('NCCN');
-    this.trials = model.createList();
-    this.interactAlts = model.create('InteractAlts');
-}
-
-/**
- * Adds a "text" property to collaborative strings for ng-model compatibility
- * after a model is created or loaded.
- */
-// OncoKB.Gene.prototype.setup = function() {
-//     Object.defineProperty(this.name, 'text', {
-//         set: this.name.setText,
-//         get: this.name.getText
-//     });
-// };
-
-// OncoKB.Mutation.prototype.setup = function() {
-//     Object.defineProperty(this.name, 'text', {
-//         set: this.name.setText,
-//         get: this.name.getText
-//     });
-// };
 
 OncoKB.loadFile = function ($route, storage) {
     var id = $route.current.params.fileId;
@@ -308,50 +373,9 @@ angular.module('oncokb').run(['$rootScope', '$location', 'storage', function ($r
  * Bootstrap the app
  */
 gapi.load('auth:client:drive-share:drive-realtime', function () {
+    
     gapi.auth.init();
-
-    // Register our class
-    OncoKB.Gene.prototype.name = gapi.drive.realtime.custom.collaborativeField('gene_name');
-    OncoKB.Gene.prototype.summary = gapi.drive.realtime.custom.collaborativeField('gene_summary');
-    OncoKB.Gene.prototype.background = gapi.drive.realtime.custom.collaborativeField('gene_background');
-    OncoKB.Gene.prototype.mutations = gapi.drive.realtime.custom.collaborativeField('mutations');
-    OncoKB.Gene.prototype.curators = gapi.drive.realtime.custom.collaborativeField('curators');
-
-    OncoKB.Mutation.prototype.name = gapi.drive.realtime.custom.collaborativeField('mutation_name');
-    OncoKB.Mutation.prototype.oncogenic = gapi.drive.realtime.custom.collaborativeField('mutation_oncogenic');
-    OncoKB.Mutation.prototype.effect = gapi.drive.realtime.custom.collaborativeField('mutation_effect');
-    OncoKB.Mutation.prototype.description = gapi.drive.realtime.custom.collaborativeField('mutation_description');
-    OncoKB.Mutation.prototype.tumors = gapi.drive.realtime.custom.collaborativeField('tumors');
-
-    OncoKB.Curator.prototype.name = gapi.drive.realtime.custom.collaborativeField('curator_name');
-    OncoKB.Curator.prototype.email = gapi.drive.realtime.custom.collaborativeField('curator_email');
-
-    gapi.drive.realtime.custom.registerType(OncoKB.Gene, 'Gene');
-    gapi.drive.realtime.custom.registerType(OncoKB.Mutation, 'Mutation');
-    gapi.drive.realtime.custom.registerType(OncoKB.Curator, 'Curator');
-    gapi.drive.realtime.custom.registerType(OncoKB.InteractAlts, 'InteractAlts');
-    gapi.drive.realtime.custom.registerType(OncoKB.NCCN, 'NCCN');
-    gapi.drive.realtime.custom.registerType(OncoKB.Treatment, 'Treatment');
-    gapi.drive.realtime.custom.registerType(OncoKB.TI, 'TI');
-    gapi.drive.realtime.custom.registerType(OncoKB.Tumor, 'Tumor');
-
-    gapi.drive.realtime.custom.setInitializer(OncoKB.Gene, OncoKB.Gene.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.Mutation, OncoKB.Mutation.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.Curator, OncoKB.Curator.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.InteractAlts, OncoKB.InteractAlts.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.NCCN, OncoKB.NCCN.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.Treatment, OncoKB.Treatment.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.TI, OncoKB.TI.prototype.initialize);
-    gapi.drive.realtime.custom.setInitializer(OncoKB.Tumor, OncoKB.Tumor.prototype.initialize);
-
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Gene, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Mutation, OncoKB.Mutation.prototype.setup);
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Curator, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.InteractAlts, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.NCCN, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Treatment, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.TI, function() {});
-    gapi.drive.realtime.custom.setOnLoaded(OncoKB.Tumor, function() {});
+    OncoKB.initialize();
 
     angular.element(document).ready(function() {
         angular.bootstrap(document, ['oncokb']);

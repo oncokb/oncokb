@@ -28,7 +28,8 @@
     "fontawesome": "~4.2.0",
     "angular-xml": "~2.0.0",
     "jspdf": "~1.0.272",
-    "angular-contenteditable": "~0.3.7"
+    "angular-contenteditable": "~0.3.7",
+    "underscore": "~1.7.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",
