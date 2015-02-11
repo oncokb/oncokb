@@ -1,29 +1,30 @@
 <div ng-init="newDocName===''">
-	<button class="btn btn-default" ng-click="checkScope()">Check scope</button>
+	<!-- <button class="btn btn-default" ng-click="checkScope()">Check scope</button> -->
 		<div class="row">
-				<div class="col-md-6 col-lg-6 ">
-						<div class="input-group input-group-sm">
-								<span class="input-group-addon"><b>File name:</b></span>
-								<input type="text" ng-model="newDocName" style='width:100%' class="form-control" placeholder="(eg. BRAF)">
-								<span id="createButton" ng-disabled="newDocName" ng-click="createDoc()" class="input-group-addon">Create New Document</span>
-						</div>
+			<div class="col-md-6 col-lg-6 ">
+				<div class="input-group input-group-sm">
+						<span class="input-group-addon"><b>File name:</b></span>
+						<input type="text" ng-model="newDocName" style='width:100%' class="form-control" placeholder="(eg. BRAF)">
+						<span id="createButton" ng-disabled="newDocName" ng-click="createDoc()" class="input-group-addon">Create New Document</span>
 				</div>
-				<div class="col-md-6 col-lg-6">
-						<div class="input-group input-group-sm">
-						<select chosen ng-model='selectedDoc' id='annotationDropdown' ng-options='document.title for document in documents' allow-single-deselect="true" data-placeholder="Choose document you can modify" style="width:300px">
-									<option value=""></option>
-						</select>
-						<!-- <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
-									<option value=""></option>
-						</select> -->
-						<button id="curateButton" ng-click="curateDoc()" class="btn btn-default">Curate Doucment</button>
-						</div>
+			</div>
+			<div class="col-md-6 col-lg-6">
+				<div class="input-group input-group-sm">
+				<select chosen ng-model='selectedDoc' id='annotationDropdown' ng-options='document.title for document in documents' allow-single-deselect="true" data-placeholder="Choose document you can modify" style="width:300px">
+							<option value=""></option>
+				</select>
+				<!-- <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
+							<option value=""></option>
+				</select> -->
+				<button id="curateButton" ng-click="curateDoc()" class="btn btn-default">Curate Doucment</button>
+				<button ng-click="getDocByTitle()" class="btn btn-default">Get document</button>
 				</div>
+			</div>
 		</div>
 
 		<div ng-if="gene">
 			<div id="gene">
-				<h2>Gene: <span contenteditable="true" ng-model="gene.name.text"/></span>
+				<h2>Gene: <span class="editableBox" contenteditable="true" ng-model="gene.name.text"/></span>
 					<span ng-repeat="collaborator in collaborators">
 						<img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
 						<!-- <span class="curateCollaboratorName" ng-style="curateCollaboratorName={'border-bottom-color': 'collaborator.color'}">{{collaborator.displayName}}</span> -->
@@ -43,10 +44,10 @@
 					<span><strong>Curator name: <span ng-bind="curatorsName()"></span></strong></span><br/>
 					<span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
 				</p>
-				<h3>Summary:</h3>
-				<p contenteditable="true" ng-model="gene.summary.text"></p>
-				<h3>Background:</h3>
-				<p contenteditable="true" ng-model="gene.background.text"></p>
+				<h3>{{gene.summary.display}}:</h3>
+				<p class="editableBox" contenteditable="true" ng-model="gene.summary.text"></p>
+				<h3>{{gene.background.display}}:</h3>
+				<p class="editableBox" contenteditable="true" ng-model="gene.background.text"></p>
 				<p>
 					<span>cBioPortal link: <a href="www.cbioportal.org/public-portal/ln?q=BRAF" target="_blank">www.cbioportal.org/public-portal/ln?q={{gene.name.text}}</a></span><br/>
 					<span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln=BRAF" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
@@ -56,27 +57,150 @@
 				<accordion close-others="oneAtATime">
 		        	<accordion-group ng-repeat="mutation in gene.mutations.asArray()">
 			        	<accordion-heading>
-				        	Mutation: <span contenteditable="true" ng-model="mutation.name.text"/></span>
-				        	<i ng-click="remove($index, $event)" class="fa fa-trash-o pull-right"></i>
+				        	Mutation: <span class="editableBox" contenteditable="true" ng-model="mutation.name.text"/></span>
+				        	<i ng-click="remove($index, gene.mutations, $event)" class="fa fa-trash-o pull-right"></i>
 				            
 				        </accordion-heading>
 				        <p>
 				        	<strong>{{mutation.oncogenic.display}}:</strong>
 				        	<span ng-repeat="checkbox in checkboxes['oncogenic']">
 								<input
-							  		id="box{{$index}}"
+							  		id="oncogenic-box{{$index}}"
 								    type="radio"
 								    ng-model="mutation.oncogenic.text"
 								    value="{{checkbox==='N/A'?'':checkbox}}"
 							  	>
-					        	<label for="box{{$index}}">{{checkbox}}
+					        	<label for="oncogenic-box{{$index}}">{{checkbox}}
 								</label>
 							</span>
 						</p>
+						<p>
+				        	<strong>{{mutation.effect.display}}:</strong>
+				        	<span ng-repeat="checkbox in checkboxes['mutation_effect']">
+								<!-- <input
+							  		id="mutation_effect-box{{$index}}"
+								    type="radio"
+								    ng-model="mutation.effect.text"
+								    value="{{checkbox==='N/A'?'':checkbox}}"
+							  	>
+					        	<label for="mutation_effect-box{{$index}}">{{checkbox}}
+								</label> -->
+							</span>
+							<input type='text' class="editableBox" contenteditable="true" ng-model="mutation.effect.text"/>
+						</p>
+						<span>
+				        	<strong>{{mutation.description.display}}:</strong>
+				        	<br/>
+				        	<p class="editableBox" contenteditable="true" ng-model="mutation.description.text">
+							</p>
+						</span>
+			            <accordion close-others="oneAtATime">
+			                <accordion-group ng-repeat="tumor in mutation.tumors.asArray()">
+			                    <accordion-heading>
+			                        Tumor type: <span class="editableBox" contenteditable="true" ng-model="tumor.name.text"/></span>
+			                        <i ng-click="remove($index, mutation.tumors, $event)" class="fa fa-trash-o pull-right"></i>
+			                    </accordion-heading>
+			                    <h4>{{tumor.prevalence.display}}</h4>
+			                    <p class="editableBox" contenteditable="true" ng-model="tumor.prevalence.text">
+								<hr/>
+			                    <h4>{{tumor.progImp.display}}</h4>
+			                    <p class="editableBox" contenteditable="true" ng-model="tumor.progImp.text">
+			                    </p>
+								<hr/>
+			                    <h4>NCCN guidelines</h4>
+			                    <p>
+						        	<strong>{{tumor.nccn.disease.display}}:</strong>
+						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.disease.text"/>
+								</p>
+								<p>
+						        	<strong>{{tumor.nccn.version.display}}:</strong>
+						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.version.text"/>
+								</p>
+								<p>
+						        	<strong>{{tumor.nccn.pages.display}}:</strong>
+						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.pages.text"/>
+								</p>
+								<p>
+						        	<strong>{{tumor.nccn.category.display}}:</strong>
+						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.category.text"/>
+								</p>
+								<span>
+						        	<strong>{{tumor.nccn.description.display}}:</strong>
+						        	<br/>
+						        	<p class="editableBox" contenteditable="true" ng-model="tumor.nccn.description.text">
+									</p>
+								</span>
+								<hr/>
+								<div ng-repeat="ti in tumor.TI.asArray()">
+									<h4>{{ti.name.text}}:</h4>
+									<span>
+							        	<p class="editableBox" contenteditable="true" ng-model="ti.description.text">
+										</p>
+									</span>
+									<accordion close-others="oneAtATime">
+									    <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
+									        <accordion-heading>
+									            <span class="editableBox" contenteditable="true" ng-model="treatment.name.text"/></span>
+									            <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o pull-right"></i>
+									        </accordion-heading>
+									        <p>
+									        	<strong>{{treatment.type.text}}:</strong>
+									        	<input type='text' class="editableBox" contenteditable="true" ng-model="treatment.name.text"/>
+											</p>
+											<p>
+									        	<strong>{{treatment.level.display}}:</strong>
+									        	<input type='text' class="editableBox" contenteditable="true" ng-model="treatment.level.text"/>
+											</p>
+											<p>
+									        	<strong>{{treatment.indication.display}}:</strong>
+									        	<input type='text' class="editableBox" contenteditable="true" ng-model="treatment.indication.text"/>
+											</p>
+											<span>
+									        	<strong>{{treatment.description.display}}:</strong>
+									        	<br/>
+									        	<p class="editableBox" contenteditable="true" ng-model="treatment.description.text">
+												</p>
+											</span>
+									    </accordion-group>
+									</accordion>
+									<div class="input-group input-group-sm">
+										<input type="text" class="form-control" ng-model="newTI[$index].name" placeholder="Drugs name" />
+										<span class="input-group-btn">
+											<button type="button" class="btn btn-default" ng-disabled="!(!!newTI[$index].name)" ng-click="addTI(ti, $index)">
+												<i class="fa fa-plus"></i> Add Therapeutic Implications
+											</button>
+										</span>
+									</div>
+									<hr/>
+								</div>
+								<h4>Ongoing clinical trials</h4>
+			                    <div>
+			                    	<span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">{{trial}}
+			                    	<i ng-click="remove($index, tumor.trials, $event)" class="fa fa-trash-o"></i>
+			                    	</span>
+			                    	<div class="input-group input-group-sm" style="width:200px">
+										<input type="text" class="form-control" ng-model="newTrial" placeholder="Trial ID" />
+										<span class="input-group-btn">
+											<button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials)">
+												<i class="fa fa-plus"></i> Add Trial
+											</button>
+										</span>
+									</div>
+			                    </div>
+			                </accordion-group>
+			            </accordion>
+						<div class="input-group input-group-sm">
+							<input type="text" class="form-control" ng-model="newTumorType.name" placeholder="Tumor type name" />
+							<span class="input-group-btn">
+								<button type="button" class="btn btn-default" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
+									<i class="fa fa-plus"></i> Add Tumor Type
+								</button>
+							</span>
+						</div>
 			        </accordion-group>
 			    </accordion>
 			</div>
-			<div id="mutation-form" class="input-group input-group-sm">
+			<div class="input-group input-group-sm">
 				<input type="text" class="form-control" ng-model="newMutation.name" placeholder="Mutation name" />
 				<span class="input-group-btn">
 					<button type="button" class="btn btn-default" ng-disabled="!(!!newMutation.name)" ng-click="addMutation()">

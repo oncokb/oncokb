@@ -65,10 +65,12 @@ angular.module('oncokb')
             $scope.gene = '';
             $scope.newGene = {};
             $scope.newMutation = {};
-            $scope.newTumor = {};
+            $scope.newTumorType = {};
+            $scope.newTI = [{},{},{},{}];
+            $scope.newTrial = '';
             $scope.collaborators = {};
             $scope.checkboxes = {
-                'oncogenic': ['YES', 'NO', 'N/A']
+                'oncogenic': ['YES', 'NO', 'Unknown']
             };
 
             print(realtimeDocument);
@@ -131,16 +133,63 @@ angular.module('oncokb')
                 }
             };
 
+            $scope.addTumorType = function(mutation) {
+                if (mutation && this.newTumorType && this.newTumorType.name) {
+                    var _tumorType = '';
+                    realtimeDocument.getModel().beginCompoundOperation();
+                    _tumorType = realtimeDocument.getModel().create(OncoKB.Tumor);
+                    _tumorType.name.setText(this.newTumorType.name);
+                    for(var i=0; i<4; i++) {
+                      var __ti = realtimeDocument.getModel().create(OncoKB.TI);
+                      var __status = i<2?1:0; // 1: Standard, 0: Investigational
+                      var __type = i%2===0?1:0; //1: sensitivity, 0: resistance
+                      var __name = (__status?'Standard':'Investigational') + ' therapeutic implications for drug ' + (__type?'sensitivity':'resistance');
+                      
+                      __ti.types.set('status', __status.toString());
+                      __ti.types.set('type', __type.toString());
+                      __ti.name.setText(__name);
+                      _tumorType.TI.push(__ti);
+                    }
+                    mutation.tumors.push(_tumorType);
+                    realtimeDocument.getModel().endCompoundOperation();
+                    this.newTumorType = {};
+                }
+            };
+
+            //Add new therapeutic implication
+            $scope.addTI = function(ti, index) {
+                if (ti && this.newTI[index] && this.newTI[index].name) {
+                    var _treatment = '';
+                    realtimeDocument.getModel().beginCompoundOperation();
+                    _treatment = realtimeDocument.getModel().create(OncoKB.Treatment);
+                    _treatment.name.setText(this.newTI[index].name);
+                    _treatment.type.setText('Therapy');
+                    ti.treatments.push(_treatment);
+                    console.log(_treatment);
+                    realtimeDocument.getModel().endCompoundOperation();
+                    this.newTI[index] = {};
+                }
+            };
+
+            //Add new therapeutic implication
+            $scope.addTrial = function(trials) {
+                if (trials && this.newTrial) {
+                    trials.push(this.newTrial);
+                    this.newTrial = '';
+                }
+            };
+
             $scope.checkScope = function() {
                 print($scope.gene);
                 print($scope.gene.mutations.asArray());
+                print($scope.gene.mutations.asArray()[1].tumors.asArray());
                 print($scope.collaborators);
             };
 
-            $scope.remove = function(index, $event) {
-                if ($event.stopPropagation) $event.stopPropagation();
-                if ($event.preventDefault) $event.preventDefault();
-                $scope.gene.mutations.remove(index);
+            $scope.remove = function(index, object, event) {
+                if (event.stopPropagation) event.stopPropagation();
+                if (event.preventDefault) event.preventDefault();
+                object.remove(index);
             };
 
             $scope.redo = function() {

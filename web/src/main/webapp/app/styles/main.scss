@@ -4,6 +4,9 @@ $icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/"
 @import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen.scss";
 // endbower
+body {
+  margin-bottom: 20px;
+}
 
 #chart, #header, #footer {
   position: absolute;
@@ -85,6 +88,27 @@ table.colorHeader thead tr{
 }
 .variantDisplayResult .icon.iconExpand{
     display: inline-block;
+}
+.editableBox {
+  background-color: #D3E8F7;
+}
+input.editableBox {
+  border: 0;
+  width:80%;
+}
+p.editableBox {
+  min-height: 20px;
+}
+.curateTrialItem {
+  float: left;
+  height: 30px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+i.fa-trash-o:hover {
+  cursor: pointer;
 }
 
 rect {
@@ -295,17 +319,17 @@ h5 {
 }
 
 /*** custom checkboxes ***/
-input[type=checkbox] { display:none; } /* to hide the checkbox itself */
-input[type=checkbox] + label:before {
+input[type=radio] { display:none; } /* to hide the checkbox itself */
+input[type=radio] + label:before {
   font-family: FontAwesome;
   display: inline-block;
   margin: 0 0 0 3px;
 }
-input[type=checkbox] + label:hover {
+input[type=radio] + label:hover {
   cursor: pointer;
 }
-input[type=checkbox] + label:before { content: "\f096"; } /* unchecked icon */
-input[type=checkbox] + label:before { letter-spacing: 5px; } /* space between checkbox and label */
+input[type=radio] + label:before { content: "\f096"; } /* unchecked icon */
+input[type=radio] + label:before { letter-spacing: 5px; } /* space between checkbox and label */
 
-input[type=checkbox]:checked + label:before { content: "\f046"; } /* checked icon */
-input[type=checkbox]:checked + label:before { letter-spacing: 5px; } /* allow space for check mark */
+input[type=radio]:checked + label:before { content: "\f046"; } /* checked icon */
+input[type=radio]:checked + label:before { letter-spacing: 5px; } /* allow space for check mark */

@@ -104,6 +104,16 @@ OncoKB.curateInfo = {
             display: 'Description of evidence'
         }
     },
+    'InteractAlts': {
+        'alterations': {
+            type: 'string',
+            display: 'Alterations'
+        },
+        'description': {
+            type: 'string',
+            display: 'Description of evidence'
+        }
+    },
     'Tumor': {
         'name': {
             type: 'string'
@@ -143,18 +153,11 @@ OncoKB.curateInfo = {
             display: 'Description of evidence'
         }
     },
-    'InteractAlts': {
-        'alterations': {
-            type: 'string',
-            display: 'Alterations'
-        },
-        'description': {
-            type: 'string',
-            display: 'Description of evidence'
-        }
-    },
     'Treatment': {
         'name': {
+            type: 'string'
+        },
+        'type': {
             type: 'string'
         },
         'level': {
@@ -163,7 +166,7 @@ OncoKB.curateInfo = {
         },
         'indication': {
             type: 'string',
-            display: 'Drugs'
+            display: 'Approved Indication'
         },
         'description': {
             type: 'string',
@@ -215,11 +218,12 @@ OncoKB.initialize = function() {
             var model = gapi.drive.realtime.custom.getModel(this);
             var id = this.attr;
             var atrrs = _.keys(OncoKB.curateInfo[id]);
-            var atrrsL = _keys.length;
+            var atrrsL = atrrs.length;
+
             for(var j = 0; j < atrrsL; j++) {
                 var __key = atrrs[j];
                 if(__key === 'types' && id === 'TI') {
-                    this.types = model.createMap({'status': '', 'type': ''});
+                    this.types = model.createMap({'status': '0', 'type': '0'});
                 }else {
                     if(OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
                         switch (OncoKB.curateInfo[id][__key].type) {
@@ -236,6 +240,7 @@ OncoKB.initialize = function() {
                     }
                 }
             }
+            console.log(this);
             this.setUp();
         }
 
