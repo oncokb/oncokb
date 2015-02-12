@@ -39,7 +39,11 @@ angular.module('oncokb')
         return $q.all([recheckDocPromise]).then(function(realdocument){
             console.log(realdocument);
             if(angular.isArray(realdocument) && realdocument.length > 0) {
-                return realdocument[0];
+                if(realdocument[0]) {
+                    return realdocument[0];
+                }else {
+                    $location.url('/');
+                }
             }else {
                 $location.url('/');
             }

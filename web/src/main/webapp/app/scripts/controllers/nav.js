@@ -93,7 +93,9 @@ angular.module('oncokb')
      
     $scope.signOut = function() {
         console.log('clicked');
-        $scope.$eval(gapi.auth.signOut());
+        gapi.auth.signOut();
+        $scope.user={}
+        $scope.signedIn = false;
     };
     // When callback is received, process user info.
     $scope.userInfoCallback = function(userInfo) {

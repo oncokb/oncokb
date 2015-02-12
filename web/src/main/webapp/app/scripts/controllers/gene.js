@@ -65,8 +65,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user',
-        function ($scope, $location, $routeParams, storage, realtimeDocument, User) {
+    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents',
+        function ($scope, $location, $routeParams, storage, realtimeDocument, User, Documents) {
             $scope.fileTitle = $routeParams.geneName;
             $scope.realtimeDocument = realtimeDocument;
             $scope.gene = '';
@@ -79,6 +79,7 @@ angular.module('oncokb')
             $scope.checkboxes = {
                 'oncogenic': ['YES', 'NO', 'Unknown']
             };
+            $scope.fileEditable = false;
 
             console.log(realtimeDocument);
             console.log($scope.fileTitle);
@@ -226,6 +227,12 @@ angular.module('oncokb')
             }
 
             function afterCreateGeneModel() {
+              var file = Documents.get({title: $scope.fileTitle});
+              file = file[0];
+              console.log('file', file);
+              console.log('or editable', file.editable);
+              $scope.fileEditable = file.editable?true:false;
+              console.log('file editable', $scope.fileEditable);
               displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
 

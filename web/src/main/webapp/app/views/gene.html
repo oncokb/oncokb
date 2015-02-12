@@ -24,7 +24,7 @@
 
 		<div ng-if="gene">
 			<div id="gene">
-				<h2>Gene: <span class="editableBox" contenteditable="true" ng-model="gene.name.text"/></span>
+				<h2>Gene: <span>{{gene.name.text}}</span>
 					<span ng-repeat="collaborator in collaborators">
 						<img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
 						<!-- <span class="curateCollaboratorName" ng-style="curateCollaboratorName={'border-bottom-color': 'collaborator.color'}">{{collaborator.displayName}}</span> -->
@@ -45,9 +45,9 @@
 					<span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
 				</p>
 				<h3>{{gene.summary.display}}:</h3>
-				<p class="editableBox" contenteditable="true" ng-model="gene.summary.text"></p>
+				<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.summary.text"></p>
 				<h3>{{gene.background.display}}:</h3>
-				<p class="editableBox" contenteditable="true" ng-model="gene.background.text"></p>
+				<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.background.text"></p>
 				<p>
 					<span>cBioPortal link: <a href="www.cbioportal.org/public-portal/ln?q=BRAF" target="_blank">www.cbioportal.org/public-portal/ln?q={{gene.name.text}}</a></span><br/>
 					<span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln=BRAF" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
@@ -57,7 +57,7 @@
 				<accordion close-others="oneAtATime">
 		        	<accordion-group ng-repeat="mutation in gene.mutations.asArray()">
 			        	<accordion-heading>
-				        	Mutation: <span class="editableBox" contenteditable="true" ng-model="mutation.name.text"/></span>
+				        	Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.name.text"/></span>
 				        	<i ng-click="remove($index, gene.mutations, $event)" class="fa fa-trash-o pull-right"></i>
 				            
 				        </accordion-heading>
@@ -86,55 +86,55 @@
 					        	<label for="mutation_effect-box{{$index}}">{{checkbox}}
 								</label> -->
 							</span>
-							<input type='text' class="editableBox" contenteditable="true" ng-model="mutation.effect.text"/>
+							<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.effect.text"/>
 						</p>
 						<span>
 				        	<strong>{{mutation.description.display}}:</strong>
 				        	<br/>
-				        	<p class="editableBox" contenteditable="true" ng-model="mutation.description.text">
+				        	<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.description.text">
 							</p>
 						</span>
 			            <accordion close-others="oneAtATime">
 			                <accordion-group ng-repeat="tumor in mutation.tumors.asArray()">
 			                    <accordion-heading>
-			                        Tumor type: <span class="editableBox" contenteditable="true" ng-model="tumor.name.text"/></span>
+			                        Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.name.text"/></span>
 			                        <i ng-click="remove($index, mutation.tumors, $event)" class="fa fa-trash-o pull-right"></i>
 			                    </accordion-heading>
 			                    <h4>{{tumor.prevalence.display}}</h4>
-			                    <p class="editableBox" contenteditable="true" ng-model="tumor.prevalence.text">
+			                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.prevalence.text">
 								<hr/>
 			                    <h4>{{tumor.progImp.display}}</h4>
-			                    <p class="editableBox" contenteditable="true" ng-model="tumor.progImp.text">
+			                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.progImp.text">
 			                    </p>
 								<hr/>
 			                    <h4>NCCN guidelines</h4>
 			                    <p>
 						        	<strong>{{tumor.nccn.disease.display}}:</strong>
-						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.disease.text"/>
+						        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.disease.text"/>
 								</p>
 								<p>
 						        	<strong>{{tumor.nccn.version.display}}:</strong>
-						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.version.text"/>
+						        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.version.text"/>
 								</p>
 								<p>
 						        	<strong>{{tumor.nccn.pages.display}}:</strong>
-						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.pages.text"/>
+						        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.pages.text"/>
 								</p>
 								<p>
 						        	<strong>{{tumor.nccn.category.display}}:</strong>
-						        	<input type='text' class="editableBox" contenteditable="true" ng-model="tumor.nccn.category.text"/>
+						        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.category.text"/>
 								</p>
 								<span>
 						        	<strong>{{tumor.nccn.description.display}}:</strong>
 						        	<br/>
-						        	<p class="editableBox" contenteditable="true" ng-model="tumor.nccn.description.text">
+						        	<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.description.text">
 									</p>
 								</span>
 								<hr/>
 								<div ng-repeat="ti in tumor.TI.asArray()">
 									<h4>{{ti.name.text}}:</h4>
 									<span>
-							        	<p class="editableBox" contenteditable="true" ng-model="ti.description.text">
+							        	<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="ti.description.text">
 										</p>
 									</span>
 									<accordion close-others="oneAtATime">
@@ -145,20 +145,20 @@
 									        </accordion-heading>
 									        <p>
 									        	<strong>{{treatment.type.text}}:</strong>
-									        	<input type='text' class="editableBox" contenteditable="true" ng-model="treatment.name.text"/>
+									        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/>
 											</p>
 											<p>
 									        	<strong>{{treatment.level.display}}:</strong>
-									        	<input type='text' class="editableBox" contenteditable="true" ng-model="treatment.level.text"/>
+									        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.level.text"/>
 											</p>
 											<p>
 									        	<strong>{{treatment.indication.display}}:</strong>
-									        	<input type='text' class="editableBox" contenteditable="true" ng-model="treatment.indication.text"/>
+									        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"/>
 											</p>
 											<span>
 									        	<strong>{{treatment.description.display}}:</strong>
 									        	<br/>
-									        	<p class="editableBox" contenteditable="true" ng-model="treatment.description.text">
+									        	<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.description.text">
 												</p>
 											</span>
 									    </accordion-group>

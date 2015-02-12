@@ -92,6 +92,9 @@ table.colorHeader thead tr{
 .editableBox {
   background-color: #D3E8F7;
 }
+.unEditableBox {
+  background-color: transparent;
+}
 input.editableBox {
   border: 0;
   width:80%;
