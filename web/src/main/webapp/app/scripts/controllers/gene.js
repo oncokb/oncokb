@@ -8,8 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage',
-        function ($scope, $location, $routeParams, storage) {
+    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents',
+        function ($scope, $location, $routeParams, storage, Documents) {
             $scope.createDoc = function() {
                 if($scope.newDocName) {
                     storage.requireAuth().then(function () {
@@ -27,10 +27,17 @@ angular.module('oncokb')
                     storage.retrieveAllFiles().then(function(result){
                         console.log('Documents', result);
                         $scope.documents = result;
+                        Documents.set(result);
                         // $scope._documents = result;
                         // getDocumentFromList(0, []);
                     });
                 });
+            };
+
+            $scope.redirect = function(path) {
+              console.log(path);
+              console.log( $location.path());
+              $location.path(path);
             };
 
             $scope.curateDoc = function() {
@@ -58,9 +65,9 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneEditCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user',
+    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user',
         function ($scope, $location, $routeParams, storage, realtimeDocument, User) {
-            $scope.fileId = $routeParams.fileId;
+            $scope.fileTitle = $routeParams.geneName;
             $scope.realtimeDocument = realtimeDocument;
             $scope.gene = '';
             $scope.newGene = {};
@@ -73,19 +80,18 @@ angular.module('oncokb')
                 'oncogenic': ['YES', 'NO', 'Unknown']
             };
 
-            print(realtimeDocument);
+            console.log(realtimeDocument);
+            console.log($scope.fileTitle);
 
-            if($routeParams.fileId) {
+            if($scope.fileTitle) {
                 var model = realtimeDocument.getModel();
                 if(!model.getRoot().get('gene')) {
-                  storage.getDocument($routeParams.fileId).then(function(file){
-                    var gene = model.create('Gene');
-                    model.getRoot().set('gene', gene);
-                    $scope.gene = gene;
-                    $scope.gene.name.setText(file.title);
-                    $scope.model =  model;
-                    afterCreateGeneModel();
-                  });
+                  var gene = model.create('Gene');
+                  model.getRoot().set('gene', gene);
+                  $scope.gene = gene;
+                  $scope.gene.name.setText($scope.fileTitle);
+                  $scope.model =  model;
+                  afterCreateGeneModel();
                 }else {
                   $scope.gene = model.getRoot().get('gene');
                   $scope.model =  model;

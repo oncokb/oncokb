@@ -1,0 +1,5 @@
+<div>
+    <span class="curateTrialItem" ng-repeat="gene in documents">{{gene.title}}
+        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
+    </span>
+</div>

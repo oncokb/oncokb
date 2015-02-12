@@ -240,7 +240,6 @@ OncoKB.initialize = function() {
                     }
                 }
             }
-            console.log(this);
             this.setUp();
         }
 
@@ -263,17 +262,6 @@ OncoKB.initialize = function() {
         }
     }
 };
-
-OncoKB.loadFile = function ($route, storage) {
-    var id = $route.current.params.fileId;
-    var userId = $route.current.params.user;
-        return storage.requireAuth(true, userId).then(function () {
-        return storage.getRealtimeDocument(id);
-    });
-    console.log($route);
-};
-
-OncoKB.loadFile.$inject = ['$route', 'storage'];
 
 var oncokbApp = angular
  .module('oncokb', [
@@ -317,15 +305,17 @@ var oncokbApp = angular
             templateUrl: 'views/reportgenerator.html',
             controller: 'ReportgeneratorCtrl'
         })
-        .when('/gene', {
-            templateUrl: 'views/gene.html',
-            controller: 'GeneCtrl'
+        .when('/genes', {
+            templateUrl: 'views/genes.html',
+            controller: 'GenesCtrl'
         })
-        .when('/gene/:fileId', {
+        .when('/gene/:geneName', {
             templateUrl: 'views/gene.html',
-            controller: 'GeneEditCtrl',
+            controller: 'GeneCtrl',
             resolve: {
-              realtimeDocument: OncoKB.loadFile
+              realtimeDocument: function(loadFile){
+                return loadFile();
+              }
             }
         })
         .otherwise({
