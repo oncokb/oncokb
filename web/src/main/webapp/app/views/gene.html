@@ -140,7 +140,7 @@
 									<accordion close-others="oneAtATime">
 									    <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
 									        <accordion-heading>
-									            <span class="editableBox" contenteditable="true" ng-model="treatment.name.text"/></span>
+									            <span>{{treatment.name.text}}</span>
 									            <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o pull-right"></i>
 									        </accordion-heading>
 									        <p>

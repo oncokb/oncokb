@@ -270,6 +270,7 @@ OncoKB.loadFile = function ($route, storage) {
         return storage.requireAuth(true, userId).then(function () {
         return storage.getRealtimeDocument(id);
     });
+    console.log($route);
 };
 
 OncoKB.loadFile.$inject = ['$route', 'storage'];
@@ -316,13 +317,13 @@ var oncokbApp = angular
             templateUrl: 'views/reportgenerator.html',
             controller: 'ReportgeneratorCtrl'
         })
-        .when('/curate', {
-            templateUrl: 'views/curate.html',
-            controller: 'CurateCtrl'
+        .when('/gene', {
+            templateUrl: 'views/gene.html',
+            controller: 'GeneCtrl'
         })
-        .when('/curate/:fileId', {
-            templateUrl: 'views/curate.html',
-            controller: 'CurateEditCtrl',
+        .when('/gene/:fileId', {
+            templateUrl: 'views/gene.html',
+            controller: 'GeneEditCtrl',
             resolve: {
               realtimeDocument: OncoKB.loadFile
             }
@@ -369,7 +370,7 @@ angular.module('oncokb').run(['$rootScope', '$location', 'storage', function ($r
         storage.requireAuth(true).then(function () {
             // no-op
         }, function () {
-            $location.url('/curate');
+            $location.url('/gene');
         });
     });
 }]);

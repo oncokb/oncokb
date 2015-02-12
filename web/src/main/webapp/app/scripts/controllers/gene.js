@@ -2,22 +2,22 @@
 
 /**
  * @ngdoc function
- * @name oncokb.controller:CurateCtrl
+ * @name oncokb.controller:GeneCtrl
  * @description
- * # CurateCtrl
+ * # GeneCtrl
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('CurateCtrl', ['$scope', '$location', '$routeParams', 'storage',
+    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage',
         function ($scope, $location, $routeParams, storage) {
             $scope.createDoc = function() {
                 if($scope.newDocName) {
                     storage.requireAuth().then(function () {
                         storage.createDocument($scope.newDocName.toString()).then(function (file) {
-                            $location.url('/curate/' + file.id + '/');
+                            $location.url('/gene/' + file.id + '/');
                         });
                     }, function () {
-                        $location.url('/curate');
+                        $location.url('/gene');
                     });
                 }
             };
@@ -37,7 +37,7 @@ angular.module('oncokb')
                 console.log($scope);
                 console.log($scope.selectedDoc);
                 console.log('selected file id', $scope.selectedDoc.id);
-                $location.url('/curate/' + $scope.selectedDoc.id + '/');
+                $location.url('/gene/' + $scope.selectedDoc.id + '/');
             };
 
             $scope.documents = [];
@@ -58,7 +58,7 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('CurateEditCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user',
+    .controller('GeneEditCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user',
         function ($scope, $location, $routeParams, storage, realtimeDocument, User) {
             $scope.fileId = $routeParams.fileId;
             $scope.realtimeDocument = realtimeDocument;
