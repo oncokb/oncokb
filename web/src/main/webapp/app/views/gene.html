@@ -65,12 +65,13 @@
 				        	<strong>{{mutation.oncogenic.display}}:</strong>
 				        	<span ng-repeat="checkbox in checkboxes['oncogenic']">
 								<input
-							  		id="oncogenic-box{{$index}}"
-								    type="radio"
+							  		id="{{mutation.name.text}}-oncogenic-box{{$index}}"
+								    type="checkbox"
+								    name="{{mutation.name.text}}-oncogenic"
 								    ng-model="mutation.oncogenic.text"
-								    value="{{checkbox==='N/A'?'':checkbox}}"
+								    value="{{checkbox}}"
 							  	>
-					        	<label for="oncogenic-box{{$index}}">{{checkbox}}
+					        	<label for="{{mutation.name.text}}-oncogenic-box{{$index}}">{{checkbox}}
 								</label>
 							</span>
 						</p>

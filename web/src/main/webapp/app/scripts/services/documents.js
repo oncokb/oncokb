@@ -8,7 +8,7 @@
  * Service in the oncokb
  */
 angular.module('oncokb')
-  .service('documents', function documents() {
+  .service('documents', function documents(storage) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     var self = this;
     self.documents = [];
@@ -32,6 +32,16 @@ angular.module('oncokb')
             }
         }
         return seletecd;
+    }
+
+    function getPermission(docId) {
+
+    }
+
+    function getAllPermission(fileId) {
+        // if(angular.isArray(self.documents) && self.documents.length) {
+        //     getPermission();
+        // }
     }
 
     return {

@@ -234,8 +234,6 @@ angular.module('oncokb')
       var token = gapi.auth.getToken();
       var now = Date.now() / 1000;
 
-      console.log('---token---', token);
-
       if (token && ((token.expires_at - now) > (60))) {
         return $q.when(token);
       } else {
@@ -248,7 +246,6 @@ angular.module('oncokb')
         var deferred = $q.defer();
         console.log(params);
         gapi.auth.authorize(params, function (result) {
-          console.log('result', result);
           if (result && !result.error) {
             deferred.resolve(result);
           } else {

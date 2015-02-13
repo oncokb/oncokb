@@ -322,17 +322,15 @@ h5 {
 }
 
 /*** custom checkboxes ***/
-input[type=radio] { display:none; } /* to hide the checkbox itself */
-input[type=radio] + label:before {
+input[type=radio], input[type=checkbox] { display:none; } /* to hide the checkbox itself */
+input[type=radio] + label:before, input[type=checkbox] + label:before {
   font-family: FontAwesome;
   display: inline-block;
   margin: 0 0 0 3px;
 }
-input[type=radio] + label:hover {
+input[type=radio] + label:hover, input[type=checkbox] + label:hover {
   cursor: pointer;
 }
-input[type=radio] + label:before { content: "\f096"; } /* unchecked icon */
-input[type=radio] + label:before { letter-spacing: 5px; } /* space between checkbox and label */
+input[type=radio] + label:before, input[type=checkbox] + label:before { content: "\f096"; letter-spacing: 5px;} /* unchecked icon */
 
-input[type=radio]:checked + label:before { content: "\f046"; } /* checked icon */
-input[type=radio]:checked + label:before { letter-spacing: 5px; } /* allow space for check mark */
+input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:before { content: "\f046"; letter-spacing: 5px;} /* checked icon */

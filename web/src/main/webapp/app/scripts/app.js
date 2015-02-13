@@ -31,8 +31,21 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/drive.file',
         'https://www.googleapis.com/auth/drive.install'
     ],
-    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'
+    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
+    userRoles: {
+        'public': 1, // 0001
+        'user':   2, // 0010
+        'curator':4, // 0100
+        'admin':  8  // 1000
+    },
+    accessLevels: {}
 }
+
+OncoKB.config.accessLevels.public = OncoKB.config.userRoles.public | OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
+OncoKB.config.accessLevels.user = OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
+OncoKB.config.accessLevels.curator = OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
+OncoKB.config.accessLevels.admin = OncoKB.config.userRoles.admin;
+
 
 OncoKB.curateInfo = {
     'Gene': {
@@ -280,38 +293,45 @@ var oncokbApp = angular
    'xml',
    'contenteditable'
  ])
- .value('config', OncoKB.config)
+ .constant('config', OncoKB.config)
  .value('user', {
     name: 'N/A',
     email: 'N/A'
  })
  .constant('gapi', window.gapi)
- .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider) {
+ .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
+    var access = config.accessLevels;
+
     $routeProvider
         .when('/', {
-           templateUrl: 'views/tree.html',
-           controller: 'TreeCtrl'
+           templateUrl: 'views/welcome.html',
+           access: access.public
         })
         .when('/tree', {
             templateUrl: 'views/tree.html',
-            controller: 'TreeCtrl'
+            controller: 'TreeCtrl',
+            access: access.admin
         })
         .when('/variant', {
             templateUrl: 'views/variant.html',
             controller: 'VariantCtrl',
-            reloadOnSearch: false
+            reloadOnSearch: false,
+            access: access.admin
         })
         .when('/reportGenerator', {
             templateUrl: 'views/reportgenerator.html',
-            controller: 'ReportgeneratorCtrl'
+            controller: 'ReportgeneratorCtrl',
+            access: access.admin
         })
         .when('/genes', {
             templateUrl: 'views/genes.html',
-            controller: 'GenesCtrl'
+            controller: 'GenesCtrl',
+            access: access.curator
         })
         .when('/gene/:geneName', {
             templateUrl: 'views/gene.html',
             controller: 'GeneCtrl',
+            access: access.curator,
             resolve: {
               realtimeDocument: function(loadFile){
                 return loadFile();
@@ -349,7 +369,11 @@ var oncokbApp = angular
  * Set up handlers for various authorization issues that may arise if the access token
  * is revoked or expired.
  */
-angular.module('oncokb').run(['$rootScope', '$location', 'storage', function ($rootScope, $location, storage) {
+angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'config', function ($rootScope, $location, storage, Access, config) {
+    $rootScope.user = {
+        role: config.userRoles.public
+    };
+
     // Error loading the document, likely due revoked access. Redirect back to home/install page
     $rootScope.$on('$routeChangeError', function () {
         $location.url('/');
@@ -363,13 +387,22 @@ angular.module('oncokb').run(['$rootScope', '$location', 'storage', function ($r
             $location.url('/gene');
         });
     });
+
+    $rootScope.$on("$routeChangeStart", function (event, next, current) {
+        if (!Access.authorize(next.access)) {
+            // if(Auth.isLoggedIn()){
+                $location.path('/')
+            // }else {
+            //     $location.path('/');
+            // }
+        }
+    });
 }]);
 
 /**
  * Bootstrap the app
  */
 gapi.load('auth:client:drive-share:drive-realtime', function () {
-    
     gapi.auth.init();
     OncoKB.initialize();
 

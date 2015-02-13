@@ -8,25 +8,33 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokb')
-.controller('NavCtrl', function ($scope, $location, config, gapi, user) {
+.controller('NavCtrl', function ($scope, $location, $rootScope, config, gapi, user, storage, access) {
+    var tabs = {
+        'tree': 'Tree',
+        'variant': 'Variant Annotation',
+        'genes': 'Genes'
+    }
+
+    var accessLevels = config.accessLevels;
+
     $scope.signinCallback = function(result) {
         console.log('auto signedIn result',result);
     };
 
-    $scope.authorize = function(){
-        storage.requireAuth(false).then(function (result) {
-            if(result.status && result.status.signed_in) {
-                $scope.signedIn = true;
-            }else{
-                $scope.signedIn = false;
-            }
-        });
-    };
+    // $scope.authorize = function(){
+    //     storage.requireAuth(false).then(function (result) {
+    //         if(result.status && result.status.signed_in) {
+    //             $scope.signedIn = true;
+    //         }else{
+    //             $scope.signedIn = false;
+    //         }
+    //     });
+    // };
 // This flag we use to show or hide the button in our HTML.
     $scope.signedIn = false;
-    $scope.user = {};
-    $scope.user.email = '';
-    $scope.user.avatar = '';
+    $scope.user = $rootScope.user;
+
+    console.log($scope.user);
     // Here we do the authentication processing and error handling.
     // Note that authResult is a JSON object.
     $scope.processAuth = function(authResult) {
@@ -34,16 +42,37 @@ angular.module('oncokb')
         console.log(gapi.auth.getToken());
         if(authResult['access_token']) {
             // Successful sign in.
-            $scope.signedIn = true;
+            // $scope.signedIn = true;
 
-            $scope.getUserInfo();
+            access.login(loginCallback);
         } else if(authResult['error']) {
             // Error while signing in.
-            $scope.signedIn = false;
-
+            // $scope.signedIn = false;
+            loginCallback();
             // Report error.
         }
     };
+
+    function loginCallback() {
+        $scope.user = $rootScope.user;
+        $scope.tabs = [];
+        if(access.authorize(accessLevels.admin)) {
+            $scope.tabs.push({key: 'tree', value: tabs.tree});
+            $scope.tabs.push({key: 'variant', value: tabs.variant});
+        }
+        if(access.authorize(accessLevels.curator)) {
+            $scope.tabs.push({key: 'genes', value: tabs.genes});
+        }
+
+        $scope.signedIn = access.isLoggedIn();
+
+        console.log('user:', $scope.user);
+        console.log('logged in:', $scope.signedIn);
+        $scope.$apply($scope.user);
+        $scope.$apply($scope.signedIn);
+        $scope.$apply($scope.tabs);
+        console.log('tabs:', $scope.tabs);
+    }
 
     // When callback is received, we need to process authentication.
     $scope.signInCallback = function(authResult) {
@@ -62,6 +91,8 @@ angular.module('oncokb')
                 'cookiepolicy': 'single_host_origin'
             }
         );
+        
+        // storage.requireAuth(false).then($scope.signInCallback);
     };
 
     // Process user info.
@@ -94,7 +125,7 @@ angular.module('oncokb')
     $scope.signOut = function() {
         console.log('clicked');
         gapi.auth.signOut();
-        $scope.user={}
+        access.logout();
         $scope.signedIn = false;
     };
     // When callback is received, process user info.
