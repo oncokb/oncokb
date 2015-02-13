@@ -8,7 +8,7 @@
  * Service in the oncokb
  */
 angular.module('oncokb')
-  .service('documents', function documents(storage) {
+  .service('documents', function documents(storage, $rootScope, $q) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     var self = this;
     self.documents = [];
@@ -34,23 +34,40 @@ angular.module('oncokb')
         return seletecd;
     }
 
-    function getPermission(docId) {
-
+    function getPermission(index, callback) {
+        if(index < self.documentsL) {
+            storage.getPermission(self.documents[index].id).then(function(file){
+                self.documents[index].permissions = file.items;
+                getPermission(++index, callback);
+            });
+        }else {
+            callback(true);
+        }
     }
 
-    function getAllPermission(fileId) {
-        // if(angular.isArray(self.documents) && self.documents.length) {
-        //     getPermission();
-        // }
+    function getAllPermission(onComplete) {
+        if(angular.isArray(self.documents) && self.documents.length > 0) {
+            getPermission(0, onComplete);
+        }
     }
 
     return {
         set: function(documents){
+            var deferred = $q.defer();
+            var onComplete = function (result) {
+                if (result && !result.error) {
+                  deferred.resolve(result);
+                } else {
+                  deferred.reject(result);
+                }
+            };
+
             if(angular.isArray(documents)) {
                 self.documents = documents;
                 self.documentsL = documents.length;
-                console.log(self);
+                getAllPermission(onComplete);
             }
+            return deferred.promise;
         },
         get: function(params){
 

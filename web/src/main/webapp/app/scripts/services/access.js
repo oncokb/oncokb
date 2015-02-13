@@ -41,10 +41,13 @@ angular.module('oncokb')
         if(userInfo.displayName) {
             user.name = angular.copy(userInfo.displayName);
         }
-        console.log(user)
+
         if(admin.indexOf(user.email) !== -1) {
             user.role = userRoles.admin;
         }else {
+            // storage.retrieveAllFiles().then(function(docs){
+            //     console.log(docs);
+            // });
             user.role = userRoles.curator;
         }
         $rootScope.user = user;

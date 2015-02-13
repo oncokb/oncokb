@@ -8,8 +8,22 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents',
-        function ($scope, $location, $routeParams, storage, Documents) {
+    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        function ($scope, $location, $routeParams, storage, Documents, DTColumnDefBuilder, DTOptionsBuilder) {
+            $scope.documents = [];
+
+            $scope.dtOptions = DTOptionsBuilder
+              .newOptions()
+              .withDOM('ifrtlp')
+              .withBootstrap();
+            $scope.dtColumns =  [
+              DTColumnDefBuilder.newColumnDef(0),
+              DTColumnDefBuilder.newColumnDef(1),
+              DTColumnDefBuilder.newColumnDef(2).notSortable(),
+              DTColumnDefBuilder.newColumnDef(3).notSortable(),
+              DTColumnDefBuilder.newColumnDef(4).notSortable()
+            ];
+
             $scope.createDoc = function() {
                 if($scope.newDocName) {
                     storage.requireAuth().then(function () {
@@ -23,31 +37,28 @@ angular.module('oncokb')
             };
 
             $scope.getDocs = function() {
+              var docs = Documents.get();
+              if(docs.length > 0) {
+                $scope.documents = Documents.get();
+              }else{
                 storage.requireAuth(true).then(function(){
                     storage.retrieveAllFiles().then(function(result){
-                        console.log('Documents', result);
-                        $scope.documents = result;
-                        Documents.set(result);
-                        // $scope._documents = result;
-                        // getDocumentFromList(0, []);
+                        Documents.set(result).then(function(result){
+                          $scope.documents = Documents.get();
+                        });
                     });
                 });
+              }
             };
 
             $scope.redirect = function(path) {
-              console.log(path);
-              console.log( $location.path());
               $location.path(path);
             };
 
             $scope.curateDoc = function() {
-                console.log($scope);
-                console.log($scope.selectedDoc);
-                console.log('selected file id', $scope.selectedDoc.id);
                 $location.url('/gene/' + $scope.selectedDoc.id + '/');
             };
 
-            $scope.documents = [];
             $scope.getDocs();
 
             function getDocumentFromList(index, documents) {
@@ -80,9 +91,6 @@ angular.module('oncokb')
                 'oncogenic': ['YES', 'NO', 'Unknown']
             };
             $scope.fileEditable = false;
-
-            console.log(realtimeDocument);
-            console.log($scope.fileTitle);
 
             if($scope.fileTitle) {
                 var model = realtimeDocument.getModel();
@@ -342,22 +350,4 @@ angular.module('oncokb')
               console.log('---------------------------------\n');
             }
         }]
-    )
-    .directive("bindCompiledHtml", function($compile, $timeout) {
-        return {
-            template: '<div></div>',
-            scope: {
-              rawHtml: '=bindCompiledHtml'
-            },
-            link: function(scope, elem, attrs) {
-              scope.$watch('rawHtml', function(value) {
-                if (!value) return;
-                // we want to use the scope OUTSIDE of this directive
-                // (which itself is an isolate scope).
-                var newElem = $compile(value)(scope.$parent);
-                elem.contents().remove();
-                elem.append(newElem);
-              });
-            }
-        };
-    });
+    );

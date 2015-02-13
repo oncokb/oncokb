@@ -38,11 +38,12 @@ OncoKB.config = {
         'curator':4, // 0100
         'admin':  8  // 1000
     },
+    users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     accessLevels: {}
 }
 
 OncoKB.config.accessLevels.public = OncoKB.config.userRoles.public | OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
-OncoKB.config.accessLevels.user = OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
+OncoKB.config.accessLevels.user = OncoKB.config.accessLevels.public;
 OncoKB.config.accessLevels.curator = OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
 OncoKB.config.accessLevels.admin = OncoKB.config.userRoles.admin;
 
@@ -291,7 +292,9 @@ var oncokbApp = angular
    'RecursionHelper',
    'angularFileUpload',
    'xml',
-   'contenteditable'
+   'contenteditable',
+   'datatables',
+   'datatables.bootstrap'
  ])
  .constant('config', OncoKB.config)
  .value('user', {
@@ -390,11 +393,7 @@ angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'c
 
     $rootScope.$on("$routeChangeStart", function (event, next, current) {
         if (!Access.authorize(next.access)) {
-            // if(Auth.isLoggedIn()){
-                $location.path('/')
-            // }else {
-            //     $location.path('/');
-            // }
+            $location.path('/')
         }
     });
 }]);

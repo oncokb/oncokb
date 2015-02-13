@@ -1,5 +1,17 @@
 <div>
-    <span class="curateTrialItem" ng-repeat="gene in documents">{{gene.title}}
-        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
-    </span>
+    <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+        <thead><tr><th>ID</th><th>Gene</th><th>Curators</th><th>Emails</th><th>Edit</th></tr></thead>
+        <tbody>
+            <tr data-ng-repeat="gene in documents">
+                <td>{{$index + 1}}</td>
+                <td><strong>{{gene.title}}</strong></td>
+                <td><div ng-repeat="permission in gene.permissions"><span>{{permission.name}}</span><br ng-if="$index<permission.length-1"/></div></td>
+                <td><div ng-repeat="permission in gene.permissions"><span>{{permission.emailAddress}}</span><br ng-if="$index<permission.length-1"/></div></td>
+                <td>
+                    <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
+                    <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"></i>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

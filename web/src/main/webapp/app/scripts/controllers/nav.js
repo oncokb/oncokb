@@ -54,24 +54,19 @@ angular.module('oncokb')
     };
 
     function loginCallback() {
-        $scope.user = $rootScope.user;
-        $scope.tabs = [];
-        if(access.authorize(accessLevels.admin)) {
-            $scope.tabs.push({key: 'tree', value: tabs.tree});
-            $scope.tabs.push({key: 'variant', value: tabs.variant});
-        }
-        if(access.authorize(accessLevels.curator)) {
-            $scope.tabs.push({key: 'genes', value: tabs.genes});
-        }
+        $scope.$apply(function(){
+            $scope.user = $rootScope.user;
+            $scope.tabs = [];
+            if(access.authorize(accessLevels.admin)) {
+                $scope.tabs.push({key: 'tree', value: tabs.tree});
+                $scope.tabs.push({key: 'variant', value: tabs.variant});
+            }
+            if(access.authorize(accessLevels.curator)) {
+                $scope.tabs.push({key: 'genes', value: tabs.genes});
+            }
 
-        $scope.signedIn = access.isLoggedIn();
-
-        console.log('user:', $scope.user);
-        console.log('logged in:', $scope.signedIn);
-        $scope.$apply($scope.user);
-        $scope.$apply($scope.signedIn);
-        $scope.$apply($scope.tabs);
-        console.log('tabs:', $scope.tabs);
+            $scope.signedIn = access.isLoggedIn();
+        });
     }
 
     // When callback is received, we need to process authentication.
@@ -95,63 +90,10 @@ angular.module('oncokb')
         // storage.requireAuth(false).then($scope.signInCallback);
     };
 
-    // Process user info.
-    // userInfo is a JSON object.
-    $scope.processUserInfo = function(userInfo) {
-        // You can check user info for domain.
-        if(userInfo['domain'] == 'mycompanydomain.com') {
-            // Hello colleague!
-        }
-
-        if(userInfo.emails) {
-            for (var i = 0; i < userInfo.emails.length; i++) {
-                if(userInfo.emails[i].type === 'account'){
-                    $scope.user.email = userInfo.emails[i].value;
-                    user.email = angular.copy($scope.user.email);
-                    break;
-                }
-            }
-        }
-        if(userInfo.image && userInfo.image.url) {
-            $scope.user.avatar = userInfo.image.url;
-        }
-        if(userInfo.displayName) {
-            user.name = angular.copy(userInfo.displayName);
-        }
-        
-        $scope.$apply();
-    }
-     
     $scope.signOut = function() {
-        console.log('clicked');
         gapi.auth.signOut();
         access.logout();
         $scope.signedIn = false;
-    };
-    // When callback is received, process user info.
-    $scope.userInfoCallback = function(userInfo) {
-        $scope.processUserInfo(userInfo);
-    };
-
-    // Request user info.
-    $scope.getUserInfo = function() {
-        // gapi.client.request(
-        //     {
-        //         'path':'/plus/v1/people/me',
-        //         'method':'GET',
-        //         'callback': $scope.userInfoCallback
-        //     }
-        // );
-        gapi.client.load('plus','v1', function(){
-            gapi.client.plus.people.get({
-                'userId' : 'me'
-            }).execute($scope.userInfoCallback);
-        });
-    };
-
-    // Start function in this example only renders the sign in button.
-    $scope.start = function() {
-        $scope.renderSignInButton();
     };
 
     $scope.tabIsActive = function(route) {

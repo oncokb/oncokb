@@ -52,7 +52,25 @@ angular.module('oncokb')
             }).execute(onComplete);
         });
         return deferred.promise;
-    }
+    };
+
+    this.getPermission = function (id) {
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+            $rootScope.$digest();
+        };
+
+        gapi.client.drive.permissions.list({
+          'fileId' : id
+        }).execute(onComplete);
+
+        return deferred.promise;
+    };
 
     this.getUserInfo = function (userId) {
         var deferred = $q.defer();
@@ -285,12 +303,6 @@ angular.module('oncokb')
         }
         $rootScope.$digest();
       };
-      
-      // gapi.client.load('drive', 'v2', function() {
-      //   gapi.client.drive.files.get({
-      //     'fileId' : id
-      //   }).execute();
-      // });
       gapi.drive.realtime.load(id, onLoad, initialize, onError);
       return deferred.promise;
     };
@@ -353,11 +365,7 @@ angular.module('oncokb')
                   'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
                 },
                 'body': multipartRequestBody});
-            // if (!callback) {
-            //     callback = function(file) {
-            //         console.log(file)
-            //     };
-            // }
+
             request.execute(onComplete);
         }
         return deferred.promise;
