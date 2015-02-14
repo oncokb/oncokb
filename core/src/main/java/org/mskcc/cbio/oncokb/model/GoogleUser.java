@@ -7,15 +7,15 @@ package org.mskcc.cbio.oncokb.model;
 public class GoogleUser {
     private String name;
     private String email;
-    private Integer permission;
+    private Integer role;
     private String genes;
 
-    public Integer getPermission() {
-        return permission;
+    public Integer getRole() {
+        return role;
     }
 
-    public void setPermission(Integer permission) {
-        this.permission = permission;
+    public void setRole(Integer role) {
+        this.role = role;
     }
 
     public String getName() {

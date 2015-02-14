@@ -296,11 +296,12 @@ var oncokbApp = angular
    'datatables',
    'datatables.bootstrap'
  ])
- .constant('config', OncoKB.config)
  .value('user', {
     name: 'N/A',
     email: 'N/A'
  })
+ .value('OncoKB', OncoKB)
+ .constant('config', OncoKB.config)
  .constant('gapi', window.gapi)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
@@ -372,10 +373,14 @@ var oncokbApp = angular
  * Set up handlers for various authorization issues that may arise if the access token
  * is revoked or expired.
  */
-angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'config', function ($rootScope, $location, storage, Access, config) {
+angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'config', 'DatabaseConnector', 'users', function ($rootScope, $location, storage, Access, config, DatabaseConnector, Users) {
     $rootScope.user = {
         role: config.userRoles.public
     };
+
+    DatabaseConnector.getAllUsers(function(users){
+        Users.setUsers(users);
+    });
 
     // Error loading the document, likely due revoked access. Redirect back to home/install page
     $rootScope.$on('$routeChangeError', function () {

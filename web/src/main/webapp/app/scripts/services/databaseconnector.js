@@ -16,6 +16,7 @@ angular.module('oncokb')
     'Evidence',
     'SearchVariant',
     'GenerateDoc',
+    'Users',
     function (
       $timeout,
       Gene,
@@ -23,7 +24,8 @@ angular.module('oncokb')
       TumorType,
       Evidence,
       SearchVariant,
-      GenerateDoc) {
+      GenerateDoc,
+      Users) {
 
     var numOfLocks = {},
         data = {};
@@ -95,6 +97,24 @@ angular.module('oncokb')
         });
       }else {
         Evidence.getFromServer().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }
+    }
+
+    function getAllUsers(callback, timestamp) {
+      if(dataFromFile) {
+        Users.getFromFile().success(function(data) {
+          if (timestamp) {
+            numOfLocks[timestamp]--;
+          }
+          callback(data);
+        });
+      }else {
+        Users.getFromServer().success(function(data) {
           if (timestamp) {
             numOfLocks[timestamp]--;
           }
@@ -182,6 +202,7 @@ angular.module('oncokb')
       'getAllEvidence': getAllEvidence,
       'searchAnnotation': searchVariant,
       'googleDoc': generateGoogleDoc,
-      'createGoogleFolder': createGoogleFolder
+      'createGoogleFolder': createGoogleFolder,
+      'getAllUsers': getAllUsers
     };
   }]);

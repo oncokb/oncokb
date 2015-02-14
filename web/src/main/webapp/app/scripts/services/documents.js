@@ -8,7 +8,7 @@
  * Service in the oncokb
  */
 angular.module('oncokb')
-  .service('documents', function documents(storage, $rootScope, $q) {
+  .service('documents', function documents(storage, $rootScope, $q, users) {
     // AngularJS will instantiate a singleton by calling "new" on this function
     var self = this;
     self.documents = [];
@@ -51,8 +51,29 @@ angular.module('oncokb')
         }
     }
 
+    function setCurators() {
+        var usersData = users.getUsers();
+        if(angular.isArray(usersData)) {
+            var usersL = usersData.length;
+            for (var i = 0; i < self.documentsL; i++) {
+                var gene = self.documents[i].title;
+                var curators = [];
+                for(var j = 0; j < usersL; j++) {
+                    if(usersData[j].genes && usersData[j].genes.indexOf(gene) !== -1) {
+                        var _user = {
+                            'name': usersData[j].name,
+                            'email' : usersData[j].email
+                        };
+                        curators.push(_user);
+                    }
+                }
+                self.documents[i].curators = curators;
+            }
+        }
+    }
+
     return {
-        set: function(documents){
+        setWithPermission: function(documents){
             var deferred = $q.defer();
             var onComplete = function (result) {
                 if (result && !result.error) {
@@ -69,6 +90,14 @@ angular.module('oncokb')
             }
             return deferred.promise;
         },
+        set: function(documents){
+            if(angular.isArray(documents)) {
+                self.documents = documents;
+                self.documentsL = documents.length;
+                setCurators();
+            }
+        },
+        setCurators: setCurators,
         get: function(params){
 
             //Only ID and Title accepted

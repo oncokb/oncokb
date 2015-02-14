@@ -49,6 +49,23 @@ angular.module('oncokb').factory('Alteration', ['$http',  function ($http) {
     };
 }]);
 
+angular.module('oncokb').factory('Users', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('users.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/users.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
 angular.module('oncokb').factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {

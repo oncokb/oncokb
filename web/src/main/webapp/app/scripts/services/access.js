@@ -45,9 +45,6 @@ angular.module('oncokb')
         if(admin.indexOf(user.email) !== -1) {
             user.role = userRoles.admin;
         }else {
-            // storage.retrieveAllFiles().then(function(docs){
-            //     console.log(docs);
-            // });
             user.role = userRoles.curator;
         }
         $rootScope.user = user;
@@ -57,8 +54,6 @@ angular.module('oncokb')
         authorize: function(accessLevel, role) {
             if(role === undefined)
                 role = $rootScope.user.role;
-
-            console.log('accesslevel:', accessLevel, ' role:', role);
             return accessLevel & role;
         },
 

@@ -17,19 +17,19 @@ angular.module('oncokb')
         function check() {
             var deferred = $q.defer();
             storage.requireAuth(true, userId).then(function () {
-                var _documents = documents.get({'title': title})
-                if(angular.isArray(documents) && _documents.length > 0) {
+                var _documents = documents.get({'title': title});
+
+                if(angular.isArray(_documents) && _documents.length > 0) {
                     deferred.resolve(storage.getRealtimeDocument(_documents[0].id));
                 }else {
                     storage.retrieveAllFiles().then(function(result){
-                        documents.set(result).then(function(){
-                            var __documents = documents.get({'title': title});
-                            if(angular.isArray(__documents) && __documents.length > 0) {
-                                deferred.resolve(storage.getRealtimeDocument(__documents[0].id));
-                            }else {
-                                deferred.resolve(null);
-                            }
-                        });
+                        documents.set(result);
+                        var __documents = documents.get({'title': title});
+                        if(angular.isArray(__documents) && __documents.length > 0) {
+                            deferred.resolve(storage.getRealtimeDocument(__documents[0].id));
+                        }else {
+                            deferred.resolve(null);
+                        }
                     });
                 }
             });

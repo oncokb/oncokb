@@ -8,34 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'DTColumnDefBuilder', 'DTOptionsBuilder',
-        function ($scope, $location, $routeParams, storage, Documents, DTColumnDefBuilder, DTOptionsBuilder) {
-            $scope.documents = [];
-
-            $scope.dtOptions = DTOptionsBuilder
-              .newOptions()
-              .withDOM('ifrtlp')
-              .withBootstrap();
-            $scope.dtColumns =  [
-              DTColumnDefBuilder.newColumnDef(0),
-              DTColumnDefBuilder.newColumnDef(1),
-              DTColumnDefBuilder.newColumnDef(2).notSortable(),
-              DTColumnDefBuilder.newColumnDef(3).notSortable(),
-              DTColumnDefBuilder.newColumnDef(4).notSortable()
-            ];
-
-            $scope.createDoc = function() {
-                if($scope.newDocName) {
-                    storage.requireAuth().then(function () {
-                        storage.createDocument($scope.newDocName.toString()).then(function (file) {
-                            $location.url('/gene/' + file.id + '/');
-                        });
-                    }, function () {
-                        $location.url('/gene');
-                    });
-                }
-            };
-
+    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        function ($scope, $location, $routeParams, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.getDocs = function() {
               var docs = Documents.get();
               if(docs.length > 0) {
@@ -43,9 +17,8 @@ angular.module('oncokb')
               }else{
                 storage.requireAuth(true).then(function(){
                     storage.retrieveAllFiles().then(function(result){
-                        Documents.set(result).then(function(result){
-                          $scope.documents = Documents.get();
-                        });
+                        Documents.set(result);
+                        $scope.documents = Documents.get();
                     });
                 });
               }
@@ -55,61 +28,45 @@ angular.module('oncokb')
               $location.path(path);
             };
 
-            $scope.curateDoc = function() {
-                $location.url('/gene/' + $scope.selectedDoc.id + '/');
-            };
+            $scope.documents = [];
 
+            $scope.dtOptions = DTOptionsBuilder
+              .newOptions()
+              .withDOM('ifrtlp')
+              .withBootstrap();
+
+            $scope.dtColumns =  [
+              DTColumnDefBuilder.newColumnDef(0),
+              DTColumnDefBuilder.newColumnDef(1),
+              DTColumnDefBuilder.newColumnDef(2).notSortable(),
+              DTColumnDefBuilder.newColumnDef(3).notSortable(),
+              DTColumnDefBuilder.newColumnDef(4).notSortable()
+            ];
             $scope.getDocs();
 
-            function getDocumentFromList(index, documents) {
-                if($scope._documents && $scope._documents.length > index) {
-                    storage.getDocument($scope._documents[index].id).then(function(file){
-                        console.log(file);
-                        if(file.editable) {
-                            documents.push(file);
-                        }
-                        getDocumentFromList(++index, documents);
-                    });
-                }else {
-                    $scope.documents = documents;
-                }
+            // var newGenes = ['RET','FGFR4','KIT','SMO','ALK1','ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K','MET','NOTCH','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2','RAD21','TET1','TET2','GATA1','GATA2','MPL','B2M','BTK','HLA-A','PRDM1','SF3B1','EPHA7','HIST1H1C','REL','CREBBP','VHL','PBRM1','SETD2','AKT2','AKT3','ERBB3','FGFR1','BRIP1','ERCC4','FANCA','FANCC','EWSR1','MDM2','MDM4','ETV6','DNMT1','EZH2','WT1','EP300','MYD88','CARD11','CD79B','KEAP1','MYC','FH','SDHA','SDHAF2','SDHB','SDHC','SDHD','RASA1','FOXA1','AURKA','AURKB','CCND1','CCNE1','PPP2R1A','CCND2','CCND3','PAK1','ERG','ETV1','SPOP','SOX2','MYOD1','CTCF','MTOR','PDGFRA','DAXX','MLH1','MSH6','RAD54L','RECQL4','BCL2','RB1','EIF1AX','EIF4A2','EIF4E','EPCAM','FAT1','SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2C','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','DNMT3A','DNMT3B','AR','E2F3','FOXP1','RYBP','SHQ1','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10','APC','ARAF','ARID1B','ARID2','ARID5B','BCL2L11','BRD4','CASP8','CBL','CDK12','CDK4','CDK6','CDKN1A','CDKN2B','GATA3','KDR','MAP2K2','MAP2K4','MAP3K1','MAX','MSH2','MYCN','NFE2L2','NFKBIA','NTRK1','NTRK2','NTRK3','PIK3CB','PIK3R2','PMS2','PTPN11','PTPRD','ROS1','RUNX1','SRC','TMPRSS2','XRCC2'];
+            var newGenes = ['ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K','MET','NOTCH','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2'];
+            
+            $scope.create = function() {
+              createDoc(0);
+            };
+
+            function createDoc(index) {
+              if(index < newGenes.length) {
+                storage.requireAuth().then(function () {
+                  storage.createDocument(newGenes[index]).then(function (file) {
+                    createDoc(++index);
+                  });
+                });
+              }else {
+                console.log('finished');
+              }
             }
+            
         }]
     )
-    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents',
-        function ($scope, $location, $routeParams, storage, realtimeDocument, User, Documents) {
-            $scope.fileTitle = $routeParams.geneName;
-            $scope.realtimeDocument = realtimeDocument;
-            $scope.gene = '';
-            $scope.newGene = {};
-            $scope.newMutation = {};
-            $scope.newTumorType = {};
-            $scope.newTI = [{},{},{},{}];
-            $scope.newTrial = '';
-            $scope.collaborators = {};
-            $scope.checkboxes = {
-                'oncogenic': ['YES', 'NO', 'Unknown']
-            };
-            $scope.fileEditable = false;
-
-            if($scope.fileTitle) {
-                var model = realtimeDocument.getModel();
-                if(!model.getRoot().get('gene')) {
-                  var gene = model.create('Gene');
-                  model.getRoot().set('gene', gene);
-                  $scope.gene = gene;
-                  $scope.gene.name.setText($scope.fileTitle);
-                  $scope.model =  model;
-                  afterCreateGeneModel();
-                }else {
-                  $scope.gene = model.getRoot().get('gene');
-                  $scope.model =  model;
-                  afterCreateGeneModel();
-                }
-            }else {
-              $scope.model = '';
-            }
-
+    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi',
+        function ($scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi) {
             $scope.authorize = function(){
                 print($routeParams);
                     storage.requireAuth(false).then(function () {
@@ -124,16 +81,6 @@ angular.module('oncokb')
                         });
                     }
                 });
-            };
-
-            $scope.addGene = function() {
-                if (this.newGene && this.newGene.name) {
-                    realtimeDocument.getModel().beginCompoundOperation();
-                    var gene = realtimeDocument.getModel().create(Oncokb.Gene, this.newGene);
-                    this.newGene = {};
-                    this.gene = gene;
-                    realtimeDocument.getModel().endCompoundOperation();
-                }
             };
 
             $scope.addMutation = function() {
@@ -180,7 +127,6 @@ angular.module('oncokb')
                     _treatment.name.setText(this.newTI[index].name);
                     _treatment.type.setText('Therapy');
                     ti.treatments.push(_treatment);
-                    console.log(_treatment);
                     realtimeDocument.getModel().endCompoundOperation();
                     this.newTI[index] = {};
                 }
@@ -202,8 +148,8 @@ angular.module('oncokb')
             };
 
             $scope.remove = function(index, object, event) {
-                if (event.stopPropagation) event.stopPropagation();
-                if (event.preventDefault) event.preventDefault();
+                if (event.stopPropagation) { event.stopPropagation();}
+                if (event.preventDefault) { event.preventDefault();}
                 object.remove(index);
             };
 
@@ -216,11 +162,11 @@ angular.module('oncokb')
             };
 
             $scope.curatorsName = function() {
-              return this.gene.curators.asArray().map(function(d){return d.name}).join(', ');
+              return this.gene.curators.asArray().map(function(d){return d.name;}).join(', ');
             };
 
             $scope.curatorsEmail = function() {
-              return this.gene.curators.asArray().map(function(d){return d.email}).join(', ');
+              return this.gene.curators.asArray().map(function(d){return d.email;}).join(', ');
             };
 
             $scope.removeCurator = function(index) {
@@ -237,14 +183,11 @@ angular.module('oncokb')
             function afterCreateGeneModel() {
               var file = Documents.get({title: $scope.fileTitle});
               file = file[0];
-              console.log('file', file);
-              console.log('or editable', file.editable);
               $scope.fileEditable = file.editable?true:false;
-              console.log('file editable', $scope.fileEditable);
               displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
 
-            function valueChanged(evt) {
+            function valueChanged() {
               if($scope.gene) {
                 var hasCurator = false;
                 if($scope.gene.curators && angular.isArray($scope.gene.curators.asArray()) && $scope.gene.curators.asArray().length > 0) {
@@ -258,8 +201,8 @@ angular.module('oncokb')
 
                   if(!hasCurator) {
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    var _curator = realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
-                    $scope.gene.curators.push(_curator);
+                    var __curator = realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
+                    $scope.gene.curators.push(__curator);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                   }
                 }else {
@@ -344,10 +287,36 @@ angular.module('oncokb')
               }
             }
 
-            function print(item) {
-              console.log('\n---------------------------------');
-              console.log(item);
-              console.log('---------------------------------\n');
+            $scope.fileTitle = $routeParams.geneName;
+            $scope.realtimeDocument = realtimeDocument;
+            $scope.gene = '';
+            $scope.newGene = {};
+            $scope.newMutation = {};
+            $scope.newTumorType = {};
+            $scope.newTI = [{},{},{},{}];
+            $scope.newTrial = '';
+            $scope.collaborators = {};
+            $scope.checkboxes = {
+                'oncogenic': ['YES', 'NO', 'Unknown']
+            };
+            $scope.fileEditable = false;
+
+            if($scope.fileTitle) {
+                var model = realtimeDocument.getModel();
+                if(!model.getRoot().get('gene')) {
+                  var gene = model.create('Gene');
+                  model.getRoot().set('gene', gene);
+                  $scope.gene = gene;
+                  $scope.gene.name.setText($scope.fileTitle);
+                  $scope.model =  model;
+                  afterCreateGeneModel();
+                }else {
+                  $scope.gene = model.getRoot().get('gene');
+                  $scope.model =  model;
+                  afterCreateGeneModel();
+                }
+            }else {
+              $scope.model = '';
             }
         }]
     );

@@ -82,7 +82,7 @@ public class UsersGoogle {
             GoogleUser user = new GoogleUser();
             user.setName(row.getCustomElements().getValue("user"));
             user.setEmail(row.getCustomElements().getValue("email"));
-            user.setPermission(Integer.parseInt(row.getCustomElements().getValue("permission")));
+            user.setRole(Integer.parseInt(row.getCustomElements().getValue("role")));
             user.setGenes(row.getCustomElements().getValue("genes"));
             users.add(user);
         }

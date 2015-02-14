@@ -34,12 +34,10 @@ angular.module('oncokb')
     $scope.signedIn = false;
     $scope.user = $rootScope.user;
 
-    console.log($scope.user);
     // Here we do the authentication processing and error handling.
     // Note that authResult is a JSON object.
     $scope.processAuth = function(authResult) {
         // Do a check if authentication has been successful.
-        console.log(gapi.auth.getToken());
         if(authResult['access_token']) {
             // Successful sign in.
             // $scope.signedIn = true;
@@ -86,8 +84,6 @@ angular.module('oncokb')
                 'cookiepolicy': 'single_host_origin'
             }
         );
-        
-        // storage.requireAuth(false).then($scope.signInCallback);
     };
 
     $scope.signOut = function() {
