@@ -35,9 +35,9 @@
 						<input
 					  		id="{{mutation.name.text}}-oncogenic-box{{$index}}"
 						    type="checkbox"
-						    name="{{mutation.name.text}}-oncogenic"
 						    ng-model="mutation.oncogenic.text"
-						    value="{{checkbox}}"
+						    ng-true-value="{{checkbox}}"
+						    ng-false-value=""
 					  	>
 			        	<label for="{{mutation.name.text}}-oncogenic-box{{$index}}">{{checkbox}}
 						</label>
@@ -45,7 +45,19 @@
 				</p>
 				<p>
 		        	<strong>{{mutation.effect.display}}:</strong>
-		        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.effect.text"/>
+		        	<span ng-repeat="checkbox in checkboxes['mutation_effect']">
+						<input
+					  		id="{{mutation.name.text}}-mutation_effect-box{{$index}}"
+						    type="checkbox"
+						    ng-model="mutation.effect.text"
+						    ng-true-value="{{checkbox}}"
+						    ng-false-value=""
+					  	>
+			        	<label for="{{mutation.name.text}}-mutation_effect-box{{$index}}">{{checkbox}}
+						</label>
+					</span>
+					Other:
+					<input type="text" style="width: 30%" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.effect.text"/>
 				</p>
 				<span>
 		        	<strong>{{mutation.description.display}}:</strong>

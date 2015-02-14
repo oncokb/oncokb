@@ -52,6 +52,7 @@ angular.module('oncokb')
     };
 
     function loginCallback() {
+        console.log('login call back');
         $scope.$apply(function(){
             $scope.user = $rootScope.user;
             $scope.tabs = [];

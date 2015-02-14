@@ -293,7 +293,15 @@ angular.module('oncokb')
             $scope.newTrial = '';
             $scope.collaborators = {};
             $scope.checkboxes = {
-                'oncogenic': ['YES', 'NO', 'Unknown']
+                'oncogenic': ['YES','NO','Unknown'],
+                'mutation_effect': ['Activating','Inactivating']
+            };
+            $scope.levels = {
+              '1': 'FDA-approved biomarker and drug association in this indication.',
+              '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
+              '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
+              '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
+              '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
             };
             $scope.fileEditable = false;
 
