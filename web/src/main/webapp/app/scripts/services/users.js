@@ -8,7 +8,7 @@
  * Service in the oncokb.
  */
 angular.module('oncokb')
-  .service('users', function user() {
+  .service('users', function user(config) {
     var self = this;
 
     self.me = {};
@@ -90,9 +90,14 @@ angular.module('oncokb')
         }
     }
 
-    function setMe(email){
-        if(angular.isString(email) && self.users.hasOwnProperty(email)) {
-            self.me = self.users[email];
+    function setMe(user){
+        if(angular.isString(user.email)) {
+            if(self.users.hasOwnProperty(user.email)) {
+                self.me = self.users[user.email];
+            }else {
+                self.me = user;
+                self.me.role = config.userRoles.user;
+            }
         }
     }
 

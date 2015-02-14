@@ -15,7 +15,7 @@ angular.module('oncokb')
     var loginCallback = '';
 
     function getUserInfo(callback) {
-        storage.requireAuth(true).then(function(){
+        storage.requireAuth(true).then(function(result){
             gapi.client.load('plus','v1', function(){
                 gapi.client.plus.people.get({
                     'userId' : 'me'
@@ -35,7 +35,7 @@ angular.module('oncokb')
             }
         }
 
-        users.setMe(user.email);
+        users.setMe(user);
         user = users.getMe();
 
         if(userInfo.image && userInfo.image.url) {
