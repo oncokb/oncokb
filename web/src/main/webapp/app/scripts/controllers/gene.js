@@ -171,6 +171,18 @@ angular.module('oncokb')
               $scope.gene.curators.remove(index);
             };
 
+            $scope.checkTI = function(TI, status, type) {
+              var _status = TI.types.get('status').toString();
+              var _type = TI.types.get('type').toString();
+              status = status.toString();
+              type = type.toString();
+              if(_status === status && _type === type) {
+                return true;
+              }else {
+                return false;
+              }
+            };
+
             function bindDocEvents() {
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
@@ -283,6 +295,38 @@ angular.module('oncokb')
               }
             }
 
+            function getLevels() {
+              var des = {
+                '': '',
+                '1': 'FDA-approved biomarker and drug association in this indication.',
+                '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
+                '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
+                '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
+                '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
+              };
+
+              var levels = {};
+
+              var levelsCategories = {
+                SS: ['','1','2A'],
+                SR: ['','2A'],
+                IS: ['','2B','3','4'],
+                IR: ['','2B','3','4']
+              }
+
+              for(var key in levelsCategories) {
+                var _items = levelsCategories[key];
+                levels[key] = [];
+                for (var i = 0; i < _items.length; i++) {
+                  var __datum = {};
+                  __datum.label = _items[i] + (_items[i]===''?'':' - ') + des[_items[i]];
+                  __datum.value = _items[i];
+                  levels[key].push(__datum);
+                }
+              }
+              return levels;
+            }
+
             $scope.fileTitle = $routeParams.geneName;
             $scope.realtimeDocument = realtimeDocument;
             $scope.gene = '';
@@ -296,13 +340,10 @@ angular.module('oncokb')
                 'oncogenic': ['YES','NO','Unknown'],
                 'mutation_effect': ['Activating','Inactivating']
             };
-            $scope.levels = {
-              '1': 'FDA-approved biomarker and drug association in this indication.',
-              '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
-              '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
-              '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
-              '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
-            };
+
+            $scope.levels = getLevels();
+            
+
             $scope.fileEditable = false;
 
             if($scope.fileTitle) {

@@ -120,7 +120,18 @@
 									</p>
 									<p>
 							        	<strong>{{treatment.level.display}}:</strong>
-							        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.level.text"/>
+							        	<select style="width: 100%" ng-if="checkTI(ti, 1, 1)" ng-model="treatment.level.text"
+							                ng-options="opt.value as opt.label for opt in levels.SS">
+							            </select>
+							        	<select style="width: 100%" ng-if="checkTI(ti, 1, 0)" ng-model="treatment.level.text"
+							                ng-options="opt.value as opt.label for opt in levels.SR">
+							            </select>
+							        	<select style="width: 100%" ng-if="checkTI(ti, 0, 1)" ng-model="treatment.level.text"
+							                ng-options="opt.value as opt.label for opt in levels.IS">
+							            </select>
+							        	<select style="width: 100%" ng-if="checkTI(ti, 0, 0)" ng-model="treatment.level.text"
+							                ng-options="opt.value as opt.label for opt in levels.IR">
+							            </select>
 									</p>
 									<p>
 							        	<strong>{{treatment.indication.display}}:</strong>
