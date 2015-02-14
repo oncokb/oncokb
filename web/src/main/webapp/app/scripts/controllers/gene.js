@@ -62,7 +62,6 @@ angular.module('oncokb')
                 console.log('finished');
               }
             }
-            
         }]
     )
     .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi',

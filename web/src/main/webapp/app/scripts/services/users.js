@@ -93,8 +93,6 @@ angular.module('oncokb')
     function setMe(email){
         if(angular.isString(email) && self.users.hasOwnProperty(email)) {
             self.me = self.users[email];
-        }else {
-            return false;
         }
     }
 

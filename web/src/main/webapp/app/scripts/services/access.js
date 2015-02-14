@@ -8,7 +8,7 @@
  * Service in the oncokb.
  */
 angular.module('oncokb')
-  .service('access', function access($rootScope, storage, config) {
+  .service('access', function access($rootScope, storage, config, users) {
     var admin = ['jackson.zhang.828@gmail.com'];
     var self = this;
     var userRoles = config.userRoles;
@@ -35,18 +35,16 @@ angular.module('oncokb')
                 }
             }
         }
+
+        console.log('pre', user);
+        users.setMe(user.email);
+        user = users.getMe();
+        console.log('post', user);
+
         if(userInfo.image && userInfo.image.url) {
             user.avatar = userInfo.image.url;
         }
-        if(userInfo.displayName) {
-            user.name = angular.copy(userInfo.displayName);
-        }
 
-        if(admin.indexOf(user.email) !== -1) {
-            user.role = userRoles.admin;
-        }else {
-            user.role = userRoles.curator;
-        }
         $rootScope.user = user;
         loginCallback();
     }
