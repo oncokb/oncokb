@@ -67,19 +67,18 @@ angular.module('oncokb')
     .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi',
         function ($scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi) {
             $scope.authorize = function(){
-                print($routeParams);
-                    storage.requireAuth(false).then(function () {
-                    var target = $location.search().target;
-                    if (target) {
-                        $location.url(target);
-                    } else {
-                        storage.getDocument('1rFgBCL0ftynBxRl5E6mgNWn0WoBPfLGm8dgvNBaHw38').then(function(file){
-                            storage.downloadFile(file).then(function(text) {
-                                $scope.curateFile = text;
-                            });
+              storage.requireAuth(false).then(function () {
+                var target = $location.search().target;
+                if (target) {
+                    $location.url(target);
+                } else {
+                    storage.getDocument('1rFgBCL0ftynBxRl5E6mgNWn0WoBPfLGm8dgvNBaHw38').then(function(file){
+                        storage.downloadFile(file).then(function(text) {
+                            $scope.curateFile = text;
                         });
-                    }
-                });
+                    });
+                }
+              });
             };
 
             $scope.addMutation = function() {
@@ -140,10 +139,10 @@ angular.module('oncokb')
             };
 
             $scope.checkScope = function() {
-                print($scope.gene);
-                print($scope.gene.mutations.asArray());
-                print($scope.gene.mutations.asArray()[1].tumors.asArray());
-                print($scope.collaborators);
+                // print($scope.gene);
+                // print($scope.gene.mutations.asArray());
+                // print($scope.gene.mutations.asArray()[1].tumors.asArray());
+                // print($scope.collaborators);
             };
 
             $scope.remove = function(index, object, event) {
@@ -214,7 +213,6 @@ angular.module('oncokb')
             }
 
             function displayCollaboratorEvent(evt) {
-              print(evt);
               switch (evt.type) {
                 case 'collaborator_left':
                   removeCollaborator(evt.collaborator);
@@ -234,7 +232,6 @@ angular.module('oncokb')
                 $scope.collaborators[user.sessionId] = {};
               }
               $scope.collaborators[user.sessionId] = user;
-              print(user);
             }
 
             function removeCollaborator(user) {

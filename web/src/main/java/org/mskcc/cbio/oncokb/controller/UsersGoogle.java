@@ -33,7 +33,7 @@ public class UsersGoogle {
     
     private static final String USER_SPREADSHEET = "1VPFB4KuE3tF07KVIbJzU8V4amjuR8f9az0Rvp6wdKzI";
         
-    @RequestMapping(value="/users", method = GET)
+    @RequestMapping(value="/users.json", method = GET)
     public @ResponseBody List<GoogleUser> UsersGoogle(
             @RequestParam(value="email", required=false) String email) throws MalformedURLException, ServiceException{
         

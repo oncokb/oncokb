@@ -9,7 +9,6 @@
  */
 angular.module('oncokb')
   .service('access', function access($rootScope, storage, config, users) {
-    var admin = ['jackson.zhang.828@gmail.com'];
     var self = this;
     var userRoles = config.userRoles;
     var accessLevel = config.accessLevel;
@@ -36,10 +35,8 @@ angular.module('oncokb')
             }
         }
 
-        console.log('pre', user);
         users.setMe(user.email);
         user = users.getMe();
-        console.log('post', user);
 
         if(userInfo.image && userInfo.image.url) {
             user.avatar = userInfo.image.url;
