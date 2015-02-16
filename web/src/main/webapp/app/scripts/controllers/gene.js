@@ -339,11 +339,30 @@ angular.module('oncokb')
                 'oncogenic': ['YES','NO','Unknown'],
                 'mutation_effect': ['Activating','Inactivating']
             };
-            $scope.nccnDiseaseTypes = ["Acute Lymphoblastic Leukemia","Acute Myeloid Leukemia      20th Annual Edition!","Anal Carcinoma","Bladder Cancer","Bone Cancer","Breast Cancer","Cancer of Unknown Primary (See Occult Primary)","Central Nervous System Cancers","Cervical Cancer","Chronic Myelogenous Leukemia","Colon/Rectal Cancer","Colon Cancer      20th Annual Edition!","Rectal Cancer      20th Annual Edition!","Cutaneous Melanoma (See Melanoma)","Endometrial Cancer (See Uterine Neoplasms)","Esophageal and Esophagogastric Junction Cancers","Fallopian Tube Cancer (See Ovarian Cancer)","Gastric Cancer","Head and Neck Cancers","Hepatobiliary Cancers","Hodgkin Lymphoma","Kidney Cancer","Malignant Pleural Mesothelioma","Melanoma","Multiple Myeloma/Other Plasma Cell Neoplasms","Multiple Myeloma","Systemic Light Chain Amyloidosis","Waldenström's Macroglobulinemia / Lymphoplasmacytic Lymphoma","Myelodysplastic Syndromes","Neuroendocrine Tumors","Non-Hodgkin's Lymphomas","Non-Melanoma Skin Cancers","Basal Cell Skin Cancer","Dermatofibrosarcoma Protuberans","Merkel Cell Carcinoma","Squamous Cell Skin Cancer","Non-Small Cell Lung Cancer      20th Annual Edition!","Occult Primary","Ovarian Cancer","Pancreatic Adenocarcinoma","Penile Cancer","Primary Peritoneal Cancer (See Ovarian Cancer)","Prostate Cancer      20th Annual Edition!","Small Cell Lung Cancer      20th Annual Edition!","Soft Tissue Sarcoma","Testicular Cancer","Thymomas and Thymic Carcinomas","Thyroid Carcinoma","Uterine Neoplasms"];
-
+            $scope.nccnDiseaseTypes = ['', "Acute Lymphoblastic Leukemia","Acute Myeloid Leukemia      20th Annual Edition!","Anal Carcinoma","Bladder Cancer","Bone Cancer","Breast Cancer","Cancer of Unknown Primary (See Occult Primary)","Central Nervous System Cancers","Cervical Cancer","Chronic Myelogenous Leukemia","Colon/Rectal Cancer","Colon Cancer      20th Annual Edition!","Rectal Cancer      20th Annual Edition!","Cutaneous Melanoma (See Melanoma)","Endometrial Cancer (See Uterine Neoplasms)","Esophageal and Esophagogastric Junction Cancers","Fallopian Tube Cancer (See Ovarian Cancer)","Gastric Cancer","Head and Neck Cancers","Hepatobiliary Cancers","Hodgkin Lymphoma","Kidney Cancer","Malignant Pleural Mesothelioma","Melanoma","Multiple Myeloma/Other Plasma Cell Neoplasms","Multiple Myeloma","Systemic Light Chain Amyloidosis","Waldenström's Macroglobulinemia / Lymphoplasmacytic Lymphoma","Myelodysplastic Syndromes","Neuroendocrine Tumors","Non-Hodgkin's Lymphomas","Non-Melanoma Skin Cancers","Basal Cell Skin Cancer","Dermatofibrosarcoma Protuberans","Merkel Cell Carcinoma","Squamous Cell Skin Cancer","Non-Small Cell Lung Cancer      20th Annual Edition!","Occult Primary","Ovarian Cancer","Pancreatic Adenocarcinoma","Penile Cancer","Primary Peritoneal Cancer (See Ovarian Cancer)","Prostate Cancer      20th Annual Edition!","Small Cell Lung Cancer      20th Annual Edition!","Soft Tissue Sarcoma","Testicular Cancer","Thymomas and Thymic Carcinomas","Thyroid Carcinoma","Uterine Neoplasms"];
+            $scope.nccnCategories = [
+              {
+                label: '',
+                value: ''
+              },
+              {
+                label: 'Category 1: Based upon high-level evidence, there is uniform NCCN consensus that the intervention is appropriate.',
+                value: '1'
+              },
+              {
+                label: 'Category 2A: Based upon lower-level evidence, there is uniform NCCN consensus that the intervention is appropriate.',
+                value: '2A'
+              },
+              {
+                label: 'Category 2B: Based upon lower-level evidence, there is NCCN consensus that the intervention is appropriate.',
+                value: '2B'
+              },
+              {
+                label: 'Category 3: Based upon any level of evidence, there is major NCCN disagreement that the intervention is appropriate.',
+                value: '3'
+              },
+            ]
             $scope.levels = getLevels();
-            
-
             $scope.fileEditable = false;
 
             if($scope.fileTitle) {

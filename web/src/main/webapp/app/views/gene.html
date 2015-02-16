@@ -96,7 +96,7 @@
 						</p>
 						<p>
 				        	<strong>{{tumor.nccn.category.display}}:</strong>
-				        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.category.text"/>
+				        	<select style="width: 100%" ng-model="tumor.nccn.category.text" ng-options="opt.value as opt.label for opt in nccnCategories"></select>
 						</p>
 						<span>
 				        	<strong>{{tumor.nccn.description.display}}:</strong>

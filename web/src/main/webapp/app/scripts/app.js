@@ -111,7 +111,7 @@ OncoKB.curateInfo = {
         },
         'category': {
             type: 'string',
-            display: 'Recommendation category'
+            display: 'NCCN Categories of Evidence and Consensus'
         },
         'description': {
             type: 'string',
