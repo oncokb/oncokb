@@ -380,6 +380,11 @@ angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'c
 
     DatabaseConnector.getAllUsers(function(users){
         Users.setUsers(users);
+        console.log('isLoggedIn:', Access.isLoggedIn());
+        if(Access.isLoggedIn()) {
+            console.log('Setting me');
+            Users.setMe();
+        }
     });
 
     // Error loading the document, likely due revoked access. Redirect back to home/install page

@@ -1,10 +1,10 @@
 <div>
     <!-- <button ng-click="create()">create</button> -->
     <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
-        <thead><tr><th>ID</th><th>Gene</th><th>Curators</th><th>Emails</th><th>Edit</th></tr></thead>
+        <thead><tr><!-- <th>ID</th> --><th>Gene</th><th>Curators</th><th>Emails</th><th>Edit</th></tr></thead>
         <tbody>
             <tr data-ng-repeat="gene in documents">
-                <td>{{$index + 1}}</td>
+                <!-- <td>{{$index + 1}}</td> -->
                 <td><strong>{{gene.title}}</strong></td>
                 <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
                 <td><div ng-repeat="curator in gene.curators"><span>{{curator.email}}</span><br ng-if="$index<curator.length-1"/></div></td>

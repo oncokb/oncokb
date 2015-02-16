@@ -38,12 +38,15 @@ angular.module('oncokb')
     // Note that authResult is a JSON object.
     $scope.processAuth = function(authResult) {
         // Do a check if authentication has been successful.
+        console.log('In processAuth');
         if(authResult['access_token']) {
+            console.log('has token');
             // Successful sign in.
             // $scope.signedIn = true;
 
             access.login(loginCallback);
         } else if(authResult['error']) {
+            console.log('hasnt token');
             // Error while signing in.
             // $scope.signedIn = false;
             loginCallback();
@@ -52,6 +55,7 @@ angular.module('oncokb')
     };
 
     function loginCallback() {
+        console.log('In login callback.')
         $scope.$apply(function(){
             $scope.user = $rootScope.user;
             $scope.tabs = [];
@@ -63,11 +67,17 @@ angular.module('oncokb')
                 $scope.tabs.push({key: 'genes', value: tabs.genes});
             }
             $scope.signedIn = access.isLoggedIn();
+            console.log('applied scope tabs.')
         });
     }
 
+    $scope.$watch($rootScope.user,function(){
+        console.log('RootScope user has changed');
+    });
+
     // When callback is received, we need to process authentication.
     $scope.signInCallback = function(authResult) {
+        console.log('Signed in.');
         $scope.processAuth(authResult);
     };
 
