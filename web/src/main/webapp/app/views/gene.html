@@ -172,6 +172,16 @@
 								</span>
 							</div>
 	                    </div>
+						<hr/>
+	                    <h4>Interacting alterations</h4>
+	                    <p>
+				        	<strong>{{tumor.interactAlts.alterations.display}}:</strong>
+				        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.interactAlts.alterations.text"/>
+						</p>
+						<span>
+				        	<strong>{{tumor.interactAlts.description.display}}:</strong>
+				        	<p class="doubleH" type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.interactAlts.description.text"></p>
+						</span>
 	                </accordion-group>
 	            </accordion>
 				<div class="input-group input-group-sm">
