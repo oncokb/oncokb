@@ -310,6 +310,7 @@ var oncokbApp = angular
  .value('OncoKB', OncoKB)
  .constant('config', OncoKB.config)
  .constant('gapi', window.gapi)
+ .constant('_', window._)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
 

@@ -190,7 +190,7 @@
 				<div style="width: 100%">
 					<!-- <input type="text" class="form-control" ng-model="newTumorType.name" placeholder="Tumor type name" /> -->
 					<div style="width: 80%; float:left">
-						<select chosen ng-model='newTumorType.name' no-results-text="'Could not find any tumor types'" ng-options='tumorType.name as tumorType.name for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Tumor type name" id="curateTumorTypesDropdown">
+						<select chosen ng-model='newTumorType.name' no-results-text="'Could not find any tumor types'" ng-options='tumorType.name as tumorType.name group by tumorType.tissue for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Tumor type name" id="curateTumorTypesDropdown">
 			            	<option value=""></option>
 			            </select>
 		            </div>

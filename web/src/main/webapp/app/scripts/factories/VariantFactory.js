@@ -66,6 +66,23 @@ angular.module('oncokb').factory('Users', ['$http',  function ($http) {
     };
 }]);
 
+angular.module('oncokb').factory('OncoTreeTumorTypes', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('oncoTreeTumorTypes.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/oncoTreeTumorTypes.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
 angular.module('oncokb').factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {

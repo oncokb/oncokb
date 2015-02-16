@@ -63,8 +63,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['$resource', '$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector',
-        function ($resource, $scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi, DatabaseConnector) {
+    .controller('GeneCtrl', ['_','$resource', '$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector',
+        function (_, $resource, $scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi, DatabaseConnector) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -371,7 +371,43 @@ angular.module('oncokb')
             ]
             $scope.levels = getLevels();
             $scope.fileEditable = false;
-            $scope.tumorTypes = $resource('data/tumorType.json').query();
+            // $scope.tumorTypes = $resource('data/tumorType.json').query();
+            DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
+              var tumorTypes = {};
+
+              data.forEach(function(e, i){
+                var key = e.primary;
+
+                if(!_.endsWith(key, 'cancer')) {
+                  key += ' cancer';
+                }
+
+                if(tumorTypes.hasOwnProperty(key)) {
+                  var loop=['secondary', 'tertiary', 'quaternary'];
+                  loop.forEach(function(e1, i1){
+                    if(e[e1] && tumorTypes[key].indexOf(e[e1]) === -1) {
+                      tumorTypes[key].push(e[e1]);
+                    }
+                  });
+                }else {
+                  tumorTypes[key] = [];
+                }
+              });
+
+              var newTumorTypes = []
+              for(var key in tumorTypes) {
+                for(var i = 0; i < tumorTypes[key].length; i++) {
+                  var __datum = {
+                    'name': tumorTypes[key][i],
+                    'tissue': key
+                  }
+                  newTumorTypes.push(__datum);
+                }
+              }
+              $scope.tumorTypes = newTumorTypes;
+              // console.log(newTumorTypes);
+              // $scope.tumorTypes = data.map(function(d){ return d.name;});
+            });
             // DatabaseConnector.getAllTumorType(function(data){
             //   $scope.tumorTypes = data.map(function(d){ return d.name;});
             // });
