@@ -98,11 +98,12 @@ angular.module('oncokb')
                     realtimeDocument.getModel().beginCompoundOperation();
                     _tumorType = realtimeDocument.getModel().create(OncoKB.Tumor);
                     _tumorType.name.setText(this.newTumorType.name);
+                    _tumorType.nccn.category.setText('2A');
                     for(var i=0; i<4; i++) {
                       var __ti = realtimeDocument.getModel().create(OncoKB.TI);
                       var __status = i<2?1:0; // 1: Standard, 0: Investigational
                       var __type = i%2===0?1:0; //1: sensitivity, 0: resistance
-                      var __name = (__status?'Standard':'Investigational') + ' therapeutic implications for drug ' + (__type?'sensitivity':'resistance');
+                      var __name = (__status?'Standard':'Investigational') + ' implications for ' + (__type?'sensitivity':'resistance') + ' to therapy';
                       
                       __ti.types.set('status', __status.toString());
                       __ti.types.set('type', __type.toString());
