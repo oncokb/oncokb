@@ -187,13 +187,18 @@
 						</span>
 	                </accordion-group>
 	            </accordion>
-				<div class="input-group input-group-sm">
-					<input type="text" class="form-control" ng-model="newTumorType.name" placeholder="Tumor type name" />
-					<span class="input-group-btn">
-						<button type="button" class="btn btn-default" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
+				<div style="width: 100%">
+					<!-- <input type="text" class="form-control" ng-model="newTumorType.name" placeholder="Tumor type name" /> -->
+					<div style="width: 80%; float:left">
+						<select chosen ng-model='newTumorType.name' no-results-text="'Could not find any tumor types'" ng-options='tumorType.name as tumorType.name for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Tumor type name" id="curateTumorTypesDropdown">
+			            	<option value=""></option>
+			            </select>
+		            </div>
+					<div style="float:left">
+						<button type="button" class="btn btn-default btn-sm" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
 							<i class="fa fa-plus"></i> Add Tumor Type
 						</button>
-					</span>
+					</div>
 				</div>
 	        </accordion-group>
 	    </accordion>

@@ -63,8 +63,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi',
-        function ($scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi) {
+    .controller('GeneCtrl', ['$resource', '$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector',
+        function ($resource, $scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi, DatabaseConnector) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -186,6 +186,8 @@ angular.module('oncokb')
             $scope.mutationEffectChanged = function(mutationEffect) {
               mutationEffect.addOn.setText('');
             };
+
+
 
             function bindDocEvents() {
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
@@ -369,6 +371,10 @@ angular.module('oncokb')
             ]
             $scope.levels = getLevels();
             $scope.fileEditable = false;
+            $scope.tumorTypes = $resource('data/tumorType.json').query();
+            // DatabaseConnector.getAllTumorType(function(data){
+            //   $scope.tumorTypes = data.map(function(d){ return d.name;});
+            // });
 
             if($scope.fileTitle) {
                 var model = realtimeDocument.getModel();

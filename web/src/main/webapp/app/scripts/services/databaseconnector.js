@@ -203,6 +203,7 @@ angular.module('oncokb')
       'searchAnnotation': searchVariant,
       'googleDoc': generateGoogleDoc,
       'createGoogleFolder': createGoogleFolder,
-      'getAllUsers': getAllUsers
+      'getAllUsers': getAllUsers,
+      'getAllTumorType': getAllTumorType
     };
   }]);

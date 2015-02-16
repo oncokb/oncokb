@@ -263,14 +263,10 @@ h5 {
 
 
 //Make sure the chosen dropdown always 100% no matter how the bower size changes
-#tumorTypesDropDown_chosen {
-  width: 100% !important;
-}
-#variantGeneNameDropDown_chosen {
-  width: 100% !important;
-}
-
-#variantMutationDropDown_chosen {
+#tumorTypesDropDown_chosen
+,#variantMutationDropDown_chosen
+,#variantGeneNameDropDown_chosen
+,#curateTumorTypesDropdown_chosen {
   width: 100% !important;
 }
 
