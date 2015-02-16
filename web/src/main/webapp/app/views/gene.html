@@ -45,22 +45,25 @@
 						</label>
 					</span>
 				</p>
-				<p>
-		        	<strong>{{mutation.effect.display}}:</strong>
-		        	<span ng-repeat="checkbox in checkboxes['mutation_effect']">
-						<input
-					  		id="{{mutation.name.text}}-mutation_effect-box{{$index}}"
-						    type="checkbox"
-						    ng-model="mutation.effect.text"
-						    ng-true-value="{{checkbox}}"
-						    ng-false-value=""
-					  	>
-			        	<label for="{{mutation.name.text}}-mutation_effect-box{{$index}}">{{checkbox}}
-						</label>
-					</span>
-					Other:
-					<input type="text" style="width: 30%" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.effect.text"/>
-				</p>
+				<div>
+		        	<strong class="muattionEffectHeader">Mutation effect:</strong>
+		        	<div class="muattionEffectBody">
+			        	<span  ng-repeat="checkbox in checkboxes['mutation_effect']">
+							<input
+						  		id="{{mutation.name.text}}-mutation_effect-box{{$index}}"
+							    type="checkbox"
+							    ng-change="mutationEffectChanged(mutation.effect)"
+							    ng-model="mutation.effect.value.text"
+							    ng-true-value="{{checkbox}}"
+							    ng-false-value=""
+						  	>
+				        	<label for="{{mutation.name.text}}-mutation_effect-box{{$index}}">{{checkbox}}
+							</label>
+							<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-if="mutation.effect.value.text === checkbox && checkbox !== 'Other'" ng-model="mutation.effect.addOn.text" placeholder=" Optional text"/>
+							<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-if="mutation.effect.value.text === checkbox && checkbox === 'Other'" ng-model="mutation.effect.addOn.text"/>
+						</span>
+					</div>
+				</div>
 				<span>
 		        	<strong>{{mutation.description.display}}:</strong>
 		        	<br/>

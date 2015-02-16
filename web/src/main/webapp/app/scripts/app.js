@@ -77,8 +77,7 @@ OncoKB.curateInfo = {
             display: 'Oncogenic'
         },
         'effect': {
-            type: 'string',
-            display: 'Mutation Effect'
+            type: 'ME'
         },
         'description': {
             type: 'string',
@@ -187,7 +186,15 @@ OncoKB.curateInfo = {
             display: 'Description of evidence'
         },
         'trials': {
-            type: 'list'
+            type: 'string'
+        }
+    },
+    'ME': {
+        'value': {
+            type: 'string'
+        },
+        'addOn': {
+            type: 'string'
         }
     }
 };

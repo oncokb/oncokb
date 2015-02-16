@@ -113,6 +113,26 @@ p.editableBox.doubleH {
   padding: 3px 8px;
   border-radius: 3px;
 }
+.muattionEffectHeader {
+  width: 16%;
+  float: left;
+}
+.muattionEffectBody {
+  width: 84%;
+  float: left;
+}
+.muattionEffectBody span{
+  width: 100%;
+  float: left;
+}
+.muattionEffectBody span{
+  width: 100%;
+  float: left;
+}
+.muattionEffectBody span input[type="text"]{
+  float: right;
+}
+
 i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover {
   cursor: pointer;
 }
