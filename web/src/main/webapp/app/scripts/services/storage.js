@@ -259,7 +259,8 @@ angular.module('oncokb')
           'client_id': config.clientId,
           'scope': config.scopes,
           'immediate': immediateMode,
-          'user_id': userId
+          'user_id': userId,
+          'approval_prompt': 'force'
         };
         var deferred = $q.defer();
         console.log(params);

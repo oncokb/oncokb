@@ -8,17 +8,27 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
-        function ($scope, $location, $routeParams, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
+    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'pleaseWait',
+        function ($scope, $location, $routeParams, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, pleaseWait) {
             $scope.getDocs = function() {
+              // var loading_screen = pleaseWait({
+              //   logo: "images/mskcc.png",
+              //   backgroundColor: '#f46d3b',
+              //   loadingHtml: "<div class='sk-spinner sk-spinner-wave'><div class='sk-rect1'></div><div class='sk-rect2'></div><div class='sk-rect3'></div><div class='sk-rect4'></div><div class='sk-rect5'></div></div>"
+              // });
               var docs = Documents.get();
               if(docs.length > 0) {
-                $scope.documents = Documents.get();
+                // $scope.$apply(function() {
+                  $scope.documents = Documents.get();
+                  $scope.loaded = true;
+                // });
               }else{
                 storage.requireAuth(true).then(function(){
                     storage.retrieveAllFiles().then(function(result){
                         Documents.set(result);
                         $scope.documents = Documents.get();
+                        $scope.loaded = true;
+                        // loading_screen.finish();
                     });
                 });
               }
@@ -27,8 +37,6 @@ angular.module('oncokb')
             $scope.redirect = function(path) {
               $location.path(path);
             };
-
-            $scope.documents = [];
 
             $scope.dtOptions = DTOptionsBuilder
               .newOptions()
@@ -41,8 +49,12 @@ angular.module('oncokb')
               DTColumnDefBuilder.newColumnDef(2).notSortable(),
               DTColumnDefBuilder.newColumnDef(3).notSortable()
             ];
+            $scope.loaded = false;
             $scope.getDocs();
 
+            $scope.$watch('loaded', function(newValue, oldValue, scope) {
+              
+            });
             // var newGenes = ['RET','FGFR4','KIT','SMO','ALK1','ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2','RAD21','TET1','TET2','GATA1','GATA2','MPL','B2M','BTK','HLA-A','PRDM1','SF3B1','EPHA7','HIST1H1C','REL','CREBBP','VHL','PBRM1','SETD2','AKT2','AKT3','ERBB3','FGFR1','BRIP1','ERCC4','FANCA','FANCC','EWSR1','MDM2','MDM4','ETV6','DNMT1','EZH2','WT1','EP300','MYD88','CARD11','CD79B','KEAP1','MYC','FH','SDHA','SDHAF2','SDHB','SDHC','SDHD','RASA1','FOXA1','AURKA','AURKB','CCND1','CCNE1','PPP2R1A','CCND2','CCND3','PAK1','ERG','ETV1','SPOP','SOX2','MYOD1','CTCF','MTOR','PDGFRA','DAXX','MLH1','MSH6','RAD54L','RECQL4','BCL2','RB1','EIF1AX','EIF4A2','EIF4E','EPCAM','FAT1','SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2C','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','DNMT3A','DNMT3B','AR','E2F3','FOXP1','RYBP','SHQ1','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10','APC','ARAF','ARID1B','ARID2','ARID5B','BCL2L11','BRD4','CASP8','CBL','CDK12','CDK4','CDK6','CDKN1A','CDKN2B','GATA3','KDR','MAP2K2','MAP2K4','MAP3K1','MAX','MSH2','MYCN','NFE2L2','NFKBIA','NTRK1','NTRK2','NTRK3','PIK3CB','PIK3R2','PMS2','PTPN11','PTPRD','ROS1','RUNX1','SRC','TMPRSS2','XRCC2'];
             var newGenes = ['ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2'];
             

@@ -132,6 +132,11 @@ p.editableBox.doubleH {
 .muattionEffectBody span input[type="text"]{
   float: right;
 }
+.genesLoading {
+  position: absolute;
+  top: 20%;
+  left: calc(50% - 150px);
+}
 
 i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover {
   cursor: pointer;
@@ -247,6 +252,12 @@ a:hover {
 h5 {
     margin-bottom: 0;
 }
+
+//Change sk-spinner style
+.sk-spinner-wave div {
+  background-color: #2986e2
+}
+
 //Change bootstrap-chosen style
 .chosen-container-single .chosen-single {
   height: 30px;

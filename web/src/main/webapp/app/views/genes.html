@@ -1,18 +1,30 @@
 <div>
     <!-- <button ng-click="create()">create</button> -->
-    <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
-        <thead><tr><!-- <th>ID</th> --><th>Gene</th><th>Curators</th><th>Emails</th><th>Edit</th></tr></thead>
-        <tbody>
-            <tr data-ng-repeat="gene in documents">
-                <!-- <td>{{$index + 1}}</td> -->
-                <td><strong>{{gene.title}}</strong></td>
-                <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
-                <td><div ng-repeat="curator in gene.curators"><span>{{curator.email}}</span><br ng-if="$index<curator.length-1"/></div></td>
-                <td>
-                    <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
-                    <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"></i>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div ng-show="loaded">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+            <thead><tr><!-- <th>ID</th> --><th>Gene</th><th>Curators</th><th>Emails</th><th>Edit</th></tr></thead>
+            <tbody>
+                <tr data-ng-repeat="gene in documents">
+                    <!-- <td>{{$index + 1}}</td> -->
+                    <td><strong>{{gene.title}}</strong></td>
+                    <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
+                    <td><div ng-repeat="curator in gene.curators"><span>{{curator.email}}</span><br ng-if="$index<curator.length-1"/></div></td>
+                    <td>
+                        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
+                        <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div ng-hide="loaded" class="genesLoading">
+        <div class='sk-spinner sk-spinner-wave'>
+            <div class='sk-rect1'></div>
+            <div class='sk-rect2'></div>
+            <div class='sk-rect3'></div>
+            <div class='sk-rect4'></div>
+            <div class='sk-rect5'></div>
+        </div>
+        Please wait, we are loading genes information.
+    </div>
 </div>

@@ -25,11 +25,9 @@ OncoKB.tree = {};
 OncoKB.config = {
     clientId: '19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com',
     scopes: [
-        'https://www.googleapis.com/auth/plus.login',
+        // 'https://www.googleapis.com/auth/plus.me',
         'https://www.googleapis.com/auth/plus.profile.emails.read',
-        'https://www.googleapis.com/auth/drive',
-        'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive.install'
+        'https://www.googleapis.com/auth/drive.file'
     ],
     folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     userRoles: {
@@ -310,6 +308,7 @@ var oncokbApp = angular
  .value('OncoKB', OncoKB)
  .constant('config', OncoKB.config)
  .constant('gapi', window.gapi)
+ .constant('pleaseWait', window.pleaseWait)
  .constant('_', window._)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
