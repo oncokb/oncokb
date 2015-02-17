@@ -408,11 +408,11 @@ angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'c
         });
     });
 
-    // $rootScope.$on("$routeChangeStart", function (event, next, current) {
-    //     if (!Access.authorize(next.access)) {
-    //         $location.path('/')
-    //     }
-    // });
+    $rootScope.$on("$routeChangeStart", function (event, next, current) {
+        if (!Access.authorize(next.access)) {
+            $location.path('/')
+        }
+    });
 }]);
 
 /**
