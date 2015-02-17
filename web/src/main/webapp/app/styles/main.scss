@@ -254,8 +254,14 @@ h5 {
 }
 
 //Change sk-spinner style
-.sk-spinner-wave div {
+.sk-spinner-wave.mskcc div {
   background-color: #2986e2
+}
+.sk-spinner-wave.white div {
+  background-color: #fff
+}
+.sk-spinner-wave.margin div {
+  margin: 0 2px;
 }
 
 //Change bootstrap-chosen style

@@ -308,7 +308,7 @@ var oncokbApp = angular
  .value('OncoKB', OncoKB)
  .constant('config', OncoKB.config)
  .constant('gapi', window.gapi)
- .constant('pleaseWait', window.pleaseWait)
+ .constant('loadingScreen', window.loadingScreen)
  .constant('_', window._)
  .config(function ($routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
@@ -380,19 +380,25 @@ var oncokbApp = angular
  * Set up handlers for various authorization issues that may arise if the access token
  * is revoked or expired.
  */
-angular.module('oncokb').run(['$rootScope', '$location', 'storage', 'access', 'config', 'DatabaseConnector', 'users', function ($rootScope, $location, storage, Access, config, DatabaseConnector, Users) {
+angular.module('oncokb').run(
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 
+    function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users) {
     $rootScope.user = {
         role: config.userRoles.public
     };
 
-    DatabaseConnector.getAllUsers(function(users){
-        Users.setUsers(users);
-        console.log('isLoggedIn:', Access.isLoggedIn());
-        if(Access.isLoggedIn()) {
-            console.log('Setting me');
-            Users.setMe();
-        }
-    });
+    // $timeout(function(){
+        DatabaseConnector.getAllUsers(function(users){
+            Users.setUsers(users);
+            // console.log('isLoggedIn:', Access.isLoggedIn());
+            if(Access.isLoggedIn()) {
+                // console.log('Setting me');
+                Users.setMe(Users.getMe());
+                $rootScope.user = Users.getMe();
+            }
+            loadingScreen.finish();
+        });
+    // }, 3000);
 
     // Error loading the document, likely due revoked access. Redirect back to home/install page
     $rootScope.$on('$routeChangeError', function () {

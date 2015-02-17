@@ -8,14 +8,9 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'pleaseWait',
-        function ($scope, $location, $routeParams, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, pleaseWait) {
+    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        function ($scope, $location, $routeParams, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.getDocs = function() {
-              // var loading_screen = pleaseWait({
-              //   logo: "images/mskcc.png",
-              //   backgroundColor: '#f46d3b',
-              //   loadingHtml: "<div class='sk-spinner sk-spinner-wave'><div class='sk-rect1'></div><div class='sk-rect2'></div><div class='sk-rect3'></div><div class='sk-rect4'></div><div class='sk-rect5'></div></div>"
-              // });
               var docs = Documents.get();
               if(docs.length > 0) {
                 // $scope.$apply(function() {

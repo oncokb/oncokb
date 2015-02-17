@@ -34,19 +34,32 @@ angular.module('oncokb')
     $scope.signedIn = false;
     $scope.user = $rootScope.user;
 
+    $rootScope.$watch('user', function(){
+        // console.log('rootScope in nav controller watched.');
+        $scope.user = $rootScope.user;
+        $scope.tabs = [];
+        if(access.authorize(accessLevels.admin)) {
+            $scope.tabs.push({key: 'tree', value: tabs.tree});
+            $scope.tabs.push({key: 'variant', value: tabs.variant});
+        }
+        if(access.authorize(accessLevels.curator)) {
+            $scope.tabs.push({key: 'genes', value: tabs.genes});
+        }
+        $scope.signedIn = access.isLoggedIn();
+    });
     // Here we do the authentication processing and error handling.
     // Note that authResult is a JSON object.
     $scope.processAuth = function(authResult) {
         // Do a check if authentication has been successful.
-        console.log('In processAuth');
+        // console.log('In processAuth');
         if(authResult['access_token']) {
-            console.log('has token');
+            // console.log('has token');
             // Successful sign in.
             // $scope.signedIn = true;
 
             access.login(loginCallback);
         } else if(authResult['error']) {
-            console.log('hasnt token');
+            // console.log('hasnt token');
             // Error while signing in.
             // $scope.signedIn = false;
             loginCallback();
@@ -55,7 +68,7 @@ angular.module('oncokb')
     };
 
     function loginCallback() {
-        console.log('In login callback.')
+        // console.log('In login callback.')
         $scope.$apply(function(){
             $scope.user = $rootScope.user;
             $scope.tabs = [];
@@ -67,17 +80,13 @@ angular.module('oncokb')
                 $scope.tabs.push({key: 'genes', value: tabs.genes});
             }
             $scope.signedIn = access.isLoggedIn();
-            console.log('applied scope tabs.')
+            // console.log('applied scope tabs.')
         });
     }
 
-    $scope.$watch($rootScope.user,function(){
-        console.log('RootScope user has changed');
-    });
-
     // When callback is received, we need to process authentication.
     $scope.signInCallback = function(authResult) {
-        console.log('Signed in.');
+        // console.log('Signed in.');
         $scope.processAuth(authResult);
     };
 
@@ -116,5 +125,4 @@ angular.module('oncokb')
 
     // Call start function on load.
     $scope.init = $scope.renderSignInButton();
-
 });
