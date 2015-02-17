@@ -17,25 +17,19 @@ angular.module('oncokb')
 
     var accessLevels = config.accessLevels;
 
-    $scope.signinCallback = function(result) {
-        console.log('auto signedIn result',result);
-    };
+    
 
-    // $scope.authorize = function(){
-    //     storage.requireAuth(false).then(function (result) {
-    //         if(result.status && result.status.signed_in) {
-    //             $scope.signedIn = true;
-    //         }else{
-    //             $scope.signedIn = false;
-    //         }
-    //     });
-    // };
-// This flag we use to show or hide the button in our HTML.
-    $scope.signedIn = false;
-    $scope.user = $rootScope.user;
+    function loginCallback() {
+        // console.log('In login callback.')
+        if(!$scope.$$phase) {
+            $scope.$apply(setParams);
+        }else {
+            setParams();
+        }
+    }
 
-    $rootScope.$watch('user', function(){
-        // console.log('rootScope in nav controller watched.');
+    function setParams() {
+        var url = access.getURL();
         $scope.user = $rootScope.user;
         $scope.tabs = [];
         if(access.authorize(accessLevels.admin)) {
@@ -46,42 +40,11 @@ angular.module('oncokb')
             $scope.tabs.push({key: 'genes', value: tabs.genes});
         }
         $scope.signedIn = access.isLoggedIn();
-    });
-    // Here we do the authentication processing and error handling.
-    // Note that authResult is a JSON object.
-    $scope.processAuth = function(authResult) {
-        // Do a check if authentication has been successful.
-        // console.log('In processAuth');
-        if(authResult['access_token']) {
-            // console.log('has token');
-            // Successful sign in.
-            // $scope.signedIn = true;
 
-            access.login(loginCallback);
-        } else if(authResult['error']) {
-            // console.log('hasnt token');
-            // Error while signing in.
-            // $scope.signedIn = false;
-            loginCallback();
-            // Report error.
+        if(url) {
+            access.setURL('');
+            $location.path(url);
         }
-    };
-
-    function loginCallback() {
-        // console.log('In login callback.')
-        $scope.$apply(function(){
-            $scope.user = $rootScope.user;
-            $scope.tabs = [];
-            if(access.authorize(accessLevels.admin)) {
-                $scope.tabs.push({key: 'tree', value: tabs.tree});
-                $scope.tabs.push({key: 'variant', value: tabs.variant});
-            }
-            if(access.authorize(accessLevels.curator)) {
-                $scope.tabs.push({key: 'genes', value: tabs.genes});
-            }
-            $scope.signedIn = access.isLoggedIn();
-            // console.log('applied scope tabs.')
-        });
     }
 
     // When callback is received, we need to process authentication.
@@ -105,9 +68,10 @@ angular.module('oncokb')
     };
 
     $scope.signOut = function() {
-        gapi.auth.signOut();
         access.logout();
         $scope.signedIn = false;
+        $scope.user = $rootScope.user;
+        gapi.auth.signOut();
     };
 
     $scope.tabIsActive = function(route) {
@@ -123,6 +87,31 @@ angular.module('oncokb')
         }
     };
 
+    // Here we do the authentication processing and error handling.
+    // Note that authResult is a JSON object.
+    $scope.processAuth = function(authResult) {
+        // Do a check if authentication has been successful.
+        // console.log('In processAuth');
+        if(authResult['access_token']) {
+            // console.log('has token');
+            // Successful sign in.
+            // $scope.signedIn = true;
+
+            access.login(loginCallback);
+        } else if(authResult['error']) {
+            // console.log('hasnt token');
+            // Error while signing in.
+            // $scope.signedIn = false;
+            loginCallback();
+            // Report error.
+        }
+    };
+
+    // This flag we use to show or hide the button in our HTML.
+    $scope.signedIn = false;
+    $scope.user = $rootScope.user;
+
+    $rootScope.$watch('user', setParams);
     // Call start function on load.
     $scope.init = $scope.renderSignInButton();
 });

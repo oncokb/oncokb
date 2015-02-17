@@ -102,9 +102,15 @@ angular.module('oncokb')
     }
 
     return {
+        resetMe: function(){ self.me = {};},
         getMe: function(){ return self.me;},
         setMe: setMe,
         setUsers: setUsers,
-        getUsers: getUsers
+        getUsers: getUsers,
+        resetUsers: function(){
+            self.users = {};
+            self.usersL = 0;
+            self.usersU = [];
+        }
     };
   });

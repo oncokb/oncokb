@@ -14,6 +14,8 @@ angular.module('oncokb')
     var accessLevel = config.accessLevel;
     var loginCallback = '';
 
+    self.url = '';
+
     function getUserInfo(callback) {
         storage.requireAuth(true).then(function(result){
             gapi.client.load('plus','v1', function(){
@@ -50,6 +52,11 @@ angular.module('oncokb')
         $rootScope.user = user;
         loginCallback();
     }
+
+    function setRedirectURL(url) {
+
+    }
+
     return {
         authorize: function(accessLevel, role) {
             if(role === undefined)
@@ -71,7 +78,16 @@ angular.module('oncokb')
         logout: function(success, error) {
             $rootScope.user = {
                 role: userRoles.public
-            }
+            };
+            users.resetMe();
+        },
+
+        setURL: function(url) {
+            self.url = url;
+        },
+
+        getURL: function() {
+            return self.url;
         }
     };
   });
