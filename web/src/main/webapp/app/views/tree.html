@@ -1,5 +1,5 @@
 <div id="mainTree" class="tab-pane fade in" ng-init='!initFlag?init():""'>
-  <div class="row">
+  <div ng-hide="rendering"  class="row">
     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback m-b-5">
       <div class="input-group input-group-sm" id='tumor_search'>
         <input type="text" class="form-control" placeholder="Search Term" ng-model='searchKeywords'/>
@@ -39,10 +39,17 @@
         </div>
     </div>
   </div>
-  <div class="row" >
-    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
-          <img id='tree_loader' ng-show="rendering" src="images/ajax-loader.gif"/>
-          <div id="tree"  ng-hide="rendering"></div>
-    </div>
- </div>
+  <div ng-hide="rendering" class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
+    <div id="tree" ></div>
+  </div>
+  <div ng-show="rendering" class="genesLoading">
+      <div class='sk-spinner sk-spinner-wave'>
+          <div class='sk-rect1'></div>
+          <div class='sk-rect2'></div>
+          <div class='sk-rect3'></div>
+          <div class='sk-rect4'></div>
+          <div class='sk-rect5'></div>
+      </div>
+      Please wait, we are loading gene evidences.
+  </div>
 </div>
