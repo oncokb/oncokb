@@ -70,8 +70,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['_','$resource', '$scope', '$location', '$routeParams', 'storage', 'realtimeDocument', 'user', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector',
-        function (_, $resource, $scope, $location, $routeParams, storage, realtimeDocument, User, Documents, OncoKB, gapi, DatabaseConnector) {
+    .controller('GeneCtrl', ['_','$resource', '$scope', '$location', '$route', '$routeParams', 'storage', 'loadFile', 'user', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector',
+        function (_, $resource, $scope, $location, $route, $routeParams, storage, loadFile, User, Documents, OncoKB, gapi, DatabaseConnector) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -90,11 +90,11 @@ angular.module('oncokb')
             $scope.addMutation = function() {
                 if (this.gene && this.newMutation && this.newMutation.name) {
                     var _mutation = '';
-                    realtimeDocument.getModel().beginCompoundOperation();
-                    _mutation = realtimeDocument.getModel().create(OncoKB.Mutation);
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
                     _mutation.name.setText(this.newMutation.name);
                     this.gene.mutations.push(_mutation);
-                    realtimeDocument.getModel().endCompoundOperation();
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
                     this.newMutation = {};
                 }
             };
@@ -102,12 +102,12 @@ angular.module('oncokb')
             $scope.addTumorType = function(mutation) {
                 if (mutation && this.newTumorType && this.newTumorType.name) {
                     var _tumorType = '';
-                    realtimeDocument.getModel().beginCompoundOperation();
-                    _tumorType = realtimeDocument.getModel().create(OncoKB.Tumor);
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    _tumorType = $scope.realtimeDocument.getModel().create(OncoKB.Tumor);
                     _tumorType.name.setText(this.newTumorType.name);
                     _tumorType.nccn.category.setText('2A');
                     for(var i=0; i<4; i++) {
-                      var __ti = realtimeDocument.getModel().create(OncoKB.TI);
+                      var __ti = $scope.realtimeDocument.getModel().create(OncoKB.TI);
                       var __status = i<2?1:0; // 1: Standard, 0: Investigational
                       var __type = i%2===0?1:0; //1: sensitivity, 0: resistance
                       var __name = (__status?'Standard':'Investigational') + ' implications for ' + (__type?'sensitivity':'resistance') + ' to therapy';
@@ -118,7 +118,7 @@ angular.module('oncokb')
                       _tumorType.TI.push(__ti);
                     }
                     mutation.tumors.push(_tumorType);
-                    realtimeDocument.getModel().endCompoundOperation();
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
                     this.newTumorType = {};
                 }
             };
@@ -127,12 +127,12 @@ angular.module('oncokb')
             $scope.addTI = function(ti, index) {
                 if (ti && this.newTI[index] && this.newTI[index].name) {
                     var _treatment = '';
-                    realtimeDocument.getModel().beginCompoundOperation();
-                    _treatment = realtimeDocument.getModel().create(OncoKB.Treatment);
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
                     _treatment.name.setText(this.newTI[index].name);
                     _treatment.type.setText('Therapy');
                     ti.treatments.push(_treatment);
-                    realtimeDocument.getModel().endCompoundOperation();
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
                     this.newTI[index] = {};
                 }
             };
@@ -194,8 +194,6 @@ angular.module('oncokb')
               mutationEffect.addOn.setText('');
             };
 
-
-
             function bindDocEvents() {
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
@@ -224,13 +222,13 @@ angular.module('oncokb')
 
                   if(!hasCurator) {
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    var __curator = realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
+                    var __curator = $scope.realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
                     $scope.gene.curators.push(__curator);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                   }
                 }else {
                   $scope.realtimeDocument.getModel().beginCompoundOperation();
-                  var _curator = realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
+                  var _curator = $scope.realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
                   $scope.gene.curators.push(_curator);
                   $scope.realtimeDocument.getModel().endCompoundOperation();
                 }
@@ -341,7 +339,6 @@ angular.module('oncokb')
             }
 
             $scope.fileTitle = $routeParams.geneName;
-            $scope.realtimeDocument = realtimeDocument;
             $scope.gene = '';
             $scope.newGene = {};
             $scope.newMutation = {};
@@ -383,6 +380,31 @@ angular.module('oncokb')
               $scope.tumorTypes = data;
             });
 
+            loadFile().then(function(file){
+              $scope.realtimeDocument = file;
+              if($scope.fileTitle) {
+                var model = $scope.realtimeDocument.getModel();
+                if(!model.getRoot().get('gene')) {
+                  var gene = model.create('Gene');
+                  model.getRoot().set('gene', gene);
+                  $scope.gene = gene;
+                  $scope.gene.name.setText($scope.fileTitle);
+                  $scope.model =  model;
+                  afterCreateGeneModel();
+                }else {
+                  $scope.gene = model.getRoot().get('gene');
+                  $scope.model =  model;
+                  afterCreateGeneModel();
+                }
+              }else {
+                $scope.model = '';
+              }
+            });
+
+            $scope.$on('$locationChangeStart', function( event , next, current) {
+              storage.closeDocument();
+            });
+
             // Get OncoTree primary/secondary/tertiary/quaternary types
             // DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
             //   var tumorTypes = {};
@@ -419,22 +441,5 @@ angular.module('oncokb')
             //   $scope.tumorTypes = newTumorTypes;
             // });
 
-            if($scope.fileTitle) {
-                var model = realtimeDocument.getModel();
-                if(!model.getRoot().get('gene')) {
-                  var gene = model.create('Gene');
-                  model.getRoot().set('gene', gene);
-                  $scope.gene = gene;
-                  $scope.gene.name.setText($scope.fileTitle);
-                  $scope.model =  model;
-                  afterCreateGeneModel();
-                }else {
-                  $scope.gene = model.getRoot().get('gene');
-                  $scope.model =  model;
-                  afterCreateGeneModel();
-                }
-            }else {
-              $scope.model = '';
-            }
         }]
     );

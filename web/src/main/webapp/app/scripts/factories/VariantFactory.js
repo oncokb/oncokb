@@ -6,7 +6,7 @@ angular.module('oncokb').factory('TumorType', ['$http',  function ($http) {
     }
 
     function getFromFile() {
-        return $http.get('data/tumorType.json');
+        return $http.get('/data/tumorType.json');
     }
 
     return {
@@ -23,7 +23,7 @@ angular.module('oncokb').factory('Gene', ['$http',  function ($http) {
     }
 
     function getFromFile() {
-        return $http.get('data/gene.json');
+        return $http.get('/data/gene.json');
     }
 
     return {
@@ -40,7 +40,7 @@ angular.module('oncokb').factory('Alteration', ['$http',  function ($http) {
     }
 
     function getFromFile() {
-        return $http.get('data/alteration.json');
+        return $http.get('/data/alteration.json');
     }
 
     return {
@@ -57,7 +57,7 @@ angular.module('oncokb').factory('Users', ['$http',  function ($http) {
     }
 
     function getFromFile() {
-        return $http.get('data/users.json');
+        return $http.get('/data/users.json');
     }
 
     return {
@@ -74,7 +74,7 @@ angular.module('oncokb').factory('OncoTreeTumorTypes', ['$http',  function ($htt
     }
 
     function getFromFile() {
-        return $http.get('data/oncoTreeTumorTypes.json');
+        return $http.get('/data/oncoTreeTumorTypes.json');
     }
 
     return {
@@ -107,7 +107,7 @@ angular.module('oncokb').factory(('SearchVariant'), ['$http', function($http) {
     }
 
     function annotationFromFile() {
-        return $http.get('data/annotation.xml');
+        return $http.get('/data/annotation.xml');
     }
 
     return {

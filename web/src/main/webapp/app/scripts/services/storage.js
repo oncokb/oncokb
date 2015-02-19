@@ -126,7 +126,7 @@ angular.module('oncokb')
               }
             });
         };
-        
+
         var deferred = $q.defer();
         gapi.client.load('drive', 'v2', function() {
             var initialRequest = gapi.client.drive.files.list({

@@ -45,12 +45,6 @@ angular.module('oncokb')
         }
     }
 
-    // When callback is received, we need to process authentication.
-    $scope.signInCallback = function(authResult) {
-        // console.log('Signed in.');
-        $scope.processAuth(authResult);
-    };
-
     // Render the sign in button.
     $scope.renderSignInButton = function() {
         gapi.signin.render('signInButton',
@@ -86,9 +80,8 @@ angular.module('oncokb')
         }
     };
 
-    // Here we do the authentication processing and error handling.
-    // Note that authResult is a JSON object.
-    $scope.processAuth = function(authResult) {
+    // When callback is received, we need to process authentication.
+    $scope.signInCallback = function(authResult) {
         // Do a check if authentication has been successful.
         // console.log('In processAuth');
         if(authResult['access_token']) {
