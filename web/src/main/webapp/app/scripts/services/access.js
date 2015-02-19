@@ -46,7 +46,7 @@ angular.module('oncokb')
 
         //if user already login, but in the user spreadsheet, his/her role is empty or is not 2, then set to 2
         if(!(user.role && user.role > 1)) {
-            user.role = uuserRoles.user;
+            user.role = userInfo.user;
         }
 
         $rootScope.user = user;

@@ -37,7 +37,7 @@ public class OncoTreeTumorTypes {
     public @ResponseBody List<OncoTreeTumorType> OncoTreeTumorTypes() throws MalformedURLException, ServiceException{
         
         try {
-            return getUserInfo();
+            return geMainTypes();
         } catch (GoogleJsonResponseException e) {
             GoogleJsonError error = e.getDetails();
 
@@ -58,7 +58,7 @@ public class OncoTreeTumorTypes {
         return null;
     }
     
-    public static List<OncoTreeTumorType> getUserInfo() throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    public static ListFeed getListFeed() throws MalformedURLException, IOException, ServiceException, GeneralSecurityException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + USER_SPREADSHEET);
         GoogleAuth google = new GoogleAuth();
         SpreadsheetService service = GoogleAuth.createSpreedSheetService();
@@ -74,6 +74,12 @@ public class OncoTreeTumorTypes {
         // Fetch the list feed of the worksheet.
         URL url = entry.getListFeedUrl();
         ListFeed list = service.getFeed(url, ListFeed.class);
+        
+        return list;
+    }
+    
+    public static List<OncoTreeTumorType> getOncoTreeTumorTypes() throws IOException, MalformedURLException, ServiceException, GeneralSecurityException {
+        ListFeed list = getListFeed();
         // Create a local representation of the new row.
         List<OncoTreeTumorType> tumorTypes = new ArrayList<OncoTreeTumorType>(); 
         // Iterate through each row, printing its cell values.
@@ -84,6 +90,19 @@ public class OncoTreeTumorTypes {
             tumorType.setTertiary(row.getCustomElements().getValue("tertiary"));
             tumorType.setQuaternary(row.getCustomElements().getValue("quaternary"));
             tumorTypes.add(tumorType);
+        }
+        return tumorTypes;
+    }
+    
+    public static List<OncoTreeTumorType> geMainTypes() throws IOException, MalformedURLException, ServiceException, GeneralSecurityException {
+        ListFeed list = getListFeed();
+        List tumorTypes = new ArrayList(); 
+        // Iterate through each row, printing its cell values.
+        for (ListEntry row : list.getEntries()) {
+            Object type = row.getCustomElements().getValue("metamaintype");
+            if(!tumorTypes.contains(type)){
+                tumorTypes.add(type);
+            }
         }
         return tumorTypes;
     }

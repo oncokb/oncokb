@@ -318,22 +318,22 @@ var oncokbApp = angular
            templateUrl: 'views/welcome.html',
            access: access.public
         })
-        .when('/tree', {
-            templateUrl: 'views/tree.html',
-            controller: 'TreeCtrl',
-            access: access.admin
-        })
-        .when('/variant', {
-            templateUrl: 'views/variant.html',
-            controller: 'VariantCtrl',
-            reloadOnSearch: false,
-            access: access.admin
-        })
-        .when('/reportGenerator', {
-            templateUrl: 'views/reportgenerator.html',
-            controller: 'ReportgeneratorCtrl',
-            access: access.admin
-        })
+        // .when('/tree', {
+        //     templateUrl: 'views/tree.html',
+        //     controller: 'TreeCtrl',
+        //     access: access.admin
+        // })
+        // .when('/variant', {
+        //     templateUrl: 'views/variant.html',
+        //     controller: 'VariantCtrl',
+        //     reloadOnSearch: false,
+        //     access: access.admin
+        // })
+        // .when('/reportGenerator', {
+        //     templateUrl: 'views/reportgenerator.html',
+        //     controller: 'ReportgeneratorCtrl',
+        //     access: access.admin
+        // })
         .when('/genes', {
             templateUrl: 'views/genes.html',
             controller: 'GenesCtrl',

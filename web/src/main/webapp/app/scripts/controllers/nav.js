@@ -17,8 +17,6 @@ angular.module('oncokb')
 
     var accessLevels = config.accessLevels;
 
-    
-
     function loginCallback() {
         // console.log('In login callback.')
         if(!$scope.$$phase) {
@@ -32,10 +30,10 @@ angular.module('oncokb')
         var url = access.getURL();
         $scope.user = $rootScope.user;
         $scope.tabs = [];
-        if(access.authorize(accessLevels.admin)) {
-            $scope.tabs.push({key: 'tree', value: tabs.tree});
-            $scope.tabs.push({key: 'variant', value: tabs.variant});
-        }
+        // if(access.authorize(accessLevels.admin)) {
+        //     $scope.tabs.push({key: 'tree', value: tabs.tree});
+        //     $scope.tabs.push({key: 'variant', value: tabs.variant});
+        // }
         if(access.authorize(accessLevels.curator)) {
             $scope.tabs.push({key: 'genes', value: tabs.genes});
         }
@@ -71,6 +69,7 @@ angular.module('oncokb')
         access.logout();
         $scope.signedIn = false;
         $scope.user = $rootScope.user;
+        $location.path('/');
         gapi.auth.signOut();
     };
 

@@ -187,18 +187,21 @@
 						</span>
 	                </accordion-group>
 	            </accordion>
-				<div style="width: 100%">
+				<div style="width: 100%" class="input-group input-group-sm">
 					<!-- <input type="text" class="form-control" ng-model="newTumorType.name" placeholder="Tumor type name" /> -->
-					<div style="width: 80%; float:left">
-						<select chosen ng-model='newTumorType.name' no-results-text="'Could not find any tumor types'" ng-options='tumorType.name as tumorType.name group by tumorType.tissue for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Tumor type name" id="curateTumorTypesDropdown">
+					<!-- <div style="width: 80%; float:left"> -->
+						<!-- <select chosen ng-model='newTumorType.name' no-results-text="'Could not find any tumor types'" ng-options='tumorType as tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Tumor type name" id="curateTumorTypesDropdown">
 			            	<option value=""></option>
-			            </select>
-		            </div>
-					<div style="float:left">
-						<button type="button" class="btn btn-default btn-sm" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
+			            </select> -->
+		            <input type="text" ng-model="newTumorType.name" typeahead="tumorType for tumorType in tumorTypes | filter:$viewValue | limitTo:8" class="form-control">
+		            <!-- </div> -->
+					<!-- <div style="float:left"> -->
+					<span class="input-group-btn">
+						<button type="button" class="btn btn-default" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
 							<i class="fa fa-plus"></i> Add Tumor Type
 						</button>
-					</div>
+					</span>
+					<!-- </div> -->
 				</div>
 	        </accordion-group>
 	    </accordion>

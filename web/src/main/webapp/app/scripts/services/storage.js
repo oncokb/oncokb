@@ -262,7 +262,7 @@ angular.module('oncokb')
           'user_id': userId
         };
         var deferred = $q.defer();
-        console.log(params);
+        
         gapi.auth.authorize(params, function (result) {
           if (result && !result.error) {
             deferred.resolve(result);
