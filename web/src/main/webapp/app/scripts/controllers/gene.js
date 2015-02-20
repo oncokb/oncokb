@@ -18,7 +18,7 @@ angular.module('oncokb')
                   $scope.loaded = true;
                 // });
               }else{
-                storage.requireAuth().then(function(){
+                storage.requireAuth(true).then(function(){
                     storage.retrieveAllFiles().then(function(result){
                         Documents.set(result);
                         $scope.documents = Documents.get();

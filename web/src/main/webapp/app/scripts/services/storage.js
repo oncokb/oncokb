@@ -40,6 +40,7 @@ angular.module('oncokb')
     this.getDocument = function (id) {
         var deferred = $q.defer();
         var onComplete = function (result) {
+          // console.log('get document', result);
             if (result && !result.error) {
               deferred.resolve(result);
             } else {
@@ -76,6 +77,7 @@ angular.module('oncokb')
     this.getUserInfo = function (userId) {
         var deferred = $q.defer();
         var onComplete = function (result) {
+          // console.log('get user info', result);
             if (result && !result.error) {
               deferred.resolve(result);
             } else {
@@ -123,6 +125,7 @@ angular.module('oncokb')
                 });
                 retrievePageOfFiles(request, result);
               } else {
+                // console.log('get all files', result);
                 deferred.resolve(result);
               }
             });
@@ -206,7 +209,7 @@ angular.module('oncokb')
     this.createDocument = function (title) {
       var deferred = $q.defer();
       var onComplete = function (result) {
-      console.log('Completes', result);
+      // console.log('Completes', result);
         if (result && !result.error) {
           deferred.resolve(result);
         } else {
@@ -214,7 +217,7 @@ angular.module('oncokb')
         }
         $rootScope.$digest();
       };
-      console.log('Start create file');
+      // console.log('Start create file');
       gapi.client.request({
         'path': '/drive/v2/files',
         'method': 'POST',
@@ -254,6 +257,7 @@ angular.module('oncokb')
       var now = Date.now() / 1000;
 
       if (token && ((token.expires_at - now) > (60))) {
+        // console.log('token unexpires', token);
         return $q.when(token);
       } else {
         var params = {
@@ -264,7 +268,9 @@ angular.module('oncokb')
         };
         var deferred = $q.defer();
         
+        // console.log('token expired, call authorize function');
         gapi.auth.authorize(params, function (result) {
+          // console.log('get authorize', result);
           if (result && !result.error) {
             deferred.resolve(result);
           } else {
@@ -289,11 +295,13 @@ angular.module('oncokb')
         // model.getRoot().set('gene', OncoKB.Gene);
       };
       var onLoad = function (document) {
+        // console.log('document loaded', document);
         this.setDocument(id, document);
         deferred.resolve(document);
         $rootScope.$digest();
       }.bind(this);
       var onError = function (error) {
+        // console.log('load on error', error);
         if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
           $rootScope.$emit('todos.token_refresh_required');
         } else if (error.type === gapi.drive.realtime.ErrorType.CLIENT_ERROR) {

@@ -38,7 +38,7 @@ angular.module('oncokb')
             $scope.tabs.push({key: 'genes', value: tabs.genes});
         }
         $scope.signedIn = access.isLoggedIn();
-
+        // console.log($scope);
         if(url) {
             if(access.isLoggedIn()){
                 access.setURL('');
@@ -49,16 +49,20 @@ angular.module('oncokb')
 
     // Render the sign in button.
     $scope.renderSignInButton = function() {
-        gapi.signin.render('signInButton',
-            {
-                'callback': $scope.signInCallback, // Function handling the callback.
-                'clientid': config.clientId, // CLIENT_ID from developer console which has been explained earlier.
-                // 'requestvisibleactions': 'http://schemas.google.com/AddActivity', // Visible actions, scope and cookie policy wont be described now,
-                                                                                  // as their explanation is available in Google+ API Documentation.
-                'scope': config.scopes.join(' '),
-                'cookiepolicy': 'single_host_origin'
-            }
-        );
+        // gapi.signin.render('signInButton',
+        //     {
+        //         'callback': $scope.signInCallback, // Function handling the callback.
+        //         'clientid': config.clientId, // CLIENT_ID from developer console which has been explained earlier.
+        //         // 'requestvisibleactions': 'http://schemas.google.com/AddActivity', // Visible actions, scope and cookie policy wont be described now,
+        //                                                                           // as their explanation is available in Google+ API Documentation.
+        //         'scope': config.scopes.join(' '),
+        //         'cookiepolicy': 'single_host_origin'
+        //     }
+        // );
+        // 
+        storage.requireAuth().then(function(result){
+            $scope.signInCallback(result);
+        });
     };
 
     $scope.signOut = function() {
@@ -90,11 +94,12 @@ angular.module('oncokb')
         if(authResult['access_token']) {
             // Successful sign in.
             // $scope.signedIn = true;
-
+            // console.log('access success', authResult);
             access.login(loginCallback);
         } else if(authResult['error']) {
             // Error while signing in.
             // $scope.signedIn = false;
+            // console.log('access failed', authResult);
             loginCallback();
             // Report error.
         }
@@ -104,7 +109,7 @@ angular.module('oncokb')
     $scope.signedIn = false;
     $scope.user = $rootScope.user;
 
-    // $rootScope.$watch('user', setParams);
+    $rootScope.$watch('user', setParams);
     // Call start function on load.
-    $scope.init = $scope.renderSignInButton();
+    // $scope.init = $scope.renderSignInButton();
 });

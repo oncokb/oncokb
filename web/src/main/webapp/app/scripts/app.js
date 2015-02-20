@@ -316,7 +316,7 @@ var oncokbApp = angular
     // $locationProvider.html5Mode(true);
     $routeProvider
         .when('/', {
-           templateUrl: '/views/welcome.html',
+           templateUrl: 'views/welcome.html',
            access: access.public
         })
         // .when('/tree', {
@@ -336,12 +336,12 @@ var oncokbApp = angular
         //     access: access.admin
         // })
         .when('/genes', {
-            templateUrl: '/views/genes.html',
+            templateUrl: 'views/genes.html',
             controller: 'GenesCtrl',
             access: access.curator
         })
         .when('/gene/:geneName', {
-            templateUrl: '/views/gene.html',
+            templateUrl: 'views/gene.html',
             controller: 'GeneCtrl',
             access: access.curator
             // resolve: {
@@ -411,7 +411,7 @@ angular.module('oncokb').run(
         storage.requireAuth(true).then(function () {
             // no-op
         }, function () {
-            $location.url('/gene');
+            $location.url('/');
         });
     });
 

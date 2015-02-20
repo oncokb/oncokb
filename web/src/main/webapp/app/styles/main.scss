@@ -65,6 +65,17 @@ body {
   margin-top: 7px !important;
 }
 
+#googleSignIn {
+  margin-top: 5px;
+}
+
+#googleSignIn button {
+  background-color: #2986e2;
+  border-color: #2986e2;
+  opacity: 1;
+  color: white;
+}
+
 table.colorFirstCol td:nth-child(1) {
     background-color: lightgray;
 }
