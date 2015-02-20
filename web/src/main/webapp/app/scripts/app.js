@@ -53,11 +53,13 @@ OncoKB.curateInfo = {
         },
         'summary': {
             type: 'string',
-            display: 'Summary'
+            display: 'Summary',
+            comment: true
         },
         'background': {
             type: 'string',
-            display: 'Background'
+            display: 'Background',
+            comment: true
         },
         'mutations': {
             type: 'list'
@@ -72,14 +74,16 @@ OncoKB.curateInfo = {
         },
         'oncogenic': {
             type: 'string',
-            display: 'Oncogenic'
+            display: 'Oncogenic',
+            comment: true
         },
         'effect': {
             type: 'ME'
         },
         'description': {
             type: 'string',
-            display: 'Description of mutation effect'
+            display: 'Description of mutation effect',
+            comment: true
         },
         'tumors': {
             type: 'list'
@@ -96,33 +100,40 @@ OncoKB.curateInfo = {
     'NCCN': {
         'disease': {
             type: 'string',
-            display: 'Diease'
+            display: 'Diease',
+            comment: true
         },
         'version': {
             type: 'string',
-            display: 'Version'
+            display: 'Version',
+            comment: true
         },
         'pages': {
             type: 'string',
-            display: 'Pages'
+            display: 'Pages',
+            comment: true
         },
         'category': {
             type: 'string',
-            display: 'NCCN Categories of Evidence and Consensus'
+            display: 'NCCN Categories of Evidence and Consensus',
+            comment: true
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence'
+            display: 'Description of evidence',
+            comment: true
         }
     },
     'InteractAlts': {
         'alterations': {
             type: 'string',
-            display: 'Alterations'
+            display: 'Alterations',
+            comment: true
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence'
+            display: 'Description of evidence',
+            comment: true
         }
     },
     'Tumor': {
@@ -131,11 +142,13 @@ OncoKB.curateInfo = {
         },
         'prevalence': {
             type: 'string',
-            display: 'Prevalence'
+            display: 'Prevalence',
+            comment: true
         },
         'progImp': {
             type: 'string',
-            display: 'Prognostic implications'
+            display: 'Prognostic implications',
+            comment: true
         },
         'trials': {
             type: 'list'
@@ -147,7 +160,8 @@ OncoKB.curateInfo = {
             type: 'NCCN'
         },
         'interactAlts': {
-            type: 'InteractAlts'
+            type: 'InteractAlts',
+            comment: true
         }
     },
     'TI': {
@@ -161,7 +175,8 @@ OncoKB.curateInfo = {
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence'
+            display: 'Description of evidence',
+            comment: true
         }
     },
     'Treatment': {
@@ -173,25 +188,45 @@ OncoKB.curateInfo = {
         },
         'level': {
             type: 'string',
-            display: 'Highest level of evidence'
+            display: 'Highest level of evidence',
+            comment: true
         },
         'indication': {
             type: 'string',
-            display: 'Approved Indication'
+            display: 'Approved Indication',
+            comment: true
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence'
+            display: 'Description of evidence',
+            comment: true
         },
         'trials': {
-            type: 'string'
+            type: 'string',
+            comment: true
         }
     },
     'ME': {
         'value': {
-            type: 'string'
+            type: 'string',
+            comment: true
         },
         'addOn': {
+            type: 'string',
+            comment: true
+        }
+    },
+    'Comment': {
+        'date': {
+            type: 'string'
+        },
+        'user': {
+            type: 'string'
+        },
+        'content': {
+            type: 'string'
+        },
+        'solved': {
             type: 'string'
         }
     }
@@ -280,6 +315,51 @@ OncoKB.initialize = function() {
             gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key], OncoKB[_key].prototype.setUp);
         }
     }
+
+    //Create comments category individually
+    // OncoKB.Comments = function() {};
+
+    // OncoKB.Comments.prototype.attr = _key;
+
+    // OncoKB.Comments.prototype.setUp = function() {};
+
+    // OncoKB.Comments.prototype.initialize = function () {
+    //     var model = gapi.drive.realtime.custom.getModel(this);
+    //     var id = this.attr;
+    //     var attr = _.keys(OncoKB.curateInfo);
+    //     var attrL = -1;
+    //     attr = _.remove(attr, function(n) { return n==='Comment'; });
+    //     attrL = attr.length;
+
+    //     for(var i = 0; i < attrL; i++) {
+    //         var _key = attr[i];
+    //         var _attr = _.keys(OncoKB.curateInfo[_key]);
+    //         var _attrL = _attr.length;
+
+    //         for(var j = 0; j < _attrL; j++) {
+    //             var __key = _attr[j];
+    //             if(OncoKB.curateInfo[_key][__key].hasOwnProperty('comment') && OncoKB.curateInfo[_key][__key].comment) {
+    //                 if(!this.hasOwnProperty(_key)){
+    //                     this[_key] == {};
+    //                 }
+    //                 this[_key][__key] = model.createList();
+    //             }
+    //         }
+    //     }
+    //     this.setUp();
+    // };
+
+    // // for(var j=0; j<_keysL; j++) {
+    // //     OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
+    // // }
+
+    // //Register custom type
+    // gapi.drive.realtime.custom.registerType(OncoKB.Comments, 'Comments');
+
+    // //Set realtime API initialize function for each type, this function only runs one time when create new data model
+    // gapi.drive.realtime.custom.setInitializer(OncoKB.Comments, OncoKB.Comments.prototype.initialize);
+
+    // gapi.drive.realtime.custom.setOnLoaded(OncoKB.Comments, OncoKB.Comments.prototype.setUp);
 };
 
 var oncokbApp = angular

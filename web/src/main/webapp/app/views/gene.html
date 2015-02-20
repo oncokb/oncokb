@@ -139,7 +139,7 @@
 							                ng-options="opt.value as opt.label for opt in levels.IR">
 							            </select>
 									</p>
-									<p>
+									<p ng-if="checkTI(ti, 1, 1)">
 							        	<strong>{{treatment.indication.display}}:</strong>
 							        	<input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"/>
 									</p>
