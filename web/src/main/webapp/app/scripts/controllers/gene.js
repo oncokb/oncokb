@@ -292,8 +292,6 @@ angular.module('oncokb')
             }
 
             function onUndoStateChanged(evt) {
-              console.info(evt);
-
               if (evt.canUndo) {
                 $scope.canUndo = true;
               }else {

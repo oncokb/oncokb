@@ -25,7 +25,8 @@ angular.module('oncokb')
      * Close the current document.
      */
     this.closeDocument = function () {
-      this.document.close();
+      if(this.document)
+        this.document.close();
       this.document = null;
       this.id = null;
     };

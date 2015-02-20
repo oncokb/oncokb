@@ -40,8 +40,10 @@ angular.module('oncokb')
         $scope.signedIn = access.isLoggedIn();
 
         if(url) {
-            access.setURL('');
-            $location.path(url);
+            if(access.isLoggedIn()){
+                access.setURL('');
+                $location.path(url);
+            }
         }
     }
 
@@ -84,14 +86,13 @@ angular.module('oncokb')
     $scope.signInCallback = function(authResult) {
         // Do a check if authentication has been successful.
         // console.log('In processAuth');
+
         if(authResult['access_token']) {
-            // console.log('has token');
             // Successful sign in.
             // $scope.signedIn = true;
 
             access.login(loginCallback);
         } else if(authResult['error']) {
-            // console.log('hasnt token');
             // Error while signing in.
             // $scope.signedIn = false;
             loginCallback();
@@ -103,7 +104,7 @@ angular.module('oncokb')
     $scope.signedIn = false;
     $scope.user = $rootScope.user;
 
-    $rootScope.$watch('user', setParams);
+    // $rootScope.$watch('user', setParams);
     // Call start function on load.
     $scope.init = $scope.renderSignInButton();
 });

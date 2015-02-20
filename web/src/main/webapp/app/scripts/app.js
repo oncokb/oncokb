@@ -417,8 +417,10 @@ angular.module('oncokb').run(
 
     $rootScope.$on("$routeChangeStart", function (event, next, current) {
         if (!Access.authorize(next.access)) {
-            Access.setURL($location.path());
-            $location.path('/')
+            if(!Access.isLoggedIn()) {
+                Access.setURL($location.path());
+            }
+            $location.path('/');
         }
     });
 }]);

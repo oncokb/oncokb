@@ -33,7 +33,7 @@ angular.module('oncokb')
         data = {};
 
     //When running locally, set this to true, all servlet will read data from relative files.
-    var dataFromFile = false;
+    var dataFromFile = true;
 
     function getAllGene(callback, timestamp) {
       if(dataFromFile) {

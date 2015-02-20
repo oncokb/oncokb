@@ -21,12 +21,12 @@ angular.module('oncokb')
             gapi.client.load('plus','v1', function(){
                 gapi.client.plus.people.get({
                     'userId' : 'me'
-                }).execute(user);
+                }).execute(userFunc);
             });
         });
     }
 
-    function user(userInfo) {
+    function userFunc(userInfo) {
         var user = {};
         if(userInfo.emails) {
             for (var i = 0; i < userInfo.emails.length; i++) {
