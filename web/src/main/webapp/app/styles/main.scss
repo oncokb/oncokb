@@ -159,6 +159,14 @@ p.editableBox.doubleH {
   display: none;
   z-index: 999;
 }
+.geneComments .title{
+  font-weight: 400;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.geneComments .content{
+  font-weight: 600;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
 i.fa-comments, i.fa-comments-o{
   font-size: 15px;
   margin: 0 5px;

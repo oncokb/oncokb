@@ -3,17 +3,17 @@
   <commentsBody class="geneComments">
     <div ng-repeat="comment in comments.asArray()">
       <div style="width: 100%; float: left; margin: 5px 0;">
-        <div style="width: 45%; float: left; font-weight: lighter;">
+        <div style="width: 45%; float: left;" class="title">
           <span style="width: 100%; float: left;">{{comment.userName.text}}</span>
           <span style="width: 100%; float: left;">{{comment.date.text | date:'h:mma MMM dd'}}</span>
         </div>
         <div style="width: 55%; float: left;">
           <span class="btn-group btn-group-sm pull-right" role="group">
-            <button class="btn btn-default" ng-click="resolve(comment)"><span ng-if="comment.resolved.text === 'false'">Resolve</span><span ng-if="comment.resolved.text === 'true'">Resolved</span></button>
+            <button class="btn btn-default" ng-click="resolve(comment)" ng-disabled="comment.resolved.text === 'true'"><span ng-if="comment.resolved.text === 'false'">Resolve</span><span ng-if="comment.resolved.text === 'true'">Resolved</span></button>
             <button class="btn btn-default" ng-click="delete($index)">Delete</button>
           </span>
         </div>
-        <div style="width: 100%; float: left;">
+        <div style="width: 100%; float: left;" class="content">
           <span>{{comment.content.text}}</span>
         </div>
       </div>
