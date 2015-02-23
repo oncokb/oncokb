@@ -92,6 +92,23 @@ public final class AlterationUtils {
                     end = start;
 
                     consequence = "frameshift_variant";
+                }else {
+                    p = Pattern.compile("([A-Z]+)([0-9]+)((ins)|(del))");
+                    m = p.matcher(proteinChange);
+                    if (m.matches()) {
+                        ref = m.group(1);
+                        start = Integer.valueOf(m.group(2));
+                        end = start;
+                        String v = m.group(3);
+                        switch (v) {
+                            case "ins":
+                                consequence = "inframe_insertion";
+                                break;
+                            case "del":
+                                consequence = "inframe_deletion";
+                                break;
+                        }
+                    }
                 }
             }
         }

@@ -74,6 +74,61 @@ angular.module('oncokb')
         return deferred.promise;
     };
 
+    this.insertPermission = function (id, email, type, role) {
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+          // console.log(result);
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+            $rootScope.$digest();
+        };
+
+        var body = {
+          'value': email,
+          'type': type,
+          'role': role
+        };
+        var request = gapi.client.drive.permissions.insert({
+          'fileId': id,
+          'resource': body
+        });
+        request.execute(onComplete);
+
+        return deferred.promise;
+    };
+
+    this.updatePermission = function (fileId, permissionId, newRole) {
+        var deferred = $q.defer();
+        var onComplete = function (result) {
+          // console.log(result);
+            if (result && !result.error) {
+              deferred.resolve(result);
+            } else {
+              deferred.reject(result);
+            }
+            $rootScope.$digest();
+        };
+
+        var request = gapi.client.drive.permissions.get({
+          'fileId': fileId,
+          'permissionId': permissionId
+        });
+        request.execute(function(resp) {
+          resp.role = newRole;
+          var updateRequest = gapi.client.drive.permissions.update({
+            'fileId': fileId,
+            'permissionId': permissionId,
+            'resource': resp
+          });
+          updateRequest.execute(onComplete);
+        });
+
+        return deferred.promise;
+    };
+
     this.getUserInfo = function (userId) {
         var deferred = $q.defer();
         var onComplete = function (result) {

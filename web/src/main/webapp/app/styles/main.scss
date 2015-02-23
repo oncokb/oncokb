@@ -148,11 +148,24 @@ p.editableBox.doubleH {
   top: 20%;
   left: calc(50% - 150px);
 }
-
+.geneComments {
+  position: absolute;
+  width: 300px;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px;
+  background-color: white;
+  display: none;
+  z-index: 999;
+}
+i.fa-comments, i.fa-comments-o{
+  font-size: 15px;
+  margin: 0 5px;
+}
 i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover {
   cursor: pointer;
 }
-
 rect {
   fill: none;
   pointer-events: all;

@@ -98,6 +98,11 @@ OncoKB.curateInfo = {
         }
     },
     'NCCN': {
+        'therapy': {
+            type: 'string',
+            display: 'Therapy',
+            comment: true
+        },
         'disease': {
             type: 'string',
             display: 'Diease',
@@ -220,13 +225,16 @@ OncoKB.curateInfo = {
         'date': {
             type: 'string'
         },
-        'user': {
+        'userName': {
+            type: 'string'
+        },
+        'email': {
             type: 'string'
         },
         'content': {
             type: 'string'
         },
-        'solved': {
+        'resolved': {
             type: 'string'
         }
     }
@@ -280,6 +288,7 @@ OncoKB.initialize = function() {
                     this.types = model.createMap({'status': '0', 'type': '0'});
                 }else {
                     if(OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
+                        this[__key + '_comments'] = model.createList();
                         switch (OncoKB.curateInfo[id][__key].type) {
                             case 'string':
                                 this[__key] = model.createString('');
@@ -300,6 +309,7 @@ OncoKB.initialize = function() {
         //Register every field of OncoKB into document
         for(var j=0; j<_keysL; j++) {
             OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
+            OncoKB[_key].prototype[_keys[j] + '_comments'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_comments');
         }
 
         //Register custom type
@@ -349,9 +359,25 @@ OncoKB.initialize = function() {
     //     this.setUp();
     // };
 
-    // // for(var j=0; j<_keysL; j++) {
-    // //     OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
-    // // }
+    // var attr = _.keys(OncoKB.curateInfo);
+    // var attrL = -1;
+    // attr = _.remove(attr, function(n) { return n !=='Comment'; });
+    // attrL = attr.length;
+
+    // for(var i = 0; i < attrL; i++) {
+    //     var _key = attr[i];
+    //     var _attr = _.keys(OncoKB.curateInfo[_key]);
+    //     var _attrL = _attr.length;
+
+    //     OncoKB.Comments.prototype[_key] = gapi.drive.realtime.custom.collaborativeField('comments_' + _key);
+
+    //     for(var j = 0; j < _attrL; j++) {
+    //         var __key = _attr[j];
+    //         if(OncoKB.curateInfo[_key][__key].hasOwnProperty('comment') && OncoKB.curateInfo[_key][__key].comment) {
+    //             OncoKB.Comments.prototype[_key][__key] = gapi.drive.realtime.custom.collaborativeField('comments_' + _key + '_' + __key);
+    //         }
+    //     }
+    // }
 
     // //Register custom type
     // gapi.drive.realtime.custom.registerType(OncoKB.Comments, 'Comments');
@@ -389,6 +415,7 @@ var oncokbApp = angular
  .constant('config', OncoKB.config)
  .constant('gapi', window.gapi)
  .constant('loadingScreen', window.loadingScreen)
+ .constant('S', window.S)
  .constant('_', window._)
  .config(function ($locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
