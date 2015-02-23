@@ -9,7 +9,6 @@
  * Main module of the application.
  */
 var OncoKB = {};
-
 //Global variables
 OncoKB.global = {};
 //OncoKB.global.genes
@@ -412,6 +411,7 @@ var oncokbApp = angular
     email: 'N/A'
  })
  .value('OncoKB', OncoKB)
+ .constant('SecretEmptyKey', '[$empty$]')
  .constant('config', OncoKB.config)
  .constant('gapi', window.gapi)
  .constant('loadingScreen', window.loadingScreen)

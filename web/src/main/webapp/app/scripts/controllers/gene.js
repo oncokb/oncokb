@@ -109,8 +109,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$scope', '$location', '$route', '$routeParams', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector',
-        function (_, S, $resource, $scope, $location, $route, $routeParams, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$timeout', '$scope', '$location', '$route', '$routeParams', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
+        function (_, S, $resource, $timeout, $scope, $location, $route, $routeParams, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -136,6 +136,10 @@ angular.module('oncokb')
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                     this.newMutation = {};
                 }
+            };
+
+            $scope.stateComparator = function (state, viewValue) {
+              return viewValue === SecretEmptyKey || (''+state).toLowerCase().indexOf((''+viewValue).toLowerCase()) > -1;
             };
 
             $scope.getComments = function() {
@@ -300,6 +304,13 @@ angular.module('oncokb')
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                     this.newTI[index] = {};
                 }
+            };
+
+            $scope.onFocus = function (e) {
+              $timeout(function () {
+                $(e.target).trigger('input');
+                $(e.target).trigger('change'); // for IE
+              });
             };
 
             //Add new therapeutic implication
@@ -572,8 +583,12 @@ angular.module('oncokb')
 
             $scope.userRole = Users.getMe().role;
             DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
+              if(data.indexOf('All tumors') === -1){
+                data.push('All tumors');
+              }
               $scope.tumorTypes = data;
             });
+            $scope.suggestedMutations = ['V600E', 'V600F'];
 
             loadFile().then(function(file){
               $scope.realtimeDocument = file;

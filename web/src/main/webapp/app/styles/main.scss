@@ -124,25 +124,6 @@ p.editableBox.doubleH {
   padding: 3px 8px;
   border-radius: 3px;
 }
-.muattionEffectHeader {
-  width: 16%;
-  float: left;
-}
-.muattionEffectBody {
-  width: 84%;
-  float: left;
-}
-.muattionEffectBody span{
-  width: 100%;
-  float: left;
-}
-.muattionEffectBody span{
-  width: 100%;
-  float: left;
-}
-.muattionEffectBody span input[type="text"]{
-  float: right;
-}
 .genesLoading {
   position: absolute;
   top: 20%;
@@ -159,6 +140,36 @@ p.editableBox.doubleH {
   display: none;
   z-index: 999;
 }
+.approvedIndication,.mutationEffect {
+  width: 100%;
+}
+.approvedIndication .header,.mutationEffect .header{
+  float: left;
+}
+.approvedIndication .header {
+  width: 170px;
+}
+.mutationEffect .header {
+  width: 120px;
+}
+.approvedIndication .content,.mutationEffect .content{
+  float: left;
+}
+.approvedIndication .content {
+  width: calc(100% - 170px);
+}
+.mutationEffect .content{
+  width: calc(100% - 120px);
+}
+.mutationEffect .content span{
+  width: 100%;
+  float: left;
+}
+.mutationEffect .content span input[type="text"]{
+  float: right;
+  width: calc(100% - 110px);
+}
+
 .geneComments .title{
   font-weight: 400;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
