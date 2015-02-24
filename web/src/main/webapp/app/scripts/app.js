@@ -104,7 +104,7 @@ OncoKB.curateInfo = {
         },
         'disease': {
             type: 'string',
-            display: 'Diease',
+            display: 'Disease',
             comment: true
         },
         'version': {
@@ -119,7 +119,7 @@ OncoKB.curateInfo = {
         },
         'category': {
             type: 'string',
-            display: 'NCCN Categories of Evidence and Consensus',
+            display: 'NCCN category of evidence and consensus',
             comment: true
         },
         'description': {
@@ -197,7 +197,7 @@ OncoKB.curateInfo = {
         },
         'indication': {
             type: 'string',
-            display: 'Approved Indication',
+            display: 'Approved indications',
             comment: true
         },
         'description': {

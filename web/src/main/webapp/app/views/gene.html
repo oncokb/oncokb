@@ -169,7 +169,7 @@
               </div>
               <hr/>
             </div>
-            <h4><comments-dict file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>Ongoing clinical trials</h4>
+            <h4><comments-dict file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>Ongoing clinical trials:</h4>
                       <div>
                         <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">{{trial}}
                         <i ng-click="remove($index, tumor.trials, $event)" class="fa fa-trash-o"></i>
@@ -192,7 +192,7 @@
               </div> -->
                       </div>
             <hr/>
-                      <h4>Interacting alterations</h4>
+                      <h4>Interacting alterations:</h4>
                       <p>
                   <strong><comments-dict file-editable="fileEditable" comments="tumor.interactAlts.alterations_comments" object="tumor.interactAlts" key="alterations" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>{{tumor.interactAlts.alterations.display}}:</strong>
                   <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.interactAlts.alterations.text"/>
