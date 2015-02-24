@@ -113,8 +113,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$timeout', '$scope', '$location', '$route', '$routeParams', 'importer', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
-        function (_, S, $resource, $timeout, $scope, $location, $route, $routeParams, importer, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$timeout', '$scope', '$location', '$route', '$routeParams', 'importer', 'curationSuggestions', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
+        function (_, S, $resource, $timeout, $scope, $location, $route, $routeParams, importer, CurationSuggestions, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -308,6 +308,20 @@ angular.module('oncokb')
               return string;
             }
 
+            function getSuggestions() {
+              var suggestions = CurationSuggestions.get();
+              if(suggestions.length === 0) {
+                DatabaseConnector.getAllCurationSuggestions(function(data){
+                  CurationSuggestions.set(data);
+                  $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
+                  console.log($scope.suggestedMutations);
+                });
+              }else {
+                $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
+                console.log($scope.suggestedMutations);
+              }
+            }
+
             function bindDocEvents() {
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
@@ -492,13 +506,15 @@ angular.module('oncokb')
             $scope.fileEditable = false;
 
             $scope.userRole = Users.getMe().role;
+
+            getSuggestions();
+
             DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
               if(data.indexOf('All tumors') === -1){
                 data.push('All tumors');
               }
               $scope.tumorTypes = data;
             });
-            $scope.suggestedMutations = ['V600E', 'V600F'];
 
             loadFile().then(function(file){
               $scope.realtimeDocument = file;
