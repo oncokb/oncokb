@@ -9,9 +9,9 @@
       <span class="btn-group pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
+       <!--  <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
         <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button> -->
       </span>
     </h2>
     <p ng-if="gene.curators && gene.curators.asArray().length > 0">

@@ -12,11 +12,11 @@ angular.module('oncokb')
     var self = this;
     self.docs = [];
     self.newFolder = '';
-
+    self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'
     function backup() {
       storage.requireAuth(true).then(function(result){
         if(result && !result.error) {
-          storage.createFolder('0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k').then(function(result){
+          storage.createFolder(self.parentFolder).then(function(result){
             if(result.id){
               // var docs = Documents.get({title: 'BRAF'});
               self.docs = documents.get();
@@ -130,9 +130,9 @@ angular.module('oncokb')
               });
             }
             console.log('\t Done.');
-            // if(angular.isFunction(callback)) {
-            //   callback(++docIndex);
-            // }
+            if(angular.isFunction(callback)) {
+              callback(++docIndex);
+            }
           });
         });
       });

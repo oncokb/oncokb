@@ -28,7 +28,7 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    folderId: '0BzBfo69g8fP6R1ZKakhOMVE3UEE',
+    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
