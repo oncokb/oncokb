@@ -14,26 +14,33 @@ angular.module('oncokb')
       scope: {
         object: '=',
         addComment: '&addComment',
-        comments: '='
+        comments: '=',
+        fileEditable: '='
       },
       replace: true,
       link: function postLink(scope, element, attrs) {
-        // console.debug(scope);
         scope.key = attrs.key;
-        // console.log(scope.object);
-        // console.log(scope.object[scope.key]);
-        // scope.object[scope.key + '_comments'].asArray().forEach(function(e){ console.log(e);});
-        element.find('i').bind('mouseenter', function() {
-          element.find('commentsBody').show();
-        });
-        element.parent().bind('mouseleave', function() {
-          element.find('commentsBody').hide();
+        scope.params = {};
+        scope.$watch('comments.length', function(){
+          if(scope.fileEditable || scope.comments.length > 0) {
+            element.find('i').off('mouseenter');
+            element.find('i').bind('mouseenter', function() {
+              element.find('commentsBody').show();
+            });
+            element.parent().off('mouseleave');
+            element.parent().bind('mouseleave', function() {
+              element.find('commentsBody').hide();
+            });
+          }else {
+            element.find('i').off('mouseenter');
+            element.parent().off('mouseleave');
+          }
         });
       },
       controller: function($scope){
         $scope.add = function() {
-          $scope.addComment({arg1: $scope.object, arg2: $scope.key, arg3: $scope.newCommentContent});
-          $scope.newCommentContent = '';
+          $scope.addComment({arg1: $scope.object, arg2: $scope.key, arg3: $scope.params.newCommentContent});
+          $scope.params.newCommentContent = '';
         };
         $scope.resolve = function(comment) {
           comment.resolved.setText('true');
