@@ -8,8 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
-        function ($scope, $location, $routeParams, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
+    .controller('GenesCtrl', ['$scope', '$location', '$routeParams', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        function ($scope, $location, $routeParams, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.getDocs = function() {
               var docs = Documents.get();
               if(docs.length > 0) {
@@ -27,6 +27,10 @@ angular.module('oncokb')
                     });
                 });
               }
+            };
+
+            $scope.backup = function() {
+              importer.backup();
             };
 
             $scope.redirect = function(path) {
@@ -109,8 +113,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$timeout', '$scope', '$location', '$route', '$routeParams', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
-        function (_, S, $resource, $timeout, $scope, $location, $route, $routeParams, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$timeout', '$scope', '$location', '$route', '$routeParams', 'importer', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
+        function (_, S, $resource, $timeout, $scope, $location, $route, $routeParams, importer, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -147,8 +151,6 @@ angular.module('oncokb')
             };
 
             $scope.addComment = function(object, key, string) {
-              console.log('add comment func has been called.');
-              console.log(object, key, string);
               var _user = Users.getMe();
               if (object && object[key+'_comments'] && _user.email) {
                 var _comment = '';
@@ -172,91 +174,9 @@ angular.module('oncokb')
               }
             };
 
-            $scope.getData = function() {
-              var gene = {};
-
-              //Get gene string info
-              gene.name = getString(this.gene.name.getText());
-              gene.summary = getString(this.gene.summary.getText());
-              gene.background = getString(this.gene.background.getText());
-              gene.mutations = [];
-              gene.curators = [];
-
-              this.gene.curators.asArray().forEach(function(e){
-                var _curator = {};
-                _curator.name = getString(e.name.getText());
-                _curator.email = getString(e.email.getText());
-                gene.curators.push(_curator);
-              });
-
-              this.gene.mutations.asArray().forEach(function(e){
-                var _mutation = {};
-
-                _mutation.name = getString(e.name.getText());
-                _mutation.oncogenic = getString(e.oncogenic.getText());
-                _mutation.description = getString(e.description.getText());
-                _mutation.effect = {};
-                _mutation.tumors = [];
-
-                _mutation.effect.value = getString(e.effect.value.getText());
-                _mutation.effect.addOn = getString(e.effect.addOn.getText());
-
-                e.tumors.asArray().forEach(function(e1){
-                  var __tumor = {};
-
-                  __tumor.name = getString(e1.name.getText());
-                  __tumor.prevalence = getString(e1.prevalence.getText());
-                  __tumor.progImp = getString(e1.progImp.getText());
-                  __tumor.trials = [];
-                  __tumor.TI = [];
-                  __tumor.nccn = {};
-                  __tumor.interactAlts = {};
-
-                  e1.trials.asArray().forEach(function(trial){
-                    __tumor.trials.push(trial);
-                  });
-
-                  e1.TI.asArray().forEach(function(e2){
-                    var ti = {};
-
-                    ti.name = getString(e2.name.getText());
-                    ti.status = getString(e2.types.get('status'));
-                    ti.type = getString(e2.types.get('type'));
-                    ti.description = getString(e2.description.getText());
-                    ti.treatments = [];
-
-                    e2.treatments.asArray().forEach(function(e3){
-                      var treatment = {};
-
-                      treatment.name = getString(e3.name.getText());
-                      treatment.type = getString(e3.type.getText());
-                      treatment.level = getString(e3.level.getText());
-                      treatment.indication = getString(e3.indication.getText());
-                      treatment.description = getString(e3.description.getText());
-
-                      ti.treatments.push(treatment);
-                    });
-                    __tumor.TI.push(ti);
-                  });
-
-                  __tumor.nccn.therapy = getString(e1.nccn.therapy.getText());
-                  __tumor.nccn.disease = getString(e1.nccn.disease.getText());
-                  __tumor.nccn.version = getString(e1.nccn.version.getText());
-                  __tumor.nccn.pages = getString(e1.nccn.pages.getText());
-                  __tumor.nccn.category = getString(e1.nccn.category.getText());
-                  __tumor.nccn.description = getString(e1.nccn.description.getText());
-
-                  __tumor.interactAlts.alterations = getString(e1.interactAlts.alterations.getText());
-                  __tumor.interactAlts.description = getString(e1.interactAlts.description.getText());
-
-                  _mutation.tumors.push(__tumor);
-                });
-
-                gene.mutations.push(_mutation);
-              });
-
+            $scope.getData = function(realtime) {
+              var gene = importer.getData(this.gene);
               console.log(gene);
-              // console.log(Object.keys($scope.gene));
             };
 
             $scope.addTumorType = function(mutation) {
@@ -271,7 +191,7 @@ angular.module('oncokb')
                       var __status = i<2?1:0; // 1: Standard, 0: Investigational
                       var __type = i%2===0?1:0; //1: sensitivity, 0: resistance
                       var __name = (__status?'Standard':'Investigational') + ' implications for ' + (__type?'sensitivity':'resistance') + ' to therapy';
-                      
+
                       __ti.types.set('status', __status.toString());
                       __ti.types.set('type', __type.toString());
                       __ti.name.setText(__name);
@@ -336,6 +256,8 @@ angular.module('oncokb')
             $scope.checkScope = function() {
               console.log($scope.gene);
               console.log($scope.gene.mutations.asArray());
+              console.log($scope.gene.mutations.get(0).tumors.get(0));
+              console.log($scope.gene.mutations.get(0).tumors.get(0).trials.get(0));
             };
 
             $scope.remove = function(index, object, event) {
@@ -398,19 +320,7 @@ angular.module('oncokb')
               file = file[0];
               $scope.fileEditable = file.editable?true:false;
               $scope.loaded = true;
-              // createCommentModel($scope.model);
               displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
-            }
-
-            function createCommentModel(model) {
-              var commentsModel = model.getRoot().get('comments');
-              if(!commentsModel) {
-                var comments = model.create('Comments');
-                model.getRoot().set('comments', comments);
-                $scope.comments = comments;
-              }else {
-                $scope.comments = commentsModel;
-              }
             }
 
             function valueChanged() {

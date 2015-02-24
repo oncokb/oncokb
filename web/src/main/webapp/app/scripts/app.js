@@ -28,7 +28,7 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
+    folderId: '0BzBfo69g8fP6R1ZKakhOMVE3UEE',
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -287,7 +287,9 @@ OncoKB.initialize = function() {
                     this.types = model.createMap({'status': '0', 'type': '0'});
                 }else {
                     if(OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
-                        this[__key + '_comments'] = model.createList();
+                        if(id !== 'Comment') {
+                            this[__key + '_comments'] = model.createList();
+                        }
                         switch (OncoKB.curateInfo[id][__key].type) {
                             case 'string':
                                 this[__key] = model.createString('');
@@ -308,7 +310,9 @@ OncoKB.initialize = function() {
         //Register every field of OncoKB into document
         for(var j=0; j<_keysL; j++) {
             OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
+            if(_key !== 'Comment') {
             OncoKB[_key].prototype[_keys[j] + '_comments'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_comments');
+            }
         }
 
         //Register custom type

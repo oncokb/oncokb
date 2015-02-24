@@ -74,6 +74,68 @@ angular.module('oncokb')
         return deferred.promise;
     };
 
+    this.createFolder = function(parentID) {
+      var deferred = $q.defer();
+      var onComplete = function (result) {
+        // console.log(result);
+          if (result && !result.error) {
+            deferred.resolve(result);
+          } else {
+            deferred.reject(result);
+          }
+          $rootScope.$digest();
+      };
+      var date = new Date();
+      var body = {
+        'title': date.toString(),
+        'parents': [{'id': parentID}],
+        'mimeType': 'application/vnd.google-apps.folder'
+      };
+      var request = gapi.client.drive.files.insert({
+        'resource': body
+      });
+      request.execute(onComplete);
+
+      return deferred.promise;
+    };
+
+    this.copyAllFiles = function(origianlFolder, toFolder) {
+      var deferred = $q.defer();
+      var onComplete = function (result) {
+        // console.log(result);
+          if (result && !result.error) {
+            deferred.resolve(result);
+          } else {
+            deferred.reject(result);
+          }
+          $rootScope.$digest();
+      };
+
+      this.retrieveAllFiles().then(function(result){
+        if(angular.isArray(result) && result.length > 0) {
+          result.forEach(function(e){
+            if(e.id) {
+              var body = {'parent': [{'id': toFolder}]};
+              var request = gapi.client.drive.files.copy({
+                'fileId': e.id
+              });
+              request.execute();
+            }
+          });
+          // onComplete();
+        }
+      })
+
+      // var body = {'title': copyTitle};
+      // var request = gapi.client.drive.files.copy({
+      //   'fileId': originFileId,
+      //   'resource': body
+      // });
+      // request.execute(function(resp) {
+      //   console.log('Copy ID: ' + resp.id);
+      // });
+    }
+
     this.insertPermission = function (id, email, type, role) {
         var deferred = $q.defer();
         var onComplete = function (result) {
@@ -261,7 +323,7 @@ angular.module('oncokb')
      * @param title
      * @returns {angular.$q.promise}
      */
-    this.createDocument = function (title) {
+    this.createDocument = function (title, parentId) {
       var deferred = $q.defer();
       var onComplete = function (result) {
       // console.log('Completes', result);
@@ -279,7 +341,7 @@ angular.module('oncokb')
         'body': JSON.stringify({
           'title': title,
           'parents': [{
-            'id': config.folderId
+            'id': parentId || config.folderId
           }],
           'mimeType': 'application/vnd.google-apps.drive-sdk'
         })
