@@ -455,11 +455,6 @@ var oncokbApp = angular
             templateUrl: 'views/gene.html',
             controller: 'GeneCtrl',
             access: access.curator
-            // resolve: {
-            //   realtimeDocument: function(loadFile){
-            //     return loadFile();
-            //   }
-            // }
         })
         .otherwise({
             redirectTo: '/'
@@ -532,6 +527,14 @@ angular.module('oncokb').run(
                 Access.setURL($location.path());
             }
             $location.path('/');
+        }
+        if(Access.isLoggedIn() && Access.getURL()){
+            Access.setURL('');
+            $location.path(url);
+        }else {
+            if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl === "views/welcome.html") {
+                $location.path('/genes');
+            }
         }
     });
 }]);

@@ -24,42 +24,35 @@ angular.module('oncokb')
         }else {
             setParams();
         }
+        $rootScope.$apply(function() {
+            var url = access.getURL();
+            if(url) {
+                if(access.isLoggedIn()){
+                    access.setURL('');
+                    $location.path(url);
+                }
+            }else {
+                if (access.isLoggedIn() && !access.getURL() && access.authorize(config.accessLevels.curator)) {
+                    $location.path('/genes');
+                }else {
+                    $location.path("/");
+                }
+            }
+        });
     }
 
     function setParams() {
         var url = access.getURL();
         $scope.user = $rootScope.user;
         $scope.tabs = [];
-        // if(access.authorize(accessLevels.admin)) {
-        //     $scope.tabs.push({key: 'tree', value: tabs.tree});
-        //     $scope.tabs.push({key: 'variant', value: tabs.variant});
-        // }
         if(access.authorize(accessLevels.curator)) {
             $scope.tabs.push({key: 'genes', value: tabs.genes});
         }
         $scope.signedIn = access.isLoggedIn();
-        // console.log($scope);
-        if(url) {
-            if(access.isLoggedIn()){
-                access.setURL('');
-                $location.path(url);
-            }
-        }
     }
 
     // Render the sign in button.
     $scope.renderSignInButton = function() {
-        // gapi.signin.render('signInButton',
-        //     {
-        //         'callback': $scope.signInCallback, // Function handling the callback.
-        //         'clientid': config.clientId, // CLIENT_ID from developer console which has been explained earlier.
-        //         // 'requestvisibleactions': 'http://schemas.google.com/AddActivity', // Visible actions, scope and cookie policy wont be described now,
-        //                                                                           // as their explanation is available in Google+ API Documentation.
-        //         'scope': config.scopes.join(' '),
-        //         'cookiepolicy': 'single_host_origin'
-        //     }
-        // );
-        // 
         storage.requireAuth().then(function(result){
             $scope.signInCallback(result);
         });
