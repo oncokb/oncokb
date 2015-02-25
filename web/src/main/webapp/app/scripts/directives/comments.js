@@ -15,27 +15,30 @@ angular.module('oncokb')
         object: '=',
         addComment: '&addComment',
         comments: '=',
-        fileEditable: '='
+        fileEditable: '=',
+        parentEvent: '='
       },
       replace: true,
       link: function postLink(scope, element, attrs) {
         scope.key = attrs.key;
         scope.params = {};
+
         scope.$watch('comments.length', function(){
           if(scope.fileEditable || scope.comments.length > 0) {
             element.find('i').off('mouseenter');
-            element.find('i').bind('mouseenter', function() {
+            element.find('i').bind('mouseenter', function(event) {
               element.find('commentsBody').show();
             });
-            element.parent().off('mouseleave');
-            element.parent().bind('mouseleave', function() {
+            element.find('i').off('mouseleave');
+            element.find('i').bind('mouseleave', function(event) {
               element.find('commentsBody').hide();
             });
           }else {
             element.find('i').off('mouseenter');
-            element.parent().off('mouseleave');
+            element.find('i').off('mouseleave');
           }
         });
+
         element.bind('keydown', function (event) {
           if(event.which === 13) {
             if(scope.params.newCommentContent) {

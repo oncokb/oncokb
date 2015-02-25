@@ -155,6 +155,7 @@ angular.module('oncokb')
         };
         var request = gapi.client.drive.permissions.insert({
           'fileId': id,
+          'sendNotificationEmails': false,
           'resource': body
         });
         request.execute(onComplete);

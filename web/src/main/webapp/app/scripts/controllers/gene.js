@@ -63,7 +63,7 @@ angular.module('oncokb')
             };
 
             $scope.givePermission = function() {
-              var testGene = {'cbioportal@gmail.com': 'BRAF, EGFR, AKT1'};
+              var testGene = {'journalistwenxiongzhang@gmail.com': 'test,BRAF'};
 
               for(var key in testGene) {
                 var _genes = testGene[key].trim().split(',').map(function(e){ return e.trim();});
@@ -98,6 +98,42 @@ angular.module('oncokb')
                   });
                 });
               }
+            };
+
+            $scope.giveFolderPermission = function() {
+              var emails = ['cbioportal@gmail.com'];
+              var userPermission = "reader";
+              var folderId = config.folderId;
+
+              emails.forEach(function(email){
+                storage.requireAuth(true).then(function(){
+                  storage.getDocument(folderId).then(function(e1){
+                    if(e1.id) {
+                      storage.getPermission(e1.id).then(function(result){
+                        if(result.items && angular.isArray(result.items)) {
+                          var permissionIndex = -1;
+                          result.items.forEach(function(permission, _index){
+                            if(permission.emailAddress && permission.emailAddress === email) {
+                              permissionIndex = _index;
+                            }
+                          });
+
+                          console.log(permissionIndex);
+                          // if(permissionIndex === -1) {
+                          //   storage.insertPermission(e1.id, key, 'user', 'writer').then(function(result){
+                          //     console.log('insert result', result);
+                          //   });
+                          // }else if(result.items[permissionIndex].role !== 'writer'){
+                          //   storage.updatePermission(e1.id, result.items[permissionIndex].id, 'writer').then(function(result){
+                          //     console.log('update result', result);
+                          //   });
+                          // }
+                        }
+                      });
+                    }
+                  });
+                });
+              });
             };
 
             function createDoc(index) {
@@ -264,6 +300,11 @@ angular.module('oncokb')
                 if (event.stopPropagation) { event.stopPropagation();}
                 if (event.preventDefault) { event.preventDefault();}
                 object.remove(index);
+            };
+
+            $scope.commentClick = function(event) {
+                if (event.stopPropagation) { event.stopPropagation();}
+                if (event.preventDefault) { event.preventDefault();}
             };
 
             $scope.redo = function() {
