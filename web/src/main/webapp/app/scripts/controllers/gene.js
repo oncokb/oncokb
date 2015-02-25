@@ -314,11 +314,9 @@ angular.module('oncokb')
                 DatabaseConnector.getAllCurationSuggestions(function(data){
                   CurationSuggestions.set(data);
                   $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
-                  console.log($scope.suggestedMutations);
                 });
               }else {
                 $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
-                console.log($scope.suggestedMutations);
               }
             }
 
