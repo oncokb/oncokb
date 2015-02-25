@@ -139,6 +139,7 @@ p.editableBox.doubleH {
   background-color: white;
   display: none;
   z-index: 999;
+  color: black;
 }
 .approvedIndication,.mutationEffect {
   width: 100%;
@@ -197,6 +198,15 @@ i.fa-comments, i.fa-comments-o{
 }
 i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover {
   cursor: pointer;
+}
+.fa-comments-white {
+  color: inherit;
+}
+.fa-comments-orange {
+  color: orange;
+}
+.fa-comments-green {
+  color: #70b500;
 }
 rect {
   fill: none;

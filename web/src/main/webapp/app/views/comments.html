@@ -1,5 +1,5 @@
 <span>
-  <i ng-class="{'fa fa-comments': comments.length > 0, 'fa fa-comments-o': comments.length === 0}">
+  <i class="fa " ng-class="{'fa-comments-o': !status.hasComment, 'fa-comments': status.hasComment, 'fa-comments-orange': status.hasComment && !status.allResolved, 'fa-comments-green': status.hasComment && status.allResolved}">
     <commentsBody class="geneComments">
       <div ng-repeat="comment in comments.asArray()">
         <div style="width: 100%; float: left; margin: 5px 0;">
@@ -9,7 +9,7 @@
           </div>
           <div ng-if="fileEditable" style="width: 55%; float: left;">
             <span class="btn-group btn-group-sm pull-right" role="group">
-              <button class="btn btn-default" ng-click="resolve(comment)" ng-disabled="comment.resolved.text === 'true'"><span ng-if="comment.resolved.text === 'false'">Resolve</span><span ng-if="comment.resolved.text === 'true'">Resolved</span></button>
+              <button class="btn btn-default" ng-click="resolve($index)" ng-disabled="comment.resolved.text === 'true'"><span ng-if="comment.resolved.text === 'false'">Resolve</span><span ng-if="comment.resolved.text === 'true'">Resolved</span></button>
               <button class="btn btn-default" ng-click="delete($index)">Delete</button>
             </span>
           </div>
