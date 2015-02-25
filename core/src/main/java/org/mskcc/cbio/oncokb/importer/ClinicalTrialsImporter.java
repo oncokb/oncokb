@@ -63,7 +63,7 @@ public class ClinicalTrialsImporter {
         matchTumorTypes(trials, tumorTypes);
     }
     
-    static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
+    public static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
         setAllTrials();
         
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

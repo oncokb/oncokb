@@ -164,3 +164,23 @@ angular.module('oncokb').factory('GenerateDoc', ['$http',  function ($http) {
         createFolder: createFolder
     };
 }]);
+
+angular.module('oncokb').factory('DriveAnnotation', ['$http',  function ($http) {
+    'use strict';
+    var transform = function(data){
+        return $.param(data);
+    };
+    
+    function updateGene(geneString) {
+        return $http.post(
+            'driveAnnotation', 
+            {'gene': geneString},
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
+    }
+    return {
+        updateGene: updateGene
+    };
+}]);

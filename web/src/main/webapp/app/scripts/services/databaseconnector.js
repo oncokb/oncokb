@@ -19,6 +19,7 @@ angular.module('oncokb')
     'Users',
     'OncoTreeTumorTypes',
     'CurationSuggestions',
+    'DriveAnnotation',
     function (
       $timeout,
       Gene,
@@ -29,7 +30,8 @@ angular.module('oncokb')
       GenerateDoc,
       Users,
       OncoTreeTumorTypes,
-      CurationSuggestions) {
+      CurationSuggestions,
+      DriveAnnotation) {
 
     var numOfLocks = {},
         data = {};
@@ -195,6 +197,21 @@ angular.module('oncokb')
       }
     }
     
+    function updateGene(geneString, success, fail) {
+      if(dataFromFile) {
+        success('');
+      }else {
+        DriveAnnotation
+            .updateGene(geneString)
+                .success(function(data) {
+                    success(data);
+                })
+                .error(function(){
+                    fail();
+                });
+      }
+    }
+    
     function createGoogleFolder(params, success, fail) {
       if(dataFromFile) {
         success('');
@@ -246,6 +263,7 @@ angular.module('oncokb')
       'getAllUsers': getAllUsers,
       'getAllTumorType': getAllTumorType,
       'getAllOncoTreeTumorTypes': getAllOncoTreeTumorTypes,
-      'getAllCurationSuggestions': getAllCurationSuggestions
+      'getAllCurationSuggestions': getAllCurationSuggestions,
+      'updateGene': updateGene
     };
   }]);

@@ -213,8 +213,14 @@ angular.module('oncokb')
             $scope.getData = function(realtime) {
               var gene = importer.getData(this.gene);
               console.log(gene);
+              console.log(JSON.stringify(gene));
             };
-
+            
+            $scope.updateGene = function() {
+              var gene = importer.getData(this.gene);
+              DatabaseConnector.updateGene(JSON.stringify(gene), function(result){ console.log(result)}, function(result){ console.log(result)});
+            };
+            
             $scope.addTumorType = function(mutation) {
                 if (mutation && this.newTumorType && this.newTumorType.name) {
                     var _tumorType = '';
