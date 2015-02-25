@@ -12,7 +12,7 @@
                     <!-- <td>{{$index + 1}}</td> -->
                     <td><strong><a ng-href="#/gene/{{gene.title}}">{{gene.title}}</a></strong></td>
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
-                    <td><div ng-repeat="curator in gene.curators"><span>{{curator.email}}</span><br ng-if="$index<curator.length-1"/></div></td>
+                    <td><div ng-repeat="curator in gene.curators"><span>{{curator.mskccEmail}}</span><br ng-if="$index<curator.length-1"/></div></td>
                     <td>
                         <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
                         <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"></i>

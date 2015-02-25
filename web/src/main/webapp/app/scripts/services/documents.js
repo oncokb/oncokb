@@ -62,7 +62,8 @@ angular.module('oncokb')
                     if(usersData[j].genes && usersData[j].genes.indexOf(gene) !== -1) {
                         var _user = {
                             'name': usersData[j].name,
-                            'email' : usersData[j].email
+                            'email' : usersData[j].email,
+                            'mskccEmail' : usersData[j].mskccEmail
                         };
                         curators.push(_user);
                     }

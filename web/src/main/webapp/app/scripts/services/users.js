@@ -18,6 +18,7 @@ angular.module('oncokb')
 
     function User(){
         this.email = '';
+        this.mskccEmail = '';
         this.name = '';
         this.role = 1;
         this.genes = [];

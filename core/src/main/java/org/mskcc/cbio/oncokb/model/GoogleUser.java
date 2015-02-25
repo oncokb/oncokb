@@ -7,8 +7,17 @@ package org.mskcc.cbio.oncokb.model;
 public class GoogleUser {
     private String name;
     private String email;
+    private String mskccEmail;
     private Integer role;
     private String genes;
+
+    public String getMskccEmail() {
+        return mskccEmail;
+    }
+
+    public void setMskccEmail(String mskccEmail) {
+        this.mskccEmail = mskccEmail;
+    }
 
     public Integer getRole() {
         return role;
