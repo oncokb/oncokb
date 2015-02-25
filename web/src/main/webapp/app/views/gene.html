@@ -105,8 +105,9 @@
             </p>
                       <p>
                   <strong>{{tumor.nccn.disease.display}}:</strong>
-                  <select style="width: 90%" ng-model="tumor.nccn.disease.text" ng-options="opt for opt in nccnDiseaseTypes">
-                    </select>
+                  <select style="width: 90%" chosen id="CurationNCCNDropDown" allow-single-deselect="true" ng-model="tumor.nccn.disease.text" ng-options="opt for opt in nccnDiseaseTypes">
+                    <option value=""></option>
+                  </select>
             </p>
             <p>
                   <strong>{{tumor.nccn.version.display}}:</strong>
