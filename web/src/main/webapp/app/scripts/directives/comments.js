@@ -36,6 +36,16 @@ angular.module('oncokb')
             element.parent().off('mouseleave');
           }
         });
+        element.bind('keydown', function (event) {
+          if(event.which === 13) {
+            if(scope.params.newCommentContent) {
+              scope.$apply(function(){
+                scope.add();
+              });
+            }
+            event.preventDefault();
+          }
+        });
       },
       controller: function($scope){
         $scope.add = function() {
