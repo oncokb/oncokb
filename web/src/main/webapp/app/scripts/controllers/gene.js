@@ -546,6 +546,16 @@ angular.module('oncokb')
 
             $scope.userRole = Users.getMe().role;
 
+            $scope.showHideButtons = [
+              {'key': 'prevelenceShow', 'display': 'Prevalence'},
+              {'key': 'proImShow', 'display': 'Prognostic implications'},
+              {'key': 'nccnShow', 'display': 'NCCN guidelines'},
+              {'key': 'ssShow', 'display': 'Standard implications for sensitivity to therapy'},
+              {'key': 'srShow', 'display': 'Standard implications for resistance to therapy'},
+              {'key': 'isShow', 'display': 'Investigational implications for sensitivity to therapy'},
+              {'key': 'irShow', 'display': 'Investigational implications for resistance to therapy'},
+              {'key': 'trialsShow', 'display': 'Ongoing clinical trials'}
+            ];
             getSuggestions();
 
             DatabaseConnector.getAllOncoTreeTumorTypes(function(data){

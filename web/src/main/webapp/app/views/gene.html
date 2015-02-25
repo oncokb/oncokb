@@ -79,12 +79,24 @@
                 Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.name.text"/></span><comments-dict file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 <i ng-click="remove($index, mutation.tumors, $event)" class="fa fa-trash-o pull-right"></i>
               </accordion-heading>
-              <h4>{{tumor.prevalence.display}}:<comments-dict file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
-              <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.prevalence.text"></p>
+              <div>
+                <div class="btn-group btn-group-sm tumorButtonsGroup" ng-repeat="button in showHideButtons" role="group">
+                    <span class="btn btn-default" style="opacity: 1" disabled>{{button.display}}</span>
+                    <button style="width: 55px" class="btn btn-default" ng-click="tumor[button.key] = !(!!tumor[button.key])"><span ng-show="tumor[button.key]">Hide</span><span ng-show="!tumor[button.key]">Show</span></button>
+                </div>
+              </div>
+              <div ng-show='!!tumor[showHideButtons[0].key]'>
+                <hr/>
+                <h4>{{tumor.prevalence.display}}:<comments-dict file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
+                <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.prevalence.text"></p>
+              </div>
+              <div ng-show='!!tumor[showHideButtons[1].key]'>
               <hr/>
                 <h4>{{tumor.progImp.display}}:<comments-dict file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
                 <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.progImp.text">
                 </p>
+                </div>
+              <div ng-show='!!tumor[showHideButtons[2].key]'>
             <hr/>
                       <h4>NCCN guidelines:<comments-dict file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
                       <p>
@@ -114,60 +126,64 @@
                   <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.description.text">
               </p>
             </span>
-            <hr/>
-            <div ng-repeat="ti in tumor.TI.asArray()">
-              <h4>{{ti.name.text}}:<comments-dict file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
-              <span>
-                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="ti.description.text">
-                </p>
-              </span>
-              <accordion close-others="oneAtATime">
-                  <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
-                      <accordion-heading>
-                          {{treatment.type.text}}:<span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
-                          <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o pull-right"></i>
-                      </accordion-heading>
-                  <p>
-                        <strong>{{treatment.level.display}}:</strong>
-                        <select style="width: 100%" ng-if="checkTI(ti, 1, 1)" ng-model="treatment.level.text"
-                              ng-options="opt.value as opt.label for opt in levels.SS">
-                          </select>
-                        <select style="width: 100%" ng-if="checkTI(ti, 1, 0)" ng-model="treatment.level.text"
-                              ng-options="opt.value as opt.label for opt in levels.SR">
-                          </select>
-                        <select style="width: 100%" ng-if="checkTI(ti, 0, 1)" ng-model="treatment.level.text"
-                              ng-options="opt.value as opt.label for opt in levels.IS">
-                          </select>
-                        <select style="width: 100%" ng-if="checkTI(ti, 0, 0)" ng-model="treatment.level.text"
-                              ng-options="opt.value as opt.label for opt in levels.IR">
-                          </select>
-                  </p>
-                  <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
-                    <div class="header">
-                      <strong>{{treatment.indication.display}}:</strong>
-                    </div>
-                    <div class="content">
-                        <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"></p>
-                    </div>
-                  </div>
-                  <span>
-                        <strong>{{treatment.description.display}}:</strong>
-                        <br/>
-                        <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.description.text">
-                    </p>
-                  </span>
-                  </accordion-group>
-              </accordion>
-              <div class="input-group input-group-sm">
-                <input type="text" class="form-control" ng-model="newTI[$index].name" placeholder="Therapy name" />
-                <span class="input-group-btn">
-                  <button type="button" class="btn btn-default" ng-disabled="!(!!newTI[$index].name)" ng-click="addTI(ti, $index)">
-                    <i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications
-                  </button>
-                </span>
-              </div>
-              <hr/>
             </div>
+            <div ng-repeat="ti in tumor.TI.asArray()">
+              <div ng-show='!!tumor[showHideButtons[3+$index].key]'>
+                <hr/>
+                <h4>{{ti.name.text}}:<comments-dict file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
+                <span>
+                      <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="ti.description.text">
+                  </p>
+                </span>
+                <accordion close-others="oneAtATime">
+                    <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
+                        <accordion-heading>
+                            {{treatment.type.text}}:<span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
+                            <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o pull-right"></i>
+                        </accordion-heading>
+                    <p>
+                          <strong>{{treatment.level.display}}:</strong>
+                          <select style="width: 100%" ng-if="checkTI(ti, 1, 1)" ng-model="treatment.level.text"
+                                ng-options="opt.value as opt.label for opt in levels.SS">
+                            </select>
+                          <select style="width: 100%" ng-if="checkTI(ti, 1, 0)" ng-model="treatment.level.text"
+                                ng-options="opt.value as opt.label for opt in levels.SR">
+                            </select>
+                          <select style="width: 100%" ng-if="checkTI(ti, 0, 1)" ng-model="treatment.level.text"
+                                ng-options="opt.value as opt.label for opt in levels.IS">
+                            </select>
+                          <select style="width: 100%" ng-if="checkTI(ti, 0, 0)" ng-model="treatment.level.text"
+                                ng-options="opt.value as opt.label for opt in levels.IR">
+                            </select>
+                    </p>
+                    <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
+                      <div class="header">
+                        <strong>{{treatment.indication.display}}:</strong>
+                      </div>
+                      <div class="content">
+                          <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"></p>
+                      </div>
+                    </div>
+                    <span>
+                          <strong>{{treatment.description.display}}:</strong>
+                          <br/>
+                          <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.description.text">
+                      </p>
+                    </span>
+                    </accordion-group>
+                </accordion>
+                <div class="input-group input-group-sm">
+                  <input type="text" class="form-control" ng-model="newTI[$index].name" placeholder="Therapy name" />
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-disabled="!(!!newTI[$index].name)" ng-click="addTI(ti, $index)">
+                      <i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div ng-show='!!tumor[showHideButtons[7].key]'>
+            <hr/>
             <h4>Ongoing clinical trials:<comments-dict file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h4>
                       <div>
                         <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">{{trial}}
@@ -189,6 +205,7 @@
                   </button>
                 </span>
               </div> -->
+                      </div>
                       </div>
             <!-- <hr/>
                       <h4>Interacting alterations:</h4>
