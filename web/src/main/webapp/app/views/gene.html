@@ -142,18 +142,28 @@
                         </accordion-heading>
                     <p>
                           <strong>{{treatment.level.display}}:</strong>
-                          <select style="width: 100%" ng-if="checkTI(ti, 1, 1)" ng-model="treatment.level.text"
+                          <span ng-if="checkTI(ti, 1, 1)">
+                            <select style="width: 90%" ng-model="treatment.level.text"
                                 ng-options="opt.value as opt.label for opt in levels.SS">
                             </select>
-                          <select style="width: 100%" ng-if="checkTI(ti, 1, 0)" ng-model="treatment.level.text"
+                          </span>
+                          <span ng-if="checkTI(ti, 1, 0)">
+                            <select style="width: 95%"  ng-model="treatment.level.text"
                                 ng-options="opt.value as opt.label for opt in levels.SR">
                             </select>
-                          <select style="width: 100%" ng-if="checkTI(ti, 0, 1)" ng-model="treatment.level.text"
+                            <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.SR}}"></i>
+                          </span>
+                          <span ng-if="checkTI(ti, 0, 1)">
+                            <select style="width: 100%" ng-model="treatment.level.text"
                                 ng-options="opt.value as opt.label for opt in levels.IS">
                             </select>
-                          <select style="width: 100%" ng-if="checkTI(ti, 0, 0)" ng-model="treatment.level.text"
+                          </span>
+                          <span ng-if="checkTI(ti, 0, 0)">
+                            <select style="width: 95%" ng-model="treatment.level.text"
                                 ng-options="opt.value as opt.label for opt in levels.IR">
                             </select>
+                            <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.IR}}"></i>
+                          </span>
                     </p>
                     <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
                       <div class="header">

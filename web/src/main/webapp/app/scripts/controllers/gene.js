@@ -521,7 +521,7 @@ angular.module('oncokb')
             }
 
             function getLevels() {
-              var des = {
+              var desS = {
                 '': '',
                 '1': 'FDA-approved biomarker and drug association in this indication.',
                 '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
@@ -530,13 +530,20 @@ angular.module('oncokb')
                 '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
               };
 
+              var desR = {
+                '': '',
+                'R1': 'NCCN-compendium listed biomarker for resistance to a FDA-approved drug.',
+                'R2': 'Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.',
+                'R3': 'Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.'
+              };
+
               var levels = {};
 
               var levelsCategories = {
                 SS: ['','1','2A'],
-                SR: ['','2A'],
+                SR: ['R1'],
                 IS: ['','2B','3','4'],
-                IR: ['','2B','3','4']
+                IR: ['R2','R3']
               }
 
               for(var key in levelsCategories) {
@@ -544,7 +551,7 @@ angular.module('oncokb')
                 levels[key] = [];
                 for (var i = 0; i < _items.length; i++) {
                   var __datum = {};
-                  __datum.label = _items[i] + (_items[i]===''?'':' - ') + des[_items[i]];
+                  __datum.label = _items[i] + (_items[i]===''?'':' - ') +( (['SS', 'IS'].indexOf(key) !== -1) ? desS[_items[i]] : desR[_items[i]]);
                   __datum.value = _items[i];
                   levels[key].push(__datum);
                 }
@@ -597,7 +604,10 @@ angular.module('oncokb')
               closed: false
             };
             $scope.userRole = Users.getMe().role;
-
+            $scope.levelExps = {
+              SR: '<strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib',
+              IR: '<strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/>'
+            };
             $scope.showHideButtons = [
               {'key': 'prevelenceShow', 'display': 'Prevalence'},
               {'key': 'proImShow', 'display': 'Prognostic implications'},

@@ -191,6 +191,18 @@ p.editableBox.doubleH {
   background-color: white;
   z-index: 999;
 }
+.tooltip-inner {
+  max-width: 400px;
+  padding: 3px 8px;
+  color: black;
+  text-align: left;
+  text-decoration: none;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid grey;
+  opacity: 1;
+  background: white;
+}
 .geneLastModify {
   font-style: italic;
   font-size: 12px;
