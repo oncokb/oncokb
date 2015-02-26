@@ -237,8 +237,8 @@ angular.module('oncokb')
               result = result.concat(resp.items);
               var nextPageToken = resp.nextPageToken;
               if (nextPageToken) {
-                request = gapi.client.drive.children.list({
-                    'q' : config.folderId + ' in parents',
+                request = gapi.client.drive.files.list({
+                    'q' : '"' + config.folderId + '" in parents',
                     'pageToken': nextPageToken
                 });
                 retrievePageOfFiles(request, result);
