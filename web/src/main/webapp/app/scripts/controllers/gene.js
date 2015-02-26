@@ -51,9 +51,6 @@ angular.module('oncokb')
             $scope.loaded = false;
             $scope.getDocs();
             $scope.userRole = users.getMe().role;
-            $scope.$watch('loaded', function(newValue, oldValue, scope) {
-              
-            });
             // var newGenes = ['RET','FGFR4','KIT','SMO','ALK1','ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2','RAD21','TET1','TET2','GATA1','GATA2','MPL','B2M','BTK','HLA-A','PRDM1','SF3B1','EPHA7','HIST1H1C','REL','CREBBP','VHL','PBRM1','SETD2','AKT2','AKT3','ERBB3','FGFR1','BRIP1','ERCC4','FANCA','FANCC','EWSR1','MDM2','MDM4','ETV6','DNMT1','EZH2','WT1','EP300','MYD88','CARD11','CD79B','KEAP1','MYC','FH','SDHA','SDHAF2','SDHB','SDHC','SDHD','RASA1','FOXA1','AURKA','AURKB','CCND1','CCNE1','PPP2R1A','CCND2','CCND3','PAK1','ERG','ETV1','SPOP','SOX2','MYOD1','CTCF','MTOR','PDGFRA','DAXX','MLH1','MSH6','RAD54L','RECQL4','BCL2','RB1','EIF1AX','EIF4A2','EIF4E','EPCAM','FAT1','SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2C','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','DNMT3A','DNMT3B','AR','E2F3','FOXP1','RYBP','SHQ1','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10','APC','ARAF','ARID1B','ARID2','ARID5B','BCL2L11','BRD4','CASP8','CBL','CDK12','CDK4','CDK6','CDKN1A','CDKN2B','GATA3','KDR','MAP2K2','MAP2K4','MAP3K1','MAX','MSH2','MYCN','NFE2L2','NFKBIA','NTRK1','NTRK2','NTRK3','PIK3CB','PIK3R2','PMS2','PTPN11','PTPRD','ROS1','RUNX1','SRC','TMPRSS2','XRCC2'];
             // var newGenes = ['ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2'];
             var newGenes = ['test'];
@@ -149,8 +146,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$timeout', '$scope', '$location', '$route', '$routeParams', 'importer', 'curationSuggestions', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
-        function (_, S, $resource, $timeout, $scope, $location, $route, $routeParams, importer, CurationSuggestions, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'importer', 'curationSuggestions', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, importer, CurationSuggestions, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -370,19 +367,45 @@ angular.module('oncokb')
             function bindDocEvents() {
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
               $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
+              $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveStateChangedEvent);
               $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
-              $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChanged);
+              $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
+            }
+
+            function saveStateChangedEvent(evt) {
+              // console.log('saveStateChangedEvent', evt);
+              // $scope.$apply(function(){
+              if(!$scope.$$phase) {
+                $scope.$apply(function(){
+                  updateDocStatus(evt);
+                });
+              }else {
+                updateDocStatus(evt);
+              }
+            }
+
+            function updateDocStatus(evt) {
+              if(evt.isSaving){
+                documentSaving();
+              }else if(!evt.isSaving && !evt.currentTarget.isClosed){
+                documentSaved();
+              }else {
+                documentClosed();
+              }
+              // console.log($scope.docStatus);
             }
 
             function afterCreateGeneModel() {
               var file = Documents.get({title: $scope.fileTitle});
               file = file[0];
+              $scope.document = file;
               $scope.fileEditable = file.editable?true:false;
               $scope.loaded = true;
               displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
 
-            function valueChanged() {
+            function valueChangedEvent(evt) {
+              console.log('valueChanged', evt);
               if($scope.gene) {
                 var hasCurator = false;
                 if($scope.gene.curators && angular.isArray($scope.gene.curators.asArray()) && $scope.gene.curators.asArray().length > 0) {
@@ -478,6 +501,25 @@ angular.module('oncokb')
               }
             }
 
+            function documentSaving() {
+              $scope.docStatus.saving = true;
+              $scope.docStatus.saved = false;
+              $scope.docStatus.closed = false;
+            }
+
+            function documentSaved() {
+              $scope.docStatus.saving = false;
+              $scope.docStatus.saved = true;
+              $scope.docStatus.closed = false;
+            }
+
+            function documentClosed(){
+              $scope.docStatus.closed = true;
+              $scope.docStatus.saving = false;
+              $scope.docStatus.saved = false;
+              $scope.fileEditable = false;
+            }
+
             function getLevels() {
               var des = {
                 '': '',
@@ -549,7 +591,11 @@ angular.module('oncokb')
             ]
             $scope.levels = getLevels();
             $scope.fileEditable = false;
-
+            $scope.docStatus = {
+              saved: true,
+              saving: false,
+              closed: false
+            };
             $scope.userRole = Users.getMe().role;
 
             $scope.showHideButtons = [
@@ -564,6 +610,20 @@ angular.module('oncokb')
             ];
             getSuggestions();
 
+            console.log($location.path());
+            // var clock;
+            // clock = $interval(function() {
+            //   storage.requireAuth(true).then(function(result){
+            //     if(result && !result.error) {
+            //       var token = gapi.auth.getToken();
+            //       console.log('\t checked token', new Date().getTime());
+            //     }else {
+            //       documentClosed();
+            //       console.log('error when renew token in interval func.');
+            //     }
+            //   });
+            // }, 600000);
+
             DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
               if(data.indexOf('All tumors') === -1){
                 data.push('All tumors');
@@ -573,6 +633,7 @@ angular.module('oncokb')
 
             loadFile().then(function(file){
               $scope.realtimeDocument = file;
+
               if($scope.fileTitle) {
                 var model = $scope.realtimeDocument.getModel();
                 if(!model.getRoot().get('gene')) {
@@ -592,8 +653,39 @@ angular.module('oncokb')
               }
             });
 
+
+            // Token expired, refresh
+            $rootScope.$on('realtimeDoc.token_refresh_required', function () {
+                console.log('--token_refresh_required-- going to refresh page.');
+                alert('Error. This page will be redirected to genes page.');
+                documentClosed();
+                $location.path('/genes');
+            });
+
+            // Other unidentify error
+            $rootScope.$on('realtimeDoc.other_error', function () {
+                alert('Error. This page will be redirected to genes page.');
+                documentClosed();
+                $location.path('/genes');
+            });
+
+            // Realtime documet not found
+            $rootScope.$on('realtimeDoc.not_found', function () {
+                alert('The document not exists. This page will be redirected to genes page.');
+                documentClosed();
+                $location.path('/genes');
+            });
+
+            // Realtime documet not found
+            $rootScope.$on('realtimeDoc.not_found', function () {
+                alert('The document not exists. This page will be redirected to genes page.');
+                documentClosed();
+                $location.path('/genes');
+            });
+
             $scope.$on('$locationChangeStart', function( event , next, current) {
               storage.closeDocument();
+              documentClosed();
             });
 
             // Get OncoTree primary/secondary/tertiary/quaternary types

@@ -1,4 +1,4 @@
-<div ng-show="loaded" ng-if="gene">
+<div ng-show="loaded" ng-if="gene" class="geneMainDiv">
   <div id="gene">
     <h2>
       <!-- Gene: <span>{{gene.name.text}}</span> -->
@@ -6,13 +6,10 @@
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
       </span>
+      <span ng-if="document" class="geneLastModify">Last edit was made on {{document.modifiedDate | date : 'MMM d, h:mm a'}} by {{document.lastModifyingUserName}}</span>
       <span class="btn-group pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()">Update gene</button>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>
       </span>
     </h2>
     <p ng-if="gene.curators && gene.curators.asArray().length > 0">
@@ -240,6 +237,16 @@
       </button>
     </span>
   </div>
+</div>
+<div ng-show="loaded" class="floatToolBox btn-group btn-group-sm" role="group">
+    <span class="btn btn-default" style="opacity: 1" disabled>{{gene.name.text}}</span>
+    <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
+    <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
+    <!-- <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
+    <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()">Update gene</button>
+    <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>
+    <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button> -->
+    <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>
 </div>
 <div ng-hide="loaded" class="genesLoading">
     <div class='sk-spinner sk-spinner-wave mskcc'>

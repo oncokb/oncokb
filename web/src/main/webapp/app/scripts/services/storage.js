@@ -374,8 +374,10 @@ angular.module('oncokb')
       var token = gapi.auth.getToken();
       var now = Date.now() / 1000;
 
-      if (token && ((token.expires_at - now) > (60))) {
-        // console.log('token unexpires', token);
+      // console.log(token);
+      // console.log(now);
+      if (token && ((token.expires_at - now) > (600))) {
+        console.log('token unexpires');
         return $q.when(token);
       } else {
         var params = {
@@ -386,7 +388,7 @@ angular.module('oncokb')
         };
         var deferred = $q.defer();
         
-        // console.log('token expired, call authorize function');
+        console.log('token expired, call authorize function');
         gapi.auth.authorize(params, function (result) {
           // console.log('get authorize', result);
           if (result && !result.error) {
@@ -419,14 +421,20 @@ angular.module('oncokb')
         $rootScope.$digest();
       }.bind(this);
       var onError = function (error) {
-        // console.log('load on error', error);
+        console.log('load on error', error);
         if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
-          $rootScope.$emit('todos.token_refresh_required');
+          console.log('error: realtimeDoc.token_refresh_required');
+          $rootScope.$emit('realtimeDoc.token_refresh_required');
         } else if (error.type === gapi.drive.realtime.ErrorType.CLIENT_ERROR) {
-          $rootScope.$emit('todos.client_error');
+          console.log('error: realtimeDoc.client_error');
+          $rootScope.$emit('realtimeDoc.client_error');
         } else if (error.type === gapi.drive.realtime.ErrorType.NOT_FOUND) {
+          console.log('error: realtimeDoc.not_found');
           deferred.reject(error);
-          $rootScope.$emit('todos.not_found', id);
+          $rootScope.$emit('realtimeDoc.not_found', id);
+        }else {
+          console.log(error, id);
+          $rootScope.$emit('realtimeDoc.other_error');
         }
         $rootScope.$digest();
       };

@@ -12,21 +12,22 @@ angular.module('oncokb')
     var self = this;
     self.docs = [];
     self.newFolder = '';
-    self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk';
+    // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
+    self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
     function backup() {
       storage.requireAuth(true).then(function(result){
         if(result && !result.error) {
-          // storage.createFolder(self.parentFolder).then(function(result){
-            // if(result.id){
+          storage.createFolder(self.parentFolder).then(function(result){
+            if(result.id){
               // var docs = Documents.get({title: 'BRAF'});
               self.docs = documents.get();
-              self.newFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk';
-              // self.newFolder = result.id;
+              // self.newFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk';
+              self.newFolder = result.id;
               copyData(0);
-            // }else {
-            //   console.error('Create folder failed.');
-            // }
-          // });
+            }else {
+              console.error('Create folder failed.');
+            }
+          });
         }
       });
     }

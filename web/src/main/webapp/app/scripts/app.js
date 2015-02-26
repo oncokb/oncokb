@@ -28,7 +28,9 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
+    // folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
+    folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
+    // folderId: '0BzBfo69g8fP6fjVRZEJyYl92X0J4a3ZTMzJUQ01yRDBpcTJUQjdLMmh3T1BmZDRBYjFVRkE', //one of backup folder
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -510,15 +512,6 @@ angular.module('oncokb').run(
     // Error loading the document, likely due revoked access. Redirect back to home/install page
     $rootScope.$on('$routeChangeError', function () {
         $location.url('/');
-    });
-
-    // Token expired, refresh
-    $rootScope.$on('oncokb.token_refresh_required', function () {
-        storage.requireAuth(true).then(function () {
-            // no-op
-        }, function () {
-            $location.url('/');
-        });
     });
 
     $rootScope.$on("$routeChangeStart", function (event, next, current) {
