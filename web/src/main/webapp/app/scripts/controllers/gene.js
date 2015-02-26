@@ -610,19 +610,18 @@ angular.module('oncokb')
             ];
             getSuggestions();
 
-            console.log($location.path());
-            // var clock;
-            // clock = $interval(function() {
-            //   storage.requireAuth(true).then(function(result){
-            //     if(result && !result.error) {
-            //       var token = gapi.auth.getToken();
-            //       console.log('\t checked token', new Date().getTime());
-            //     }else {
-            //       documentClosed();
-            //       console.log('error when renew token in interval func.');
-            //     }
-            //   });
-            // }, 600000);
+            var clock;
+            clock = $interval(function() {
+              storage.requireAuth(true).then(function(result){
+                if(result && !result.error) {
+                  var token = gapi.auth.getToken();
+                  console.log('\t checked token', new Date().getTime());
+                }else {
+                  documentClosed();
+                  console.log('error when renew token in interval func.');
+                }
+              });
+            }, 600000);
 
             DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
               if(data.indexOf('All tumors') === -1){
