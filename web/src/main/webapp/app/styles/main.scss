@@ -7,7 +7,16 @@ $icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/"
 body {
   margin-bottom: 20px;
 }
-
+@media only screen and (min-width: 768px) {
+  .fixedNavbar .container{
+    padding: 0 0 0 15px;
+  }
+}
+@media only screen and (max-width: 768px) {
+  .fixedNavbar .container{
+    padding: 0 15px;
+  }
+}
 #chart, #header, #footer {
   position: absolute;
   top: 0;
