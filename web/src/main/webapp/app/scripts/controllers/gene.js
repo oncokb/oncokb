@@ -693,7 +693,7 @@ angular.module('oncokb')
               {'key': 'trialsShow', 'display': 'Ongoing clinical trials'}
             ];
             getSuggestions();
-
+            getOncoTreeTumortypes();
             var clock;
             clock = $interval(function() {
               storage.requireAuth(true).then(function(result){
@@ -707,14 +707,71 @@ angular.module('oncokb')
               });
             }, 600000);
 
-            DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
-              if(data.indexOf('All tumors') === -1){
-                data.push('All tumors');
-              }
-              data = _.remove(data, function(n) { return n.toString().toLowerCase().indexOf('lung') === -1;});
-              data.push('Lung cancer');
-              $scope.tumorTypes = data;
-            });
+            function getOncoTreeTumortypes(){
+              $scope.tumorTypes = [ 'Adrenocortical Carcinoma',
+                'Pheochromocytoma',
+                'Ampullary Carcinoma',
+                'Biliary Cancer',
+                'Bladder Cancer',
+                'Blastic Plasmacytoid Dendritic Cell Neoplasm',
+                'Histiocytosis',
+                'Leukemia',
+                'Multiple Myeloma',
+                'Myelodysplasia',
+                'Myeloproliferative Neoplasm',
+                'Chondroblastoma',
+                'Chondrosarcoma',
+                'Chordoma',
+                'Ewing Sarcoma',
+                'Giant Cell Tumor',
+                'Osteosarcoma',
+                'Anal Cancer',
+                'Melanoma',
+                'Appendiceal Cancer',
+                'Colorectal Cancer',
+                'Gastrointestinal Neuroendocrine Tumor',
+                'Small Bowel Cancer',
+                'Diffuse Glioma',
+                'Encapsulated Glioma',
+                'Ependymomal Tumor',
+                'Miscellaneous Neuroepithelial Tumor',
+                'Meningothelial Tumor',
+                'Embryonal Tumor',
+                'Sellar Tumor',
+                'Nerve Sheath Tumor',
+                'Choroid Plexus Tumor',
+                'Pineal Tumor',
+                'Germ Cell Tumor',
+                'Miscellaneous Brain Tumor',
+                'Breast Carcinoma',
+                'Cervical Cancer',
+                'Esophagogastric Carcinoma',
+                'Retinoblastoma',
+                'Head and Neck Carcinoma',
+                'Renal Cell Carcinoma',
+                'Wilms Tumor',
+                'Hepatocellular Carcinoma',
+                'Hodgkin\'s Lymphoma',
+                'Non-Hodgkin’s Lymphoma',
+                'Lung cancer',
+                'Mesothelioma',
+                'Ovarian Cancer',
+                'Pancreatic Cancer',
+                'Penile Cancer',
+                'Prostate Cancer',
+                'Skin Cancer, Non-Melanoma',
+                'Soft Tissue Sarcoma',
+                'Gastrointestinal Stromal Tumor',
+                'Thymic Tumor',
+                'Thyroid Cancer',
+                'Gestational Trophoblastic Disease',
+                'Endometrial Cancer',
+                'Uterine Sarcoma',
+                'Vulvar Carcinoma',
+                'Cancer of Unknown Primary',
+                'Mixed Cancer Types',
+                'Unknown Cancer Type' ];
+            }
 
             loadFile().then(function(file){
               $scope.realtimeDocument = file;
