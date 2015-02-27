@@ -71,7 +71,62 @@ angular.module('oncokb')
             };
 
             $scope.givePermission = function() {
-              var testGene = {'journalistwenxiongzhang@gmail.com': 'test,BRAF'};
+              var testGene = {
+                    'karuna.ganesh@gmail.com':' EPCAM, FAT1, SMAD2, SMAD3, SMAD4, TGFBR1, TGFBR2, U2AF1, BMPR1A, XPO1, RET, ALK1, CTNNB1',
+                    'a3740H@gmail.com':'  AKT2, AKT3, ERBB3, FGFR1, ERBB2, FGFR3, ERBB4, FGFR2, FGFR4',
+                    'andrew.intlekofer@gmail.com':' PTEN, PIK3CA, PIK3R1, AKT1, STK11, B2M, BTK, HLA-A, PRDM1, SF3B1, EPHA7, HIST1H1C, REL, CREBBP',
+                    'zeena.salman@gmail.com':'  FLT3, CEPBA, NPM1, EGFR, MET. DDR2, PDGFRB, KIT',
+                    'smithj10smad4@gmail.com':' CDK4, CDK6, NFKBIA, SMO, IDH1, IDH2, NOTCH1, PTCH1 ',
+                    'tousledninja@gmail.com':'  CDH1, STAG2, MDC1, MRE11A, POLD1, KRAS, NRAS, HRAS',
+                    'moriah.heller@gmail.com':' NF1, CASP8, BRAF, GNAQ, GNAS, GNA11, MAP2K1',
+                    'phil.iaquinta@gmail.com':' E2F3, FOXP1, RYBP, SHQ1, PIK3CB, PIK3R2, TP53, FBXW7, FOXL2',
+                    'aaron.viny@gmail.com':'  RAD21, MSH2, XRCC2',
+                    'ahs500@gmail.com':'  TET1, TET2, GATA1, GATA2, MPL',
+                    'aawaite@gmail.com':' CBL, KDR, PTPN11',
+                    'awiner24@gmail.com':'  VHL, PBRM1, SETD2',
+                    'cannin@gmail.com':'  BRIP1, ERCC4, FANCA, FANCC',
+                    'bill.terry.lab@gmail.com':'  EWSR1, MDM2, MDM4, ETV6',
+                    'byronhlee@gmail.com':' DNMT1, EZH2',
+                    'cchang331@gmail.com':' WT1, ROS1',
+                    'conniewclee@gmail.com':' EP300, MYD88, CARD11, CD79B',
+                    'reznik.ed@gmail.com':' KEAP1, NFE2L2, MYC, FH, SDHA, SDHAF2, BRD4, MAX, MYCN',
+                    'elena.gold.nyc@gmail.com':'  RASA1, MAP2K2, MAP2K4, MAP3K1',
+                    'elizjadams@gmail.com':'  FOXA1',
+                    'emilyafoley@gmail.com':' AURKA, AURKB, CCND1, CCNE1, PPP2R1A, CCND2, CCND3',
+                    'redelmansidi@gmail.com':'  PAK1',
+                    'ingo.bothe@gmail.com':'  MYOD1, SRC',
+                    'landa.inigo@gmail.com':' CTCF, CDKN1A, CDKN2B',
+                    'jiangingxu@gmail.com':'  MTOR',
+                    'joachimsilber2@gmail.com':'  PDGFRA, DAXX',
+                    'jesdmp@gmail.com':'  MLH1, MSH6, RAD54L, RECQL4, PMS2',
+                    'jtpoirier@gmail.com':' BCL2L11, BCL2, RB1',
+                    'kaminiy79@gmail.com':' EIF1AX, EIF4A2, EIF4E, GATA3',
+                    'kdobrenkov@gmail.com':'  ATRX, SMARCB1',
+                    'manjushanamuduri@gmail.com':'  CD276, CD274, CTLA4, TNFRSF14, IL7R, JAK1, JAK2, JAK3, IKZF1',
+                    'marcusgon@gmail.com':' ACVR1, IGF1, IGF1R, IGF2, INHA, INHBA',
+                    'mgzauderer@gmail.com':'  BAP1, NF2',
+                    'martingdalin@gmail.com':'  RAF1, CDKN1B, RHOA, RAC1, MEN1, ARAF',
+                    'chheda@gmail.com':'  SOX9, ZFHX3',
+                    'amelie092006@gmail.com':'  RAD50, RAD51B, RAD51C, RAD51D, RAD52, TOP1, HIST1H3A',
+                    'nelsonmoussazadeh@gmail.com':' KDM5C, KDM6A, KMT2A, KMT2D, H3F3A, H3F3B, H3F3C, KDM5A',
+                    'nils.weinhold@gmail.com':' POLE, PTPRD',
+                    'olgaaguryanova@gmail.com':'  DNMT3A, DNMT3B, RUNX1',
+                    'watsonp@mskcc.org@gmail.com':' AR',
+                    'qinghur@gmail.com':' SDHB, SDHC, SDHD, PAX8, TCEB1',
+                    'rohinir14@gmail.com':' BRCA1, BRCA2, PALB2, CDK12',
+                    'samkaff@gmail.com':' RHEB, TSC1, TSC2, RICTOR',
+                    'sevinturcan@gmail.com':' CIC, FUBP1',
+                    'shipsmail@gmail.com':' HNF1A',
+                    'tara.albano@gmail.com':' MED12, BCOR',
+                    'liwei75@gmail.com':' YAP1, LATS1, LATS2, MST1',
+                    'toyweiyi@gmail.com':'  ESR1',
+                    'xiang.zhangm@gmail.com':'  ATM, CHEK1, CHEK2, ATR, CENPA, MITF, ARID2',
+                    'niuzhaoyang@gmail.com':' RBM10',
+                    'chenyu32548@gmail.com':' ERG, ETV1, SPOP, TMPRSS2, SOX9, ZFHX3',
+                    'petjela@hotmail.com':' SMARCA4',
+                    'prazavi@gmail.com':' FOXA1, CDH1, PALB2, TBX3, ESR1, MAP3K1, FANCA, FANCC, BRCA1, BRCA2, GATA3',
+                    'vero.rodriguez.bravo@gmail.com':'  NTRK1, NTRK2, NTRK3, U2AF1'
+                  };
 
               for(var key in testGene) {
                 var _genes = testGene[key].trim().split(',').map(function(e){ return e.trim();});
@@ -656,6 +711,8 @@ angular.module('oncokb')
               if(data.indexOf('All tumors') === -1){
                 data.push('All tumors');
               }
+              data = _.remove(data, function(n) { return n.toString().toLowerCase().indexOf('lung') === -1;});
+              data.push('Lung cancer');
               $scope.tumorTypes = data;
             });
 
