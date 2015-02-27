@@ -53,7 +53,7 @@ angular.module('oncokb')
             $scope.userRole = users.getMe().role;
             // var newGenes = ['RET','FGFR4','KIT','SMO','ALK1','ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2','RAD21','TET1','TET2','GATA1','GATA2','MPL','B2M','BTK','HLA-A','PRDM1','SF3B1','EPHA7','HIST1H1C','REL','CREBBP','VHL','PBRM1','SETD2','AKT2','AKT3','ERBB3','FGFR1','BRIP1','ERCC4','FANCA','FANCC','EWSR1','MDM2','MDM4','ETV6','DNMT1','EZH2','WT1','EP300','MYD88','CARD11','CD79B','KEAP1','MYC','FH','SDHA','SDHAF2','SDHB','SDHC','SDHD','RASA1','FOXA1','AURKA','AURKB','CCND1','CCNE1','PPP2R1A','CCND2','CCND3','PAK1','ERG','ETV1','SPOP','SOX2','MYOD1','CTCF','MTOR','PDGFRA','DAXX','MLH1','MSH6','RAD54L','RECQL4','BCL2','RB1','EIF1AX','EIF4A2','EIF4E','EPCAM','FAT1','SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2C','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','DNMT3A','DNMT3B','AR','E2F3','FOXP1','RYBP','SHQ1','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10','APC','ARAF','ARID1B','ARID2','ARID5B','BCL2L11','BRD4','CASP8','CBL','CDK12','CDK4','CDK6','CDKN1A','CDKN2B','GATA3','KDR','MAP2K2','MAP2K4','MAP3K1','MAX','MSH2','MYCN','NFE2L2','NFKBIA','NTRK1','NTRK2','NTRK3','PIK3CB','PIK3R2','PMS2','PTPN11','PTPRD','ROS1','RUNX1','SRC','TMPRSS2','XRCC2'];
             // var newGenes = ['ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2'];
-            var newGenes = ['test'];
+            var newGenes = ['TBX3'];
 
             //phase 1/2 genes 210
             // var newGenes = ['RAD21','MSH2','XRCC2','TET1','TET2','GATA1','GATA2','MPL','CBL','KDR','PTPN11','B2M','BTK','HLA-A','PRDM1','SF3B1','EPHA7','HIST1H1C','REL','CREBBP','VHL','PBRM1','SETD2','AKT2','AKT3','ERBB3','FGFR1','BRIP1','ERCC4','FANCA','FANCC','EWSR1','MDM2','MDM4','ETV6','DNMT1','EZH2','WT1','ROS1','EP300','MYD88','CARD11','CD79B','KEAP1','NFE2L2','MYC','FH','SDHA','SDHAF2','BRD4','MAX','MYCN','RASA1','MAP2K2','MAP2K4','MAP3K1','FOXA1','AURKA','AURKB','CCND1','CCNE1','PPP2R1A','CCND2','CCND3','PAK1','ERG','ETV1','SPOP','TMPRSS2','SOX2','KMT2C','MYOD1','SRC','CTCF','CDKN1A','CDKN2B','APC','NTRK1','NTRK2','NTRK3','CDK4','CDK6','NFKBIA','MTOR','PDGFRA','DAXX','MLH1','MSH6','RAD54L','RECQL4','PMS2','BCL2L11','BCL2','RB1','EIF1AX','EIF4A2','EIF4E','GATA3','EPCAM','FAT1','SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','ARAF','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','CASP8','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','PTPRD','DNMT3A','DNMT3B','RUNX1','AR','E2F3','FOXP1','RYBP','SHQ1','PIK3CB','PIK3R2','SDHB','SDHC','SDHD','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','CDK12','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','ARID1B','ARID2','ARID5B','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10'];
@@ -71,97 +71,56 @@ angular.module('oncokb')
             };
 
             $scope.givePermission = function() {
-              var testGene = {
-                    'karuna.ganesh@gmail.com':' EPCAM, FAT1, SMAD2, SMAD3, SMAD4, TGFBR1, TGFBR2, U2AF1, BMPR1A, XPO1, RET, ALK1, CTNNB1',
-                    'a3740H@gmail.com':'  AKT2, AKT3, ERBB3, FGFR1, ERBB2, FGFR3, ERBB4, FGFR2, FGFR4',
-                    'andrew.intlekofer@gmail.com':' PTEN, PIK3CA, PIK3R1, AKT1, STK11, B2M, BTK, HLA-A, PRDM1, SF3B1, EPHA7, HIST1H1C, REL, CREBBP',
-                    'zeena.salman@gmail.com':'  FLT3, CEPBA, NPM1, EGFR, MET. DDR2, PDGFRB, KIT',
-                    'smithj10smad4@gmail.com':' CDK4, CDK6, NFKBIA, SMO, IDH1, IDH2, NOTCH1, PTCH1 ',
-                    'tousledninja@gmail.com':'  CDH1, STAG2, MDC1, MRE11A, POLD1, KRAS, NRAS, HRAS',
-                    'moriah.heller@gmail.com':' NF1, CASP8, BRAF, GNAQ, GNAS, GNA11, MAP2K1',
-                    'phil.iaquinta@gmail.com':' E2F3, FOXP1, RYBP, SHQ1, PIK3CB, PIK3R2, TP53, FBXW7, FOXL2',
-                    'aaron.viny@gmail.com':'  RAD21, MSH2, XRCC2',
-                    'ahs500@gmail.com':'  TET1, TET2, GATA1, GATA2, MPL',
-                    'aawaite@gmail.com':' CBL, KDR, PTPN11',
-                    'awiner24@gmail.com':'  VHL, PBRM1, SETD2',
-                    'cannin@gmail.com':'  BRIP1, ERCC4, FANCA, FANCC',
-                    'bill.terry.lab@gmail.com':'  EWSR1, MDM2, MDM4, ETV6',
-                    'byronhlee@gmail.com':' DNMT1, EZH2',
-                    'cchang331@gmail.com':' WT1, ROS1',
-                    'conniewclee@gmail.com':' EP300, MYD88, CARD11, CD79B',
-                    'reznik.ed@gmail.com':' KEAP1, NFE2L2, MYC, FH, SDHA, SDHAF2, BRD4, MAX, MYCN',
-                    'elena.gold.nyc@gmail.com':'  RASA1, MAP2K2, MAP2K4, MAP3K1',
-                    'elizjadams@gmail.com':'  FOXA1',
-                    'emilyafoley@gmail.com':' AURKA, AURKB, CCND1, CCNE1, PPP2R1A, CCND2, CCND3',
-                    'redelmansidi@gmail.com':'  PAK1',
-                    'ingo.bothe@gmail.com':'  MYOD1, SRC',
-                    'landa.inigo@gmail.com':' CTCF, CDKN1A, CDKN2B',
-                    'jiangingxu@gmail.com':'  MTOR',
-                    'joachimsilber2@gmail.com':'  PDGFRA, DAXX',
-                    'jesdmp@gmail.com':'  MLH1, MSH6, RAD54L, RECQL4, PMS2',
-                    'jtpoirier@gmail.com':' BCL2L11, BCL2, RB1',
-                    'kaminiy79@gmail.com':' EIF1AX, EIF4A2, EIF4E, GATA3',
-                    'kdobrenkov@gmail.com':'  ATRX, SMARCB1',
-                    'manjushanamuduri@gmail.com':'  CD276, CD274, CTLA4, TNFRSF14, IL7R, JAK1, JAK2, JAK3, IKZF1',
-                    'marcusgon@gmail.com':' ACVR1, IGF1, IGF1R, IGF2, INHA, INHBA',
-                    'mgzauderer@gmail.com':'  BAP1, NF2',
-                    'martingdalin@gmail.com':'  RAF1, CDKN1B, RHOA, RAC1, MEN1, ARAF',
-                    'chheda@gmail.com':'  SOX9, ZFHX3',
-                    'amelie092006@gmail.com':'  RAD50, RAD51B, RAD51C, RAD51D, RAD52, TOP1, HIST1H3A',
-                    'nelsonmoussazadeh@gmail.com':' KDM5C, KDM6A, KMT2A, KMT2D, H3F3A, H3F3B, H3F3C, KDM5A',
-                    'nils.weinhold@gmail.com':' POLE, PTPRD',
-                    'olgaaguryanova@gmail.com':'  DNMT3A, DNMT3B, RUNX1',
-                    'watsonp@mskcc.org@gmail.com':' AR',
-                    'qinghur@gmail.com':' SDHB, SDHC, SDHD, PAX8, TCEB1',
-                    'rohinir14@gmail.com':' BRCA1, BRCA2, PALB2, CDK12',
-                    'samkaff@gmail.com':' RHEB, TSC1, TSC2, RICTOR',
-                    'sevinturcan@gmail.com':' CIC, FUBP1',
-                    'shipsmail@gmail.com':' HNF1A',
-                    'tara.albano@gmail.com':' MED12, BCOR',
-                    'liwei75@gmail.com':' YAP1, LATS1, LATS2, MST1',
-                    'toyweiyi@gmail.com':'  ESR1',
-                    'xiang.zhangm@gmail.com':'  ATM, CHEK1, CHEK2, ATR, CENPA, MITF, ARID2',
-                    'niuzhaoyang@gmail.com':' RBM10',
-                    'chenyu32548@gmail.com':' ERG, ETV1, SPOP, TMPRSS2, SOX9, ZFHX3',
-                    'petjela@hotmail.com':' SMARCA4',
-                    'prazavi@gmail.com':' FOXA1, CDH1, PALB2, TBX3, ESR1, MAP3K1, FANCA, FANCC, BRCA1, BRCA2, GATA3',
-                    'vero.rodriguez.bravo@gmail.com':'  NTRK1, NTRK2, NTRK3, U2AF1'
-                  };
+              var testGene = {};
+              var genes = [];
 
               for(var key in testGene) {
                 var _genes = testGene[key].trim().split(',').map(function(e){ return e.trim();});
-
                 _genes.forEach(function(_gene){
-                  var _docs = Documents.get({title: _gene});
-                  _docs.forEach(function(e1){
-                    if(e1.id) {
-                      storage.requireAuth().then(function(){
-                        storage.getPermission(e1.id).then(function(result){
-                          if(result.items && angular.isArray(result.items)) {
-                            var permissionIndex = -1;
-                            result.items.forEach(function(permission, _index){
-                              if(permission.emailAddress && permission.emailAddress === key) {
-                                permissionIndex = _index;
-                              }
-                            });
-
-                            if(permissionIndex === -1) {
-                              storage.insertPermission(e1.id, key, 'user', 'writer').then(function(result){
-                                console.log('insert result', result);
-                              });
-                            }else if(result.items[permissionIndex].role !== 'writer'){
-                              storage.updatePermission(e1.id, result.items[permissionIndex].id, 'writer').then(function(result){
-                                console.log('update result', result);
-                              });
-                            }
-                          }
-                        });
-                      });
-                    }
-                  });
+                  genes.push({'email': key, 'gene': _gene});
                 });
               }
+
+              $scope.genesPermissions = genes;
+              givePermissionSub(0);
             };
+
+            function givePermissionSub(index){
+              if(index < $scope.genesPermissions.length) {
+                var permission = $scope.genesPermissions[index];
+                console.log(permission.gene, '\t', permission.email);
+                var _docs = Documents.get({title: permission.gene});
+                var _doc = _docs[0];
+                if(_doc.id) {
+                  storage.requireAuth().then(function(){
+                    storage.getPermission(_doc.id).then(function(result){
+                      if(result.items && angular.isArray(result.items)) {
+                        var permissionIndex = -1;
+                        result.items.forEach(function(permission, _index){
+                          if(permission.emailAddress && permission.emailAddress === permission.email) {
+                            permissionIndex = _index;
+                          }
+                        });
+
+                        if(permissionIndex === -1) {
+                          storage.insertPermission(_doc.id, permission.email, 'user', 'writer').then(function(result){
+                            console.log('\tinsert writer to', permission.gene);
+                            givePermissionSub(++index);
+                          });
+                        }else if(result.items[permissionIndex].role !== 'writer'){
+                          storage.updatePermission(_doc.id, result.items[permissionIndex].id, 'writer').then(function(result){
+                            console.log('\tupdat  writer to', permission.gene);
+                            givePermissionSub(++index);
+                          });
+                        }
+                      }
+                    });
+                  });
+                }
+              }else{
+                console.info('Done.....');
+              }
+            }
 
             $scope.giveFolderPermission = function() {
               var emails = ['cbioportal@gmail.com'];
