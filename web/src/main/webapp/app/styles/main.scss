@@ -91,7 +91,20 @@ table.colorFirstCol td:nth-child(1) {
 table.colorHeader thead tr{
     background-color: lightgray;
 }
+[contenteditable=true]:empty:before{
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+  color: grey;
+  margin-left: 5px;
+}
 
+/* */
+
+div[contenteditable=true] {
+  border: 1px dashed #AAA;
+  width: 290px;
+  padding: 5px;
+}
 .variantDisplayResult {
   margin: 10px 0;
 }

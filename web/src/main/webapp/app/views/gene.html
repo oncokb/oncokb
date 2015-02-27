@@ -145,13 +145,12 @@
                     <comments-dict file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
                   <span>
-                        <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="ti.description.text">
-                    </p>
+                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" placeholder="Optional general summary" ng-model="ti.description.text"></p>
                   </span>
                   <accordion close-others="oneAtATime">
                       <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
                           <accordion-heading>
-                              {{treatment.type.text}}:<span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
+                              {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                               <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o pull-right"></i>
                           </accordion-heading>
                       <p>
@@ -239,7 +238,7 @@
                   </accordion-group>
               </accordion>
         <div style="width: 100%" class="input-group input-group-sm">
-          <input type="text" ng-model="newTumorType.name" typeahead="tumorType for tumorType in tumorTypes | filter:$viewValue | limitTo:8" class="form-control">
+          <input type="text" ng-model="newTumorType.name" typeahead="tumorType for tumorType in tumorTypes | filter:$viewValue | limitTo:8" class="form-control" placeholder="Free text or choose from the dropdown list">
           <span class="input-group-btn">
             <button type="button" class="btn btn-default" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
               <i class="fa fa-plus"></i> Add Tumor Type

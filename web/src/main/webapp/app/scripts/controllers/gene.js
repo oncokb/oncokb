@@ -161,8 +161,8 @@ angular.module('oncokb')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'importer', 'curationSuggestions', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, importer, CurationSuggestions, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'curationSuggestions', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, CurationSuggestions, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -317,7 +317,11 @@ angular.module('oncokb')
             $scope.remove = function(index, object, event) {
                 if (event.stopPropagation) { event.stopPropagation();}
                 if (event.preventDefault) { event.preventDefault();}
-                object.remove(index);
+
+                var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
+                dlg.result.then(function(btn){
+                  object.remove(index);
+                },function(btn){});
             };
 
             $scope.commentClick = function(event) {
