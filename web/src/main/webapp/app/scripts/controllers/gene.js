@@ -40,13 +40,14 @@ angular.module('oncokb')
             $scope.dtOptions = DTOptionsBuilder
               .newOptions()
               .withDOM('ifrtlp')
+              .withOption('order', [[3, 'desc'],[0, 'desc']])
               .withBootstrap();
 
             $scope.dtColumns =  [
               DTColumnDefBuilder.newColumnDef(0),
               DTColumnDefBuilder.newColumnDef(1).notSortable(),
               DTColumnDefBuilder.newColumnDef(2).notSortable(),
-              DTColumnDefBuilder.newColumnDef(3).notSortable()
+              DTColumnDefBuilder.newColumnDef(3)
             ];
             $scope.loaded = false;
             $scope.getDocs();

@@ -15,8 +15,8 @@
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.mskccEmail}}</span><br ng-if="$index<curator.length-1"/></div></td>
                     <td>
-                        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"></i>
-                        <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"></i>
+                        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">1</span></i>
+                        <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">0</span></i>
                     </td>
                 </tr>
             </tbody>
