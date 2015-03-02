@@ -31,7 +31,7 @@ angular.module('oncokb')
         if(userInfo.emails) {
             for (var i = 0; i < userInfo.emails.length; i++) {
                 if(userInfo.emails[i].type === 'account'){
-                    user.email = userInfo.emails[i].value;
+                    user.email = userInfo.emails[i].value.toString().toLowerCase();
                     break;
                 }
             }

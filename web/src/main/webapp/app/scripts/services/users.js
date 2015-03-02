@@ -77,6 +77,9 @@ angular.module('oncokb')
                             }else {
                                 _user[__key] = users[i][__key].split(',').map(function(d){ return d.toString().trim();});
                             }
+                            if(__key === 'email') {
+                                _user[__key] =  _user[__key].toString().toLowerCase();
+                            }
                         }
                     }
                     self.users[_user.email] = angular.copy(_user);
@@ -93,8 +96,9 @@ angular.module('oncokb')
 
     function setMe(user){
         if(angular.isString(user.email)) {
-            if(self.users.hasOwnProperty(user.email)) {
-                self.me = self.users[user.email];
+            var email = user.email.toLowerCase();
+            if(self.users.hasOwnProperty(email)) {
+                self.me = self.users[email];
             }else {
                 self.me = user;
                 self.me.role = config.userRoles.user;
