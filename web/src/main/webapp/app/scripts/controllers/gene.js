@@ -398,6 +398,9 @@ angular.module('oncokb')
                 });
               }else {
                 $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
+                if($scope.suggestedMutations.length === 0) {
+                  $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
+                }
               }
             }
 
