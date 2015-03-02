@@ -14,7 +14,10 @@ public enum LevelOfEvidence {
     LEVEL_2A ("2a", "FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication"),
     LEVEL_2B ("2b", "FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication"),
     LEVEL_3 ("3", "Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association"),
-    LEVEL_4 ("4", "Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association");
+    LEVEL_4 ("4", "Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association"),
+    LEVEL_R1 ("r1", "NCCN-compendium listed biomarker for resistance to a FDA-approved drug"),
+    LEVEL_R2 ("r2", "Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance"),
+    LEVEL_R3 ("r3", "Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance");
     
     private LevelOfEvidence(String level, String description) {
         this.level = level;

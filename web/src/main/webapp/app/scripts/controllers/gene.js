@@ -392,6 +392,9 @@ angular.module('oncokb')
                 DatabaseConnector.getAllCurationSuggestions(function(data){
                   CurationSuggestions.set(data);
                   $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
+                  if($scope.suggestedMutations.length === 0) {
+                    $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
+                  }
                 });
               }else {
                 $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
@@ -637,6 +640,7 @@ angular.module('oncokb')
               saving: false,
               closed: false
             };
+            $scope.addMutationPlaceholder = "Mutation Name";
             $scope.userRole = Users.getMe().role;
             $scope.levelExps = {
               SR: '<strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib',

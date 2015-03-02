@@ -249,7 +249,7 @@
       </accordion>
   </div>
   <div class="input-group input-group-sm">
-    <input type="text" class="form-control" ng-model="newMutation.name" placeholder="Mutation name"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
+    <input type="text" class="form-control" ng-model="newMutation.name" placeholder="{{addMutationPlaceholder}}"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
     <span class="input-group-btn">
       <button type="button" class="btn btn-default" ng-disabled="!(!!newMutation.name)" ng-click="addMutation()">
         <i class="fa fa-plus"></i> Add Mutation
