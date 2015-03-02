@@ -15,21 +15,21 @@ angular.module('oncokb')
     // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
     self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
     function backup() {
-      // storage.requireAuth(true).then(function(result){
-      //   if(result && !result.error) {
-      //     storage.createFolder(self.parentFolder).then(function(result){
-      //       if(result.id){
-              // var docs = Documents.get({title: 'BRAF'});
+      storage.requireAuth(true).then(function(result){
+        if(result && !result.error) {
+          storage.createFolder(self.parentFolder).then(function(result){
+            if(result.id){
+              // var docs = documents.get({title: 'BRAF'});
               self.docs = documents.get();
-              self.newFolder = '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8';
-              // self.newFolder = result.id;
+              // self.newFolder = '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8';
+              self.newFolder = result.id;
               copyData(0);
-      //       }else {
-      //         console.error('Create folder failed.');
-      //       }
-      //     });
-      //   }
-      // });
+            }else {
+              console.error('Create folder failed.');
+            }
+          });
+        }
+      });
     }
 
     function copyData(index) {
@@ -229,7 +229,10 @@ angular.module('oncokb')
     }
 
     function getString(string){
-      string = S(string).stripTags().s;
+      var tmp = window.document.createElement("DIV");
+      tmp.innerHTML = string;
+      var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
+      string = S(_string).collapseWhitespace().s;
       return string;
     }
 
