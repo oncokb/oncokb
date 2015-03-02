@@ -40,7 +40,7 @@ angular.module('oncokb')
             $scope.dtOptions = DTOptionsBuilder
               .newOptions()
               .withDOM('ifrtlp')
-              .withOption('order', [[3, 'desc'],[0, 'desc']])
+              .withOption('order', [[3, 'desc'],[0, 'asc']])
               .withBootstrap();
 
             $scope.dtColumns =  [
@@ -245,7 +245,7 @@ angular.module('oncokb')
             
             $scope.updateGene = function() {
               var gene = importer.getData(this.gene);
-              DatabaseConnector.updateGene(JSON.stringify(gene), function(result){ console.log(result)}, function(result){ console.log(result)});
+              DatabaseConnector.updateGene(JSON.stringify(gene), function(result){ console.log('success', result);}, function(result){ console.log('failed', result);});
             };
             
             $scope.addTumorType = function(mutation) {

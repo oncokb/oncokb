@@ -239,7 +239,8 @@ angular.module('oncokb')
               if (nextPageToken) {
                 request = gapi.client.drive.files.list({
                     'q' : '"' + config.folderId + '" in parents',
-                    'pageToken': nextPageToken
+                    'pageToken': nextPageToken,
+                    'maxResults': 300
                 });
                 retrievePageOfFiles(request, result);
               } else {
