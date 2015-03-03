@@ -260,6 +260,9 @@ p.editableBox.doubleH {
   z-index: 999;
   box-shadow: 0 0 4px rgba(0,0,0,.3);
 }
+.dashedHeader th:not(:first-child){
+  border-left: 1px dashed lightgrey;
+}
 .oncokbMainView {
   box-shadow: 0 0 4px rgba(0,0,0,.3);
   padding-top: 70px;
