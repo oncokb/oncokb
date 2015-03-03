@@ -32,12 +32,6 @@
           Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.name.text"/></span><comments-dict ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <i ng-click="remove($index, gene.mutations, $event)" class="fa fa-trash-o pull-right"></i>
         </accordion-heading>
-        <div class="input-group input-group-sm">
-          <input type="text" class="form-control" ng-model="selfParams.moveIndex" placeholder="Search for...">
-          <span class="input-group-btn">
-            <button type="button" class="btn btn-default" ng-click="move(gene.mutations, $index)">Move</button>
-          </span>
-        </div>
         <accordion close-others="oneAtATime">
             <!-- Mutation Effect -->
             <accordion-group>
@@ -153,58 +147,55 @@
                   <span>
                     <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" placeholder="Optional general summary" ng-model="ti.description.text"></p>
                   </span>
-                  <div>
-                    <accordion close-others="oneAtATime" ui-sortable="sortableOptions" ng-model="list">
-                        <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
-                            <accordion-heading>
-                                {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
-                                <span class="pull-right">
-                                  <i class="fa fa-arrows myHandle"></i>
-                                  <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o"></i>
-                                </span>
-                            </accordion-heading>
-                        <p>
-                              <strong>{{treatment.level.display}}:</strong>
-                              <span ng-if="checkTI(ti, 1, 1)">
-                                <select style="width: 90%" ng-model="treatment.level.text"
-                                    ng-options="opt.value as opt.label for opt in levels.SS">
-                                </select>
+                  <accordion close-others="oneAtATime">
+                      <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
+                          <accordion-heading>
+                              {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
+                              <span class="pull-right">
+                                <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o"></i>
                               </span>
-                              <span ng-if="checkTI(ti, 1, 0)">
-                                <select style="width: 95%"  ng-model="treatment.level.text"
-                                    ng-options="opt.value as opt.label for opt in levels.SR">
-                                </select>
-                                <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.SR}}"></i>
-                              </span>
-                              <span ng-if="checkTI(ti, 0, 1)">
-                                <select style="width: 100%" ng-model="treatment.level.text"
-                                    ng-options="opt.value as opt.label for opt in levels.IS">
-                                </select>
-                              </span>
-                              <span ng-if="checkTI(ti, 0, 0)">
-                                <select style="width: 95%" ng-model="treatment.level.text"
-                                    ng-options="opt.value as opt.label for opt in levels.IR">
-                                </select>
-                                <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.IR}}"></i>
-                              </span>
-                        </p>
-                        <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
-                          <div class="header">
-                            <strong>{{treatment.indication.display}}:</strong>
-                          </div>
-                          <div class="content">
-                              <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"></p>
-                          </div>
+                          </accordion-heading>
+                      <p>
+                            <strong>{{treatment.level.display}}:</strong>
+                            <span ng-if="checkTI(ti, 1, 1)">
+                              <select style="width: 90%" ng-model="treatment.level.text"
+                                  ng-options="opt.value as opt.label for opt in levels.SS">
+                              </select>
+                            </span>
+                            <span ng-if="checkTI(ti, 1, 0)">
+                              <select style="width: 95%"  ng-model="treatment.level.text"
+                                  ng-options="opt.value as opt.label for opt in levels.SR">
+                              </select>
+                              <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.SR}}"></i>
+                            </span>
+                            <span ng-if="checkTI(ti, 0, 1)">
+                              <select style="width: 100%" ng-model="treatment.level.text"
+                                  ng-options="opt.value as opt.label for opt in levels.IS">
+                              </select>
+                            </span>
+                            <span ng-if="checkTI(ti, 0, 0)">
+                              <select style="width: 95%" ng-model="treatment.level.text"
+                                  ng-options="opt.value as opt.label for opt in levels.IR">
+                              </select>
+                              <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.IR}}"></i>
+                            </span>
+                      </p>
+                      <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
+                        <div class="header">
+                          <strong>{{treatment.indication.display}}:</strong>
                         </div>
-                        <span>
-                              <strong>{{treatment.description.display}}:</strong>
-                              <br/>
-                              <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.description.text">
-                          </p>
-                        </span>
-                        </accordion-group>
-                    </accordion>
-                  </div>
+                        <div class="content">
+                            <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"></p>
+                        </div>
+                      </div>
+                      <span>
+                            <strong>{{treatment.description.display}}:</strong>
+                            <br/>
+                            <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.description.text">
+                        </p>
+                      </span>
+                      </accordion-group>
+                  </accordion>
                   <div class="input-group input-group-sm">
                     <input type="text" class="form-control" ng-model="newTI[$index].name" placeholder="Therapy name" />
                     <span class="input-group-btn">
@@ -256,8 +247,8 @@
             </button>
           </span>
         </div>
-          </accordion-group>
-      </accordion>
+      </accordion-group>
+    </accordion>
   </div>
   <div class="input-group input-group-sm">
     <input type="text" class="form-control" ng-model="newMutation.name" placeholder="{{addMutationPlaceholder}}"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
