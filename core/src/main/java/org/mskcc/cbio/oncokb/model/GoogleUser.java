@@ -10,6 +10,7 @@ public class GoogleUser {
     private String mskccEmail;
     private Integer role;
     private String genes;
+    private String phases;
 
     public String getMskccEmail() {
         return mskccEmail;
@@ -49,5 +50,13 @@ public class GoogleUser {
 
     public void setGenes(String genes) {
         this.genes = genes;
+    }
+
+    public String getPhases() {
+        return phases;
+    }
+
+    public void setPhases(String phases) {
+        this.phases = phases;
     }
 }
