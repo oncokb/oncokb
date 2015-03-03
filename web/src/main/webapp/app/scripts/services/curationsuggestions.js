@@ -37,7 +37,11 @@ angular.module('oncokb')
             if(e.gene) {
               var _sug = new Suggestion();
               _sug.gene = e.gene.toString().trim();
-              _sug.mutations = e.mutations.split(';').map(function(e){ return e.toString().trim()});
+              if(angular.isString(e.mutations)) {
+                _sug.mutations = e.mutations.split(';').map(function(e){ return e.toString().trim()});
+              }else {
+                _sug.mutations = [];
+              }
               self.suggestionsA.push(_sug);
               self.suggestions[e.gene] = _sug;
             }
