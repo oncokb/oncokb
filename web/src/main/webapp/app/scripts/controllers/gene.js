@@ -40,14 +40,15 @@ angular.module('oncokb')
             $scope.dtOptions = DTOptionsBuilder
               .newOptions()
               .withDOM('ifrtlp')
-              .withOption('order', [[3, 'desc'],[0, 'asc']])
+              .withOption('order', [[4, 'desc'], [1, 'asc'], [0, 'asc']])
               .withBootstrap();
 
             $scope.dtColumns =  [
               DTColumnDefBuilder.newColumnDef(0),
-              DTColumnDefBuilder.newColumnDef(1).notSortable(),
+              DTColumnDefBuilder.newColumnDef(1),
               DTColumnDefBuilder.newColumnDef(2).notSortable(),
-              DTColumnDefBuilder.newColumnDef(3)
+              DTColumnDefBuilder.newColumnDef(3).notSortable(),
+              DTColumnDefBuilder.newColumnDef(4)
             ];
             $scope.loaded = false;
             $scope.getDocs();
@@ -380,6 +381,19 @@ angular.module('oncokb')
               mutationEffect.addOn.setText('');
             };
 
+            $scope.move = function(driveList, index) {
+              var moveIndex = parseInt($scope.selfParams.moveIndex);
+              console.log(moveIndex);
+              console.log(typeof moveIndex);
+              console.log(angular.isNumber(moveIndex));
+              if(angular.isNumber(moveIndex) && moveIndex >= 0) {
+                console.log('moved');
+                driveList.move(index, moveIndex);
+              }else {
+
+              }
+            }
+
             function getString(string){
               string = S(string).stripTags().s;
 
@@ -659,6 +673,22 @@ angular.module('oncokb')
               {'key': 'irShow', 'display': 'Investigational implications for resistance to therapy'},
               {'key': 'trialsShow', 'display': 'Ongoing clinical trials'}
             ];
+            $scope.list = [];
+            $scope.sortableOptions = {
+              stop: function(e, ui){
+                console.log('dropindex',ui.dropindex);
+                console.log('index',ui.index);
+                console.log(e, ui);
+              },
+              beforeStop: function(e, ui){ 
+                console.log('dropindex',ui.dropindex);
+                console.log('index',ui.index);
+                console.log(e, ui);
+              }
+              // handle: '> .myHandle'
+            };
+            $scope.selfParams = {};
+
             getSuggestions();
             getOncoTreeTumortypes();
             var clock;

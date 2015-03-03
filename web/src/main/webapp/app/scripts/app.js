@@ -28,9 +28,9 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
+//    folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
-    folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
+     folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     // folderId: '0BzBfo69g8fP6ZU9QUEdLcnhFUm8', //one of backup folder
     userRoles: {
         'public': 1, // 0001
@@ -411,7 +411,8 @@ var oncokbApp = angular
    'xml',
    'contenteditable',
    'datatables',
-   'datatables.bootstrap'
+   'datatables.bootstrap',
+   'ui.sortable'
  ])
  .value('user', {
     name: 'N/A',
@@ -424,7 +425,7 @@ var oncokbApp = angular
  .constant('loadingScreen', window.loadingScreen)
  .constant('S', window.S)
  .constant('_', window._)
- .config(function ($locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
+ .config(function ($provide, $locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
 
     // $locationProvider.html5Mode(true);
@@ -484,6 +485,12 @@ var oncokbApp = angular
         */
         attributePrefix : '$'
     };
+
+    $provide.decorator('accordionDirective', function($delegate) { 
+        var directive = $delegate[0];
+        directive.replace = true;
+        return $delegate;
+    });
  });
 
 /**

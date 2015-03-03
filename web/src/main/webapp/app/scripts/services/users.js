@@ -22,6 +22,7 @@ angular.module('oncokb')
         this.name = '';
         this.role = 1;
         this.genes = [];
+        this.phases = [];
     };
 
     /**
@@ -72,7 +73,7 @@ angular.module('oncokb')
                     var _user = new User();
                     for(var __key in users[i]) {
                         if(_user.hasOwnProperty(__key) && users[i][__key]) {
-                            if(__key !== 'genes') {
+                            if(['genes', 'phases'].indexOf(__key) === -1) {
                                 _user[__key] = users[i][__key];
                             }else {
                                 _user[__key] = users[i][__key].split(',').map(function(d){ return d.toString().trim();});
@@ -82,6 +83,10 @@ angular.module('oncokb')
                             }
                         }
                     }
+
+                    // if(_user['genes'].length !== _user['phases'].length) {
+                    //     console.log(_user);
+                    // }
                     self.users[_user.email] = angular.copy(_user);
                     self.usersU.push(_user);
                     _user = null;

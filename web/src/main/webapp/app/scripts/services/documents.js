@@ -66,6 +66,7 @@ angular.module('oncokb')
                             'mskccEmail' : usersData[j].mskccEmail
                         };
                         curators.push(_user);
+                        self.documents[i].phase = usersData[j].phases[usersData[j].genes.indexOf(gene)];
                     }
                 }
                 self.documents[i].curators = curators;

@@ -265,6 +265,12 @@ p.editableBox.doubleH {
   padding-top: 70px;
   min-height: 400px;
 }
+table.dataTable thead .sorting_asc {
+  background: none;
+}
+table.dataTable thead .sorting_desc {
+  background: none;
+}
 i.fa-comments, i.fa-comments-o{
   font-size: 15px;
 }

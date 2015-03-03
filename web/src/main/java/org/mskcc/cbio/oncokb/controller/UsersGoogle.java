@@ -84,6 +84,7 @@ public class UsersGoogle {
             user.setMskccEmail(row.getCustomElements().getValue("mskccemail"));
             user.setRole(Integer.parseInt(row.getCustomElements().getValue("role")));
             user.setGenes(row.getCustomElements().getValue("genes"));
+            user.setPhases(row.getCustomElements().getValue("phases"));
             users.add(user);
         }
         return users;
