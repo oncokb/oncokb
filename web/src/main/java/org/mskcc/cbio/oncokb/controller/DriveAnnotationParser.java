@@ -78,6 +78,8 @@ public class DriveAnnotationParser {
                     throw new RuntimeException("Could not find gene "+hugo+" either.");
                 }
                 geneBo.save(gene);
+            }else {
+                
             }
 
             // summary
@@ -149,34 +151,32 @@ public class DriveAnnotationParser {
             
             Set<Alteration> alterations = new HashSet<Alteration>();
             
-            // oncogenic
-            String oncogenicStr = mutationObj.getString("oncogenic");
+            Boolean oncogenic = false;
             
-            if(oncogenicStr != null && !oncogenicStr.isEmpty()) {
-                Boolean oncogenic = oncogenicStr.equalsIgnoreCase("YES");
-                Map<String,String> mutations = parseMutationString(mutationStr);
-                for (Map.Entry<String,String> mutation : mutations.entrySet()) {
-                    String proteinChange = mutation.getKey();
-                    String displayName = mutation.getValue();
-                    Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
-                    if (alteration==null) {
-                        alteration = new Alteration();
-                        alteration.setGene(gene);
-                        alteration.setAlterationType(type);
-                        alteration.setAlteration(proteinChange);
-                        alteration.setName(displayName);
-                        alteration.setOncogenic(oncogenic);
-                        AlterationUtils.annotateAlteration(alteration, proteinChange);
-                        alterationBo.save(alteration);
-                    }
-
-                    if (oncogenic && !alteration.getOncogenic()) {
-                        alterationBo.update(alteration);
-                    }
-                    alterations.add(alteration);
+            if(mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
+                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
+            }
+            
+            Map<String,String> mutations = parseMutationString(mutationStr);
+            for (Map.Entry<String,String> mutation : mutations.entrySet()) {
+                String proteinChange = mutation.getKey();
+                String displayName = mutation.getValue();
+                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                if (alteration==null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(type);
+                    alteration.setAlteration(proteinChange);
+                    alteration.setName(displayName);
+                    alteration.setOncogenic(oncogenic);
+                    AlterationUtils.annotateAlteration(alteration, proteinChange);
+                    alterationBo.save(alteration);
                 }
-            }else {
-                System.out.println("    No oncogenic info...");
+
+                if (oncogenic && !alteration.getOncogenic()) {
+                    alterationBo.update(alteration);
+                }
+                alterations.add(alteration);
             }
             
             // mutation effect
@@ -340,7 +340,7 @@ public class DriveAnnotationParser {
         
         for(int i = 0; i < implications.length(); i++) {
             JSONObject implication = implications.getJSONObject(i);
-            if((implication.has("description") && !implication.getString("description").trim().isEmpty()) || (implication.has("treatments") && implication.getJSONArray("treatment").length() > 0)) {
+            if((implication.has("description") && !implication.getString("description").trim().isEmpty()) || (implication.has("treatments") && implication.getJSONArray("treatments").length() > 0)) {
                 EvidenceType evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
                 String type = "";
                 if(implication.has("status") && implication.has("type")) {

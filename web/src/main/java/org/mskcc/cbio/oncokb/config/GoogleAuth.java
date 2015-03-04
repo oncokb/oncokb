@@ -87,7 +87,7 @@ public class GoogleAuth {
     public static SpreadsheetService createSpreedSheetService() throws GeneralSecurityException, IOException, ServiceException {
         HttpTransport httpTransport = new NetHttpTransport();
         JacksonFactory jsonFactory = new JacksonFactory();
-        String [] SCOPESArray= {"https://spreadsheets.google.com/private/feeds"};
+        String [] SCOPESArray= {"https://spreadsheets.google.com/feeds", "https://docs.google.com/feeds"};
         String username = "jackson.zhang.828@gmail.com";
         String password = "gmail_privatespace";
         final List SCOPES = Arrays.asList(SCOPESArray); 

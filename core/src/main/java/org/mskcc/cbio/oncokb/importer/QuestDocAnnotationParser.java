@@ -103,7 +103,7 @@ public final class QuestDocAnnotationParser {
         throw new AssertionError();
     }
     
-    private static final String QUEST_CURATION_FOLDER = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/annotations";
+    private static final String QUEST_CURATION_FOLDER = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/annotations_sample";
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
     public static void main(String[] args) throws Exception {

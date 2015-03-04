@@ -825,7 +825,7 @@ public class VariantAnnotationXMLController {
            sb.append("the ").append(alteration);
         } else if (alterations.size()>2) {
             sb.append("specific mutations");
-        } else {
+        } else if (alterations.size() == 1){
             sb.append("the ").append(alterationsToString(alterations));
         }
         
@@ -944,8 +944,10 @@ public class VariantAnnotationXMLController {
                 types.add(oncokbType);
             }
             
-            for (List<TumorType> list : questTumorTypeMap.values()) {
-                list.add(tumorTypeAll);
+            if(tumorTypeAll != null) {
+                for (List<TumorType> list : questTumorTypeMap.values()) {
+                    list.add(tumorTypeAll);
+                }
             }
         }
         
