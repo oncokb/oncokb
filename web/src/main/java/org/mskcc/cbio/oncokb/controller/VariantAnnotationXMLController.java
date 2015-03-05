@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -254,7 +255,7 @@ public class VariantAnnotationXMLController {
                 sbTumorType.append("</recommendation_category>\n");
                 sbTumorType.append("        <description>");
                 if (nccnGuideline.getDescription()!= null) {
-                    sbTumorType.append(nccnGuideline.getDescription());
+                    sbTumorType.append(StringEscapeUtils.escapeXml(nccnGuideline.getDescription()));
                 }
                 sbTumorType.append("</description>\n");
                 sbTumorType.append("    </nccn_guidelines>\n");

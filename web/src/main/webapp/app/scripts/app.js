@@ -28,10 +28,10 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-//    folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
+    // folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
-     folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
-    // folderId: '0BzBfo69g8fP6ZU9QUEdLcnhFUm8', //one of backup folder
+    folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
+    // folderId: '0BzBfo69g8fP6Z0FDSXJOUF9fR3c', //one of backup folder
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -491,6 +491,15 @@ var oncokbApp = angular
         directive.replace = true;
         return $delegate;
     });
+    
+    $provide.decorator("$exceptionHandler", function($delegate, $injector){
+        return function(exception, cause){
+            var $rootScope = $injector.get("$rootScope");
+            $rootScope.addError({message:"Exception", reason:exception});
+            console.info(exception, cause);
+            $delegate(exception, cause);
+        };
+    });
  });
 
 /**
@@ -502,6 +511,10 @@ angular.module('oncokb').run(
     function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users) {
     $rootScope.user = {
         role: config.userRoles.public
+    };
+    
+    $rootScope.addError = function(error){
+        console.log(error);
     };
 
     // $timeout(function(){

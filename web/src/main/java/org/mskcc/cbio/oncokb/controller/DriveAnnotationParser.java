@@ -81,7 +81,14 @@ public class DriveAnnotationParser {
             }else {
                 
             }
-
+            
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            List<Evidence> evidences =  evidenceBo.findEvidencesByGene(Collections.singleton(gene));
+            
+            for(Evidence evidence : evidences){
+                evidenceBo.delete(evidence);
+            }
+            
             // summary
             parseSummary(gene, geneInfo.has("summary")? geneInfo.getString("summary").trim() : null);
 
@@ -365,7 +372,7 @@ public class DriveAnnotationParser {
         }
         
         // NCCN
-        if (cancerObj.has("nccn") && cancerObj.getJSONObject("nccn").has("disease")) {
+        if (cancerObj.has("nccn") && cancerObj.getJSONObject("nccn").has("disease") && !cancerObj.getJSONObject("nccn").getString("disease").isEmpty()) {
             System.out.println("##      NCCN for "+alterations.toString());
             parseNCCN(gene, alterations, tumorType, cancerObj.getJSONObject("nccn"));
         } else {

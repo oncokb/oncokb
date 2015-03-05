@@ -131,6 +131,8 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     @Override
     public void delete(T obj)
     {
-        getHibernateTemplate().delete(obj);
+        if(obj != null) {
+            getHibernateTemplate().delete(obj);
+        }
     }
 }

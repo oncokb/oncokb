@@ -15,7 +15,7 @@ import org.mskcc.cbio.oncokb.dao.GenericDao;
 public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
 
     private DAO dao;
-
+    
     public void setDao(DAO dao) {
         this.dao = dao;
     }
@@ -38,5 +38,10 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
     
     public List<T> findAll() {
         return dao.findAll();
+    }
+    
+    @Override
+    public void delete(T t) {
+        dao.delete(t);
     }
 }
