@@ -30,7 +30,15 @@
       <accordion-group ng-repeat="mutation in gene.mutations.asArray()">
         <accordion-heading>
           Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.name.text"/></span><comments-dict ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-          <i ng-click="remove($index, gene.mutations, $event)" class="fa fa-trash-o pull-right"></i>
+          <span class="pull-right">
+            <span style="font-size: 11px" ng-if="userRole === 8">
+              Go to
+              <input type="text" style="width: 20px;" ng-click="stopCollopse($event)" ng-model="moveIndex" />
+              <button type="button" ng-click="move(gene.mutations, $index, moveIndex, $event)">Go</button>
+              Current {{$index + 1}}
+            </span>
+            <i ng-click="remove($index, gene.mutations, $event)" class="fa fa-trash-o"></i>
+          </span>
         </accordion-heading>
         <accordion close-others="oneAtATime">
             <!-- Mutation Effect -->
@@ -79,7 +87,15 @@
             <accordion-group ng-repeat="tumor in mutation.tumors.asArray()">
               <accordion-heading>
                 Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.name.text"/></span><comments-dict file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
+                <span class="pull-right">
+                  <span style="font-size: 11px" ng-if="userRole === 8">
+                    Go to
+                    <input type="text" style="width: 20px;" ng-click="stopCollopse($event)" ng-model="moveIndex" />
+                    <button type="button" ng-click="move(mutation.tumors, $index, moveIndex, $event)">Go</button>
+                    Current {{$index + 1}}
+                  </span>
                 <i ng-click="remove($index, mutation.tumors, $event)" class="fa fa-trash-o pull-right"></i>
+                </span>
               </accordion-heading>
 
               <accordion close-others="oneAtATime">
@@ -152,6 +168,12 @@
                           <accordion-heading>
                               {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                               <span class="pull-right">
+                                <span style="font-size: 11px" ng-if="userRole === 8">
+                                  Go to
+                                  <input type="text" style="width: 20px;" ng-click="stopCollopse($event)" ng-model="moveIndex" />
+                                  <button type="button" ng-click="move(ti.treatments, $index, moveIndex, $event)">Go</button>
+                                  Current {{$index + 1}}
+                                </span>
                                 <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o"></i>
                               </span>
                           </accordion-heading>

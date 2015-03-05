@@ -8,8 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokb')
-    .controller('GenesCtrl', ['$scope', '$location', '$timeout', '$routeParams', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
-        function ($scope, $location, $timeout, $routeParams, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
+    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        function ($scope, $rootScope, $location, $timeout, $routeParams, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.getDocs = function() {
               var docs = Documents.get();
               if(docs.length > 0) {
@@ -37,13 +37,17 @@ angular.module('oncokb')
               $location.path(path);
             };
 
+            $scope.checkError = function() {
+              console.log($rootScope.errors);
+            };
+
             $scope.userRole = users.getMe().role;
-            
+
             var sorting = [[5, 'desc'], [1, 'asc'], [0, 'asc']];
             if(users.getMe().role === 8) {
                 sorting = [[4, 'desc'], [1, 'asc'], [0, 'asc']];
             }
-            
+
             $scope.dtOptions = DTOptionsBuilder
               .newOptions()
               .withDOM('ifrtlp')
@@ -338,18 +342,15 @@ angular.module('oncokb')
             };
 
             $scope.remove = function(index, object, event) {
-                if (event.stopPropagation) { event.stopPropagation();}
-                if (event.preventDefault) { event.preventDefault();}
-
-                var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
-                dlg.result.then(function(btn){
-                  object.remove(index);
-                },function(btn){});
+              $scope.stopCollopse(event);
+              var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
+              dlg.result.then(function(btn){
+                object.remove(index);
+              },function(btn){});
             };
 
             $scope.commentClick = function(event) {
-                if (event.stopPropagation) { event.stopPropagation();}
-                if (event.preventDefault) { event.preventDefault();}
+              $scope.stopCollopse(event);
             };
 
             $scope.redo = function() {
@@ -388,18 +389,25 @@ angular.module('oncokb')
               mutationEffect.addOn.setText('');
             };
 
-            $scope.move = function(driveList, index) {
-              var moveIndex = parseInt($scope.selfParams.moveIndex);
-              console.log(moveIndex);
-              console.log(typeof moveIndex);
-              console.log(angular.isNumber(moveIndex));
-              if(angular.isNumber(moveIndex) && moveIndex >= 0) {
-                console.log('moved');
-                driveList.move(index, moveIndex);
-              }else {
+            $scope.move = function(driveList, index, moveIndex, event) {
+              $scope.stopCollopse(event);
 
+              index = parseInt(index);
+              moveIndex = parseInt(moveIndex);
+
+              if(moveIndex <= index) {
+                moveIndex = moveIndex <=0 ? 0 : moveIndex-1;
               }
-            }
+
+              moveIndex = moveIndex < driveList.length ? moveIndex : driveList.length;
+
+              driveList.move(index, moveIndex);
+            };
+
+            $scope.stopCollopse = function(event) {
+              if (event.stopPropagation) { event.stopPropagation();}
+              if (event.preventDefault) { event.preventDefault();}
+            };
 
             function getString(string){
               string = S(string).stripTags().s;

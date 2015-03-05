@@ -496,8 +496,7 @@ var oncokbApp = angular
         return function(exception, cause){
             var $rootScope = $injector.get("$rootScope");
             $rootScope.addError({message:"Exception", reason:exception});
-            console.info(exception, cause);
-            $delegate(exception, cause);
+            // $delegate(exception, cause);
         };
     });
  });
@@ -509,12 +508,14 @@ var oncokbApp = angular
 angular.module('oncokb').run(
     ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 
     function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users) {
+    $rootScope.errors = [];
+
     $rootScope.user = {
         role: config.userRoles.public
     };
     
     $rootScope.addError = function(error){
-        console.log(error);
+        $rootScope.errors.push(error);
     };
 
     // $timeout(function(){
