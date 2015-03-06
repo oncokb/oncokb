@@ -25,8 +25,9 @@ angular.module('oncokb')
      * Close the current document.
      */
     this.closeDocument = function () {
-      if(this.document)
+      if(this.document){
         this.document.close();
+      }
       this.document = null;
       this.id = null;
     };
@@ -98,43 +99,6 @@ angular.module('oncokb')
 
       return deferred.promise;
     };
-
-    this.copyAllFiles = function(origianlFolder, toFolder) {
-      var deferred = $q.defer();
-      var onComplete = function (result) {
-        // console.log(result);
-          if (result && !result.error) {
-            deferred.resolve(result);
-          } else {
-            deferred.reject(result);
-          }
-          $rootScope.$digest();
-      };
-
-      this.retrieveAllFiles().then(function(result){
-        if(angular.isArray(result) && result.length > 0) {
-          result.forEach(function(e){
-            if(e.id) {
-              var body = {'parent': [{'id': toFolder}]};
-              var request = gapi.client.drive.files.copy({
-                'fileId': e.id
-              });
-              request.execute();
-            }
-          });
-          // onComplete();
-        }
-      })
-
-      // var body = {'title': copyTitle};
-      // var request = gapi.client.drive.files.copy({
-      //   'fileId': originFileId,
-      //   'resource': body
-      // });
-      // request.execute(function(resp) {
-      //   console.log('Copy ID: ' + resp.id);
-      // });
-    }
 
     this.insertPermission = function (id, email, type, role) {
         var deferred = $q.defer();
@@ -209,7 +173,7 @@ angular.module('oncokb')
             }).execute(onComplete);
         });
         return deferred.promise;
-    }
+    };
 
     /**
      * Ensure the document is loaded.
@@ -224,7 +188,7 @@ angular.module('oncokb')
             this.closeDocument();
         }
         return this.load(id);
-    }
+    };
 
     /**
      * Retrieve a list of File resources.
@@ -258,7 +222,7 @@ angular.module('oncokb')
             retrievePageOfFiles(initialRequest, []);
         });
         return deferred.promise;
-    }
+    };
 
     /**
      * Retrieve a list of File resources.
@@ -290,7 +254,7 @@ angular.module('oncokb')
             retrievePageOfFiles(initialRequest, []);
         });
         return deferred.promise;
-    }
+    };
 
     this.downloadFile = function(file) {
         var deferred = $q.defer();
@@ -302,22 +266,24 @@ angular.module('oncokb')
             }
         };
         if (file.exportLinks['text/html']) {
-            var accessToken = gapi.auth.getToken().access_token;
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', file.exportLinks['text/html']);
-            xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-            xhr.onload = function() {
-                onComplete(xhr.responseText);
-            };
-            xhr.onerror = function() {
-                onComplete(null);
-            };
-            xhr.send();
+          /* jshint -W106 */
+          var accessToken = gapi.auth.getToken().access_token;
+          /* jshint +W106 */
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', file.exportLinks['text/html']);
+          xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+          xhr.onload = function() {
+              onComplete(xhr.responseText);
+          };
+          xhr.onerror = function() {
+              onComplete(null);
+          };
+          xhr.send();
         } else {
             onComplete(null);
         }
         return deferred.promise;
-    }
+    };
 
     /**
      * Creates a new document.
@@ -371,12 +337,9 @@ angular.module('oncokb')
      * @returns {angular.$q.promise}
      */
     this.requireAuth = function (immediateMode, userId) {
-      /* jshint camelCase: false */
       var token = gapi.auth.getToken();
       var now = Date.now() / 1000;
 
-      // console.log(token);
-      // console.log(now);
       if (token && ((token.expires_at - now) > (600))) {
         console.log('token unexpires');
         return $q.when(token);
@@ -412,11 +375,8 @@ angular.module('oncokb')
      */
     this.load = function (id) {
       var deferred = $q.defer();
-      var initialize = function (model) {
-        // model.getRoot().set('gene', OncoKB.Gene);
-      };
+      var initialize = function () {};
       var onLoad = function (document) {
-        // console.log('document loaded', document);
         this.setDocument(id, document);
         deferred.resolve(document);
         $rootScope.$digest();
@@ -464,8 +424,8 @@ angular.module('oncokb')
 
     this.updateFile = function(fileId, fileMetadata, fileData) {
         var boundary = '-------314159265358979323846';
-        var delimiter = "\r\n--" + boundary + "\r\n";
-        var close_delim = "\r\n--" + boundary + "--";
+        var delimiter = '\r\n--' + boundary + '\r\n';
+        var close_delim = '\r\n--' + boundary + '--';
 
         var reader = new FileReader();
         var deferred = $q.defer();
@@ -478,7 +438,7 @@ angular.module('oncokb')
         };
 
         reader.readAsBinaryString(fileData);
-        reader.onload = function(e) {
+        reader.onload = function() {
             var contentType = fileData.type || 'application/octet-stream';
             // Updating the metadata is optional and you can instead use the value from drive.files.get.
             var base64Data = btoa(reader.result);
@@ -503,8 +463,8 @@ angular.module('oncokb')
                 'body': multipartRequestBody});
 
             request.execute(onComplete);
-        }
+        };
         return deferred.promise;
-    }
+    };
   }]
 );

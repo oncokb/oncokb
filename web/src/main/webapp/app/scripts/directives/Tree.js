@@ -1,6 +1,9 @@
+
+var d3 = window.d3;
+var $ = window.$;
 var Tree = (function() {
-    "use strict";
-    
+    'use strict';
+
     var m = [20, 120, 20, 50],
         w = 500 - m[1] - m[3],
         h = 500 - m[0] - m[2],
@@ -14,34 +17,36 @@ var Tree = (function() {
     var tree, diagonal, vis, numOfTumorTypes = 0, numOfTissues = 0;
 
     var searchResult = [];
-        
+
     function initDataAndTree(_treeInfo, _description) {
-        var rootName = "Genes",
+        var rootName = 'Genes',
             treeData = {};
-    
+
         treeData[rootName] = {};
         treeInfo = _treeInfo;
         description.Genes = _description;
-        description.description = [{ evidenceType: "", description: ""}];
-        
+        description.description = [{ evidenceType: '', description: ''}];
+
         tree = d3.layout.tree()
         .nodeSize([20, null]);
 
         diagonal = d3.svg.diagonal()
             .projection(function(d) { return [d.y, d.x]; });
 
-        vis = d3.select("#tree").append("svg:svg")
-            .attr("width", w + m[1] + m[3])
-            .attr("height", h + m[0] + m[2])
-          .append("svg:g")
-            .attr("transform", "translate(" + m[3] + "," + 300 + ")");
+        vis = d3.select('#tree').append('svg:svg')
+            .attr('width', w + m[1] + m[3])
+            .attr('height', h + m[0] + m[2])
+          .append('svg:g')
+            .attr('transform', 'translate(' + m[3] + ',' + 300 + ')');
 
         for(var i = 0, treeInfoL = treeInfo.length; i < treeInfoL; i++) {
             var node = treeData[rootName],
                 treeInfoDatum = treeInfo[i];
             for (var col in treeInfoDatum) {
                 var type = treeInfoDatum[col];
-                if (!type) break;
+                if (!type) {
+                    break;
+                }
                 if (!(type in node)) {
                         node[type] = {};
                 }
@@ -50,15 +55,12 @@ var Tree = (function() {
         }
         var json = formatTree(rootName, treeData, description);
         build(json);
-//        $("#summary-info").text(function() {
-//            return "( " + numOfTissues + " gene" + ( numOfTissues === 1 ? "" : "s" ) + " )";
-//        });
     }
 
     function formatTree(name, tree, description) {
         var ret = {
             name: name, 
-            description: description[name]["description"] || []
+            description: description[name].description || []
         };
         var root = tree[name];
         var children = [];
@@ -66,9 +68,9 @@ var Tree = (function() {
             children.push(formatTree(child, root,description[name]));
         }
         if (children.length===0) {
-            ret["size"] = 4000;
+            ret.size = 4000;
         } else {
-            ret["children"] = children;
+            ret.children = children;
         }
         return ret;
     }
@@ -95,9 +97,9 @@ var Tree = (function() {
         var duration = d3.event && d3.event.altKey ? 5000 : 500;
         var translateY = Number(vis.attr('transform').split(',')[1].split(')')[0]);
         var nodes = tree.nodes(root).reverse();
-
-        var overStep = false;
         var minX = 0;
+        var aftetTranslateY = 50;
+
         nodes.forEach(function(d) {
         if( minX > d.x) {
             minX = d.x;
@@ -105,15 +107,14 @@ var Tree = (function() {
         });
 
         minX = Math.abs(minX);
+        aftetTranslateY += minX;
 
         if( minX > (translateY-50)) {
-          var aftetTranslateY = minX + 50;
           vis.transition()
             .duration(duration)
             .attr('transform', 'translate('+ m[3] +','+aftetTranslateY+')');
           nodes = tree.nodes(root).reverse();
         } else if(minX + 50 < translateY){
-          var aftetTranslateY = minX + 50;
           vis.transition()
             .duration(duration)
             .attr('transform', 'translate('+ m[3] +','+aftetTranslateY+')');
@@ -125,14 +126,11 @@ var Tree = (function() {
         //Indicate the right side depth for specific level (circal point as center)
         var rightDepth = {0: 0};
 
-        var numOfPoints = {},
-            maxNumOfPoints = 0;
-
         //Calculate maximum length of selected nodes in different levels
         nodes.forEach(function(d) {
-          var _upperL = d.name.replace(/[^A-Z]/g, "").length,
-              _lowerL = d.name.replace(/[^a-z]/g, "").length,
-              _numberL = d.name.replace(/[^0-9]/g, "").length;
+          var _upperL = d.name.replace(/[^A-Z]/g, '').length,
+              _lowerL = d.name.replace(/[^a-z]/g, '').length,
+              _numberL = d.name.replace(/[^0-9]/g, '').length;
 
           var _nameLength = _lowerL * 6 + _upperL * 9 + _numberL * 7 + 50;
 
@@ -140,7 +138,7 @@ var Tree = (function() {
             if (!leftDepth.hasOwnProperty(d.depth)) {
               leftDepth[d.depth] = 0;
               rightDepth[d.depth] = 0;
-            };
+            }
 
             //Only calculate the point without child and without showed child
             if( !d.children &&  !d._children && rightDepth[d.depth] < _nameLength) {
@@ -164,74 +162,59 @@ var Tree = (function() {
 
             for (var i = 1; i <= _length; i++) {
               if(leftDepth[i] === 0) {
-                rightDepth[i-1] !== 0 ? _y += rightDepth[i-1] : _y += 50; //Give constant depth if no point has child or has showed child
+                _y += (rightDepth[i-1] !== 0 ? rightDepth[i-1] : 50); //Give constant depth if no point has child or has showed child
               }else {
                 if(i>1) {
                   _y += leftDepth[i] + rightDepth[i-1];
-                  (leftDepth[i] > 0 && rightDepth[i-1] > 0) ? _y-=50: _y-=0;
+                  _y -= (leftDepth[i] > 0 && rightDepth[i-1] > 0) ? 50: 0;
                 }else {
                   _y += leftDepth[i];
                 }
               }
-            };
+            }
             d.y = _y; 
           }
         });
 
         // Update the nodes…
-        var   node = vis.selectAll("g.node")
+        var   node = vis.selectAll('g.node')
               .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
         // Enter any new nodes at the parent's previous position.
-        var   nodeEnter = node.enter().append("svg:g")
-              .attr("class", "node")
-              .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-              .on("click", function(d) { toggle(d); update(d); });
+        var   nodeEnter = node.enter().append('svg:g')
+              .attr('class', 'node')
+              .attr('transform', function() { return 'translate(' + source.y0 + ',' + source.x0 + ')'; })
+              .on('click', function(d) { toggle(d); update(d); });
 
-        nodeEnter.append("svg:circle")
-            .attr("r", 1e-6)
-            .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+        nodeEnter.append('svg:circle')
+            .attr('r', 1e-6)
+            .style('fill', function(d) { return d._children ? 'lightsteelblue' : '#fff'; });
 
-        nodeEnter.append("svg:text")
-            .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-            .attr("dy", ".35em")
+        nodeEnter.append('svg:text')
+            .attr('x', function(d) { return d.children || d._children ? -10 : 10; })
+            .attr('dy', '.35em')
             .attr('font-size', fontSize)
-            .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-            // .attr("tooltip", function(d) {
-            //     var qtipText = "";
-            //     if(d["description"].length > 0) {
-            //         for(var i = 0, desL = d["description"].length; i < desL; i++) {
-            //             for(var _evidence in d["description"][i]){
-            //                 if(d["description"][i][_evidence] && d["description"][i][_evidence] !== ""){
-            //                     qtipText += "<b>" + _evidence + "</b>: " + d["description"][i][_evidence] + "<br>";
-            //                 }
-            //             }
-            //             if(i+1 !== desL)
-            //                 qtipText += "<hr>";
-            //         }
-            //     }
-
-            //     return qtipText;
-            // })
+            .attr('text-anchor', function(d) { return d.children || d._children ? 'end' : 'start'; })
             .text(function(d) {
-              if(d["description"].length > 0) {
-                  var qtipText = "";
+              if(d.description.length > 0) {
+                  var qtipText = '';
                   var _position = {};
-                  for(var i = 0, desL = d["description"].length; i < desL; i++) {
-                      if(d["description"][i].hasOwnProperty('Evidence Type')){
+                  for(var i = 0, desL = d.description.length; i < desL; i++) {
+                      if(d.description[i].hasOwnProperty('Evidence Type')){
                           
-                            switch(d["description"][i]['Evidence Type']) {
+                            switch(d.description[i]['Evidence Type']) {
                                 case 'MUTATION_EFFECT':
-                                    qtipText += "<b>Mutation Effect: " + d["description"][i]['Known Effect'] + "</b><br>" + d["description"][i]['Description'] + "<br>";
+                                    qtipText += '<b>Mutation Effect: ' + d.description[i]['Known Effect'] + '</b><br>' + d.description[i].Description + '<br>';
                                     break;
                                 default:
-                                    qtipText += "<b>" + upperFirstLetter(d["description"][i]['Evidence Type']) + "</b><br>" + d["description"][i]['Description'] + "<br>";
+                                    qtipText += '<b>' + upperFirstLetter(d.description[i]['Evidence Type']) + '</b><br>' + d.description[i].Description + '<br>';
                                     break;
                         }
                       }
                       
-                      if(i+1 !== desL)
-                          qtipText += "<hr/>";
+                      if(i+1 !== desL){
+                        qtipText += '<hr/>';
+                      }
                   }
 
                   if((d.children || d._children) && d.depth > 1){
@@ -248,57 +231,57 @@ var Tree = (function() {
               } 
               return d.name; })
 
-            .style("fill-opacity", 1e-6);
+            .style('fill-opacity', 1e-6);
 
         // Transition nodes to their new position.
         var nodeUpdate = node.transition()
             .duration(duration)
-            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+            .attr('transform', function(d) { return 'translate(' + d.y + ',' + d.x + ')'; });
 
-        nodeUpdate.select("circle")
-            .attr("r", radius)
-            .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+        nodeUpdate.select('circle')
+            .attr('r', radius)
+            .style('fill', function(d) { return d._children ? 'lightsteelblue' : '#fff'; });
 
-        nodeUpdate.select("text")
-            .style("fill-opacity", 1)
-            .style("font-size", fontSize);
+        nodeUpdate.select('text')
+            .style('fill-opacity', 1)
+            .style('font-size', fontSize);
 
         // Transition exiting nodes to the parent's new position.
         var nodeExit = node.exit().transition()
             .duration(duration)
-            .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+            .attr('transform', function() { return 'translate(' + source.y + ',' + source.x + ')'; })
             .remove();
 
-        nodeExit.select("circle")
-            .attr("r", 1e-6);
+        nodeExit.select('circle')
+            .attr('r', 1e-6);
 
-        nodeExit.select("text")
-            .style("fill-opacity", 1e-6);
+        nodeExit.select('text')
+            .style('fill-opacity', 1e-6);
 
         // Update the links…
-        var link = vis.selectAll("path.link")
+        var link = vis.selectAll('path.link')
             .data(tree.links(nodes), function(d) { return d.target.id; });
 
         // Enter any new links at the parent's previous position.
-        link.enter().insert("svg:path", "g")
-            .attr("class", "link")
-            .attr("d", function(d) {
+        link.enter().insert('svg:path', 'g')
+            .attr('class', 'link')
+            .attr('d', function() {
               var o = {x: source.x0, y: source.y0};
               return diagonal({source: o, target: o});
             })
           .transition()
             .duration(duration)
-            .attr("d", diagonal);
+            .attr('d', diagonal);
 
         // Transition links to their new position.
         link.transition()
             .duration(duration)
-            .attr("d", diagonal);
+            .attr('d', diagonal);
 
         // Transition exiting nodes to the parent's new position.
         link.exit().transition()
             .duration(duration)
-            .attr("d", function(d) {
+            .attr('d', function() {
               var o = {x: source.x, y: source.y};
               return diagonal({source: o, target: o});
             })
@@ -348,7 +331,7 @@ var Tree = (function() {
     function expandWithArray(nodesArray) {
             for (var i = 0, nodesLength = nodesArray.length; i <nodesLength; i++) {
                     toggle(root.children[nodesArray[i]]);
-            };
+            }
             update(root);
     }
 
@@ -385,15 +368,15 @@ var Tree = (function() {
         maxWidth = maxWidth + 100 + lastDepth;
 
         if(500 < maxWidth) {
-                d3.select("body").select("svg").attr("width", maxWidth);
+                d3.select('body').select('svg').attr('width', maxWidth);
         }else {
-                d3.select("body").select("svg").attr("width", 500);
+                d3.select('body').select('svg').attr('width', 500);
         }
 
         if(500 < maxHeight) {
-                d3.select("body").select("svg").attr("height", maxHeight);
+                d3.select('body').select('svg').attr('height', maxHeight);
         }else {
-                d3.select("body").select("svg").attr("height", 500);
+                d3.select('body').select('svg').attr('height', 500);
         }
     }
 
@@ -403,12 +386,12 @@ var Tree = (function() {
         update(root);
         searchKey = searchKey.toLowerCase();
 
-        if(searchKey !== "") {
+        if(searchKey !== '') {
             for(var i = 0, numOfChild = root.children.length; i< numOfChild; i++) {
                 findChildContain(i, searchKey, root.children[i]);
             }
 
-            searchResult.forEach(function(content, index) {
+            searchResult.forEach(function(content) {
                 var _indexes = content.split('-'),
                         _indexesLength = _indexes.length,
                         _node = root.children[_indexes[0]];
@@ -429,7 +412,7 @@ var Tree = (function() {
     }
 
     function highlightSearchKey(searchKey) {
-        d3.select("body svg").selectAll('text').each(function(d, i) {
+        d3.select('body svg').selectAll('text').each(function(d) {
             if(searchKey === '') {
                     d3.select(this).style('fill','black');
             }else {
@@ -449,7 +432,7 @@ var Tree = (function() {
                     searchResult.push(parentId);
             }
             for(var i = 0, numOfChild = node._children.length; i< numOfChild; i++) {
-                    findChildContain(parentId + "-" + i, searchKey, node._children[i]);
+                    findChildContain(parentId + '-' + i, searchKey, node._children[i]);
             }
         }else {
             if(node.name.toLowerCase().indexOf(searchKey) !== -1) {
@@ -460,16 +443,18 @@ var Tree = (function() {
 
     function searchLeaf(node) {
         if(node._children || node.children) {
-            if(node.children) {
-                    for (var i = 0, _length = node.children.length; i < _length; i++) {
-                            searchLeaf(node.children[i]);
-                    }
-            }
-            if(node._children) {
-                    for (var i = 0, _length = node._children.length; i < _length; i++) {
-                            searchLeaf(node._children[i]);
-                    }
-            }
+          var i, _length = 0;
+
+          if(node.children) {
+              for (i = 0, _length = node.children.length; i < _length; i++) {
+                      searchLeaf(node.children[i]);
+              }
+          }
+          if(node._children) {
+              for (i = 0, _length = node._children.length; i < _length; i++) {
+                      searchLeaf(node._children[i]);
+              }
+          }
         }else {
             numOfTumorTypes++;
         }

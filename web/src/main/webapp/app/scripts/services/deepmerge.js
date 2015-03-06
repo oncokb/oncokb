@@ -20,7 +20,7 @@ angular.module('oncokb')
             if (array) {
                 target = target || [];
                 dst = dst.concat(target);
-                src.forEach(function(e, i) {
+                src.forEach(function(e) {
                     dst.push(e);
                 });
             } else {

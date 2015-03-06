@@ -1,5 +1,5 @@
 'use strict';
-
+/*jshint -W083 */
 /**
  * @ngdoc overview
  * @name oncokb
@@ -9,6 +9,8 @@
  * Main module of the application.
  */
 var OncoKB = {};
+var gapi = window.gapi;
+
 //Global variables
 OncoKB.global = {};
 //OncoKB.global.genes
@@ -40,7 +42,7 @@ OncoKB.config = {
     },
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     accessLevels: {}
-}
+};
 
 OncoKB.config.accessLevels.public = OncoKB.config.userRoles.public | OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
 OncoKB.config.accessLevels.user = OncoKB.config.accessLevels.public;
@@ -260,12 +262,12 @@ OncoKB.setUp = function(object) {
 
 OncoKB.initialize = function() {
     var nonSetUp = ['TI'];
-    var keys = _.keys(OncoKB.curateInfo);
+    var keys = window._.keys(OncoKB.curateInfo);
     var keysL = keys.length;
 
     for (var i = 0; i < keysL; i++) {
         var _key = keys[i];
-        var _keys = _.keys(OncoKB.curateInfo[_key]);
+        var _keys = window._.keys(OncoKB.curateInfo[_key]);
         var _keysL = _keys.length;
 
         //Google Realtime data module for annotation curation
@@ -281,7 +283,7 @@ OncoKB.initialize = function() {
         OncoKB[_key].prototype.initialize = function () {
             var model = gapi.drive.realtime.custom.getModel(this);
             var id = this.attr;
-            var atrrs = _.keys(OncoKB.curateInfo[id]);
+            var atrrs = window._.keys(OncoKB.curateInfo[id]);
             var atrrsL = atrrs.length;
 
             for(var j = 0; j < atrrsL; j++) {
@@ -308,7 +310,7 @@ OncoKB.initialize = function() {
                 }
             }
             this.setUp();
-        }
+        };
 
         //Register every field of OncoKB into document
         for(var j=0; j<_keysL; j++) {
@@ -331,71 +333,9 @@ OncoKB.initialize = function() {
             gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key], OncoKB[_key].prototype.setUp);
         }
     }
-
-    //Create comments category individually
-    // OncoKB.Comments = function() {};
-
-    // OncoKB.Comments.prototype.attr = _key;
-
-    // OncoKB.Comments.prototype.setUp = function() {};
-
-    // OncoKB.Comments.prototype.initialize = function () {
-    //     var model = gapi.drive.realtime.custom.getModel(this);
-    //     var id = this.attr;
-    //     var attr = _.keys(OncoKB.curateInfo);
-    //     var attrL = -1;
-    //     attr = _.remove(attr, function(n) { return n==='Comment'; });
-    //     attrL = attr.length;
-
-    //     for(var i = 0; i < attrL; i++) {
-    //         var _key = attr[i];
-    //         var _attr = _.keys(OncoKB.curateInfo[_key]);
-    //         var _attrL = _attr.length;
-
-    //         for(var j = 0; j < _attrL; j++) {
-    //             var __key = _attr[j];
-    //             if(OncoKB.curateInfo[_key][__key].hasOwnProperty('comment') && OncoKB.curateInfo[_key][__key].comment) {
-    //                 if(!this.hasOwnProperty(_key)){
-    //                     this[_key] == {};
-    //                 }
-    //                 this[_key][__key] = model.createList();
-    //             }
-    //         }
-    //     }
-    //     this.setUp();
-    // };
-
-    // var attr = _.keys(OncoKB.curateInfo);
-    // var attrL = -1;
-    // attr = _.remove(attr, function(n) { return n !=='Comment'; });
-    // attrL = attr.length;
-
-    // for(var i = 0; i < attrL; i++) {
-    //     var _key = attr[i];
-    //     var _attr = _.keys(OncoKB.curateInfo[_key]);
-    //     var _attrL = _attr.length;
-
-    //     OncoKB.Comments.prototype[_key] = gapi.drive.realtime.custom.collaborativeField('comments_' + _key);
-
-    //     for(var j = 0; j < _attrL; j++) {
-    //         var __key = _attr[j];
-    //         if(OncoKB.curateInfo[_key][__key].hasOwnProperty('comment') && OncoKB.curateInfo[_key][__key].comment) {
-    //             OncoKB.Comments.prototype[_key][__key] = gapi.drive.realtime.custom.collaborativeField('comments_' + _key + '_' + __key);
-    //         }
-    //     }
-    // }
-
-    // //Register custom type
-    // gapi.drive.realtime.custom.registerType(OncoKB.Comments, 'Comments');
-
-    // //Set realtime API initialize function for each type, this function only runs one time when create new data model
-    // gapi.drive.realtime.custom.setInitializer(OncoKB.Comments, OncoKB.Comments.prototype.initialize);
-
-    // gapi.drive.realtime.custom.setOnLoaded(OncoKB.Comments, OncoKB.Comments.prototype.setUp);
 };
 
-var oncokbApp = angular
- .module('oncokb', [
+angular.module('oncokb', [
    'ngAnimate',
    'ngCookies',
    'ngResource',
@@ -425,6 +365,8 @@ var oncokbApp = angular
  .constant('loadingScreen', window.loadingScreen)
  .constant('S', window.S)
  .constant('_', window._)
+ .constant('Levenshtein', window.Levenshtein)
+ .constant('XLSX', window.XLSX)
  .config(function ($provide, $locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
 
@@ -491,11 +433,11 @@ var oncokbApp = angular
         directive.replace = true;
         return $delegate;
     });
-    
-    $provide.decorator("$exceptionHandler", function($delegate, $injector){
+
+    $provide.decorator('$exceptionHandler', function($delegate, $injector){
         return function(exception, cause){
-            var $rootScope = $injector.get("$rootScope");
-            $rootScope.addError({message:"Exception", reason:exception});
+            var $rootScope = $injector.get('$rootScope');
+            $rootScope.addError({message: 'Exception', reason: exception, case: cause});
             // $delegate(exception, cause);
         };
     });
@@ -536,7 +478,7 @@ angular.module('oncokb').run(
         $location.url('/');
     });
 
-    $rootScope.$on("$routeChangeStart", function (event, next, current) {
+    $rootScope.$on('$routeChangeStart', function (event, next) {
         if (!Access.authorize(next.access)) {
             if(!Access.isLoggedIn()) {
                 Access.setURL($location.path());
@@ -545,9 +487,9 @@ angular.module('oncokb').run(
         }
         if(Access.isLoggedIn() && Access.getURL()){
             Access.setURL('');
-            $location.path(url);
+            $location.path(Access.getURL());
         }else {
-            if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl === "views/welcome.html") {
+            if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl ==='views/welcome.html') {
                 $location.path('/genes');
             }
         }

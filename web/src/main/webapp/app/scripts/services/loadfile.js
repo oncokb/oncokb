@@ -10,10 +10,6 @@
 angular.module('oncokb')
   .service('loadFile', function loadFile($route, $location, $q, storage, documents) {
     return function() {
-        var title = $route.current.params.geneName;
-        var userId = $route.current.params.user;
-        var recheckDocPromise = check();
-
         function check() {
             var deferred = $q.defer();
             storage.requireAuth(true, userId).then(function () {
@@ -35,17 +31,20 @@ angular.module('oncokb')
             });
             return deferred.promise;
         }
+        var title = $route.current.params.geneName;
+        var userId = $route.current.params.user;
+        var recheckDocPromise = check();
 
         return $q.all([recheckDocPromise]).then(function(realdocument){
             if(angular.isArray(realdocument) && realdocument.length > 0) {
                 if(realdocument[0]) {
                     return realdocument[0];
                 }else {
-                    $location.url('/');
+                    $location.path('/');
                 }
             }else {
-                $location.url('/');
+                $location.path('/');
             }
         });
-    }
+    };
   });

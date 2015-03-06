@@ -76,11 +76,11 @@ angular.module('oncokb').factory('AnalysisEvidence', function() {
                 datum.treatments.length > 0) {
                 initTreeTreatments(datum, treeInfo);
             }else {
-                for( var _key in treeInfo) {
-                    _datumName += treeInfo[_key] + ',';
+                for( var __key in treeInfo) {
+                    _datumName += treeInfo[__key] + ',';
                 }
                 treeInfoDul[_datumName] = treeInfo;
-                _key = null;
+                __key = null;
             }
         }else {
             for( var _key in treeInfo) {
@@ -121,8 +121,8 @@ angular.module('oncokb').factory('AnalysisEvidence', function() {
                 }
             }else {
                 _datumName = '';
-                for( var _key in _treeInfodatum) {
-                    _datumName += _treeInfodatum[_key] + ',';
+                for( var __key in _treeInfodatum) {
+                    _datumName += _treeInfodatum[__key] + ',';
                 }
                 treeInfoDul[_datumName] = _treeInfodatum;
             }
@@ -178,14 +178,15 @@ angular.module('oncokb').factory('AnalysisEvidence', function() {
                 }
                 
                 if(_datum.alterations && _datum.alterations.length > 0) {
+                    var _altL = _datum.alterations.length;
                     if(treeType === 'combined') {
                         _altName = _datum.alterations[0].alteration || '';
-                        for(var j = 1, _altL = _datum.alterations.length; j < _altL; j++) {
+                        for(var j = 1; j < _altL; j++) {
                             _altName += ',' + _datum.alterations[j].alteration;
                         }
                         initDesAlterations(_datum, _attrDatum, _geneName, _altName);
                     }else {
-                        for(var n = 0, _altL = _datum.alterations.length; n < _altL; n++) {
+                        for(var n = 0; n < _altL; n++) {
                             _altName = _datum.alterations[n].alteration;
                             initDesAlterations(_datum, _attrDatum, _geneName, _altName);
                         }

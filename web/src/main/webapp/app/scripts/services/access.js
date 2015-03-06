@@ -8,21 +8,25 @@
  * Service in the oncokb.
  */
 angular.module('oncokb')
-  .service('access', function access($rootScope, storage, config, users) {
+  .service('access', function access($rootScope, storage, config, users, gapi) {
     var self = this;
     var userRoles = config.userRoles;
-    var accessLevel = config.accessLevel;
+    // var accessLevel = config.accessLevel;
     var loginCallback = '';
 
     self.url = '';
 
-    function getUserInfo(callback) {
+    function getUserInfo() {
         storage.requireAuth(true).then(function(result){
-            gapi.client.load('plus','v1', function(){
-                gapi.client.plus.people.get({
-                    'userId' : 'me'
-                }).execute(userFunc);
-            });
+            if(result && result.error) {
+                console.error('Error when require Auth.');
+            }else{
+                gapi.client.load('plus','v1', function(){
+                    gapi.client.plus.people.get({
+                        'userId' : 'me'
+                    }).execute(userFunc);
+                });
+            }
         });
     }
 
@@ -53,20 +57,18 @@ angular.module('oncokb')
         loginCallback();
     }
 
-    function setRedirectURL(url) {
-
-    }
-
     return {
         authorize: function(accessLevel, role) {
-            if(role === undefined)
+            if(role === undefined){
                 role = $rootScope.user.role;
+            }
             return accessLevel & role;
         },
 
         isLoggedIn: function(user) {
-            if(user === undefined)
+            if(user === undefined){
                 user = $rootScope.user;
+            }
             return user.role === userRoles.user || user.role === userRoles.curator || user.role === userRoles.admin;
         },
 
@@ -75,7 +77,7 @@ angular.module('oncokb')
             getUserInfo();
         },
 
-        logout: function(success, error) {
+        logout: function() {
             $rootScope.user = {
                 role: userRoles.public
             };

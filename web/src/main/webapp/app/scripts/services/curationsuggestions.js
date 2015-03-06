@@ -38,7 +38,7 @@ angular.module('oncokb')
               var _sug = new Suggestion();
               _sug.gene = e.gene.toString().trim();
               if(angular.isString(e.mutations)) {
-                _sug.mutations = e.mutations.split(';').map(function(e){ return e.toString().trim()});
+                _sug.mutations = e.mutations.split(';').map(function(e){ return e.toString().trim();});
               }else {
                 _sug.mutations = [];
               }
@@ -60,5 +60,5 @@ angular.module('oncokb')
         }
         return false;
       }
-    }
+    };
   });

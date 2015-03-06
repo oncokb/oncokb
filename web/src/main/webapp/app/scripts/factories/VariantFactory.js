@@ -1,3 +1,5 @@
+var $ = window.$;
+
 angular.module('oncokb').factory('TumorType', ['$http',  function ($http) {
     'use strict';
 
@@ -139,7 +141,7 @@ angular.module('oncokb').factory('GenerateDoc', ['$http',  function ($http) {
     var transform = function(data){
         return $.param(data);
     };
-    
+
     function getDoc(params) {
         return $http.post(
             'generateGoogleDoc', 
@@ -149,7 +151,7 @@ angular.module('oncokb').factory('GenerateDoc', ['$http',  function ($http) {
                 transformRequest: transform
             });
     }
-    
+
     function createFolder(params) {
         return $http.post(
             'createGoogleFolder',
@@ -170,10 +172,10 @@ angular.module('oncokb').factory('DriveAnnotation', ['$http',  function ($http) 
     var transform = function(data){
         return $.param(data);
     };
-    
+
     function updateGene(geneString) {
         return $http.post(
-            'driveAnnotation', 
+            'driveAnnotation',
             {'gene': geneString},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},

@@ -88,10 +88,12 @@ angular.module('oncokb')
               var genes = [];
 
               for(var key in testGene) {
+                /* jshint -W083 */
                 var _genes = testGene[key].trim().split(',').map(function(e){ return e.trim();});
                 _genes.forEach(function(_gene){
                   genes.push({'email': key, 'gene': _gene});
                 });
+                /* jshint +W083 */
               }
 
               $scope.genesPermissions = genes;
@@ -117,13 +119,21 @@ angular.module('oncokb')
 
                         if(permissionIndex === -1) {
                           storage.insertPermission(_doc.id, permission.email, 'user', 'writer').then(function(result){
-                            console.log('\tinsert writer to', permission.gene);
-                            givePermissionSub(++index);
+                            if(result && result.error) {
+                              console.log('Error when insert permission.');
+                            }else{
+                              console.log('\tinsert writer to', permission.gene);
+                              givePermissionSub(++index);
+                            }
                           });
                         }else if(result.items[permissionIndex].role !== 'writer'){
                           storage.updatePermission(_doc.id, result.items[permissionIndex].id, 'writer').then(function(result){
-                            console.log('\tupdat  writer to', permission.gene);
-                            givePermissionSub(++index);
+                            if(result && result.error) {
+                              console.log('Error when update permission.');
+                            }else{
+                              console.log('\tupdat  writer to', permission.gene);
+                              givePermissionSub(++index);
+                            }
                           });
                         }
                       }
@@ -137,7 +147,6 @@ angular.module('oncokb')
 
             $scope.giveFolderPermission = function() {
               var emails = ['cbioportal@gmail.com'];
-              var userPermission = "reader";
               var folderId = config.folderId;
 
               emails.forEach(function(email){
@@ -176,10 +185,14 @@ angular.module('oncokb')
                 storage.requireAuth().then(function () {
                   console.log(index, ' -> Creating', newGenes[index]);
                   // storage.createDocument(newGenes[index], '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M').then(function (file) {
-                  storage.createDocument(newGenes[index]).then(function (file) {
-                    $timeout(function(){
-                      createDoc(++index);
-                    }, 200);
+                  storage.createDocument(newGenes[index]).then(function (result) {
+                    if(result && result.error) {
+                      console.log('Error when creating docuemnt.');
+                    }else {
+                      $timeout(function(){
+                        createDoc(++index);
+                      }, 200);
+                    }
                   });
                 });
               }else {
@@ -245,11 +258,11 @@ angular.module('oncokb')
                 object[key+'_comments'].push(_comment);
                 $scope.realtimeDocument.getModel().endCompoundOperation();
               }else {
-                console.log('Unable to add comment.')
+                console.log('Unable to add comment.');
               }
             };
 
-            $scope.getData = function(realtime) {
+            $scope.getData = function() {
               var gene = importer.getData(this.gene);
               console.log(gene);
               console.log(JSON.stringify(gene));
@@ -309,8 +322,10 @@ angular.module('oncokb')
 
             $scope.onFocus = function (e) {
               $timeout(function () {
+                /* jshint -W117 */
                 $(e.target).trigger('input');
                 $(e.target).trigger('change'); // for IE
+                /* jshint +W117 */
               });
             };
 
@@ -344,9 +359,9 @@ angular.module('oncokb')
             $scope.remove = function(index, object, event) {
               $scope.stopCollopse(event);
               var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
-              dlg.result.then(function(btn){
+              dlg.result.then(function(){
                 object.remove(index);
-              },function(btn){});
+              },function(){});
             };
 
             $scope.commentClick = function(event) {
@@ -409,12 +424,6 @@ angular.module('oncokb')
               if (event.preventDefault) { event.preventDefault();}
             };
 
-            function getString(string){
-              string = S(string).stripTags().s;
-
-              return string;
-            }
-
             function getSuggestions() {
               var suggestions = CurationSuggestions.get();
               if(suggestions.length === 0) {
@@ -442,8 +451,6 @@ angular.module('oncokb')
             }
 
             function saveStateChangedEvent(evt) {
-              // console.log('saveStateChangedEvent', evt);
-              // $scope.$apply(function(){
               if(!$scope.$$phase) {
                 $scope.$apply(function(){
                   updateDocStatus(evt);
@@ -461,7 +468,6 @@ angular.module('oncokb')
               }else {
                 documentClosed();
               }
-              // console.log($scope.docStatus);
             }
 
             function afterCreateGeneModel() {
@@ -589,136 +595,6 @@ angular.module('oncokb')
               $scope.fileEditable = false;
             }
 
-            function getLevels() {
-              var desS = {
-                '': '',
-                '1': 'FDA-approved biomarker and drug association in this indication.',
-                '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
-                '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
-                '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
-                '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
-              };
-
-              var desR = {
-                '': '',
-                'R1': 'NCCN-compendium listed biomarker for resistance to a FDA-approved drug.',
-                'R2': 'Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.',
-                'R3': 'Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.'
-              };
-
-              var levels = {};
-
-              var levelsCategories = {
-                SS: ['','1','2A'],
-                SR: ['R1'],
-                IS: ['','2B','3','4'],
-                IR: ['R2','R3']
-              }
-
-              for(var key in levelsCategories) {
-                var _items = levelsCategories[key];
-                levels[key] = [];
-                for (var i = 0; i < _items.length; i++) {
-                  var __datum = {};
-                  __datum.label = _items[i] + (_items[i]===''?'':' - ') +( (['SS', 'IS'].indexOf(key) !== -1) ? desS[_items[i]] : desR[_items[i]]);
-                  __datum.value = _items[i];
-                  levels[key].push(__datum);
-                }
-              }
-              return levels;
-            }
-
-            $scope.loaded = false;
-            $scope.fileTitle = $routeParams.geneName;
-            $scope.gene = '';
-            $scope.comments = '';
-            $scope.newGene = {};
-            $scope.newMutation = {};
-            $scope.newTumorType = {};
-            $scope.newTI = [{},{},{},{}];
-            $scope.newTrial = '';
-            $scope.collaborators = {};
-            $scope.checkboxes = {
-                'oncogenic': ['YES','NO','UNKNOWN'],
-                'mutation_effect': ['Activating','Inactivating', 'Other']
-            };
-            $scope.nccnDiseaseTypes = ['', "Acute Lymphoblastic Leukemia","Acute Myeloid Leukemia      20th Annual Edition!","Anal Carcinoma","Bladder Cancer","Bone Cancer","Breast Cancer","Cancer of Unknown Primary (See Occult Primary)","Central Nervous System Cancers","Cervical Cancer","Chronic Myelogenous Leukemia","Colon/Rectal Cancer","Colon Cancer      20th Annual Edition!","Rectal Cancer      20th Annual Edition!","Cutaneous Melanoma (See Melanoma)","Endometrial Cancer (See Uterine Neoplasms)","Esophageal and Esophagogastric Junction Cancers","Fallopian Tube Cancer (See Ovarian Cancer)","Gastric Cancer","Head and Neck Cancers","Hepatobiliary Cancers","Hodgkin Lymphoma","Kidney Cancer","Malignant Pleural Mesothelioma","Melanoma","Multiple Myeloma/Other Plasma Cell Neoplasms","Multiple Myeloma","Systemic Light Chain Amyloidosis","Waldenström's Macroglobulinemia / Lymphoplasmacytic Lymphoma","Myelodysplastic Syndromes","Neuroendocrine Tumors","Non-Hodgkin's Lymphomas","Non-Melanoma Skin Cancers","Basal Cell Skin Cancer","Dermatofibrosarcoma Protuberans","Merkel Cell Carcinoma","Squamous Cell Skin Cancer","Non-Small Cell Lung Cancer      20th Annual Edition!","Occult Primary","Ovarian Cancer","Pancreatic Adenocarcinoma","Penile Cancer","Primary Peritoneal Cancer (See Ovarian Cancer)","Prostate Cancer      20th Annual Edition!","Small Cell Lung Cancer      20th Annual Edition!","Soft Tissue Sarcoma","Testicular Cancer","Thymomas and Thymic Carcinomas","Thyroid Carcinoma","Uterine Neoplasms"];
-            $scope.nccnCategories = [
-              {
-                label: '',
-                value: ''
-              },
-              {
-                label: 'Category 1: Based upon high-level evidence, there is uniform NCCN consensus that the intervention is appropriate.',
-                value: '1'
-              },
-              {
-                label: 'Category 2A: Based upon lower-level evidence, there is uniform NCCN consensus that the intervention is appropriate.',
-                value: '2A'
-              },
-              {
-                label: 'Category 2B: Based upon lower-level evidence, there is NCCN consensus that the intervention is appropriate.',
-                value: '2B'
-              },
-              {
-                label: 'Category 3: Based upon any level of evidence, there is major NCCN disagreement that the intervention is appropriate.',
-                value: '3'
-              },
-            ]
-            $scope.levels = getLevels();
-            $scope.fileEditable = false;
-            $scope.docStatus = {
-              saved: true,
-              saving: false,
-              closed: false
-            };
-            $scope.addMutationPlaceholder = "Mutation Name";
-            $scope.userRole = Users.getMe().role;
-            $scope.levelExps = {
-              SR: '<strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib',
-              IR: '<strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/>'
-            };
-            $scope.showHideButtons = [
-              {'key': 'prevelenceShow', 'display': 'Prevalence'},
-              {'key': 'proImShow', 'display': 'Prognostic implications'},
-              {'key': 'nccnShow', 'display': 'NCCN guidelines'},
-              {'key': 'ssShow', 'display': 'Standard implications for sensitivity to therapy'},
-              {'key': 'srShow', 'display': 'Standard implications for resistance to therapy'},
-              {'key': 'isShow', 'display': 'Investigational implications for sensitivity to therapy'},
-              {'key': 'irShow', 'display': 'Investigational implications for resistance to therapy'},
-              {'key': 'trialsShow', 'display': 'Ongoing clinical trials'}
-            ];
-            $scope.list = [];
-            $scope.sortableOptions = {
-              stop: function(e, ui){
-                console.log('dropindex',ui.dropindex);
-                console.log('index',ui.index);
-                console.log(e, ui);
-              },
-              beforeStop: function(e, ui){ 
-                console.log('dropindex',ui.dropindex);
-                console.log('index',ui.index);
-                console.log(e, ui);
-              }
-              // handle: '> .myHandle'
-            };
-            $scope.selfParams = {};
-
-            getSuggestions();
-            getOncoTreeTumortypes();
-            var clock;
-            clock = $interval(function() {
-              storage.requireAuth(true).then(function(result){
-                if(result && !result.error) {
-                  var token = gapi.auth.getToken();
-                  console.log('\t checked token', new Date().getTime());
-                }else {
-                  documentClosed();
-                  console.log('error when renew token in interval func.');
-                }
-              });
-            }, 600000);
-
             function getOncoTreeTumortypes(){
               $scope.tumorTypes = [ 'Adrenocortical Carcinoma',
                 'Pheochromocytoma',
@@ -785,6 +661,136 @@ angular.module('oncokb')
                 'Unknown Cancer Type' ];
             }
 
+            function getLevels() {
+              var desS = {
+                '': '',
+                '1': 'FDA-approved biomarker and drug association in this indication.',
+                '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
+                '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
+                '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
+                '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
+              };
+
+              var desR = {
+                '': '',
+                'R1': 'NCCN-compendium listed biomarker for resistance to a FDA-approved drug.',
+                'R2': 'Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.',
+                'R3': 'Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.'
+              };
+
+              var levels = {};
+
+              var levelsCategories = {
+                SS: ['','1','2A'],
+                SR: ['R1'],
+                IS: ['','2B','3','4'],
+                IR: ['R2','R3']
+              };
+
+              for(var key in levelsCategories) {
+                var _items = levelsCategories[key];
+                levels[key] = [];
+                for (var i = 0; i < _items.length; i++) {
+                  var __datum = {};
+                  __datum.label = _items[i] + (_items[i]===''?'':' - ') +( (['SS', 'IS'].indexOf(key) !== -1) ? desS[_items[i]] : desR[_items[i]]);
+                  __datum.value = _items[i];
+                  levels[key].push(__datum);
+                }
+              }
+              return levels;
+            }
+
+            $scope.loaded = false;
+            $scope.fileTitle = $routeParams.geneName;
+            $scope.gene = '';
+            $scope.comments = '';
+            $scope.newGene = {};
+            $scope.newMutation = {};
+            $scope.newTumorType = {};
+            $scope.newTI = [{},{},{},{}];
+            $scope.newTrial = '';
+            $scope.collaborators = {};
+            $scope.checkboxes = {
+                'oncogenic': ['YES','NO','UNKNOWN'],
+                'mutation_effect': ['Activating','Inactivating', 'Other']
+            };
+            $scope.nccnDiseaseTypes = ['', 'Acute Lymphoblastic Leukemia','Acute Myeloid Leukemia      20th Annual Edition!','Anal Carcinoma','Bladder Cancer','Bone Cancer','Breast Cancer','Cancer of Unknown Primary (See Occult Primary)','Central Nervous System Cancers','Cervical Cancer','Chronic Myelogenous Leukemia','Colon/Rectal Cancer','Colon Cancer      20th Annual Edition!','Rectal Cancer      20th Annual Edition!','Cutaneous Melanoma (See Melanoma)','Endometrial Cancer (See Uterine Neoplasms)','Esophageal and Esophagogastric Junction Cancers','Fallopian Tube Cancer (See Ovarian Cancer)','Gastric Cancer','Head and Neck Cancers','Hepatobiliary Cancers','Hodgkin Lymphoma','Kidney Cancer','Malignant Pleural Mesothelioma','Melanoma','Multiple Myeloma/Other Plasma Cell Neoplasms','Multiple Myeloma','Systemic Light Chain Amyloidosis','Waldenström\'s Macroglobulinemia / Lymphoplasmacytic Lymphoma','Myelodysplastic Syndromes','Neuroendocrine Tumors','Non-Hodgkin\'s Lymphomas','Non-Melanoma Skin Cancers','Basal Cell Skin Cancer','Dermatofibrosarcoma Protuberans','Merkel Cell Carcinoma','Squamous Cell Skin Cancer','Non-Small Cell Lung Cancer      20th Annual Edition!','Occult Primary','Ovarian Cancer','Pancreatic Adenocarcinoma','Penile Cancer','Primary Peritoneal Cancer (See Ovarian Cancer)','Prostate Cancer      20th Annual Edition!','Small Cell Lung Cancer      20th Annual Edition!','Soft Tissue Sarcoma','Testicular Cancer','Thymomas and Thymic Carcinomas','Thyroid Carcinoma','Uterine Neoplasms'];
+            $scope.nccnCategories = [
+              {
+                label: '',
+                value: ''
+              },
+              {
+                label: 'Category 1: Based upon high-level evidence, there is uniform NCCN consensus that the intervention is appropriate.',
+                value: '1'
+              },
+              {
+                label: 'Category 2A: Based upon lower-level evidence, there is uniform NCCN consensus that the intervention is appropriate.',
+                value: '2A'
+              },
+              {
+                label: 'Category 2B: Based upon lower-level evidence, there is NCCN consensus that the intervention is appropriate.',
+                value: '2B'
+              },
+              {
+                label: 'Category 3: Based upon any level of evidence, there is major NCCN disagreement that the intervention is appropriate.',
+                value: '3'
+              },
+            ];
+            $scope.levels = getLevels();
+            $scope.fileEditable = false;
+            $scope.docStatus = {
+              saved: true,
+              saving: false,
+              closed: false
+            };
+            $scope.addMutationPlaceholder = 'Mutation Name';
+            $scope.userRole = Users.getMe().role;
+            $scope.levelExps = {
+              SR: '<strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib',
+              IR: '<strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/>'
+            };
+            $scope.showHideButtons = [
+              {'key': 'prevelenceShow', 'display': 'Prevalence'},
+              {'key': 'proImShow', 'display': 'Prognostic implications'},
+              {'key': 'nccnShow', 'display': 'NCCN guidelines'},
+              {'key': 'ssShow', 'display': 'Standard implications for sensitivity to therapy'},
+              {'key': 'srShow', 'display': 'Standard implications for resistance to therapy'},
+              {'key': 'isShow', 'display': 'Investigational implications for sensitivity to therapy'},
+              {'key': 'irShow', 'display': 'Investigational implications for resistance to therapy'},
+              {'key': 'trialsShow', 'display': 'Ongoing clinical trials'}
+            ];
+            $scope.list = [];
+            $scope.sortableOptions = {
+              stop: function(e, ui){
+                console.log('dropindex',ui.dropindex);
+                console.log('index',ui.index);
+                console.log(e, ui);
+              },
+              beforeStop: function(e, ui){ 
+                console.log('dropindex',ui.dropindex);
+                console.log('index',ui.index);
+                console.log(e, ui);
+              }
+              // handle: '> .myHandle'
+            };
+            $scope.selfParams = {};
+
+            getSuggestions();
+            getOncoTreeTumortypes();
+            var clock;
+            clock = $interval(function() {
+              storage.requireAuth(true).then(function(result){
+                if(result && !result.error) {
+                  console.log('\t checked token', new Date().getTime());
+                }else {
+                  documentClosed();
+                  console.log('error when renew token in interval func.');
+                }
+              });
+            }, 600000);
+
+
             loadFile().then(function(file){
               $scope.realtimeDocument = file;
 
@@ -811,33 +817,33 @@ angular.module('oncokb')
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function () {
                 console.log('--token_refresh_required-- going to refresh page.');
-                alert('Error. This page will be redirected to genes page.');
+                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
                 documentClosed();
                 $location.path('/genes');
             });
 
             // Other unidentify error
             $rootScope.$on('realtimeDoc.other_error', function () {
-                alert('Error. This page will be redirected to genes page.');
+                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
+                documentClosed();
+                $location.path('/genes');
+            });
+
+            // Realtime documet not found
+            $rootScope.$on('realtimeDoc.client_error', function () {
+                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
                 documentClosed();
                 $location.path('/genes');
             });
 
             // Realtime documet not found
             $rootScope.$on('realtimeDoc.not_found', function () {
-                alert('The document not exists. This page will be redirected to genes page.');
+                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
                 documentClosed();
                 $location.path('/genes');
             });
 
-            // Realtime documet not found
-            $rootScope.$on('realtimeDoc.not_found', function () {
-                alert('The document not exists. This page will be redirected to genes page.');
-                documentClosed();
-                $location.path('/genes');
-            });
-
-            $scope.$on('$locationChangeStart', function( event , next, current) {
+            $scope.$on('$locationChangeStart', function() {
               storage.closeDocument();
               documentClosed();
             });

@@ -11,7 +11,9 @@ angular.module('oncokb')
         'DeepMerge',
         'x2js',
         'FindRegex',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService, DeepMerge, x2js, FindRegex) {
+        'OncoKB',
+        'S',
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, ReportDataService, DeepMerge, x2js, FindRegex, OncoKB, S) {
 
         'use strict';
 
@@ -92,7 +94,7 @@ angular.module('oncokb')
             var unique = [];
 
             if(angular.isArray(data)){
-                data.forEach(function(e, i) {
+                data.forEach(function(e) {
                     if(unique.indexOf(e[attr]) === -1) {
                         unique.push(e[attr]);
                     }
@@ -153,7 +155,7 @@ angular.module('oncokb')
             }else {
                 return false;
             }
-        }
+        };
 
         $scope.fdaApproved = function(drug) {
             if (typeof drug.fda_approved === 'string' && drug.fda_approved.toLowerCase() === 'yes'){
@@ -169,7 +171,7 @@ angular.module('oncokb')
             }else {
                 return false;
             }
-        }
+        };
         
         $scope.setCollapsed = function(trial, attr) {
             $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
@@ -233,18 +235,18 @@ angular.module('oncokb')
                 }
             }
             if(hasSelectedTumorType) {
-                params['tumorType'] = $scope.selectedTumorType;
+                params.tumorType = $scope.selectedTumorType;
             }
-            
+
             changeUrl(params);
-            
+
             DatabaseConnector.searchAnnotation(params, function(data) {
                 searchAnnotationCallback('success', data);
             }, function(){
                 searchAnnotationCallback('fail');
             });
         };
-        
+
         function searchAnnotationCallback(status, data) {
             var annotation = {};
             if(status === 'success') {
@@ -252,11 +254,13 @@ angular.module('oncokb')
                 for(var key in annotation) {
                     annotation[key] = formatDatum(annotation[key], key);
                 }
-                
+
                 $scope.annotation = annotation;
                 if($scope.annotation.cancer_type) {
                     var relevantCancerType = [];
-                    for(var i=0, cancerTypeL = $scope.annotation.cancer_type.length; i < cancerTypeL; i++) {
+                    var i = 0;
+                    var cancerTypeL = $scope.annotation.cancer_type.length;
+                    for(; i < cancerTypeL; i++) {
                         var _cancerType = $scope.annotation.cancer_type[i];
                         if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
                             relevantCancerType.push(_cancerType);
@@ -264,8 +268,8 @@ angular.module('oncokb')
                     }
                     if(relevantCancerType.length > 1) {
                         var obj1 = relevantCancerType[0];
-                        
-                        for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
+                        var relevantL = relevantCancerType.length;
+                        for(i=1; i < relevantL; i++) {
                             obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
                         }
                         $scope.relevantCancerType = obj1;
@@ -287,7 +291,7 @@ angular.module('oncokb')
         
         function processData(object){
             if(isArray(object)) {
-                object.forEach(function(e, i){
+                object.forEach(function(e){
                     e = processData(e);
                 });
             }else if(isObject(object)) {
@@ -302,101 +306,25 @@ angular.module('oncokb')
             return object;
         }
 
-        function upperFirstLetter(str){
-            str = str.replace('_', ' ');
-            return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
-        }
-        
         function reportViewData(params) {
             var _parmas = angular.copy(params);
             _parmas.overallInterpretation = processOverallInterpretation(_parmas.overallInterpretation);
             _parmas = constructData(_parmas);
             return _parmas;
         }
-        
-//        function regularViewData(annotation) {
-//            
-//            if(annotation.hasOwnProperty('cancer_type')) {
-//                annotation.cancer_type.forEach(function(e, i){
-//                    var obj = {};
-//                    
-//                    obj['Treatment Implications'] = {
-//                        'nccn_guidelines' : e.nccn_guidelines || '',
-//                        'prognostic_implications': e.prognostic_implications || ''
-//                    };
-//                    
-//                    obj['FDA Approved Drugs in Tumor Type'] = {};
-//                    if(e.hasOwnProperty('standard_therapeutic_implications')){
-//                        if(e.standard_therapeutic_implications.hasOwnProperty('general_statement')) {
-//                            obj['Treatment Implications'].standard_therapeutic_implications = e.standard_therapeutic_implications.general_statement;
-//                            delete e.standard_therapeutic_implications.general_statement;
-//                        }
-//                        obj['FDA Approved Drugs in Tumor Type']['drugs'] = {};
-//                        for(var key in e.standard_therapeutic_implications) {
-//                            if(e.standard_therapeutic_implications.hasOwnProperty(key)){
-//                                obj['FDA Approved Drugs in Tumor Type']['drugs'][key]= e.standard_therapeutic_implications[key];
-//                            }
-//                        }
-//                        if(Object.keys(obj['FDA Approved Drugs in Tumor Type']['drugs']).length > 0) {
-//                            obj['FDA Approved Drugs in Tumor Type']['type'] = e.type || '';
-//                        }
-//                        delete e.standard_therapeutic_implications;
-//                    }
-//                    delete e.nccn_guidelines;
-//                    delete e.prognostic_implications;
-//                    
-//                    obj['Clinical Trials'] = {
-//                        'clinical_trial' : e.clinical_trial || '',
-//                        'investigational_therapeutic_implications': e.investigational_therapeutic_implications || ''
-//                    };
-//                    
-//                    delete e.clinical_trial;
-//                    delete e.investigational_therapeutic_implications;
-//                    
-//                    obj['type'] = e.type || '';
-//                    obj['relevant_to_patient_disease'] = e.relevant_to_patient_disease || '';
-//                    
-//                    delete e.type;
-//                    delete e.relevant_to_patient_disease;
-//                    
-//                    //Add rest info to  Additional Information section
-//                    obj['Additional Information'] = {};
-//                    for(var key in e) {
-//                        if(e.hasOwnProperty(key)) {
-//                            obj['Additional Information'][key] = e[key];
-//                            delete e[key];
-//                        }
-//                    }
-//                    annotation.cancer_type[i] = obj;
-//                });
-//                
-//                annotation.cancer_type.forEach(function(e, i){
-//                    e['FDA Approved Drugs in Other Tumor Type'] = [];
-//                    annotation.cancer_type.forEach(function(e1, i1){
-//                        if(i !== i1) {
-//                            if(e1['FDA Approved Drugs in Tumor Type'].hasOwnProperty('type')) {
-//                                e['FDA Approved Drugs in Other Tumor Type'].push(e1['FDA Approved Drugs in Tumor Type']);
-//                            }
-//                        }
-//                    });
-//                });
-//            }
-//            console.log(annotation);
-//            return annotation;
-//        }
 
         function isObject(obj) {
             return angular.isObject(obj) && !angular.isArray(obj);
         }
-        
+
         function isArray(obj) {
             return angular.isArray(obj);
         }
-        
+
         function isString(obj) {
             return angular.isString(obj);
         }
-        
+
         function bottomObject(obj) {
            var flag = true;
            if(obj && typeof obj === 'object') {
@@ -415,7 +343,7 @@ angular.module('oncokb')
         function objToArray(obj) {
             var delayAttrs = ['description'];
             var priorAttrs = ['trial','nccn_special','recommendation category 1 / 2A / 2 / 2A / 2A'];
-            
+
             if (!angular.isObject(obj)) {
               return obj;
             }
@@ -539,11 +467,6 @@ angular.module('oncokb')
                 }
             }
             str = content.join('<br/>');
-            return str;
-        }
-        
-        function lineBreakToHtml(str) {
-            str = str.replace(/(\r\n|\n|\r)/gm, '<br/>');
             return str;
         }
 

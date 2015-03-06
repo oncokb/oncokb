@@ -254,7 +254,7 @@ angular.module('oncokb')
           data[timestamp].tumorTypes = d;
         }, timestamp);
 
-        timeout(callback, timestamp)
+        timeout(callback, timestamp);
       },
       'getAllEvidence': getAllEvidence,
       'searchAnnotation': searchVariant,

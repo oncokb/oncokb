@@ -5,10 +5,24 @@ angular.module('oncokb').controller('TreeCtrl', [
     'DatabaseConnector', 
     'AnalysisEvidence', 
     'storage',
-
-    function ($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence, storage) {
+    'OncoKB',
+    function ($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence, storage, OncoKB) {
 
     'use strict';
+
+    function drawTree(data) {
+        if(typeof OncoKB.tree.processedData === 'undefined' || OncoKB.tree.processedData) {
+            OncoKB.tree.processedData = AnalysisEvidence.init($scope.treeType, data);
+        }
+
+        $scope.rendering = true;
+        $scope.genes = OncoKB.tree.processedData.genes;
+        $scope.descriptions = OncoKB.tree.processedData.descriptions;
+
+        Tree.init(OncoKB.tree.processedData.treeInfo, $scope.descriptions);
+
+        $scope.rendering = false;
+    }
 
     $scope.init = function() {
         $scope.treeType = 'separated';
@@ -28,20 +42,6 @@ angular.module('oncokb').controller('TreeCtrl', [
             });
         }
     };
-            
-    function drawTree(data) {
-        if(typeof OncoKB.tree.processedData === 'undefined' || OncoKB.tree.processedData) {
-            OncoKB.tree.processedData = AnalysisEvidence.init($scope.treeType, data);
-        }
-        
-        $scope.rendering = true;
-        $scope.genes = OncoKB.tree.processedData.genes;
-        $scope.descriptions = OncoKB.tree.processedData.descriptions;
-
-        Tree.init(OncoKB.tree.processedData.treeInfo, $scope.descriptions);
-        
-        $scope.rendering = false;
-    }
 
     $scope.search = function() {
         var result = Tree.search($scope.searchKeywords),

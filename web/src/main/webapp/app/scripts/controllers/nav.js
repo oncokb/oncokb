@@ -13,7 +13,7 @@ angular.module('oncokb')
         'tree': 'Tree',
         'variant': 'Variant Annotation',
         'genes': 'Genes'
-    }
+    };
 
     var accessLevels = config.accessLevels;
 
@@ -35,14 +35,13 @@ angular.module('oncokb')
                 if (access.isLoggedIn() && !access.getURL() && access.authorize(config.accessLevels.curator)) {
                     $location.path('/genes');
                 }else {
-                    $location.path("/");
+                    $location.path('/');
                 }
             }
         });
     }
 
     function setParams() {
-        var url = access.getURL();
         $scope.user = $rootScope.user;
         $scope.tabs = [];
         if(access.authorize(accessLevels.curator)) {
@@ -84,12 +83,12 @@ angular.module('oncokb')
         // Do a check if authentication has been successful.
         // console.log('In processAuth');
 
-        if(authResult['access_token']) {
+        if(authResult.access_token) {
             // Successful sign in.
             // $scope.signedIn = true;
             // console.log('access success', authResult);
             access.login(loginCallback);
-        } else if(authResult['error']) {
+        } else if(authResult.error) {
             // Error while signing in.
             // $scope.signedIn = false;
             // console.log('access failed', authResult);

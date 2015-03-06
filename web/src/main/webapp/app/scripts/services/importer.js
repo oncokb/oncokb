@@ -41,7 +41,9 @@ angular.module('oncokb')
       }
     }
 
+
     function getData(realtime) {
+      /* jshint -W106 */
       var gene = {};
       var geneData = realtime;
 
@@ -107,6 +109,7 @@ angular.module('oncokb')
         gene.mutations.push(_mutation);
       });
       return gene;
+      /* jshint +W106 */
     }
 
     function copyFileData(folderId, fileId, fileTitle, docIndex, callback) {
@@ -229,7 +232,7 @@ angular.module('oncokb')
     }
 
     function getString(string){
-      var tmp = window.document.createElement("DIV");
+      var tmp = window.document.createElement('DIV');
       tmp.innerHTML = string;
       var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
       string = S(_string).collapseWhitespace().s;

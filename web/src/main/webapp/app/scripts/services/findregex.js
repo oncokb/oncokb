@@ -18,9 +18,11 @@ angular.module('oncokb')
                 var result = str.match(regex[j]);
 
                 if(result) {
+                    /*jshint -W083 */
                     var uniqueResult = result.filter(function(elem, pos) {
                         return result.indexOf(elem) === pos;
                     });
+                    /*jshint +W083 */
                     for(var i = 0, resultL = uniqueResult.length; i < resultL; i++) {
                         var _datum = uniqueResult[i];
 

@@ -19,7 +19,7 @@ angular.module('oncokb')
       		$scope.depth++;
       	},
       	compile: function(element) {
-            return RecursionHelper.compile(element, function(scope, iElement, iAttrs, controller, transcludeFn){
+            return RecursionHelper.compile(element, function(scope){
                 // Define your normal link function here.
                 // Alternative: instead of passing a function,
                 // you can also pass an object with 
@@ -75,10 +75,6 @@ angular.module('oncokb')
                         str += '<br/>';
                         return str;
                 };
-                function upperFirstLetter(str){
-                        str = str.replace('_', ' ');
-                        return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
-                }
             });
         }
     };

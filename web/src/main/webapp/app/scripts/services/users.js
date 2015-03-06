@@ -23,7 +23,7 @@ angular.module('oncokb')
         this.role = 1;
         this.genes = [];
         this.phases = [];
-    };
+    }
 
     /**
      * [getUsers description]
@@ -66,6 +66,7 @@ angular.module('oncokb')
     function setUsers(users) {
         var usersL = 0;
 
+        /* jslint -W083 */
         if(angular.isArray(users)) {
             usersL = users.length;
             for (var i = 0; i < usersL; i++) {
@@ -97,6 +98,7 @@ angular.module('oncokb')
         }else {
             return false;
         }
+        /* jslint +W083 */
     }
 
     function setMe(user){

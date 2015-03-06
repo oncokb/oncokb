@@ -15,30 +15,10 @@ angular.module('oncokb')
     return {
       require: 'ngModel',
       link: function(scope, element, attr, ngModel) {
-        ngModel.$parsers.push(function (inputValue) {
-          // dont put empty space to model
-            console.info(inputValue);
-            if(inputValue===' '){
-              return '';
-            }
-            return inputValue;
-          });
-
-      
-        //trigger the popup on 'click' because 'focus'
-        //is also triggered after the item selection
-        element.bind('click', triggerPopup);
-
-        //compare function that treats the empty space as a match
-        scope.emptyOrMatch = emptyOrMatch;
-
-        /////
-
-
         function triggerPopup() {
 
           var viewValue = ngModel.$viewValue;
-          var modelValue = ngModel.$modelValue;
+          // var modelValue = ngModel.$modelValue;
 
           console.log(ngModel);
 
@@ -52,17 +32,31 @@ angular.module('oncokb')
 
           //set the actual value in case there was already a value in the input
           ngModel.$setViewValue(viewValue || ' ');
-          
-         
         }
 
         function emptyOrMatch(actual, expected) {
           console.log(arguments);
-          if (expected == ' ') {
+          if (expected === ' ') {
             return true;
           }
           return actual.indexOf(expected) > -1;
         }
+
+        ngModel.$parsers.push(function (inputValue) {
+          // dont put empty space to model
+            console.info(inputValue);
+            if(inputValue===' '){
+              return '';
+            }
+            return inputValue;
+          });
+
+        //trigger the popup on 'click' because 'focus'
+        //is also triggered after the item selection
+        element.bind('click', triggerPopup);
+
+        //compare function that treats the empty space as a match
+        scope.emptyOrMatch = emptyOrMatch;
       }
     };
   })
@@ -97,5 +91,5 @@ angular.module('oncokb')
           return inputValue === SecretEmptyKey ? '' : inputValue; // set the secretEmptyKey back to empty string
         });
       }
-    }
+    };
   });

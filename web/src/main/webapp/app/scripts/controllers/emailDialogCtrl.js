@@ -1,5 +1,6 @@
+'use strict';
 angular.module('oncokb')
-  .controller('emailDialogCtrl',function($scope,$modalInstance,data){
+  .controller('emailDialogCtrl',function($scope,$modalInstance){
   $scope.user = {email : ''};
 
   $scope.cancel = function(){

@@ -11,18 +11,18 @@ angular.module('oncokb')
         function link($scope) {
             $scope.getDrugHeader = function(key, data) {
                 var header = '';
-                
+
                 if(key !== 'sensitive_to') {
-                    header += $scope.displayProcess(key) + ": ";
+                    header += $scope.displayProcess(key) + ': ';
                 }
-                
+
                 if(typeof data === 'object') {
                     if(data.hasOwnProperty('treatment')) {
                         var hasTreatment = false;
-                        data.treatment.forEach(function(e, i){
+                        data.treatment.forEach(function(e){
                             if(e.hasOwnProperty('drug')) {
                                 var hasDrug = false;
-                                e.drug.forEach(function(e1, i1){
+                                e.drug.forEach(function(e1){
                                     if(e1.hasOwnProperty('name')) {
                                         hasDrug = true;
                                         header += e1.name + ' + ';
@@ -71,7 +71,6 @@ angular.module('oncokb')
             };
             $scope.generateTrial = function(trial) {
                 var str = '';
-                var purposeStr = '';
 
                 if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
                     $scope.isCollapsed[trial.trial_id] = {
@@ -89,18 +88,20 @@ angular.module('oncokb')
 
             $scope.getCollapseIcon = function(trial, attr) {
                 if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr] ) {
-                    return "images/add.svg";
+                    return 'images/add.svg';
                 }else{
-                    return "images/subtract.svg";
+                    return 'images/subtract.svg';
                 }
             };
-            
+
             $scope.findRegex = FindRegex.get;
 
             function hasEvidenceLevel(data) {
-                if(typeof data === 'object' 
-                        && data.hasOwnProperty('level_of_evidence_for_patient_indication')
-                        && data['level_of_evidence_for_patient_indication'].hasOwnProperty('level')) {
+                if(typeof data === 'object' && 
+                    data.hasOwnProperty('level_of_evidence_for_patient_indication') && 
+                    /* jshint -W069 */
+                    data['level_of_evidence_for_patient_indication'].hasOwnProperty('level')) {
+                    /* jshint +W069 */
                     return true;
                 }else {
                     return false;

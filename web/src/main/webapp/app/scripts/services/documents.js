@@ -114,5 +114,5 @@ angular.module('oncokb')
             }
             return self.documents;
         }
-    }
+    };
   });
