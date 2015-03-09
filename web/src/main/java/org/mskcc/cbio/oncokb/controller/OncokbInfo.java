@@ -47,7 +47,7 @@ public class OncokbInfo {
             List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
             
             Map<String, List> oncokbInfo = new HashMap<String, List>();
-            oncokbInfo.put("user", getUsersInfo(worksheets.get(0), service));
+            oncokbInfo.put("users", getUsersInfo(worksheets.get(0), service));
             oncokbInfo.put("suggestions", getSuggestionsInfo(worksheets.get(1), service));
             oncokbInfo.put("pubMed", getPubMedInfo(worksheets.get(2), service));
             

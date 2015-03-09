@@ -16,9 +16,8 @@ angular.module('oncokbApp')
     'Evidence',
     'SearchVariant',
     'GenerateDoc',
-    'Users',
+    'DriveOncokbInfo',
     'OncoTreeTumorTypes',
-    'CurationSuggestions',
     'DriveAnnotation',
     function (
       $timeout,
@@ -28,9 +27,8 @@ angular.module('oncokbApp')
       Evidence,
       SearchVariant,
       GenerateDoc,
-      Users,
+      DriveOncokbInfo,
       OncoTreeTumorTypes,
-      CurationSuggestions,
       DriveAnnotation) {
 
     var numOfLocks = {},
@@ -93,16 +91,16 @@ angular.module('oncokbApp')
       }
     }
 
-    function getAllCurationSuggestions(callback, timestamp) {
+    function getOncokbInfo(callback, timestamp) {
       if(dataFromFile) {
-        CurationSuggestions.getFromFile().success(function(data) {
+        DriveOncokbInfo.getFromFile().success(function(data) {
           if (timestamp) {
             numOfLocks[timestamp]--;
           }
           callback(data);
         });
       }else {
-        CurationSuggestions.getFromServer().success(function(data) {
+        DriveOncokbInfo.getFromServer().success(function(data) {
           if (timestamp) {
             numOfLocks[timestamp]--;
           }
@@ -139,24 +137,6 @@ angular.module('oncokbApp')
         });
       }else {
         Evidence.getFromServer().success(function(data) {
-          if (timestamp) {
-            numOfLocks[timestamp]--;
-          }
-          callback(data);
-        });
-      }
-    }
-
-    function getAllUsers(callback, timestamp) {
-      if(dataFromFile) {
-        Users.getFromFile().success(function(data) {
-          if (timestamp) {
-            numOfLocks[timestamp]--;
-          }
-          callback(data);
-        });
-      }else {
-        Users.getFromServer().success(function(data) {
           if (timestamp) {
             numOfLocks[timestamp]--;
           }
@@ -260,10 +240,9 @@ angular.module('oncokbApp')
       'searchAnnotation': searchVariant,
       'googleDoc': generateGoogleDoc,
       'createGoogleFolder': createGoogleFolder,
-      'getAllUsers': getAllUsers,
+      'getOncokbInfo': getOncokbInfo,
       'getAllTumorType': getAllTumorType,
       'getAllOncoTreeTumorTypes': getAllOncoTreeTumorTypes,
-      'getAllCurationSuggestions': getAllCurationSuggestions,
       'updateGene': updateGene
     };
   }]);

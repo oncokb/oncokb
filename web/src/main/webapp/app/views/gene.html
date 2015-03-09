@@ -20,10 +20,20 @@
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.summary.text"></p>
     <h3>{{gene.background.display}}:<comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.background.text"></p>
-    <p ng-if="gene.name.text">
+    <div ng-if="gene.name.text">
       <span>cBioPortal link: <a href="http://www.cbioportal.org/ln?q={{gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{gene.name.text}}</a></span><br/>
       <span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
-    </p>
+      <br/>
+      <span ng-if="pubMedLinks && pubMedLinks.length > 1">
+      PubMed links:
+        <ul>
+          <li ng-repeat="link in pubMedLinks"><a href="{{link}}" target="_blank">{{link}}</a></li>
+        </ul>
+      </span>
+      <span ng-if="pubMedLinks && pubMedLinks.length === 1">
+      PubMed link: <a href="{{pubMedLinks[0]}}" target="_blank">{{pubMedLinks[0]}}</a>
+      </span>
+    </div>
   </div>
   <div id="mutation">
     <accordion close-others="oneAtATime">

@@ -13,7 +13,6 @@ angular.module('oncokbApp')
       restrict: 'E',
       controller: function($scope, browser) {
         var browserType = browser.detectBrowser();
-        console.log('browserType:', browserType);
         if(browserType === 'ie') {
           $scope.isIE = true;
           $scope.isUnknown = false;
@@ -25,7 +24,6 @@ angular.module('oncokbApp')
             $scope.isUnknown = false;
           }
         }
-        console.log(browserType, $scope.isIE);
       }
     };
   });

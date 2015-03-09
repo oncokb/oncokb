@@ -448,30 +448,43 @@ angular.module('oncokbApp', [
  * is revoked or expired.
  */
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 
-    function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'driveOncokbInfo', 'dialogs',
+    function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs) {
     $rootScope.errors = [];
 
     $rootScope.user = {
         role: config.userRoles.public
     };
-    
+
     $rootScope.addError = function(error){
         $rootScope.errors.push(error);
     };
 
-    // $timeout(function(){
-        DatabaseConnector.getAllUsers(function(users){
-            Users.setUsers(users);
-            // console.log('isLoggedIn:', Access.isLoggedIn());
+    DatabaseConnector.getOncokbInfo(function(oncokbInfo){
+
+        if(oncokbInfo) {
+            if(oncokbInfo.users) {
+                Users.setUsers(oncokbInfo.users);
+            }
+
+            if(oncokbInfo.suggestions) {
+                DriveOncokbInfo.setSuggestions(oncokbInfo.suggestions);
+            }
+
+            if(oncokbInfo.pubMed) {
+                DriveOncokbInfo.setPubMed(oncokbInfo.pubMed);
+            }
+
             if(Access.isLoggedIn()) {
                 // console.log('Setting me');
                 Users.setMe(Users.getMe());
                 $rootScope.user = Users.getMe();
             }
-            loadingScreen.finish();
-        });
-    // }, 3000);
+        }else{
+            dialogs.error('Error', 'OncoKB has error. Refresh page might solve the problem.');
+        }
+        loadingScreen.finish();
+    });
 
     // Error loading the document, likely due revoked access. Redirect back to home/install page
     $rootScope.$on('$routeChangeError', function () {

@@ -201,8 +201,8 @@ angular.module('oncokbApp')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'curationSuggestions', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, CurationSuggestions, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey) {
             $scope.authorize = function(){
               storage.requireAuth(false).then(function () {
                 var target = $location.search().target;
@@ -424,22 +424,13 @@ angular.module('oncokbApp')
               if (event.preventDefault) { event.preventDefault();}
             };
 
-            function getSuggestions() {
-              var suggestions = CurationSuggestions.get();
-              if(suggestions.length === 0) {
-                DatabaseConnector.getAllCurationSuggestions(function(data){
-                  CurationSuggestions.set(data);
-                  $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
-                  if($scope.suggestedMutations.length === 0) {
-                    $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
-                  }
-                });
-              }else {
-                $scope.suggestedMutations = CurationSuggestions.getMutation($scope.fileTitle) || [];
-                if($scope.suggestedMutations.length === 0) {
-                  $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
-                }
+            function getDriveOncokbInfo() {
+              $scope.suggestedMutations = DriveOncokbInfo.getMutation($scope.fileTitle) || [];
+              if($scope.suggestedMutations.length === 0) {
+                $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
               }
+
+              $scope.pubMedLinks = DriveOncokbInfo.getPubMed({gene: $scope.fileTitle}) || [];
             }
 
             function bindDocEvents() {
@@ -776,7 +767,7 @@ angular.module('oncokbApp')
             };
             $scope.selfParams = {};
 
-            getSuggestions();
+            getDriveOncokbInfo();
             getOncoTreeTumortypes();
             var clock;
             clock = $interval(function() {

@@ -51,23 +51,6 @@ angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('Users', ['$http',  function ($http) {
-    'use strict';
-
-    function getFromServer() {
-        return $http.get('users.json');
-    }
-
-    function getFromFile() {
-        return $http.get('data/users.json');
-    }
-
-    return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
-    };
-}]);
-
 angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http',  function ($http) {
     'use strict';
 
@@ -85,15 +68,15 @@ angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http',  function ($
     };
 }]);
 
-angular.module('oncokbApp').factory('CurationSuggestions', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('curationSuggestions.json');
+        return $http.get('oncokbInfo.json');
     }
 
     function getFromFile() {
-        return $http.get('data/curationSuggestions.json');
+        return $http.get('data/oncokbInfo.json');
     }
 
     return {
