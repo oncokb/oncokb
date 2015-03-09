@@ -11,27 +11,16 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import com.google.gdata.client.spreadsheet.FeedURLFactory;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
-import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
-import com.google.gdata.data.spreadsheet.WorksheetEntry;
-import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  *
@@ -43,48 +32,45 @@ public class GoogleAuth {
 
     /** Path to the Service Account's Private Key file */
     private static final String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/OncoKB-Report-7c732673acd9.p12";
-    private static File file;
-    /**
-     * Build and returns a Drive service object authorized with the service accounts.
-     *
-     * @return Drive service object that is ready to make requests.
-     * @throws java.security.GeneralSecurityException
-     * @throws java.io.IOException
-     * @throws java.net.URISyntaxException
-     */       
-    public static Drive getDriveService() throws GeneralSecurityException,
+    private static final URL url= GoogleAuth.class.getResource(SERVICE_ACCOUNT_PKCS12_FILE_PATH);
+    private static final File file = new java.io.File(url.getPath());
+    private static Drive driveService;
+    private static SpreadsheetService spreadsheetService;
+    
+    public static Drive getDriveService() throws GeneralSecurityException, IOException, URISyntaxException {
+        if(GoogleAuth.driveService == null){
+            createDriveService();
+        }
+        
+        return GoogleAuth.driveService;
+    }
+    
+    public static SpreadsheetService getSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
+        if(GoogleAuth.spreadsheetService == null){
+            createSpreadSheetService();
+        }
+        
+        return GoogleAuth.spreadsheetService;
+    }
+    
+    private static void createDriveService() throws GeneralSecurityException,
         IOException, URISyntaxException {
         HttpTransport httpTransport = new NetHttpTransport();
         JacksonFactory jsonFactory = new JacksonFactory();
-        String [] SCOPESArray= {
-            DriveScopes.DRIVE, 
-            DriveScopes.DRIVE_APPDATA, 
-            DriveScopes.DRIVE_FILE,
-            DriveScopes.DRIVE_APPS_READONLY,
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/userinfo.email"
-        };
-        final List SCOPES = Arrays.asList(SCOPESArray);
         GoogleCredential credential = new GoogleCredential.Builder()
             .setTransport(httpTransport)
             .setJsonFactory(jsonFactory)
             .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-            .setServiceAccountScopes(DriveScopes.all())
+            .setServiceAccountScopes(Collections.singleton(DriveScopes.DRIVE_FILE))
             .setServiceAccountPrivateKeyFromP12File(file)
           .build();
         credential.refreshToken();
-        Drive service = new Drive.Builder(httpTransport, jsonFactory, null)
+        GoogleAuth.driveService = new Drive.Builder(httpTransport, jsonFactory, null)
                 .setApplicationName("Oncoreport")
                 .setHttpRequestInitializer(credential).build();
-        return service;
     }
     
-    public GoogleAuth() throws IOException {
-        URL url = this.getClass().getResource(SERVICE_ACCOUNT_PKCS12_FILE_PATH);
-        file =new java.io.File(url.getPath());
-    }
-    
-    public static SpreadsheetService createSpreedSheetService() throws GeneralSecurityException, IOException, ServiceException {
+    private static void createSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
         HttpTransport httpTransport = new NetHttpTransport();
         JacksonFactory jsonFactory = new JacksonFactory();
         String [] SCOPESArray= {"https://spreadsheets.google.com/feeds", "https://docs.google.com/feeds"};
@@ -99,50 +85,8 @@ public class GoogleAuth {
           .setServiceAccountPrivateKeyFromP12File(file)
           .build();
       
-        SpreadsheetService service =
-            new SpreadsheetService("data");
-        service.setOAuth2Credentials(credential);
-        service.setUserCredentials(username, password);
-        
-        return service;
-    }
-    
-    public static void sendPost() throws Exception {
- 
-            String url = "https://script.google.com/macros/s/AKfycbzUugMu9fibfZUTM909RA_wOvDaI4w9uYna42ysRdsYZrv7gA/exec";
-            URL obj = new URL(url);
-            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-
-            //add reuqest header
-            con.setRequestMethod("POST");
-//            con.setRequestProperty("User-Agent", USER_AGENT);
-            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-            String urlParameters = "";
-
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
-            int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Post parameters : " + urlParameters);
-            System.out.println("Response Code : " + responseCode);
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-            }
-            in.close();
-
-            //print result
-            System.out.println(response.toString());
+        GoogleAuth.spreadsheetService = new SpreadsheetService("data");
+        GoogleAuth.spreadsheetService.setOAuth2Credentials(credential);
+        GoogleAuth.spreadsheetService.setUserCredentials(username, password);
     }
 }

@@ -10,9 +10,7 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
-import com.google.gdata.client.spreadsheet.*;
-import com.google.gdata.data.Link;
-import com.google.gdata.data.batch.*;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import java.io.IOException;
@@ -21,15 +19,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.mskcc.cbio.oncokb.config.GoogleAuth;
 import org.json.*;
 import org.springframework.stereotype.Controller;
@@ -72,10 +66,9 @@ public class GenerateGoogleDoc {
         
     @RequestMapping(value="/generateGoogleDoc", method = POST)
     public @ResponseBody Boolean generateGoogleDoc(
-            @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException{
+            @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException, URISyntaxException{
         Boolean responseFlag = false;
         try {
-            GoogleAuth google = new GoogleAuth();
             JSONObject jsonObj = new JSONObject(reportContent);
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
             Date date = new Date();
@@ -110,8 +103,6 @@ public class GenerateGoogleDoc {
             System.out.println("An error occurred: " + e);
         } catch (GeneralSecurityException e) {
             System.out.println("An GeneralSecurityException occurred: " + e);
-        } catch (URISyntaxException e) {
-            System.out.println("An URISyntaxException occurred: " + e);
         }
         return responseFlag;
     }
@@ -119,7 +110,7 @@ public class GenerateGoogleDoc {
     public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
         
-        SpreadsheetService service = GoogleAuth.createSpreedSheetService();
+        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
         
         WorksheetFeed worksheetFeed = service.getFeed(
@@ -152,7 +143,7 @@ public class GenerateGoogleDoc {
     public static void changeFileContent(String fileId, String fileName, JSONObject content) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
         
-        SpreadsheetService service = GoogleAuth.createSpreedSheetService();
+        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
 
         WorksheetFeed worksheetFeed = service.getFeed(

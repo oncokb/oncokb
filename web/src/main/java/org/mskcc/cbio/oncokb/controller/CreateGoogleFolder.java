@@ -35,10 +35,9 @@ public class CreateGoogleFolder {
     
     @RequestMapping(value="/createGoogleFolder", method = POST)
     public @ResponseBody String CreateGoogleFolder(
-            @RequestParam(value="folderName", required=true) String folderName) throws MalformedURLException, ServiceException{
+            @RequestParam(value="folderName", required=true) String folderName) throws MalformedURLException, ServiceException, GeneralSecurityException, URISyntaxException{
         try {
             if(folderName != null && !folderName.equals("")) {
-                GoogleAuth google = new GoogleAuth();
                 Drive driveService = GoogleAuth.getDriveService();
                 System.out.println("Got drive service");
                 
@@ -66,10 +65,6 @@ public class CreateGoogleFolder {
         } catch (IOException e) {
             // Other errors (e.g connection timeout, etc.).
             System.out.println("An error occurred: " + e);
-        } catch (GeneralSecurityException e) {
-            System.out.println("An GeneralSecurityException occurred: " + e);
-        } catch (URISyntaxException e) {
-            System.out.println("An URISyntaxException occurred: " + e);
         }
         throw new Error("Error.");
     }

@@ -34,12 +34,11 @@ public class SuggestedMutations {
     private static final Integer ENTRY = 1;
         
     @RequestMapping(value="/curationSuggestions.json", method = GET)
-    public @ResponseBody List<CurationSuggestion> SuggestedMutations() throws MalformedURLException, ServiceException{
+    public @ResponseBody List<CurationSuggestion> SuggestedMutations() throws MalformedURLException, ServiceException, GeneralSecurityException{
         
         try {
             URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + USER_SPREADSHEET);
-            GoogleAuth google = new GoogleAuth();
-            SpreadsheetService service = GoogleAuth.createSpreedSheetService();
+            SpreadsheetService service = GoogleAuth.getSpreadSheetService();
             SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
 
             WorksheetFeed worksheetFeed = service.getFeed(
@@ -74,8 +73,6 @@ public class SuggestedMutations {
         } catch (IOException e) {
             // Other errors (e.g connection timeout, etc.).
             System.out.println("An error occurred: " + e);
-        } catch (GeneralSecurityException e) {
-            System.out.println("An GeneralSecurityException occurred: " + e);
         }
         
         return null;

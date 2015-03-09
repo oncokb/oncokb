@@ -60,8 +60,7 @@ public class OncoTreeTumorTypes {
     
     public static ListFeed getListFeed() throws MalformedURLException, IOException, ServiceException, GeneralSecurityException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + USER_SPREADSHEET);
-        GoogleAuth google = new GoogleAuth();
-        SpreadsheetService service = GoogleAuth.createSpreedSheetService();
+        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
         
         WorksheetFeed worksheetFeed = service.getFeed(

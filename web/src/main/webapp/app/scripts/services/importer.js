@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokb')
-  .service('importer', function importer(documents, S, storage, OncoKB) {
+  .service('importer', function importer($timeout, documents, S, storage, OncoKB) {
     var self = this;
     self.docs = [];
     self.newFolder = '';
@@ -117,26 +117,39 @@ angular.module('oncokb')
         storage.createDocument(fileTitle, folderId).then(function (file) {
           console.log('Created file ', fileTitle);
           storage.getRealtimeDocument(fileId).then(function (realtime){
-            console.log('\t copying');
-            var gene = realtime.getModel().getRoot().get('gene');
-            if(gene) {
-              var geneData = getData(gene);
-              storage.getRealtimeDocument(file.id).then(function(newRealtime){
-                var model = createGeneModel(newRealtime.getModel());
-                var geneModel = model.getRoot().get('gene');
+            if(realtime && realtime.error) {
+              console.log('did not get realtime document.');
+            }else{
+              console.log('\t copying');
+              var gene = realtime.getModel().getRoot().get('gene');
+              if(gene) {
+                var geneData = getData(gene);
+                storage.getRealtimeDocument(file.id).then(function(newRealtime){
+                  var model = createGeneModel(newRealtime.getModel());
+                  var geneModel = model.getRoot().get('gene');
 
-                model.beginCompoundOperation();
-                for(var key in geneData) {
-                  if(geneModel[key]) {
-                    geneModel = setValue(model, geneModel, geneData[key], key);
+                  model.beginCompoundOperation();
+                  for(var key in geneData) {
+                    if(geneModel[key]) {
+                      geneModel = setValue(model, geneModel, geneData[key], key);
+                    }
                   }
+                  model.endCompoundOperation();
+                  console.log('\t Done.');
+                  if(angular.isFunction(callback)) {
+                    $timeout(function(){
+                      callback(++docIndex);
+                    }, 500, false);
+                  }
+                });
+              }else{
+                console.log('\t\tNo gene model.');
+                if(angular.isFunction(callback)) {
+                  $timeout(function(){
+                    callback(++docIndex);
+                  }, 500, false);
                 }
-                model.endCompoundOperation();
-              });
-            }
-            console.log('\t Done.');
-            if(angular.isFunction(callback)) {
-              callback(++docIndex);
+              }
             }
           });
         });
