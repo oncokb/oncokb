@@ -7,7 +7,7 @@
  * # storage
  * Service in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('storage', ['$q', '$rootScope', 'config', 'gapi',
   /**
    * Handles document creation & loading for the app. Keeps only

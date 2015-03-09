@@ -1,6 +1,6 @@
 var $ = window.$;
 
-angular.module('oncokb').factory('TumorType', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('TumorType', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -17,7 +17,7 @@ angular.module('oncokb').factory('TumorType', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokb').factory('Gene', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('Gene', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -34,7 +34,7 @@ angular.module('oncokb').factory('Gene', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokb').factory('Alteration', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -51,7 +51,7 @@ angular.module('oncokb').factory('Alteration', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokb').factory('Users', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('Users', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -68,7 +68,7 @@ angular.module('oncokb').factory('Users', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokb').factory('OncoTreeTumorTypes', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -85,7 +85,7 @@ angular.module('oncokb').factory('OncoTreeTumorTypes', ['$http',  function ($htt
     };
 }]);
 
-angular.module('oncokb').factory('CurationSuggestions', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('CurationSuggestions', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -102,7 +102,7 @@ angular.module('oncokb').factory('CurationSuggestions', ['$http',  function ($ht
     };
 }]);
 
-angular.module('oncokb').factory(('SearchVariant'), ['$http', function($http) {
+angular.module('oncokbApp').factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {
         var _params = angular.copy(params),
@@ -136,7 +136,7 @@ angular.module('oncokb').factory(('SearchVariant'), ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokb').factory('GenerateDoc', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
     'use strict';
     var transform = function(data){
         return $.param(data);
@@ -167,7 +167,7 @@ angular.module('oncokb').factory('GenerateDoc', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokb').factory('DriveAnnotation', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($http) {
     'use strict';
     var transform = function(data){
         return $.param(data);

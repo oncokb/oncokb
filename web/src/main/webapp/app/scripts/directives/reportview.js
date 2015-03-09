@@ -6,7 +6,7 @@
  * @description
  * # reportView
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
     .directive('reportView', function () {
 
         function link($scope) {
@@ -48,7 +48,7 @@ angular.module('oncokb')
         };
     });
 
-angular.module('oncokb')
+angular.module('oncokbApp')
 .animation('.hide-animation', function () {
   return {
     beforeAddClass : function(element, className, done) {

@@ -7,7 +7,7 @@
  * # importer
  * Service in the oncokbApp.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('importer', function importer($timeout, documents, S, storage, OncoKB) {
     var self = this;
     self.docs = [];

@@ -7,7 +7,7 @@
  * # GeneCtrl
  * Controller of the oncokb
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
         function ($scope, $rootScope, $location, $timeout, $routeParams, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.getDocs = function() {

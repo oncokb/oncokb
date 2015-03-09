@@ -1,4 +1,4 @@
-angular.module('oncokb').controller('TreeCtrl', [
+angular.module('oncokbApp').controller('TreeCtrl', [
     '$scope',
     '$location',
     '$timeout',

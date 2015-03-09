@@ -1,5 +1,5 @@
 'use strict';
-angular.module('oncokb').filter('getIndexByObjectNameInArray', function() {
+angular.module('oncokbApp').filter('getIndexByObjectNameInArray', function() {
   return function(array, name, attr) {
         for (var i = 0, arrayL = array.length; i < arrayL; i++) {
         	var _datum;

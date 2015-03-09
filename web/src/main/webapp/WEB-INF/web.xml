@@ -34,7 +34,7 @@
 	</servlet-mapping>
 
 	<session-config>
-		<session-timeout>600</session-timeout>
+		<session-timeout>1</session-timeout>
 	</session-config>
         <filter>
             <filter-name>CorsFilter</filter-name>

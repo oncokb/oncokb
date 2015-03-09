@@ -6,7 +6,7 @@
  * @description
  * # reportInfo
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .directive('reportInfo', function () {
   	return {
       	restrict: 'E',

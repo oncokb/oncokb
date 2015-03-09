@@ -7,7 +7,7 @@
  * # ReportgeneratorCtrl
  * Controller of the oncokb
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .controller('ReportgeneratorCtrl', [
     '$scope',
     '$timeout' ,

@@ -1,5 +1,5 @@
 'use strict';
-angular.module('oncokb')
+angular.module('oncokbApp')
   .controller('emailDialogCtrl',function($scope,$modalInstance){
   $scope.user = {email : ''};
 

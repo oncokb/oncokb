@@ -7,7 +7,7 @@
  * # access
  * Service in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('access', function access($rootScope, storage, config, users, gapi) {
     var self = this;
     var userRoles = config.userRoles;

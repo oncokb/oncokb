@@ -268,6 +268,13 @@ p.editableBox.doubleH {
   padding-top: 70px;
   min-height: 400px;
 }
+.ieWarning {
+  width: 100%;
+  background-color: red;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+}
 table.dataTable thead .sorting_asc {
   background: none;
 }

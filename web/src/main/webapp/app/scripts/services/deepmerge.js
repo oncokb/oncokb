@@ -11,7 +11,7 @@
  * ct1: cancer type of target; ct2: cancer type of source
  */
 
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('DeepMerge', function DeepMerge() {
         function deepMerge(target, src, ct1, ct2) {
             var array = Array.isArray(src);

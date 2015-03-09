@@ -9,7 +9,7 @@
  *
  * focusMe and emptyTypeahead originally come from http://plnkr.co/edit/Qrnat8yTvISuM1qHHDlA?p=preview
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   //Did not use this directive, it needs angular 1.3.* support
   .directive('typeaheadFocus', function () {
     return {

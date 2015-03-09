@@ -7,7 +7,7 @@
  * # NavCtrl
  * Controller of the oncokbApp
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
 .controller('NavCtrl', function ($scope, $location, $rootScope, config, gapi, user, storage, access) {
     var tabs = {
         'tree': 'Tree',

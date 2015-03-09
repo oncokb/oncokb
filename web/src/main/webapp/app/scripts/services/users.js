@@ -7,7 +7,7 @@
  * # user
  * Service in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('users', function user(config) {
     var self = this;
 

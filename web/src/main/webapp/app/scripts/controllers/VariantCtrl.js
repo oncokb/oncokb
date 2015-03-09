@@ -1,4 +1,4 @@
-angular.module('oncokb')
+angular.module('oncokbApp')
     .controller('VariantCtrl', [
         '$scope',
         '$filter',

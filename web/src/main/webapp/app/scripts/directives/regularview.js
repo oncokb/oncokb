@@ -6,7 +6,7 @@
  * @description
  * # regularView
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
     .directive('regularView', ['FindRegex', function (FindRegex) {
         function link($scope) {
             $scope.getDrugHeader = function(key, data) {

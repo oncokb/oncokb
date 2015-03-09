@@ -335,7 +335,7 @@ OncoKB.initialize = function() {
     }
 };
 
-angular.module('oncokb', [
+angular.module('oncokbApp', [
    'ngAnimate',
    'ngCookies',
    'ngResource',
@@ -447,7 +447,7 @@ angular.module('oncokb', [
  * Set up handlers for various authorization issues that may arise if the access token
  * is revoked or expired.
  */
-angular.module('oncokb').run(
+angular.module('oncokbApp').run(
     ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 
     function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users) {
     $rootScope.errors = [];
@@ -504,6 +504,6 @@ gapi.load('auth:client:drive-share:drive-realtime', function () {
     OncoKB.initialize();
 
     angular.element(document).ready(function() {
-        angular.bootstrap(document, ['oncokb']);
+        angular.bootstrap(document, ['oncokbApp']);
     });
 });

@@ -6,7 +6,7 @@
  * @description
  * # reportViewRecursionCell
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .directive('reportViewRecursionCell', function (RecursionHelper) {
     return {
       	templateUrl: 'views/reportViewRecursionCellTemp.html',

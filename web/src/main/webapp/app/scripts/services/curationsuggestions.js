@@ -7,7 +7,7 @@
  * # curationSuggestions
  * Service in the oncokbApp.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('curationSuggestions', function curationSuggestions() {
     var self = this;
     self.suggestions = {};

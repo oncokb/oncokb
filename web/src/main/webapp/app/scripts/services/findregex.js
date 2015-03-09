@@ -7,7 +7,7 @@
  * # GenerateReportDataService
  * Factory in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .factory('FindRegex', function () {
     function get(str) {
         if(typeof str === 'string' && str !== '') {

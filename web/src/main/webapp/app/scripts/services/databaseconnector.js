@@ -7,7 +7,7 @@
  * # DatabaseConnector
  * Factory in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .factory('DatabaseConnector', [
     '$timeout',
     'Gene',

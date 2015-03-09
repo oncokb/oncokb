@@ -6,7 +6,7 @@
  * @description
  * # comments
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .directive('commentsDict', function () {
     return {
       templateUrl: 'views/comments.html',

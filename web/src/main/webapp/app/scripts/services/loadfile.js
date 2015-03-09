@@ -7,7 +7,7 @@
  * # loadFile
  * Service in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .service('loadFile', function loadFile($route, $location, $q, storage, documents) {
     return function() {
         function check() {

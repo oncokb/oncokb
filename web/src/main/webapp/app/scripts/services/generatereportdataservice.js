@@ -7,7 +7,7 @@
  * # GenerateReportDataService
  * Factory in the oncokb.
  */
-angular.module('oncokb')
+angular.module('oncokbApp')
   .factory('GenerateReportDataService', function () {
     var specialKeyChars = '#$%';
     /*jshint -W106 */
