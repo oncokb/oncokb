@@ -103,7 +103,7 @@ public final class QuestDocAnnotationParser {
         throw new AssertionError();
     }
     
-    private static final String QUEST_CURATION_FOLDER = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/annotations_sample";
+    private static final String QUEST_CURATION_FOLDER = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/annotations";
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
     public static void main(String[] args) throws Exception {
@@ -482,7 +482,7 @@ public final class QuestDocAnnotationParser {
         List<int[]> standardResistanceLines = extractLines(lines, start+1, end, STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P, CANCER_HEADERS_P, 1);
         if (!standardResistanceLines.isEmpty()) {
             parseTherapeuticImplcations(gene, alterations, tumorType, lines, standardResistanceLines.get(0)[0], standardResistanceLines.get(0)[1],
-                    EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, "Resistant", RESISTANT_TO_P); 
+                    EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, "Resistant", RESISTANT_TO_P); 
         } else {
             System.out.println("##      No "+STANDARD_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE_P+" for "+alterations.toString());
         }

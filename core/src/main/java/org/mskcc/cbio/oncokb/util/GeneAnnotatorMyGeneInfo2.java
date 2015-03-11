@@ -82,12 +82,14 @@ public final class GeneAnnotatorMyGeneInfo2 {
         
         List<Gene> genes = new ArrayList<Gene>();
         for (Map<String,Object> hit : hits) {
-            int entrez = Integer.class.cast(hit.get("entrezgene"));
-            String symbol = String.class.cast(hit.get("symbol"));
-            String name = String.class.cast(hit.get("name"));
-            
-            Gene gene = new Gene(entrez, symbol, name);
-            genes.add(gene);
+            if(hit.containsKey("entrezgene") && hit.containsKey("symbol") && hit.containsKey("name")) {
+                int entrez = Integer.class.cast(hit.get("entrezgene"));
+                String symbol = String.class.cast(hit.get("symbol"));
+                String name = String.class.cast(hit.get("name"));
+
+                Gene gene = new Gene(entrez, symbol, name);
+                genes.add(gene);
+            }
         }
         
         return genes;

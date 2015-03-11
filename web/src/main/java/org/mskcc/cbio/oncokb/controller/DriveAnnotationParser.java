@@ -75,30 +75,34 @@ public class DriveAnnotationParser {
                 System.out.println("Could not find gene "+hugo+". Loading from MyGene.Info...");
                 gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
                 if (gene == null) {
-                    throw new RuntimeException("Could not find gene "+hugo+" either.");
+//                    throw new RuntimeException("Could not find gene "+hugo+" either.");
+                    System.out.println("!!!!!!!!!Could not find gene "+hugo+" either.");
+                }else{
+                    geneBo.save(gene);
                 }
-                geneBo.save(gene);
             }else {
                 
             }
             
-            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-            List<Evidence> evidences =  evidenceBo.findEvidencesByGene(Collections.singleton(gene));
-            
-            for(Evidence evidence : evidences){
-                evidenceBo.delete(evidence);
+            if(gene != null) {
+                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                List<Evidence> evidences =  evidenceBo.findEvidencesByGene(Collections.singleton(gene));
+
+                for(Evidence evidence : evidences){
+                    evidenceBo.delete(evidence);
+                }
+
+                // summary
+                parseSummary(gene, geneInfo.has("summary")? geneInfo.getString("summary").trim() : null);
+
+                // background
+                parseGeneBackground(gene, geneInfo.has("background")? geneInfo.getString("background").trim() : null);
+
+                // mutations
+                parseMutations(gene, geneInfo.has("mutations")? geneInfo.getJSONArray("mutations") : null);
+            }else {
+                System.out.print("No gene name available");
             }
-            
-            // summary
-            parseSummary(gene, geneInfo.has("summary")? geneInfo.getString("summary").trim() : null);
-
-            // background
-            parseGeneBackground(gene, geneInfo.has("background")? geneInfo.getString("background").trim() : null);
-
-            // mutations
-            parseMutations(gene, geneInfo.has("mutations")? geneInfo.getJSONArray("mutations") : null);
-        }else {
-            System.out.print("No gene name available");
         }
     }
     
@@ -150,7 +154,7 @@ public class DriveAnnotationParser {
     private static void parseMutation(Gene gene, JSONObject mutationObj) {
         String mutationStr = mutationObj.getString("name").trim();
         
-        if(mutationStr != null && !mutationStr.isEmpty()) {
+        if(mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
             System.out.println("##  Mutation: "+mutationStr);
 
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -403,7 +407,7 @@ public class DriveAnnotationParser {
                 trial.getAlterations().addAll(alterations);
                 trial.getTumorTypes().add(tumorType);
                 trial.getGenes().add(gene);
-                clinicalTrialBo.saveOrUpdate(trial);
+                clinicalTrialBo.save(trial);
             }
         } catch (Exception e) {
             e.printStackTrace();
