@@ -8,8 +8,44 @@
  * Controller of the oncokb
  */
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder',
-        function ($scope, $rootScope, $location, $timeout, $routeParams, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder) {
+    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
+        function ($scope, $rootScope, $location, $timeout, $routeParams, _, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector) {
+            function saveGene(docs, docIndex){
+              if(docIndex < docs.length) {
+               var fileId = docs[docIndex].id;
+                storage.getRealtimeDocument(fileId).then(function (realtime){
+                  if(realtime && realtime.error) {
+                    console.log('did not get realtime document.');
+                  }else{
+                    console.log(docs[docIndex].title, '\t\t', docIndex);
+                    console.log('\t copying');
+                    var gene = realtime.getModel().getRoot().get('gene');
+                    if(gene) {
+                      var geneData = importer.getData(gene);
+                      DatabaseConnector.updateGene(JSON.stringify(geneData), 
+                        function(result){ 
+                          console.log('\t success', result);
+                          $timeout(function(){
+                            saveGene(docs, ++docIndex);
+                          }, 200, false);
+                        },
+                        function(result){
+                          console.log('\t failed', result);
+                        }
+                      );
+                    }else{
+                      console.log('\t\tNo gene model.');
+                      $timeout(function(){
+                          saveGene(docs, ++docIndex);
+                      }, 200, false);
+                    }
+                  }
+                });
+              }else {
+                console.log('finished.');
+              }
+            }
+
             $scope.getDocs = function() {
               var docs = Documents.get();
               if(docs.length > 0) {
@@ -39,6 +75,15 @@ angular.module('oncokbApp')
 
             $scope.checkError = function() {
               console.log($rootScope.errors);
+            };
+
+            $scope.saveAllGenes = function() {
+//              console.log($scope.documents);
+                saveGene($scope.documents, 0);
+
+//              var sampleGenes = _.slice($scope.documents, 0, 50);
+//              saveGene(sampleGenes, 0);
+//              saveGene(Documents.get({title: 'U2AF1'}), 0);
             };
 
             $scope.userRole = users.getMe().role;
