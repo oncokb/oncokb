@@ -15,3 +15,7 @@ shutdown.sh
 buildAndStartup.sh
 gruntBuildAndCopy.sh
 web/src/main/webapp/app/components$
+web/yo$
+start.sh
+build.sh
+npm-debug.log

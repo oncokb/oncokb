@@ -84,7 +84,7 @@ public final class AlterationUtils {
                         consequence = "any";
                 }
             } else {
-                p = Pattern.compile("([A-Z\\*])([0-9]+)fs.*");
+                p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
                 m = p.matcher(proteinChange);
                 if (m.matches()) {
                     ref = m.group(1);
