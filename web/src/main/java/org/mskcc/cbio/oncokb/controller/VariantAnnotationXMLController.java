@@ -312,6 +312,9 @@ public class VariantAnnotationXMLController {
     
     private void exportSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType, StringBuilder sb) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        
+        queryTumorType = queryTumorType.toLowerCase();
+        
         sb.append("<annotation_summary>");
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
