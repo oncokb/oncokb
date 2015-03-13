@@ -76,7 +76,7 @@ module.exports = function (grunt) {
           open: true,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect.static('<%= oncokb.app %>'),
               connect().use(
                 '<%= oncokb.app %>/components',
                 connect.static('<%= oncokb.app %>/components')
@@ -365,8 +365,8 @@ module.exports = function (grunt) {
           src: ['generated/*']
         }, {
           expand: true,
-          cwd: '.',
-          src: 'app/components/bootstrap-sass-official/assets/fonts/bootstrap/*',
+          cwd: '<%= oncokb.app %>/components/bootstrap-sass-official/assets/fonts/bootstrap/*',
+          src: '*',
           dest: '<%= oncokb.dist %>/fonts'
         }, {
           expand: true,
@@ -378,6 +378,11 @@ module.exports = function (grunt) {
           cwd: '<%= oncokb.app %>/components/datatables/media/images',
           src: '*',
           dest: '<%= oncokb.dist %>/images'
+        }, {
+          expand: true,
+          cwd: '.',
+          src: ['app/components/bootstrap-chosen/chosen-sprite.png','app/components/bootstrap-chosen/chosen-sprite@2x.png'],
+          dest: '<%= oncokb.dist %>'
         }]
       },
       styles: {
@@ -446,7 +451,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', [
-    'build'
+    'test'
   ]);
 
   grunt.registerTask('build', [

@@ -35,7 +35,8 @@
     "lodash": "~3.2.0",
     "please-wait": "~0.0.2",
     "spinkit": "~1.0.1",
-    "angular-ui-sortable": "~0.13.3"
+    "angular-ui-sortable": "~0.13.3",
+    "d3": "~3.5.5"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",

@@ -6,8 +6,8 @@
         <span id="searchRemoveIcon"  ng-click='removeSearchKeywords()' ng-show='keywordsExist()'
             ng-class='{
               "form-control-feedback": true,
-              "glyphicon": true,
-              "glyphicon-remove-circle": true,
+              "fa": true,
+              "fa-times-circle-o": true,
               "upper": keywordsExist()
             }'></span>
         <span id="searchResult" ng-show='showSearchResult()' 
@@ -34,8 +34,8 @@
         </div>
 
         <div class="btn-group btn-group-sm">
-            <button type="button" ng-click='expandAll()' class="btn btn-default glyphicon glyphicon-resize-full" id='expand-nodes-btn' tooltip='Expand all branches'></button>
-            <button type="button" ng-click='collapseAll()' class="btn btn-default glyphicon glyphicon-resize-small" id='collapse-nodes-btn' tooltip='Collapse all branches'></button>
+            <button type="button" ng-click='expandAll()' class="btn btn-default" id='expand-nodes-btn' tooltip='Expand all branches'><i class="fa fa-expand"></i></button>
+            <button type="button" ng-click='collapseAll()' class="btn btn-default" id='collapse-nodes-btn' tooltip='Collapse all branches'><i class="fa fa-compress"></i></button>
         </div>
     </div>
   </div>

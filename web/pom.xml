@@ -200,7 +200,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <skipBuild>true</skipBuild>
+                        <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>

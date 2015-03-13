@@ -14,7 +14,11 @@ angular.module('oncokbApp')
     self.newFolder = '';
     // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
     self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
-    function backup() {
+    function backup(callback) {
+      if(!angular.isFunction(callback)){
+        callback = undefined;
+      }
+
       storage.requireAuth(true).then(function(result){
         if(result && !result.error) {
           storage.createFolder(self.parentFolder).then(function(result){
@@ -23,20 +27,26 @@ angular.module('oncokbApp')
               self.docs = documents.get();
               // self.newFolder = '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8';
               self.newFolder = result.id;
-              copyData(0);
+              copyData(0, callback);
             }else {
               console.error('Create folder failed.');
+              if(callback) {
+                callback();
+              }
             }
           });
         }
       });
     }
 
-    function copyData(index) {
+    function copyData(index, callback) {
       if(index < self.docs.length) {
         var doc = self.docs[index];
         copyFileData(self.newFolder, doc.id, doc.title, index, copyData);
       }else {
+        if(callback) {
+          callback();
+        }
         console.log('finished');
       }
     }
