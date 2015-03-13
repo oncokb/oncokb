@@ -1,0 +1,31 @@
+<span>
+  <i class="fa " ng-class="{'fa-comments-o': !status.hasComment, 'fa-comments': status.hasComment, 'fa-comments-orange': status.hasComment && !status.allResolved, 'fa-comments-green': status.hasComment && status.allResolved}">
+    <commentsBody class="geneComments">
+      <div ng-repeat="comment in comments.asArray()">
+        <div style="width: 100%; float: left; margin: 5px 0;">
+          <div style="width: 45%; float: left;" class="title">
+            <span style="width: 100%; float: left;">{{comment.userName.text}}</span>
+            <span style="width: 100%; float: left;">{{comment.date.text | date:'h:mma MMM dd'}}</span>
+          </div>
+          <div ng-if="fileEditable" style="width: 55%; float: left;">
+            <span class="btn-group btn-group-sm pull-right" role="group">
+              <button class="btn btn-default" ng-click="resolve($index)" ng-disabled="comment.resolved.text === 'true'"><span ng-if="comment.resolved.text === 'false'">Resolve</span><span ng-if="comment.resolved.text === 'true'">Resolved</span></button>
+              <button class="btn btn-default" ng-click="delete($index)">Delete</button>
+            </span>
+          </div>
+          <div style="width: 100%; float: left;" class="content">
+            <span contenteditable="true" ng-model="comment.content.text" file-editable="fileEditable"></span>
+          </div>
+        </div>
+      </div>
+      <div ng-if="fileEditable" class="input-group input-group-sm">
+        <input type="text" class="form-control" ng-model="params.newCommentContent" placeholder="Add comment." />
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-disabled="!(!!params.newCommentContent)" ng-click="add()">
+            <i class="fa fa-plus"></i>
+          </button>
+        </span>
+      </div>
+    </commentsBody>
+  </i>
+</span>

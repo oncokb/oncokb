@@ -25,7 +25,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
 
     // Project settings
-    yeoman: appConfig,
+    oncokb: appConfig,
 
     // Watches files for changes and runs tasks based on the changed files
     watch: {
@@ -34,7 +34,7 @@ module.exports = function (grunt) {
         tasks: ['wiredep']
       },
       js: {
-        files: ['<%= yeoman.app %>/scripts/{,*/}*.js'],
+        files: ['<%= oncokb.app %>/scripts/{,*/}*.js'],
         tasks: ['newer:jshint:all'],
         options: {
           livereload: '<%= connect.options.livereload %>'
@@ -45,7 +45,7 @@ module.exports = function (grunt) {
         tasks: ['newer:jshint:test', 'karma']
       },
       compass: {
-        files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+        files: ['<%= oncokb.app %>/styles/{,*/}*.{scss,sass}'],
         tasks: ['compass:server', 'autoprefixer']
       },
       gruntfile: {
@@ -56,9 +56,9 @@ module.exports = function (grunt) {
           livereload: '<%= connect.options.livereload %>'
         },
         files: [
-          '<%= yeoman.app %>/{,*/}*.html',
+          '<%= oncokb.app %>/{,*/}*.html',
           '.tmp/styles/{,*/}*.css',
-          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+          '<%= oncokb.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       }
     },
@@ -78,8 +78,8 @@ module.exports = function (grunt) {
             return [
               connect.static('.tmp'),
               connect().use(
-                '<%= yeoman.app %>/components',
-                connect.static('<%= yeoman.app %>/components')
+                '<%= oncokb.app %>/components',
+                connect.static('<%= oncokb.app %>/components')
               ),
               connect.static(appConfig.app)
             ];
@@ -94,8 +94,8 @@ module.exports = function (grunt) {
               connect.static('.tmp'),
               connect.static('test'),
               connect().use(
-                '<%= yeoman.app %>/components',
-                connect.static('<%= yeoman.app %>/components')
+                '<%= oncokb.app %>/components',
+                connect.static('<%= oncokb.app %>/components')
               ),
               connect.static(appConfig.app)
             ];
@@ -105,7 +105,7 @@ module.exports = function (grunt) {
       dist: {
         options: {
           open: true,
-          base: '<%= yeoman.dist %>'
+          base: '<%= oncokb.dist %>'
         }
       }
     },
@@ -119,7 +119,7 @@ module.exports = function (grunt) {
       all: {
         src: [
           'Gruntfile.js',
-          '<%= yeoman.app %>/scripts/{,*/}*.js'
+          '<%= oncokb.app %>/scripts/{,*/}*.js'
         ]
       },
       test: {
@@ -137,8 +137,8 @@ module.exports = function (grunt) {
           dot: true,
           src: [
             '.tmp',
-            '<%= yeoman.dist %>/{,*/}*',
-            '!<%= yeoman.dist %>/.git*'
+            '<%= oncokb.dist %>/{,*/}*',
+            '!<%= oncokb.dist %>/.git*'
           ]
         }]
       },
@@ -164,12 +164,11 @@ module.exports = function (grunt) {
     wiredep: {
       app: {
         src: [
-          '<%= yeoman.app %>/index.html',
-          '<%= yeoman.app %>/home.html'],
+          '<%= oncokb.app %>/index.html'],
         ignorePath:  /\.\.\//
       },
       sass: {
-        src: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+        src: ['<%= oncokb.app %>/styles/{,*/}*.{scss,sass}'],
         ignorePath: /(\.\.\/){1,2}app\/components\//
       }
     },
@@ -177,13 +176,13 @@ module.exports = function (grunt) {
     // Compiles Sass to CSS and generates necessary files if requested
     compass: {
       options: {
-        sassDir: '<%= yeoman.app %>/styles',
+        sassDir: '<%= oncokb.app %>/styles',
         cssDir: '.tmp/styles',
         generatedImagesDir: '.tmp/images/generated',
-        imagesDir: '<%= yeoman.app %>/images',
-        javascriptsDir: '<%= yeoman.app %>/scripts',
-        fontsDir: '<%= yeoman.app %>/styles/fonts',
-        importPath: '<%= yeoman.app %>/components',
+        imagesDir: '<%= oncokb.app %>/images',
+        javascriptsDir: '<%= oncokb.app %>/scripts',
+        fontsDir: '<%= oncokb.app %>/styles/fonts',
+        importPath: '<%= oncokb.app %>/components',
         httpImagesPath: '/images',
         httpGeneratedImagesPath: '/images/generated',
         httpFontsPath: '/styles/fonts',
@@ -193,7 +192,7 @@ module.exports = function (grunt) {
       },
       dist: {
         options: {
-          generatedImagesDir: '<%= yeoman.dist %>/images/generated'
+          generatedImagesDir: '<%= oncokb.dist %>/images/generated'
         }
       },
       server: {
@@ -207,10 +206,10 @@ module.exports = function (grunt) {
     filerev: {
       dist: {
         src: [
-          '<%= yeoman.dist %>/scripts/{,*/}*.js',
-          '<%= yeoman.dist %>/styles/{,*/}*.css',
-          '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-          '<%= yeoman.dist %>/styles/fonts/*'
+          '<%= oncokb.dist %>/scripts/{,*/}*.js',
+          '<%= oncokb.dist %>/styles/{,*/}*.css',
+          '<%= oncokb.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
+          '<%= oncokb.dist %>/styles/fonts/*'
         ]
       }
     },
@@ -219,9 +218,9 @@ module.exports = function (grunt) {
     // concat, minify and revision files. Creates configurations in memory so
     // additional tasks can operate on them
     useminPrepare: {
-      html: '<%= yeoman.app %>/index.html',
+      html: '<%= oncokb.app %>/index.html',
       options: {
-        dest: '<%= yeoman.dist %>',
+        dest: '<%= oncokb.dist %>',
         flow: {
           html: {
             steps: {
@@ -236,10 +235,10 @@ module.exports = function (grunt) {
 
     // Performs rewrites based on filerev and the useminPrepare configuration
     usemin: {
-      html: ['<%= yeoman.dist %>/{,*/}*.html'],
-      css: ['<%= yeoman.dist %>/styles/{,*/}*.css'],
+      html: ['<%= oncokb.dist %>/{,*/}*.html'],
+      css: ['<%= oncokb.dist %>/styles/{,*/}*.css'],
       options: {
-        assetsDirs: ['<%= yeoman.dist %>','<%= yeoman.dist %>/images']
+        assetsDirs: ['<%= oncokb.app %>','<%= oncokb.app %>/images']
       }
     },
 
@@ -248,37 +247,49 @@ module.exports = function (grunt) {
     // minification. These next options are pre-configured if you do not wish
     // to use the Usemin blocks.
     cssmin: {
-      dist: {
-        files: {
-          '<%= yeoman.dist %>/styles/main.css': [
-            '.tmp/styles/{,*/}*.css'
-          ]
-        }
-      }
+      // dist: {
+      //   files: {
+      //     '<%= oncokb.dist %>/styles/main.css': [
+      //       '.tmp/styles/{,*/}*.css'
+      //     ]
+      //   }
+      // }
     },
     uglify: {
-      dist: {
-        files: {
-          '<%= yeoman.dist %>/scripts/scripts.js': [
-            '<%= yeoman.dist %>/scripts/scripts.js'
-          ]
-        }
-      }
+      // dist: {
+      //   files: {
+      //     '<%= oncokb.dist %>/scripts/scripts.js': [
+      //       '<%= oncokb.app %>/scripts/**/**.js'
+      //     ]
+      //   }
+      // }
+      // js: {
+      //   src: ['<%= oncokb.app %>/scripts/**/**.js'],
+      //   dest: '<%= oncokb.dist %>/scripts/scripts.js'
+      // }
+      // my_target: {
+      //   files: [{
+      //       expand: true,
+      //       cwd: '<%= oncokb.app %>/scripts',
+      //       src: '**/*.js',
+      //       dest: '<%= oncokb.dist %>/scripts'
+      //   }]
+      // }
     },
     concat: {
-      dist: {
-        src: ['<%= yeoman.dist %>/scripts/controllers/tree.js', '<%= yeoman.dist %>/scripts/controllers/variant.js'],
-        dest: 'dist/controllers.js'
-      }
+      // dist: {
+      //   src: ['<%= oncokb.dist %>/scripts/**/**.js'],
+      //   dest: 'dist/controllers.js'
+      // }
     },
 
     imagemin: {
       dist: {
         files: [{
           expand: true,
-          cwd: '<%= yeoman.app %>/images',
+          cwd: '<%= oncokb.app %>/images',
           src: '{,*/}*.{png,jpg,jpeg,gif}',
-          dest: '<%= yeoman.dist %>/images'
+          dest: '<%= oncokb.dist %>/images'
         }]
       }
     },
@@ -287,9 +298,9 @@ module.exports = function (grunt) {
       dist: {
         files: [{
           expand: true,
-          cwd: '<%= yeoman.app %>/images',
+          cwd: '<%= oncokb.app %>/images',
           src: '{,*/}*.svg',
-          dest: '<%= yeoman.dist %>/images'
+          dest: '<%= oncokb.dist %>/images'
         }]
       }
     },
@@ -305,9 +316,9 @@ module.exports = function (grunt) {
         },
         files: [{
           expand: true,
-          cwd: '<%= yeoman.dist %>',
+          cwd: '<%= oncokb.dist %>',
           src: ['*.html', 'views/{,*/}*.html'],
-          dest: '<%= yeoman.dist %>'
+          dest: '<%= oncokb.dist %>'
         }]
       }
     },
@@ -328,7 +339,7 @@ module.exports = function (grunt) {
     // Replace Google CDN references
     cdnify: {
       dist: {
-        html: ['<%= yeoman.dist %>/*.html']
+        html: ['<%= oncokb.dist %>/*.html']
       }
     },
 
@@ -338,8 +349,8 @@ module.exports = function (grunt) {
         files: [{
           expand: true,
           dot: true,
-          cwd: '<%= yeoman.app %>',
-          dest: '<%= yeoman.dist %>',
+          cwd: '<%= oncokb.app %>',
+          dest: '<%= oncokb.dist %>',
           src: [
             '*.{ico,png,txt}',
             '.htaccess',
@@ -351,18 +362,18 @@ module.exports = function (grunt) {
         }, {
           expand: true,
           cwd: '.tmp/images',
-          dest: '<%= yeoman.dist %>/images',
+          dest: '<%= oncokb.dist %>/images',
           src: ['generated/*']
         }, {
           expand: true,
           cwd: '.',
           src: 'app/components/bootstrap-sass-official/assets/fonts/bootstrap/*',
-          dest: '<%= yeoman.dist %>'
+          dest: '<%= oncokb.dist %>'
         }]
       },
       styles: {
         expand: true,
-        cwd: '<%= yeoman.app %>/styles',
+        cwd: '<%= oncokb.app %>/styles',
         dest: '.tmp/styles/',
         src: '{,*/}*.css'
       }
@@ -398,7 +409,7 @@ module.exports = function (grunt) {
               match: ['/*.js', '/*.css']
           },
           files: {
-              src: ['<%= yeoman.app %>/index.html']
+              src: ['<%= oncokb.app %>/index.html']
           }
       }
     }
@@ -426,23 +437,19 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', [
-    'clean:server',
-    'concurrent:test',
-    'autoprefixer',
-    'connect:test',
-    'karma'
+    'build'
   ]);
 
   grunt.registerTask('build', [
     'clean:dist',
     'wiredep',
-    'useminPrepare',
+    'useminPrepare:html',
     'concurrent:dist',
     'autoprefixer',
     'concat',
     'ngAnnotate',
     'copy:dist',
-    'cdnify',
+    // 'cdnify',
     'cssmin',
     'uglify',
     'filerev',

@@ -1,0 +1,529 @@
+$icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/";
+// bower:scss
+@import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+@import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
+@import "../components/bootstrap-chosen/bootstrap-chosen.scss";
+// endbower
+body {
+  margin-bottom: 20px;
+}
+@media only screen and (min-width: 768px) {
+  .fixedNavbar .container{
+    padding: 0 0 0 15px;
+  }
+}
+@media only screen and (max-width: 768px) {
+  .fixedNavbar .container{
+    padding: 0 15px;
+  }
+}
+#chart, #header, #footer {
+  position: absolute;
+  top: 0;
+}
+
+#header, #footer {
+  z-index: 1;
+  display: block;
+  font-size: 20px;
+  font-weight: 300;
+  text-shadow: 0 1px 0 #fff;
+}
+
+#header.inverted, #footer.inverted {
+  color: #fff;
+  text-shadow: 0 1px 4px #000;
+}
+
+#header {
+  top: 80px;
+  left: 140px;
+  width: 1000px;
+}
+
+#footer {
+  top: 680px;
+  right: 140px;
+  text-align: right;
+}
+
+#top-link-block.affix-top {
+    position: absolute; /* allows it to "slide" up into view */
+    bottom: -82px; /* negative of the offset - height of link element */
+    left: 10px; /* padding from the left side of the window */
+}
+#top-link-block.affix {
+    position: fixed; /* keeps it on the bottom once in view */
+    bottom: 18px; /* height of link element */
+    left: 10px; /* padding from the left side of the window */
+}
+
+#searchRemoveIcon:hover{
+    cursor: pointer;
+}
+
+#signout {
+    float: right;
+}
+#signout:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+//Google login button
+#signInButton {
+  margin-top: 7px !important;
+}
+
+#googleSignIn {
+  margin-top: 5px;
+}
+
+#googleSignIn button {
+  background-color: #2986e2;
+  border-color: #2986e2;
+  opacity: 1;
+  color: white;
+}
+
+table.colorFirstCol td:nth-child(1) {
+    background-color: lightgray;
+}
+table.colorHeader thead tr{
+    background-color: lightgray;
+}
+[contenteditable=true]:empty:before{
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+  color: grey;
+  margin-left: 5px;
+}
+
+/* */
+
+div[contenteditable=true] {
+  border: 1px dashed #AAA;
+  width: 290px;
+  padding: 5px;
+}
+.variantDisplayResult {
+  margin: 10px 0;
+}
+
+.variantDisplayResult table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+.variantDisplayResult .icon {
+    width: 12px;
+}
+.variantDisplayResult .icon.iconCollapse{
+    display: none;
+}
+.variantDisplayResult .icon.iconExpand{
+    display: inline-block;
+}
+.editableBox {
+  background-color: #F1F9FF;
+}
+.unEditableBox {
+  background-color: transparent;
+}
+input.editableBox {
+  border: 0;
+  width:80%;
+}
+p.editableBox {
+  min-height: 20px;
+}
+p.editableBox.doubleH {
+  min-height: 40px;
+}
+.curateTrialItem {
+  float: left;
+  height: 30px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.genesLoading {
+  position: absolute;
+  top: 20%;
+  left: calc(50% - 150px);
+}
+.geneComments {
+  position: absolute;
+  width: 300px;
+  border: 1px solid lightgrey;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px;
+  background-color: white;
+  display: none;
+  z-index: 999;
+  color: black;
+}
+.approvedIndication,.mutationEffect {
+  width: 100%;
+}
+.approvedIndication .header,.mutationEffect .header{
+  float: left;
+}
+.approvedIndication .header {
+  width: 175px;
+}
+.mutationEffect .header {
+  width: 140px;
+}
+.approvedIndication .content,.mutationEffect .content{
+  float: left;
+}
+.approvedIndication .content {
+  width: calc(100% - 175px);
+}
+.mutationEffect .content{
+  width: calc(100% - 140px);
+}
+.mutationEffect .content span{
+  width: 100%;
+  float: left;
+}
+.mutationEffect .content span input[type="text"]{
+  float: right;
+  width: calc(100% - 110px);
+}
+.mutationEffectDiv {
+  border: 1px solid #ddd;
+  margin: 5px 0;
+  padding: 10px 10px 0 10px;
+  border-radius: 5px;
+}
+.mutationEffectDivHeader {
+  font-weight: bold;
+  width: 140px;
+  margin-top: -20px;
+  background: white;
+  color: grey;
+  margin-bottom: 10px;
+}
+.floatToolBox {
+  position: fixed;
+  bottom: 16px;
+  left: 10px;
+  background-color: white;
+  z-index: 999;
+}
+.tooltip-inner {
+  max-width: 400px;
+  padding: 3px 8px;
+  color: black;
+  text-align: left;
+  text-decoration: none;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid grey;
+  opacity: 1;
+  background: white;
+}
+.geneLastModify {
+  font-style: italic;
+  font-size: 12px;
+  color: grey;
+}
+.geneMainDiv {
+  margin-bottom: 40px;
+}
+.tumorButtonsGroup {
+  margin: 5px 5px 5px 0;
+}
+.tumorButtonsGroup button span {
+  font-weight: bold;
+}
+.geneComments .title{
+  font-weight: 400;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.geneComments .content{
+  font-weight: 600;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.curationNoEntry {
+  font-size: 11px;
+  font-style: italic;
+  color: orange;
+  font-weight: bold;
+  margin: 0 5px;
+}
+.fixedNavbar {
+  position: fixed;
+  width: 100%;
+  z-index: 999;
+  box-shadow: 0 0 4px rgba(0,0,0,.3);
+}
+.dashedHeader th:not(:first-child){
+  border-left: 1px dashed lightgrey;
+}
+.oncokbMainView {
+  box-shadow: 0 0 4px rgba(0,0,0,.3);
+  padding-top: 70px;
+  min-height: 400px;
+}
+.ieWarning {
+  width: 100%;
+  background-color: red;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+}
+table.dataTable thead .sorting_asc {
+  background: none;
+}
+table.dataTable thead .sorting_desc {
+  background: none;
+}
+i.fa-comments, i.fa-comments-o{
+  font-size: 15px;
+}
+i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover {
+  cursor: pointer;
+}
+.fa-comments-white {
+  color: inherit;
+}
+.fa-comments-orange {
+  color: orange;
+}
+.fa-comments-green {
+  color: #70b500;
+}
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+pre {
+  font-size: 18px;
+}
+
+line {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+path.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.container {
+  // margin-left: 50px;
+  // margin-top: 20px;
+}
+
+.node circle {
+  cursor: pointer;
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.string, .regexp {
+  color: #f39;
+}
+
+.keyword {
+  color: #00c;
+}
+
+.comment {
+  color: #777;
+  font-style: oblique;
+}
+
+.number {
+  color: #369;
+}
+
+.class, .special {
+  color: #1181B8;
+}
+
+a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+a.withUnderScore {
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #666;
+}
+
+._hidden {
+  display: none;
+}
+
+.hint {
+  position: absolute;
+  right: 0;
+  width: 1280px;
+  font-size: 12px;
+  color: #999;
+}
+
+.has-addon-feedback .form-control-feedback {
+    position: absolute;
+    top: 1px;
+    right: 70px;
+    width: 34px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    color: grey;
+    pointer-events: auto;
+}
+
+.has-addon-feedback .form-control-feedback.result {
+    right: 100px;
+    width: 80px;
+    text-align: right;
+}
+.has-addon-feedback .form-control-feedback.upper {
+    z-index: 2;
+}
+.has-addon-feedback .form-control-feedback.lower {
+    z-index: 1;
+}
+.annotationClinicalTrial {
+  margin-bottom: 10px;
+}
+.resistance-title {
+    color: red;
+}
+h5 {
+    margin-bottom: 0;
+}
+
+//Change sk-spinner style
+.sk-spinner-wave.mskcc div {
+  background-color: #2986e2
+}
+.sk-spinner-wave.white div {
+  background-color: #fff
+}
+.sk-spinner-wave.margin div {
+  margin: 0 2px;
+}
+
+//Change bootstrap-chosen style
+.chosen-container-single .chosen-single {
+  height: 30px;
+  line-height: 30px;
+  width: 100%;
+}
+
+//Change bootstrap default color
+
+.table-bordered, .table-bordered > thead > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > tfoot > tr > td{
+  border: 1px solid black;
+}
+
+
+
+//Make sure the chosen dropdown always 100% no matter how the bower size changes
+#tumorTypesDropDown_chosen
+,#variantMutationDropDown_chosen
+,#variantGeneNameDropDown_chosen
+,#curateTumorTypesDropdown_chosen {
+  width: 100% !important;
+}
+#CurationNCCNDropDown_chosen {
+  width: 80% !important;
+}
+
+.m-b-5 {
+  margin-bottom: 5px;
+}
+
+.half {
+  width: 50%;
+}
+.oneThird {
+  width: 33.33333%
+}
+.oneFifth {
+  width: 20%
+}
+.twoFifth {
+  width: 40%
+}
+.threeFifth {
+  width: 60%
+}
+.fullWidth {
+  width: 100%;
+}
+.alignCenter {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.logo {
+  width: 100%;
+  height:50px;
+  position:relative;
+  display:inline-block;
+  overflow:hidden;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.logo > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-height: 50px;
+}
+.greyB {
+  background-color: lightgray;
+  font-weight: bold;
+}
+#variantCriteria>div {
+  margin-bottom: 5px;
+}
+#questHeaderSwither {
+  width: 100%;
+  margin-bottom: 10px;
+  height: 20px;
+}
+#questHeaderSwither button {
+  padding: 1px 10px;
+  border: 0;
+  float: right;
+}
+#questHeaderSwither div.fa {
+  margin-left: 5px;
+}
+#rg-rfr-btn {
+    margin-left: 5px;
+}
+
+.qtip hr {
+    margin: 5px 0;
+}
+
+/*** custom checkboxes ***/
+input[type=radio], input[type=checkbox] { display:none; } /* to hide the checkbox itself */
+input[type=radio] + label:before, input[type=checkbox] + label:before {
+  font-family: FontAwesome;
+  display: inline-block;
+  margin: 0 0 0 3px;
+}
+input[type=radio] + label:hover, input[type=checkbox] + label:hover {
+  cursor: pointer;
+}
+input[type=radio] + label:before, input[type=checkbox] + label:before { content: "\f096"; letter-spacing: 5px;} /* unchecked icon */
+
+input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:before { content: "\f046"; letter-spacing: 5px;} /* checked icon */

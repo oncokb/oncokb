@@ -17,20 +17,21 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter{
 	@Bean
 	public ViewResolver getViewResolver(){
 		InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-		resolver.setPrefix("/app/");
+		resolver.setPrefix("/");
 		resolver.setSuffix(".html");
 		return resolver;
 	}
 	
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/**").addResourceLocations("/");
 		registry.addResourceHandler("/app/**").addResourceLocations("/app/");
 		registry.addResourceHandler("/components/**").addResourceLocations("/app/components/");
-		registry.addResourceHandler("/images/**").addResourceLocations("/app/images/");
-		registry.addResourceHandler("/scripts/**").addResourceLocations("/app/scripts/");
-		registry.addResourceHandler("/styles/**").addResourceLocations("/app/styles/");
-		registry.addResourceHandler("/views/**").addResourceLocations("/app/views/");
-		registry.addResourceHandler("/data/**").addResourceLocations("/app/data/");
+		registry.addResourceHandler("/images/**").addResourceLocations("/images/");
+		registry.addResourceHandler("/scripts/**").addResourceLocations("/scripts/");
+		registry.addResourceHandler("/styles/**").addResourceLocations("/styles/");
+		registry.addResourceHandler("/views/**").addResourceLocations("/views/");
+		registry.addResourceHandler("/data/**").addResourceLocations("/data/");
 	}
 
 	

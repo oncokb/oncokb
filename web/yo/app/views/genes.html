@@ -1,0 +1,39 @@
+<div>
+    <span class="btn-group btn-group-sm pull-right" role="group">
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="givePermission()">give files permission</button>
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="giveFolderPermission()">give folder permission</button>
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="create()">Create Doc</button>
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="backup()">Backup</button>
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="saveAllGenes()">Save All Genes</button>
+        <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkError()">Check errors</button>
+    </span>
+    <div ng-show="loaded">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+            <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th>Edit</th></tr></thead>
+            <tbody>
+                <tr data-ng-repeat="gene in documents">
+                    <!-- <td>{{$index + 1}}</td> -->
+                    <td><strong><a ng-href="#/gene/{{gene.title}}">{{gene.title}}</a></strong></td>
+                    <td>{{gene.phase}}</a></td>
+                    <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
+                    <td><div ng-repeat="curator in gene.curators"><span>{{curator.mskccEmail}}</span><br ng-if="$index<curator.length-1"/></div></td>
+                    <td>{{gene.modifiedDate | date : 'MMM d, h:mm a'}}</a></td>
+                    <td>
+                        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">1</span></i>
+                        <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">0</span></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div ng-hide="loaded" class="genesLoading">
+        <div class='sk-spinner sk-spinner-wave mskcc'>
+            <div class='sk-rect1'></div>
+            <div class='sk-rect2'></div>
+            <div class='sk-rect3'></div>
+            <div class='sk-rect4'></div>
+            <div class='sk-rect5'></div>
+        </div>
+        Please wait, we are loading genes information.
+    </div>
+</div>

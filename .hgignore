@@ -15,7 +15,11 @@ shutdown.sh
 buildAndStartup.sh
 gruntBuildAndCopy.sh
 web/src/main/webapp/app/components$
-web/yo$
-start.sh
-build.sh
+web/yo/.tmp$
+web/yo/dist$
+web/yo/.sass-cache$
+web/yo/app/components$
+web/yo/node_modules$
 npm-debug.log
+build.sh
+start.sh
