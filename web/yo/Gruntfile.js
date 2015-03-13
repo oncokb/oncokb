@@ -208,7 +208,6 @@ module.exports = function (grunt) {
         src: [
           '<%= oncokb.dist %>/scripts/{,*/}*.js',
           '<%= oncokb.dist %>/styles/{,*/}*.css',
-          '<%= oncokb.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
           '<%= oncokb.dist %>/styles/fonts/*'
         ]
       }
@@ -238,7 +237,7 @@ module.exports = function (grunt) {
       html: ['<%= oncokb.dist %>/{,*/}*.html'],
       css: ['<%= oncokb.dist %>/styles/{,*/}*.css'],
       options: {
-        assetsDirs: ['<%= oncokb.app %>','<%= oncokb.app %>/images']
+        assetsDirs: ['<%= oncokb.dist %>','<%= oncokb.dist %>/images']
       }
     },
 
@@ -368,7 +367,17 @@ module.exports = function (grunt) {
           expand: true,
           cwd: '.',
           src: 'app/components/bootstrap-sass-official/assets/fonts/bootstrap/*',
-          dest: '<%= oncokb.dist %>'
+          dest: '<%= oncokb.dist %>/fonts'
+        }, {
+          expand: true,
+          cwd: '<%= oncokb.app %>/components/fontawesome/fonts',
+          src: ['*'],
+          dest: '<%= oncokb.dist %>/fonts'
+        }, {
+          expand: true,
+          cwd: '<%= oncokb.app %>/components/datatables/media/images',
+          src: '*',
+          dest: '<%= oncokb.dist %>/images'
         }]
       },
       styles: {
@@ -454,8 +463,8 @@ module.exports = function (grunt) {
     'uglify',
     'filerev',
     'usemin',
-    'htmlmin',
-    'cachebreaker:dev'
+    // 'htmlmin',
+    // 'cachebreaker:dev'
   ]);
 
   grunt.registerTask('default', [

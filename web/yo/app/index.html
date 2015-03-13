@@ -8,26 +8,33 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css styles/vendor.css -->
     <!-- bower:css -->
-    <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.css?rel=1426195693227" />
-    <link rel="stylesheet" href="components/angular-dialog-service/dist/dialogs.min.css?rel=1426195693227" />
-    <link rel="stylesheet" href="components/fontawesome/css/font-awesome.css?rel=1426195693227" />
-    <link rel="stylesheet" href="components/datatables/media/css/jquery.dataTables.css?rel=1426195693227" />
-    <link rel="stylesheet" href="components/please-wait/build/please-wait.css?rel=1426195693227" />
-    <link rel="stylesheet" href="components/spinkit/css/spinkit.css?rel=1426195693227" />
+    <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="components/angular-dialog-service/dist/dialogs.min.css" />
+    <link rel="stylesheet" href="components/fontawesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="components/datatables/media/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="components/please-wait/build/please-wait.css" />
+    <link rel="stylesheet" href="components/spinkit/css/spinkit.css" />
     <!-- endbower -->
 
-    <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css?rel=1426195693227">
-    <link rel="stylesheet" href="components/_components/jquery.qtip.min.css?rel=1426195693227">
+    <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css">
+    <link rel="stylesheet" href="_components/jquery.qtip.min.css">
 
-    <link rel="stylesheet" href="styles/main.css?rel=1426195693227">
+    <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
+
 </head>
 <body>
-    <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-      <![endif]-->
+    <!-- build:js scripts/pleaseWait.js -->
+    <script src="components/please-wait/build/please-wait.js"></script>
+    <!-- endbuild -->
 
-      <!-- Add your site or application content here -->
+    <script type="text/javascript">
+      window.loadingScreen = window.pleaseWait({
+        logo: "images/mskcc_full.png",
+        backgroundColor: '#2986e2',
+        loadingHtml: "<div class='sk-spinner sk-spinner-wave white margin'><div class='sk-rect1'></div><div class='sk-rect2'></div><div class='sk-rect3'></div><div class='sk-rect4'></div><div class='sk-rect5'></div></div>"
+    });
+    </script>
     <div id="displayTabs">
         <nav class="navbar navbar-default fixedNavbar" role="navigation" ng-controller="NavCtrl" ng-init="init()">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -80,147 +87,97 @@
         <ie-warning></ie-warning>
         <div ng-view="" class="container oncokbMainView"></div>
     </div>
-      <!-- <div class="header">
-        
-        <form class="navbar-form navbar-left" role="search">
-          <div class="form-group">
-            <input type="text" class="form-control" placeholder="Search">
-          </div>
-          <button type="submit" class="btn btn-default">Submit</button>
-        </form>
-        <ul class="nav nav-tabs" role="tablist">
-            <li id="tab-1" ng-class="{active:tabIsActive(['/tree', '/'])}"><a ng-href="#/tree">Home</a></li>
-            <li id="tab-2" ng-class="{active:tabIsActive('/variant')}"}><a ng-href="#/variant">Variants Annotation</a></li>
-            <li id="tab-3" ng-class="{active:tabIsActive('/reportGenerator')}"}><a ng-href="#/reportGenerator">Generate Reports</a></li>
-        </ul>
-      </div>
-      <span id="top-link-block" class="hidden">
-        <a href="#top" class="well well-sm"  onclick="$('html,body').animate({scrollTop:0, scrollLeft: 0},'slow');return false;">
-            <i class="glyphicon glyphicon-chevron-up"></i> Back to Top
-        </a>
-      </span>
-  </div> -->
 
-
-    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID
-     <script>
-       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-       })(window,document,'script','//www.google-analytics.com/analytics.js?rel=1426195693227','ga');
-
-       ga('create', 'UA-XXXXX-X');
-       ga('send', 'pageview');
-   </script> -->
-   <!-- build:js(.) scripts/oldieshim.js -->
-    <!--[if lt IE 9]>
-    <script src="bower_components/es5-shim/es5-shim.js?rel=1426195693227"></script>
-    <script src="bower_components/json3/lib/json3.js?rel=1426195693227"></script>
-    <![endif]-->
-    <!-- endbuild -->
-
-    <!-- build:js scripts/vendor.js -->
-    <script src="components/please-wait/build/please-wait.js?rel=1426195693227"></script>
-    <script type="text/javascript">
-      window.loadingScreen = window.pleaseWait({
-        logo: "images/mskcc_full.png",
-        backgroundColor: '#2986e2',
-        loadingHtml: "<div class='sk-spinner sk-spinner-wave white margin'><div class='sk-rect1'></div><div class='sk-rect2'></div><div class='sk-rect3'></div><div class='sk-rect4'></div><div class='sk-rect5'></div></div>"
-    });
-    </script>
-
+    <!-- build:js scripts/oncokbOne.js -->
     <!-- bower:js -->
-    <script src="components/es5-shim/es5-shim.js?rel=1426195693227"></script>
-    <script src="components/jquery/dist/jquery.js?rel=1426195693227"></script>
-    <script src="components/angular/angular.js?rel=1426195693227"></script>
-    <script src="components/json3/lib/json3.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/affix.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/alert.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/button.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/carousel.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/collapse.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/tab.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/transition.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/scrollspy.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js?rel=1426195693227"></script>
-    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/popover.js?rel=1426195693227"></script>
-    <script src="components/angular-resource/angular-resource.js?rel=1426195693227"></script>
-    <script src="components/angular-cookies/angular-cookies.js?rel=1426195693227"></script>
-    <script src="components/angular-sanitize/angular-sanitize.js?rel=1426195693227"></script>
-    <script src="components/angular-animate/angular-animate.js?rel=1426195693227"></script>
-    <script src="components/angular-touch/angular-touch.js?rel=1426195693227"></script>
-    <script src="components/angular-route/angular-route.js?rel=1426195693227"></script>
-    <script src="components/angular-bootstrap/ui-bootstrap-tpls.js?rel=1426195693227"></script>
-    <script src="components/angular-chosen/angular-chosen.js?rel=1426195693227"></script>
-    <script src="components/angular-chosen-localytics/chosen.js?rel=1426195693227"></script>
-    <script src="components/bootstrap/dist/js/bootstrap.js?rel=1426195693227"></script>
-    <script src="components/angular-translate/angular-translate.js?rel=1426195693227"></script>
-    <script src="components/angular-dialog-service/dist/dialogs.min.js?rel=1426195693227"></script>
-    <script src="components/angular-dialog-service/dist/dialogs-default-translations.min.js?rel=1426195693227"></script>
-    <script src="components/angular-recursion/angular-recursion.js?rel=1426195693227"></script>
-    <script src="components/angular-file-upload/angular-file-upload.js?rel=1426195693227"></script>
-    <script src="components/jszip/dist/jszip.js?rel=1426195693227"></script>
-    <script src="components/js-xlsx/dist/xlsx.js?rel=1426195693227"></script>
-    <script src="components/stringjs/lib/string.min.js?rel=1426195693227"></script>
-    <script src="components/levenshtein/lib/levenshtein.js?rel=1426195693227"></script>
-    <script src="components/oridomi/oridomi.js?rel=1426195693227"></script>
-    <script src="components/x2js/xml2json.min.js?rel=1426195693227"></script>
-    <script src="components/angular-xml/angular-xml.js?rel=1426195693227"></script>
-    <script src="components/jspdf/dist/jspdf.min.js?rel=1426195693227"></script>
-    <script src="components/angular-contenteditable/angular-contenteditable.js?rel=1426195693227"></script>
-    <script src="components/underscore/underscore.js?rel=1426195693227"></script>
-    <script src="components/datatables/media/js/jquery.dataTables.js?rel=1426195693227"></script>
-    <script src="components/angular-datatables/dist/angular-datatables.js?rel=1426195693227"></script>
-    <script src="components/lodash/lodash.js?rel=1426195693227"></script>
-    <script src="components/please-wait/build/please-wait.js?rel=1426195693227"></script>
-    <script src="components/jquery-ui/jquery-ui.js?rel=1426195693227"></script>
-    <script src="components/angular-ui-sortable/sortable.js?rel=1426195693227"></script>
+    <script src="components/es5-shim/es5-shim.js"></script>
+    <script src="components/jquery/dist/jquery.js"></script>
+    <script src="components/angular/angular.js"></script>
+    <script src="components/json3/lib/json3.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/affix.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/alert.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/button.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/carousel.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/collapse.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/tab.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/transition.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/scrollspy.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/popover.js"></script>
+    <script src="components/angular-resource/angular-resource.js"></script>
+    <script src="components/angular-cookies/angular-cookies.js"></script>
+    <script src="components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="components/angular-animate/angular-animate.js"></script>
+    <script src="components/angular-touch/angular-touch.js"></script>
+    <script src="components/angular-route/angular-route.js"></script>
+    <script src="components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="components/angular-chosen/angular-chosen.js"></script>
+    <script src="components/angular-chosen-localytics/chosen.js"></script>
+    <script src="components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="components/angular-translate/angular-translate.js"></script>
+    <script src="components/angular-dialog-service/dist/dialogs.min.js"></script>
+    <script src="components/angular-dialog-service/dist/dialogs-default-translations.min.js"></script>
+    <script src="components/angular-recursion/angular-recursion.js"></script>
+    <script src="components/angular-file-upload/angular-file-upload.js"></script>
+    <script src="components/jszip/dist/jszip.js"></script>
+    <script src="components/js-xlsx/dist/xlsx.js"></script>
+    <script src="components/stringjs/lib/string.min.js"></script>
+    <script src="components/levenshtein/lib/levenshtein.js"></script>
+    <script src="components/oridomi/oridomi.js"></script>
+    <script src="components/x2js/xml2json.min.js"></script>
+    <script src="components/angular-xml/angular-xml.js"></script>
+    <script src="components/jspdf/dist/jspdf.min.js"></script>
+    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
+    <script src="components/underscore/underscore-min.js"></script>
+    <script src="components/datatables/media/js/jquery.dataTables.min.js"></script>
+    <script src="components/angular-datatables/dist/angular-datatables.js"></script>
+    <script src="components/lodash/lodash.js"></script>
+    <script src="components/jquery-ui/jquery-ui.js"></script>
+    <script src="components/angular-ui-sortable/sortable.js"></script>
     <!-- endbower -->
-
-    
-
-    <script src="components/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js?rel=1426195693227"></script>
-    <script src="components/d3/d3.min.js?rel=1426195693227"></script>
-    <script src="components/chosen/chosen.jquery.js?rel=1426195693227"></script>
-    <script src="components/_components/jquery.qtip.min.js?rel=1426195693227"></script>
-    <script src="//apis.google.com/js/api.js?rel=1426195693227"></script>
-    <script src="https://apis.google.com/js/client:platform.js?rel=1426195693227"></script>
-    
-    <!-- <script src="https://apis.google.com/js/platform.js?rel=1426195693227"></script>
-    <script src="scripts/realtime-client-utils.js?rel=1426195693227"></script> -->
-
-    <script src="scripts/directives/Tree.js?rel=1426195693227"></script>
-    <script src="scripts/app.js?rel=1426195693227"></script>
-    <script src="scripts/factories/TreeFactory.js?rel=1426195693227"></script>
-    <script src="scripts/factories/VariantFactory.js?rel=1426195693227"></script>
-    <script src="scripts/controllers/TreeCtrl.js?rel=1426195693227"></script>
-    <script src="scripts/controllers/VariantCtrl.js?rel=1426195693227"></script>
-    <script src="scripts/controllers/emailDialogCtrl.js?rel=1426195693227"></script>
-    <script src="scripts/filters/Filter.js?rel=1426195693227"></script>
-    <script src="scripts/directives/regularview.js?rel=1426195693227"></script>
-    <script src="scripts/directives/reportview.js?rel=1426195693227"></script>
-    <script src="scripts/directives/reportinfo.js?rel=1426195693227"></script>
-    <script src="scripts/directives/reportviewrecursioncell.js?rel=1426195693227"></script>
-    <script src="scripts/controllers/reportgenerator.js?rel=1426195693227"></script>
-    <script src="scripts/services/generatereportdataservice.js?rel=1426195693227"></script>
-    <script src="scripts/services/databaseconnector.js?rel=1426195693227"></script>
-    <script src="scripts/services/deepmerge.js?rel=1426195693227"></script>
-    <script src="scripts/services/findregex.js?rel=1426195693227"></script>
-    <script src="scripts/controllers/gene.js?rel=1426195693227"></script>
-    <script src="scripts/services/storage.js?rel=1426195693227"></script>
-    <script src="scripts/controllers/nav.js?rel=1426195693227"></script>
-    <script src="scripts/services/users.js?rel=1426195693227"></script>
-    <script src="scripts/services/documents.js?rel=1426195693227"></script>
-    <script src="scripts/services/loadfile.js?rel=1426195693227"></script>
-    <script src="scripts/services/access.js?rel=1426195693227"></script>
-    <script src="scripts/directives/comments.js?rel=1426195693227"></script>
-    <script src="scripts/directives/typeaheadfocus.js?rel=1426195693227"></script>
-    <script src="scripts/services/importer.js?rel=1426195693227"></script>
-    <script src="scripts/services/driveoncokbinfo.js?rel=1426195693227"></script>
-    <script src="scripts/services/browser.js?rel=1426195693227"></script>
-    <script src="scripts/directives/iewarning.js?rel=1426195693227"></script>
     <!-- endbuild -->
+
+    <script src="//apis.google.com/js/api.js"></script>
+    <script src="//apis.google.com/js/client:platform.js"></script>
+
+    <!-- build:js scripts/scripts.js -->
+    <script src="components/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js"></script>
+    <script src="components/d3/d3.min.js"></script>
+    <script src="components/chosen/chosen.jquery.min.js"></script>
+    <script src="_components/jquery.qtip.min.js"></script>
+    <script src="scripts/directives/Tree.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/factories/TreeFactory.js"></script>
+    <script src="scripts/factories/VariantFactory.js"></script>
+    <script src="scripts/controllers/TreeCtrl.js"></script>
+    <script src="scripts/controllers/VariantCtrl.js"></script>
+    <script src="scripts/controllers/emailDialogCtrl.js"></script>
+    <script src="scripts/filters/Filter.js"></script>
+    <script src="scripts/directives/regularview.js"></script>
+    <script src="scripts/directives/reportview.js"></script>
+    <script src="scripts/directives/reportinfo.js"></script>
+    <script src="scripts/directives/reportviewrecursioncell.js"></script>
+    <script src="scripts/controllers/reportgenerator.js"></script>
+    <script src="scripts/services/generatereportdataservice.js"></script>
+    <script src="scripts/services/databaseconnector.js"></script>
+    <script src="scripts/services/deepmerge.js"></script>
+    <script src="scripts/services/findregex.js"></script>
+    <script src="scripts/controllers/gene.js"></script>
+    <script src="scripts/services/storage.js"></script>
+    <script src="scripts/controllers/nav.js"></script>
+    <script src="scripts/services/users.js"></script>
+    <script src="scripts/services/documents.js"></script>
+    <script src="scripts/services/loadfile.js"></script>
+    <script src="scripts/services/access.js"></script>
+    <script src="scripts/directives/comments.js"></script>
+    <script src="scripts/directives/typeaheadfocus.js"></script>
+    <script src="scripts/services/importer.js"></script>
+    <script src="scripts/services/driveoncokbinfo.js"></script>
+    <script src="scripts/services/browser.js"></script>
+    <script src="scripts/directives/iewarning.js"></script>
+    <!-- endbuild -->
+
 </body>
 </html>
