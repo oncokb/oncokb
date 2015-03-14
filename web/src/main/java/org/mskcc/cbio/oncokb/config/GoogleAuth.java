@@ -61,7 +61,7 @@ public class GoogleAuth {
             .setTransport(httpTransport)
             .setJsonFactory(jsonFactory)
             .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-            .setServiceAccountScopes(Collections.singleton(DriveScopes.DRIVE_FILE))
+            .setServiceAccountScopes(Collections.singleton(DriveScopes.DRIVE))
             .setServiceAccountPrivateKeyFromP12File(file)
           .build();
         credential.refreshToken();
