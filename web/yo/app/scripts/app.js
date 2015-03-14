@@ -438,7 +438,7 @@ angular.module('oncokbApp', [
         return function(exception, cause){
             var $rootScope = $injector.get('$rootScope');
             $rootScope.addError({message: 'Exception', reason: exception, case: cause});
-            $delegate(exception, cause);
+            // $delegate(exception, cause);
         };
     });
  });
