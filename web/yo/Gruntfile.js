@@ -365,14 +365,15 @@ module.exports = function (grunt) {
           src: ['generated/*']
         }, {
           expand: true,
-          cwd: '<%= oncokb.app %>/components/bootstrap-sass-official/assets/fonts/bootstrap/*',
-          src: '*',
-          dest: '<%= oncokb.dist %>/fonts'
+          cwd: '<%= oncokb.app %>/components/',
+          src: ['bootstrap-sass-official/assets/fonts/bootstrap/*', 'fontawesome/fonts/*'],
+          dest: '<%= oncokb.dist %>/fonts',
+          flatten: true
         }, {
           expand: true,
-          cwd: '<%= oncokb.app %>/components/fontawesome/fonts',
-          src: ['*'],
-          dest: '<%= oncokb.dist %>/fonts'
+          cwd: '<%= oncokb.app %>/',
+          src: 'components/bootstrap-sass-official/assets/fonts/bootstrap/*',
+          dest: '<%= oncokb.dist %>'
         }, {
           expand: true,
           cwd: '<%= oncokb.app %>/components/datatables/media/images',
