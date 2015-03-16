@@ -76,7 +76,7 @@ module.exports = function (grunt) {
           open: true,
           middleware: function (connect) {
             return [
-              connect.static('<%= oncokb.app %>'),
+              connect.static('.tmp'),
               connect().use(
                 '<%= oncokb.app %>/components',
                 connect.static('<%= oncokb.app %>/components')

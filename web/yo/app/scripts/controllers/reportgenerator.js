@@ -475,46 +475,58 @@ angular.module('oncokbApp')
         reader.readAsBinaryString(file._file);
     }
     
-     function readXMLfile(file) {
+    function readXMLfile(file) {
         var reader = new FileReader();
 
         reader.onload = function(e) {
             var full = x2js.xml_str2json(e.target.result);
-            var annotation = processData(full.document.sample.test.variant.allele.transcript);
-            var relevantCancerType = {};
-            var reportParams = '';
-
-            for(var key in annotation) {
-                annotation[key] = formatDatum(annotation[key], key);
+            var reportViewDatas = [];
+            var variants = [];
+            if(angular.isArray(full.document.sample.test.variant)) {
+                variants = full.document.sample.test.variant;
+            }else {
+                variants.push(full.document.sample.test.variant);
             }
-            if(annotation.cancer_type) {
-                var relevantCancerTypeArray = [];
-                var i = 0;
-                for(var cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
-                    var _cancerType = annotation.cancer_type[i];
-                    if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
-                        relevantCancerTypeArray.push(_cancerType);
-                    }
+            for(var k = 0 ;k < variants.length;k++){
+                var annotation = processData(variants[k].allele.transcript);
+                var relevantCancerType = {};
+                for(var key in annotation) {
+                    annotation[key] = formatDatum(annotation[key], key);
                 }
-                if(relevantCancerTypeArray.length > 1) {
-                    var obj1 = relevantCancerTypeArray[0];
-
-                    i = 1;
-                    for(var relevantL=relevantCancerTypeArray.length; i < relevantL; i++) {
-                        obj1 = DeepMerge.init(obj1, relevantCancerTypeArray[i], obj1.$type, relevantCancerType[i].$type);
+                if(annotation.cancer_type) {
+                    var relevantCancerType = [];
+                    for(var i=0, cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
+                        var _cancerType = annotation.cancer_type[i];
+                        if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
+                            relevantCancerType.push(_cancerType);
+                        }
                     }
-                    relevantCancerType = obj1;
-                }else if(relevantCancerTypeArray.length === 1){
-                    relevantCancerType = relevantCancerTypeArray[0];
+                    if(relevantCancerType.length > 1) {
+                        relevantCancerType.sort(function(e){
+                            if(e.$type.toString().toLowerCase() === "all tumors"){
+                                return -1;
+                            }else{
+                                return 1;
+                            }
+                        });
+                        var obj1 = relevantCancerType[0];
+
+                        for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
+                            obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
+                        }
+                        relevantCancerType = obj1;
+                    }else if(relevantCancerType.length === 1){
+                        relevantCancerType = relevantCancerType[0];
+                    }else {
+                        relevantCancerType = null;
+                    }
                 }else {
                     relevantCancerType = null;
                 }
-            }else {
-                relevantCancerType = null;
+                var reportParams = ReportDataService.init(annotation.hgnc_symbol, annotation.hgvs_p_short, full.document.sample.diagnosis, relevantCancerType, annotation);
+                reportViewDatas.push(reportViewData(reportParams));
             }
-
-            reportParams = ReportDataService.init(annotation.hgnc_symbol, annotation.hgvs_p_short, full.document.sample.diagnosis, relevantCancerType, annotation);
-            $scope.reportViewData = reportViewData(reportParams);
+            $scope.reportViewDatas = reportViewDatas;
             $scope.isXML = true;
             $scope.$apply();
         };

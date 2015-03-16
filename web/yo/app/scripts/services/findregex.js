@@ -9,7 +9,7 @@
  */
 angular.module('oncokbApp')
   .factory('FindRegex', function () {
-    function get(str) {
+    function find(str, type) {
         if(typeof str === 'string' && str !== '') {
             var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
                 links = ['http://www.ncbi.nlm.nih.gov/pubmed/',
@@ -30,10 +30,10 @@ angular.module('oncokbApp')
                             case 0:
                                 var _number = _datum.split(':')[1].trim();
                                 _number = _number.replace(/\s+/g, '');
-                                str = str.replace(new RegExp(_datum, 'g'), '<a class="withUnderScore" target="_blank" href="'+ links[j] + _number+'">' + _datum + '</a>');
+                                str = str.replace(new RegExp(_datum, 'g'), createTag(type, links[j] + _number, _datum));
                                 break;
                             default:
-                                str = str.replace(_datum, '<a class="withUnderScore" target="_blank" href="'+ links[j] + _datum+'">' + _datum + '</a>');
+                                str = str.replace(_datum, createTag(type, links[j] + _datum, _datum));
                                 break;
                         }
 
@@ -43,8 +43,24 @@ angular.module('oncokbApp')
         }
         return str;
     }
+
+    function createTag(type, link, content){
+        var str = '';
+        switch (type) {
+            case 'link':
+                str = '<a class="withUnderScore" target="_blank" href="'+ link +'">' + content + '</a>';
+                break;
+            case 'iframe':
+                str = '<div contenteditable="false" tooltip-html-unsafe="<iframe src=\'' + link + '\'></iframe>">' + content + '</div>';
+                break;
+            default:
+                break;
+        }
+        return str;
+    }
     // Public API here
     return {
-      get: get
+      get: function(str){ return find(str, 'link')},
+      iframe: function(str){ return find(str, 'iframe')}
     };
   });

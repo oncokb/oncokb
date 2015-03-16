@@ -20,6 +20,7 @@
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.summary.text"></p>
     <h3>{{gene.background.display}}:<comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.background.text"></p>
+    <div style="margin-bottom: 10px">Above keywords: <span class="geneKeywordSpan" qtip type="pmid" number="23617957">PMID:23617957</span><span class="geneKeywordSpan" qtip type="pmid" number="21169255">PMID:21169255</span><span class="geneKeywordSpan" qtip type="pmid" number="22473468">PMID:22473468</span></div>
     <div ng-if="gene.name.text">
       <span>cBioPortal link: <a href="http://www.cbioportal.org/ln?q={{gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{gene.name.text}}</a></span><br/>
       <span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
@@ -37,7 +38,7 @@
   </div>
   <div id="mutation">
     <accordion close-others="oneAtATime">
-      <accordion-group ng-repeat="mutation in gene.mutations.asArray()">
+      <accordion-group class="mutationHeader" ng-init="if(mutation.newCreate){isOpen = true;}else{isOpen = false}" is-open="isOpen" ng-repeat="mutation in gene.mutations.asArray()">
         <accordion-heading>
           Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.name.text"/></span><comments-dict ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <span class="pull-right">
@@ -94,7 +95,7 @@
               </span>
             </accordion-group>
             <!-- tumor types -->
-            <accordion-group ng-repeat="tumor in mutation.tumors.asArray()">
+            <accordion-group  class="tumorTypeHeader" ng-repeat="tumor in mutation.tumors.asArray()">
               <accordion-heading>
                 Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.name.text"/></span><comments-dict file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 <span class="pull-right">
