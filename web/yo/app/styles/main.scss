@@ -275,6 +275,22 @@ p.editableBox.doubleH {
   z-index: 1000;
   top: 0;
 }
+.levelOneHeader .panel-heading{
+  background-color: #E2F1EF;
+  border-left: 5px solid #2BB09A;
+}
+.levelTwoHeader .panel-heading{
+  background-color: #FFF9EF;
+  border-left: 5px solid #FFB83E;
+}
+.levelThreeHeader .panel-heading{
+  background-color: #FFF5EF;
+  border-left: 5px solid #FF8C3E;
+}
+.levelFourHeader .panel-heading{
+  background-color: #E4EAF2;
+  border-left: 5px solid #396BB6;
+}
 table.dataTable thead .sorting_asc {
   background: none;
 }

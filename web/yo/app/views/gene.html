@@ -38,7 +38,7 @@
   </div>
   <div id="mutation">
     <accordion close-others="oneAtATime">
-      <accordion-group class="mutationHeader" ng-init="if(mutation.newCreate){isOpen = true;}else{isOpen = false}" is-open="isOpen" ng-repeat="mutation in gene.mutations.asArray()">
+      <accordion-group class="levelOneHeader" ng-init="if(mutation.newCreate){isOpen = true;}else{isOpen = false}" is-open="isOpen" ng-repeat="mutation in gene.mutations.asArray()">
         <accordion-heading>
           Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.name.text"/></span><comments-dict ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <span class="pull-right">
@@ -53,7 +53,7 @@
         </accordion-heading>
         <accordion close-others="oneAtATime">
             <!-- Mutation Effect -->
-            <accordion-group>
+            <accordion-group class="levelTwoHeader">
               <accordion-heading>
                 Mutation effect<span class="curationNoEntry" ng-if="mutation.oncogenic.text === '' && mutation.effect.value.text === '' && mutation.description.text === ''">No Entry</span><comments-dict file-editable="fileEditable" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
               </accordion-heading>
@@ -95,7 +95,7 @@
               </span>
             </accordion-group>
             <!-- tumor types -->
-            <accordion-group  class="tumorTypeHeader" ng-repeat="tumor in mutation.tumors.asArray()">
+            <accordion-group  class="levelTwoHeader" ng-repeat="tumor in mutation.tumors.asArray()">
               <accordion-heading>
                 Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.name.text"/></span><comments-dict file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 <span class="pull-right">
@@ -111,7 +111,7 @@
 
               <accordion close-others="oneAtATime">
                 <!-- Prevalence -->
-                <accordion-group>
+                <accordion-group class="levelThreeHeader">
                   <accordion-heading>
                     {{tumor.prevalence.display}}:
                     <span class="curationNoEntry" ng-if="tumor.prevalence.text === ''">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
@@ -120,7 +120,7 @@
                 </accordion-group>
 
                 <!-- Prognostic implications -->
-                <accordion-group>
+                <accordion-group class="levelThreeHeader">
                   <accordion-heading>
                     {{tumor.progImp.display}}:
                     <span class="curationNoEntry" ng-if="tumor.progImp.text === ''">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
@@ -129,7 +129,7 @@
                 </accordion-group>
 
                 <!-- NCCN guidelines -->
-                <accordion-group>
+                <accordion-group class="levelThreeHeader">
                   <accordion-heading>
                     NCCN guidelines:
                     <span class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
@@ -165,7 +165,7 @@
                 </accordion-group>
 
                 <!-- Theraputic implications -->
-                <accordion-group ng-repeat="ti in tumor.TI.asArray()">
+                <accordion-group class="levelThreeHeader" ng-repeat="ti in tumor.TI.asArray()">
                   <accordion-heading>
                     {{ti.name.text}}:
                     <span class="curationNoEntry" ng-if="ti.description.text === '' && ti.treatments.length === 0">No Entry</span>
@@ -175,7 +175,7 @@
                     <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" placeholder="Optional general summary" ng-model="ti.description.text"></p>
                   </span>
                   <accordion close-others="oneAtATime">
-                      <accordion-group ng-repeat="treatment in ti.treatments.asArray()">
+                      <accordion-group class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
                           <accordion-heading>
                               {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                               <span class="pull-right">
@@ -240,7 +240,7 @@
                 </accordion-group>
 
                 <!-- Trials -->
-                <accordion-group>
+                <accordion-group class="levelThreeHeader">
                   <accordion-heading>
                     Ongoing clinical trials:
                     <span class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
