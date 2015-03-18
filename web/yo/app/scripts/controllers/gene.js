@@ -832,7 +832,7 @@ angular.module('oncokbApp')
               // handle: '> .myHandle'
             };
             $scope.selfParams = {};
-
+            
             getDriveOncokbInfo();
             getOncoTreeTumortypes();
             var clock;

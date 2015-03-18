@@ -2,7 +2,7 @@
   <div id="gene">
     <h2>
       <!-- Gene: <span>{{gene.name.text}}</span> -->
-      Gene: <span contenteditable="true" ng-model="gene.name.text"></span><comments-dict gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+      Gene: <span contenteditable="{{fileEditable}}" ng-model="gene.name.text"></span><comments-dict gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
       </span>
@@ -17,9 +17,9 @@
       <span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
     </p>
     <h3>{{gene.summary.display}}:<comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
-    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.summary.text"></p>
+    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.summary.text"></p>
     <h3>{{gene.background.display}}:<comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
-    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="gene.background.text"></p>
+    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.background.text"></p>
     <div style="margin-bottom: 10px">Above keywords: <span class="geneKeywordSpan" qtip type="pmid" number="23617957">PMID:23617957</span><span class="geneKeywordSpan" qtip type="pmid" number="21169255">PMID:21169255</span><span class="geneKeywordSpan" qtip type="pmid" number="22473468">PMID:22473468</span></div>
     <div ng-if="gene.name.text">
       <span>cBioPortal link: <a href="http://www.cbioportal.org/ln?q={{gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{gene.name.text}}</a></span><br/>
@@ -40,7 +40,7 @@
     <accordion close-others="oneAtATime">
       <accordion-group class="levelOneHeader" ng-repeat="mutation in gene.mutations.asArray()">
         <accordion-heading>
-          Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" gene-name="{{gene.name.text}}"ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+          Mutation: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" gene-name="{{gene.name.text}}"ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <span class="pull-right">
             <span style="font-size: 11px" ng-if="userRole === 8">
               Go to
@@ -83,21 +83,21 @@
                       ng-false-value=""
                     >
                     <label for="{{mutation.name.text}}-mutation_effect-box{{$index}}">{{checkbox}}</label>
-                    <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-if="mutation.effect.value.text === checkbox && checkbox !== 'Other'" ng-model="mutation.effect.addOn.text" placeholder=" Optional text"/>
-                    <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-if="mutation.effect.value.text === checkbox && checkbox === 'Other'" ng-model="mutation.effect.addOn.text"/>
+                    <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-if="mutation.effect.value.text === checkbox && checkbox !== 'Other'" ng-model="mutation.effect.addOn.text" placeholder=" Optional text"/>
+                    <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-if="mutation.effect.value.text === checkbox && checkbox === 'Other'" ng-model="mutation.effect.addOn.text"/>
                   </span>
                 </div>
               </div>
               <span>
                 <strong>{{mutation.description.display}}:</strong>
                 <br/>
-                <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="mutation.description.text"></p>
+                <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.description.text"></p>
               </span>
             </accordion-group>
             <!-- tumor types -->
             <accordion-group  class="levelTwoHeader" ng-repeat="tumor in mutation.tumors.asArray()">
               <accordion-heading>
-                Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
+                Tumor type: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 <span class="pull-right">
                   <span style="font-size: 11px" ng-if="userRole === 8">
                     Go to
@@ -116,7 +116,7 @@
                     {{tumor.prevalence.display}}:
                     <span class="curationNoEntry" ng-if="tumor.prevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
-                  <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.prevalence.text"></p>
+                  <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.prevalence.text"></p>
                 </accordion-group>
 
                 <!-- Prognostic implications -->
@@ -125,7 +125,7 @@
                     {{tumor.progImp.display}}:
                     <span class="curationNoEntry" ng-if="tumor.progImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
-                  <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.progImp.text"></p>
+                  <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.progImp.text"></p>
                 </accordion-group>
 
                 <!-- NCCN guidelines -->
@@ -136,7 +136,7 @@
                   </accordion-heading>
                     <p>
                       <strong>{{tumor.nccn.therapy.display}}:</strong>
-                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.therapy.text"/>
+                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.therapy.text"/>
                     </p>
                     <p>
                       <strong>{{tumor.nccn.disease.display}}:</strong>
@@ -146,11 +146,11 @@
                     </p>
                     <p>
                       <strong>{{tumor.nccn.version.display}}:</strong>
-                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.version.text"/>
+                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.version.text"/>
                     </p>
                     <p>
                       <strong>{{tumor.nccn.pages.display}}:</strong>
-                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.pages.text"/>
+                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.pages.text"/>
                     </p>
                     <p>
                       <strong>{{tumor.nccn.category.display}}:</strong>
@@ -159,7 +159,7 @@
                     <span>
                       <strong>{{tumor.nccn.description.display}}:</strong>
                           <br/>
-                      <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.nccn.description.text">
+                      <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.description.text">
                       </p>
                     </span>
                 </accordion-group>
@@ -172,12 +172,12 @@
                     <comments-dict display-name="{{ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
                   <span>
-                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" placeholder="Optional general summary" ng-model="ti.description.text"></p>
+                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional general summary" ng-model="ti.description.text"></p>
                   </span>
                   <accordion close-others="oneAtATime">
                       <accordion-group class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
                           <accordion-heading>
-                              {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.name.text"/></span><comments-dict gene-name="{{gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
+                              {{treatment.type.text}}: <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.name.text"/></span><comments-dict gene-name="{{gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                               <span class="pull-right">
                                 <span style="font-size: 11px" ng-if="userRole === 8">
                                   Go to
@@ -218,13 +218,13 @@
                           <strong>{{treatment.indication.display}}:</strong>
                         </div>
                         <div class="content">
-                            <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.indication.text"></p>
+                            <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.indication.text"></p>
                         </div>
                       </div>
                       <span>
                             <strong>{{treatment.description.display}}:</strong>
                             <br/>
-                            <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="treatment.description.text">
+                            <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.description.text">
                         </p>
                       </span>
                       </accordion-group>
@@ -264,11 +264,11 @@
                       <h4>Interacting alterations:</h4>
                       <p>
                   <strong><comments-dict file-editable="fileEditable" comments="tumor.interactAlts.alterations_comments" object="tumor.interactAlts" key="alterations" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>{{tumor.interactAlts.alterations.display}}:</strong>
-                  <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.interactAlts.alterations.text"/>
+                  <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.interactAlts.alterations.text"/>
             </p>
             <span>
                   <strong><comments-dict file-editable="fileEditable" comments="tumor.interactAlts.description_comments" object="tumor.interactAlts" key="description" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>{{tumor.interactAlts.description.display}}:</strong>
-                  <p class="doubleH" type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="true" ng-model="tumor.interactAlts.description.text"></p>
+                  <p class="doubleH" type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.interactAlts.description.text"></p>
             </span> -->
                   </accordion-group>
               </accordion>
