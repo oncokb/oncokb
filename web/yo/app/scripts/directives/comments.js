@@ -7,7 +7,7 @@
  * # comments
  */
 angular.module('oncokbApp')
-  .directive('commentsDict', function (DatabaseConnector) {
+  .directive('commentsDict', function (DatabaseConnector, S) {
     return {
       templateUrl: 'views/comments.html',
       restrict: 'AE',
@@ -182,7 +182,7 @@ angular.module('oncokbApp')
 
         $scope.blur = function(index) {
           if($scope.comments.get(index).content.getText() !== $scope.commentsCopy.content[index]){
-            createEmail('change', $scope.comments.get(index).content.getText(), $scope.commentsCopy.content[index]);
+            createEmail('change', S($scope.comments.get(index).content.getText()).stripTags().s, S($scope.commentsCopy.content[index]).stripTags().s);
             $scope.commentsCopy.content[index] = $scope.comments.get(index).content.getText();
           }
         };
@@ -196,10 +196,10 @@ angular.module('oncokbApp')
         $scope.resolve = function(index) {
           $scope.comments.get(index).resolved.setText('true');
           $scope.commentsCopy.resolved[index] = 'true';
-          createEmail('resolved', $scope.comments.get(index).content.getText());
+          createEmail('resolved', S($scope.comments.get(index).content.getText()).stripTags().s);
         };
         $scope.delete = function(index) {
-          createEmail('delete', $scope.comments.get(index).content.getText());
+          createEmail('delete', S($scope.comments.get(index).content.getText()).stripTags().s);
           $scope.comments.remove(index);
         };
       }
