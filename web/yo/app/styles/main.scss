@@ -300,7 +300,8 @@ table.dataTable thead .sorting_desc {
 i.fa-comments, i.fa-comments-o{
   font-size: 15px;
 }
-i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover {
+i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover, 
+i.fa-compress, i.fa-expand{
   cursor: pointer;
 }
 .fa-comments-white {
@@ -434,6 +435,22 @@ h5 {
   margin: 0 2px;
 }
 
+//Change/add font awesome icons
+.fa-rotate-45 {
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.fa-rotate-135 {
+  -webkit-transform: rotate(135deg);
+  -moz-transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  -o-transform: rotate(135deg);
+  transform: rotate(135deg);
+}
+
 //Change bootstrap-chosen style
 .chosen-container-single .chosen-single {
   height: 30px;
@@ -442,7 +459,10 @@ h5 {
 }
 
 //Change bootstrap default color
-
+.panel-heading a:hover {
+  color: black;
+  text-decoration: none;
+}
 .table-bordered, .table-bordered > thead > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > tfoot > tr > td{
   border: 1px solid black;
 }
