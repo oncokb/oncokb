@@ -14,7 +14,7 @@
             </span>
           </div>
           <div style="width: 100%; float: left;" class="content">
-            <span contenteditable="true" ng-model="comment.content.text" file-editable="fileEditable"></span>
+            <span contenteditable="true" ng-blur="blur($index)" ng-model="comment.content.text" file-editable="fileEditable"></span>
           </div>
         </div>
       </div>

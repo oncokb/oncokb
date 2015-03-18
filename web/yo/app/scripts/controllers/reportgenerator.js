@@ -494,29 +494,37 @@ angular.module('oncokbApp')
                     annotation[key] = formatDatum(annotation[key], key);
                 }
                 if(annotation.cancer_type) {
-                    var relevantCancerType = [];
-                    for(var i=0, cancerTypeL = annotation.cancer_type.length; i < cancerTypeL; i++) {
+                    var relevantCancerTypeA = [];
+                    var i = 0;
+                    var cancerTypeL = annotation.cancer_type.length;
+
+                    for(; i < cancerTypeL; i++) {
                         var _cancerType = annotation.cancer_type[i];
                         if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
-                            relevantCancerType.push(_cancerType);
+                            relevantCancerTypeA.push(_cancerType);
                         }
                     }
-                    if(relevantCancerType.length > 1) {
-                        relevantCancerType.sort(function(e){
-                            if(e.$type.toString().toLowerCase() === "all tumors"){
+                    if(relevantCancerTypeA.length > 1) {
+                        /* jshint -W083 */
+                        relevantCancerTypeA.sort(function(e){
+                            if(e.$type.toString().toLowerCase() === 'all tumors'){
                                 return -1;
                             }else{
                                 return 1;
                             }
                         });
-                        var obj1 = relevantCancerType[0];
+                        /* jshint +W083 */
+                        var obj1 = relevantCancerTypeA[0];
+                        var relevantL=relevantCancerTypeA.length;
+                        
+                        i = 1;
 
-                        for(var i=1, relevantL=relevantCancerType.length; i < relevantL; i++) {
-                            obj1 = DeepMerge.init(obj1, relevantCancerType[i], obj1.$type, relevantCancerType[i].$type);
+                        for(; i < relevantL; i++) {
+                            obj1 = DeepMerge.init(obj1, relevantCancerTypeA[i], obj1.$type, relevantCancerType[i].$type);
                         }
                         relevantCancerType = obj1;
-                    }else if(relevantCancerType.length === 1){
-                        relevantCancerType = relevantCancerType[0];
+                    }else if(relevantCancerTypeA.length === 1){
+                        relevantCancerType = relevantCancerTypeA[0];
                     }else {
                         relevantCancerType = null;
                     }

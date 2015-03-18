@@ -177,7 +177,7 @@ module.exports = function (grunt) {
     compass: {
       options: {
         sassDir: '<%= oncokb.app %>/styles',
-        cssDir: '.tmp/styles',
+        cssDir: '<%= oncokb.app %>/styles',
         generatedImagesDir: '.tmp/images/generated',
         imagesDir: '<%= oncokb.app %>/images',
         javascriptsDir: '<%= oncokb.app %>/scripts',

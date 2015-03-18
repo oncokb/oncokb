@@ -9,9 +9,9 @@
 angular.module('oncokbApp')
   .directive('qtip', function () {
     return {
-      restrict: "A",
+      restrict: 'A',
       link: function (scope, element, attrs) {
-        var src = '<iframe width="850px" height="400px" src=\''
+        var src = '<iframe width="850px" height="400px" src=\'';
         if(attrs.type && attrs.number) {
           switch (attrs.type) {
             case 'pmid':

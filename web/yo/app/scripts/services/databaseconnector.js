@@ -19,6 +19,7 @@ angular.module('oncokbApp')
     'DriveOncokbInfo',
     'OncoTreeTumorTypes',
     'DriveAnnotation',
+    'SendEmail',
     function (
       $timeout,
       Gene,
@@ -29,7 +30,8 @@ angular.module('oncokbApp')
       GenerateDoc,
       DriveOncokbInfo,
       OncoTreeTumorTypes,
-      DriveAnnotation) {
+      DriveAnnotation,
+      SendEmail) {
 
     var numOfLocks = {},
         data = {};
@@ -191,13 +193,29 @@ angular.module('oncokbApp')
                 });
       }
     }
-    
+
     function createGoogleFolder(params, success, fail) {
       if(dataFromFile) {
         success('');
       }else {
         GenerateDoc
             .createFolder(params)
+                .success(function(data) {
+                    success(data);
+                })
+                .error(function(){
+                    fail();
+                });
+      }
+    }
+
+    function sendEmail(params, success, fail) {
+      if(dataFromFile) {
+        success(true);
+      }else {
+        console.log(params);
+        SendEmail
+            .init(params)
                 .success(function(data) {
                     success(data);
                 })
@@ -243,6 +261,7 @@ angular.module('oncokbApp')
       'getOncokbInfo': getOncokbInfo,
       'getAllTumorType': getAllTumorType,
       'getAllOncoTreeTumorTypes': getAllOncoTreeTumorTypes,
-      'updateGene': updateGene
+      'updateGene': updateGene,
+      'sendEmail': sendEmail
     };
   }]);

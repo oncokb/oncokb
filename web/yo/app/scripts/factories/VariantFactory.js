@@ -150,6 +150,27 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
     };
 }]);
 
+angular.module('oncokbApp').factory('SendEmail', ['$http',  function ($http) {
+    'use strict';
+    var transform = function(data){
+        return $.param(data);
+    };
+
+    function init(params) {
+        return $http.post(
+            'sendEmail', 
+            params,
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
+    }
+
+    return {
+        init: init
+    };
+}]);
+
 angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($http) {
     'use strict';
     var transform = function(data){

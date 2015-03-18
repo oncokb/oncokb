@@ -60,7 +60,7 @@ angular.module('oncokbApp')
     }
     // Public API here
     return {
-      get: function(str){ return find(str, 'link')},
-      iframe: function(str){ return find(str, 'iframe')}
+      get: function(str){ return find(str, 'link');},
+      iframe: function(str){ return find(str, 'iframe');}
     };
   });
