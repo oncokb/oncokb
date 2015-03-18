@@ -520,7 +520,7 @@ angular.module('oncokbApp')
                         i = 1;
 
                         for(; i < relevantL; i++) {
-                            obj1 = DeepMerge.init(obj1, relevantCancerTypeA[i], obj1.$type, relevantCancerType[i].$type);
+                            obj1 = DeepMerge.init(obj1, relevantCancerTypeA[i], obj1.$type, relevantCancerTypeA[i].$type);
                         }
                         relevantCancerType = obj1;
                     }else if(relevantCancerTypeA.length === 1){

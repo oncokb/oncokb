@@ -31,9 +31,9 @@ public class SendEmailController {
             @RequestParam(value="content", required=false) String body) {
         
         if(subject != null && body != null) {
-            String from = "jackson.zhang.828@gmail.com";
-            String pass = "gmail_privatespace";
-            String[] to = { "jackson.zhang.828@gmail.com" }; // list of recipient email addresses
+            String from = "oncokb.curation@gmail.com";
+            String pass = "oncokbmskcc";
+            String[] to = { "oncokb.curation@gmail.com" }; // list of recipient email addresses
 
             return sendFromGMail(from, pass, to, subject, body);
         }else {
