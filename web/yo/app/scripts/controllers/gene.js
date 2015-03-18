@@ -282,6 +282,7 @@ angular.module('oncokbApp')
                     _mutation.name.setText(newMutationName);
                     this.gene.mutations.push(_mutation);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
+                    sendEmail(this.gene.name.text + ': new MUTATION added -> ' + newMutationName, '');
                 }
             };
 
@@ -352,6 +353,7 @@ angular.module('oncokbApp')
                     mutation.tumors.push(_tumorType);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                 }
+                sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, '');
             };
 
             //Add new therapeutic implication
@@ -480,13 +482,15 @@ angular.module('oncokbApp')
             };
 
             function sendEmail(subject, content) {
-              var param = {subject: subject, content: content};
+              if($scope.userRole < 8) {
+                var param = {subject: subject, content: content};
 
-              DatabaseConnector.sendEmail(
-                JSON.stringify(param),
-                function(result){ console.log('success', result);}, 
-                function(result){ console.log('failed', result);}
-              );
+                DatabaseConnector.sendEmail(
+                  JSON.stringify(param),
+                  function(result){ console.log('success', result);}, 
+                  function(result){ console.log('failed', result);}
+                );
+              }
             }
 
             function getDriveOncokbInfo() {

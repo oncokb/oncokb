@@ -147,7 +147,7 @@ angular.module('oncokbApp')
               }else if($scope.displayName){
                 _display = ', ' + $scope.displayName;
               }else{
-                _display = ''
+                _display = '';
               }
               subject += _display;
             }
@@ -167,7 +167,7 @@ angular.module('oncokbApp')
                 break;
               case 'change':
                 subject += 'CHANGED';
-                body = 'Previous comment content: \n\n' + previousComment + 
+                content = 'Previous comment content: \n\n' + previousComment + 
                 '\n\nCurrent comment content: \n\n' + comment;
                 break;
               default:
@@ -185,7 +185,7 @@ angular.module('oncokbApp')
             createEmail('change', $scope.comments.get(index).content.getText(), $scope.commentsCopy.content[index]);
             $scope.commentsCopy.content[index] = $scope.comments.get(index).content.getText();
           }
-        }
+        };
 
         $scope.add = function() {
           console.log($scope);
