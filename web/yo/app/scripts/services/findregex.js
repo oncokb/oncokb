@@ -44,6 +44,54 @@ angular.module('oncokbApp')
         return str;
     }
 
+    function result(str) {
+        var uniqueResult = {},
+        uniqueResultA = [];
+        if(typeof str === 'string' && str !== '') {
+            var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
+                links = ['http://www.ncbi.nlm.nih.gov/pubmed/',
+                         'http://clinicaltrials.gov/show/'];
+            for (var j = 0, regexL = regex.length; j < regexL; j++) {
+                var result = str.match(regex[j]);
+
+                if(result) {
+                    /*jshint -W083 */
+                    var _uniqueResult = result.filter(function(elem, pos) {
+                        return result.indexOf(elem) === pos;
+                    });
+                    for(var i = 0, resultL = _uniqueResult.length; i < resultL; i++) {
+                        var _datum = _uniqueResult[i];
+                        var _number = 0;
+                        switch(j) {
+                            //pubmed PMID
+                            case 0:
+                                _number = _datum.split(':')[1].trim();
+                                _number = _number.replace(/\s+/g, '');
+                                _number = _number.split(',');
+                                _number.forEach(function(e){
+                                    uniqueResult['pmid' + e] = {type: 'pmid', id: e};
+                                });
+                                break;
+                            //clinical trial NCT
+                            case 1:
+                                uniqueResult[_datum] = {type: 'nct', id: _datum};
+                                break;
+                            default:
+                                break;
+                        }
+
+                    }
+                    /*jshint +W083 */
+                }
+            }
+        }
+
+        for(var key in uniqueResult) {
+            uniqueResultA.push(uniqueResult[key]);
+        }
+        return uniqueResultA;
+    }
+
     function createTag(type, link, content){
         var str = '';
         switch (type) {
@@ -61,6 +109,7 @@ angular.module('oncokbApp')
     // Public API here
     return {
       get: function(str){ return find(str, 'link');},
-      iframe: function(str){ return find(str, 'iframe');}
+      iframe: function(str){ return find(str, 'iframe');},
+      result: function(str){ return result(str);}
     };
   });

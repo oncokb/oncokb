@@ -16,6 +16,12 @@ angular.module('oncokbApp')
           switch (attrs.type) {
             case 'pmid':
               src += 'http://www.ncbi.nlm.nih.gov/pubmed/' + attrs.number;
+              break;
+            case 'nct':
+              src += 'https://clinicaltrials.gov/show/' + attrs.number;
+              break;
+            default:
+              break;
           }
         }
 

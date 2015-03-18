@@ -56,4 +56,26 @@ angular.module('oncokbApp').filter('getIndexByObjectNameInArray', function() {
 			      	});
 	    	}
   	};
+})
+.filter('sortPubs', function () {
+  return function (array) {
+    if(angular.isArray(array)) {
+      array.sort(function(a, b){
+        var strA = '', strB = '';
+        var numA = -1, numB = -1;
+
+        strA = a.type.trim();
+        strB = b.type.trim();
+        numA = a.id.trim();
+        numB = b.id.trim();
+
+        if(strA !== strB) {
+          return strA < strB;
+        }else{
+          return numA < numB;
+        }
+      });
+    }
+    return array;
+  };
 });

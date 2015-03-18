@@ -20,7 +20,7 @@
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.summary.text"></p>
     <h3>{{gene.background.display}}:<comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.background.text"></p>
-    <div style="margin-bottom: 10px">Above keywords: <span class="geneKeywordSpan" qtip type="pmid" number="23617957">PMID:23617957</span><span class="geneKeywordSpan" qtip type="pmid" number="21169255">PMID:21169255</span><span class="geneKeywordSpan" qtip type="pmid" number="22473468">PMID:22473468</span></div>
+    <pub-iframe ng-model="gene.background.text"></pub-iframe>
     <div ng-if="gene.name.text">
       <span>cBioPortal link: <a href="http://www.cbioportal.org/ln?q={{gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{gene.name.text}}</a></span><br/>
       <span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
@@ -93,6 +93,7 @@
                 <br/>
                 <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.description.text"></p>
               </span>
+              <pub-iframe ng-model="mutation.description.text"></pub-iframe>
             </accordion-group>
             <!-- tumor types -->
             <accordion-group  class="levelTwoHeader" ng-repeat="tumor in mutation.tumors.asArray()">
@@ -117,6 +118,7 @@
                     <span class="curationNoEntry" ng-if="tumor.prevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
                   <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.prevalence.text"></p>
+                  <pub-iframe ng-model="tumor.prevalence.text"></pub-iframe>
                 </accordion-group>
 
                 <!-- Prognostic implications -->
@@ -126,6 +128,7 @@
                     <span class="curationNoEntry" ng-if="tumor.progImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
                   <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.progImp.text"></p>
+                  <pub-iframe ng-model="tumor.progImp.text"></pub-iframe>
                 </accordion-group>
 
                 <!-- NCCN guidelines -->
@@ -162,6 +165,7 @@
                       <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.description.text">
                       </p>
                     </span>
+                    <pub-iframe ng-model="tumor.nccn.description.text"></pub-iframe>
                 </accordion-group>
 
                 <!-- Theraputic implications -->
@@ -174,6 +178,7 @@
                   <span>
                     <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional general summary" ng-model="ti.description.text"></p>
                   </span>
+                  <pub-iframe ng-model="ti.description.text"></pub-iframe>
                   <accordion close-others="oneAtATime">
                       <accordion-group class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
                           <accordion-heading>
@@ -219,13 +224,15 @@
                         </div>
                         <div class="content">
                             <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.indication.text"></p>
+                            <pub-iframe ng-model="treatment.indication.text"></pub-iframe>
                         </div>
                       </div>
                       <span>
-                            <strong>{{treatment.description.display}}:</strong>
-                            <br/>
-                            <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.description.text">
+                        <strong>{{treatment.description.display}}:</strong>
+                        <br/>
+                        <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.description.text">
                         </p>
+                        <pub-iframe ng-model="treatment.description.text"></pub-iframe>
                       </span>
                       </accordion-group>
                   </accordion>
