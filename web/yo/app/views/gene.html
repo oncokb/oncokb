@@ -230,9 +230,9 @@
                       </accordion-group>
                   </accordion>
                   <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" ng-model="newTI[$index].name" placeholder="Therapy name" />
+                    <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
                     <span class="input-group-btn">
-                      <button type="button" class="btn btn-default" ng-disabled="!(!!newTI[$index].name)" ng-click="addTI(ti, $index)">
+                      <button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTI(ti, $index, newTIName); newTIName=''">
                         <i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications
                       </button>
                     </span>
@@ -252,7 +252,7 @@
                     <div class="input-group input-group-sm" style="width:200px">
                       <input type="text" class="form-control" ng-model="newTrial" placeholder="Trial ID" />
                       <span class="input-group-btn">
-                        <button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials)">
+                        <button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials, newTrial); newTrial=''">
                           <i class="fa fa-plus"></i> Add Trial
                         </button>
                       </span>
@@ -273,9 +273,9 @@
                   </accordion-group>
               </accordion>
         <div style="width: 100%" class="input-group input-group-sm">
-          <input type="text" ng-model="newTumorType.name" typeahead="tumorType for tumorType in tumorTypes | filter:$viewValue | limitTo:8" class="form-control" placeholder="Free text or choose from the dropdown list">
+          <input type="text" ng-model="newTumorTypeName" typeahead="tumorType for tumorType in tumorTypes | filter:$viewValue | limitTo:8" class="form-control" placeholder="Free text or choose from the dropdown list">
           <span class="input-group-btn">
-            <button type="button" class="btn btn-default" ng-disabled="!(!!newTumorType.name)" ng-click="addTumorType(mutation)">
+            <button type="button" class="btn btn-default" ng-disabled="!(!!newTumorTypeName)" ng-click="addTumorType(mutation, newTumorTypeName); newTumorTypeName=''">
               <i class="fa fa-plus"></i> Add Tumor Type
             </button>
           </span>
@@ -284,9 +284,9 @@
     </accordion>
   </div>
   <div class="input-group input-group-sm">
-    <input type="text" class="form-control" ng-model="newMutation.name" placeholder="{{addMutationPlaceholder}}"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
+    <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{addMutationPlaceholder}}"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
     <span class="input-group-btn">
-      <button type="button" class="btn btn-default" ng-disabled="!(!!newMutation.name)" ng-click="addMutation()">
+      <button type="button" class="btn btn-default" ng-disabled="!(!!newMutationName)" ng-click="addMutation(newMutationName); newMutationName=''">
         <i class="fa fa-plus"></i> Add Mutation
       </button>
     </span>

@@ -274,15 +274,14 @@ angular.module('oncokbApp')
               });
             };
 
-            $scope.addMutation = function() {
-                if (this.gene && this.newMutation && this.newMutation.name) {
+            $scope.addMutation = function(newMutationName) {
+                if (this.gene && newMutationName) {
                     var _mutation = '';
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
-                    _mutation.name.setText(this.newMutation.name);
+                    _mutation.name.setText(newMutationName);
                     this.gene.mutations.push(_mutation);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
-                    this.newMutation = {};
                 }
             };
 
@@ -332,12 +331,12 @@ angular.module('oncokbApp')
               // }, 1000);
             };
 
-            $scope.addTumorType = function(mutation) {
-                if (mutation && this.newTumorType && this.newTumorType.name) {
+            $scope.addTumorType = function(mutation, newTumorTypeName) {
+                if (mutation && newTumorTypeName) {
                     var _tumorType = '';
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     _tumorType = $scope.realtimeDocument.getModel().create(OncoKB.Tumor);
-                    _tumorType.name.setText(this.newTumorType.name);
+                    _tumorType.name.setText(newTumorTypeName);
                     _tumorType.nccn.category.setText('2A');
                     for(var i=0; i<4; i++) {
                       var __ti = $scope.realtimeDocument.getModel().create(OncoKB.TI);
@@ -352,17 +351,16 @@ angular.module('oncokbApp')
                     }
                     mutation.tumors.push(_tumorType);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
-                    this.newTumorType = {};
                 }
             };
 
             //Add new therapeutic implication
-            $scope.addTI = function(ti, index) {
-                if (ti && this.newTI[index] && this.newTI[index].name) {
+            $scope.addTI = function(ti, index, newTIName) {
+                if (ti && newTIName) {
                     var _treatment = '';
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
-                    _treatment.name.setText(this.newTI[index].name);
+                    _treatment.name.setText(newTIName);
                     _treatment.type.setText('Therapy');
                     if($scope.checkTI(ti, 1, 1)) {
                       _treatment.level.setText('1');
@@ -375,7 +373,6 @@ angular.module('oncokbApp')
                     }
                     ti.treatments.push(_treatment);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
-                    this.newTI[index] = {};
                 }
             };
 
@@ -389,10 +386,9 @@ angular.module('oncokbApp')
             };
 
             //Add new therapeutic implication
-            $scope.addTrial = function(trials) {
-                if (trials && this.newTrial) {
-                    trials.push(this.newTrial);
-                    this.newTrial = '';
+            $scope.addTrial = function(trials, newTrial) {
+                if (trials && newTrial) {
+                    trials.push(newTrial);
                 }
             };
 
@@ -482,6 +478,16 @@ angular.module('oncokbApp')
               if (event.stopPropagation) { event.stopPropagation();}
               if (event.preventDefault) { event.preventDefault();}
             };
+
+            function sendEmail(subject, content) {
+              var param = {subject: subject, content: content};
+
+              DatabaseConnector.sendEmail(
+                JSON.stringify(param),
+                function(result){ console.log('success', result);}, 
+                function(result){ console.log('failed', result);}
+              );
+            }
 
             function getDriveOncokbInfo() {
               $scope.suggestedMutations = DriveOncokbInfo.getMutation($scope.fileTitle) || [];
@@ -755,10 +761,6 @@ angular.module('oncokbApp')
             $scope.gene = '';
             $scope.comments = '';
             $scope.newGene = {};
-            $scope.newMutation = {};
-            $scope.newTumorType = {};
-            $scope.newTI = [{},{},{},{}];
-            $scope.newTrial = '';
             $scope.collaborators = {};
             $scope.checkboxes = {
                 'oncogenic': ['YES','NO','UNKNOWN'],
