@@ -291,7 +291,7 @@
                   </accordion-group>
               </accordion>
         <div style="width: 100%" class="input-group input-group-sm">
-          <input type="text" ng-model="newTumorTypeName" typeahead="tumorType for tumorType in tumorTypes | filter:$viewValue | limitTo:8" class="form-control" placeholder="Free text or choose from the dropdown list">
+          <input type="text" ng-model="newTumorTypeName" typeahead="tumorType for tumorType in tumorTypes | typeaheadFilter:$viewValue | limitTo: 10" class="form-control" placeholder="Free text or choose from the dropdown list">
           <span class="input-group-btn">
             <button type="button" class="btn btn-default" ng-disabled="!(!!newTumorTypeName)" ng-click="addTumorType(mutation, newTumorTypeName); newTumorTypeName=''">
               <i class="fa fa-plus"></i> Add Tumor Type

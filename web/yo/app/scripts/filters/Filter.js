@@ -78,4 +78,30 @@ angular.module('oncokbApp').filter('getIndexByObjectNameInArray', function() {
     }
     return array;
   };
+})
+.filter('typeaheadFilter', function (Levenshtein) {
+    return function (input, query) {
+        var result = [];
+
+        query = query.toString().toLowerCase();
+        angular.forEach(input, function (object) {
+            if (object.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+                result.push(object);
+            }
+        });
+        result.sort(function(a, b){
+          a = a.toString().toLowerCase();
+          b = b.toString().toLowerCase();
+          if(a.indexOf(query) === 0) {
+            return -1;
+          }else if(b.indexOf(query) === 0) {
+            return 1;
+          }else{
+            var matchA = new Levenshtein(a, query),
+            matchB = new Levenshtein(b, query);
+            return matchA.distance < matchB.distance;
+          }
+        });
+        return result;
+    };
 });
