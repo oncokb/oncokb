@@ -38,16 +38,16 @@
   </div>
   <div id="mutation">
     <accordion close-others="oneAtATime">
-      <accordion-group is-open="mutationIsopen" class="levelOneHeader" ng-repeat="mutation in gene.mutations.asArray()">
+      <accordion-group is-open="mutationIsopen[$index]" ng-repeat="mutation in gene.mutations.asArray()" class="levelOneHeader">
         <accordion-heading >
-          <i class="fa  fa-rotate-135" ng-class="{'fa-compress': mutationIsopen, 'fa-expand': !mutationIsopen}" ng-click="mutationIsopen=!mutationIsopen"></i>
+          <i class="fa  fa-rotate-135" ng-class="{'fa-compress': mutationIsopen[$index], 'fa-expand': !mutationIsopen[$index]}"></i>
           <span ng-click="$event.preventDefault(); $event.stopPropagation();">Mutation: </span><span ng-click="$event.preventDefault(); $event.stopPropagation();" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" gene-name="{{gene.name.text}}"ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             <span class="pull-right">
-              <span style="font-size: 11px" ng-if="userRole === 8">
-                Go to
-                <input type="text" style="width: 20px;" ng-click="stopCollopse($event)" ng-model="moveIndex" />
-                <button type="button" ng-click="move(gene.mutations, $index, moveIndex, $event)">Go</button>
-                Current {{$index + 1}}
+              <span style="margin-right: 20px" ng-if="userRole === 8">
+                <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(gene.mutations, $index, $index, $event)"></i>
+                <i class="fa fa-angle-down" ng-if="$index !== gene.mutations.length-1" ng-click="move(gene.mutations, $index, $index+2, $event)"></i>
+                <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(gene.mutations, $index, 0, $event)"></i>
+                <i ng-if="$index < gene.mutations.length-2" class="fa fa-angle-double-down" ng-click="move(gene.mutations, $index, gene.mutations.length, $event)"></i>
               </span>
               <i ng-click="remove($index, gene.mutations, $event)" class="fa fa-trash-o"></i>
             </span>
@@ -98,19 +98,19 @@
               <pub-iframe ng-model="mutation.description.text"></pub-iframe>
             </accordion-group>
             <!-- tumor types -->
-            <accordion-group  is-open="ttIsopen" class="levelTwoHeader" ng-repeat="tumor in mutation.tumors.asArray()">
+            <accordion-group  is-open="ttIsopen[$index]" class="levelTwoHeader" ng-repeat="tumor in mutation.tumors.asArray()">
               <accordion-heading>
-                <i class="fa  fa-rotate-135" ng-class="{'fa-compress': ttIsopen, 'fa-expand': !ttIsopen}" ng-click="ttIsopen=!ttIsopen"></i>
+                <i class="fa  fa-rotate-135" ng-class="{'fa-compress': ttIsopen[$index], 'fa-expand': !ttIsopen[$index]}"></i>
                 <span ng-click="$event.preventDefault(); $event.stopPropagation();">Tumor type: </span>
                 <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 <span class="pull-right">
-                  <span style="font-size: 11px" ng-if="userRole === 8">
-                    Go to
-                    <input type="text" style="width: 20px;" ng-click="stopCollopse($event)" ng-model="moveIndex" />
-                    <button type="button" ng-click="move(mutation.tumors, $index, moveIndex, $event)">Go</button>
-                    Current {{$index + 1}}
+                  <span style="margin-right: 20px" ng-if="userRole === 8">
+                    <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(mutation.tumors, $index, $index, $event)"></i>
+                    <i class="fa fa-angle-down" ng-if="$index !== mutation.tumors.length-1" ng-click="move(mutation.tumors, $index, $index+2, $event)"></i>
+                    <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(mutation.tumors, $index, 0, $event)"></i>
+                    <i ng-if="$index < mutation.tumors.length-2" class="fa fa-angle-double-down" ng-click="move(mutation.tumors, $index, mutation.tumors.length, $event)"></i>
                   </span>
-                <i ng-click="remove($index, mutation.tumors, $event)" class="fa fa-trash-o pull-right"></i>
+                  <i ng-click="remove($index, mutation.tumors, $event)" class="fa fa-trash-o pull-right"></i>
                 </span>
               </accordion-heading>
 
@@ -188,17 +188,17 @@
                   </span>
                   <pub-iframe ng-model="ti.description.text"></pub-iframe>
                   <accordion close-others="oneAtATime">
-                      <accordion-group is-open="drugIsopen" class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
+                      <accordion-group is-open="therapyIsopen[$index]" class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
                           <accordion-heading>
-                            <i class="fa  fa-rotate-135" ng-class="{'fa-compress': drugIsopen, 'fa-expand': !drugIsopen}" ng-click="drugIsopen=!drugIsopen"></i>
+                            <i class="fa  fa-rotate-135" ng-class="{'fa-compress': therapyIsopen[$index], 'fa-expand': !therapyIsopen[$index]}"></i>
                             <span ng-click="$event.preventDefault(); $event.stopPropagation();">{{treatment.type.text}}: </span>
                                <span ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.name.text"/></span><comments-dict gene-name="{{gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                               <span class="pull-right">
-                                <span style="font-size: 11px" ng-if="userRole === 8">
-                                  Go to
-                                  <input type="text" style="width: 20px;" ng-click="stopCollopse($event)" ng-model="moveIndex" />
-                                  <button type="button" ng-click="move(ti.treatments, $index, moveIndex, $event)">Go</button>
-                                  Current {{$index + 1}}
+                                <span style="margin-right: 20px" ng-if="userRole === 8">
+                                  <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(ti.treatments, $index, $index, $event)"></i>
+                                  <i class="fa fa-angle-down" ng-if="$index < ti.treatments.length-2" ng-click="move(ti.treatments, $index, $index+2, $event)"></i>
+                                  <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
+                                  <i ng-if="$index !== ti.treatments.length-1" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $index, ti.treatments.length, $event)"></i>
                                 </span>
                                 <i ng-click="remove($index, ti.treatments, $event)" class="fa fa-trash-o"></i>
                               </span>

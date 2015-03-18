@@ -8921,50 +8921,51 @@ i.fa-comments, i.fa-comments-o {
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003303}}
 i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover,
-i.fa-compress, i.fa-expand {
+i.fa-compress, i.fa-expand, i.fa-arrow-down,
+i.fa-arrow-up, i.fa-arrow-double-down, i.fa-arrow-double-up {
   cursor: pointer;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003307}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003308}}
 .fa-comments-white {
   color: inherit;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003310}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003311}}
 .fa-comments-orange {
   color: orange;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003313}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003314}}
 .fa-comments-green {
   color: #70b500;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003316}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003317}}
 rect {
   fill: none;
   pointer-events: all;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003321}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003322}}
 pre {
   font-size: 18px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003326}}
 line {
   stroke: #000;
   stroke-width: 1.5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003330}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003331}}
 path.link {
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003341}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003342}}
 .node circle {
   cursor: pointer;
   fill: #fff;
@@ -8972,54 +8973,54 @@ path.link {
   stroke-width: 1.5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003348}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003349}}
 .string, .regexp {
   color: #f39;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003352}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003353}}
 .keyword {
   color: #00c;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003356}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003357}}
 .comment {
   color: #777;
   font-style: oblique;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003361}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003362}}
 .number {
   color: #369;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003365}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003366}}
 .class, .special {
   color: #1181B8;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003369}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003370}}
 a:link, a:visited {
   color: #000;
   text-decoration: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003375}}
 a.withUnderScore {
   text-decoration: underline;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003379}}
 a:hover {
   color: #666;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003382}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003383}}
 ._hidden {
   display: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003386}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003387}}
 .hint {
   position: absolute;
   right: 0;
@@ -9028,7 +9029,7 @@ a:hover {
   color: #999;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003394}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003395}}
 .has-addon-feedback .form-control-feedback {
   position: absolute;
   top: 1px;
@@ -9041,54 +9042,54 @@ a:hover {
   pointer-events: auto;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003406}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003407}}
 .has-addon-feedback .form-control-feedback.result {
   right: 100px;
   width: 80px;
   text-align: right;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003411}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003412}}
 .has-addon-feedback .form-control-feedback.upper {
   z-index: 2;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003414}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003415}}
 .has-addon-feedback .form-control-feedback.lower {
   z-index: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003417}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003418}}
 .annotationClinicalTrial {
   margin-bottom: 10px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003420}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003421}}
 .resistance-title {
   color: red;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003423}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003424}}
 h5 {
   margin-bottom: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003428}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003429}}
 .sk-spinner-wave.mskcc div {
   background-color: #2986e2;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003431}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003432}}
 .sk-spinner-wave.white div {
   background-color: #fff;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003434}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003435}}
 .sk-spinner-wave.margin div {
   margin: 0 2px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003439}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003440}}
 .fa-rotate-45 {
   -webkit-transform: rotate(45deg);
   -moz-transform: rotate(45deg);
@@ -9097,7 +9098,7 @@ h5 {
   transform: rotate(45deg);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003446}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003447}}
 .fa-rotate-135 {
   -webkit-transform: rotate(135deg);
   -moz-transform: rotate(135deg);
@@ -9106,25 +9107,25 @@ h5 {
   transform: rotate(135deg);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003455}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003456}}
 .chosen-container-single .chosen-single {
   height: 30px;
   line-height: 30px;
   width: 100%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003462}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003463}}
 .panel-heading a:hover {
   color: black;
   text-decoration: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003466}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003467}}
 .table-bordered, .table-bordered > thead > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > tfoot > tr > td {
   border: 1px solid black;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003473}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003474}}
 #tumorTypesDropDown_chosen
 , #variantMutationDropDown_chosen
 , #variantGeneNameDropDown_chosen
@@ -9132,54 +9133,54 @@ h5 {
   width: 100% !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003479}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003480}}
 #CurationNCCNDropDown_chosen {
   width: 80% !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003483}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003484}}
 .m-b-5 {
   margin-bottom: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003487}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003488}}
 .half {
   width: 50%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003490}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003491}}
 .oneThird {
   width: 33.33333%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003493}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003494}}
 .oneFifth {
   width: 20%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003496}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003497}}
 .twoFifth {
   width: 40%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003499}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003500}}
 .threeFifth {
   width: 60%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003502}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003503}}
 .fullWidth {
   width: 100%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003505}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003506}}
 .alignCenter {
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003510}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003511}}
 .logo {
   width: 100%;
   height: 50px;
@@ -9190,7 +9191,7 @@ h5 {
   margin-bottom: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003519}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003520}}
 .logo > img {
   display: block;
   margin-left: auto;
@@ -9198,84 +9199,84 @@ h5 {
   max-height: 50px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003525}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003526}}
 .greyB {
   background-color: lightgray;
   font-weight: bold;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003529}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003530}}
 #variantCriteria > div {
   margin-bottom: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003532}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003533}}
 #questHeaderSwither {
   width: 100%;
   margin-bottom: 10px;
   height: 20px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003537}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003538}}
 #questHeaderSwither button {
   padding: 1px 10px;
   border: 0;
   float: right;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003542}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003543}}
 #questHeaderSwither div.fa {
   margin-left: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003545}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003546}}
 #rg-rfr-btn {
   margin-left: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003549}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003550}}
 .qtip hr {
   margin: 5px 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003553}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003554}}
 .qtip {
   max-width: 1000px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003556}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003557}}
 .geneKeywordSpan {
   margin: 0 5px;
   text-decoration: underline;
 }
 
 /*** custom checkboxes ***/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003562}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003563}}
 input[type=radio], input[type=checkbox] {
   display: none;
 }
 
 /* to hide the checkbox itself */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003563}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003564}}
 input[type=radio] + label:before, input[type=checkbox] + label:before {
   font-family: FontAwesome;
   display: inline-block;
   margin: 0 0 0 3px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003568}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003569}}
 input[type=radio] + label:hover, input[type=checkbox] + label:hover {
   cursor: pointer;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003571}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003572}}
 input[type=radio] + label:before, input[type=checkbox] + label:before {
   content: "\f096";
   letter-spacing: 5px;
 }
 
 /* unchecked icon */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003573}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/zhangh2\/repos\/oncokb\/web\/yo\/app\/styles\/main\.scss}line{font-family:\00003574}}
 input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:before {
   content: "\f046";
   letter-spacing: 5px;
