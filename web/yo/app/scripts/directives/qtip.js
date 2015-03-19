@@ -11,7 +11,7 @@ angular.module('oncokbApp')
     return {
       restrict: 'A',
       link: function (scope, element, attrs) {
-        var src = '<iframe width="850px" height="400px" src=\'';
+        var src = '<iframe width="600px" height="400px" src=\'';
         if(attrs.type && attrs.number) {
           switch (attrs.type) {
             case 'pmid':
@@ -31,7 +31,8 @@ angular.module('oncokbApp')
           content: $(src),
           position: {
             my: 'top left',
-            at: 'bottom left'
+            at: 'bottom right',
+            viewport: $(window)
           },
           style: {
             classes: 'qtip-light qtip-rounded'

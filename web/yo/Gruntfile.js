@@ -177,7 +177,7 @@ module.exports = function (grunt) {
     compass: {
       options: {
         sassDir: '<%= oncokb.app %>/styles',
-        cssDir: ['<%= oncokb.app %>/styles','.tmp/styles'],
+        cssDir: '.tmp/styles',
         generatedImagesDir: '.tmp/images/generated',
         imagesDir: '<%= oncokb.app %>/images',
         javascriptsDir: '<%= oncokb.app %>/scripts',
@@ -192,12 +192,14 @@ module.exports = function (grunt) {
       },
       dist: {
         options: {
-          generatedImagesDir: '<%= oncokb.dist %>/images/generated'
+          generatedImagesDir: '<%= oncokb.dist %>/images/generated',
+          environment: 'production'
         }
       },
       server: {
         options: {
-          debugInfo: true
+          debugInfo: true,
+          environment: 'development'
         }
       }
     },
@@ -358,6 +360,11 @@ module.exports = function (grunt) {
             'images/{,*/}*.{webp}',
             'fonts/*'
           ]
+        }, {
+          expand: true,
+          cwd: '.tmp/styles',
+          dest: '<%= oncokb.app %>/styles',
+          src: ['main.css']
         }, {
           expand: true,
           cwd: '.tmp/images',

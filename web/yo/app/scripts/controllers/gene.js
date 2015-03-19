@@ -333,7 +333,7 @@ angular.module('oncokbApp')
               // }, 1000);
             };
 
-            $scope.addTumorType = function(mutation, newTumorTypeName) {
+            $scope.addTumorType = function(mutation, newTumorTypeName, mutationIndex) {
               if (mutation && newTumorTypeName) {
                 var _tumorType = '';
                 $scope.realtimeDocument.getModel().beginCompoundOperation();
@@ -353,13 +353,13 @@ angular.module('oncokbApp')
                 }
                 mutation.tumors.push(_tumorType);
                 $scope.realtimeDocument.getModel().endCompoundOperation();
-                $scope.ttIsopen[mutation.tumors.length - 1] = true;
+                $scope.ttIsopen[mutationIndex][mutation.tumors.length - 1] = true;
                 sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
               }
             };
 
             //Add new therapeutic implication
-            $scope.addTI = function(ti, index, newTIName) {
+            $scope.addTI = function(ti, index, newTIName, mutationIndex, tumorIndex, tiIndex) {
               if (ti && newTIName) {
                 var _treatment = '';
                 $scope.realtimeDocument.getModel().beginCompoundOperation();
@@ -377,7 +377,7 @@ angular.module('oncokbApp')
                 }
                 ti.treatments.push(_treatment);
                 $scope.realtimeDocument.getModel().endCompoundOperation();
-                $scope.therapyIsopen[ti.treatments.length - 1] = true;
+                $scope.therapyIsopen[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = true;
               }
             };
 

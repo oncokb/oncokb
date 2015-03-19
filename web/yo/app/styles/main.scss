@@ -301,9 +301,12 @@ i.fa-comments, i.fa-comments-o{
   font-size: 15px;
 }
 i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover, 
-i.fa-compress, i.fa-expand, i.fa-angle-down, 
+i.fa-minus, i.fa-plus, i.fa-angle-down, 
 i.fa-angle-up, i.fa-angle-double-down, i.fa-angle-double-up{
   cursor: pointer;
+}
+.geneMainDiv i.fa-minus, .geneMainDiv i.fa-plus {
+  color: grey;
 }
 .fa-comments-white {
   color: inherit;
@@ -552,7 +555,7 @@ h5 {
 }
 
 .qtip {
-  max-width: 1000px
+  max-width: 700px
 }
 .geneKeywordSpan {
   margin: 0 5px;
