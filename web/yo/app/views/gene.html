@@ -10,6 +10,7 @@
       <span class="btn-group pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
+        <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
       </span>
     </h2>
     <p ng-if="gene.curators && gene.curators.asArray().length > 0">
@@ -18,7 +19,6 @@
     </p>
     <h3>{{gene.summary.display}}:<comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.summary.text"></p>
-    <pub-iframe ng-model="gene.summary.text"></pub-iframe>
     <h3>{{gene.background.display}}:<comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.background.text"></p>
     <pub-iframe ng-model="gene.background.text"></pub-iframe>
@@ -315,6 +315,7 @@
     <span class="btn btn-default" style="opacity: 1" disabled>{{gene.name.text}}</span>
     <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
     <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
+    <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
     <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
     <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
     <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>
