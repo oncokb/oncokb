@@ -36,6 +36,7 @@ angular.module('oncokbApp')
     };
 
     function create(data){
+      Y = MARGIN;
       DOC = new PDF('p','in','letter'); // inches on a 8.5 x 11 inch sheet.
       gene(data);
       DOC.save(data.name + '.pdf');
@@ -187,7 +188,5 @@ angular.module('oncokbApp')
       drawFunc(therapy.description);
     }
 
-    return {
-      create: create
-    };
+    this.create = create;
   });
