@@ -367,6 +367,7 @@ angular.module('oncokbApp', [
  .constant('_', window._)
  .constant('Levenshtein', window.Levenshtein)
  .constant('XLSX', window.XLSX)
+ .constant('PDF', window.jsPDF)
  .config(function ($provide, $locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
     var access = config.accessLevels;
 
