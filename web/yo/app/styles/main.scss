@@ -141,10 +141,15 @@ p.editableBox.doubleH {
 .curateTrialItem {
   float: left;
   height: 30px;
-  margin-right: 10px;
+  margin: 5px;
   border: 1px solid #ccc;
   padding: 3px 8px;
   border-radius: 3px;
+}
+.trialsInputGroup {
+  float: left;
+  margin: 5px;
+  width: 200px;
 }
 .genesLoading {
   position: absolute;

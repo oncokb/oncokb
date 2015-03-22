@@ -28,13 +28,19 @@ public class SendEmailController {
     @RequestMapping(value="/sendEmail", method = POST)
     public @ResponseBody Boolean getEmailContent(
             @RequestParam(value="subject", required=false) String subject,
-            @RequestParam(value="content", required=false) String body) {
+            @RequestParam(value="content", required=false) String body,
+            @RequestParam(value="sendTo", required=false) String sendTo) {
         
         if(subject != null && body != null) {
             String from = "oncokb.curation@gmail.com";
             String pass = "oncokbmskcc";
-            String[] to = { "oncokb.curation@gmail.com" }; // list of recipient email addresses
+            String[] to = new String[1]; // list of recipient email addresses
 
+            if(sendTo != null) {
+                to[0] = sendTo;
+            }else{
+                to[0] = "oncokb.curation@gmail.com";
+            }
             return sendFromGMail(from, pass, to, subject, body);
         }else {
             return false;

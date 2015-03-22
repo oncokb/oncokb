@@ -30,10 +30,10 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
+    folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
-    folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
-     // folderId: '0BzBfo69g8fP6UzdMZWY3ZHl2aGc', //one of backup folder
+    // folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
+    // folderId: '0BzBfo69g8fP6OW1YWWVRWHQ0WGs', //one of backup folder
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -439,6 +439,7 @@ angular.module('oncokbApp', [
         return function(exception, cause){
             var $rootScope = $injector.get('$rootScope');
             $rootScope.addError({message: 'Exception', reason: exception, case: cause});
+            $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
             // $delegate(exception, cause);
         };
     });
@@ -507,6 +508,11 @@ angular.module('oncokbApp').run(
                 $location.path('/genes');
             }
         }
+    });
+
+    // Other unidentify error
+    $rootScope.$on('oncokbError', function (data) {
+        DatabaseConnector.sendEmail({'sendTo': 'bugs.pro.exterminator', 'subject': 'OncoKB Bug: ' + data.reason, 'content': 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.reason + '\n\n' + 'Error message - cause:\n' + data.cause}, function(){}, function(){});
     });
 }]);
 

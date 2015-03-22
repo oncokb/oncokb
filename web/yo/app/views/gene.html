@@ -251,7 +251,7 @@
                     <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
                     <span class="input-group-btn">
                       <button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTI(ti, $index, newTIName, mutationIndex, tumorIndex, tiIndex); newTIName=''">
-                        <i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications{{mutationIndex}} {{tumorIndex}} {{tiIndex}}
+                        <i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications
                       </button>
                     </span>
                   </div>
@@ -265,15 +265,19 @@
                     <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict display-name="Ongoing clinical trials" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                   </accordion-heading>
                   <div>
-                    <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">{{trial}}
+                    <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">
+                    <a ng-href="https://clinicaltrials.gov/show/{{trial}}" target="_blank">{{trial}}</a>
                     <i ng-show="fileEditable" ng-click="remove($index, tumor.trials, $event)" class="fa fa-trash-o"></i>
                     </span>
-                    <div class="input-group input-group-sm" style="width:200px">
+                    <div class="input-group input-group-sm trialsInputGroup">
                       <input type="text" class="form-control" ng-model="newTrial" placeholder="Trial ID" />
                       <span class="input-group-btn">
                         <button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials, newTrial); newTrial=''">
                           <i class="fa fa-plus"></i> Add Trial
                         </button>
+                        <!-- <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="cleanTrial(tumor.trials)">
+                          <i class="fa fa-plus"></i> Clean Trial
+                        </button> -->
                       </span>
                     </div>
                   </div>

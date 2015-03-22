@@ -275,16 +275,28 @@ angular.module('oncokbApp')
             };
 
             $scope.addMutation = function(newMutationName) {
-                if (this.gene && newMutationName) {
-                    var _mutation = '';
-                    $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
-                    _mutation.name.setText(newMutationName);
-                    this.gene.mutations.push(_mutation);
-                    $scope.realtimeDocument.getModel().endCompoundOperation();
-                    $scope.mutationIsopen[this.gene.mutations.length - 1] = true;
-                    sendEmail(this.gene.name.text + ': new MUTATION added -> ' + newMutationName, ' ');
+              if (this.gene && newMutationName) {
+                newMutationName = newMutationName.toString().trim();
+                var exists = false;
+                this.gene.mutations.asArray().forEach(function(e){
+                  if(e.name.getText().toLowerCase() === newMutationName.toLowerCase()) {
+                    exists = true;
+                  }
+                })
+
+                if(exists) {
+                  dialogs.notify('Warning', 'Mutation exists.');
+                }else{
+                  var _mutation = '';
+                  $scope.realtimeDocument.getModel().beginCompoundOperation();
+                  _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
+                  _mutation.name.setText(newMutationName);
+                  this.gene.mutations.push(_mutation);
+                  $scope.realtimeDocument.getModel().endCompoundOperation();
+                  $scope.mutationIsopen[this.gene.mutations.length - 1] = true;
+                  sendEmail(this.gene.name.text + ': new MUTATION added -> ' + newMutationName, ' ');
                 }
+              }
             };
 
             $scope.stateComparator = function (state, viewValue) {
@@ -336,25 +348,38 @@ angular.module('oncokbApp')
             $scope.addTumorType = function(mutation, newTumorTypeName, mutationIndex) {
               if (mutation && newTumorTypeName) {
                 var _tumorType = '';
-                $scope.realtimeDocument.getModel().beginCompoundOperation();
-                _tumorType = $scope.realtimeDocument.getModel().create(OncoKB.Tumor);
-                _tumorType.name.setText(newTumorTypeName);
-                _tumorType.nccn.category.setText('2A');
-                for(var i=0; i<4; i++) {
-                  var __ti = $scope.realtimeDocument.getModel().create(OncoKB.TI);
-                  var __status = i<2?1:0; // 1: Standard, 0: Investigational
-                  var __type = i%2===0?1:0; //1: sensitivity, 0: resistance
-                  var __name = (__status?'Standard':'Investigational') + ' implications for ' + (__type?'sensitivity':'resistance') + ' to therapy';
+                var exists = false;
+                newTumorTypeName = newTumorTypeName.toString().trim();
 
-                  __ti.types.set('status', __status.toString());
-                  __ti.types.set('type', __type.toString());
-                  __ti.name.setText(__name);
-                  _tumorType.TI.push(__ti);
+                mutation.tumors.asArray().forEach(function(e){
+                  if(e.name.getText().toLowerCase() === newTumorTypeName.toLowerCase()) {
+                    exists = true;
+                  }
+                });
+
+                if(exists) {
+                  dialogs.notify('Warning', 'Tumor type exists.');
+                }else{
+                  $scope.realtimeDocument.getModel().beginCompoundOperation();
+                  _tumorType = $scope.realtimeDocument.getModel().create(OncoKB.Tumor);
+                  _tumorType.name.setText(newTumorTypeName);
+                  _tumorType.nccn.category.setText('2A');
+                  for(var i=0; i<4; i++) {
+                    var __ti = $scope.realtimeDocument.getModel().create(OncoKB.TI);
+                    var __status = i<2?1:0; // 1: Standard, 0: Investigational
+                    var __type = i%2===0?1:0; //1: sensitivity, 0: resistance
+                    var __name = (__status?'Standard':'Investigational') + ' implications for ' + (__type?'sensitivity':'resistance') + ' to therapy';
+
+                    __ti.types.set('status', __status.toString());
+                    __ti.types.set('type', __type.toString());
+                    __ti.name.setText(__name);
+                    _tumorType.TI.push(__ti);
+                  }
+                  mutation.tumors.push(_tumorType);
+                  $scope.realtimeDocument.getModel().endCompoundOperation();
+                  $scope.ttIsopen[mutationIndex][mutation.tumors.length - 1] = true;
+                  sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
                 }
-                mutation.tumors.push(_tumorType);
-                $scope.realtimeDocument.getModel().endCompoundOperation();
-                $scope.ttIsopen[mutationIndex][mutation.tumors.length - 1] = true;
-                sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
               }
             };
 
@@ -362,22 +387,35 @@ angular.module('oncokbApp')
             $scope.addTI = function(ti, index, newTIName, mutationIndex, tumorIndex, tiIndex) {
               if (ti && newTIName) {
                 var _treatment = '';
-                $scope.realtimeDocument.getModel().beginCompoundOperation();
-                _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
-                _treatment.name.setText(newTIName);
-                _treatment.type.setText('Therapy');
-                if($scope.checkTI(ti, 1, 1)) {
-                  _treatment.level.setText('1');
-                }else if($scope.checkTI(ti, 0, 1)){
-                  _treatment.level.setText('4');
-                }else if($scope.checkTI(ti, 1, 0)){
-                  _treatment.level.setText('1');
-                }else if($scope.checkTI(ti, 0, 0)){
-                  _treatment.level.setText('4');
+                var exists = false;
+                newTIName = newTIName.toString().trim();
+
+                ti.treatments.asArray().forEach(function(e){
+                  if(e.name.getText().toLowerCase() === newTIName.toLowerCase()) {
+                    exists = true;
+                  }
+                });
+
+                if(exists) {
+                  dialogs.notify('Warning', 'Therapy exists.');
+                }else{
+                  $scope.realtimeDocument.getModel().beginCompoundOperation();
+                  _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
+                  _treatment.name.setText(newTIName);
+                  _treatment.type.setText('Therapy');
+                  if($scope.checkTI(ti, 1, 1)) {
+                    _treatment.level.setText('1');
+                  }else if($scope.checkTI(ti, 0, 1)){
+                    _treatment.level.setText('4');
+                  }else if($scope.checkTI(ti, 1, 0)){
+                    _treatment.level.setText('1');
+                  }else if($scope.checkTI(ti, 0, 0)){
+                    _treatment.level.setText('4');
+                  }
+                  ti.treatments.push(_treatment);
+                  $scope.realtimeDocument.getModel().endCompoundOperation();
+                  $scope.therapyIsopen[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = true;
                 }
-                ti.treatments.push(_treatment);
-                $scope.realtimeDocument.getModel().endCompoundOperation();
-                $scope.therapyIsopen[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = true;
               }
             };
 
@@ -392,9 +430,36 @@ angular.module('oncokbApp')
 
             //Add new therapeutic implication
             $scope.addTrial = function(trials, newTrial) {
-                if (trials && newTrial) {
+              if (trials && newTrial) {
+                if(trials.indexOf(newTrial) === -1){
+                  if(newTrial.match(/NCT[0-9]+/ig)) {
                     trials.push(newTrial);
+                  }else{
+                    dialogs.notify('Warning', 'Please check your trial ID format. (e.g. NCT01562899)');
+                  }
+                }else {
+                  dialogs.notify('Warning', 'Trial exists.');
                 }
+              }
+            };
+
+            $scope.cleanTrial = function(trials) {
+              var cleanTrials = {};
+              trials.asArray().forEach(function(e,index){
+                if(cleanTrials.hasOwnProperty(e)){
+                  cleanTrials[e].push(index);
+                }else{
+                  cleanTrials[e] = [];
+                }
+              });
+              for(var key in cleanTrials) {
+                if(cleanTrials[key].length > 0) {
+                  cleanTrials[key].forEach(function(e){
+                    trials.removeValue(key);
+                  });
+                }
+              }
+              console.log(cleanTrials);
             };
 
             $scope.addTrialStr = function(trials) {
