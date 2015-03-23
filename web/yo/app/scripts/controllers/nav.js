@@ -12,7 +12,8 @@ angular.module('oncokbApp')
     var tabs = {
         'tree': 'Tree',
         'variant': 'Variant Annotation',
-        'genes': 'Genes'
+        'genes': 'Genes',
+        'reportGenerator': 'Tools'
     };
 
     var accessLevels = config.accessLevels;
@@ -48,7 +49,7 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'genes', value: tabs.genes});
         }
         // if(access.authorize(accessLevels.admin)) {
-        //     var keys = ['tree', 'variant'];
+        //     var keys = ['tree', 'variant', 'reportGenerator'];
 
         //     keys.forEach(function(e){
         //         filterTabs.push({'key': e, 'value': tabs[e]});
