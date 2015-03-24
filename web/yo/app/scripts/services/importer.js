@@ -125,7 +125,7 @@ angular.module('oncokbApp')
     function copyFileData(folderId, fileId, fileTitle, docIndex, callback) {
       storage.requireAuth(true).then(function () {
         storage.createDocument(fileTitle, folderId).then(function (file) {
-          console.log('Created file ', fileTitle);
+          console.log('Created file ', fileTitle, docIndex + 1);
           storage.getRealtimeDocument(fileId).then(function (realtime){
             if(realtime && realtime.error) {
               console.log('did not get realtime document.');
