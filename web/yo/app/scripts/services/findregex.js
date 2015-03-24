@@ -8,7 +8,7 @@
  * Factory in the oncokb.
  */
 angular.module('oncokbApp')
-  .factory('FindRegex', function () {
+  .factory('FindRegex', function (_) {
     function find(str, type) {
         if(typeof str === 'string' && str !== '') {
             var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
@@ -45,19 +45,16 @@ angular.module('oncokbApp')
     }
 
     function result(str) {
-        var uniqueResult = {},
-        uniqueResultA = [];
+        var uniqueResultA = [];
         if(typeof str === 'string' && str !== '') {
-            var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
-                links = ['http://www.ncbi.nlm.nih.gov/pubmed/',
-                         'http://clinicaltrials.gov/show/'];
+            var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig];
             for (var j = 0, regexL = regex.length; j < regexL; j++) {
-                var result = str.match(regex[j]);
+                var resultMatch = str.match(regex[j]);
 
-                if(result) {
+                if(resultMatch) {
                     /*jshint -W083 */
-                    var _uniqueResult = result.filter(function(elem, pos) {
-                        return result.indexOf(elem) === pos;
+                    var _uniqueResult = resultMatch.filter(function(elem, pos) {
+                        return resultMatch.indexOf(elem) === pos;
                     });
                     for(var i = 0, resultL = _uniqueResult.length; i < resultL; i++) {
                         var _datum = _uniqueResult[i];
@@ -69,12 +66,14 @@ angular.module('oncokbApp')
                                 _number = _number.replace(/\s+/g, '');
                                 _number = _number.split(',');
                                 _number.forEach(function(e){
-                                    uniqueResult['pmid' + e] = {type: 'pmid', id: e};
+                                    if(e) {
+                                        uniqueResultA.push({type: 'pmid', id: e});
+                                    }
                                 });
                                 break;
                             //clinical trial NCT
                             case 1:
-                                uniqueResult[_datum] = {type: 'nct', id: _datum};
+                                uniqueResultA.push({type: 'nct', id: _datum});
                                 break;
                             default:
                                 break;
@@ -86,10 +85,7 @@ angular.module('oncokbApp')
             }
         }
 
-        for(var key in uniqueResult) {
-            uniqueResultA.push(uniqueResult[key]);
-        }
-        return uniqueResultA;
+        return _.uniq(uniqueResultA, 'id');
     }
 
     function createTag(type, link, content){

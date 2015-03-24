@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-  .service('driveOncokbInfo', function driveOncokbInfo() {
+  .service('driveOncokbInfo', function driveOncokbInfo(_) {
 
     var self = this;
     self.genes = {};
@@ -54,8 +54,9 @@ angular.module('oncokbApp')
       }
     }
 
-    function set(data, dataKey, geneKey) {
+    function set(data, dataKey, geneKey, type) {
       if(!angular.isUndefined(dataKey) &&!angular.isUndefined(geneKey) && angular.isArray(data)){
+        var jsonObject = {};
         data.forEach(function(e){
           if(e.gene) {
             var _gene = e.gene.toString().trim();
@@ -63,8 +64,17 @@ angular.module('oncokbApp')
               self.genes[_gene] = new Gene();
             }
 
-            if(angular.isString(e[dataKey])) {
-              self.genes[_gene][geneKey] = e[dataKey].split(';').map(function(e1){ return e1.toString().trim();});
+            if(angular.isDefined(type) && type === 'object') {
+              if(e[dataKey]) {
+                jsonObject = JSON.parse(e[dataKey]);
+                self.genes[_gene][geneKey] = _.forIn(jsonObject, function(value, key){
+                  jsonObject[key] = splitLinks(value);
+                });
+              }else{
+                self.genes[_gene][geneKey] = {};
+              }
+            }else if(angular.isString(e[dataKey])) {
+              self.genes[_gene][geneKey] = splitLinks(e[dataKey]);
             }else {
               self.genes[_gene][geneKey] = [];
             }
@@ -72,6 +82,10 @@ angular.module('oncokbApp')
         });
         updateGenesArray();
       }
+    }
+
+    function splitLinks(str) {
+      return str.split(';').map(function(e){ return e.toString().trim();});
     }
 
     function updateGenesArray() {
@@ -88,17 +102,27 @@ angular.module('oncokbApp')
       },
       setPubMed: function(pubMed){
         set(pubMed, 'links', 'pubMedLinks');
+        set(pubMed, 'mutationLinks', 'pubMedMutationLinks', 'object');
       },
       get: get,
       getSuggestions: function(params){
         return get(params, 'mutations');
       },
       getPubMed: function(params){
-        var pubMed = get(params, 'pubMedLinks');
-        if(pubMed){
-          return pubMed.pubMedLinks;
+        var pubMed = {
+          gene: [],
+          mutations: {}
+        };
+        var gene = get(params, 'pubMedLinks');
+        var mutations = get(params, 'pubMedMutationLinks');
+        if(gene){
+          pubMed.gene = gene;
         }
-        return undefined;
+
+        if(mutations){
+          pubMed.mutations = mutations;
+        }
+        return pubMed;
       },
       getMutation: function(gene){
         if(angular.isString(gene)) {

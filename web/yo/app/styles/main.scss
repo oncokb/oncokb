@@ -296,6 +296,22 @@ p.editableBox.doubleH {
   background-color: #E4EAF2;
   border-left: 5px solid #396BB6;
 }
+.geneLinks td:nth-child(1){
+  font-size:15px;
+  font-weight: bold;
+}
+.geneLinkDiv>span {
+  float: left;
+  font-size: 13px;
+  font-weight: bold;
+}
+.geneLinkDiv>div{
+  float: left;
+  margin: 0 0 0 10px;
+}
+.geneLinkDiv>div>div>span{
+  font-style: italic;
+}
 table.dataTable thead .sorting_asc {
   background: none;
 }
@@ -468,12 +484,15 @@ h5 {
 }
 
 //Change bootstrap default color
-.panel-heading a:hover {
-  color: black;
-  text-decoration: none;
+.animate-show.ng-hide-add, .animate-show.ng-hide-remove {
+  /* this is required as of 1.3x to properly
+     apply all styling in a show/hide animation */
+  transition: 0s linear all;
 }
-.table-bordered, .table-bordered > thead > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > th, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > th, .table-bordered > tfoot > tr > td{
-  border: 1px solid black;
+.animate-show.ng-hide-add.ng-hide-add-active,
+.animate-show.ng-hide-remove.ng-hide-remove-active {
+  -webkit-transition: all linear 0.5s;
+  transition: all linear 0.5s;
 }
 
 

@@ -282,7 +282,7 @@ angular.module('oncokbApp')
                   if(e.name.getText().toLowerCase() === newMutationName.toLowerCase()) {
                     exists = true;
                   }
-                })
+                });
 
                 if(exists) {
                   dialogs.notify('Warning', 'Mutation exists.');
@@ -452,6 +452,7 @@ angular.module('oncokbApp')
                   cleanTrials[e] = [];
                 }
               });
+              /*jshint -W083 */
               for(var key in cleanTrials) {
                 if(cleanTrials[key].length > 0) {
                   cleanTrials[key].forEach(function(e){
@@ -459,6 +460,7 @@ angular.module('oncokbApp')
                   });
                 }
               }
+              /*jshint +W083 */
               console.log(cleanTrials);
             };
 
@@ -565,12 +567,24 @@ angular.module('oncokbApp')
             }
 
             function getDriveOncokbInfo() {
+              var pubMedLinks = DriveOncokbInfo.getPubMed({gene: $scope.fileTitle});
+              var pubMedLinksLength = 0;
               $scope.suggestedMutations = DriveOncokbInfo.getMutation($scope.fileTitle) || [];
               if($scope.suggestedMutations.length === 0) {
                 $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
               }
 
-              $scope.pubMedLinks = DriveOncokbInfo.getPubMed({gene: $scope.fileTitle}) || [];
+              $scope.pubMedLinks = {
+                gene: pubMedLinks.gene.pubMedLinks || [],
+                mutations: pubMedLinks.mutations.pubMedMutationLinks || {}
+              };
+
+              for(var key in $scope.pubMedLinks.mutations) {
+                pubMedLinksLength += $scope.pubMedLinks.mutations[key].length;
+              }
+              $scope.pubMedMutationLength = Object.keys($scope.pubMedLinks.mutations).length;
+              $scope.pubMedMutationLinksLength = pubMedLinksLength;
+              $scope.pubMedLinksLength = pubMedLinksLength + $scope.pubMedLinks.gene.length;
             }
 
             function bindDocEvents() {

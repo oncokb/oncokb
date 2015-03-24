@@ -16,9 +16,7 @@ angular.module('oncokbApp')
 
         function updatePubs(modelValue) {
           var pubs = FindRegex.result(modelValue);
-          pubs = sortPubsFilter(pubs);
           scope.pubs = pubs;
-
         }
         scope.pubs = [];
 

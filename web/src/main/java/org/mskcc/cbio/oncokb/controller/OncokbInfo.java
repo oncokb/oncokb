@@ -108,6 +108,7 @@ public class OncokbInfo {
             PubMed link = new PubMed();
             link.setGene(row.getCustomElements().getValue("gene"));
             link.setLinks(row.getCustomElements().getValue("links"));
+            link.setMutationLinks(row.getCustomElements().getValue("mutationlinks"));
             links.add(link);
         }
         return links;

@@ -65,9 +65,6 @@ angular.module('oncokbApp')
         element.css({
           height: '100%'
         });
-        // element.animate({
-        //   height: '100%'
-        // }, 0, done);
       } else {
         done();
       }

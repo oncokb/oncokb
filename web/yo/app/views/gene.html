@@ -23,18 +23,45 @@
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.background.text"></p>
     <pub-iframe ng-model="gene.background.text"></pub-iframe>
     <div ng-if="gene.name.text">
-      <span>cBioPortal link: <a href="http://www.cbioportal.org/ln?q={{gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{gene.name.text}}</a></span><br/>
-      <span>COSMIC link: <a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></span>
-      <br/>
-      <span ng-if="pubMedLinks && pubMedLinks.length > 1">
-      PubMed links:
-        <ul>
-          <li ng-repeat="link in pubMedLinks"><a href="{{link}}" target="_blank">{{link}}</a></li>
-        </ul>
-      </span>
-      <span ng-if="pubMedLinks && pubMedLinks.length === 1">
-      PubMed link: <a href="{{pubMedLinks[0]}}" target="_blank">{{pubMedLinks[0]}}</a>
-      </span>
+      <table class="table geneLinks">
+      <tbody>
+        <tr>
+          <td>cBioPortal link: </td>
+          <td><a href="http://www.cbioportal.org/ln?q={{gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{gene.name.text}}</a></td>
+        </tr>
+        <tr>
+          <td>COSMIC link: </td>
+          <td><a href="http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}" target="_blank">http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={{gene.name.text}}</a></td>
+        </tr>
+        <tr>
+          <td>
+            <span ng-if="pubMedLinks && pubMedLinksLength > 1">PubMed links:</span>
+            <span ng-if="pubMedLinks && pubMedLinksLength === 1">PubMed link:</span>
+          </td>
+          <td>
+            <div ng-if="pubMedLinks.gene.length > 0">
+              <span style="font-size: 13px;font-weight: bold;">Gene:</span>
+              <ul>
+                <li ng-repeat="link in pubMedLinks.gene"><a href="{{link}}" target="_blank">{{link}}</a></li>
+              </ul>
+            </div>
+            <div class="geneLinkDiv" ng-if="pubMedMutationLinksLength > 0">
+              <span><span ng-show="pubMedMutationLinksLength > 2"><i ng-click="expand = !(!!expand)" class="fa" ng-class="{'fa-minus': !!expand, 'fa-plus':!(!!expand)}"></i> {{pubMedMutationLength}} m</span><span ng-if="pubMedMutationLinksLength <=2">M</span>utation<span ng-if="pubMedMutationLinksLength > 1">s</span></span>
+              <div ng-show="!!expand || pubMedMutationLinksLength <= 2">
+                <div ng-repeat="(key, value) in pubMedLinks.mutations">
+                  <span>{{key}}</span>
+                  <ul>
+                    <li ng-repeat="link in value"><a href="{{link}}" target="_blank">{{link}}</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+      </table>
+      
+      
     </div>
   </div>
   <div id="mutation">

@@ -7,6 +7,7 @@ package org.mskcc.cbio.oncokb.model;
 public class PubMed {
     private String gene;
     private String links;
+    private String mutationLinks;
 
     public String getGene() {
         return gene;
@@ -22,5 +23,13 @@ public class PubMed {
 
     public void setLinks(String links) {
         this.links = links;
+    }
+
+    public String getMutationLinks() {
+        return mutationLinks;
+    }
+
+    public void setMutationLinks(String mutationLinks) {
+        this.mutationLinks = mutationLinks;
     }
 }

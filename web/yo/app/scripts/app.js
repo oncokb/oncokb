@@ -33,13 +33,14 @@ OncoKB.config = {
     // folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
-    // folderId: '0BzBfo69g8fP6OW1YWWVRWHQ0WGs', //one of backup folder
+    // folderId: '0BzBfo69g8fP6UmVBd0txZkJMaGs', //one of backup folder
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
         'curator':4, // 0100
         'admin':  8  // 1000
     },
+    // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     accessLevels: {}
 };
