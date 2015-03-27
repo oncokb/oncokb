@@ -61,33 +61,64 @@ public class GenerateGoogleDoc {
     }
     
     private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6eXoydVRrdHJBbE0";
-    private static final String  REPORT_DATA_TEMPLATE = "1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM";
-    private static final String REPORTS_INFO_SHEET_ID = "1fsixOxg-o-_UwZvInU99791ITyYhs4nz8s35_qJmw8o";
+    private static final String  REPORT_DATA_TEMPLATE = "1bE3h2a_xz7do6wvdnbK7DXZOpuuK0Vh8ccraTDHcvQs";
+    private static final String REPORTS_INFO_SHEET_ID = "1dHsXjrk9R5C3MkJ_iEUZ39OQPTSF3UOPYjU_C54zXuA";
         
     @RequestMapping(value="/generateGoogleDoc", method = POST)
     public @ResponseBody Boolean generateGoogleDoc(
-            @RequestParam(value="reportContent", required=false) String reportContent) throws MalformedURLException, ServiceException, URISyntaxException{
-        Boolean responseFlag = false;
+            @RequestParam(value="reportContent", required=true) String report,
+            @RequestParam(value="requestInfo", required=true) String request) throws MalformedURLException, ServiceException, URISyntaxException{
         try {
-            JSONObject jsonObj = new JSONObject(reportContent);
-            DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
-            Date date = new Date();
-            String dateString = dateFormat.format(date);
-            Drive driveService = GoogleAuth.getDriveService();
-            System.out.println("Got drive service");
-            String fileName = jsonObj.getString("geneName") + "_" + jsonObj.getString("mutation") + "_" + jsonObj.getString("diagnosis");
-            File file = new File();
-            file.setTitle(fileName);
-            file.setParents(Arrays.asList(new ParentReference().setId(REPORT_PARENT_FOLDER)));
-            file.setDescription("New File created from server");
-            System.out.println("Copying file");
-            file = driveService.files().copy(REPORT_DATA_TEMPLATE, file).execute();
-            System.out.println("Successfully copied file. Start to change file content");
-            changeFileContent(file.getId(), file.getTitle(), jsonObj);
-            System.out.println("Successfully changed file content. Start to add new record");
-            addNewRecord(file.getId(), file.getTitle(), "zhx", dateString, jsonObj.get("email").toString(),jsonObj.has("folderId")?jsonObj.get("folderId").toString():null,jsonObj.has("folderId")?jsonObj.get("folderName").toString():null);
-            System.out.println("Successfully added new record");
-            responseFlag = true;
+            
+            if(report == null || request == null) {
+                return false;
+            }else{
+                JSONObject reportContent = new JSONObject(report);
+                JSONObject requestInfo = new JSONObject(request);
+                
+                if(reportContent.isNull("records") || reportContent.getJSONArray("records").length() == 0) {
+                    return false;
+                }else{
+                    JSONArray records = reportContent.getJSONArray("records");
+                    
+                    DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
+                    Date date = new Date();
+                    String dateString = dateFormat.format(date);
+                    
+                    Drive driveService = GoogleAuth.getDriveService();
+                    System.out.println("Got drive service");
+                    
+                    String fileName = getFileName(reportContent, records);
+                    
+                    File file = new File();
+                    file.setTitle(fileName);
+                    file.setParents(Arrays.asList(new ParentReference().setId(REPORT_PARENT_FOLDER)));
+                    file.setDescription("New File created from server");
+                    
+                    System.out.println("Copying file");
+                    
+                    file = driveService.files().copy(REPORT_DATA_TEMPLATE, file).execute();
+                    
+                    System.out.println("Successfully copied file. Start to change file content");
+                    
+                    changeFileContent(file.getId(), file.getTitle(), reportContent, records);
+                    
+                    String userName = "zhx";
+                    
+                    if(requestInfo.has("userName")) {
+                        userName = requestInfo.getString("userName");
+                    }
+                    System.out.println("Successfully changed file content. Start to add new record");
+                    
+                    addNewRecord(file.getId(), file.getTitle(), userName, 
+                            dateString, requestInfo.get("email").toString(), 
+                            requestInfo.has("folderId")?requestInfo.get("folderId").toString():null,
+                            requestInfo.has("folderName")?requestInfo.get("folderName").toString():null);
+                    
+                    System.out.println("Successfully added new record");
+                    return true;
+                }
+            }
         } catch (GoogleJsonResponseException e) {
             GoogleJsonError error = e.getDetails();
 
@@ -104,10 +135,25 @@ public class GenerateGoogleDoc {
         } catch (GeneralSecurityException e) {
             System.out.println("An GeneralSecurityException occurred: " + e);
         }
-        return responseFlag;
+        return false;
     }
     
-    public static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    private static String getFileName(JSONObject content, JSONArray records){
+        String fileName = "";
+        
+        if(content.has("records")) {
+            if(records.length() > 1) {
+                fileName = content.getString("patientName");
+            }else{
+                fileName = records.getJSONObject(0).getString("geneName") + "_" + records.getJSONObject(0).getString("mutation");
+            }
+            fileName += "_" + content.getString("diagnosis");
+        }
+        
+        return fileName;
+    }
+    
+    private static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
         
         SpreadsheetService service = GoogleAuth.getSpreadSheetService();
@@ -120,7 +166,7 @@ public class GenerateGoogleDoc {
         
         // Fetch the list feed of the worksheet.
         URL listFeedUrl = worksheet.getListFeedUrl();
-        ListFeed listEntry = service.getFeed(listFeedUrl, ListFeed.class);
+        
         // Create a local representation of the new row.
         ListEntry row = new ListEntry();
         row.getCustomElements().setValueLocal("reportdatafileid", reportDataFileId);
@@ -140,7 +186,7 @@ public class GenerateGoogleDoc {
         service.insert(listFeedUrl, row);
     }
     
-    public static void changeFileContent(String fileId, String fileName, JSONObject content) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    private static void changeFileContent(String fileId, String fileName, JSONObject content, JSONArray records) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
         
         SpreadsheetService service = GoogleAuth.getSpreadSheetService();
@@ -157,15 +203,27 @@ public class GenerateGoogleDoc {
         ListEntry listEntry  = listFeed.getEntries().get(0);
         
         Iterator<String> keys = content.keys();
-        System.out.println("Successfully get all entries. Start to change content");
-        while(keys.hasNext()){
-            String key = keys.next();
-            if(!content.get(key).toString().equals("")) {
-                listEntry.getCustomElements().setValueLocal(key, content.get(key).toString());
+        System.out.println("Successfully get all entries. Start to add record");
+        
+        for(int i = 0 ; i < records.length() ; i++) {
+            ListEntry row = new ListEntry();
+            JSONObject record = records.getJSONObject(i);
+            while(keys.hasNext()){
+                String key = keys.next();
+                if(!content.get(key).toString().equals("")) {
+                    listEntry.getCustomElements().setValueLocal(key, content.get(key).toString());
+                }
             }
+            Iterator<String> recordKeys = record.keys();
+            while(recordKeys.hasNext()){
+                String recordKey = recordKeys.next();
+                if(!content.get(recordKey).toString().equals("")) {
+                    listEntry.getCustomElements().setValueLocal(recordKey, record.get(recordKey).toString());
+                }
+            }
+            System.out.print("Added one record.");
+            service.insert(listFeedUrl, row);
         }
-        System.out.print("Updating...");
-        listEntry.update();
         System.out.println("Done.");
     }
 }
