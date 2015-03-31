@@ -2,9 +2,9 @@
 
 /**
  * @ngdoc service
- * @name oncokb.GenerateReportDataService
+ * @name oncokb.FindRegex
  * @description
- * # GenerateReportDataService
+ * # FindRegex
  * Factory in the oncokb.
  */
 angular.module('oncokbApp')
