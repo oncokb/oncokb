@@ -249,6 +249,12 @@ angular.module('oncokbApp')
 
         function searchAnnotationCallback(status, data) {
             var annotation = {};
+            var params = {
+                'geneName': '',
+                'alteration': '',
+                'tumorType': '',
+                'annotation': '',
+                'relevantCancerType': ''};
             if(status === 'success') {
                 annotation = processData(x2js.xml_str2json(data).xml);
                 for(var key in annotation) {
@@ -282,7 +288,13 @@ angular.module('oncokbApp')
                     $scope.relevantCancerType = null;
                 }
 
-                $scope.reportParams = ReportDataService.init($scope.gene, $scope.alteration, $scope.selectedTumorType, $scope.relevantCancerType, $scope.annotation);
+                params.geneName = $scope.gene;
+                params.alteration = $scope.alteration;
+                params.tumorType = $scope.selectedTumorType;
+                params.annotation = $scope.annotation;
+                params.relevantCancerType = $scope.relevantCancerType;
+
+                $scope.reportParams = ReportDataService.init([params])[0];
     //                $scope.regularViewData = regularViewData($scope.annotation);
                 $scope.reportViewData = reportViewData($scope.reportParams);
             }
