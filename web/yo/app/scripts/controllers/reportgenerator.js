@@ -258,6 +258,12 @@ angular.module('oncokbApp')
         var reportParams = '';
         var relevantCancerTypeArray = [];
         var relevantCancerType = {};
+        var params = {
+            'geneName': '',
+            'alteration': '',
+            'tumorType': '',
+            'annotation': '',
+            'relevantCancerType': ''};
 
         if(status === 'success') {
             annotation = processData(x2js.xml_str2json(data).xml);
@@ -286,8 +292,13 @@ angular.module('oncokbApp')
                     relevantCancerType = null;
                 }
             }
+            params.geneName = worker.gene;
+            params.alteration = worker.alteration;
+            params.tumorType = worker.tumorType;
+            params.annotation = annotation;
+            params.relevantCancerType = relevantCancerType;
 
-            reportParams = ReportDataService.init(worker.gene, worker.alteration, worker.tumorType, relevantCancerType,annotation);
+            reportParams = ReportDataService.init([params])[0];
 
             //Check email
             if($scope.sheets.email && $scope.sheets.email !== '') {
@@ -482,61 +493,73 @@ angular.module('oncokbApp')
             var full = x2js.xml_str2json(e.target.result);
             var reportViewDatas = [];
             var variants = [];
-            if(angular.isArray(full.document.sample.test.variant)) {
-                variants = full.document.sample.test.variant;
-            }else {
-                variants.push(full.document.sample.test.variant);
-            }
-            for(var k = 0 ;k < variants.length;k++){
-                var annotation = processData(variants[k].allele.transcript);
-                var relevantCancerType = {};
-                for(var key in annotation) {
-                    annotation[key] = formatDatum(annotation[key], key);
+            if(angular.isDefined(full.document.sample.test.variant)) {
+                if(angular.isArray(full.document.sample.test.variant)) {
+                    variants = full.document.sample.test.variant;
+                }else {
+                    variants.push(full.document.sample.test.variant);
                 }
-                if(annotation.cancer_type) {
-                    var relevantCancerTypeA = [];
-                    var i = 0;
-                    var cancerTypeL = annotation.cancer_type.length;
-
-                    for(; i < cancerTypeL; i++) {
-                        var _cancerType = annotation.cancer_type[i];
-                        if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
-                            relevantCancerTypeA.push(_cancerType);
-                        }
+                for(var k = 0 ;k < variants.length;k++){
+                    var annotation = processData(variants[k].allele.transcript);
+                    var relevantCancerType = {};
+                    for(var key in annotation) {
+                        annotation[key] = formatDatum(annotation[key], key);
                     }
-                    if(relevantCancerTypeA.length > 1) {
-                        /* jshint -W083 */
-                        relevantCancerTypeA.sort(function(e){
-                            if(e.$type.toString().toLowerCase() === 'all tumors'){
-                                return -1;
-                            }else{
-                                return 1;
-                            }
-                        });
-                        /* jshint +W083 */
-                        var obj1 = relevantCancerTypeA[0];
-                        var relevantL=relevantCancerTypeA.length;
-                        
-                        i = 1;
+                    if(annotation.cancer_type) {
+                        var relevantCancerTypeA = [];
+                        var i = 0;
+                        var cancerTypeL = annotation.cancer_type.length;
 
-                        for(; i < relevantL; i++) {
-                            obj1 = DeepMerge.init(obj1, relevantCancerTypeA[i], obj1.$type, relevantCancerTypeA[i].$type);
+                        for(; i < cancerTypeL; i++) {
+                            var _cancerType = annotation.cancer_type[i];
+                            if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
+                                relevantCancerTypeA.push(_cancerType);
+                            }
                         }
-                        relevantCancerType = obj1;
-                    }else if(relevantCancerTypeA.length === 1){
-                        relevantCancerType = relevantCancerTypeA[0];
+                        if(relevantCancerTypeA.length > 1) {
+                            /* jshint -W083 */
+                            relevantCancerTypeA.sort(function(e){
+                                if(e.$type.toString().toLowerCase() === 'all tumors'){
+                                    return -1;
+                                }else{
+                                    return 1;
+                                }
+                            });
+                            /* jshint +W083 */
+                            var obj1 = relevantCancerTypeA[0];
+                            var relevantL=relevantCancerTypeA.length;
+                            
+                            i = 1;
+
+                            for(; i < relevantL; i++) {
+                                obj1 = DeepMerge.init(obj1, relevantCancerTypeA[i], obj1.$type, relevantCancerTypeA[i].$type);
+                            }
+                            relevantCancerType = obj1;
+                        }else if(relevantCancerTypeA.length === 1){
+                            relevantCancerType = relevantCancerTypeA[0];
+                        }else {
+                            relevantCancerType = null;
+                        }
                     }else {
                         relevantCancerType = null;
                     }
-                }else {
-                    relevantCancerType = null;
+                    var params = {
+                    'geneName': annotation.hgnc_symbol,
+                    'alteration': annotation.hgvs_p_short,
+                    'tumorType': full.document.sample.diagnosis,
+                    'annotation': annotation,
+                    'relevantCancerType': relevantCancerType};
+
+                    var reportParams = ReportDataService.init([params])[0];
+                    reportViewDatas.push(reportViewData(reportParams));
                 }
-                var reportParams = ReportDataService.init(annotation.hgnc_symbol, annotation.hgvs_p_short, full.document.sample.diagnosis, relevantCancerType, annotation);
-                reportViewDatas.push(reportViewData(reportParams));
+                $scope.reportViewDatas = reportViewDatas;
+                $scope.isXML = true;
+                $scope.$apply();
+            }else{
+                $scope.isXML = false;
+                $scope.$apply();
             }
-            $scope.reportViewDatas = reportViewDatas;
-            $scope.isXML = true;
-            $scope.$apply();
         };
 
         reader.readAsBinaryString(file._file);
@@ -698,4 +721,6 @@ angular.module('oncokbApp')
             generate(getWorkers('regenerate'));
         }
     };
+
+    $scope.multiVariants = [];
   }]);
