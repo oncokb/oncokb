@@ -64,8 +64,7 @@ angular.module('oncokbApp')
             self.init = function() {
                 self.id = '';
                 self.status = {};
-                self.status.generating = false;
-                self.status.generated = false;
+                self.status.generate = 0; //0: ungenerated, 1: successfully generated, -1: unsuccessfully generated, 2: generating
                 self.email = '';
                 self.folderName = '';
                 self.fileName = '';
@@ -104,6 +103,7 @@ angular.module('oncokbApp')
         //Workers could be categorised by XLSX entries or by patientId, each entry could also category variants based on
         //patientId
         function set(data) {
+            workers.length = 0;
             createWorkers(data);
             initWorkers();
         }
@@ -124,13 +124,13 @@ angular.module('oncokbApp')
                     if(angular.isArray(data[key])){
                         datum.forEach(function(e){
                             var _worker = new ReportGeneratorWorker(e);
-                            console.log(_worker);
+                            _worker.parent.name = key;
                             workers.push(_worker);
                         });
                     }else{
                         for(var patientId in datum){
                             var _worker = new ReportGeneratorWorker(datum[patientId], patientId);
-                            console.log(_worker);
+                            _worker.parent.name = key;
                             workers.push(_worker);
                         }
                     }
@@ -257,7 +257,7 @@ angular.module('oncokbApp')
 
 angular.module('oncokbApp')
     .factory('reportGeneratorData', function($q, DatabaseConnector){
-        var genes, mutations, tumorTypes;
+        var genes, alterations, tumorTypes;
         function init(){
             var defer = $q.defer();
             DatabaseConnector.getGeneAlterationTumortype(function(data){
@@ -265,9 +265,9 @@ angular.module('oncokbApp')
                 OncoKB.global.alterations = angular.copy(data.alterations);
                 OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
-                $scope.genes = getUnique(data.genes, 'hugoSymbol');
-                $scope.alterations = getUnique(data.alterations, 'name');
-                $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
+                genes = getUnique(data.genes, 'hugoSymbol');
+                alterations = getUnique(data.alterations, 'name');
+                tumorTypes = getUnique(data.tumorTypes, 'name');
                 defer.resolve();
             });
 
@@ -275,42 +275,55 @@ angular.module('oncokbApp')
         }
 
         function getGene(){
-            if(!$scope.genes) {
+            var defer = $q.defer();
+            if(!genes) {
                 init().then(function(){
-                    return $scope.gene;
+                    defer.resolve(genes);
                 })
             }else{
-                return $scope.gene;
+                defer.resolve(genes);
             }
-
+            return defer.promise;;
         }
 
         function getMutation(){
-            if(!$scope.alterations) {
+            var defer = $q.defer();
+            if(!alterations) {
                 init().then(function(){
-                    return $scope.alterations;
-                })
+                    defer.resolve(alterations);
+                });
             }else{
-                return $scope.alterations;
+                defer.resolve(alterations);
             }
+            return defer.promise;
         }
 
         function getTumorType(){
-            if(!$scope.tumorTypes) {
+            var defer = $q.defer();
+            if(!tumorTypes) {
                 init().then(function(){
-                    return $scope.tumorTypes;
-                })
+                    defer.resolve(tumorTypes);
+                });
             }else{
-                return $scope.tumorTypes;
+                defer.resolve(tumorTypes);
             }
+            return defer.promise;
         }
 
         function get(){
-            return {
-                gene: getGene(),
-                mutation: getMutation(),
-                tumorType: getTumorType()
-            }
+            var defer = $q.defer();
+            getGene().then(function(){
+                getMutation().then(function(){
+                    getTumorType().then(function(){
+                        defer.resolve({
+                            genes: genes,
+                            alterations: alterations,
+                            tumorTypes: tumorTypes
+                        });
+                    });
+                });
+            });
+            return defer.promise;
         }
 
         function getUnique(data, attr) {

@@ -7,67 +7,75 @@
  * # toolXLSX
  */
 angular.module('oncokbApp')
-    .directive('toolXLSX', function (FileUploader, DatabaseConnector) {
+    .directive('toolXlsx', function (
+        FileUploader,
+        DatabaseConnector,
+        reportGeneratorData,
+        reportGeneratorWorkers,
+        XLSX,
+        dialogs,
+        S,
+        Levenshtein) {
       return {
-        template: '<div></div>',
+        templateUrl: 'views/toolxlsx.html',
         restrict: 'E',
-        scope: {
-          uploader: ''
-        },
+        scope: {},
         link: function postLink(scope, element, attrs) {
-          element.text('this is the toolXLSX directive');
+
         },
         controller: function($scope){
-          var uploader = $scope.uploader;
-          uploader = $scope.uploader = new FileUploader();
+          function initUploader() {
+            var uploader = $scope.uploader;
+            uploader = $scope.uploader = new FileUploader();
 
-          uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
-            console.info('onWhenAddingFileFailed', item, filter, options);
-          };
+            uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
+              console.info('onWhenAddingFileFailed', item, filter, options);
+            };
 
-          uploader.onAfterAddingFile  = function(fileItem) {
-            console.info('onAfterAddingFile', fileItem);
-            initParams();
-            $scope.fileSelected = true;
-            if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-              readXLSXfile(fileItem);
-            }else if(fileItem.file.type === 'text/xml'){
-              readXMLfile(fileItem);
-            }else {
-              dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
-              uploader.removeFromQueue(fileItem);
-            }
-          };
+            uploader.onAfterAddingFile  = function(fileItem) {
+              console.info('onAfterAddingFile', fileItem);
+              console.log($scope);
+              initParams(function(){
+                $scope.fileSelected = true;
+                if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                  readXLSXfile(fileItem);
+                }else {
+                  dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
+                  uploader.removeFromQueue(fileItem);
+                }
+              });
+            };
 
-          uploader.onAfterAddingAll = function(addedFileItems) {
-            console.info('onAfterAddingAll', addedFileItems);
-          };
-          uploader.onBeforeUploadItem = function(item) {
-            console.info('onBeforeUploadItem', item);
-          };
-          uploader.onProgressItem = function(fileItem, progress) {
-            console.info('onProgressItem', fileItem, progress);
-          };
-          uploader.onProgressAll = function(progress) {
-            console.info('onProgressAll', progress);
-          };
-          uploader.onSuccessItem = function(fileItem, response, status, headers) {
-            console.info('onSuccessItem', fileItem, response, status, headers);
-          };
-          uploader.onErrorItem = function(fileItem, response, status, headers) {
-            console.info('onErrorItem', fileItem, response, status, headers);
-          };
-          uploader.onCancelItem = function(fileItem, response, status, headers) {
-            console.info('onCancelItem', fileItem, response, status, headers);
-          };
-          uploader.onCompleteItem = function(fileItem, response, status, headers) {
-            console.info('onCompleteItem', fileItem, response, status, headers);
-          };
-          uploader.onCompleteAll = function() {
-            console.info('onCompleteAll');
-          };
+            uploader.onAfterAddingAll = function(addedFileItems) {
+              console.info('onAfterAddingAll', addedFileItems);
+            };
+            uploader.onBeforeUploadItem = function(item) {
+              console.info('onBeforeUploadItem', item);
+            };
+            uploader.onProgressItem = function(fileItem, progress) {
+              console.info('onProgressItem', fileItem, progress);
+            };
+            uploader.onProgressAll = function(progress) {
+              console.info('onProgressAll', progress);
+            };
+            uploader.onSuccessItem = function(fileItem, response, status, headers) {
+              console.info('onSuccessItem', fileItem, response, status, headers);
+            };
+            uploader.onErrorItem = function(fileItem, response, status, headers) {
+              console.info('onErrorItem', fileItem, response, status, headers);
+            };
+            uploader.onCancelItem = function(fileItem, response, status, headers) {
+              console.info('onCancelItem', fileItem, response, status, headers);
+            };
+            uploader.onCompleteItem = function(fileItem, response, status, headers) {
+              console.info('onCompleteItem', fileItem, response, status, headers);
+            };
+            uploader.onCompleteAll = function() {
+              console.info('onCompleteAll');
+            };
+          }
 
-          function initParams() {
+          function initParams(callback) {
             $scope.sheets = {
               length: 0,
               attr: ['sheet1'],
@@ -96,21 +104,6 @@ angular.module('oncokbApp')
 
             $scope.hasFailed = false;
 
-
-              $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
-              $scope.alterations = getUnique(angular.copy(OncoKB.global.alterations), 'name');
-              $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
-            }else {
-              DatabaseConnector.getGeneAlterationTumortype(function(data){
-                OncoKB.global.genes = angular.copy(data.genes);
-                OncoKB.global.alterations = angular.copy(data.alterations);
-                OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
-
-                $scope.genes = getUnique(data.genes, 'hugoSymbol');
-                $scope.alterations = getUnique(data.alterations, 'name');
-                $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
-              });
-            }
             $scope.summaryTableTitles = [
               'Treatment Implications',
               'FDA Approved Drugs in Tumor Type',
@@ -125,6 +118,22 @@ angular.module('oncokbApp')
               'clinicalTrials',
               'additionalInfo'
             ];
+            $scope.$watch('sheets.folder', function(o,n){
+              console.log(o, n);
+            });
+
+            getGMT(callback);
+          }
+
+          //get genes, mutations and tumor types
+          function getGMT(callback){
+            var data = reportGeneratorData.get().then(function(data){
+              console.log(data);
+              $scope.genes = data.genes;
+              $scope.alterations = data.alterations;
+              $scope.tumorTypes = data.tumorTypes;
+              callback();
+            });
           }
 
           function readXLSXfile(file) {
@@ -143,9 +152,10 @@ angular.module('oncokbApp')
                 var sheetName = workbook.SheetNames[i];
 
                 var json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[i]]);
-
+                console.log(json);
                 fileValue[sheetName] = [];
                 fileAttrs[sheetName] = ['gene', 'alteration', 'tumorType'];
+                $scope.sheets.folder[sheetName] = {};
                 /* jshint -W083 */
                 json.forEach(function(e,i){
                   var datum = {
@@ -160,8 +170,7 @@ angular.module('oncokbApp')
                   for(var key in e) {
                     if (e.hasOwnProperty(key)) {
                       if(/gene/i.test(key)) {
-                        var _gene = check(e[key], 'genes');
-                        datum.gene = _gene;
+                        datum.gene = check(e[key], 'genes');
                       }else if(/alteration/i.test(key)) {
                         var _alteration = check(trimAlteration(e[key]), 'alterations');
                         datum.alteration = _alteration;
@@ -177,7 +186,50 @@ angular.module('oncokbApp')
                 totalRecord += fileValue[sheetName].length;
               }
 
+              function trimAlteration(alteration) {
+                if(S(alteration).startsWith('p.')) {
+                  alteration = alteration.slice(2);
+                }
+
+                if(alteration.indexOf('Ter')) {
+                  alteration = alteration.replace('Ter', '*');
+                }
+                return alteration;
+              }
+
+              function check(datum, checkV, attr) {
+                var similarity = [],
+                    same = false;
+                for (var i = 0, length = $scope[checkV].length; i < length; i++) {
+                  var _datum;
+
+                  if(typeof attr !== 'undefined' && attr) {
+                    _datum = $scope[checkV][i][attr];
+                  }else {
+                    _datum = $scope[checkV][i];
+                  }
+
+
+                  if(datum.toString().toUpperCase() === _datum.toString().toUpperCase()) {
+                    datum = _datum;
+                    same = true;
+                    break;
+                  }else {
+                    var lavenshtein = new Levenshtein(datum, _datum);
+                    similarity.push(lavenshtein.distance);
+                  }
+                }
+
+                // if(same) {
+                return datum;
+                // }else {
+                //     return datum + ' ' + noMatchSeperator;
+                // }
+              }
+
               console.log(workbookSheetsNum, fileAttrs, fileValue, totalRecord);
+              reportGeneratorWorkers.set(fileValue);
+              $scope.workers = reportGeneratorWorkers.get();
               $scope.sheets.length = workbookSheetsNum;
               $scope.sheets.attr = fileAttrs;
               $scope.sheets.arr = fileValue;
@@ -186,10 +238,36 @@ angular.module('oncokbApp')
               $scope.progress.max = totalRecord;
               $scope.isXLSX = true;
               $scope.$apply();
+              console.log($scope.workers);
             };
 
             reader.readAsBinaryString(file._file);
           }
+
+          function generate(){
+            console.log($scope);
+            $scope.workers.forEach(function(worker){
+              worker.email = $scope.sheets.email || 'jackson.zhang.828@gmail.com';
+              worker.folderName = $scope.sheets.folder[worker.parent.name].name || '';
+              worker.status.generate = 2;
+              worker.getData().then(function(){
+                worker.generateGoogleDoc().then(function(result){
+                  console.log(worker);
+                  $scope.progress.dynamic += 1;
+                  $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+                  if(result && result.error){
+                    worker.status.generate = -1;
+                  }else{
+                    worker.status.generate = 1;
+                  }
+                });
+                console.log(worker);
+              });
+            });
+          }
+
+          $scope.generate = generate;
+          $scope.init = initUploader;
         }
       };
     });
