@@ -1,0 +1,78 @@
+<div class="reportGenerator" nv-file-drop="" uploader="uploader" filters="queueLimit, customFilter" ng-init="init()">
+
+    <div class="row">
+        <h3>Select file</h3>
+
+        <div ng-show="uploader.isHTML5">
+            <!-- 3. nv-file-over uploader="link" over-class="className" -->
+            <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
+                Drop your file in here. <br/>(xlsx file or quest annotated xml file only)
+            </div>
+        </div>
+        <input type="file" nv-file-select="" uploader="uploader" />
+
+        <br/>
+        <form ng-if="fileSelected && isXLSX" class="form-inline">
+            <div class="input-group input-group-sm" style='width:100%' >
+                <span class="input-group-addon"><b>Email:</b></span>
+                <input type="text" ng-model="sheets.email" id="email" class="form-control">
+            </div>
+            <div ng-repeat="(key, value) in sheets.arr" class="input-group input-group-sm" style='width:100%'>
+                <span class="input-group-addon"><b>Folder name for {{key}}:</b></span>
+                <input type="text" id="folderName-{{$index}}" ng-model="sheets.folder[key].name" class="form-control" placeholder="(optional)">
+            </div>
+        </form>
+    </div>
+    <hr/>
+    <div class="row">
+        <h3>Create multi-variants report</h3>
+        <table class="table">
+            <thead><tr><th>ID</th><th>Patient ID</th><th>Gene Name</th><th>Mutation</th><th>Tumor Type</th></tr></thead>
+            <tbody>
+            <tr ng-repeat="variant in multiVariants">
+                <td>{{$index + 1}}</td>
+                <td>{{variant.patientId}}</td>
+                <td>{{variant.gene}}</td>
+                <td>{{variant.alteration}}</td>
+                <td>{{variant.tumorType}}</td>
+                <td><i class="fa fa-trash-o" ng-click="deleteItem($index, multiVariants, 'multiV')"></i></td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td></td>
+                <td class="input-group input-group-sm"><input type="text" class="form-control" ng-model='patientIdFront'/></td>
+                <td>
+                    <select chosen ng-model='geneFront' id="variantGeneNameDropDown" ng-options='gene for gene in genes' allow-single-deselect="true">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td class="input-group input-group-sm"><input type="text" class="form-control" ng-model="mutationFront"></td>
+                <td>
+                    <select chosen ng-model='selectedTumorTypeFront' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true">
+                        <option value=""></option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn btn-default btn-sm" ng-click="addItem(patientIdFront, geneFront, mutationFront, selectedTumorTypeFront)" ng-disabled="!patientIdFront || !geneFront || !mutationFront || !selectedTumorTypeFront"><i class="fa fa-plus"></i></button>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div ng-if="fileSelected && isXML" class="col-md-12">
+        <accordion close-others="oneAtATime">
+            <accordion-group  ng-repeat="reportViewData in reportViewDatas" >
+                <accordion-heading>
+                    <span>{{reportViewData.geneName}}&nbsp;&nbsp;&nbsp;{{reportViewData.mutation}}&nbsp;&nbsp;&nbsp;{{reportViewData.tumorTissueType}}</span>
+                </accordion-heading>
+                <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
+
+            </accordion-group>
+        </accordion>
+    </div>
+    <div ng-if="fileSelected && !isXML && !isXLSX" class="col-md-12">
+        No info.
+    </div>
+</div>

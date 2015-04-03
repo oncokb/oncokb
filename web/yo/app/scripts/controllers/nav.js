@@ -48,13 +48,13 @@ angular.module('oncokbApp')
         if(access.authorize(accessLevels.curator)) {
             filterTabs.push({key: 'genes', value: tabs.genes});
         }
-        // if(access.authorize(accessLevels.admin)) {
-        //     var keys = ['tree', 'variant', 'reportGenerator'];
+        if(access.authorize(accessLevels.admin)) {
+            var keys = ['tree', 'variant', 'reportGenerator'];
 
-        //     keys.forEach(function(e){
-        //         filterTabs.push({'key': e, 'value': tabs[e]});
-        //     });
-        // }
+            keys.forEach(function(e){
+                filterTabs.push({'key': e, 'value': tabs[e]});
+            });
+        }
         $scope.signedIn = access.isLoggedIn();
         $scope.tabs = filterTabs;
     }

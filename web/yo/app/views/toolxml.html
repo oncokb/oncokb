@@ -1,0 +1,14 @@
+<div ng-if="fileSelected && isXML" class="col-md-12">
+    <accordion close-others="oneAtATime">
+        <accordion-group  ng-repeat="reportViewData in reportViewDatas" >
+            <accordion-heading>
+                <span>{{reportViewData.geneName}}&nbsp;&nbsp;&nbsp;{{reportViewData.mutation}}&nbsp;&nbsp;&nbsp;{{reportViewData.tumorTissueType}}</span>
+            </accordion-heading>
+            <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
+
+        </accordion-group>
+    </accordion>
+</div>
+<div ng-if="fileSelected && !isXML && !isXLSX" class="col-md-12">
+    No info.
+</div>
