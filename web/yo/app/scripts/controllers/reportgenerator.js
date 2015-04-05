@@ -13,7 +13,6 @@ angular.module('oncokbApp')
         '$timeout' ,
         'dialogs',
         'DatabaseConnector',
-        'GenerateReportDataService',
         'DeepMerge',
         'x2js',
         'FindRegex',

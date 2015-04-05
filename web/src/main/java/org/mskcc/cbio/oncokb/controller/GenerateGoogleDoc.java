@@ -66,20 +66,20 @@ public class GenerateGoogleDoc {
         
     @RequestMapping(value="/generateGoogleDoc", method = POST)
     public @ResponseBody Boolean generateGoogleDoc(
-            @RequestParam(value="reportContent", required=true) String report,
-            @RequestParam(value="requestInfo", required=true) String request) throws MalformedURLException, ServiceException, URISyntaxException{
+            @RequestParam(value="reportParams", required=true) String reportParams) throws MalformedURLException, ServiceException, URISyntaxException{
         try {
             
-            if(report == null || request == null) {
+            if(reportParams == null) {
                 return false;
             }else{
-                JSONObject reportContent = new JSONObject(report);
-                JSONObject requestInfo = new JSONObject(request);
+                JSONObject reportParams = new JSONObject(reportParams);
+                JSONObject reportContent = reportParams.getJSONObject('reportContent');
+                JSONObject requestInfo =  reportParams.getJSONObject('requestInfo');
                 
-                if(reportContent.isNull("records") || reportContent.getJSONArray("records").length() == 0) {
+                if(reportContent.isNull("items") || reportContent.getJSONArray("items").length() == 0) {
                     return false;
                 }else{
-                    JSONArray records = reportContent.getJSONArray("records");
+                    JSONArray items = reportContent.getJSONArray("items");
                     
                     DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
                     Date date = new Date();
@@ -88,7 +88,7 @@ public class GenerateGoogleDoc {
                     Drive driveService = GoogleAuth.getDriveService();
                     System.out.println("Got drive service");
                     
-                    String fileName = getFileName(reportContent, records);
+                    String fileName = requestInfo.getString("fileName");
                     
                     File file = new File();
                     file.setTitle(fileName);
@@ -101,9 +101,13 @@ public class GenerateGoogleDoc {
                     
                     System.out.println("Successfully copied file. Start to change file content");
                     
-                    changeFileContent(file.getId(), file.getTitle(), reportContent, records);
+                    changeFileContent(file.getId(), file.getTitle(), reportContent, items);
                     
                     String userName = "zhx";
+
+                    if(requestInfo.has("userName") && requestInfo.getString("fileName") != ""){
+                        userName = requestInfo.getString("fileName");
+                    }
                     
                     if(requestInfo.has("userName")) {
                         userName = requestInfo.getString("userName");
@@ -138,14 +142,14 @@ public class GenerateGoogleDoc {
         return false;
     }
     
-    private static String getFileName(JSONObject content, JSONArray records){
+    private static String getFileName(JSONObject content, JSONArray items){
         String fileName = "";
         
-        if(content.has("records")) {
-            if(records.length() > 1) {
+        if(content.has("items")) {
+            if(items.length() > 1) {
                 fileName = content.getString("patientName");
             }else{
-                fileName = records.getJSONObject(0).getString("geneName") + "_" + records.getJSONObject(0).getString("mutation");
+                fileName = items.getJSONObject(0).getString("geneName") + "_" + items.getJSONObject(0).getString("mutation");
             }
             fileName += "_" + content.getString("diagnosis");
         }

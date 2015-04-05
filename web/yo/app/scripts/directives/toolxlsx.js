@@ -11,8 +11,10 @@ angular.module('oncokbApp')
         $timeout,
         FileUploader,
         DatabaseConnector,
+        reportGenerator,
         reportGeneratorData,
         reportGeneratorWorkers,
+        GenerateReportDataService,
         XLSX,
         dialogs,
         S,
@@ -86,6 +88,9 @@ angular.module('oncokbApp')
               email: 'jackson.zhang.828@gmail.com'
             };
 
+            //Group workers by patient id
+            $scope.groups = {};
+
             $scope.workers = [];
 
             $scope.progress = {
@@ -122,6 +127,7 @@ angular.module('oncokbApp')
               generating: false,
               generateIndex: -1,
               initializingIndex: -1,
+              groupIndex: -1,
               failed: false,
               fileSelected: false,
               mergePatient: true
@@ -131,38 +137,58 @@ angular.module('oncokbApp')
               $scope.progress.max = n;
             });
 
-            $scope.$watch('status.generateIndex', function(n, o){
-              if(n == 0){
+            $scope.$watch('status.initializingIndex', function(n, o){
+              if(n === 0) {
+                $scope.groupKeys = [];
+                $scope.groups = {};
+                $scope.status.groupIndex = -1;
+                $scope.status.generateIndex = -1;
                 $scope.progress.dynamic = 0;
-                $scope.progress.value = 0;
-                $scope.progress.max = $scope.workers.length;
+                $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
               }
+
               if(n >= 0) {
-                if(n >= $scope.workers.length) {
-                  $scope.status.generating = false;
-                  $scope.status.generateIndex = -1;
+                if(n === $scope.workers.length) {
+                  $scope.status.initializing = false;
+                  $scope.status.initializingIndex = -1;
+                  groupWorkers();
+                  $scope.status.groupIndex = 0;
+                  $scope.status.generateIndex = 0;
                 }
 
                 if(n < $scope.workers.length){
-                  generate();
+                  initializeWorkersData();
+                }
+              }
+            });
+
+            $scope.$watch('status.groupIndex', function(n, o){
+              if(n >= 0) {
+                if(n >= $scope.groupKeys.length) {
+                  $scope.status.generating = false;
+                  $scope.status.groupIndex = -1;
+                }
+
+                if(n < $scope.groupKeys.length){
+                  generateGoogleDocs();
                 }
               }
             });
 
             $scope.$watch('status.generateIndex', function(n, o){
-              if(n == 0){
+              if(n === 0){
                 $scope.progress.dynamic = 0;
                 $scope.progress.value = 0;
                 $scope.progress.max = $scope.workers.length;
               }
               if(n >= 0) {
+                if(n > 0){
+                  $scope.progress.dynamic += n - o;
+                  $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+                }
                 if(n >= $scope.workers.length) {
                   $scope.status.generating = false;
                   $scope.status.generateIndex = -1;
-                }
-
-                if(n < $scope.workers.length){
-                  generate();
                 }
               }
             });
@@ -284,13 +310,72 @@ angular.module('oncokbApp')
             reader.readAsBinaryString(file._file);
           }
 
-          function initialzeWorkersData(){
+          function initializeWorkersData(){
             $scope.workers[$scope.status.initializingIndex].email = $scope.sheets.email || 'jackson.zhang.828@gmail.com';
-            $scope.workers[$scope.status.initializingIndex].folderName = $scope.sheets.folder[$scope.workers[$scope.status.generateIndex].parent.name].name || '';
+            $scope.workers[$scope.status.initializingIndex].folderName = $scope.sheets.folder[$scope.workers[$scope.status.initializingIndex].parent.name].name || '';
             $scope.workers[$scope.status.initializingIndex].status.generate = 2;
+            $scope.workers[$scope.status.initializingIndex].userName = $rootScope.user.name;
             $scope.workers[$scope.status.initializingIndex].getData().then(function(){
-              $scope.workers[$scope.status.initializingIndex].status.generate = 3;
+              $timeout(function(){
+                $scope.workers[$scope.status.initializingIndex].status.generate = 3;
+                $scope.status.initializingIndex++;
+              },1000);
             });
+          }
+
+          function groupWorkers(){
+            if($scope.status.mergePatient) {
+              $scope.workers.forEach(function(e, i){
+                var _id = e.parent.name + '-' + e.patientId;
+                if(!$scope.groups.hasOwnProperty(_id)){
+                  $scope.groups[_id] = [];
+                }
+                $scope.groups[_id].push(i);
+              });
+              $scope.groupKeys = Object.keys($scope.groups);
+            }else{
+              $scope.workers.forEach(function(e, i){
+                if(!$scope.groups.hasOwnProperty(i)){
+                  $scope.groups[i] = [];
+                }
+                $scope.groups[i].push(i);
+              });
+              $scope.groupKeys = Object.keys($scope.groups);
+            }
+          }
+
+          function generateGoogleDocs() {
+            var params = [];
+            var reportParams = {};
+            var group = $scope.groups[$scope.groupKeys[$scope.status.groupIndex]];
+
+            group.forEach(function(e){
+              var _worker = $scope.workers[e];
+              $scope.workers[e].status.generate = 4;
+              reportParams.email =  _worker.email;
+              reportParams.folderName = _worker.folderName;
+              reportParams.fileName = _worker.fileName;
+              params.push({
+                geneName: _worker.gene,
+                alteration: _worker.alteration,
+                tumorType: _worker.tumorType,
+                annotation: _worker.annotation.annotation,
+                relevantCancerType: _worker.annotation.relevantCancerType
+              });
+            });
+
+            reportParams.items = GenerateReportDataService.init(params);
+            console.log(reportParams);
+            $timeout(function(){
+              reportGenerator.generateGoogleDoc(reportParams).then(function(){
+                group.forEach(function(e){
+                  $scope.workers[e].status.generate = 1;
+                });
+                $scope.status.groupIndex++;
+                $scope.status.generateIndex += group.length;
+              },function(){
+              });
+            }, 1000);
           }
           function generate(){
             console.log('Generating - ', $scope.status.generateIndex);

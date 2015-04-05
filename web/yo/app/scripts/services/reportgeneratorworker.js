@@ -12,18 +12,23 @@ angular.module('oncokbApp')
         var worker = function(data, patientId){
             var self = this;
             self.parseAnnotation = function(data){
-                var annotation = reportGeneratorParseAnnotation.parse(data);
+                self.annotation = reportGeneratorParseAnnotation.parse(data);
+            };
 
-                self.reportParams = GenerateReportDataService.init([{
+            self.prepareReportParams = function(){
+                self.reportParams.reportContent = GenerateReportDataService.init([{
                     geneName: self.gene,
                     alteration: self.alteration,
                     tumorType: self.tumorType,
-                    annotation: annotation.annotation,
-                    relevantCancerType: annotation.relevantCancerType
-                }])[0];
-                self.reportParams.email = self.email;
-                self.reportParams.folderName = self.folderName;
-                self.reportParams.fileName = self.fileName;
+                    annotation: self.annotation.annotation,
+                    relevantCancerType: self.annotation.relevantCancerType
+                }]);
+                self.reportParams.reportContent.patientName = self.patientId || '';
+                self.reportParams.reportContent.diagnosis = self.reportParams.reportContent.tumorTissueType = self.tumorType;
+                self.reportParams.requestInfo.email = self.email;
+                self.reportParams.requestInfo.folderName = self.folderName;
+                self.reportParams.requestInfo.fileName = self.fileName;
+                self.reportParams.requestInfo.userName = self.userName;
             };
 
             self.generateGoogleDoc = function(){
@@ -61,10 +66,14 @@ angular.module('oncokbApp')
                 self.email = '';
                 self.folderName = '';
                 self.fileName = '';
+                self.userName = '';
                 self.parent = {};
                 self.annotation = '';
                 self.parent.name = ''; // could be the entry name
-                self.reportParams = {};
+                self.reportParams = {
+                    requestInfo: {},
+                    reportContent: {}
+                };
 
                 if(angular.isString(patientId)) {
                     self.patientId = patientId;
@@ -241,7 +250,7 @@ angular.module('oncokbApp')
     });
 
 angular.module('oncokbApp')
-    .factory('reportGeneratorData', function($q, DatabaseConnector){
+    .factory('reportGeneratorData', function($q, DatabaseConnector, OncoKB){
         var genes, alterations, tumorTypes;
         function init(){
             var defer = $q.defer();
@@ -264,11 +273,11 @@ angular.module('oncokbApp')
             if(!genes) {
                 init().then(function(){
                     defer.resolve(genes);
-                })
+                });
             }else{
                 defer.resolve(genes);
             }
-            return defer.promise;;
+            return defer.promise;
         }
 
         function getMutation(){
