@@ -12,14 +12,7 @@ angular.module('oncokbApp')
         var worker = function(data, patientId){
             var self = this;
             self.parseAnnotation = function(data){
-                var params = {};
                 var annotation = reportGeneratorParseAnnotation.parse(data);
-
-                params.geneName = self.gene;
-                params.alteration = self.alteration;
-                params.tumorType = self.tumorType;
-                params.annotation = annotation.annotation;
-                params.relevantCancerType = annotation.relevantCancerType;
 
                 self.reportParams = GenerateReportDataService.init([{
                     geneName: self.gene,
@@ -64,7 +57,7 @@ angular.module('oncokbApp')
             self.init = function() {
                 self.id = '';
                 self.status = {};
-                self.status.generate = 0; //0: ungenerated, 1: successfully generated, -1: unsuccessfully generated, 2: generating
+                self.status.generate = 0; //0: ungenerated, 1: successfully generated, -1: unsuccessfully generated, 2: initializing, 3: initialized, 4: generating
                 self.email = '';
                 self.folderName = '';
                 self.fileName = '';
@@ -105,19 +98,11 @@ angular.module('oncokbApp')
         function set(data) {
             workers.length = 0;
             createWorkers(data);
-            initWorkers();
-        }
-
-        function initWorkers(){
-            if(workers.length > 0) {
-                workers.forEach(function(e){
-                    e.init();
-                });
-            }
         }
 
         function createWorkers(data){
             //self is categorised by XLSX entries
+
             if(angular.isObject(data)){
                 for(var key in data){
                     var datum = data[key];

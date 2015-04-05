@@ -8,6 +8,7 @@
  */
 angular.module('oncokbApp')
     .directive('toolXlsx', function (
+        $timeout,
         FileUploader,
         DatabaseConnector,
         reportGeneratorData,
@@ -24,6 +25,7 @@ angular.module('oncokbApp')
 
         },
         controller: function($scope){
+
           function initUploader() {
             var uploader = $scope.uploader;
             uploader = $scope.uploader = new FileUploader();
@@ -34,10 +36,10 @@ angular.module('oncokbApp')
 
             uploader.onAfterAddingFile  = function(fileItem) {
               console.info('onAfterAddingFile', fileItem);
-              console.log($scope);
               initParams(function(){
-                $scope.fileSelected = true;
+                $scope.status.fileSelected = true;
                 if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                  $scope.status.isXLSX = true;
                   readXLSXfile(fileItem);
                 }else {
                   dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
@@ -83,43 +85,86 @@ angular.module('oncokbApp')
               folder: {},
               email: 'jackson.zhang.828@gmail.com'
             };
+
+            $scope.workers = [];
+
             $scope.progress = {
               value: 0,
               dynamic: 0,
-              max: 0
+              max: $scope.workers.length
             };
-            //if file selected
-            $scope.fileSelected = false;
 
-            //default file type is xlsx
-            $scope.isXML = false;
-            $scope.isXLSX = false;
-
-            //one worker running
-            $scope.generating = false;
-
-            //all workering running
-            $scope.working = false;
-            $scope.generateIndex = -1;
-
-            $scope.hasFailed = false;
-
-            $scope.summaryTableTitles = [
-              'Treatment Implications',
-              'FDA Approved Drugs in Tumor Type',
-              'FDA Approved Drugs in Other Tumor Type',
-              'Clinical Trials',
-              'Additional Information'
+            $scope.table = [
+              {
+                name: 'parent',
+                title: 'Entry'
+              },
+              {
+                name: 'patientId',
+                title: 'Patient ID'
+              },
+              {
+                name: 'gene',
+                title: 'Gene'
+              },
+              {
+                name: 'alteration',
+                title: 'Alteration'
+              },
+              {
+                name: 'tumorType',
+                title: 'Tumor Type'
+              }
             ];
-            $scope.reportMatchedParams = [
-              'treatment',
-              'fdaApprovedInTumor',
-              'fdaApprovedInOtherTumor',
-              'clinicalTrials',
-              'additionalInfo'
-            ];
-            $scope.$watch('sheets.folder', function(o,n){
-              console.log(o, n);
+
+            $scope.status = {
+              isXLSX: false,
+              generating: false,
+              generateIndex: -1,
+              initializingIndex: -1,
+              failed: false,
+              fileSelected: false,
+              mergePatient: true
+            };
+
+            $scope.$watch('$scope.workers.length', function(n, o){
+              $scope.progress.max = n;
+            });
+
+            $scope.$watch('status.generateIndex', function(n, o){
+              if(n == 0){
+                $scope.progress.dynamic = 0;
+                $scope.progress.value = 0;
+                $scope.progress.max = $scope.workers.length;
+              }
+              if(n >= 0) {
+                if(n >= $scope.workers.length) {
+                  $scope.status.generating = false;
+                  $scope.status.generateIndex = -1;
+                }
+
+                if(n < $scope.workers.length){
+                  generate();
+                }
+              }
+            });
+
+            $scope.$watch('status.generateIndex', function(n, o){
+              if(n == 0){
+                $scope.progress.dynamic = 0;
+                $scope.progress.value = 0;
+                $scope.progress.max = $scope.workers.length;
+              }
+              if(n >= 0) {
+                if(n >= $scope.workers.length) {
+                  $scope.status.generating = false;
+                  $scope.status.generateIndex = -1;
+                }
+
+                if(n < $scope.workers.length){
+                  generate();
+                }
+              }
             });
 
             getGMT(callback);
@@ -146,30 +191,29 @@ angular.module('oncokbApp')
               var workbook = XLSX.read(data, {type: 'binary'});
               var fileValue = {};
               var fileAttrs = {};
-              var totalRecord = 0;
 
               for (var i=0, workbookSheetsNum = workbook.SheetNames.length; i < workbookSheetsNum; i++) {
                 var sheetName = workbook.SheetNames[i];
-
                 var json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[i]]);
-                console.log(json);
+
                 fileValue[sheetName] = [];
                 fileAttrs[sheetName] = ['gene', 'alteration', 'tumorType'];
+
                 $scope.sheets.folder[sheetName] = {};
-                /* jshint -W083 */
+
                 json.forEach(function(e,i){
                   var datum = {
                     'id': sheetName + '-' + i,
                     'gene': '',
                     'alteration': '',
-                    'tumorType': '',
-                    'generated': 0, //0: hasn't been generated 1: successfully generated -1: unsuccessfully generated
-                    'generating': false
+                    'tumorType': ''
                   };
 
                   for(var key in e) {
                     if (e.hasOwnProperty(key)) {
-                      if(/gene/i.test(key)) {
+                      if(/patient/i.test(key)) {
+                        datum.patientId = e[key];
+                      }else if(/gene/i.test(key)) {
                         datum.gene = check(e[key], 'genes');
                       }else if(/alteration/i.test(key)) {
                         var _alteration = check(trimAlteration(e[key]), 'alterations');
@@ -182,8 +226,6 @@ angular.module('oncokbApp')
                   }
                   fileValue[sheetName].push(datum);
                 });
-                /* jshint +W083 */
-                totalRecord += fileValue[sheetName].length;
               }
 
               function trimAlteration(alteration) {
@@ -227,42 +269,34 @@ angular.module('oncokbApp')
                 // }
               }
 
-              console.log(workbookSheetsNum, fileAttrs, fileValue, totalRecord);
               reportGeneratorWorkers.set(fileValue);
               $scope.workers = reportGeneratorWorkers.get();
+              console.log($scope.workers);
               $scope.sheets.length = workbookSheetsNum;
               $scope.sheets.attr = fileAttrs;
               $scope.sheets.arr = fileValue;
               $scope.progress.dynamic = 0;
               $scope.progress.value = 0;
-              $scope.progress.max = totalRecord;
               $scope.isXLSX = true;
               $scope.$apply();
-              console.log($scope.workers);
             };
 
             reader.readAsBinaryString(file._file);
           }
 
+          function initialzeWorkersData(){
+            $scope.workers[$scope.status.initializingIndex].email = $scope.sheets.email || 'jackson.zhang.828@gmail.com';
+            $scope.workers[$scope.status.initializingIndex].folderName = $scope.sheets.folder[$scope.workers[$scope.status.generateIndex].parent.name].name || '';
+            $scope.workers[$scope.status.initializingIndex].status.generate = 2;
+            $scope.workers[$scope.status.initializingIndex].getData().then(function(){
+              $scope.workers[$scope.status.initializingIndex].status.generate = 3;
+            });
+          }
           function generate(){
-            console.log($scope);
-            $scope.workers.forEach(function(worker){
-              worker.email = $scope.sheets.email || 'jackson.zhang.828@gmail.com';
-              worker.folderName = $scope.sheets.folder[worker.parent.name].name || '';
-              worker.status.generate = 2;
-              worker.getData().then(function(){
-                worker.generateGoogleDoc().then(function(result){
-                  console.log(worker);
-                  $scope.progress.dynamic += 1;
-                  $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
-                  if(result && result.error){
-                    worker.status.generate = -1;
-                  }else{
-                    worker.status.generate = 1;
-                  }
-                });
-                console.log(worker);
-              });
+            console.log('Generating - ', $scope.status.generateIndex);
+            $scope.workers[$scope.status.generateIndex].status.generate = 4;
+            $scope.workers[$scope.status.generateIndex].getData().then(function(){
+              $scope.workers[$scope.status.initializingIndex].status.generate = 1;
             });
           }
 
