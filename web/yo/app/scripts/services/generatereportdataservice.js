@@ -39,6 +39,6 @@ angular.module('oncokbApp')
 
         // Public API here
         return {
-            init: generateReportData
+            init: init
         };
     });

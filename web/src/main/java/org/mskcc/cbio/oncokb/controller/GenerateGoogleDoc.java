@@ -72,9 +72,9 @@ public class GenerateGoogleDoc {
             if(reportParams == null) {
                 return false;
             }else{
-                JSONObject reportParams = new JSONObject(reportParams);
-                JSONObject reportContent = reportParams.getJSONObject('reportContent');
-                JSONObject requestInfo =  reportParams.getJSONObject('requestInfo');
+                JSONObject params = new JSONObject(reportParams);
+                JSONObject reportContent = params.getJSONObject("reportContent");
+                JSONObject requestInfo =  params.getJSONObject("requestInfo");
                 
                 if(reportContent.isNull("items") || reportContent.getJSONArray("items").length() == 0) {
                     return false;

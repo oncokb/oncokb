@@ -88,6 +88,11 @@ angular.module('oncokbApp')
                         checkUrl();
                     });
                 }
+
+                $scope.reportParams = {
+                    reportContent: {},
+                    requestInfo: {}
+                };
             };
 
             function getUnique(data, attr) {
@@ -294,7 +299,7 @@ angular.module('oncokbApp')
                     params.annotation = $scope.annotation;
                     params.relevantCancerType = $scope.relevantCancerType;
 
-                    $scope.reportParams.reportContent = ReportDataService.init([params])[0];
+                    $scope.reportParams.reportContent = ReportDataService.init([params]);
                     $scope.reportParams.requestInfo = {
                         email: $rootScope.user.email,
                         folderName: '',
@@ -302,7 +307,20 @@ angular.module('oncokbApp')
                         userName: $rootScope.user.name
                     };
                     //                $scope.regularViewData = regularViewData($scope.annotation);
-                    $scope.reportViewData = reportViewData($scope.reportParams);
+                    console.log($scope.reportParams);
+
+                    var reportViewParams = {};
+                    for(var key in $scope.reportParams.reportContent) {
+                        if(key !== 'items') {
+                            reportViewParams[key] = $scope.reportParams.reportContent[key];
+                        }else{
+                            for(var key1 in $scope.reportParams.reportContent['items'][0]){
+                                reportViewParams[key1] = $scope.reportParams.reportContent['items'][0][key1];
+                            }
+                        }
+                    }
+                    console.log(reportViewParams);
+                    $scope.reportViewData = reportViewData(reportViewParams);
                 }
                 $scope.rendering = false;
             }

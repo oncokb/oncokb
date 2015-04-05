@@ -8,6 +8,7 @@
  */
 angular.module('oncokbApp')
     .directive('toolXlsx', function (
+        $rootScope,
         $timeout,
         FileUploader,
         DatabaseConnector,
