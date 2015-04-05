@@ -128,7 +128,7 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
     function getDoc(params) {
         return $http.post(
             'generateGoogleDoc', 
-            {'reportContent':JSON.stringify(params)},
+            {'reportParams':JSON.stringify(params)},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform

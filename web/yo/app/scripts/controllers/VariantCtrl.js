@@ -464,7 +464,7 @@ angular.module('oncokbApp')
                         dlg = dialogs.wait('Sending request','Please wait...');
                         generating();
                         var params = googleDocData($scope.reportParams);
-                        params.email = data;
+                        params.requestInfo.email = data;
                         DatabaseConnector.googleDoc(params, function() {
                             $scope.generaingReport =false;
                         }, function() {

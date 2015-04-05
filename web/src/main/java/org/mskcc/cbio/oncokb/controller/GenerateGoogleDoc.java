@@ -60,8 +60,8 @@ public class GenerateGoogleDoc {
         }
     }
     
-    private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6eXoydVRrdHJBbE0";
-    private static final String  REPORT_DATA_TEMPLATE = "1bE3h2a_xz7do6wvdnbK7DXZOpuuK0Vh8ccraTDHcvQs";
+    private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6fnhBT1hjQkhQV3M3dnRkajdyYmtWR3pxeS1VTkJURVhwRkhlYV8wT0J6ZTA";
+    private static final String  REPORT_DATA_TEMPLATE = "1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM";
     private static final String REPORTS_INFO_SHEET_ID = "1dHsXjrk9R5C3MkJ_iEUZ39OQPTSF3UOPYjU_C54zXuA";
         
     @RequestMapping(value="/generateGoogleDoc", method = POST)

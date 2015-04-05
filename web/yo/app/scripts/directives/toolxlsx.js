@@ -317,10 +317,10 @@ angular.module('oncokbApp')
             $scope.workers[$scope.status.initializingIndex].status.generate = 2;
             $scope.workers[$scope.status.initializingIndex].userName = $rootScope.user.name;
             $scope.workers[$scope.status.initializingIndex].getData().then(function(){
-              $timeout(function(){
+              //$timeout(function(){
                 $scope.workers[$scope.status.initializingIndex].status.generate = 3;
                 $scope.status.initializingIndex++;
-              },1000);
+              //},1000);
             });
           }
 
@@ -347,15 +347,19 @@ angular.module('oncokbApp')
 
           function generateGoogleDocs() {
             var params = [];
-            var reportParams = {};
+            var reportParams = {
+              requestInfo: {},
+              reportContent: {}
+            };
             var group = $scope.groups[$scope.groupKeys[$scope.status.groupIndex]];
 
             group.forEach(function(e){
               var _worker = $scope.workers[e];
               $scope.workers[e].status.generate = 4;
-              reportParams.email =  _worker.email;
-              reportParams.folderName = _worker.folderName;
-              reportParams.fileName = _worker.fileName;
+              reportParams.requestInfo.email =  _worker.email;
+              reportParams.requestInfo.folderName = _worker.folderName;
+              reportParams.requestInfo.fileName = _worker.fileName;
+              reportParams.requestInfo.userName = $rootScope.user.name;
               params.push({
                 geneName: _worker.gene,
                 alteration: _worker.alteration,
@@ -365,9 +369,8 @@ angular.module('oncokbApp')
               });
             });
 
-            reportParams.items = GenerateReportDataService.init(params);
-            console.log(reportParams);
-            $timeout(function(){
+            reportParams.reportContent = GenerateReportDataService.init(params);
+            //$timeout(function(){
               reportGenerator.generateGoogleDoc(reportParams).then(function(){
                 group.forEach(function(e){
                   $scope.workers[e].status.generate = 1;
@@ -376,7 +379,7 @@ angular.module('oncokbApp')
                 $scope.status.generateIndex += group.length;
               },function(){
               });
-            }, 1000);
+            //}, 1000);
           }
           function generate(){
             console.log('Generating - ', $scope.status.generateIndex);
