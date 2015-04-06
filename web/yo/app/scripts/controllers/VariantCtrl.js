@@ -319,7 +319,6 @@ angular.module('oncokbApp')
                             }
                         }
                     }
-                    console.log(reportViewParams);
                     $scope.reportViewData = reportViewData(reportViewParams);
                 }
                 $scope.rendering = false;

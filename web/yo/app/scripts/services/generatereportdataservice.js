@@ -22,7 +22,7 @@ angular.module('oncokbApp')
 
         function init(data){
             var params = {
-                'patientName': '',
+                'patientId': '',
                 'specimen': '',
                 'clientNum': '',
                 'diagnosis': '',
@@ -34,6 +34,7 @@ angular.module('oncokbApp')
                 'items': []
             };
             params.items = generateItems(data);
+            params.diagnosis = params.tumorTissueType = data[0].tumorType;
             return params;
         }
 

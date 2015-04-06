@@ -134,11 +134,11 @@ angular.module('oncokbApp')
               mergePatient: true
             };
 
-            $scope.$watch('$scope.workers.length', function(n, o){
+            $scope.$watch('$scope.workers.length', function(n){
               $scope.progress.max = n;
             });
 
-            $scope.$watch('status.initializingIndex', function(n, o){
+            $scope.$watch('status.initializingIndex', function(n){
               if(n === 0) {
                 $scope.groupKeys = [];
                 $scope.groups = {};
@@ -163,7 +163,7 @@ angular.module('oncokbApp')
               }
             });
 
-            $scope.$watch('status.groupIndex', function(n, o){
+            $scope.$watch('status.groupIndex', function(n){
               if(n >= 0) {
                 if(n >= $scope.groupKeys.length) {
                   $scope.status.generating = false;
@@ -327,11 +327,12 @@ angular.module('oncokbApp')
           function groupWorkers(){
             if($scope.status.mergePatient) {
               $scope.workers.forEach(function(e, i){
-                var _id = e.parent.name + '-' + e.patientId;
+                var _id = e.patientId + (e.parent.name===''?'': ('-'+ e.parent.name));
                 if(!$scope.groups.hasOwnProperty(_id)){
                   $scope.groups[_id] = [];
                 }
                 $scope.groups[_id].push(i);
+                e.fileName = _id;
               });
               $scope.groupKeys = Object.keys($scope.groups);
             }else{
@@ -340,6 +341,7 @@ angular.module('oncokbApp')
                   $scope.groups[i] = [];
                 }
                 $scope.groups[i].push(i);
+                e.fileName = e.gene + '_' + e.alteration + '_' + e.tumorType;
               });
               $scope.groupKeys = Object.keys($scope.groups);
             }
@@ -356,9 +358,6 @@ angular.module('oncokbApp')
             group.forEach(function(e){
               var _worker = $scope.workers[e];
               $scope.workers[e].status.generate = 4;
-              reportParams.requestInfo.email =  _worker.email;
-              reportParams.requestInfo.folderName = _worker.folderName;
-              reportParams.requestInfo.fileName = _worker.fileName;
               reportParams.requestInfo.userName = $rootScope.user.name;
               params.push({
                 geneName: _worker.gene,
@@ -370,6 +369,10 @@ angular.module('oncokbApp')
             });
 
             reportParams.reportContent = GenerateReportDataService.init(params);
+            reportParams.reportContent.patientId = $scope.workers[group[0]].patientId;
+            reportParams.requestInfo.email =  $scope.workers[group[0]].email;
+            reportParams.requestInfo.folderName = $scope.workers[group[0]].folderName;
+            reportParams.requestInfo.fileName = $scope.workers[group[0]].fileName;
             //$timeout(function(){
               reportGenerator.generateGoogleDoc(reportParams).then(function(){
                 group.forEach(function(e){

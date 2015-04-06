@@ -61,7 +61,7 @@ public class GenerateGoogleDoc {
     }
     
     private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6fnhBT1hjQkhQV3M3dnRkajdyYmtWR3pxeS1VTkJURVhwRkhlYV8wT0J6ZTA";
-    private static final String  REPORT_DATA_TEMPLATE = "1fCv8J8fZ2ZziZFJMqRRpNexxqGT5tewDEdbVT64wjjM";
+    private static final String REPORT_DATA_TEMPLATE = "1740Tw1f06j0IZPKqnNeg0E-7639sd4y50ZiE2ORPCn0";
     private static final String REPORTS_INFO_SHEET_ID = "1dHsXjrk9R5C3MkJ_iEUZ39OQPTSF3UOPYjU_C54zXuA";
         
     @RequestMapping(value="/generateGoogleDoc", method = POST)
@@ -203,29 +203,30 @@ public class GenerateGoogleDoc {
 
         // Fetch the list feed of the worksheet.
         URL listFeedUrl = worksheet.getListFeedUrl();
-        ListFeed listFeed = service.getFeed(listFeedUrl, ListFeed.class);
-        ListEntry listEntry  = listFeed.getEntries().get(0);
         
-        Iterator<String> keys = content.keys();
         System.out.println("Successfully get all entries. Start to add record");
         
         for(int i = 0 ; i < records.length() ; i++) {
             ListEntry row = new ListEntry();
             JSONObject record = records.getJSONObject(i);
+            Iterator<String> keys = content.keys();
             while(keys.hasNext()){
                 String key = keys.next();
                 if(!content.get(key).toString().equals("")) {
-                    listEntry.getCustomElements().setValueLocal(key, content.get(key).toString());
+                    row.getCustomElements().setValueLocal(key, content.get(key).toString());
                 }
             }
             Iterator<String> recordKeys = record.keys();
             while(recordKeys.hasNext()){
                 String recordKey = recordKeys.next();
-                if(!content.get(recordKey).toString().equals("")) {
-                    listEntry.getCustomElements().setValueLocal(recordKey, record.get(recordKey).toString());
+                if(!record.get(recordKey).toString().equals("")) {
+                    row.getCustomElements().setValueLocal(recordKey, record.get(recordKey).toString());
+                }else{
+                    System.out.println(recordKey);
+                    System.out.println(content);
                 }
             }
-            System.out.print("Added one record.");
+            System.out.println("Added one record.");
             service.insert(listFeedUrl, row);
         }
         System.out.println("Done.");
