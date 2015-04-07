@@ -68,7 +68,7 @@ angular.module('oncokbApp')
                 self.fileName = '';
                 self.userName = '';
                 self.parent = {};
-                self.annotation = '';
+                self.annotation = {};
                 self.parent.name = ''; // could be the entry name
                 self.reportParams = {
                     requestInfo: {},
@@ -112,7 +112,7 @@ angular.module('oncokbApp')
         function createWorkers(data){
             //self is categorised by XLSX entries
 
-            if(angular.isObject(data)){
+            if(angular.isObject(data) && !angular.isArray(data)){
                 for(var key in data){
                     var datum = data[key];
                     if(angular.isArray(data[key])){
@@ -189,8 +189,6 @@ angular.module('oncokbApp')
         }
 
         function parse(data){
-            var relevantCancerTypeArray = [];
-            var relevantCancerType = {};
 
             var annotation = processData(x2js.xml_str2json(data).xml);
 
@@ -198,6 +196,15 @@ angular.module('oncokbApp')
                 annotation[key] = formatDatum(annotation[key], key);
             }
 
+            return {
+                annotation: annotation,
+                relevantCancerType: getRelevantCancerType(annotation)
+            };
+        }
+
+        function getRelevantCancerType(annotation){
+            var relevantCancerType = {};
+            var relevantCancerTypeArray = [];
             if(annotation.cancer_type) {
                 var i = 0;
 
@@ -219,15 +226,12 @@ angular.module('oncokbApp')
                     relevantCancerType = null;
                 }
             }
-
-            return {
-                annotation: annotation,
-                relevantCancerType: relevantCancerType
-            };
+            return relevantCancerType;
         }
 
         return {
-            'parse': parse
+            'parse': parse,
+            'getRelevantCancerType': getRelevantCancerType
         };
     });
 

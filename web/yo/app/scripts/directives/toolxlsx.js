@@ -42,7 +42,6 @@ angular.module('oncokbApp')
               initParams(function(){
                 $scope.status.fileSelected = true;
                 if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-                  $scope.status.isXLSX = true;
                   readXLSXfile(fileItem);
                 }else {
                   dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
@@ -296,6 +295,7 @@ angular.module('oncokbApp')
                 // }
               }
 
+              console.log(fileValue);
               reportGeneratorWorkers.set(fileValue);
               $scope.workers = reportGeneratorWorkers.get();
               console.log($scope.workers);
@@ -304,7 +304,7 @@ angular.module('oncokbApp')
               $scope.sheets.arr = fileValue;
               $scope.progress.dynamic = 0;
               $scope.progress.value = 0;
-              $scope.isXLSX = true;
+              $scope.status.isXLSX = true;
               $scope.$apply();
             };
 
@@ -327,7 +327,8 @@ angular.module('oncokbApp')
           function groupWorkers(){
             if($scope.status.mergePatient) {
               $scope.workers.forEach(function(e, i){
-                var _id = e.patientId + (e.parent.name===''?'': ('-'+ e.parent.name));
+                var _id = e.patientId + e.parent.name===''?'': ('-'+ e.parent.name);
+                console.log(_id, e.patientId, e.parent)
                 if(!$scope.groups.hasOwnProperty(_id)){
                   $scope.groups[_id] = [];
                 }
@@ -341,7 +342,7 @@ angular.module('oncokbApp')
                   $scope.groups[i] = [];
                 }
                 $scope.groups[i].push(i);
-                e.fileName = e.gene + '_' + e.alteration + '_' + e.tumorType;
+                e.fileName = e.geneName + '_' + e.alteration + '_' + e.tumorType;
               });
               $scope.groupKeys = Object.keys($scope.groups);
             }

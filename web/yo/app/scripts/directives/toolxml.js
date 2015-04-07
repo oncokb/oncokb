@@ -7,119 +7,158 @@
  * # toolXML
  */
 angular.module('oncokbApp')
-  .directive('toolXML', function () {
-    return {
-      template: '<div></div>',
-      restrict: 'E',
-      link: function postLink(scope, element, attrs) {
-        element.text('this is the toolXML directive');
-      },
-      controller: function($scope){
+    .directive('toolXml', function (
+        FileUploader,
+        reportGeneratorWorkers,
+        reportGeneratorParseAnnotation,
+        reportViewFactory,
+        dialogs,
+        FindRegex,
+        x2js) {
+      return {
+        templateUrl: 'views/toolxml.html',
+        restrict: 'E',
+        scope: {},
+        controller: function($scope){
+          function initUploader() {
+            var uploader = $scope.uploader;
+            uploader = $scope.uploader = new FileUploader();
 
+            uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
+              console.info('onWhenAddingFileFailed', item, filter, options);
+            };
 
-        function readXMLfile(file) {
-          var reader = new FileReader();
-
-          reader.onload = function(e) {
-            var full = x2js.xml_str2json(e.target.result);
-            var reportViewDatas = [];
-            var variants = [];
-            if(angular.isDefined(full.document.sample.test.variant)) {
-              if(angular.isArray(full.document.sample.test.variant)) {
-                variants = full.document.sample.test.variant;
-              }else {
-                variants.push(full.document.sample.test.variant);
-              }
-              for(var k = 0 ;k < variants.length;k++){
-                var annotation = processData(variants[k].allele.transcript);
-                var relevantCancerType = {};
-                for(var key in annotation) {
-                  annotation[key] = formatDatum(annotation[key], key);
-                }
-                if(annotation.cancer_type) {
-                  var relevantCancerTypeA = [];
-                  var i = 0;
-                  var cancerTypeL = annotation.cancer_type.length;
-
-                  for(; i < cancerTypeL; i++) {
-                    var _cancerType = annotation.cancer_type[i];
-                    if(_cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes') {
-                      relevantCancerTypeA.push(_cancerType);
-                    }
-                  }
-                  if(relevantCancerTypeA.length > 1) {
-                    /* jshint -W083 */
-                    relevantCancerTypeA.sort(function(e){
-                      if(e.$type.toString().toLowerCase() === 'all tumors'){
-                        return -1;
-                      }else{
-                        return 1;
-                      }
-                    });
-                    /* jshint +W083 */
-                    var obj1 = relevantCancerTypeA[0];
-                    var relevantL=relevantCancerTypeA.length;
-
-                    i = 1;
-
-                    for(; i < relevantL; i++) {
-                      obj1 = DeepMerge.init(obj1, relevantCancerTypeA[i], obj1.$type, relevantCancerTypeA[i].$type);
-                    }
-                    relevantCancerType = obj1;
-                  }else if(relevantCancerTypeA.length === 1){
-                    relevantCancerType = relevantCancerTypeA[0];
-                  }else {
-                    relevantCancerType = null;
-                  }
+            uploader.onAfterAddingFile  = function(fileItem) {
+              console.info('onAfterAddingFile', fileItem);
+              initParams(function(){
+                $scope.status.fileSelected = true;
+                if(fileItem.file.type === 'text/xml') {
+                  $scope.status.isXML = true;
+                  readXMLfile(fileItem);
                 }else {
-                  relevantCancerType = null;
+                  dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
+                  uploader.removeFromQueue(fileItem);
                 }
-                var params = {
-                  'geneName': annotation.hgnc_symbol,
-                  'alteration': annotation.hgvs_p_short,
-                  'tumorType': full.document.sample.diagnosis,
-                  'annotation': annotation,
-                  'relevantCancerType': relevantCancerType};
+              });
+            };
 
-                var reportParams = ReportDataService.init([params])[0];
-                reportViewDatas.push(reportViewData(reportParams));
-              }
-              $scope.reportViewDatas = reportViewDatas;
-              $scope.isXML = true;
-              $scope.$apply();
-            }else{
-              $scope.isXML = false;
-              $scope.$apply();
-            }
-          };
-
-          reader.readAsBinaryString(file._file);
-        }
-
-        function reportViewData(params) {
-          var _parmas = angular.copy(params);
-          _parmas.overallInterpretation = processOverallInterpretation(_parmas.overallInterpretation);
-          _parmas = constructData(_parmas);
-          return _parmas;
-        }
-
-        function constructData(data) {
-          for(var key in data) {
-            var datum = data[key];
-            if(angular.isArray(datum)) {
-              datum = constructData(datum);
-            }else if(isObject(datum) && !bottomObject(datum)) {
-              datum = constructData(datum);
-            }else if(isObject(datum) && bottomObject(datum)) {
-              datum = objToArray(datum);
-            }else {
-              datum = FindRegex.get(datum);
-            }
-            data[key] = datum;
+            uploader.onAfterAddingAll = function(addedFileItems) {
+              console.info('onAfterAddingAll', addedFileItems);
+            };
+            uploader.onBeforeUploadItem = function(item) {
+              console.info('onBeforeUploadItem', item);
+            };
+            uploader.onProgressItem = function(fileItem, progress) {
+              console.info('onProgressItem', fileItem, progress);
+            };
+            uploader.onProgressAll = function(progress) {
+              console.info('onProgressAll', progress);
+            };
+            uploader.onSuccessItem = function(fileItem, response, status, headers) {
+              console.info('onSuccessItem', fileItem, response, status, headers);
+            };
+            uploader.onErrorItem = function(fileItem, response, status, headers) {
+              console.info('onErrorItem', fileItem, response, status, headers);
+            };
+            uploader.onCancelItem = function(fileItem, response, status, headers) {
+              console.info('onCancelItem', fileItem, response, status, headers);
+            };
+            uploader.onCompleteItem = function(fileItem, response, status, headers) {
+              console.info('onCompleteItem', fileItem, response, status, headers);
+            };
+            uploader.onCompleteAll = function() {
+              console.info('onCompleteAll');
+            };
           }
 
-          return data;
+          function initParams(callback) {
+            $scope.status = {
+              isXML: false
+            };
+
+            $scope.summaryTableTitles = [
+              'Treatment Implications',
+              'FDA Approved Drugs in Tumor Type',
+              'FDA Approved Drugs in Other Tumor Type',
+              'Clinical Trials',
+              'Additional Information'
+            ];
+            $scope.reportMatchedParams = [
+              'treatment',
+              'fdaApprovedInTumor',
+              'fdaApprovedInOtherTumor',
+              'clinicalTrials',
+              'additionalInfo'
+            ];
+
+            callback();
+          }
+
+          function readXMLfile(file) {
+            var reader = new FileReader();
+            var workers = [];
+            var i;
+
+            reader.onload = function(e) {
+              var full = x2js.xml_str2json(e.target.result);
+              console.log(full);
+              var reportViewData = [];
+              var variants = [];
+              var reportViewDatas = [];
+              if(angular.isDefined(full.document.sample.test.variant)) {
+                if(angular.isArray(full.document.sample.test.variant)) {
+                  variants = full.document.sample.test.variant;
+                }else {
+                  variants.push(full.document.sample.test.variant);
+                }
+
+                for(var k = 0 ;k < variants.length;k++) {
+                  reportViewData.push({
+                    gene: variants[k].allele.transcript.hgnc_symbol,
+                    alteration: variants[k].allele.transcript.hgvs_p_short,
+                    tumorType: full.document.sample.diagnosis
+                  });
+                }
+                console.log(reportViewData);
+
+                reportGeneratorWorkers.set(reportViewData);
+                workers = reportGeneratorWorkers.get();
+                for(i=0; i<workers.length; i++) {
+                  workers[i].annotation.annotation = variants[i].allele.transcript;
+                  workers[i].annotation.relevantCancerType = reportGeneratorParseAnnotation.getRelevantCancerType(variants[i].allele.transcript);
+                  console.log(workers[i]);
+                  workers[i].prepareReportParams();
+
+                  var reportViewParams = {};
+                  for(var key in workers[i].reportParams.reportContent) {
+                    if(key !== 'items') {
+                      reportViewParams[key] = workers[i].reportParams.reportContent[key];
+                    }else{
+                      for(var key1 in workers[i].reportParams.reportContent.items[0]){
+                        reportViewParams[key1] = workers[i].reportParams.reportContent.items[0][key1];
+                      }
+                    }
+                  }
+                  reportViewDatas.push(reportViewFactory.getData(reportViewParams));
+                }
+                console.log(workers);
+                console.log(reportViewDatas);
+
+                $scope.reportViewDatas = reportViewDatas;
+                $scope.status.isXML = true;
+                $scope.$apply();
+              }else{
+                $scope.status.isXML = false;
+                $scope.$apply();
+              }
+            };
+
+            reader.readAsBinaryString(file._file);
+          }
+
+
+
+          $scope.init = initUploader;
         }
-      }
-    };
-  });
+      };
+    });

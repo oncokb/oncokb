@@ -48,7 +48,7 @@ angular.module('oncokbApp')
                     return flag;
                 };
                 scope.keyProcess = function(key) {
-                    if(key.indexOf('(Resistance)') !== -1) {
+                    if(key && key.indexOf('(Resistance)') !== -1) {
                         key = key.replace('(Resistance)', '<span class="resistance-title">(Resistance)</span>');
                     }
                     key = '<b>' + key + '</b>';
