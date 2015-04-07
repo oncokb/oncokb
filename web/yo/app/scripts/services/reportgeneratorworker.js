@@ -77,6 +77,8 @@ angular.module('oncokbApp')
 
                 if(angular.isString(patientId)) {
                     self.patientId = patientId;
+                }else{
+                    self.patientId =- new Date().getTime();
                 }
 
                 self.gene = data.gene;
