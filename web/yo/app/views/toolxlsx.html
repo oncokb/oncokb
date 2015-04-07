@@ -1,17 +1,5 @@
-<div class="reportGenerator" nv-file-drop="" uploader="uploader" filters="queueLimit, customFilter" ng-init="init()">
-
+<div>
     <div class="row">
-        <h3>Select file</h3>
-
-        <div ng-show="uploader.isHTML5">
-            <!-- 3. nv-file-over uploader="link" over-class="className" -->
-            <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
-                Drop your file in here. <br/>(xlsx file or quest annotated xml file only)
-            </div>
-        </div>
-        <input type="file" nv-file-select="" uploader="uploader" />
-
-        <br/>
         <form ng-if="status.fileSelected && status.isXLSX" class="form-inline">
             <div class="input-group input-group-sm" style='width:100%' >
                 <span class="input-group-addon"><b>Email:</b></span>

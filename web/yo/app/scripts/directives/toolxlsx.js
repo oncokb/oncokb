@@ -23,61 +23,18 @@ angular.module('oncokbApp')
       return {
         templateUrl: 'views/toolxlsx.html',
         restrict: 'E',
-        scope: {},
-        link: function postLink(scope, element, attrs) {
-
+        scope: {
+          file: '=',
+          open: '='
+        },
+        link: function(scope) {
+          scope.$watch('file', function(n){
+            if(angular.isDefined(n) && scope.open){
+              scope.init();
+            }
+          });
         },
         controller: function($scope){
-
-          function initUploader() {
-            var uploader = $scope.uploader;
-            uploader = $scope.uploader = new FileUploader();
-
-            uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {
-              console.info('onWhenAddingFileFailed', item, filter, options);
-            };
-
-            uploader.onAfterAddingFile  = function(fileItem) {
-              console.info('onAfterAddingFile', fileItem);
-              initParams(function(){
-                $scope.status.fileSelected = true;
-                if(fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-                  readXLSXfile(fileItem);
-                }else {
-                  dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
-                  uploader.removeFromQueue(fileItem);
-                }
-              });
-            };
-
-            uploader.onAfterAddingAll = function(addedFileItems) {
-              console.info('onAfterAddingAll', addedFileItems);
-            };
-            uploader.onBeforeUploadItem = function(item) {
-              console.info('onBeforeUploadItem', item);
-            };
-            uploader.onProgressItem = function(fileItem, progress) {
-              console.info('onProgressItem', fileItem, progress);
-            };
-            uploader.onProgressAll = function(progress) {
-              console.info('onProgressAll', progress);
-            };
-            uploader.onSuccessItem = function(fileItem, response, status, headers) {
-              console.info('onSuccessItem', fileItem, response, status, headers);
-            };
-            uploader.onErrorItem = function(fileItem, response, status, headers) {
-              console.info('onErrorItem', fileItem, response, status, headers);
-            };
-            uploader.onCancelItem = function(fileItem, response, status, headers) {
-              console.info('onCancelItem', fileItem, response, status, headers);
-            };
-            uploader.onCompleteItem = function(fileItem, response, status, headers) {
-              console.info('onCompleteItem', fileItem, response, status, headers);
-            };
-            uploader.onCompleteAll = function() {
-              console.info('onCompleteAll');
-            };
-          }
 
           function initParams(callback) {
             $scope.sheets = {
@@ -318,8 +275,8 @@ angular.module('oncokbApp')
             $scope.workers[$scope.status.initializingIndex].userName = $rootScope.user.name;
             $scope.workers[$scope.status.initializingIndex].getData().then(function(){
               //$timeout(function(){
-                $scope.workers[$scope.status.initializingIndex].status.generate = 3;
-                $scope.status.initializingIndex++;
+              $scope.workers[$scope.status.initializingIndex].status.generate = 3;
+              $scope.status.initializingIndex++;
               //},1000);
             });
           }
@@ -375,14 +332,14 @@ angular.module('oncokbApp')
             reportParams.requestInfo.folderName = $scope.workers[group[0]].folderName;
             reportParams.requestInfo.fileName = $scope.workers[group[0]].fileName;
             //$timeout(function(){
-              reportGenerator.generateGoogleDoc(reportParams).then(function(){
-                group.forEach(function(e){
-                  $scope.workers[e].status.generate = 1;
-                });
-                $scope.status.groupIndex++;
-                $scope.status.generateIndex += group.length;
-              },function(){
+            reportGenerator.generateGoogleDoc(reportParams).then(function(){
+              group.forEach(function(e){
+                $scope.workers[e].status.generate = 1;
               });
+              $scope.status.groupIndex++;
+              $scope.status.generateIndex += group.length;
+            },function(){
+            });
             //}, 1000);
           }
           function generate(){
@@ -394,7 +351,13 @@ angular.module('oncokbApp')
           }
 
           $scope.generate = generate;
-          $scope.init = initUploader;
+          $scope.init = function(){
+            console.log('initializing....');
+            initParams(function(){
+              $scope.status.fileSelected = true;
+              readXLSXfile($scope.file);
+            });
+          };
         }
       };
     });
