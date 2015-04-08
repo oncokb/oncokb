@@ -8,7 +8,6 @@
  */
 angular.module('oncokbApp')
     .directive('toolXml', function (
-        FileUploader,
         reportGeneratorWorkers,
         reportGeneratorParseAnnotation,
         reportViewFactory,
@@ -59,6 +58,8 @@ angular.module('oncokbApp')
             var i;
 
             reader.onload = function(e) {
+              console.log(e);
+              console.log(x2js);
               var full = x2js.xml_str2json(e.target.result);
               console.log(full);
               var reportViewData = [];
@@ -78,14 +79,12 @@ angular.module('oncokbApp')
                     tumorType: full.document.sample.diagnosis
                   });
                 }
-                console.log(reportViewData);
 
                 reportGeneratorWorkers.set(reportViewData);
                 workers = reportGeneratorWorkers.get();
                 for(i=0; i<workers.length; i++) {
                   workers[i].annotation.annotation = variants[i].allele.transcript;
                   workers[i].annotation.relevantCancerType = reportGeneratorParseAnnotation.getRelevantCancerType(variants[i].allele.transcript);
-                  console.log(workers[i]);
                   workers[i].prepareReportParams();
 
                   var reportViewParams = {};
@@ -100,8 +99,6 @@ angular.module('oncokbApp')
                   }
                   reportViewDatas.push(reportViewFactory.getData(reportViewParams));
                 }
-                console.log(workers);
-                console.log(reportViewDatas);
 
                 $scope.reportViewDatas = reportViewDatas;
                 $scope.status.isXML = true;
@@ -112,7 +109,7 @@ angular.module('oncokbApp')
               }
             };
 
-            reader.readAsBinaryString(file._file);
+            reader.readAsText(file._file);
           }
 
           $scope.init = function(){
