@@ -154,8 +154,7 @@ angular.module('oncokbApp')
 
           //get genes, mutations and tumor types
           function getGMT(callback){
-            var data = reportGeneratorData.get().then(function(data){
-              console.log(data);
+            reportGeneratorData.get().then(function(data){
               $scope.genes = data.genes;
               $scope.alterations = data.alterations;
               $scope.tumorTypes = data.tumorTypes;
@@ -284,7 +283,6 @@ angular.module('oncokbApp')
             if($scope.status.mergePatient) {
               $scope.workers.forEach(function(e, i){
                 var _id = e.patientId + e.parent.name===''?'': ('-'+ e.parent.name);
-                console.log(_id, e.patientId, e.parent)
                 if(!$scope.groups.hasOwnProperty(_id)){
                   $scope.groups[_id] = [];
                 }

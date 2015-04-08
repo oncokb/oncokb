@@ -75,5 +75,5 @@ angular.module('oncokbApp')
                 isXML: false
             };
             initUploader();
-        }
+        };
     });
