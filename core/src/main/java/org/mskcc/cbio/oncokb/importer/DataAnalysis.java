@@ -10,10 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.ClinicalTrial;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
@@ -39,6 +42,7 @@ public final class DataAnalysis {
     private static String[] branch = {
         EvidenceType.PREVALENCE.name(), 
         EvidenceType.PROGNOSTIC_IMPLICATION.name(), 
+        EvidenceType.MUTATION_EFFECT.name(),
         EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY.name(), 
         EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE.name(), 
         EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY.name(), 
@@ -85,12 +89,35 @@ public final class DataAnalysis {
     }
     
     private static Map<String, Map> parseGene(Gene gene) {
-        AlterationBo altBo = ApplicationContextSingleton.getAlterationBo();
-        
         System.out.println("#Gene: " + gene.getHugoSymbol());
         
+        AlterationBo altBo = ApplicationContextSingleton.getAlterationBo();
+        Map<String, String> attrs = new HashMap<>();
         List<Alteration> alterations = altBo.findAlterationsByGene(Collections.singleton(gene));
         Map<String, Map> alterationsMap = new HashMap<>();
+        
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene));
+        
+        for(Evidence evidence : evidences) {
+            if(evidence.getEvidenceType().equals(EvidenceType.GENE_SUMMARY)){
+                if(evidence.getDescription().isEmpty()){
+                    attrs.put("hasSummary", "FALSE");
+                }else{
+                    System.out.println("\t\thas summary");
+                    attrs.put("hasSummary", "TRUE");
+                }
+            }
+            if(evidence.getEvidenceType().equals(EvidenceType.GENE_BACKGROUND)){
+                if(evidence.getDescription().isEmpty()){
+                    attrs.put("hasBackground", "FALSE");
+                }else{
+                    System.out.println("\t\thas background");
+                    attrs.put("hasBackground", "TRUE");
+                }
+            }
+        }    
+        alterationsMap.put("attrs", attrs);
         
         DATA.get(gene.getHugoSymbol()).put("alts", alterations.size());
         
@@ -107,29 +134,63 @@ public final class DataAnalysis {
         Set<TumorType> tts = ttBo.findTumorTypesWithEvidencesForAlterations(Collections.singleton(alt));
         System.out.println("\tAlteration:" + alt.getName());
         
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(EvidenceType.MUTATION_EFFECT));
+        Map<Integer, String> mutationEffect = new HashMap();
+        for(Evidence evidence : evidences){
+            mutationEffect.put(evidence.getEvidenceId(), evidence.getKnownEffect());
+        }
+        if(evidences.size() > 1){
+            System.out.println("******* Warning**** multi mutation effects");
+        }
+        
         Map<String, Map> ttsMap = new HashMap<>();
+        Map<String, Object> attrs = new HashMap<>();
+        attrs.put("mutationEffect", mutationEffect);
+        attrs.put("oncoGenic", alt.getOncogenic().toString());
+        attrs.put("mutationType", alt.getAlterationType().name());
+        ttsMap.put("attrs", attrs);
         
         for(TumorType tt : tts) {
             if(!TUMORS.containsKey(tt.getName())){
                 TUMORS.put(tt.getName(), 0);
             }
-            Map<String, List> altMap = parseTumorType(tt, alt, gene);
+            Map<String, Object> altMap = parseTumorType(tt, alt, gene);
             ttsMap.put(tt.getName(), altMap);
         }
         return ttsMap;
     }
     
-    private static Map<String, List> parseTumorType(TumorType tt, Alteration alt, Gene gene) {
+    private static Map<String, Object> parseTumorType(TumorType tt, Alteration alt, Gene gene) {
         System.out.println("\t\tTumorType: " + tt.getName());
         
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        Map<String, List> evidencesMap = new HashMap<>();
+        Map<String, Object> evidencesMap = new HashMap<>();
         
-        for(EvidenceType type : EvidenceType.values()) {
+        List<EvidenceType> evidenceTypes = new ArrayList();
+        evidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
+        evidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        evidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
+        evidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        evidenceTypes.add(EvidenceType.PREVALENCE);
+        evidenceTypes.add(EvidenceType.PROGNOSTIC_IMPLICATION);
+        evidenceTypes.add(EvidenceType.NCCN_GUIDELINES);
+        
+        List types = new ArrayList();
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        
+        List specialTypes = new ArrayList();
+        specialTypes.add(EvidenceType.PREVALENCE);
+        specialTypes.add(EvidenceType.PROGNOSTIC_IMPLICATION);
+        specialTypes.add(EvidenceType.NCCN_GUIDELINES);
+        
+        for(EvidenceType type : evidenceTypes) {
             List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(type), Collections.singleton(tt));
             List<Map> map = new ArrayList<>();
             Integer implications = 0;
-            
             if(type.name().equals(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY.name())) {
                 implications = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("is").toString());
                 DATA.get(gene.getHugoSymbol()).put("is", implications + evidences.size());
@@ -155,13 +216,31 @@ public final class DataAnalysis {
                 DATA.get(gene.getHugoSymbol()).put("branch3", branch3 + evidences.size());
             }
             
-            for(Evidence evidence : evidences) {
-                Map<String, Map> evidenceMap = parseEvidence(evidence, tt, gene);
-                map.add(evidenceMap);
+            if(types.contains(type)) {
+                for(Evidence evidence : evidences) {
+                    Map<String, Map> evidenceMap = parseEvidence(evidence, tt, gene);
+                    map.add(evidenceMap);
+                }
+                evidencesMap.put(type.name(), map);
+            }else if(specialTypes.contains(type)){
+                List<Integer> evidenceIds = new ArrayList();
+                for(Evidence evidence : evidences){
+                    evidenceIds.add(evidence.getEvidenceId());
+                }
+                if(evidences.size() > 1){
+                    System.out.println("******* Warning**** multi " + type.name());
+                }
+                evidencesMap.put(type.name(), evidenceIds);
             }
-            evidencesMap.put(type.name(), map);
         }
-        
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        List<ClinicalTrial> trials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(Collections.singleton(tt), Collections.singleton(alt), true);
+        List<String> trialIds = new ArrayList();
+        for(ClinicalTrial trial : trials){
+            trialIds.add(trial.getNctId());
+        }
+        evidencesMap.put("trials", trialIds);
+            
         return evidencesMap;
     }
     
@@ -216,8 +295,15 @@ public final class DataAnalysis {
                 return treatmentsMap;
             }
         }else{
+            Map<String, Map> map = new HashMap<>();
+            Map<String, String> subMap = new HashMap<>();
+            subMap.put("knowEffect", evidence.getKnownEffect());
+            subMap.put("hasDescription", evidence.getDescription().isEmpty()?"FALSE":"TRUE");
+            subMap.put("evidenceType", evidence.getEvidenceType().name());
+            subMap.put("level", evidence.getLevelOfEvidence().getLevel());
+            map.put("attrs", subMap);
 //            System.out.println("\t\t\tNo Treatment Info");
-            return null;
+            return map;
         }
     }
     

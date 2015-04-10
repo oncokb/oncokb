@@ -31,6 +31,9 @@ angular.module('oncokbApp')
                         },
                         function(result){
                           console.log('\t failed', result);
+                            $timeout(function(){
+                                saveGene(docs, ++docIndex, callback);
+                            }, 200, false);
                         }
                       );
                     }else{
