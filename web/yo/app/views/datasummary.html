@@ -2,20 +2,32 @@
     <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
         <thead><tr class="dashedHeader">
             <th>Gene</th>
+            <th>Summary</th>
+            <th>Background</th>
             <th># Variants</th>
             <th># Cancer Type</th>
             <th># Combinations</th>
-            <th>Has summary</th>
-            <th>Has background</th>
+            <th># SS</th>
+            <th># SR</th>
+            <th># IS</th>
+            <th># IR</th>
+            <th>Highest Level of Sensitivity</th>
+            <th>Highest Level of Resistance</th>
         </tr></thead>
         <tbody>
         <tr data-ng-repeat="gene in genes">
             <td><strong>{{gene.name}}</strong></td>
+            <td>{{gene.hasSummary}}</td>
+            <td>{{gene.hasBackground}}</td>
             <td>{{gene.numMutations}}</td>
             <td>{{gene.numCancerTypes}}</td>
             <td>{{gene.numVCConbinations}}</td>
-            <td>{{gene.hasSummary}}</td>
-            <td>{{gene.hasBackground}}</td>
+            <td>{{gene.numSS}}</td>
+            <td>{{gene.numSR}}</td>
+            <td>{{gene.numIS}}</td>
+            <td>{{gene.numIR}}</td>
+            <td>{{gene.highestLevelS}}</td>
+            <td>{{gene.highestLevelR}}</td>
         </tr>
         </tbody>
     </table>
