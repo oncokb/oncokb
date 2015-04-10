@@ -1,0 +1,22 @@
+<div ng-init="init()">
+    <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+        <thead><tr class="dashedHeader">
+            <th>Gene</th>
+            <th># Variants</th>
+            <th># Cancer Type</th>
+            <th># Combinations</th>
+            <th>Has summary</th>
+            <th>Has background</th>
+        </tr></thead>
+        <tbody>
+        <tr data-ng-repeat="gene in genes">
+            <td><strong>{{gene.name}}</strong></td>
+            <td>{{gene.numMutations}}</td>
+            <td>{{gene.numCancerTypes}}</td>
+            <td>{{gene.numVCConbinations}}</td>
+            <td>{{gene.hasSummary}}</td>
+            <td>{{gene.hasBackground}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

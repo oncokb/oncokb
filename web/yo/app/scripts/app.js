@@ -33,7 +33,7 @@ OncoKB.config = {
     folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
-    // folderId: '0BzBfo69g8fP6UmVBd0txZkJMaGs', //one of backup folder
+    //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -403,6 +403,12 @@ angular.module('oncokbApp', [
                 templateUrl: 'views/gene.html',
                 controller: 'GeneCtrl',
                 access: access.curator
+            })
+            .when('/dataSummary', {
+                templateUrl: 'views/datasummary.html',
+                controller: 'DatasummaryCtrl',
+                access: access.admin
+
             })
             .otherwise({
                 redirectTo: '/'

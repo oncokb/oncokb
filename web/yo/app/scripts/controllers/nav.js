@@ -13,6 +13,7 @@ angular.module('oncokbApp')
         'tree': 'Tree',
         'variant': 'Variant Annotation',
         'genes': 'Genes',
+        'dataSummary': 'Summary',
         'reportGenerator': 'Tools'
     };
 
@@ -49,7 +50,7 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'genes', value: tabs.genes});
         }
         if(access.authorize(accessLevels.admin)) {
-            var keys = ['tree', 'variant', 'reportGenerator'];
+            var keys = ['tree', 'variant', 'dataSummary', 'reportGenerator'];
 
             keys.forEach(function(e){
                 filterTabs.push({'key': e, 'value': tabs[e]});

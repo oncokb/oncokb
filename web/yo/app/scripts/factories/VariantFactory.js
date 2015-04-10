@@ -34,6 +34,23 @@ angular.module('oncokbApp').factory('Gene', ['$http',  function ($http) {
     };
 }]);
 
+angular.module('oncokbApp').factory('DataSummary', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('data/summary.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/summary.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
 angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
     'use strict';
 
