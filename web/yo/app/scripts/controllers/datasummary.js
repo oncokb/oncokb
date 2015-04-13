@@ -20,6 +20,17 @@ angular.module('oncokbApp')
             this.numIS = 0;
             this.numIR = 0;
 
+            this.levels = {
+                '1': 0,
+                '2a': 0,
+                '2b': 0,
+                '3': 0,
+                '4': 0,
+                'r1': 0,
+                'r2': 0,
+                'r3': 0
+            };
+
             this.highestLevelS = 'N/A'; //highest level of sensitivity
             this.highestLevelR = 'N/A'; //highest level of resistance
 
@@ -96,11 +107,16 @@ angular.module('oncokbApp')
                                         }
 
                                         if(e.hasOwnProperty('level')){
+                                            var _level = e.level.level || '';
                                             if(sensitTherapies.indexOf(tumorAttrs) !== -1){
-                                                gene.highestLevelS = compare(e.level.level, gene.highestLevelS, 'sensitivity');
+                                                gene.highestLevelS = compare(_level, gene.highestLevelS, 'sensitivity');
                                             }else{
-                                                gene.highestLevelR = compare(e.level.level, gene.highestLevelR, 'resistance');
+                                                gene.highestLevelR = compare(_level, gene.highestLevelR, 'resistance');
                                             }
+                                            if(!gene.levels.hasOwnProperty(_level)){
+                                                gene.levels[_level] = 0;
+                                            }
+                                            gene.levels[_level]++;
                                         }else{
                                             console.log(gene.name, mutation, tumor, tumorAttrs);
                                         }
@@ -162,7 +178,13 @@ angular.module('oncokbApp')
             DTColumnDefBuilder.newColumnDef(8),
             DTColumnDefBuilder.newColumnDef(9),
             DTColumnDefBuilder.newColumnDef(10),
-            DTColumnDefBuilder.newColumnDef(11)
+            DTColumnDefBuilder.newColumnDef(11),
+            DTColumnDefBuilder.newColumnDef(12),
+            DTColumnDefBuilder.newColumnDef(13),
+            DTColumnDefBuilder.newColumnDef(14),
+            DTColumnDefBuilder.newColumnDef(15),
+            DTColumnDefBuilder.newColumnDef(16),
+            DTColumnDefBuilder.newColumnDef(17)
         ];
 
         $scope.data = [];

@@ -2,17 +2,23 @@
     <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
         <thead><tr class="dashedHeader">
             <th>Gene</th>
-            <th>Summary</th>
-            <th>Background</th>
+            <th qtip content="Has summary">Summary</th>
+            <th qtip content="Has background">BG</th>
             <th># Variants</th>
             <th># Cancer Type</th>
-            <th># Combinations</th>
-            <th># SS</th>
-            <th># SR</th>
-            <th># IS</th>
-            <th># IR</th>
-            <th>Highest Level of Sensitivity</th>
-            <th>Highest Level of Resistance</th>
+            <th qtip content="Combination between variant and cancer type"># Combo</th>
+            <th qtip content="Number of standard implications for sensitivity to therapy"># SS</th>
+            <th qtip content="Number of standard implications for resistance to therapy"># SR</th>
+            <th qtip content="Number of investigational implications for sensitivity to therapy"># IS</th>
+            <th qtip content="Number of investigational implications for resistance to therapy"># IR</th>
+            <th># L-1</th>
+            <th># L-2A</th>
+            <th># L-2B</th>
+            <th># L-3</th>
+            <th># L-4</th>
+            <th># L-R1</th>
+            <th># L-R2</th>
+            <th># L-R3</th>
         </tr></thead>
         <tbody>
         <tr data-ng-repeat="gene in genes">
@@ -26,8 +32,14 @@
             <td>{{gene.numSR}}</td>
             <td>{{gene.numIS}}</td>
             <td>{{gene.numIR}}</td>
-            <td>{{gene.highestLevelS}}</td>
-            <td>{{gene.highestLevelR}}</td>
+            <td>{{gene.levels.1}}</td>
+            <td>{{gene.levels.2a}}</td>
+            <td>{{gene.levels.2b}}</td>
+            <td>{{gene.levels.3}}</td>
+            <td>{{gene.levels.4}}</td>
+            <td>{{gene.levels.r1}}</td>
+            <td>{{gene.levels.r2}}</td>
+            <td>{{gene.levels.r3}}</td>
         </tr>
         </tbody>
     </table>
