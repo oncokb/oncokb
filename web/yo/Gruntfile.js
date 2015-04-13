@@ -399,8 +399,8 @@ module.exports = function (grunt) {
         },{
           expand: true,
           cwd: '<%= oncokb.app %>/data',
-          src: '*',
-          dest: '<%= oncokb.dist %>'
+          src: 'summary.json',
+          dest: '<%= oncokb.dist %>/data'
         }]
       },
       styles: {
