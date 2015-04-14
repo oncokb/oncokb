@@ -113,7 +113,7 @@ angular.module('oncokbApp')
             if(cancerTypeInfo.nccn_guidelines) {
                 var _datum = cancerTypeInfo.nccn_guidelines;
                 var _datumL = _datum.length;
-                var i = 0;
+                var i;
                 var versions = {};
 
                 value = [];
@@ -408,7 +408,7 @@ angular.module('oncokbApp')
         }
 
         function constructClinicalTrial(annotation, geneName, mutation, tumorType, relevantCancerType) {
-            var clincialTrials = [],
+            var clinicalTrials = [],
                 key = '',
                 value = [],
                 object = {},
@@ -444,7 +444,7 @@ angular.module('oncokbApp')
                 }
 
                 object[key] = value;
-                clincialTrials.push(object);
+                clinicalTrials.push(object);
             }
 
             if(cancerTypeInfo.investigational_therapeutic_implications) {
@@ -455,9 +455,9 @@ angular.module('oncokbApp')
                     key = 'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS';
                     object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description, value);
 
-                    clincialTrials.push(object);
+                    clinicalTrials.push(object);
                 }else if(Object.keys(cancerTypeInfo.investigational_therapeutic_implications).length > 0){
-                    clincialTrials.push({'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS': []});
+                    clinicalTrials.push({'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS': []});
                 }
 
                 for (var j = 0; j < attrsToDisplay.length; j++) {
@@ -477,7 +477,7 @@ angular.module('oncokbApp')
                             var _object = {},
                                 _newKey = _key.replace(specialKeyChars, '');
                             _object[_newKey] = object[_key];
-                            clincialTrials.push(_object);
+                            clinicalTrials.push(_object);
                             _object = null;
                         }
                     }
@@ -490,9 +490,9 @@ angular.module('oncokbApp')
                         key = 'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS';
                         value.push({'description': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
                         object[key] = value;
-                        clincialTrials.push(object);
+                        clinicalTrials.push(object);
                     }else {
-                        clincialTrials.push({'no_evidence': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
+                        clinicalTrials.push({'no_evidence': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
                     }
                 }
 
@@ -506,9 +506,9 @@ angular.module('oncokbApp')
                     {'level 4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'}
                 ];
                 object[key] = value;
-                clincialTrials.push(object);
+                clinicalTrials.push(object);
             }
-            return clincialTrials;
+            return clinicalTrials;
         }
 
         function addRecord(keys, value, array) {

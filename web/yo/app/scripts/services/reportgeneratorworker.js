@@ -218,7 +218,7 @@ angular.module('oncokbApp')
                 }
                 if(relevantCancerTypeArray.length > 1) {
                     relevantCancerType = relevantCancerTypeArray[0];
-                    i = 0;
+                    i = 1;
                     for(var relevantL=relevantCancerTypeArray.length; i < relevantL; i++) {
                         relevantCancerType = DeepMerge.init(relevantCancerType, relevantCancerTypeArray[i], relevantCancerType.$type, relevantCancerTypeArray[i].$type);
                     }
@@ -227,6 +227,32 @@ angular.module('oncokbApp')
                 }else {
                     relevantCancerType = null;
                 }
+            }
+
+            //Sort clinical trials
+            if(angular.isArray(relevantCancerType.clinical_trial)){
+                relevantCancerType.clinical_trial.sort(function(a, b){
+                    var _a = a.phase? a.phase: '';
+                    var _b = b.phase? b.phase: '';
+                    var regex = /\d|\d\/\d/igm;
+
+                    var matchA = _a.match(regex);
+                    var matchB = _b.match(regex);
+
+                    var largestA = Math.max.apply(Math, matchA);
+                    var largestB = Math.max.apply(Math, matchB);
+
+                    if(largestA - largestB > 0){
+                        return -1;
+                    }else if(largestA === largestB) {
+                        if(matchA.length > matchB.length){
+                            return 1;
+                        }
+                        return -1;
+                    }else {
+                        return 1;
+                    }
+                });
             }
             return relevantCancerType;
         }
