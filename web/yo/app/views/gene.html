@@ -48,7 +48,7 @@
               </ul>
             </div>
             <div class="geneLinkDiv" ng-if="pubMedMutationLinksLength > 0">
-              <span><span ng-show="pubMedMutationLinksLength > 2"><i ng-click="expand = !(!!expand)" class="fa" ng-class="{'fa-minus': !!expand, 'fa-plus':!(!!expand)}"></i> {{pubMedMutationLength}} m</span><span ng-if="pubMedMutationLinksLength <=2">M</span>utation<span ng-if="pubMedMutationLinksLength > 1">s</span></span>
+              <span><span ng-show="pubMedMutationLinksLength > 2"><i ng-click="expand = !(!!expand)" class="fa" ng-class="{'fa-chevron-down': !!expand, 'fa-chevron-right':!(!!expand)}"></i> {{pubMedMutationLength}} m</span><span ng-if="pubMedMutationLinksLength <=2">M</span>utation<span ng-if="pubMedMutationLinksLength > 1">s</span></span>
               <div ng-show="!!expand || pubMedMutationLinksLength <= 2">
                 <div ng-repeat="(key, value) in pubMedLinks.mutations">
                   <span>{{key}}</span>
@@ -70,7 +70,7 @@
     <accordion close-others="oneAtATime">
       <accordion-group ng-init="mutationIndex = $index; ttIsopen[mutationIndex] = {}; mutationIsopen[mutationIndex]=false; ttIsopen[mutationIndex].oncogenic = false; therapyIsopen[mutationIndex] = {}" is-open="mutationIsopen[$index]" ng-repeat="mutation in gene.mutations.asArray()" class="levelOneHeader">
         <accordion-heading >
-          <i class="fa  " ng-class="{'fa-minus': mutationIsopen[mutationIndex], 'fa-plus': !mutationIsopen[mutationIndex]}"></i>
+          <i class="fa  " ng-class="{'fa-chevron-down': mutationIsopen[mutationIndex], 'fa-chevron-right': !mutationIsopen[mutationIndex]}"></i>
           <span ng-click="stopCollopse($event)">Mutation: </span><span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" gene-name="{{gene.name.text}}" ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             <span class="pull-right" ng-show="fileEditable">
               <span style="margin-right: 20px">
@@ -86,7 +86,7 @@
           <!-- Mutation Effect -->
           <accordion-group is-open="ttIsopen[mutationIndex].oncogenic" class="levelTwoHeader">
             <accordion-heading>
-              <i class="fa  " ng-class="{'fa-minus': ttIsopen[mutationIndex].oncogenic, 'fa-plus': !ttIsopen[mutationIndex].oncogenic}" ng-click="changeIsOpen(ttIsopen[mutationIndex].oncogenic)"></i>
+              <i class="fa  " ng-class="{'fa-chevron-down': ttIsopen[mutationIndex].oncogenic, 'fa-chevron-right': !ttIsopen[mutationIndex].oncogenic}" ng-click="changeIsOpen(ttIsopen[mutationIndex].oncogenic)"></i>
               <span ng-click="stopCollopse($event)"> Mutation effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="mutation.oncogenic.text === '' && mutation.effect.value.text === '' && mutation.description.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             </accordion-heading>
             <p>
@@ -130,7 +130,7 @@
           <!-- tumor types -->
           <accordion-group ng-init="tumorIndex=$index; ttIsopen[mutationIndex][tumorIndex] = false; therapyIsopen[mutationIndex][tumorIndex] = {};" is-open="ttIsopen[mutationIndex][tumorIndex]" class="levelTwoHeader" ng-repeat="tumor in mutation.tumors.asArray()">
             <accordion-heading >
-              <i class="fa  " ng-class="{'fa-minus': ttIsopen[mutationIndex][tumorIndex], 'fa-plus': !ttIsopen[mutationIndex][tumorIndex]}"></i>
+              <i class="fa  " ng-class="{'fa-chevron-down': ttIsopen[mutationIndex][tumorIndex], 'fa-chevron-right': !ttIsopen[mutationIndex][tumorIndex]}"></i>
               <span ng-click="stopCollopse($event)">Tumor type: </span>
               <span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 <span class="pull-right" ng-show="fileEditable">
@@ -148,7 +148,7 @@
               <!-- Prevalence -->
               <accordion-group ng-init="therapyIsopen[mutationIndex][tumorIndex].prevalence = false" is-open="therapyIsopen[mutationIndex][tumorIndex].prevalence" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-minus': therapyIsopen[mutationIndex][tumorIndex].prevalence, 'fa-plus': !therapyIsopen[mutationIndex][tumorIndex].prevalence}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex])"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': therapyIsopen[mutationIndex][tumorIndex].prevalence, 'fa-chevron-right': !therapyIsopen[mutationIndex][tumorIndex].prevalence}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex])"></i>
                   <span ng-click="stopCollopse($event)">{{tumor.prevalence.display}}: </span>
                   <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
@@ -159,7 +159,7 @@
               <!-- Prognostic implications -->
               <accordion-group ng-init="therapyIsopen[mutationIndex][tumorIndex].progImp = false" is-open="therapyIsopen[mutationIndex][tumorIndex].progImp" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-minus': therapyIsopen[mutationIndex][tumorIndex].progImp, 'fa-plus': !therapyIsopen[mutationIndex][tumorIndex].progImp}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex].progImp)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': therapyIsopen[mutationIndex][tumorIndex].progImp, 'fa-chevron-right': !therapyIsopen[mutationIndex][tumorIndex].progImp}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex].progImp)"></i>
                   <span ng-click="stopCollopse($event)">{{tumor.progImp.display}}: </span>
                   <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
@@ -170,7 +170,7 @@
               <!-- NCCN guidelines -->
               <accordion-group ng-init="therapyIsopen[mutationIndex][tumorIndex].nccn = false" is-open="therapyIsopen[mutationIndex][tumorIndex].nccn" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-minus': therapyIsopen[mutationIndex][tumorIndex].nccn, 'fa-plus': !therapyIsopen[mutationIndex][tumorIndex].nccn}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex].nccn)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': therapyIsopen[mutationIndex][tumorIndex].nccn, 'fa-chevron-right': !therapyIsopen[mutationIndex][tumorIndex].nccn}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex].nccn)"></i>
                   <span ng-click="stopCollopse($event)">NCCN guidelines: </span>
                   <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict display-name="NCCN guidelines" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
@@ -208,7 +208,7 @@
               <!-- Theraputic implications -->
               <accordion-group is-open="therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen" ng-init="tiIndex = $index; therapyIsopen[mutationIndex][tumorIndex][tiIndex] = {}; therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen = false;" class="levelThreeHeader" ng-repeat="ti in tumor.TI.asArray()">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-minus': therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen, 'fa-plus': !therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen, 'fa-chevron-right': !therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex][tiIndex].isOpen)"></i>
                   <span ng-click="stopCollopse($event)">{{ti.name.text}}: </span>
                   <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="ti.description.text === '' && ti.treatments.length === 0">No Entry</span>
                   <comments-dict display-name="{{ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
@@ -220,7 +220,7 @@
                 <accordion close-others="oneAtATime">
                   <accordion-group ng-init="treatmentIndex = $index; therapyIsopen[mutationIndex][tumorIndex][tiIndex][treatmentIndex] = false;" is-open="therapyIsopen[mutationIndex][tumorIndex][tiIndex][treatmentIndex]" class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
                     <accordion-heading>
-                      <i class="fa  " ng-class="{'fa-minus': therapyIsopen[mutationIndex][tumorIndex][tiIndex][treatmentIndex], 'fa-plus': !therapyIsopen[mutationIndex][tumorIndex][tiIndex][treatmentIndex]}"></i>
+                      <i class="fa  " ng-class="{'fa-chevron-down': therapyIsopen[mutationIndex][tumorIndex][tiIndex][treatmentIndex], 'fa-chevron-right': !therapyIsopen[mutationIndex][tumorIndex][tiIndex][treatmentIndex]}"></i>
                       <span ng-click="stopCollopse($event)">{{treatment.type.text}}: </span>
                       <span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.name.text"/></span><comments-dict gene-name="{{gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                               <span class="pull-right" ng-show="fileEditable">
@@ -289,7 +289,7 @@
               <!-- Trials -->
               <accordion-group ng-init="therapyIsopen[mutationIndex][tumorIndex].trials = false" is-open="therapyIsopen[mutationIndex][tumorIndex].trials" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-minus': therapyIsopen[mutationIndex][tumorIndex].trials, 'fa-plus': !therapyIsopen[mutationIndex][tumorIndex].trials}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex].trials)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': therapyIsopen[mutationIndex][tumorIndex].trials, 'fa-chevron-right': !therapyIsopen[mutationIndex][tumorIndex].trials}" ng-click="changeIsOpen(therapyIsopen[mutationIndex][tumorIndex].trials)"></i>
                   <span ng-click="stopCollopse($event)">Ongoing clinical trials: </span>
                   <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict display-name="Ongoing clinical trials" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
