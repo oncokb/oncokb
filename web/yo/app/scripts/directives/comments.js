@@ -26,7 +26,7 @@ angular.module('oncokbApp')
           hasComment: false,
           allResolved: false
         };
-        $scope.userRole = users.getMe().role;
+        scope.userRole = users.getMe().role;
 
         if(attrs.geneName) {
           scope.geneName = attrs.geneName;

@@ -7,7 +7,7 @@
  * # pubIframe
  */
 angular.module('oncokbApp')
-  .directive('pubIframe', function (FindRegex, sortPubsFilter) {
+  .directive('pubIframe', function (FindRegex, S, sortPubsFilter) {
     return {
       templateUrl: 'views/pubIframe.html',
       restrict: 'E',
@@ -15,6 +15,8 @@ angular.module('oncokbApp')
       link: function(scope, element, attr, ngModel) {
 
         function updatePubs(modelValue) {
+          modelValue = S(modelValue).stripTags().s;
+          modelValue = S(modelValue).collapseWhitespace().s;
           var pubs = FindRegex.result(modelValue);
           scope.pubs = pubs;
         }
