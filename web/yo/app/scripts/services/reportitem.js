@@ -416,8 +416,13 @@ angular.module('oncokbApp')
                 attrsToDisplay = ['resistant_to', 'sensitive_to'];
 
             if(cancerTypeInfo.clinical_trial) {
-                var _datum = cancerTypeInfo.clinical_trial;
+                var _datum=[];
 
+                if(angular.isArray(cancerTypeInfo.clinical_trial)){
+                    _datum = cancerTypeInfo.clinical_trial;
+                }else{
+                    _datum.push(cancerTypeInfo.clinical_trial);
+                }
                 value = [];
                 object = {};
                 key = 'CLINICAL TRIALS MATCHED FOR GENE AND DISEASE';

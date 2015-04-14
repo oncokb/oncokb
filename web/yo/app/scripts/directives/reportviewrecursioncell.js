@@ -22,7 +22,7 @@ angular.module('oncokbApp')
             return RecursionHelper.compile(element, function(scope){
                 // Define your normal link function here.
                 // Alternative: instead of passing a function,
-                // you can also pass an object with 
+                // you can also pass an object with
                 // a 'pre'- and 'post'-link function.
                 scope.isObject = function(obj) {
                     return angular.isObject(obj) && !angular.isArray(obj);

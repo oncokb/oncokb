@@ -191,16 +191,17 @@ angular.module('oncokbApp')
         }
 
         function parse(data){
+            return parseJSON(processData(x2js.xml_str2json(data).xml));
+        }
 
-            var annotation = processData(x2js.xml_str2json(data).xml);
-
-            for(var key in annotation) {
-                annotation[key] = formatDatum(annotation[key], key);
+        function parseJSON(data){
+            for(var key in data) {
+                data[key] = formatDatum(data[key], key);
             }
 
             return {
-                annotation: annotation,
-                relevantCancerType: getRelevantCancerType(annotation)
+                annotation: data,
+                relevantCancerType: getRelevantCancerType(data)
             };
         }
 
@@ -259,6 +260,7 @@ angular.module('oncokbApp')
 
         return {
             'parse': parse,
+            'parseJSON': parseJSON,
             'getRelevantCancerType': getRelevantCancerType
         };
     });

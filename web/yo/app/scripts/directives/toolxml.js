@@ -58,10 +58,7 @@ angular.module('oncokbApp')
             var i;
 
             reader.onload = function(e) {
-              console.log(e);
-              console.log(x2js);
               var full = x2js.xml_str2json(e.target.result);
-              console.log(full);
               var reportViewData = [];
               var variants = [];
               var reportViewDatas = [];
@@ -83,10 +80,9 @@ angular.module('oncokbApp')
                 reportGeneratorWorkers.set(reportViewData);
                 workers = reportGeneratorWorkers.get();
                 for(i=0; i<workers.length; i++) {
-                  workers[i].annotation.annotation = variants[i].allele.transcript;
-                  workers[i].annotation.relevantCancerType = reportGeneratorParseAnnotation.getRelevantCancerType(variants[i].allele.transcript);
+                  var _annotation = reportGeneratorParseAnnotation.parseJSON(variants[i].allele.transcript);
+                  workers[i].annotation = _annotation;
                   workers[i].prepareReportParams();
-
                   var reportViewParams = {};
                   for(var key in workers[i].reportParams.reportContent) {
                     if(key !== 'items') {
@@ -100,6 +96,7 @@ angular.module('oncokbApp')
                   reportViewDatas.push(reportViewFactory.getData(reportViewParams));
                 }
 
+                console.log(workers);
                 $scope.reportViewDatas = reportViewDatas;
                 $scope.status.isXML = true;
                 $scope.$apply();
