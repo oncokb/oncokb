@@ -504,11 +504,14 @@ angular.module('oncokbApp')
                 object = {};
                 key = 'LEVELS OF EVIDENCE';
                 value =  [
-                    {'level 1': 'FDA-approved biomarker and drug association in this indication.'},
-                    {'level 2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.'},
-                    {'level 2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.'},
-                    {'level 3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'},
-                    {'level 4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'}
+                    {'Level 1': 'FDA-approved biomarker and drug association in this indication.'},
+                    {'Level 2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.'},
+                    {'Level 2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.'},
+                    {'Level 3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'},
+                    {'Level 4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'},
+                    {'Level R1': 'NCCN-compendium listed biomarker for resistance to a FDA-approved drug.'},
+                    {'Level R2': 'Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.'},
+
                 ];
                 object[key] = value;
                 clinicalTrials.push(object);
