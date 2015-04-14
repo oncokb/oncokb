@@ -15,7 +15,7 @@ angular.module('oncokbApp')
             this.mutation = mutation || 'N/A';
             this.tumorType = tumorType || 'N/A';
             this.overallInterpretation = 'None.';
-            this.alterType = 'MUTATION';
+            this.alterType = 'Somatic Mutation';
             this.mutationFreq = 'N/A';
             this.tumorTypeDrugs = 'N/A';
             this.nonTumorTypeDrugs = 'N/A';
@@ -78,7 +78,7 @@ angular.module('oncokbApp')
             params.additionalInfo = _additionalInfo.length > 0 ? _additionalInfo : 'None.';
 
             //Set the mutation type to MUTATION, need to change after type available
-            params.alterType = 'MUTATION';
+            params.alterType = 'Somatic Mutation';
             return params;
         }
 
