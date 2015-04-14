@@ -233,7 +233,7 @@ angular.module('oncokbApp')
             }
 
             //Sort clinical trials
-            if(angular.isArray(relevantCancerType.clinical_trial)){
+            if(relevantCancerType && angular.isArray(relevantCancerType.clinical_trial)){
                 relevantCancerType.clinical_trial.sort(function(a, b){
                     var _a = a.phase? a.phase: '';
                     var _b = b.phase? b.phase: '';

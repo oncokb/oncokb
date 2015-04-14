@@ -7,7 +7,7 @@
  * # comments
  */
 angular.module('oncokbApp')
-  .directive('commentsDict', function (DatabaseConnector, S) {
+  .directive('commentsDict', function (DatabaseConnector, S, Users) {
     return {
       templateUrl: 'views/comments.html',
       restrict: 'AE',
@@ -26,6 +26,7 @@ angular.module('oncokbApp')
           hasComment: false,
           allResolved: false
         };
+        $scope.userRole = Users.getMe().role;
 
         if(attrs.geneName) {
           scope.geneName = attrs.geneName;
