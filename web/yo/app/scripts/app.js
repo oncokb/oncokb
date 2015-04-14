@@ -30,9 +30,9 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
+    //folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
-    //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
+    folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     userRoles: {
         'public': 1, // 0001
@@ -447,7 +447,7 @@ angular.module('oncokbApp', [
                 var $rootScope = $injector.get('$rootScope');
                 $rootScope.addError({message: 'Exception', reason: exception, case: cause});
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                $delegate(exception, cause);
+                //$delegate(exception, cause);
             };
         });
     });
