@@ -282,7 +282,7 @@ angular.module('oncokbApp')
           function groupWorkers(){
             if($scope.status.mergePatient) {
               $scope.workers.forEach(function(e, i){
-                var _id = e.patientId + e.parent.name===''?'': ('-'+ e.parent.name);
+                var _id = e.patientId + (e.parent.name?('_'+ e.parent.name):'');
                 if(!$scope.groups.hasOwnProperty(_id)){
                   $scope.groups[_id] = [];
                 }
@@ -296,7 +296,7 @@ angular.module('oncokbApp')
                   $scope.groups[i] = [];
                 }
                 $scope.groups[i].push(i);
-                e.fileName = e.geneName + '_' + e.alteration + '_' + e.tumorType;
+                e.fileName = e.gene + '_' + e.alteration + '_' + e.tumorType;
               });
               $scope.groupKeys = Object.keys($scope.groups);
             }
