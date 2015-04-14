@@ -27,6 +27,7 @@ angular.module('oncokbApp')
                 self.reportParams.reportContent.diagnosis = self.reportParams.reportContent.tumorTissueType = self.tumorType;
                 self.reportParams.requestInfo.email = self.email;
                 self.reportParams.requestInfo.folderName = self.folderName;
+                self.reportParams.requestInfo.folderId = self.folderId;
                 self.reportParams.requestInfo.fileName = self.fileName;
                 self.reportParams.requestInfo.userName = self.userName;
             };
@@ -65,6 +66,7 @@ angular.module('oncokbApp')
                 self.status.generate = 0; //0: ungenerated, 1: successfully generated, -1: unsuccessfully generated, 2: initializing, 3: initialized, 4: generating
                 self.email = '';
                 self.folderName = '';
+                self.folderId = '';
                 self.fileName = '';
                 self.userName = '';
                 self.parent = {};

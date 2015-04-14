@@ -221,19 +221,22 @@ angular.module('oncokbApp')
           }
         }
 
-        function createGoogleFolder(params, success, fail) {
+        function createGoogleFolder(params) {
+          var deferred = $q.defer();
+
           if(dataFromFile) {
-            success('');
+            deferred.resolve('test name');
           }else {
             GenerateDoc
                 .createFolder(params)
                 .success(function(data) {
-                  success(data);
+                  deferred.resolve(data);
                 })
                 .error(function(){
-                  fail();
+                  deferred.reject();
                 });
           }
+          return deferred.promise;
         }
 
         function sendEmail(params, success, fail) {

@@ -18,6 +18,7 @@ angular.module('oncokbApp')
         XLSX,
         dialogs,
         S,
+        $q,
         Levenshtein) {
       return {
         templateUrl: 'views/toolxlsx.html',
@@ -145,6 +146,7 @@ angular.module('oncokbApp')
                 if(n >= $scope.workers.length) {
                   $scope.status.generating = false;
                   $scope.status.generateIndex = -1;
+                  $scope.status.working = false;
                 }
               }
             });
@@ -269,6 +271,7 @@ angular.module('oncokbApp')
           function initializeWorkersData(){
             $scope.workers[$scope.status.initializingIndex].email = $scope.sheets.email || 'jackson.zhang.828@gmail.com';
             $scope.workers[$scope.status.initializingIndex].folderName = $scope.sheets.folder[$scope.workers[$scope.status.initializingIndex].parent.name].name || '';
+            $scope.workers[$scope.status.initializingIndex].folderId = $scope.sheets.folder[$scope.workers[$scope.status.initializingIndex].parent.name].id || '';
             $scope.workers[$scope.status.initializingIndex].status.generate = 2;
             $scope.workers[$scope.status.initializingIndex].userName = $rootScope.user.name;
             $scope.workers[$scope.status.initializingIndex].getData().then(function(){
@@ -327,6 +330,7 @@ angular.module('oncokbApp')
             reportParams.reportContent.patientId = $scope.workers[group[0]].patientId;
             reportParams.requestInfo.email =  $scope.workers[group[0]].email;
             reportParams.requestInfo.folderName = $scope.workers[group[0]].folderName;
+            reportParams.requestInfo.folderId = $scope.workers[group[0]].folderId;
             reportParams.requestInfo.fileName = $scope.workers[group[0]].fileName;
             //$timeout(function(){
             reportGenerator.generateGoogleDoc(reportParams).then(function(){
@@ -339,11 +343,28 @@ angular.module('oncokbApp')
             });
             //}, 1000);
           }
+
           function generate(){
-            console.log('Generating - ', $scope.status.generateIndex);
-            $scope.workers[$scope.status.generateIndex].status.generate = 4;
-            $scope.workers[$scope.status.generateIndex].getData().then(function(){
-              $scope.workers[$scope.status.initializingIndex].status.generate = 1;
+            $scope.status.working = true;
+            createFolder();
+          }
+
+          function createFolder(){
+            var promises = [];
+            var folderNames = [];
+            for(var folder in $scope.sheets.folder){
+              var name = $scope.sheets.folder[folder].name || '';
+              if(name){
+                folderNames.push(folder);
+                promises.push(DatabaseConnector.createGoogleFolder({folderName: name}));
+              }
+            }
+            $q.all(promises).then(function(result){
+              console.log(result);
+              result.forEach(function(e, i){
+                $scope.sheets.folder[folderNames[i]].id = e;
+              });
+              $scope.status.initializingIndex = 0;
             });
           }
 
@@ -352,6 +373,7 @@ angular.module('oncokbApp')
             console.log('initializing....');
             initParams(function(){
               $scope.status.fileSelected = true;
+              $scope.status.working = false;
               readXLSXfile($scope.file);
             });
           };
