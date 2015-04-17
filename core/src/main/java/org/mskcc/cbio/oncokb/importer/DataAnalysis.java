@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
@@ -38,17 +40,6 @@ public final class DataAnalysis {
     private static final String QUEST_CURATION_FOLDER = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/annotations_sample";
     private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
     
-    private static Map<String, Map> DATA = new HashMap<>();
-    private static String[] branch = {
-        EvidenceType.PREVALENCE.name(), 
-        EvidenceType.PROGNOSTIC_IMPLICATION.name(), 
-        EvidenceType.MUTATION_EFFECT.name(),
-        EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY.name(), 
-        EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE.name(), 
-        EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY.name(), 
-        EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE.name()};
-    
-    private static List BRANCH3 = Arrays.asList(branch);
     private static Map<String, Integer> TUMORS = new HashMap<>();
     private static Map<String, List> DRUGS = new HashMap<>();
     
@@ -58,28 +49,12 @@ public final class DataAnalysis {
         Map<String, Map> genesMap = new HashMap<>();
         
         for(Gene gene : genes){
-            Map<String, Integer> datum = new HashMap<>();
-            datum.put("alts", 0);
-            datum.put("ss", 0);
-            datum.put("sr", 0);
-            datum.put("is", 0);
-            datum.put("ir", 0);
-            datum.put("branch3", 0);
-            datum.put("l1", 0);
-            datum.put("l2a", 0);
-            datum.put("l2b", 0);
-            datum.put("l3", 0);
-            datum.put("l4", 0);
-            DATA.put(gene.getHugoSymbol(), datum);
             Map<String, Map> geneMap = parseGene(gene);
             genesMap.put(gene.getHugoSymbol(), geneMap);
         }
         
         JSONObject object = new JSONObject(genesMap);
         System.out.println(object.toString());
-        
-        JSONObject data = new JSONObject(DATA);
-        System.out.println(data.toString());
         
         JSONObject tumors = new JSONObject(TUMORS);
         System.out.println(tumors.toString());
@@ -118,8 +93,6 @@ public final class DataAnalysis {
             }
         }    
         alterationsMap.put("attrs", attrs);
-        
-        DATA.get(gene.getHugoSymbol()).put("alts", alterations.size());
         
         for(Alteration alt : alterations) {
             Map<String, Map> altMap = parseAlteration(alt, gene);
@@ -189,37 +162,14 @@ public final class DataAnalysis {
         
         for(EvidenceType type : evidenceTypes) {
             List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(type), Collections.singleton(tt));
-            List<Map> map = new ArrayList<>();
-            Integer implications = 0;
-            if(type.name().equals(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY.name())) {
-                implications = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("is").toString());
-                DATA.get(gene.getHugoSymbol()).put("is", implications + evidences.size());
-            }
-            
-            if(type.name().equals(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE.name())) {
-                implications = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("ir").toString());
-                DATA.get(gene.getHugoSymbol()).put("ir", implications + evidences.size());
-            }
-            
-            if(type.name().equals(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY.name())) {
-                implications = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("ss").toString());
-                DATA.get(gene.getHugoSymbol()).put("ss", implications + evidences.size());
-            }
-            
-            if(type.name().equals(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE.name())) {
-                implications = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("sr").toString());
-                DATA.get(gene.getHugoSymbol()).put("sr", implications + evidences.size());
-            }
-            
-            if(BRANCH3.contains(type.name())) {
-                Integer branch3 = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("branch3").toString());
-                DATA.get(gene.getHugoSymbol()).put("branch3", branch3 + evidences.size());
-            }
+            List<Object> map = new ArrayList<>();
             
             if(types.contains(type)) {
                 for(Evidence evidence : evidences) {
-                    Map<String, Map> evidenceMap = parseEvidence(evidence, tt, gene);
-                    map.add(evidenceMap);
+                    if(evidence.getLevelOfEvidence() != null) {
+                        Map<String, Object> evidenceMap = parseEvidence(evidence, tt, gene);
+                        map.add(evidenceMap);
+                    }
                 }
                 evidencesMap.put(type.name(), map);
             }else if(specialTypes.contains(type)){
@@ -244,90 +194,58 @@ public final class DataAnalysis {
         return evidencesMap;
     }
     
-    private static Map<String, Map> parseEvidence(Evidence evidence, TumorType tt, Gene gene) {
-//        System.out.println("\t\tEvidence Type:" + evidence.getEvidenceType());
-        
+    private static Map<String, Object> parseEvidence(Evidence evidence, TumorType tt, Gene gene) {
+        Map<String, Object> therapyMap = new HashMap<>();
+        therapyMap.put("approvedIndications", false);
+
+        //Get therapy level
         Set<Treatment> treatments = evidence.getTreatments();
+
         Map<String, String> level = new HashMap<>();
         String levelStr = "";
         if(evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().getLevel() != null) {
             levelStr = evidence.getLevelOfEvidence().getLevel();
         }
         level.put("level",  levelStr);
-        if(treatments != null){
-            if(treatments.isEmpty()) {
-//                System.out.println("\t\t\tNo Treatment.");
-                return null;
-            }else {
-                Map<String, Map> treatmentsMap = new HashMap<>();
-                for(Treatment t : treatments) {
-                    Map<String, List> treatmentMap = parseTreatment(t, tt, gene);
-                    treatmentsMap.put("treatment", treatmentMap);
-                    treatmentsMap.put("level", level);
-                    
-                    Integer levelNum = 0;
-                    
-                    switch(levelStr){
-                        case "1":
-                            Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("l1").toString());
-                            DATA.get(gene.getHugoSymbol()).put("l1", ++levelNum);
-                            break;
-                        case "2a":
-                            levelNum = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("l2a").toString());
-                            DATA.get(gene.getHugoSymbol()).put("l2a", ++levelNum);
-                            break;
-                        case "2b":
-                            levelNum = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("l2b").toString());
-                            DATA.get(gene.getHugoSymbol()).put("l2b", ++levelNum);
-                            break;
-                        case "3":
-                            levelNum = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("l3").toString());
-                            DATA.get(gene.getHugoSymbol()).put("l3", ++levelNum);
-                            break;
-                        case "4":
-                            levelNum = Integer.parseInt(DATA.get(gene.getHugoSymbol()).get("l4").toString());
-                            DATA.get(gene.getHugoSymbol()).put("l4", ++levelNum);
-                            break;
-                        default:
-                            break;
-                    }
+        therapyMap.put("level", level);
+        therapyMap.put("name", "");
+
+        //Get therapy treatments
+        List<Map> treatmentsList = new ArrayList<>();
+        List<String> approvedIndicationsList = new ArrayList<>();
+        for(Treatment t : treatments) {
+            Map<String, Object> treatmentMap = parseTreatment(t, tt, gene);
+
+            Set<String> approvedIndications = t.getApprovedIndications();
+            for(String s : approvedIndications) {
+                if(!s.isEmpty()){
+                    approvedIndicationsList.add(treatmentMap.get("name").toString());
                 }
-                return treatmentsMap;
             }
-        }else{
-            Map<String, Map> map = new HashMap<>();
-            Map<String, String> subMap = new HashMap<>();
-            subMap.put("knowEffect", evidence.getKnownEffect());
-            subMap.put("hasDescription", evidence.getDescription().isEmpty()?"FALSE":"TRUE");
-            subMap.put("evidenceType", evidence.getEvidenceType().name());
-            subMap.put("level", evidence.getLevelOfEvidence().getLevel());
-            map.put("attrs", subMap);
-//            System.out.println("\t\t\tNo Treatment Info");
-            return map;
+
+            String therapyName = therapyMap.get("name").toString();
+            therapyMap.put("name", therapyName + (therapyName.isEmpty()?"":",")+treatmentMap.get("name"));
+
+            treatmentsList.add(treatmentMap);
         }
+        therapyMap.put("approvedIndications", approvedIndicationsList);
+        therapyMap.put("treatments", treatmentsList);
+
+        return therapyMap;
     }
     
-    private static Map<String, List> parseTreatment(Treatment treatment, TumorType tt, Gene gene) {
+    private static Map<String, Object> parseTreatment(Treatment treatment, TumorType tt, Gene gene) {
 //        System.out.println("\t\t\tTreatment");
-        Map<String, List> treatmentsMap = new HashMap<>();
-        Set<String> approvedIndications = treatment.getApprovedIndications();
-        if(approvedIndications != null && !approvedIndications.isEmpty()){
-            List<String> approvedIndicationsMap = new ArrayList<>();
-//            System.out.println("\t\t\t\tIndications");
-            for(String s : approvedIndications) {
-//                System.out.println("\t\t\t\t\t ---");
-                approvedIndicationsMap.add("1");
-            }
-            treatmentsMap.put("approvedIndications",  approvedIndicationsMap);
-        }
-        
+        Map<String, Object> treatmentsMap = new HashMap<>();
+
         Set<Drug> drugs = treatment.getDrugs();
         if(drugs != null && !drugs.isEmpty()){
 //            System.out.println("\t\t\t\tDrugs");
             List<String> drugList = new ArrayList<>();
             String ttName = tt.getName();
+
             for(Drug drug : drugs) {
-//                System.out.println("\t\t\t\t\t" + drug.getDrugName());
+                System.out.println("\t\t\t\t\t" + drug.getDrugName());
                 String drugName = drug.getDrugName();
                 
                 Integer associations = Integer.parseInt(TUMORS.get(ttName).toString());
@@ -342,9 +260,10 @@ public final class DataAnalysis {
                 }
                 
                 drugList.add(drugName);
-                
+
             }
             treatmentsMap.put("drugs", drugList);
+            treatmentsMap.put("name", StringUtils.join(drugList, "+"));
         }else{
 //            System.out.println("\t\t\tNo Drug.");
         }
