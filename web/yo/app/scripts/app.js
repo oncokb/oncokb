@@ -30,9 +30,9 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    //folderId: '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M', //testing folder
+    folderId: '0BzBfo69g8fP6TEt3bmU5RzJGYnM', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
-    folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
+    //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     userRoles: {
         'public': 1, // 0001
@@ -248,10 +248,11 @@ OncoKB.curateInfo = {
 OncoKB.setUp = function(object) {
     if(OncoKB.curateInfo.hasOwnProperty(object.attr)){
         for(var key1 in OncoKB.curateInfo[object.attr]){
-            if(OncoKB.curateInfo[object.attr][key1].hasOwnProperty('display')) {
+            if(object[key1] && OncoKB.curateInfo[object.attr][key1].hasOwnProperty('display')) {
                 object[key1].display = OncoKB.curateInfo[object.attr][key1].display;
             }
-            if(object[key1].type === 'EditableString') {
+
+            if(object[key1] && object[key1].type === 'EditableString') {
                 Object.defineProperty(object[key1], 'text', {
                     set: object[key1].setText,
                     get: object[key1].getText

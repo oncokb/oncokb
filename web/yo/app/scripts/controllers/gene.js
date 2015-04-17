@@ -136,7 +136,20 @@ angular.module('oncokbApp')
             // rest 110 genes
             // var newGenes = ['SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','ARAF','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','CASP8','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','PTPRD','DNMT3A','DNMT3B','RUNX1','AR','E2F3','FOXP1','RYBP','SHQ1','PIK3CB','PIK3R2','SDHB','SDHC','SDHD','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','CDK12','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','ARID1B','ARID2','ARID5B','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10'];
 
+            $scope.migrate = function(){
+                console.log($scope.documents);
 
+                //Steo 0. Create a folder to put all files (Manully did)
+                var newFolderId = '0BzBfo69g8fP6fjVqN1dCbGdYRUYxd0xfck5FTjdWLXVCaEZxZjhuWTFIcFBVODk3ZDNEX0E';
+                //Step 1. For loop all documents
+                //Step 2. Create file with same name
+                //Step 3. Give file same permission
+                //Step 4. Copy file content, but create
+
+                storage.getPermission($scope.documents[0].id).then(function(result){
+                    console.log(result);
+                });
+            };
 
             $scope.create = function() {
                 createDoc(0);
