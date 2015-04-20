@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector) {
+    .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DTInstances, DatabaseConnector, OncoKB) {
         function Levels(){
             return {
                 '1': {},
@@ -52,15 +52,20 @@ angular.module('oncokbApp')
         }
 
         function init(){
-            DatabaseConnector.getDataSummary().then(function(result){
-                if(result && result.error){
-                    $scope.data = {};
-                }else{
-                    $scope.data = result;
-                }
-                console.log(result);
-                parseGene(result);
-            });
+            $scope.rendering = true;
+            //if(!OncoKB.dataSummaryGenes){
+                DatabaseConnector.getDataSummary().then(function(result){
+                    if(result && result.error){
+                        $scope.data = {};
+                    }else{
+                        $scope.data = result;
+                    }
+                    console.log(result);
+                    parseGene(result);
+                });
+            //}else{
+            //    $scope.genes = OncoKB.dataSummaryGenes;
+            //}
         }
 
         function parseGene(data){
@@ -207,6 +212,10 @@ angular.module('oncokbApp')
             }
 
             $scope.genes = genes;
+            OncoKB.dataSummaryGenes = genes;
+            DTInstances.getLast().then(function(dtInstances){
+                $scope.rendering = false;
+            });
             //console.log(genes);
         }
 
@@ -260,5 +269,6 @@ angular.module('oncokbApp')
         $scope.therapyCategories = ['SS','SR','IS','IR'];
         $scope.levelCategories = ['1', '2a', '2b', '3', '4', 'r1', 'r2', 'r3'];
         $scope.data = [];
+        $scope.rendering = false;
         $scope.init = init;
     });

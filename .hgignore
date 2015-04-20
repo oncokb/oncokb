@@ -24,3 +24,4 @@ npm-debug.log
 build.sh
 start.sh
 .idea$
+\.iml$

@@ -1,9 +1,11 @@
-<div ng-init="init()">
+<div ng-init="init()" ng-hide="rendering">
+    <div><span class="pull-right">Last modified: 04/16/2015</span></div>
+    <br>
     <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
         <thead><tr class="dashedHeader">
             <th>Gene</th>
             <th qtip content="Has summary">Summary</th>
-            <th qtip content="Has background">BG</th>
+            <th qtip content="Has background">Background</th>
             <th># Variants</th>
             <th># Cancer Type</th>
             <th qtip content="Combination between variant and cancer type"># Combo</th>
@@ -11,7 +13,7 @@
             <th qtip content="Number of standard implications for resistance to therapy"># SR</th>
             <th qtip content="Number of investigational implications for sensitivity to therapy"># IS</th>
             <th qtip content="Number of investigational implications for resistance to therapy"># IR</th>
-            <th># trials</th>
+            <th># Trials</th>
         </tr></thead>
         <tbody>
         <tr data-ng-repeat="gene in genes">
@@ -72,4 +74,14 @@
         </tr>
         </tbody>
     </table>
+</div>
+<div ng-show="rendering" class="genesLoading">
+    <div class='sk-spinner sk-spinner-wave mskcc'>
+        <div class='sk-rect1'></div>
+        <div class='sk-rect2'></div>
+        <div class='sk-rect3'></div>
+        <div class='sk-rect4'></div>
+        <div class='sk-rect5'></div>
+    </div>
+    Please wait, we are loading information.
 </div>
