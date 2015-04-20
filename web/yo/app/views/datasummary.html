@@ -5,10 +5,14 @@
         <thead><tr class="dashedHeader">
             <th>Gene</th>
             <th qtip content="Has summary">Summary</th>
-            <th qtip content="Has background">Background</th>
+            <th qtip content="Has background">Bg</th>
             <th># Variants</th>
+            <th qtip content="Number of oncogenic variants"># O Variants</th>
+            <th qtip content="Number of non-oncogenic variants"># Non-O Variants</th>
+            <th qtip content="Number of positioned variants"># P Variants</th>
             <th># Cancer Type</th>
             <th qtip content="Combination between variant and cancer type"># Combo</th>
+            <th qtip content="Combination between positioned variant and cancer type"># P Combo</th>
             <th qtip content="Number of standard implications for sensitivity to therapy"># SS</th>
             <th qtip content="Number of standard implications for resistance to therapy"># SR</th>
             <th qtip content="Number of investigational implications for sensitivity to therapy"># IS</th>
@@ -20,9 +24,13 @@
             <td><strong>{{gene.name}}</strong></td>
             <td>{{gene.hasSummary}}</td>
             <td>{{gene.hasBackground}}</td>
-            <td><span qtip content="{{gene.mutations.join('<br>')}}">{{gene.numMutations}}</span></td>
-            <td><span qtip content="{{gene.tumors.join('<br>')}}">{{gene.numCancerTypes}}</span></td>
-            <td>{{gene.numVCConbinations}}</td>
+            <td><span qtip content="{{gene.mutations.keys.join('<br>')}}">{{gene.mutations.num}}</span></td>
+            <td><span qtip content="{{gene.oncoGenicVariants.true.keys.join('<br>')}}">{{gene.oncoGenicVariants.true.num}}</span></td>
+            <td><span qtip content="{{gene.oncoGenicVariants.false.keys.join('<br>')}}">{{gene.oncoGenicVariants.false.num}}</span></td>
+            <td><span qtip content="{{gene.positionedMutations.keys.join('<br>')}}">{{gene.positionedMutations.num}}</span></td>
+            <td><span qtip content="{{gene.tumors.keys.join('<br>')}}">{{gene.tumors.num}}</span></td>
+            <td><span qtip content="{{gene.mtMap.keys.join('<br>')}}">{{gene.mtMap.num}}</span></td>
+            <td><span qtip content="{{gene.positionedMtMap.keys.join('<br>')}}">{{gene.positionedMtMap.num}}</span></td>
             <td ng-repeat="therapyCategory in therapyCategories"><span qtip content="{{gene[therapyCategory].keys.join('<br>')}}">{{gene[therapyCategory].num}}</span></td>
             <td><span qtip content="{{gene.trials.keys.join('<br>')}}">{{gene.trials.num}}</span></td>
         </tr>

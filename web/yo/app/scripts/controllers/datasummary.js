@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DTInstances, DatabaseConnector, OncoKB) {
+    .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DTInstances, DatabaseConnector, OncoKB, $timeout) {
         function Levels(){
             return {
                 '1': {},
@@ -24,10 +24,6 @@ angular.module('oncokbApp')
 
         function Gene(geneName) {
             this.name = geneName || '';
-            this.numMutations = 0;
-            this.numCancerTypes = 0;
-            this.numVCConbinations = 0;
-            this.numClinicalTrials = 0;
             this.SS = {};
             this.SR = {};
             this.IS = {};
@@ -39,21 +35,47 @@ angular.module('oncokbApp')
             this.highestLevelS = 'N/A'; //highest level of sensitivity
             this.highestLevelR = 'N/A'; //highest level of resistance
 
+            this.oncoGenicVariants = {
+                'true': {
+                    keys: [],
+                    num: 0
+                },
+                'false': {
+                    keys: [],
+                    num: 0
+                }
+            };
+
             this.hasBackground = false;
             this.hasSummary = false;
             this.hasStanderTherapy = false;
             this.hasInvestigationalTherapy = false;
 
-            this.mutations = [];
-            this.tumors = [];
-            this.mtMap = {}; //mutation tumor mapping
+            this.mutations = {
+                keys: [],
+                num: 0
+            };
+            this.positionedMutations = {};
+            this.tumors = {
+                keys: [],
+                num: 0
+            };
+            this.mtMap = {
+                keys: [],
+                num: 0
+            }; //mutation tumor mapping
+            this.positionedMtMap = {
+                keys: [],
+                num: 0
+            }; //positioned mutation and tumor mapping
 
             this.trials = {};
         }
 
         function init(){
             $scope.rendering = true;
-            //if(!OncoKB.dataSummaryGenes){
+            $timeout(function(){
+                //if(!OncoKB.dataSummaryGenes){
                 DatabaseConnector.getDataSummary().then(function(result){
                     if(result && result.error){
                         $scope.data = {};
@@ -63,9 +85,10 @@ angular.module('oncokbApp')
                     console.log(result);
                     parseGene(result);
                 });
-            //}else{
-            //    $scope.genes = OncoKB.dataSummaryGenes;
-            //}
+                //}else{
+                //    $scope.genes = OncoKB.dataSummaryGenes;
+                //}
+            }, 100);
         }
 
         function parseGene(data){
@@ -80,10 +103,10 @@ angular.module('oncokbApp')
                 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY',
                 'INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY'
             ];
+            var positionedMutationRegex = /^([a-zA-Z]+\d+)[a-zA-Z]*$/im;
             for(var key in data){
                 var gene = new Gene(key);
                 var datum = data[key];
-                var combination = 0;
 
                 if(datum.hasOwnProperty('attrs')){
                     gene.hasSummary = datum.attrs.hasSummary==="TRUE"?'Y':'N';
@@ -94,19 +117,52 @@ angular.module('oncokbApp')
 
                 for(var mutation in datum) {
                     var mutationO = datum[mutation]; //mutation object
+                    var position = positionedMutationRegex.exec(mutation);
+                    var positionedMutation = '';
 
-                    gene.mutations.push(mutation);
+                    gene.mutations.keys.push(mutation);
                     gene.mtMap[mutation] = [];
 
+                    if(position && position[1]){
+                        positionedMutation = position[1];
+                    }
+
+                    if(positionedMutation){
+                        if(!gene.positionedMutations.hasOwnProperty(positionedMutation)){
+                            gene.positionedMutations[positionedMutation] = [];
+                            gene.positionedMtMap[positionedMutation] = [];
+                        }
+                        gene.positionedMutations[positionedMutation].push(position[0]);
+                    }
+
                     if(mutationO.hasOwnProperty('attrs')){
+                        if(!gene.mutations.hasOwnProperty(mutation)){
+                            var effects = [];
+
+                            for(var effect in mutationO.attrs.mutationEffect){
+                                effects.push(mutationO.attrs.mutationEffect[effect]);
+                            }
+
+                            gene.mutations[mutation] = {
+                                effect: effects.join(', '),
+                                oncoGenic: mutationO.attrs.oncoGenic==='true'?true:false,
+                                type: mutationO.attrs.mutationType || 'MUTATION'
+                            };
+
+                            if(gene.mutations[mutation].oncoGenic) {
+                                gene.oncoGenicVariants.true.keys.push(mutation);
+                            }else{
+                                gene.oncoGenicVariants.false.keys.push(mutation);
+                            }
+                        }
                         delete mutationO.attrs;
                     }
 
                     for(var tumor in mutationO){
                         var tumorO = mutationO[tumor];
 
-                        if(gene.tumors.indexOf(tumor) === -1){
-                            gene.tumors.push(tumor);
+                        if(gene.tumors.keys.indexOf(tumor) === -1){
+                            gene.tumors.keys.push(tumor);
                         }
 
                         for(var tumorAttrs in tumorO){
@@ -165,9 +221,7 @@ angular.module('oncokbApp')
                                         console.log(gene.name, mutation, tumor, tumorAttrs, 'null tumorAttrs');
                                     }
                                 });
-                            }
-
-                            if(tumorAttrs === 'trials'){
+                            }else if(tumorAttrs === 'trials'){
                                 tumorAttrsO.forEach(function(trial){
                                     if(!gene.trials.hasOwnProperty(trial)){
                                         gene.trials[trial] = [];
@@ -180,19 +234,32 @@ angular.module('oncokbApp')
                                 });
                             }
                         }
+                        if(positionedMutation && gene.positionedMtMap[positionedMutation].indexOf(tumor) === -1){
+                            gene.positionedMtMap[positionedMutation].push(tumor);
+                            gene.positionedMtMap.keys.push(positionedMutation + ' ~ ' + tumor);
+                            gene.positionedMtMap.num++;
+                        }
                         gene.mtMap[mutation].push(tumor);
-                        combination++;
+                        gene.mtMap.keys.push(mutation + ' ~ ' + tumor);
+                        gene.mtMap.num++;
                     }
 
                 }
 
-                gene.mutations.sort();
-                gene.tumors.sort();
+                gene.mutations.keys.sort();
+                gene.mutations.num = gene.mutations.keys.length;
+                gene.tumors.keys.sort();
+                gene.tumors.num = gene.tumors.keys.length;
+                gene.oncoGenicVariants.true.keys.sort();
+                gene.oncoGenicVariants.false.keys.sort();
                 gene.trials.keys = Object.keys(gene.trials).sort();
+                gene.oncoGenicVariants.true.num = gene.oncoGenicVariants.true.keys.length;
+                gene.oncoGenicVariants.false.num = gene.oncoGenicVariants.false.keys.length;
                 gene.trials.num = gene.trials.keys.length;
-                gene.numMutations = gene.mutations.length;
-                gene.numCancerTypes = gene.tumors.length;
-                gene.numVCConbinations = combination;
+                gene.positionedMutations.keys = Object.keys(gene.positionedMutations).sort();
+                gene.positionedMutations.num = gene.positionedMutations.keys.length;
+
+
                 for(var key in therapies){
                     gene[therapies[key]].keys = Object.keys(gene[therapies[key]]).sort();
                     gene[therapies[key]].num = gene[therapies[key]].keys.length;
@@ -252,7 +319,11 @@ angular.module('oncokbApp')
             DTColumnDefBuilder.newColumnDef(7),
             DTColumnDefBuilder.newColumnDef(8),
             DTColumnDefBuilder.newColumnDef(9),
-            DTColumnDefBuilder.newColumnDef(10)
+            DTColumnDefBuilder.newColumnDef(10),
+            DTColumnDefBuilder.newColumnDef(11),
+            DTColumnDefBuilder.newColumnDef(12),
+            DTColumnDefBuilder.newColumnDef(13),
+            DTColumnDefBuilder.newColumnDef(14)
         ];
         $scope.dtColumnsLevels =  [
             DTColumnDefBuilder.newColumnDef(0),
