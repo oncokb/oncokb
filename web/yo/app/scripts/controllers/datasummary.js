@@ -9,27 +9,32 @@
  */
 angular.module('oncokbApp')
     .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector) {
+        function Levels(){
+            return {
+                '1': {},
+                '2a': {},
+                '2b': {},
+                '3': {},
+                '4': {},
+                'r1': {},
+                'r2': {},
+                'r3': {}
+            };
+        }
+
         function Gene(geneName) {
             this.name = geneName || '';
             this.numMutations = 0;
             this.numCancerTypes = 0;
             this.numVCConbinations = 0;
             this.numClinicalTrials = 0;
-            this.numSS = 0;
-            this.numSR = 0;
-            this.numIS = 0;
-            this.numIR = 0;
+            this.SS = {};
+            this.SR = {};
+            this.IS = {};
+            this.IR = {};
 
-            this.levels = {
-                '1': 0,
-                '2a': 0,
-                '2b': 0,
-                '3': 0,
-                '4': 0,
-                'r1': 0,
-                'r2': 0,
-                'r3': 0
-            };
+            this.therapyLevels = new Levels();
+            this.treatmentLevels = new Levels();
 
             this.highestLevelS = 'N/A'; //highest level of sensitivity
             this.highestLevelR = 'N/A'; //highest level of resistance
@@ -42,6 +47,8 @@ angular.module('oncokbApp')
             this.mutations = [];
             this.tumors = [];
             this.mtMap = {}; //mutation tumor mapping
+
+            this.trials = {};
         }
 
         function init(){
@@ -59,10 +66,10 @@ angular.module('oncokbApp')
         function parseGene(data){
             var genes = [];
             var therapies = {
-                'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY': 'numSS',
-                'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE': 'numSR',
-                'INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY': 'numIS',
-                'INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE': 'numIR'
+                'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY': 'SS',
+                'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE': 'SR',
+                'INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY': 'IS',
+                'INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE': 'IR'
             };
             var sensitTherapies = [
                 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY',
@@ -102,8 +109,16 @@ angular.module('oncokbApp')
                             if(therapies.hasOwnProperty(tumorAttrs)){
                                 tumorAttrsO.forEach(function(e){
                                     if(e){
-                                        if(e.hasOwnProperty('treatment')){
-                                            gene[therapies[tumorAttrs]]++;
+                                        if(e.hasOwnProperty('treatments') && e.hasOwnProperty('name') && e.name){
+                                            if(!gene[therapies[tumorAttrs]].hasOwnProperty(e.name)){
+                                                gene[therapies[tumorAttrs]][e.name] = [];
+                                            }
+                                            gene[therapies[tumorAttrs]][e.name].push({
+                                                gene: gene.name,
+                                                mutation: mutation,
+                                                tumorType: tumor,
+                                                therapy: e
+                                            });
                                         }
 
                                         if(e.hasOwnProperty('level')){
@@ -113,10 +128,31 @@ angular.module('oncokbApp')
                                             }else{
                                                 gene.highestLevelR = compare(_level, gene.highestLevelR, 'resistance');
                                             }
-                                            if(!gene.levels.hasOwnProperty(_level)){
-                                                gene.levels[_level] = 0;
+                                            if(!gene.therapyLevels.hasOwnProperty(_level)){
+                                                gene.therapyLevels[_level] = {};
+                                            } if(!gene.treatmentLevels.hasOwnProperty(_level)){
+                                                gene.treatmentLevels[_level] = {};
                                             }
-                                            gene.levels[_level]++;
+                                            if(!gene.therapyLevels[_level].hasOwnProperty(e.name)){
+                                                gene.therapyLevels[_level][e.name]=[];
+                                            }
+                                            gene.therapyLevels[_level][e.name].push({
+                                                gene: gene.name,
+                                                mutation: mutation,
+                                                tumorType: tumor,
+                                                type: tumorAttrs
+                                            });
+                                            e.treatments.forEach(function(e1){
+                                                if(!gene.treatmentLevels[_level].hasOwnProperty(e1.name)){
+                                                    gene.treatmentLevels[_level][e1.name]=[];
+                                                }
+                                                gene.treatmentLevels[_level][e1.name].push({
+                                                    gene: gene.name,
+                                                    mutation: mutation,
+                                                    tumorType: tumor,
+                                                    type: tumorAttrs
+                                                });
+                                            });
                                         }else{
                                             console.log(gene.name, mutation, tumor, tumorAttrs);
                                         }
@@ -126,6 +162,18 @@ angular.module('oncokbApp')
                                 });
                             }
 
+                            if(tumorAttrs === 'trials'){
+                                tumorAttrsO.forEach(function(trial){
+                                    if(!gene.trials.hasOwnProperty(trial)){
+                                        gene.trials[trial] = [];
+                                    }
+                                    gene.trials[trial].push({
+                                        gene: gene.name,
+                                        mutation: mutation,
+                                        tumorType: tumor
+                                    });
+                                });
+                            }
                         }
                         gene.mtMap[mutation].push(tumor);
                         combination++;
@@ -133,15 +181,33 @@ angular.module('oncokbApp')
 
                 }
 
+                gene.mutations.sort();
+                gene.tumors.sort();
+                gene.trials.keys = Object.keys(gene.trials).sort();
+                gene.trials.num = gene.trials.keys.length;
                 gene.numMutations = gene.mutations.length;
                 gene.numCancerTypes = gene.tumors.length;
                 gene.numVCConbinations = combination;
-
+                for(var key in therapies){
+                    gene[therapies[key]].keys = Object.keys(gene[therapies[key]]).sort();
+                    gene[therapies[key]].num = gene[therapies[key]].keys.length;
+                }
+                for(var level in gene.treatmentLevels){
+                    gene.treatmentLevels[level].keys = Object.keys(gene.treatmentLevels[level]).sort();
+                    gene.treatmentLevels[level].num = gene.treatmentLevels[level].keys.length;
+                }
+                for(var level in gene.therapyLevels){
+                    gene.therapyLevels[level].keys = Object.keys(gene.therapyLevels[level]).sort();
+                    gene.therapyLevels[level].num = gene.therapyLevels[level].keys.length;
+                }
+                if(gene.name === 'HRAS' || gene.name === 'BRAF' ){
+                    console.log(gene);
+                }
                 genes.push(gene);
             }
 
             $scope.genes = genes;
-            console.log(genes);
+            //console.log(genes);
         }
 
         function compare(n, o, type){
@@ -177,16 +243,22 @@ angular.module('oncokbApp')
             DTColumnDefBuilder.newColumnDef(7),
             DTColumnDefBuilder.newColumnDef(8),
             DTColumnDefBuilder.newColumnDef(9),
-            DTColumnDefBuilder.newColumnDef(10),
-            DTColumnDefBuilder.newColumnDef(11),
-            DTColumnDefBuilder.newColumnDef(12),
-            DTColumnDefBuilder.newColumnDef(13),
-            DTColumnDefBuilder.newColumnDef(14),
-            DTColumnDefBuilder.newColumnDef(15),
-            DTColumnDefBuilder.newColumnDef(16),
-            DTColumnDefBuilder.newColumnDef(17)
+            DTColumnDefBuilder.newColumnDef(10)
+        ];
+        $scope.dtColumnsLevels =  [
+            DTColumnDefBuilder.newColumnDef(0),
+            DTColumnDefBuilder.newColumnDef(1),
+            DTColumnDefBuilder.newColumnDef(2),
+            DTColumnDefBuilder.newColumnDef(3),
+            DTColumnDefBuilder.newColumnDef(4),
+            DTColumnDefBuilder.newColumnDef(5),
+            DTColumnDefBuilder.newColumnDef(6),
+            DTColumnDefBuilder.newColumnDef(7),
+            DTColumnDefBuilder.newColumnDef(8)
         ];
 
+        $scope.therapyCategories = ['SS','SR','IS','IR'];
+        $scope.levelCategories = ['1', '2a', '2b', '3', '4', 'r1', 'r2', 'r3'];
         $scope.data = [];
         $scope.init = init;
     });
