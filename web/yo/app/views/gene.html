@@ -19,6 +19,19 @@
       <span><strong>Curator name: <span ng-bind="curatorsName()"></span></strong></span><br/>
       <span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
     </p>
+    <p ng-if="userRole === 8">
+      <strong>Status:</strong>
+      <span ng-repeat="checkbox in checkboxes['geneStatus']">
+        <input
+                id="{{gene.name.text}}-gene-status-box{{$index}}"
+                type="checkbox"
+                ng-model="gene.status.text"
+                ng-true-value="{{checkbox}}"
+                ng-false-value=""
+                >
+        <label for="{{gene.name.text}}-gene-status-box{{$index}}">{{checkbox}}</label>
+      </span>
+    </p>
     <h3>{{gene.summary.display}}:<comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.summary.text"></p>
     <h3>{{gene.background.display}}:<comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict></h3>
