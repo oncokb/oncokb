@@ -8,8 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        function ($scope, $rootScope, $location, $timeout, $routeParams, _, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector) {
+    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'OncoKB',
+        function ($scope, $rootScope, $location, $timeout, $routeParams, _, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, OncoKB) {
             function saveGene(docs, docIndex, callback){
                 if(docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -60,14 +60,29 @@ angular.module('oncokbApp')
                     $scope.loaded = true;
                     // });
                 }else{
-                    storage.requireAuth(true).then(function(){
-                        storage.retrieveAllFiles().then(function(result){
-                            Documents.set(result);
-                            $scope.documents = Documents.get();
-                            $scope.loaded = true;
-                            // loading_screen.finish();
+                    if(OncoKB.global.genes){
+                        storage.requireAuth(true).then(function(){
+                            storage.retrieveAllFiles().then(function(result){
+                                Documents.set(result);
+                                Documents.setGeneStatus(OncoKB.global.genes);
+                                $scope.documents = Documents.get();
+                                $scope.loaded = true;
+                                // loading_screen.finish();
+                            });
                         });
-                    });
+                    }else{
+                        DatabaseConnector.getAllGene(function(data){
+                            OncoKB.global.genes = data;
+                            storage.requireAuth(true).then(function(){
+                                storage.retrieveAllFiles().then(function(result){
+                                    Documents.set(result);
+                                    Documents.setStatus(OncoKB.global.genes);
+                                    $scope.documents = Documents.get();
+                                    $scope.loaded = true;
+                                });
+                            });
+                        });
+                    }
                 }
             };
 
@@ -115,7 +130,8 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(2).notSortable(),
                 DTColumnDefBuilder.newColumnDef(3).notSortable(),
                 DTColumnDefBuilder.newColumnDef(4),
-                DTColumnDefBuilder.newColumnDef(5)
+                DTColumnDefBuilder.newColumnDef(5),
+                DTColumnDefBuilder.newColumnDef(6)
             ];
             $scope.loaded = false;
             $scope.status = {
@@ -570,10 +586,12 @@ angular.module('oncokbApp')
             };
 
             $scope.setGeneStatus = function(){
-                DatabaseConnector.setGeneStatus({
+                var newStatus = {
                     geneId: $scope.gene.name.text,
                     status: $scope.gene.status.text
-                }).then(function(result){
+                };
+                Documents.updateStatus(newStatus);
+                DatabaseConnector.setGeneStatus(newStatus).then(function(result){
                     if(result && result.error){
                         console.error(result);
                     }else{
