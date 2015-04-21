@@ -22,6 +22,7 @@ angular.module('oncokbApp')
       'DriveAnnotation',
       'SendEmail',
       'DataSummary',
+      'GeneStatus',
       function (
           $timeout,
           $q,
@@ -35,7 +36,8 @@ angular.module('oncokbApp')
           OncoTreeTumorTypes,
           DriveAnnotation,
           SendEmail,
-          DataSummary) {
+          DataSummary,
+          GeneStatus) {
 
         var numOfLocks = {},
             data = {};
@@ -73,6 +75,50 @@ angular.module('oncokbApp')
                 });
           }else {
             DataSummary.getFromFile()
+                .success(function(data) {
+                  deferred.resolve(data);
+                })
+                .error(function(result){
+                  deferred.reject(result);
+                });
+          }
+          return deferred.promise;
+        }
+
+        function getGeneStatus(params) {
+          var deferred = $q.defer();
+          if(dataFromFile) {
+            GeneStatus.getFromFile(params)
+                .success(function(data) {
+                  deferred.resolve(data);
+                })
+                .error(function(result){
+                  deferred.reject(result);
+                });
+          }else {
+            GeneStatus.getFromServer(params)
+                .success(function(data) {
+                  deferred.resolve(data);
+                })
+                .error(function(result){
+                  deferred.reject(result);
+                });
+          }
+          return deferred.promise;
+        }
+
+        function setGeneStatus(params) {
+          var deferred = $q.defer();
+          if(dataFromFile) {
+            GeneStatus.setToFile(params)
+                .success(function(data) {
+                  deferred.resolve(data);
+                })
+                .error(function(result){
+                  deferred.reject(result);
+                });
+          }else {
+            GeneStatus.setToServer(params)
                 .success(function(data) {
                   deferred.resolve(data);
                 })
@@ -293,6 +339,8 @@ angular.module('oncokbApp')
           'getAllTumorType': getAllTumorType,
           'getAllOncoTreeTumorTypes': getAllOncoTreeTumorTypes,
           'updateGene': updateGene,
-          'sendEmail': sendEmail
+          'sendEmail': sendEmail,
+          'setGeneStatus': setGeneStatus,
+          'getGeneStatus': getGeneStatus
         };
       }]);

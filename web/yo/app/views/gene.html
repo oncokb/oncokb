@@ -28,6 +28,7 @@
                 ng-model="gene.status.text"
                 ng-true-value="{{checkbox}}"
                 ng-false-value=""
+                ng-change="setGeneStatus()"
                 >
         <label for="{{gene.name.text}}-gene-status-box{{$index}}">{{checkbox}}</label>
       </span>

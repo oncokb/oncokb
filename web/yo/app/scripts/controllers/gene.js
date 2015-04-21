@@ -569,6 +569,19 @@ angular.module('oncokbApp')
                 if (event.preventDefault) { event.preventDefault();}
             };
 
+            $scope.setGeneStatus = function(){
+                DatabaseConnector.setGeneStatus({
+                    geneId: $scope.gene.name.text,
+                    status: $scope.gene.status.text
+                }).then(function(result){
+                    if(result && result.error){
+                        console.error(result);
+                    }else{
+                        console.info(result);
+                    }
+                });
+            };
+
             $scope.generatePDF = function() {
                 jspdf.create(importer.getData(this.gene));
             };
