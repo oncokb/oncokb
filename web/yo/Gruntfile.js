@@ -66,7 +66,7 @@ module.exports = function (grunt) {
     // The actual grunt server settings
     connect: {
       options: {
-        port: 8080,
+        port: 9000,
         // Change this to '0.0.0.0' to access the server from outside.
         hostname: 'localhost',
         livereload: 35729
@@ -396,6 +396,11 @@ module.exports = function (grunt) {
           cwd: '.',
           src: ['app/components/bootstrap-chosen/chosen-sprite.png','app/components/bootstrap-chosen/chosen-sprite@2x.png'],
           dest: '<%= oncokb.dist %>'
+        },{
+          expand: true,
+          cwd: '<%= oncokb.app %>/data',
+          src: 'summary.json',
+          dest: '<%= oncokb.dist %>/data'
         }]
       },
       styles: {

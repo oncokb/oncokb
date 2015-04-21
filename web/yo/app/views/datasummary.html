@@ -1,0 +1,95 @@
+<div ng-init="init()" ng-hide="rendering">
+    <div><span class="pull-right">Last modified: 04/16/2015</span></div>
+    <br>
+    <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+        <thead><tr class="dashedHeader">
+            <th>Gene</th>
+            <th qtip content="Has summary">Summary</th>
+            <th qtip content="Has background">Bg</th>
+            <th># Variants</th>
+            <th qtip content="Number of oncogenic variants"># O Variants</th>
+            <th qtip content="Number of non-oncogenic variants"># Non-O Variants</th>
+            <th qtip content="Number of positioned variants"># P Variants</th>
+            <th># Cancer Type</th>
+            <th qtip content="Combination between variant and cancer type"># Combo</th>
+            <th qtip content="Combination between positioned variant and cancer type"># P Combo</th>
+            <th qtip content="Number of standard implications for sensitivity to therapy"># SS</th>
+            <th qtip content="Number of standard implications for resistance to therapy"># SR</th>
+            <th qtip content="Number of investigational implications for sensitivity to therapy"># IS</th>
+            <th qtip content="Number of investigational implications for resistance to therapy"># IR</th>
+            <th># Trials</th>
+        </tr></thead>
+        <tbody>
+        <tr data-ng-repeat="gene in genes">
+            <td><strong>{{gene.name}}</strong></td>
+            <td>{{gene.hasSummary}}</td>
+            <td>{{gene.hasBackground}}</td>
+            <td><span qtip content="{{gene.mutations.keys.join('<br>')}}">{{gene.mutations.num}}</span></td>
+            <td><span qtip content="{{gene.oncoGenicVariants.true.keys.join('<br>')}}">{{gene.oncoGenicVariants.true.num}}</span></td>
+            <td><span qtip content="{{gene.oncoGenicVariants.false.keys.join('<br>')}}">{{gene.oncoGenicVariants.false.num}}</span></td>
+            <td><span qtip content="{{gene.positionedMutations.keys.join('<br>')}}">{{gene.positionedMutations.num}}</span></td>
+            <td><span qtip content="{{gene.tumors.keys.join('<br>')}}">{{gene.tumors.num}}</span></td>
+            <td><span qtip content="{{gene.mtMap.keys.join('<br>')}}">{{gene.mtMap.num}}</span></td>
+            <td><span qtip content="{{gene.positionedMtMap.keys.join('<br>')}}">{{gene.positionedMtMap.num}}</span></td>
+            <td ng-repeat="therapyCategory in therapyCategories"><span qtip content="{{gene[therapyCategory].keys.join('<br>')}}">{{gene[therapyCategory].num}}</span></td>
+            <td><span qtip content="{{gene.trials.keys.join('<br>')}}">{{gene.trials.num}}</span></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h4>Therapy levels</h4>
+    <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumnsLevels">
+        <thead><tr class="dashedHeader">
+            <th>Gene</th>
+            <th># L-1</th>
+            <th># L-2A</th>
+            <th># L-2B</th>
+            <th># L-3</th>
+            <th># L-4</th>
+            <th># L-R1</th>
+            <th># L-R2</th>
+            <th># L-R3</th>
+        </tr></thead>
+        <tbody>
+        <tr data-ng-repeat="gene in genes">
+            <td><strong>{{gene.name}}</strong></td>
+            <td ng-repeat="levelCategory in levelCategories">
+                <span qtip content="{{gene.therapyLevels[levelCategory].keys.join('<br>')}}">{{gene.therapyLevels[levelCategory].num}}</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h4>Treatment levels</h4>
+    <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumnsLevels">
+        <thead><tr class="dashedHeader">
+            <th>Gene</th>
+            <th># L-1</th>
+            <th># L-2A</th>
+            <th># L-2B</th>
+            <th># L-3</th>
+            <th># L-4</th>
+            <th># L-R1</th>
+            <th># L-R2</th>
+            <th># L-R3</th>
+        </tr></thead>
+        <tbody>
+        <tr data-ng-repeat="gene in genes">
+            <td><strong>{{gene.name}}</strong></td>
+            <td ng-repeat="levelCategory in levelCategories">
+                <span qtip content="{{gene.treatmentLevels[levelCategory].keys.join('<br>')}}">{{gene.treatmentLevels[levelCategory].num}}</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div ng-show="rendering" class="genesLoading">
+    <div class='sk-spinner sk-spinner-wave mskcc'>
+        <div class='sk-rect1'></div>
+        <div class='sk-rect2'></div>
+        <div class='sk-rect3'></div>
+        <div class='sk-rect4'></div>
+        <div class='sk-rect5'></div>
+    </div>
+    Please wait, we are loading information.
+</div>

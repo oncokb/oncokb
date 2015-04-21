@@ -22,7 +22,7 @@ angular.module('oncokbApp')
             return RecursionHelper.compile(element, function(scope){
                 // Define your normal link function here.
                 // Alternative: instead of passing a function,
-                // you can also pass an object with 
+                // you can also pass an object with
                 // a 'pre'- and 'post'-link function.
                 scope.isObject = function(obj) {
                     return angular.isObject(obj) && !angular.isArray(obj);
@@ -48,7 +48,7 @@ angular.module('oncokbApp')
                     return flag;
                 };
                 scope.keyProcess = function(key) {
-                    if(key.indexOf('(Resistance)') !== -1) {
+                    if(key && key.indexOf('(Resistance)') !== -1) {
                         key = key.replace('(Resistance)', '<span class="resistance-title">(Resistance)</span>');
                     }
                     key = '<b>' + key + '</b>';

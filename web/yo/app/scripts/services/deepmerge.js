@@ -33,9 +33,11 @@ angular.module('oncokbApp')
                     if (typeof src[key] !== 'object' || !src[key]) {
                         if(!Array.isArray(dst[key])) {
                             var _tmp = dst[key];
-                            dst[key] = [{'value':_tmp.toString().trim(), 'Cancer type': ct1}];
+                            _tmp = angular.isString(_tmp)?_tmp.trim():_tmp;
+                            dst[key] = [{'value': _tmp, 'Cancer type': ct1}];
                         }
-                        dst[key].push({'value':src[key].toString().trim(), 'Cancer type': ct2} );
+                        src[key] = angular.isString(src[key])?src[key].trim():src[key];
+                        dst[key].push({'value':src[key], 'Cancer type': ct2} );
                     }
                     else {
                         if (!target[key]) {

@@ -34,6 +34,23 @@ angular.module('oncokbApp').factory('Gene', ['$http',  function ($http) {
     };
 }]);
 
+angular.module('oncokbApp').factory('DataSummary', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('data/summary.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/summary.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
 angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
     'use strict';
 
@@ -128,7 +145,7 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
     function getDoc(params) {
         return $http.post(
             'generateGoogleDoc', 
-            {'reportContent':JSON.stringify(params)},
+            {'reportParams':JSON.stringify(params)},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform

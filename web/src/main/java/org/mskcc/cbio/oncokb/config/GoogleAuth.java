@@ -101,7 +101,7 @@ public class GoogleAuth {
             .setTransport(httpTransport)
             .setJsonFactory(jsonFactory)
             .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
-            .setServiceAccountScopes(Collections.singleton(DriveScopes.DRIVE))
+            .setServiceAccountScopes(DriveScopes.all())
             .setServiceAccountPrivateKeyFromP12File(SERVICE_ACCOUNT_PKCS12_FILE)
           .build();
         credential.refreshToken();
