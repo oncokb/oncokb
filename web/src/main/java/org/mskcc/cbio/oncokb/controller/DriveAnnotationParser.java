@@ -70,7 +70,10 @@ public class DriveAnnotationParser {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         if(geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
             String hugo = geneInfo.getString("name").trim();
+            String status = geneInfo.getString("status").trim();
             Gene gene = geneBo.findGeneByHugoSymbol(hugo);
+
+
             if (gene == null) {
                 System.out.println("Could not find gene "+hugo+". Loading from MyGene.Info...");
                 gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
@@ -78,10 +81,16 @@ public class DriveAnnotationParser {
 //                    throw new RuntimeException("Could not find gene "+hugo+" either.");
                     System.out.println("!!!!!!!!!Could not find gene "+hugo+" either.");
                 }else{
+                    if(status != null){
+                        gene.setStatus(status);
+                    }
                     geneBo.save(gene);
                 }
             }else {
-                
+                if(status != null){
+                    gene.setStatus(status);
+                    geneBo.saveOrUpdate(gene);
+                }
             }
             
             if(gene != null) {

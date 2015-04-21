@@ -58,7 +58,7 @@ angular.module('oncokbApp')
         var gene = {};
         var geneData = realtime;
 
-        gene = combineData(gene, geneData, ['name', 'summary', 'background']);
+        gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background']);
         gene.mutations = [];
         gene.curators = [];
 
