@@ -13,6 +13,8 @@
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
         <button type="button" class="btn btn-default" ng-click="isOpenFunc('expand')">Expand all</button>
         <button type="button" class="btn btn-default" ng-click="isOpenFunc('collapse')">Collapse all</button>
+        <button type="button" class="btn btn-default" ng-click="isOpenFunc('showEmpty')">Show all empty</button>
+        <button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>
       </span>
     </h2>
     <p ng-if="gene.curators && gene.curators.asArray().length > 0">
@@ -98,7 +100,7 @@
         </accordion-heading>
         <accordion close-others="oneAtATime">
           <!-- Mutation Effect -->
-          <accordion-group ng-init="geneStatus[mutationIndex].oncogenic = {}" is-open="geneStatus[mutationIndex].oncogenic.isOpen" class="levelTwoHeader">
+          <accordion-group ng-init="geneStatus[mutationIndex].oncogenic = {}" is-open="geneStatus[mutationIndex].oncogenic.isOpen" class="levelTwoHeader" ng-show="geneStatus[mutationIndex].oncogenic.showEmpty && ">
             <accordion-heading>
               <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[mutationIndex].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex].oncogenic.isOpen)"></i>
               <span ng-click="stopCollopse($event)"> Mutation effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="mutation.oncogenic.text === '' && mutation.effect.value.text === '' && mutation.description.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
@@ -365,6 +367,8 @@
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
   <button type="button" class="btn btn-default" ng-click="isOpenFunc('expand')">Expand all</button>
   <button type="button" class="btn btn-default" ng-click="isOpenFunc('collapse')">Collapse all</button>
+  <button type="button" class="btn btn-default" ng-click="isOpenFunc('showEmpty')">Show all empty</button>
+  <button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>

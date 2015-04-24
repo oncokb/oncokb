@@ -451,6 +451,7 @@ angular.module('oncokbApp')
                         ti.treatments.push(_treatment);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
                         $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1].isOpen = true;
+                        $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1].show = true;
                     }
                 }
             };
@@ -607,32 +608,43 @@ angular.module('oncokbApp')
             };
 
             $scope.isOpenFunc = function(type){
+                var processKey = '';
+                var specialEscapeKeys = ['isOpen', 'showEmpty'];
                 if(type === 'expand'){
                     $scope.expandAll = true;
+                    processKey = 'isOpen';
                 }else if (type === 'collapse'){
                     $scope.expandAll = false;
+                    processKey = 'isOpen';
+                }else if (type === 'showEmpty'){
+                    $scope.showAllEmpty = true;
+                    processKey = 'showEmpty';
+                }else if (type === 'hideEmpty'){
+                    $scope.showAllEmpty = false;
+                    processKey = 'showEmpty';
                 }
+
 
                 //for: mutation
                 for(var key in $scope.geneStatus) {
                     if(!isNaN(key)){
-                        $scope.geneStatus[key].isOpen = $scope.expandAll;
+                        $scope.geneStatus[key][processKey] = $scope.expandAll;
                     }
 
                     //for: tumor type
                     for(var _key in $scope.geneStatus[key]) {
                         //for: therapeutic implications
-                        if(_key !== 'isOpen'){
+                        if(specialEscapeKeys.indexOf(_key) === -1){
                             var flag = $scope.expandAll;
                             if(isNaN(_key) && flag){
                                 flag = $scope.gene.mutations.get(Number(key))[_key].text?$scope.expandAll: false;
                             }
-                            $scope.geneStatus[key][_key].isOpen = flag;
+                            $scope.geneStatus[key][_key][processKey] = flag;
 
 
                             for(var __key in $scope.geneStatus[key][_key]) {
                                 var flag = $scope.expandAll;
-                                if(__key !== 'isOpen'){
+                                if(specialEscapeKeys.indexOf(__key) === -1){
                                     if(isNaN(__key) && flag){
                                         if(__key === 'nccn'){
                                             flag = $scope.gene.mutations.get(Number(key)).tumors.get(Number(_key)).disease?$scope.expandAll: false;
@@ -641,20 +653,32 @@ angular.module('oncokbApp')
                                         }else{
                                             flag = $scope.gene.mutations.get(Number(key)).tumors.get(Number(_key))[__key].text?$scope.expandAll: false;
                                         }
-                                        $scope.geneStatus[key][_key][__key].isOpen = flag;
+                                        $scope.geneStatus[key][_key][__key][processKey] = flag;
                                     }else if(!isNaN(__key)){
                                         if($scope.gene.mutations.get(Number(key)).tumors.get(Number(_key)).TI.get(Number(__key)).treatments.length > 0){
                                             //for: treatments
-                                            $scope.geneStatus[key][_key][__key].isOpen = flag;
+                                            $scope.geneStatus[key][_key][__key][processKey] = flag;
                                             for(var ___key in $scope.geneStatus[key][_key][__key]) {
-                                                if(___key !== 'isOpen'){
-                                                    $scope.geneStatus[key][_key][__key][___key].isOpen = flag;
+                                                if(specialEscapeKeys.indexOf(___key) === -1){
+                                                    console.log(key);
+                                                    console.log(_key);
+                                                    console.log(__key);
+                                                    console.log(___key);
+                                                    console.log(processKey);
+                                                    console.log($scope.geneStatus[key]);
+                                                    console.log($scope.geneStatus[key][_key]);
+                                                    console.log($scope.geneStatus[key][_key][__key]);
+                                                    console.log($scope.geneStatus[key][_key][__key][___key]);
+                                                    console.log($scope.geneStatus[key][_key][__key][___key][processKey]);
+                                                    console.log(flag);
+                                                    console.log('------------------');
+                                                    $scope.geneStatus[key][_key][__key][___key][processKey] = flag;
                                                 }
                                             }
                                         }else if($scope.gene.mutations.get(Number(key)).tumors.get(Number(_key)).TI.get(Number(__key)).description.text){
-                                            $scope.geneStatus[key][_key][__key].isOpen = flag;
+                                            $scope.geneStatus[key][_key][__key][processKey] = flag;
                                         }else{
-                                            $scope.geneStatus[key][_key][__key].isOpen = false;
+                                            $scope.geneStatus[key][_key][__key][processKey] = false;
                                         }
                                     }
                                 }
@@ -665,7 +689,6 @@ angular.module('oncokbApp')
             };
 
             $scope.changeIsOpen = function(target){
-                console.log(target);
                 target = !target;
             };
 
@@ -1036,6 +1059,7 @@ angular.module('oncokbApp')
             $scope.geneStatus = {};
 
             $scope.expandAll = false;
+            $scope.showAllEmpty = false;
 
             getDriveOncokbInfo();
             getOncoTreeTumortypes();
