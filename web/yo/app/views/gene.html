@@ -162,7 +162,7 @@
 
             <accordion close-others="oneAtATime">
               <!-- Prevalence -->
-              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].prevalence={}; geneStatus[mutationIndex][tumorIndex].prevalence.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].prevalence.isOpen" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].prevalence={}; geneStatus[mutationIndex][tumorIndex].prevalence.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].prevalence.isOpen" ng-hide="(!!geneStatus[mutationIndex][tumorIndex].prevalence.hideEmpty) && !tumor.prevalence.text" class="levelThreeHeader">
                 <accordion-heading>
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex][tumorIndex].prevalence.isOpen, 'fa-chevron-right': !geneStatus[mutationIndex][tumorIndex].prevalence.isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex][tumorIndex].isOpen)"></i>
                   <span ng-click="stopCollopse($event)">{{tumor.prevalence.display}}: </span>
@@ -173,7 +173,7 @@
               </accordion-group>
 
               <!-- Prognostic implications -->
-              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].progImp={}; geneStatus[mutationIndex][tumorIndex].progImp.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].progImp.isOpen" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].progImp={}; geneStatus[mutationIndex][tumorIndex].progImp.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].progImp.isOpen" ng-hide="(!!geneStatus[mutationIndex][tumorIndex].prevalence.hideEmpty) && !tumor.progImp.text" class="levelThreeHeader">
                 <accordion-heading>
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex][tumorIndex].progImp.isOpen, 'fa-chevron-right': !geneStatus[mutationIndex][tumorIndex].progImp.isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex][tumorIndex].progImp.isOpen)"></i>
                   <span ng-click="stopCollopse($event)">{{tumor.progImp.display}}: </span>
@@ -184,7 +184,7 @@
               </accordion-group>
 
               <!-- NCCN guidelines -->
-              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].nccn={}; geneStatus[mutationIndex][tumorIndex].nccn.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].nccn.isOpen" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].nccn={}; geneStatus[mutationIndex][tumorIndex].nccn.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].nccn.isOpen" ng-hide="(!!geneStatus[mutationIndex][tumorIndex].nccn.hideEmpty) && !tumor.nccn.disease.text" class="levelThreeHeader">
                 <accordion-heading>
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex][tumorIndex].nccn.isOpen, 'fa-chevron-right': !geneStatus[mutationIndex][tumorIndex].nccn.isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex][tumorIndex].nccn.isOpen)"></i>
                   <span ng-click="stopCollopse($event)">NCCN guidelines: </span>
@@ -222,11 +222,11 @@
               </accordion-group>
 
               <!-- Theraputic implications -->
-              <accordion-group is-open="geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen" ng-init="tiIndex = $index; geneStatus[mutationIndex][tumorIndex][tiIndex] = {}; geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen = false;" class="levelThreeHeader" ng-repeat="ti in tumor.TI.asArray()">
+              <accordion-group is-open="geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen" ng-init="tiIndex = $index; geneStatus[mutationIndex][tumorIndex][tiIndex] = {}; geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen = false;" class="levelThreeHeader" ng-repeat="ti in tumor.TI.asArray()" ng-hide="(!!geneStatus[mutationIndex][tumorIndex][tiIndex].hideEmpty) && !ti.description.text && ti.treatments.length === 0">
                 <accordion-heading>
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen, 'fa-chevron-right': !geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex][tumorIndex][tiIndex].isOpen)"></i>
                   <span ng-click="stopCollopse($event)">{{ti.name.text}}: </span>
-                  <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="ti.description.text === '' && ti.treatments.length === 0">No Entry</span>
+                  <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.description.text && ti.treatments.length === 0">No Entry</span>
                   <comments-dict display-name="{{ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
                   <span>
@@ -303,7 +303,7 @@
               </accordion-group>
 
               <!-- Trials -->
-              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].trials={}; geneStatus[mutationIndex][tumorIndex].trials.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].trials.isOpen" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[mutationIndex][tumorIndex].trials={}; geneStatus[mutationIndex][tumorIndex].trials.isOpen = false" is-open="geneStatus[mutationIndex][tumorIndex].trials.isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[mutationIndex][tumorIndex].trials.hideEmpty) && tumor.trials.length === 0">
                 <accordion-heading>
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex][tumorIndex].trials.isOpen, 'fa-chevron-right': !geneStatus[mutationIndex][tumorIndex].trials.isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex][tumorIndex].trials.isOpen)"></i>
                   <span ng-click="stopCollopse($event)">Ongoing clinical trials: </span>
