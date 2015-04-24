@@ -100,10 +100,10 @@
         </accordion-heading>
         <accordion close-others="oneAtATime">
           <!-- Mutation Effect -->
-          <accordion-group ng-init="geneStatus[mutationIndex].oncogenic = {}" is-open="geneStatus[mutationIndex].oncogenic.isOpen" class="levelTwoHeader" ng-show="geneStatus[mutationIndex].oncogenic.showEmpty && ">
+          <accordion-group ng-init="geneStatus[mutationIndex].oncogenic = {}" is-open="geneStatus[mutationIndex].oncogenic.isOpen" class="levelTwoHeader" ng-hide="(!!geneStatus[mutationIndex].oncogenic.hideEmpty) && mutationEffectEmpty(mutation)">
             <accordion-heading>
               <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[mutationIndex].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[mutationIndex].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[mutationIndex].oncogenic.isOpen)"></i>
-              <span ng-click="stopCollopse($event)"> Mutation effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="mutation.oncogenic.text === '' && mutation.effect.value.text === '' && mutation.description.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+              <span ng-click="stopCollopse($event)"> Mutation effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="mutationEffectEmpty(mutation)">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             </accordion-heading>
             <p>
               <strong>{{mutation.oncogenic.display}}:</strong>
