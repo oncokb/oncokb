@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DTInstances, DatabaseConnector, OncoKB, $timeout) {
+    .controller('DatasummaryCtrl', function ($scope, DTColumnDefBuilder, DTOptionsBuilder, DTInstances, DatabaseConnector, OncoKB, $timeout, cbioDownloadUtil) {
         function Levels(){
             return {
                 '1': {},
@@ -109,8 +109,8 @@ angular.module('oncokbApp')
                 var datum = data[key];
 
                 if(datum.hasOwnProperty('attrs')){
-                    gene.hasSummary = datum.attrs.hasSummary==="TRUE"?'Y':'N';
-                    gene.hasBackground = datum.attrs.hasBackground==="TRUE"?'Y':'N';
+                    gene.hasSummary = datum.attrs.hasSummary==='TRUE'?'Y':'N';
+                    gene.hasBackground = datum.attrs.hasBackground==='TRUE'?'Y':'N';
 
                     delete datum.attrs;
                 }
@@ -292,7 +292,7 @@ angular.module('oncokbApp')
 
             var levelS = ['4', '3', '2b', '2a', '1'];
             var levelR = ['r3', 'r2', 'r1'];
-            var levels = type === "sensitivity"?levelS:levelR;
+            var levels = type === 'sensitivity'?levelS:levelR;
             var nI = levels.indexOf(n);
             var oI = levels.indexOf(o);
 
@@ -300,6 +300,199 @@ angular.module('oncokbApp')
                 return o;
             }else {
                 return n;
+            }
+        }
+
+        /**
+         * Use download util from cbioportal created by Onur
+         *
+         * @param type download file type
+         * @param tableId 0: all from three tables; 1: main table; 2:
+         */
+        function download(type, tableId){
+            var content = '',
+                seperator,
+                downloadOpts = {
+                    filename: 'download.',
+                    contentType: 'text/plain;charset=utf-8',
+                    preProcess: false
+                };
+
+            var tableKeys = {
+                common: {
+                    header: [{
+                        attr: 'name',
+                        display: 'Gene'
+                    }]
+                },
+                0: {
+                    name: 'All information'
+                },
+                1: {
+                    name: 'Main information',
+                    header: [{
+                        attr: 'hasSummary',
+                        display: 'Summary'
+                    },{
+                        attr: 'hasBackground',
+                        display: 'Background'
+                    },{
+                        attr: 'mutations.num',
+                        display: '# Variants'
+                    },{
+                        attr: 'oncoGenicVariants.true.num',
+                        display: '# Oncogenic variants'
+                    },{
+                        attr: 'oncoGenicVariants.false.num',
+                        display: '# Non-oncogenic variants'
+                    },{
+                        attr: 'positionedMutations.num',
+                        display: '# Positioned variants'
+                    },{
+                        attr: 'tumors.num',
+                        display: '# Cancer type'
+                    },{
+                        attr: 'mtMap.num',
+                        display: '# Combination between variant and cancer type'
+                    },{
+                        attr: 'positionedMtMap.num',
+                        display: '# Combination between positioned variant and cancer type'
+                    },{
+                        attr: 'SS.num',
+                        display: '# Standard implications for sensitivity to therapy'
+                    },{
+                        attr: 'SR.num',
+                        display: '# Standard implications for resistance to therapy'
+                    },{
+                        attr: 'IS.num',
+                        display: '# Investigational implications for sensitivity to therapy'
+                    },{
+                        attr: 'IR.num',
+                        display: '# Investigational implications for resistance to therapy'
+                    },{
+                        attr: 'trials.num',
+                        display: '# Trials'
+                    }]
+                },
+                2: {
+                    name: 'Therapy levels',
+                    header: [{
+                        attr: 'therapyLevels.1.num',
+                        display: '# Therapy L-1'
+                    },{
+                        attr: 'therapyLevels.2a.num',
+                        display: '# Therapy L-2A'
+                    },{
+                        attr: 'therapyLevels.2b.num',
+                        display: '# Therapy L-2B'
+                    },{
+                        attr: 'therapyLevels.3.num',
+                        display: '# Therapy L-3'
+                    },{
+                        attr: 'therapyLevels.4.num',
+                        display: '# Therapy L-4'
+                    },{
+                        attr: 'therapyLevels.r1.num',
+                        display: '# Therapy L-R1'
+                    },{
+                        attr: 'therapyLevels.r2.num',
+                        display: '# Therapy L-R2'
+                    },{
+                        attr: 'therapyLevels.r3.num',
+                        display: '# Therapy L-R3'
+                    }]},
+                3: {
+                    name: 'Treatment levels',
+                    header: [{
+                        attr: 'treatmentLevels.1.num',
+                        display: '# Treatment L-1'
+                    },{
+                        attr: 'treatmentLevels.2a.num',
+                        display: '# Treatment L-2A'
+                    },{
+                        attr: 'treatmentLevels.2b.num',
+                        display: '# Treatment L-2B'
+                    },{
+                        attr: 'treatmentLevels.3.num',
+                        display: '# Treatment L-3'
+                    },{
+                        attr: 'treatmentLevels.4.num',
+                        display: '# Treatment L-4'
+                    },{
+                        attr: 'treatmentLevels.r1.num',
+                        display: '# Treatment L-R1'
+                    },{
+                        attr: 'treatmentLevels.r2.num',
+                        display: '# Treatment L-R2'
+                    },{
+                        attr: 'treatmentLevels.r3.num',
+                        display: '# Treatment L-R3'
+                    }]}
+            };
+            var headers = [];
+
+            if(tableKeys.hasOwnProperty(tableId.toString())){
+                var _headers = [];
+                switch(type){
+                    case 'csv':
+                        downloadOpts.filename += 'csv';
+                        seperator = ',';
+                        break;
+                    case 'tsv':
+                        downloadOpts.filename += 'tsv';
+                        seperator = '\t';
+                        break;
+                    default:
+                        downloadOpts.filename += 'tsv';
+                        seperator = '\t';
+                        break;
+                }
+
+                headers = tableKeys['common'].header;
+                switch(tableId) {
+                    case 0:
+                        headers = headers.concat(tableKeys['1'].header,tableKeys['2'].header,tableKeys['3'].header);
+                        break;
+                    case 1:
+                        headers = headers.concat(tableKeys['1'].header);
+                        break;
+                    case 2:
+                        headers = headers.concat(tableKeys['2'].header);
+                        break;
+                    case 3:
+                        headers = headers.concat(tableKeys['3'].header);
+                        break;
+                    default:
+                        break;
+                }
+
+                console.log(headers);
+
+                headers.forEach(function(header){
+                    _headers.push(header.display);
+                });
+                content += _headers.join(seperator);
+                content += '\n';
+
+                $scope.genes.forEach(function(gene){
+                    var _data = [];
+
+
+                    headers.forEach(function(header){
+                        var __attrs = header.attr.split('.');
+                        var __data = angular.copy(gene);
+
+                        __attrs.forEach(function(__attr){
+                            __data = __data[__attr];
+                        });
+
+                        _data.push(__data);
+                    });
+                    content += _data.join(seperator);
+                    content += '\n';
+                });
+
+                cbioDownloadUtil.initDownload(content, downloadOpts);
             }
         }
 
@@ -362,4 +555,5 @@ angular.module('oncokbApp')
         $scope.data = [];
         $scope.rendering = false;
         $scope.init = init;
+        $scope.download = download;
     });

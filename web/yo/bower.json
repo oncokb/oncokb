@@ -36,7 +36,8 @@
     "spinkit": "~1.0.1",
     "angular-ui-sortable": "~0.13.3",
     "d3": "~3.5.5",
-    "angular-file-upload": "~1.1.5"
+    "angular-file-upload": "~1.1.5",
+    "file-saver.js": "~1.20150304.1"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",
