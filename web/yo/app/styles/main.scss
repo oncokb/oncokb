@@ -84,7 +84,18 @@ body {
   opacity: 1;
   color: white;
 }
-
+#dataSummary table td{
+  text-align: center;
+}
+#dataSummary table th:nth-child(1){
+  text-align: left;
+}
+#dataSummary table th{
+  text-align: center;
+}
+#dataSummary table td:nth-child(1){
+  text-align: left;
+}
 table.colorFirstCol td:nth-child(1) {
     background-color: lightgray;
 }

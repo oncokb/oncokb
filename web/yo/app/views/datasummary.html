@@ -1,4 +1,4 @@
-<div ng-init="init()" ng-hide="rendering">
+<div ng-init="init()" ng-hide="rendering" id="dataSummary">
     <div><span class="pull-right">Last modified: 04/16/2015</span></div>
     <br>
     <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
@@ -6,10 +6,10 @@
             <th>Gene</th>
             <th qtip content="Has summary">Summary</th>
             <th qtip content="Has background">Bg</th>
-            <th># Variants</th>
-            <th qtip content="Number of oncogenic variants"># O Variants</th>
-            <th qtip content="Number of non-oncogenic variants"># Non-O Variants</th>
-            <th qtip content="Number of positioned variants"># P Variants</th>
+            <th qtip content="Number of Variants"># V</th>
+            <th qtip content="Number of oncogenic variants"># Oncogenic</th>
+            <th qtip content="Number of non-oncogenic variants"># Non-Oncogenic</th>
+            <th qtip content="Number of positioned variants"># Positioned</th>
             <th># Cancer Type</th>
             <th qtip content="Combination between variant and cancer type"># Combo</th>
             <th qtip content="Combination between positioned variant and cancer type"># P Combo</th>

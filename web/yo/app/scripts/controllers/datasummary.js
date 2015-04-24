@@ -312,29 +312,49 @@ angular.module('oncokbApp')
             DTColumnDefBuilder.newColumnDef(0),
             DTColumnDefBuilder.newColumnDef(1),
             DTColumnDefBuilder.newColumnDef(2),
-            DTColumnDefBuilder.newColumnDef(3),
-            DTColumnDefBuilder.newColumnDef(4),
-            DTColumnDefBuilder.newColumnDef(5),
-            DTColumnDefBuilder.newColumnDef(6),
-            DTColumnDefBuilder.newColumnDef(7),
-            DTColumnDefBuilder.newColumnDef(8),
-            DTColumnDefBuilder.newColumnDef(9),
-            DTColumnDefBuilder.newColumnDef(10),
-            DTColumnDefBuilder.newColumnDef(11),
-            DTColumnDefBuilder.newColumnDef(12),
-            DTColumnDefBuilder.newColumnDef(13),
+            DTColumnDefBuilder.newColumnDef(3)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(4)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(5)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(6)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(7)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(8)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(9)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(10)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(11)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(12)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(13)
+                .withOption('sType', 'num-html'),
             DTColumnDefBuilder.newColumnDef(14)
+                .withOption('sType', 'num-html')
         ];
         $scope.dtColumnsLevels =  [
             DTColumnDefBuilder.newColumnDef(0),
-            DTColumnDefBuilder.newColumnDef(1),
-            DTColumnDefBuilder.newColumnDef(2),
-            DTColumnDefBuilder.newColumnDef(3),
-            DTColumnDefBuilder.newColumnDef(4),
-            DTColumnDefBuilder.newColumnDef(5),
-            DTColumnDefBuilder.newColumnDef(6),
-            DTColumnDefBuilder.newColumnDef(7),
+            DTColumnDefBuilder.newColumnDef(1)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(2)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(3)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(4)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(5)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(6)
+                .withOption('sType', 'num-html'),
+            DTColumnDefBuilder.newColumnDef(7)
+                .withOption('sType', 'num-html'),
             DTColumnDefBuilder.newColumnDef(8)
+                .withOption('sType', 'num-html')
         ];
 
         $scope.therapyCategories = ['SS','SR','IS','IR'];
