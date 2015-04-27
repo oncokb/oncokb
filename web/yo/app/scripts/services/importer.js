@@ -8,42 +8,65 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('importer', function importer($timeout, documents, S, storage, OncoKB) {
+    .service('importer', function importer($timeout, documents, S, storage, OncoKB, $q) {
       var self = this;
       self.docs = [];
+      self.docsL = 0;
       self.newFolder = '';
       // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
       //self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
       self.parentFolder = '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk'; //backup folder under knowledgebase
+      self.status = {
+        backupIndex: -1,
+        migrateIndex: -1
+      };
+
       function backup(callback) {
         if(!angular.isFunction(callback)){
           callback = undefined;
         }
 
+        createFolder().then(function(result){
+          if(result && result.error){
+            console.error('Create folder failed.', result);
+            if(callback) {
+              callback();
+            }
+          }else{
+            // var docs = documents.get({title: 'BRAF'});
+            self.docs = documents.get();
+            self.docsL = self.docs.length;
+            // self.newFolder = '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8';
+            copyData(0, callback);
+          }
+        });
+      }
+
+      function createFolder(){
+        var deferred = $q.defer();
+
         storage.requireAuth(true).then(function(result){
           if(result && !result.error) {
             storage.createFolder(self.parentFolder).then(function(result){
               if(result.id){
-                // var docs = documents.get({title: 'BRAF'});
-                self.docs = documents.get();
-                // self.newFolder = '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8';
                 self.newFolder = result.id;
-                copyData(0, callback);
+                deferred.resolve(result);
               }else {
-                console.error('Create folder failed.');
-                if(callback) {
-                  callback();
-                }
+                deferred.reject(result);
               }
             });
           }
         });
+
+        return deferred.promise;
       }
 
       function copyData(index, callback) {
         if(index < self.docs.length) {
           var doc = self.docs[index];
-          copyFileData(self.newFolder, doc.id, doc.title, index, copyData);
+          copyFileData(self.newFolder, doc.id, doc.title, index).then(function(){
+            copyData(index++, callback);
+          });
         }else {
           if(callback) {
             callback();
@@ -52,6 +75,74 @@ angular.module('oncokbApp')
         }
       }
 
+      function migrate(){
+        var deferred = $q.defer();
+        createFolder().then(function(result){
+          if(result && result.error){
+            console.log('Unable create folder.', result);
+          }else{
+            self.docs = documents.get();
+            self.docsL = self.docs.length;
+
+            //copy foler permissions
+            assignPermission(OncoKB.config.folderId, self.newFolder)
+                .then(function(result){
+                  if(result && result.error){
+                    console.log('Error when assigning folder permissions', result);
+                  }else{
+                    migrateOneFileProcess(0, deferred);
+                  }
+                });
+          }
+        });
+        return deferred.promise;
+      }
+
+      function migrateOneFileProcess(docIndex, deferred) {
+        if(docIndex < self.docsL) {
+          var doc = self.docs[docIndex];
+          copyFileData(self.newFolder, doc.id, doc.title, docIndex)
+              .then(function (result) {
+                if (result && result.error) {
+                  console.log(result);
+                  migrateOneFileProcess(++docIndex, deferred);
+                } else {
+                  assignPermission(doc.id, result.id)
+                      .then(function(result){
+                        if(result && result.error){
+                          console.log('error', result);
+                        }else{
+                          migrateOneFileProcess(++docIndex, deferred);
+                        }
+                      });
+                }
+              });
+        }else{
+          console.log('Migrating finished.');
+          deferred.resolve();
+        }
+      }
+
+      function assignPermission(oldDocId, newDocId){
+        var deferred = $q.defer();
+        console.log('\t Giving permissions');
+        storage.getPermission(oldDocId).then(function(result){
+          if(result && result.error){
+            deferred.reject(result);
+          }else{
+            var promises = [];
+            promises = result.items.forEach(function(permission, i){
+              if(permission.id && permission.emailAddress && permission.role && permission.type && permission.role !== 'owner'){
+                promises.push(storage.insertPermission(newDocId, permission.emailAddress, permission.type, permission.role));
+              }
+            });
+            $q.all(promises).then(function(){
+              deferred.resolve();
+            });
+          }
+        });
+        return deferred.promise;
+      }
 
       function getData(realtime) {
         /* jshint -W106 */
@@ -123,7 +214,8 @@ angular.module('oncokbApp')
         /* jshint +W106 */
       }
 
-      function copyFileData(folderId, fileId, fileTitle, docIndex, callback) {
+      function copyFileData(folderId, fileId, fileTitle, docIndex) {
+        var deferred = $q.defer();
         storage.requireAuth(true).then(function () {
           storage.createDocument(fileTitle, folderId).then(function (file) {
             console.log('Created file ', fileTitle, docIndex + 1);
@@ -131,7 +223,7 @@ angular.module('oncokbApp')
               if(realtime && realtime.error) {
                 console.log('did not get realtime document.');
               }else{
-                console.log('\t copying');
+                console.log('\t Copying');
                 var gene = realtime.getModel().getRoot().get('gene');
                 if(gene) {
                   var geneData = getData(gene);
@@ -147,24 +239,21 @@ angular.module('oncokbApp')
                     }
                     model.endCompoundOperation();
                     console.log('\t Done.');
-                    if(angular.isFunction(callback)) {
-                      $timeout(function(){
-                        callback(++docIndex);
-                      }, 500, false);
-                    }
+                    $timeout(function(){
+                      deferred.resolve(file);
+                    }, 500, false);
                   });
                 }else{
                   console.log('\t\tNo gene model.');
-                  if(angular.isFunction(callback)) {
-                    $timeout(function(){
-                      callback(++docIndex);
-                    }, 500, false);
-                  }
+                  $timeout(function(){
+                    deferred.resolve(file);
+                  }, 500, false);
                 }
               }
             });
           });
         });
+        return deferred.promise;
       }
 
       function setValue(rootModel, model, value, key) {
@@ -286,6 +375,7 @@ angular.module('oncokbApp')
 
       return {
         backup: backup,
+        migrate: migrate,
         getData: getData
       };
     });
