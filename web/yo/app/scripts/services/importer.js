@@ -336,9 +336,11 @@ angular.module('oncokbApp')
 
       function combineData(object, model, keys) {
         keys.forEach(function(e){
-          object[e] = getString(model[e].getText());
-          if(model[e + '_comments']) {
-            object[e + '_comments'] = getComments(model[e + '_comments']);
+          if(model[e]) {
+            object[e] = getString(model[e].getText());
+            if(model[e + '_comments']) {
+              object[e + '_comments'] = getComments(model[e + '_comments']);
+            }
           }
         });
         return object;
