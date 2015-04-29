@@ -301,6 +301,9 @@ angular.module('oncokbApp')
 )
     .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', 'jspdf',
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, jspdf) {
+            $scope.test = function(a,b,c,d,e,f,g){
+                console.log(a,b,c,d,e,f,g);
+            }
             $scope.authorize = function(){
                 storage.requireAuth(false).then(function () {
                     var target = $location.search().target;
