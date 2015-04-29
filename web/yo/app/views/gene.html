@@ -162,9 +162,9 @@
 
             <accordion close-others="oneAtATime">
               <!-- Prevalence -->
-              <accordion-group ng-init="geneStatus[$parent.$index][$index].prevalence={}; geneStatus[$parent.$index][$index].prevalence.isOpen = false" is-open="geneStatus[$parent.$index][$index].prevalence.isOpen" ng-hide="(!!geneStatus[$parent.$index][$index].prevalence.hideEmpty) && !tumor.prevalence.text" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$index][$parent.$index].prevalence={}; geneStatus[$parent.$parent.$parent.$index][$parent.$index].prevalence.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$index].prevalence.isOpen" ng-hide="(!!geneStatus[$parent.$parent.$parent.$index][$parent.$index].prevalence.hideEmpty) && !tumor.prevalence.text" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index][$index].prevalence.isOpen, 'fa-chevron-right': !geneStatus[$parent.$index][$index].prevalence.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$index][$index].isOpen)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$index][$parent.$index].prevalence.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$index][$parent.$index].prevalence.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$index][$parent.$index].isOpen)"></i>
                   <span ng-click="stopCollopse($event)">{{tumor.prevalence.display}}: </span>
                   <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
@@ -173,9 +173,9 @@
               </accordion-group>
 
               <!-- Prognostic implications -->
-              <accordion-group ng-init="geneStatus[$parent.$index][$index].progImp={}; geneStatus[$parent.$index][$index].progImp.isOpen = false" is-open="geneStatus[$parent.$index][$index].progImp.isOpen" ng-hide="(!!geneStatus[$parent.$index][$index].prevalence.hideEmpty) && !tumor.progImp.text" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$index][$parent.$index].progImp={}; geneStatus[$parent.$parent.$parent.$index][$parent.$index].progImp.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$index].progImp.isOpen" ng-hide="(!!geneStatus[$parent.$index][$index].prevalence.hideEmpty) && !tumor.progImp.text" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index][$index].progImp.isOpen, 'fa-chevron-right': !geneStatus[$parent.$index][$index].progImp.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$index][$index].progImp.isOpen)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$index][$parent.$index].progImp.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$index][$parent.$index].progImp.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$index][$parent.$index].progImp.isOpen)"></i>
                   <span ng-click="stopCollopse($event)">{{tumor.progImp.display}}: </span>
                   <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
@@ -184,9 +184,9 @@
               </accordion-group>
 
               <!-- NCCN guidelines -->
-              <accordion-group ng-init="geneStatus[$parent.$index][$index].nccn={}; geneStatus[$parent.$index][$index].nccn.isOpen = false" is-open="geneStatus[$parent.$index][$index].nccn.isOpen" ng-hide="(!!geneStatus[$parent.$index][$index].nccn.hideEmpty) && !tumor.nccn.disease.text" class="levelThreeHeader">
+              <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn={}; geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn.isOpen" ng-hide="(!!geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn.hideEmpty) && !tumor.nccn.disease.text" class="levelThreeHeader">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index][$index].nccn.isOpen, 'fa-chevron-right': !geneStatus[$parent.$index][$index].nccn.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$index][$index].nccn.isOpen)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$index][$parent.$index].nccn.isOpen)"></i>
                   <span ng-click="stopCollopse($event)">NCCN guidelines: </span>
                   <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict display-name="NCCN guidelines" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>
@@ -222,92 +222,93 @@
               </accordion-group>
 
               <!-- Theraputic implications -->
-              <accordion-group is-open="geneStatus[$parent.$parent.$index][$parent.$index][$index].isOpen" ng-init="geneStatus[$parent.$parent.$index][$parent.$index][$index] = {}; geneStatus[$parent.$parent.$index][$parent.$index][$index].isOpen = false;" class="levelThreeHeader" ng-repeat="ti in tumor.TI.asArray()" ng-hide="(!!geneStatus[$parent.$parent.$index][$parent.$index][$index].hideEmpty) && !ti.description.text && ti.treatments.length === 0">
-                <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$index][$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$index][$parent.$index][$index].isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$index][$parent.$index][$index].isOpen)"></i>
-                  <span ng-click="stopCollopse($event)">{{ti.name.text}}: </span>
-                  <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.description.text && ti.treatments.length === 0">No Entry</span>
-                  <comments-dict display-name="{{ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
-                </accordion-heading>
-                  <span>
-                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional general summary" ng-model="ti.description.text"></p>
-                  </span>
-                <pub-iframe ng-model="ti.description.text"></pub-iframe>
-                <accordion close-others="oneAtATime">
-                  <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index]={}; geneStatus[$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen = false;" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">
-                    <accordion-heading>
-                      <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen}"></i>
-                      <span ng-click="stopCollopse($event)">{{treatment.type.text}}: </span>
-                      <span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.name.text"/></span>
-                      <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!treatment.level.text && !treatment.indication.text && !treatment.description.text">No Entry</span>
-                      <comments-dict gene-name="{{gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
-                      <span class="pull-right" ng-show="fileEditable">
-                        <span style="margin-right: 20px">
-                          <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(ti.treatments, $index, $index, $event)"></i>
-                          <i class="fa fa-angle-down" ng-if="$index < ti.treatments.length-2" ng-click="move(ti.treatments, $index, $index+2, $event)"></i>
-                          <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
-                          <i ng-if="$index !== ti.treatments.length-1" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $index, ti.treatments.length, $event)"></i>
-                        </span>
-                        <i ng-click="remove($event, $parent.$parent.$parent.$index, $parent.$parent.$index, $parent.$index, $index)" class="fa fa-trash-o"></i>
-                      </span>
-                    </accordion-heading>
-                    <p>
-                      <strong>{{treatment.level.display}}:</strong>
-                            <span ng-if="checkTI(ti, 1, 1)">
-                              <select style="width: 90%" ng-model="treatment.level.text"
-                                      ng-options="opt.value as opt.label for opt in levels.SS">
-                              </select>
-                            </span>
-                            <span ng-if="checkTI(ti, 1, 0)">
-                              <select style="width: 95%"  ng-model="treatment.level.text"
-                                      ng-options="opt.value as opt.label for opt in levels.SR">
-                              </select>
-                              <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.SR}}"></i>
-                            </span>
-                            <span ng-if="checkTI(ti, 0, 1)">
-                              <select style="width: 100%" ng-model="treatment.level.text"
-                                      ng-options="opt.value as opt.label for opt in levels.IS">
-                              </select>
-                            </span>
-                            <span ng-if="checkTI(ti, 0, 0)">
-                              <select style="width: 95%" ng-model="treatment.level.text"
-                                      ng-options="opt.value as opt.label for opt in levels.IR">
-                              </select>
-                              <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.IR}}"></i>
-                            </span>
-                    </p>
-                    <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
-                      <div class="header">
-                        <strong>{{treatment.indication.display}}:</strong>
-                      </div>
-                      <div class="content">
-                        <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.indication.text"></p>
-                        <pub-iframe ng-model="treatment.indication.text"></pub-iframe>
-                      </div>
-                    </div>
-                      <span>
-                        <strong>{{treatment.description.display}}:</strong>
-                        <br/>
-                        <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.description.text">
-                        </p>
-                        <pub-iframe ng-model="treatment.description.text"></pub-iframe>
-                      </span>
-                  </accordion-group>
-                </accordion>
-                <div class="input-group input-group-sm">
-                  <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTI(ti, $index, newTIName, $parent.$parent.$index, $parent.$index, $index); newTIName=''">
-                        <i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications
-                      </button>
-                    </span>
-                </div>
-              </accordion-group>
+              <!--<accordion-group ng-init="geneStatus[$parent.$parent.$parent..$parent$index][$parent..$parent$index][$index] = {}; geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen = false;" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelThreeHeader" ng-repeat="ti in tumor.TI.asArray()" ng-hide="(!!geneStatus[$parent.$parent.$parent.$index][$parent.$index][$index].hideEmpty) && !ti.description.text && ti.treatments.length === 0">-->
+                <!--<accordion-heading>-->
+                  <!--<i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen)"></i>-->
+                  <!--<span ng-click="stopCollopse($event)">{{ti.name.text}}: </span>-->
+                  <!--<span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.description.text && ti.treatments.length === 0">No Entry</span>-->
+                  <!--<comments-dict display-name="{{ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>-->
+                <!--</accordion-heading>-->
+                <!--<span>-->
+                  <!--<p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional general summary" ng-model="ti.description.text"></p>-->
+                <!--</span>-->
+                <!--<pub-iframe ng-model="ti.description.text"></pub-iframe>-->
+                <!--&lt;!&ndash;<accordion close-others="oneAtATime">&ndash;&gt;-->
+                  <!--&lt;!&ndash;<accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index]={}; geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen = false;" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelFourHeader" ng-repeat="treatment in ti.treatments.asArray()">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<accordion-heading>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$parent.$index][$index].isOpen}"></i>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<span ng-click="stopCollopse($event)">{{treatment.type.text}}: </span>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.name.text"/></span>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!treatment.level.text && !treatment.indication.text && !treatment.description.text">No Entry</span>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<comments-dict gene-name="{{gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<span class="pull-right" ng-show="fileEditable">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<span style="margin-right: 20px">&ndash;&gt;-->
+                          <!--&lt;!&ndash;<i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(ti.treatments, $index, $index, $event)"></i>&ndash;&gt;-->
+                          <!--&lt;!&ndash;<i class="fa fa-angle-down" ng-if="$index < ti.treatments.length-2" ng-click="move(ti.treatments, $index, $index+2, $event)"></i>&ndash;&gt;-->
+                          <!--&lt;!&ndash;<i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>&ndash;&gt;-->
+                          <!--&lt;!&ndash;<i ng-if="$index !== ti.treatments.length-1" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $index, ti.treatments.length, $event)"></i>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<i ng-click="remove($event, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $parent.$index, $index)" class="fa fa-trash-o"></i>&ndash;&gt;-->
+                      <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</accordion-heading>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<p>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<strong>{{treatment.level.display}}:</strong>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<span ng-if="checkTI(ti, 1, 1)">&ndash;&gt;-->
+                              <!--&lt;!&ndash;<select style="width: 90%" ng-model="treatment.level.text"&ndash;&gt;-->
+                                      <!--&lt;!&ndash;ng-options="opt.value as opt.label for opt in levels.SS">&ndash;&gt;-->
+                              <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<span ng-if="checkTI(ti, 1, 0)">&ndash;&gt;-->
+                              <!--&lt;!&ndash;<select style="width: 95%"  ng-model="treatment.level.text"&ndash;&gt;-->
+                                      <!--&lt;!&ndash;ng-options="opt.value as opt.label for opt in levels.SR">&ndash;&gt;-->
+                              <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                              <!--&lt;!&ndash;<i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.SR}}"></i>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<span ng-if="checkTI(ti, 0, 1)">&ndash;&gt;-->
+                              <!--&lt;!&ndash;<select style="width: 100%" ng-model="treatment.level.text"&ndash;&gt;-->
+                                      <!--&lt;!&ndash;ng-options="opt.value as opt.label for opt in levels.IS">&ndash;&gt;-->
+                              <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<span ng-if="checkTI(ti, 0, 0)">&ndash;&gt;-->
+                              <!--&lt;!&ndash;<select style="width: 95%" ng-model="treatment.level.text"&ndash;&gt;-->
+                                      <!--&lt;!&ndash;ng-options="opt.value as opt.label for opt in levels.IR">&ndash;&gt;-->
+                              <!--&lt;!&ndash;</select>&ndash;&gt;-->
+                              <!--&lt;!&ndash;<i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.IR}}"></i>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</p>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">&ndash;&gt;-->
+                      <!--&lt;!&ndash;<div class="header">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<strong>{{treatment.indication.display}}:</strong>&ndash;&gt;-->
+                      <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<div class="content">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.indication.text"></p>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<pub-iframe ng-model="treatment.indication.text"></pub-iframe>&ndash;&gt;-->
+                      <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                      <!--&lt;!&ndash;<span>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<strong>{{treatment.description.display}}:</strong>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<br/>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.description.text">&ndash;&gt;-->
+                        <!--&lt;!&ndash;</p>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<pub-iframe ng-model="treatment.description.text"></pub-iframe>&ndash;&gt;-->
+                      <!--&lt;!&ndash;</span>&ndash;&gt;-->
+                  <!--&lt;!&ndash;</accordion-group>&ndash;&gt;-->
+                <!--&lt;!&ndash;</accordion>&ndash;&gt;-->
+                <!--<div class="input-group input-group-sm">-->
+                  <!--<input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />-->
+                    <!--<span class="input-group-btn">-->
+                      <!--[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$parent.$index][$index]-->
+                      <!--<button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTI(ti, $index, newTIName, $parent.$parent.$parent.$parent.$index, $parent.$parent.$index, $parent.$index); newTIName=''">-->
+                        <!--<i class="fa fa-plus"></i> Add Therapy and {{ti.types.get('status').toString() === '0'?'Investigational': 'Standard'}} implications-->
+                      <!--</button>-->
+                    <!--</span>-->
+                <!--</div>-->
+              <!--</accordion-group>-->
 
               <!-- Trials -->
-              <accordion-group ng-init="geneStatus[$parent.$index][$index].trials={}; geneStatus[$parent.$index][$index].trials.isOpen = false" is-open="geneStatus[$parent.$index][$index].trials.isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$index][$index].trials.hideEmpty) && tumor.trials.length === 0">
+              <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials={}; geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials.isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials.hideEmpty) && tumor.trials.length === 0">
                 <accordion-heading>
-                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index][$index].trials.isOpen, 'fa-chevron-right': !geneStatus[$parent.$index][$index].trials.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$index][$index].trials.isOpen)"></i>
+                  <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$index][$parent.$index].trials.isOpen)"></i>
                   <span ng-click="stopCollopse($event)">Ongoing clinical trials: </span>
                   <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict display-name="Ongoing clinical trials" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                 </accordion-heading>

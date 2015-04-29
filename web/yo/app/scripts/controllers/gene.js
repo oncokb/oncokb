@@ -518,7 +518,7 @@ angular.module('oncokbApp')
 
             $scope.checkScope = function() {
                 console.log($scope.gene);
-                console.log($scope.gene.mutations.get(0).tumors.get(0));
+                //console.log($scope.gene.mutations.get(0).tumors.get(0));
                 console.log($scope.geneStatus);
             };
 
@@ -527,24 +527,25 @@ angular.module('oncokbApp')
                 var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
                 dlg.result.then(function(){
                     var _index = -1;
+                    console.log(mutationIndex, tumorTypeIndex, therapyCategoryIndex, therapyIndex);
                     if(angular.isNumber(mutationIndex)){
                         if(!isNaN(mutationIndex)){
                             if(isNaN(tumorTypeIndex)){
                                 _index = Number(angular.copy(mutationIndex));
-                                $scope.gene.mutations.remove(mutationIndex);
+                                $scope.gene.mutations.remove(_index);
                                 delete $scope.geneStatus[mutationIndex];
                                 $scope.geneStatus = migrateGeneStatusPosition( $scope.geneStatus, _index);
                             }else{
-                                if(isNaN(therapyCategoryIndex && therapyIndex)){
-                                    _index = Number(angular.copy(tumorTypeIndex));
-                                    $scope.gene.mutations.get(mutationIndex).tumors.remove(tumorTypeIndex);
-                                    delete $scope.geneStatus[mutationIndex][tumorTypeIndex];
-                                    $scope.geneStatus[mutationIndex] = migrateGeneStatusPosition($scope.geneStatus[mutationIndex], _index);
-                                }else{
+                                if(!isNaN(therapyCategoryIndex) && !isNaN(therapyIndex)){
                                     _index = Number(angular.copy(therapyIndex));
                                     $scope.gene.mutations.get(mutationIndex).tumors.get(tumorTypeIndex).TI.get(therapyCategoryIndex).treatments.remove(tumorTypeIndex);
-                                    delete $scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex][therapyIndex];
+                                    delete $scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex][_index];
                                     $scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex] = migrateGeneStatusPosition($scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex], _index);
+                                }else{
+                                    _index = Number(angular.copy(tumorTypeIndex));
+                                    $scope.gene.mutations.get(mutationIndex).tumors.remove(_index);
+                                    delete $scope.geneStatus[mutationIndex][_index];
+                                    $scope.geneStatus[mutationIndex] = migrateGeneStatusPosition($scope.geneStatus[mutationIndex], _index);
                                 }
                             }
                         }
@@ -560,10 +561,12 @@ angular.module('oncokbApp')
 
             $scope.redo = function() {
                 $scope.model.redo();
+                regenerateGeneStatus();
             };
 
             $scope.undo = function() {
                 $scope.model.undo();
+                regenerateGeneStatus();
             };
 
             $scope.curatorsName = function() {
@@ -595,16 +598,62 @@ angular.module('oncokbApp')
             };
 
             $scope.move = function(driveList, index, moveIndex, event) {
+                var tmpStatus;
+                var moveStatusIndex;
+                var indexes = [];
+                var geneStatus = angular.copy($scope.geneStatus);
                 $scope.stopCollopse(event);
 
                 index = parseInt(index);
                 moveIndex = parseInt(moveIndex);
 
                 if(moveIndex <= index) {
+                    if(moveIndex <= 0){
+                        moveIndex = moveStatusIndex = 0;
+                    }else{
+                        moveIndex = moveStatusIndex = moveIndex-1;
+                    }
                     moveIndex = moveIndex <=0 ? 0 : moveIndex-1;
+                }else{
+                    moveStatusIndex = moveIndex - 1;
                 }
 
-                moveIndex = moveIndex < driveList.length ? moveIndex : driveList.length;
+                if(moveIndex > driveList.length){
+                    moveIndex = driveList.length;
+                    moveStatusIndex = moveIndex-1;
+                }
+
+                tmpStatus = angular.copy($scope.geneStatus[index]);
+
+                if(index < moveStatusIndex){
+                    for(var key in geneStatus){
+                        if(!isNaN(key)){
+                            var numKey = Number(key);
+                            if(numKey <= moveStatusIndex && numKey > index){
+                                indexes.push(numKey);
+                            };
+                        }
+                    }
+                    indexes.sort(function(a, b){return a-b}).forEach(function(e,i){
+                        geneStatus[e-1] = geneStatus[e];
+                    });
+                }else{
+                    for(var key in geneStatus){
+                        if(!isNaN(key)){
+                            var numKey = Number(key);
+                            if(numKey >= moveStatusIndex && numKey < index){
+                                indexes.push(numKey);
+                            };
+                        }
+                    }
+                    indexes.sort(function(a, b){return b-a}).forEach(function(e,i){
+                        geneStatus[e+1] = geneStatus[e];
+                    });
+                }
+
+                geneStatus[moveStatusIndex] = tmpStatus;
+
+                $scope.geneStatus = geneStatus;
 
                 driveList.move(index, moveIndex);
             };
@@ -731,7 +780,38 @@ angular.module('oncokbApp')
                 return false;
             }
 
+            function regenerateGeneStatus() {
+                var geneStatus = {};
+                var mutationKeys = ['oncogenic'];
+                var tumorKeys = ['prevalence', 'progImp', 'nccn', 'trials'];
+
+                $scope.gene.mutations.asArray().forEach(function(mutation,mutationIndex){
+                    geneStatus[mutationIndex] = new geneStatusSingleton();
+                    mutationKeys.forEach(function(key){
+                        if(mutation[key]) {
+                            geneStatus[mutationIndex][key] = new geneStatusSingleton();
+                        }
+                    });
+
+                    if(mutation.tumors.length > 0){
+                        mutation.tumors.asArray().forEach(function(tumor, tumorIndex){
+                            geneStatus[mutationIndex][tumorIndex] = new geneStatusSingleton();
+                            tumorKeys.forEach(function(key){
+                                if(tumor[key]) {
+                                    geneStatus[mutationIndex][tumorIndex][key] = new geneStatusSingleton();
+                                }
+                                tumor.TI.asArray(function(therapyType, therapyTypeIndex){
+                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new geneStatusSingleton();
+                                });
+                            });
+                        });
+                    }
+                });
+                $scope.geneStatus = geneStatus;
+            }
+
             function migrateGeneStatusPosition(object, indexRemoved){
+                console.log(object, indexRemoved);
                 if(angular.isNumber(indexRemoved)){
                     var indexes = [];
                     for(var key in object){
@@ -740,7 +820,7 @@ angular.module('oncokbApp')
                         }
                     }
 
-                    indexes.sort().forEach(function(e,i){
+                    indexes.sort(function(a, b){return a-b}).forEach(function(e,i){
                         object[e-1] = object[e];
                     });
 
@@ -1042,9 +1122,8 @@ angular.module('oncokbApp')
             }
 
             function geneStatusSingleton() {
-                this.isOpen = true;
+                this.isOpen = false;
                 this.hideEmpty = false;
-                this.show = true;
             }
 
             $scope.loaded = false;
