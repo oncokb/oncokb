@@ -48,26 +48,26 @@ body {
 }
 
 #top-link-block.affix-top {
-    position: absolute; /* allows it to "slide" up into view */
-    bottom: -82px; /* negative of the offset - height of link element */
-    left: 10px; /* padding from the left side of the window */
+  position: absolute; /* allows it to "slide" up into view */
+  bottom: -82px; /* negative of the offset - height of link element */
+  left: 10px; /* padding from the left side of the window */
 }
 #top-link-block.affix {
-    position: fixed; /* keeps it on the bottom once in view */
-    bottom: 18px; /* height of link element */
-    left: 10px; /* padding from the left side of the window */
+  position: fixed; /* keeps it on the bottom once in view */
+  bottom: 18px; /* height of link element */
+  left: 10px; /* padding from the left side of the window */
 }
 
 #searchRemoveIcon:hover{
-    cursor: pointer;
+  cursor: pointer;
 }
 
 #signout {
-    float: right;
+  float: right;
 }
 #signout:hover {
-    cursor: pointer;
-    text-decoration: underline;
+  cursor: pointer;
+  text-decoration: underline;
 }
 //Google login button
 #signInButton {
@@ -97,10 +97,10 @@ body {
   text-align: left;
 }
 table.colorFirstCol td:nth-child(1) {
-    background-color: lightgray;
+  background-color: lightgray;
 }
 table.colorHeader thead tr{
-    background-color: lightgray;
+  background-color: lightgray;
 }
 [contenteditable=true]:empty:before{
   content: attr(placeholder);
@@ -121,17 +121,17 @@ div[contenteditable=true] {
 }
 
 .variantDisplayResult table td:nth-child(1) {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .variantDisplayResult .icon {
-    width: 12px;
+  width: 12px;
 }
 .variantDisplayResult .icon.iconCollapse{
-    display: none;
+  display: none;
 }
 .variantDisplayResult .icon.iconExpand{
-    display: inline-block;
+  display: inline-block;
 }
 .editableBox {
   background-color: #F1F9FF;
@@ -252,6 +252,9 @@ p.editableBox.doubleH {
 .geneMainDiv {
   margin-bottom: 40px;
 }
+.accordionMarginTop {
+  margin-top: 5px;
+}
 .tumorButtonsGroup {
   margin: 5px 5px 5px 0;
 }
@@ -335,7 +338,7 @@ table.dataTable thead .sorting_desc {
 i.fa-comments, i.fa-comments-o{
   font-size: 15px;
 }
-i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover, 
+i.fa-trash-o:hover, i.fa-pencil:hover, i.fa-eye:hover,
 i.fa-minus, i.fa-plus, i.fa-angle-down,
 i.fa-chevron-right, i.fa-chevron-down,
 i.fa-angle-up, i.fa-angle-double-down, i.fa-angle-double-up{
@@ -432,36 +435,36 @@ a:hover {
 }
 
 .has-addon-feedback .form-control-feedback {
-    position: absolute;
-    top: 1px;
-    right: 70px;
-    width: 34px;
-    height: 30px;
-    line-height: 30px;
-    text-align: center;
-    color: grey;
-    pointer-events: auto;
+  position: absolute;
+  top: 1px;
+  right: 70px;
+  width: 34px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  color: grey;
+  pointer-events: auto;
 }
 
 .has-addon-feedback .form-control-feedback.result {
-    right: 100px;
-    width: 80px;
-    text-align: right;
+  right: 100px;
+  width: 80px;
+  text-align: right;
 }
 .has-addon-feedback .form-control-feedback.upper {
-    z-index: 2;
+  z-index: 2;
 }
 .has-addon-feedback .form-control-feedback.lower {
-    z-index: 1;
+  z-index: 1;
 }
 .annotationClinicalTrial {
   margin-bottom: 10px;
 }
 .resistance-title {
-    color: red;
+  color: red;
 }
 h5 {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 //Change sk-spinner style
@@ -586,11 +589,11 @@ h5 {
   margin-left: 5px;
 }
 #rg-rfr-btn {
-    margin-left: 5px;
+  margin-left: 5px;
 }
 
 .qtip hr {
-    margin: 5px 0;
+  margin: 5px 0;
 }
 
 .qtip {

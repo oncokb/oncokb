@@ -144,7 +144,7 @@
             <pub-iframe ng-model="mutation.description.text"></pub-iframe>
           </accordion-group>
           <!-- tumor types -->
-          <div ng-repeat="tumor in mutation.tumors.asArray()">
+          <div ng-repeat="tumor in mutation.tumors.asArray()" class="accordionMarginTop">
             <accordion-group ng-init="geneStatus[$parent.$index][$index] = {}; geneStatus[$parent.$index][$index].isOpen = false; " is-open="geneStatus[$parent.$index][$index].isOpen" class="levelTwoHeader">
               <accordion-heading >
                 <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$index][$index].isOpen}"></i>
@@ -223,7 +223,7 @@
                 </accordion-group>
 
                 <!-- Theraputic implications -->
-                <div ng-repeat="ti in tumor.TI.asArray()" >
+                <div ng-repeat="ti in tumor.TI.asArray()" class="accordionMarginTop">
                   <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index] = {}; geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen = false;" is-open="geneStatus[$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].hideEmpty) && !ti.description.text && ti.treatments.length === 0">
                     <accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen)"></i>
@@ -234,7 +234,7 @@
                     <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional general summary" ng-model="ti.description.text"></p></span>
                     <pub-iframe ng-model="ti.description.text"></pub-iframe>
                     <accordion close-others="oneAtATime">
-                      <div ng-repeat="treatment in ti.treatments.asArray()">
+                      <div ng-repeat="treatment in ti.treatments.asArray()" class="accordionMarginTop">
                         <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index]={}; geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen = false;" is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index][$index].isOpen" class="levelFourHeader">
                           <accordion-heading>
                             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$parent.$index].isOpen, 'fa-chevron-right': !geneStatusgeneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$parent.$index].isOpen}"></i>
@@ -295,7 +295,7 @@
                           </span>
                         </accordion-group>
                       </div>
-                      <div class="input-group input-group-sm">
+                      <div class="input-group input-group-sm accordionMarginTop">
                         <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
                         <span class="input-group-btn">
                           <button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTI(ti, $index, newTIName, $parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$index); newTIName=''">
@@ -345,7 +345,7 @@
             </accordion-group>
           </div>
         </accordion>
-        <div style="width: 100%" class="input-group input-group-sm">
+        <div style="width: 100%" class="input-group input-group-sm accordionMarginTop">
           <input type="text" ng-model="newTumorTypeName" typeahead="tumorType for tumorType in tumorTypes | typeaheadFilter:$viewValue | limitTo: 10" class="form-control" placeholder="Free text or choose from the dropdown list">
           <span class="input-group-btn">
             <button type="button" class="btn btn-default" ng-disabled="!(!!newTumorTypeName)" ng-click="addTumorType(mutation, newTumorTypeName, $index); newTumorTypeName=''">
@@ -356,7 +356,7 @@
       </accordion-group>
     </accordion>
   </div>
-  <div class="input-group input-group-sm">
+  <div class="input-group input-group-sm accordionMarginTop">
     <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{addMutationPlaceholder}}"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
     <span class="input-group-btn">
       <button type="button" class="btn btn-default" ng-disabled="!(!!newMutationName)" ng-click="addMutation(newMutationName); newMutationName=''">
