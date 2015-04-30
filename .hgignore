@@ -20,6 +20,7 @@ web/yo/dist$
 web/yo/.sass-cache$
 web/yo/app/components$
 web/yo/node_modules$
+node_modules$
 npm-debug.log
 build.sh
 start.sh
