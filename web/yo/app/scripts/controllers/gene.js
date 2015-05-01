@@ -617,7 +617,6 @@ angular.module('oncokbApp')
                     }else{
                         moveIndex = moveStatusIndex = moveIndex-1;
                     }
-                    moveIndex = moveIndex <=0 ? 0 : moveIndex-1;
                 }else{
                     moveStatusIndex = moveIndex - 1;
                 }
