@@ -690,20 +690,18 @@ angular.module('oncokbApp')
                 var targetStatus = '';
                 var specialEscapeKeys = ['isOpen', 'hideEmpty'];
                 if(type === 'expand'){
-                    $scope.expandAll = true;
-                    targetStatus = $scope.expandAll;
+                    $scope.status.expandAll = true;
+                    targetStatus = $scope.status.expandAll;
                     processKey = 'isOpen';
                 }else if (type === 'collapse'){
-                    $scope.expandAll = false;
-                    targetStatus = $scope.expandAll;
+                    $scope.status.expandAll = false;
+                    targetStatus = $scope.status.expandAll;
                     processKey = 'isOpen';
                 }else if (type === 'hideEmpty'){
-                    $scope.hideAllEmpty = true;
-                    targetStatus = $scope.hideAllEmpty;
+                    targetStatus = true;
                     processKey = 'hideEmpty';
                 }else if (type === 'showEmpty'){
-                    $scope.hideAllEmpty = false;
-                    targetStatus = $scope.hideAllEmpty;
+                    targetStatus = false;
                     processKey = 'hideEmpty';
                 }
 
@@ -1208,8 +1206,20 @@ angular.module('oncokbApp')
             $scope.selfParams = {};
             $scope.geneStatus = {};
 
-            $scope.expandAll = false;
-            $scope.hideAllEmpty = false;
+            $scope.status = {
+                expandAll: false,
+                hideAllEmpty: false
+            };
+
+            $scope.$watch('status.hideAllEmpty', function(n, o){
+                if(n !== o){
+                    if(n){
+                        $scope.isOpenFunc('hideEmpty');
+                    }else{
+                        $scope.isOpenFunc('showEmpty');
+                    }
+                }
+            });
 
             getDriveOncokbInfo();
             getOncoTreeTumortypes();

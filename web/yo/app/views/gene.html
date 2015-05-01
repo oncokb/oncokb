@@ -13,8 +13,9 @@
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
         <button type="button" class="btn btn-default" ng-click="isOpenFunc('expand')">Expand all</button>
         <button type="button" class="btn btn-default" ng-click="isOpenFunc('collapse')">Collapse all</button>
-        <button type="button" class="btn btn-default" ng-click="isOpenFunc('showEmpty')">Show all empty</button>
-        <button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>
+
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty"><i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>All empty</button>
+        <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
       </span>
     </h2>
     <p ng-if="gene.curators && gene.curators.asArray().length > 0">
@@ -377,8 +378,7 @@
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
   <button type="button" class="btn btn-default" ng-click="isOpenFunc('expand')">Expand all</button>
   <button type="button" class="btn btn-default" ng-click="isOpenFunc('collapse')">Collapse all</button>
-  <button type="button" class="btn btn-default" ng-click="isOpenFunc('showEmpty')">Show all empty</button>
-  <button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>
+  <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty"><i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>All empty</button>
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>
