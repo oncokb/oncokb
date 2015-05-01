@@ -301,7 +301,8 @@ angular.module('oncokbApp')
 )
     .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', 'jspdf',
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, jspdf) {
-            $scope.test = function(a,b,c,d,e,f,g){
+            $scope.test = function(event, a,b,c,d,e,f,g){
+                $scope.stopCollopse(event);
                 console.log(a,b,c,d,e,f,g);
             }
             $scope.authorize = function(){
@@ -752,7 +753,11 @@ angular.module('oncokbApp')
                                         }else if($scope.gene.mutations.get(Number(key)).tumors.get(Number(_key)).TI.get(Number(__key)).description.text){
                                             $scope.geneStatus[key][_key][__key][processKey] = flag;
                                         }else{
-                                            $scope.geneStatus[key][_key][__key][processKey] = flag;
+                                            if(processKey === 'isOpen'){
+                                                $scope.geneStatus[key][_key][__key].isOpen = false;
+                                            }else{
+                                                $scope.geneStatus[key][_key][__key][processKey] = flag;
+                                            }
                                         }
                                     }
                                 }
