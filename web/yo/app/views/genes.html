@@ -10,7 +10,7 @@
     </span>
     <div ng-show="loaded">
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
-            <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th>Status</th><th>Edit</th></tr></thead>
+            <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th ng-show="userRole === 8">Status</th><th>Edit</th></tr></thead>
             <tbody>
                 <tr data-ng-repeat="gene in documents">
                     <!-- <td>{{$index + 1}}</td> -->
@@ -19,7 +19,7 @@
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.mskccEmail}}</span><br ng-if="$index<curator.length-1"/></div></td>
                     <td>{{gene.modifiedDate | date : 'MMM d, h:mm a'}}</a></td>
-                    <td>{{gene.oncokbStatus}}</a></td>
+                    <td ng-show="userRole === 8">{{gene.oncokbStatus}}</a></td>
                     <td>
                         <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">1</span></i>
                         <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">0</span></i>
