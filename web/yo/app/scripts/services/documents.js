@@ -65,7 +65,7 @@ angular.module('oncokbApp')
                     if(status.hasOwnProperty(gene)){
                         self.documents[i].oncokbStatus = status[gene];
                     }else{
-                        self.documents[i].oncokbStatus = 'not available';
+                        self.documents[i].oncokbStatus = 'Not available';
                     }
                 }
             }

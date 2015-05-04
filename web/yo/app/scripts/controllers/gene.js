@@ -690,12 +690,10 @@ angular.module('oncokbApp')
                 var targetStatus = '';
                 var specialEscapeKeys = ['isOpen', 'hideEmpty'];
                 if(type === 'expand'){
-                    $scope.status.expandAll = true;
-                    targetStatus = $scope.status.expandAll;
+                    targetStatus = true;;
                     processKey = 'isOpen';
                 }else if (type === 'collapse'){
-                    $scope.status.expandAll = false;
-                    targetStatus = $scope.status.expandAll;
+                    targetStatus = false;
                     processKey = 'isOpen';
                 }else if (type === 'hideEmpty'){
                     targetStatus = true;
@@ -1217,6 +1215,16 @@ angular.module('oncokbApp')
                         $scope.isOpenFunc('hideEmpty');
                     }else{
                         $scope.isOpenFunc('showEmpty');
+                    }
+                }
+            });
+
+            $scope.$watch('status.expandAll', function(n, o){
+                if(n !== o){
+                    if(n){
+                        $scope.isOpenFunc('expand');
+                    }else{
+                        $scope.isOpenFunc('collapse');
                     }
                 }
             });

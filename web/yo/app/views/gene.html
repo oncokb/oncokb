@@ -11,10 +11,15 @@
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-        <button type="button" class="btn btn-default" ng-click="isOpenFunc('expand')">Expand all</button>
-        <button type="button" class="btn btn-default" ng-click="isOpenFunc('collapse')">Collapse all</button>
+        <button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">
+          <i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>
+          <span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all
+        </button>
 
-        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty"><i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>All empty</button>
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">
+          <i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>
+          <span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty
+        </button>
         <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
       </span>
     </h2>
@@ -376,12 +381,17 @@
   <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
   <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-  <button type="button" class="btn btn-default" ng-click="isOpenFunc('expand')">Expand all</button>
-  <button type="button" class="btn btn-default" ng-click="isOpenFunc('collapse')">Collapse all</button>
-  <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty"><i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>All empty</button>
-  <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>
+  <button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">
+    <i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>
+    <span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all
+  </button>
+  <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">
+    <i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>
+    <span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty
+  </button>
+  <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>-->
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
-  <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>
+  <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>-->
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>
   <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>
 </div>
