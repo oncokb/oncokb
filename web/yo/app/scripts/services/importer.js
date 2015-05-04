@@ -65,7 +65,7 @@ angular.module('oncokbApp')
         if(index < self.docs.length) {
           var doc = self.docs[index];
           copyFileData(self.newFolder, doc.id, doc.title, index).then(function(){
-            copyData(index++, callback);
+            copyData(++index, callback);
           });
         }else {
           if(callback) {

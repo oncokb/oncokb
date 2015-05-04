@@ -814,7 +814,6 @@ angular.module('oncokbApp')
             }
 
             function migrateGeneStatusPosition(object, indexRemoved){
-                console.log(object, indexRemoved);
                 if(angular.isNumber(indexRemoved)){
                     var indexes = [];
                     for(var key in object){
@@ -1235,7 +1234,7 @@ angular.module('oncokbApp')
             clock = $interval(function() {
                 storage.requireAuth(true).then(function(result){
                     if(result && !result.error) {
-                        console.log('\t checked token', new Date().getTime());
+                        console.log('\t checked token', new Date().getTime(), gapi.auth.getToken());
                     }else {
                         documentClosed();
                         console.log('error when renew token in interval func.');
