@@ -1,5 +1,8 @@
 <div ng-init="init()" ng-hide="rendering" id="dataSummary">
-    <div><span class="pull-right">Last modified: 05/05/2015</span></div>
+    <div class="pull-right">
+        <button type="button" class="btn btn-default btn-sm" ng-click="download('tsv', 0)" >Download data</button>
+        <span>Last modified: 05/05/2015</span>
+    </div>
     <br>
     <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
         <thead><tr class="dashedHeader">
