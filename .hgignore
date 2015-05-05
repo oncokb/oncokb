@@ -25,3 +25,4 @@ build.sh
 start.sh
 .idea$
 \.iml$
+node_modules$
