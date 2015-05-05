@@ -546,7 +546,7 @@ angular.module('oncokbApp')
                             }else{
                                 if(!isNaN(therapyCategoryIndex) && !isNaN(therapyIndex)){
                                     _index = Number(angular.copy(therapyIndex));
-                                    $scope.gene.mutations.get(mutationIndex).tumors.get(tumorTypeIndex).TI.get(therapyCategoryIndex).treatments.remove(tumorTypeIndex);
+                                    $scope.gene.mutations.get(mutationIndex).tumors.get(tumorTypeIndex).TI.get(therapyCategoryIndex).treatments.remove(therapyIndex);
                                     delete $scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex][_index];
                                     $scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex] = migrateGeneStatusPosition($scope.geneStatus[mutationIndex][tumorTypeIndex][therapyCategoryIndex], _index);
                                 }else{
