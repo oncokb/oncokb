@@ -64,7 +64,7 @@ angular.module('oncokbApp')
                         storage.requireAuth(true).then(function(){
                             storage.retrieveAllFiles().then(function(result){
                                 Documents.set(result);
-                                Documents.setGeneStatus(OncoKB.global.genes);
+                                Documents.setStatus(OncoKB.global.genes);
                                 $scope.documents = Documents.get();
                                 $scope.loaded = true;
                                 // loading_screen.finish();
