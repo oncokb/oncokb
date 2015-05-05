@@ -379,38 +379,38 @@ angular.module('oncokbApp', [
                 templateUrl: 'views/welcome.html',
                 access: access.public
             })
-            .when('/tree', {
-                templateUrl: 'views/tree.html',
-                controller: 'TreeCtrl',
-                access: access.admin
-            })
-            .when('/variant', {
-                templateUrl: 'views/variant.html',
-                controller: 'VariantCtrl',
-                reloadOnSearch: false,
-                access: access.admin
-            })
-            .when('/reportGenerator', {
-                templateUrl: 'views/reportgenerator.html',
-                controller: 'ReportgeneratorCtrl',
-                access: access.admin
-            })
-            .when('/genes', {
-                templateUrl: 'views/genes.html',
-                controller: 'GenesCtrl',
-                access: access.curator
-            })
-            .when('/gene/:geneName', {
-                templateUrl: 'views/gene.html',
-                controller: 'GeneCtrl',
-                access: access.curator
-            })
-            .when('/dataSummary', {
-                templateUrl: 'views/datasummary.html',
-                controller: 'DatasummaryCtrl',
-                access: access.admin
-
-            })
+            //.when('/tree', {
+            //    templateUrl: 'views/tree.html',
+            //    controller: 'TreeCtrl',
+            //    access: access.admin
+            //})
+            //.when('/variant', {
+            //    templateUrl: 'views/variant.html',
+            //    controller: 'VariantCtrl',
+            //    reloadOnSearch: false,
+            //    access: access.admin
+            //})
+            //.when('/reportGenerator', {
+            //    templateUrl: 'views/reportgenerator.html',
+            //    controller: 'ReportgeneratorCtrl',
+            //    access: access.admin
+            //})
+            //.when('/genes', {
+            //    templateUrl: 'views/genes.html',
+            //    controller: 'GenesCtrl',
+            //    access: access.curator
+            //})
+            //.when('/gene/:geneName', {
+            //    templateUrl: 'views/gene.html',
+            //    controller: 'GeneCtrl',
+            //    access: access.curator
+            //})
+            //.when('/dataSummary', {
+            //    templateUrl: 'views/datasummary.html',
+            //    controller: 'DatasummaryCtrl',
+            //    access: access.admin
+            //
+            //})
             .otherwise({
                 redirectTo: '/'
             });
@@ -470,31 +470,31 @@ angular.module('oncokbApp').run(
                 $rootScope.errors.push(error);
             };
 
-            DatabaseConnector.getOncokbInfo(function(oncokbInfo){
+            //DatabaseConnector.getOncokbInfo(function(oncokbInfo){
 
-                if(oncokbInfo) {
-                    if(oncokbInfo.users) {
-                        Users.setUsers(oncokbInfo.users);
-                    }
-
-                    if(oncokbInfo.suggestions) {
-                        DriveOncokbInfo.setSuggestions(oncokbInfo.suggestions);
-                    }
-
-                    if(oncokbInfo.pubMed) {
-                        DriveOncokbInfo.setPubMed(oncokbInfo.pubMed);
-                    }
-
-                    if(Access.isLoggedIn()) {
-                        // console.log('Setting me');
-                        Users.setMe(Users.getMe());
-                        $rootScope.user = Users.getMe();
-                    }
-                }else{
-                    dialogs.error('Error', 'OncoKB has error. Refresh page might solve the problem.');
-                }
+                //if(oncokbInfo) {
+                //    if(oncokbInfo.users) {
+                //        Users.setUsers(oncokbInfo.users);
+                //    }
+                //
+                //    if(oncokbInfo.suggestions) {
+                //        DriveOncokbInfo.setSuggestions(oncokbInfo.suggestions);
+                //    }
+                //
+                //    if(oncokbInfo.pubMed) {
+                //        DriveOncokbInfo.setPubMed(oncokbInfo.pubMed);
+                //    }
+                //
+                //    if(Access.isLoggedIn()) {
+                //        // console.log('Setting me');
+                //        Users.setMe(Users.getMe());
+                //        $rootScope.user = Users.getMe();
+                //    }
+                //}else{
+                //    dialogs.error('Error', 'OncoKB has error. Refresh page might solve the problem.');
+                //}
                 loadingScreen.finish();
-            });
+            //});
 
             // Error loading the document, likely due revoked access. Redirect back to home/install page
             $rootScope.$on('$routeChangeError', function () {

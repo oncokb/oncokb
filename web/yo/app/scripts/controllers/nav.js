@@ -61,11 +61,11 @@ angular.module('oncokbApp')
     }
 
     // Render the sign in button.
-    $scope.renderSignInButton = function() {
-        storage.requireAuth().then(function(result){
-            $scope.signInCallback(result);
-        });
-    };
+    //$scope.renderSignInButton = function() {
+    //    storage.requireAuth().then(function(result){
+    //        $scope.signInCallback(result);
+    //    });
+    //};
 
     $scope.signOut = function() {
         access.logout();

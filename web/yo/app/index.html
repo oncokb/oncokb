@@ -56,27 +56,6 @@
                     <ul class="nav navbar-nav">
                         <li ng-repeat="tab in tabs" ng-class="{active:tabIsActive('/'+tab.key)}"><a ng-href="#/{{tab.key}}">{{tab.value}}</a></li>
                     </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <!-- <span ng-if="!signedIn"><i class="fa fa-google fa-lg"></i> Login with Google</span>
-                            <span ng-if="signedIn">Welcome</span> -->
-                            
-                            <div ng-if="signedIn" style="float: left">
-                                <div  style="float: left; margin: 5px">
-                                    <span>{{user.email}}</span><br/>
-                                    <span id="signout" style="" ng-click="signOut()">Sign out</span>
-                                </div>
-                                <img style="float: left" ng-if="user.avatar !== ''" ng-src="{{user.avatar}}">
-                            </div>
-                            <div class="btn-group" role="group" ng-show="!signedIn" id="googleSignIn">
-                                <!-- <span id="signInButton">
-                                </span> -->
-                                <!-- <i class="fa fa-google"></i> -->
-                                <button class="btn btn-default" disabled><i class="fa fa-google"></i></button>
-                                <button class="btn btn-default" ng-click="renderSignInButton()">Sign in</button>
-                            </div>
-                        </li>
-                    </ul>
                 </div>
                 <div>
                     
