@@ -182,7 +182,7 @@ angular.module('oncokbApp')
             };
 
             $scope.givePermission = function() {
-                var testGene = {};
+                var testGene = {'test@gmail.com':'  AKT2, AKT3, ERBB3, FGFR1, ERBB2, FGFR3, ERBB4, FGFR2, FGFR4'};
                 var genes = [];
 
                 for(var key in testGene) {
@@ -221,7 +221,9 @@ angular.module('oncokbApp')
                                                 console.log('Error when insert permission.');
                                             }else{
                                                 console.log('\tinsert writer to', permission.gene);
-                                                givePermissionSub(++index);
+                                                $timeout(function(){
+                                                    givePermissionSub(++index);
+                                                }, 100);
                                             }
                                         });
                                     }else if(result.items[permissionIndex].role !== 'writer'){
@@ -230,7 +232,9 @@ angular.module('oncokbApp')
                                                 console.log('Error when update permission.');
                                             }else{
                                                 console.log('\tupdat  writer to', permission.gene);
-                                                givePermissionSub(++index);
+                                                $timeout(function(){
+                                                    givePermissionSub(++index);
+                                                }, 100);
                                             }
                                         });
                                     }
