@@ -57,7 +57,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DriveAnnotationParser {
     private static final String DO_NOT_IMPORT = "DO NOT IMPORT";
     
-    @RequestMapping(value="/driveAnnotation", method = POST)
+//    @RequestMapping(value="/driveAnnotation", method = POST)
     public @ResponseBody void getEvidence(
             @RequestParam(value="gene", required=true) String gene) throws IOException {
         

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TumorTypeController {
     
-    @RequestMapping(value="/tumorType.json")
+//    @RequestMapping(value="/tumorType.json")
     public @ResponseBody List<TumorType> getTumorType(
             @RequestParam(value="tumorTypeId", required=false) List<String> tumorTypeIds) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();

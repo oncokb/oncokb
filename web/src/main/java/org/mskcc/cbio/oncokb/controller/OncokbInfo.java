@@ -35,7 +35,7 @@ public class OncokbInfo {
     
     private static final String USER_SPREADSHEET = "1VPFB4KuE3tF07KVIbJzU8V4amjuR8f9az0Rvp6wdKzI";
         
-    @RequestMapping(value="/oncokbInfo.json", method = GET)
+//    @RequestMapping(value="/oncokbInfo.json", method = GET)
     public @ResponseBody Map OncokbInfo() throws MalformedURLException, ServiceException{
         try {
             URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + USER_SPREADSHEET);

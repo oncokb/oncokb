@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class EvidenceController {
     
-    @RequestMapping(value="/evidence.json")
+//    @RequestMapping(value="/evidence.json")
     public @ResponseBody List<Evidence> getEvidence(
             @RequestParam(value="entrezGeneId", required=false) String entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,

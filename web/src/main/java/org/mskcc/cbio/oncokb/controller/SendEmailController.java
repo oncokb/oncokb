@@ -63,7 +63,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class SendEmailController {
-    @RequestMapping(value="/sendEmail", method = POST)
+//    @RequestMapping(value="/sendEmail", method = POST)
     public @ResponseBody Boolean getEmailContent(
             @RequestParam(value="subject", required=false) String subject,
             @RequestParam(value="content", required=false) String body,

@@ -33,7 +33,7 @@ public class OncoTreeTumorTypes {
     private static final String USER_SPREADSHEET = "0AhyhUieStXV-dFdXbGZ6dGFIRE0tWTJ5RGpYV2E5Y2c";
     private static final Integer ENTRY = 1;
     
-    @RequestMapping(value="/oncoTreeTumorTypes.json", method = GET)
+//    @RequestMapping(value="/oncoTreeTumorTypes.json", method = GET)
     public @ResponseBody List<OncoTreeTumorType> OncoTreeTumorTypes() throws MalformedURLException, ServiceException{
         
         try {

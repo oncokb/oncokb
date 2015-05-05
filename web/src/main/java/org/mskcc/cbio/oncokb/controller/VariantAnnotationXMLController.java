@@ -56,7 +56,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class VariantAnnotationXMLController {
-    @RequestMapping(value="/var_annotation", produces="application/xml;charset=UTF-8")//plain/text
+//    @RequestMapping(value="/var_annotation", produces="application/xml;charset=UTF-8")//plain/text
     public @ResponseBody String getVariantAnnotation(
             @RequestParam(value="entrezGeneId", required=false) Integer entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
