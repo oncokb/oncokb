@@ -15,7 +15,8 @@ angular.module('oncokbApp')
       self.newFolder = '';
       // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
       //self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
-      self.parentFolder = '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk'; //backup folder under knowledgebase
+      //self.parentFolder = '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk'; //backup folder under knowledgebase
+      self.parentFolder = '0BzBfo69g8fP6fmttemU5Y3dEd2hZOVUyMmIzN2FDSlZKcks0N19wVmlvdUV1c2RaWDVUcFk'; //Curation documents folder
       self.status = {
         backupIndex: -1,
         migrateIndex: -1
@@ -76,25 +77,46 @@ angular.module('oncokbApp')
       }
 
       function migrate(){
+        var destinationFolderId = '';
         var deferred = $q.defer();
-        createFolder().then(function(result){
-          if(result && result.error){
-            console.log('Unable create folder.', result);
-          }else{
-            self.docs = documents.get();
-            self.docsL = self.docs.length;
 
-            //copy foler permissions
-            assignPermission(OncoKB.config.folderId, self.newFolder)
-                .then(function(result){
-                  if(result && result.error){
-                    console.log('Error when assigning folder permissions', result);
-                  }else{
-                    migrateOneFileProcess(0, deferred);
-                  }
-                });
-          }
-        });
+        destinationFolderId = '0BzBfo69g8fP6RmczanJFSVlNSjA';
+
+        if(destinationFolderId){
+          self.newFolder = destinationFolderId;
+          self.docs = documents.get();
+          self.docsL = self.docs.length;
+
+          //copy foler permissions
+          //assignPermission(OncoKB.config.folderId, self.newFolder)
+          //    .then(function(result){
+          //      if(result && result.error){
+          //        console.log('Error when assigning folder permissions', result);
+          //      }else{
+                  migrateOneFileProcess(0, deferred);
+                //}
+              //});
+        }else {
+          createFolder().then(function(result){
+            if(result && result.error){
+              console.log('Unable create folder.', result);
+            }else{
+              self.docs = documents.get();
+              self.docsL = self.docs.length;
+
+              //copy foler permissions
+              assignPermission(OncoKB.config.folderId, self.newFolder)
+                  .then(function(result){
+                    if(result && result.error){
+                      console.log('Error when assigning folder permissions', result);
+                    }else{
+                      migrateOneFileProcess(0, deferred);
+                    }
+                  });
+            }
+          });
+        }
+
         return deferred.promise;
       }
 
@@ -130,18 +152,41 @@ angular.module('oncokbApp')
           if(result && result.error){
             deferred.reject(result);
           }else{
-            var promises = [];
-            promises = result.items.forEach(function(permission, i){
-              if(permission.id && permission.emailAddress && permission.role && permission.type && permission.role !== 'owner'){
-                promises.push(storage.insertPermission(newDocId, permission.emailAddress, permission.type, permission.role));
-              }
-            });
-            $q.all(promises).then(function(){
-              deferred.resolve();
-            });
+            assignIndividualPermission(newDocId, result.items, 0, deferred);
+            //var promises = [];
+            //promises = result.items.forEach(function(permission, i){
+            //  if(permission.id && permission.emailAddress && permission.role && permission.type && permission.role !== 'owner'){
+            //    promises.push();
+            //  }
+            //});
+            //$q.all(promises).then(function(){
+            //  deferred.resolve();
+            //});
           }
         });
         return deferred.promise;
+      }
+
+      function assignIndividualPermission(newDocId, items, itemIndex, deferred){
+        if(itemIndex < items.length){
+          var permission = items[itemIndex];
+          console.log('\t\t\tp-',itemIndex+1);
+          if(permission.id && permission.emailAddress && permission.role && permission.type && permission.role !== 'owner') {
+            storage.insertPermission(newDocId, permission.emailAddress, permission.type, permission.role).then(function () {
+              //$timeout(function () {
+                assignIndividualPermission(newDocId, items, ++itemIndex, deferred);
+              //}, 100);
+            });
+          }else{
+            console.log('\t\t\tskip-', permission);
+            //$timeout(function () {
+              assignIndividualPermission(newDocId, items, ++itemIndex, deferred);
+            //}, 100);
+          }
+        }else{
+          deferred.resolve();
+          console.log('\t\tAll permissions are assigned.')
+        }
       }
 
       function getData(realtime) {
