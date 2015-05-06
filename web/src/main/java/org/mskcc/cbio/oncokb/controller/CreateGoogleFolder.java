@@ -38,7 +38,8 @@ public class CreateGoogleFolder {
             @RequestParam(value="folderName", required=true) String folderName) throws MalformedURLException, ServiceException, GeneralSecurityException, URISyntaxException{
         try {
             if(folderName != null && !folderName.equals("")) {
-                Drive driveService = GoogleAuth.getDriveService();
+                GoogleAuth auth = new GoogleAuth();
+                Drive driveService = auth.getDriveService();
                 System.out.println("Got drive service");
                 
                 File folder = new File();

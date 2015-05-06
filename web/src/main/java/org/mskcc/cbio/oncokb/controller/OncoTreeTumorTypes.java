@@ -58,9 +58,10 @@ public class OncoTreeTumorTypes {
         return null;
     }
     
-    public static ListFeed getListFeed() throws MalformedURLException, IOException, ServiceException, GeneralSecurityException {
+    public ListFeed getListFeed() throws MalformedURLException, IOException, ServiceException, GeneralSecurityException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + USER_SPREADSHEET);
-        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
+        GoogleAuth auth = new GoogleAuth();
+        SpreadsheetService service = auth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
         
         WorksheetFeed worksheetFeed = service.getFeed(
@@ -77,7 +78,7 @@ public class OncoTreeTumorTypes {
         return list;
     }
     
-    public static List<OncoTreeTumorType> getOncoTreeTumorTypes() throws IOException, MalformedURLException, ServiceException, GeneralSecurityException {
+    public List<OncoTreeTumorType> getOncoTreeTumorTypes() throws IOException, MalformedURLException, ServiceException, GeneralSecurityException {
         ListFeed list = getListFeed();
         // Create a local representation of the new row.
         List<OncoTreeTumorType> tumorTypes = new ArrayList<OncoTreeTumorType>(); 
@@ -93,7 +94,7 @@ public class OncoTreeTumorTypes {
         return tumorTypes;
     }
     
-    public static List<OncoTreeTumorType> geMainTypes() throws IOException, MalformedURLException, ServiceException, GeneralSecurityException {
+    public List<OncoTreeTumorType> geMainTypes() throws IOException, MalformedURLException, ServiceException, GeneralSecurityException {
         ListFeed list = getListFeed();
         List tumorTypes = new ArrayList(); 
         // Iterate through each row, printing its cell values.

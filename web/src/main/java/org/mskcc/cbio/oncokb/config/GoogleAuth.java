@@ -12,24 +12,20 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.gmail.Gmail;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.util.ServiceException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
  *
@@ -37,54 +33,85 @@ import java.util.List;
  */
 public class GoogleAuth {
     /** Email of the Service Account */
-    private static final String SERVICE_ACCOUNT_EMAIL = "184231070809-f51uf3d89ljd78ssvss5eoidhtca4fhp@developer.gserviceaccount.com";
+    private String SERVICE_ACCOUNT_EMAIL;
 
     /** Path to the Service Account's Private Key file */
-    private static Drive driveService;
-    private static SpreadsheetService spreadsheetService;
-    private static Gmail gmailService;
-    private static GoogleClientSecrets clientSecrets;
-    private static File CLIENT_SECRET_FILE;
-    private static File SERVICE_ACCOUNT_PKCS12_FILE;
+    private Drive DRIVESERVICE;
+    private SpreadsheetService SPREADSHEETSERVICE;
+    private Gmail GMAILSERVICE;
+    private GoogleClientSecrets clientSecrets;
+    private File CLIENT_SECRET_FILE;
+    private File SERVICE_ACCOUNT_PKCS12_FILE;
+    private Properties PROPERTIES;
+    private String USERNAME;
+    private String PASSWORD;
     
     
-    public static Drive getDriveService() throws GeneralSecurityException, IOException, URISyntaxException {
+    public Drive getDriveService() throws GeneralSecurityException, IOException, URISyntaxException {
         if(CLIENT_SECRET_FILE == null) {
             openFile();
         }
-        
-        if(GoogleAuth.driveService == null){
+
+        if(PROPERTIES == null){
+            getProperties();
+        }
+
+        if(DRIVESERVICE == null){
             createDriveService();
         }
         
-        return GoogleAuth.driveService;
+        return DRIVESERVICE;
     }
     
-    public static SpreadsheetService getSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
+    public SpreadsheetService getSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
         if(CLIENT_SECRET_FILE == null) {
             openFile();
         }
+
+        if(PROPERTIES == null){
+            getProperties();
+        }
         
-        if(GoogleAuth.spreadsheetService == null){
+        if(SPREADSHEETSERVICE == null){
             createSpreadSheetService();
         }
         
-        return GoogleAuth.spreadsheetService;
+        return SPREADSHEETSERVICE;
     }
     
-    public static Gmail getGmailService() throws GeneralSecurityException, IOException, ServiceException {
+    public Gmail getGmailService() throws GeneralSecurityException, IOException, ServiceException {
         if(CLIENT_SECRET_FILE == null) {
             openFile();
         }
+
+        if(PROPERTIES == null){
+            getProperties();
+        }
         
-        if(GoogleAuth.gmailService == null){
+        if(GMAILSERVICE == null){
             createGmailService();
         }
         
-        return GoogleAuth.gmailService;
+        return GMAILSERVICE;
     }
-    
-    private static void openFile() {
+
+    private void getProperties() throws IOException {
+        String propFileName = "/properties/config.properties";
+        PROPERTIES = new Properties();
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+
+        if (inputStream != null) {
+            PROPERTIES.load(inputStream);
+        } else {
+            throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+        }
+
+        SERVICE_ACCOUNT_EMAIL = PROPERTIES.getProperty("google.service_account_email");
+        USERNAME = PROPERTIES.getProperty("google.username");
+        PASSWORD = PROPERTIES.getProperty("google.password");
+    }
+
+    private void openFile() {
         String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/OncoKB-Report-7c732673acd9.p12";
         String CLIENT_SECRET_PATH = "/OncoKB-Report-ba65ac545ecb.json";
         URL CLIENT_SECRET_PATH_URL= GoogleAuth.class.getResource(CLIENT_SECRET_PATH);
@@ -93,7 +120,7 @@ public class GoogleAuth {
         CLIENT_SECRET_FILE = new java.io.File(CLIENT_SECRET_PATH_URL.getPath());
     }
     
-    private static void createDriveService() throws GeneralSecurityException,
+    private void createDriveService() throws GeneralSecurityException,
         IOException, URISyntaxException {
         HttpTransport httpTransport = new NetHttpTransport();
         JacksonFactory jsonFactory = new JacksonFactory();
@@ -105,18 +132,16 @@ public class GoogleAuth {
             .setServiceAccountPrivateKeyFromP12File(SERVICE_ACCOUNT_PKCS12_FILE)
           .build();
         credential.refreshToken();
-        GoogleAuth.driveService = new Drive.Builder(httpTransport, jsonFactory, null)
+        DRIVESERVICE = new Drive.Builder(httpTransport, jsonFactory, null)
                 .setApplicationName("Oncoreport")
                 .setHttpRequestInitializer(credential).build();
     }
     
-    private static void createSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
+    private void createSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
         HttpTransport httpTransport = new NetHttpTransport();
         JacksonFactory jsonFactory = new JacksonFactory();
         String [] SCOPESArray= {"https://spreadsheets.google.com/feeds", "https://docs.google.com/feeds"};
-        String username = "jackson.zhang.828@gmail.com";
-        String password = "gmail_privatespace";
-        final List SCOPES = Arrays.asList(SCOPESArray); 
+        final List SCOPES = Arrays.asList(SCOPESArray);
         GoogleCredential credential = new GoogleCredential.Builder()
           .setTransport(httpTransport)
           .setJsonFactory(jsonFactory)
@@ -125,18 +150,16 @@ public class GoogleAuth {
           .setServiceAccountPrivateKeyFromP12File(SERVICE_ACCOUNT_PKCS12_FILE)
           .build();
       
-        GoogleAuth.spreadsheetService = new SpreadsheetService("data");
-        GoogleAuth.spreadsheetService.setOAuth2Credentials(credential);
-        GoogleAuth.spreadsheetService.setUserCredentials(username, password);
+        SPREADSHEETSERVICE = new SpreadsheetService("data");
+        SPREADSHEETSERVICE.setOAuth2Credentials(credential);
+        SPREADSHEETSERVICE.setUserCredentials(USERNAME, PASSWORD);
     }
     
-    private static void createGmailService() throws GeneralSecurityException, IOException, ServiceException {
+    private void createGmailService() throws GeneralSecurityException, IOException, ServiceException {
         HttpTransport httpTransport = new NetHttpTransport();
         JacksonFactory jsonFactory = new JacksonFactory();
         
         String [] SCOPESArray= {"https://www.googleapis.com/auth/gmail.compose"};
-        String username = "jackson.zhang.828@gmail.com";
-        String password = "gmail_privatespace";
         final List SCOPES = Arrays.asList(SCOPESArray); 
         clientSecrets = GoogleClientSecrets.load(jsonFactory,  new FileReader(CLIENT_SECRET_FILE.getAbsolutePath()));
 
@@ -162,7 +185,7 @@ public class GoogleAuth {
             .setFromTokenResponse(response);
             
         // Create a new authorized Gmail API client
-        GoogleAuth.gmailService = new Gmail.Builder(httpTransport, jsonFactory, credential).setApplicationName("OncoKB curation comments").build();
+        GMAILSERVICE = new Gmail.Builder(httpTransport, jsonFactory, credential).setApplicationName("OncoKB curation comments").build();
         System.out.println();
     }
 }

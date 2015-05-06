@@ -84,8 +84,9 @@ public class GenerateGoogleDoc {
                     DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss MM-dd-yyyy z");
                     Date date = new Date();
                     String dateString = dateFormat.format(date);
-                    
-                    Drive driveService = GoogleAuth.getDriveService();
+
+                    GoogleAuth auth = new GoogleAuth();
+                    Drive driveService = auth.getDriveService();
                     System.out.println("Got drive service");
                     
                     String fileName = requestInfo.getString("fileName");
@@ -159,8 +160,9 @@ public class GenerateGoogleDoc {
     
     private static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
-        
-        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
+
+        GoogleAuth auth = new GoogleAuth();
+        SpreadsheetService service = auth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
         
         WorksheetFeed worksheetFeed = service.getFeed(
@@ -192,8 +194,9 @@ public class GenerateGoogleDoc {
     
     private static void changeFileContent(String fileId, String fileName, JSONObject content, JSONArray records) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
-        
-        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
+
+        GoogleAuth auth = new GoogleAuth();
+        SpreadsheetService service = auth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
 
         WorksheetFeed worksheetFeed = service.getFeed(
