@@ -5,35 +5,16 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.google.api.services.gmail.Gmail;
 //import com.google.api.services.gmail.model.Message;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Thread;
-import com.google.api.services.gmail.model.ListThreadsResponse;
 import com.google.gdata.util.ServiceException;
-import java.io.BufferedReader;
+
+import java.io.*;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Properties;
+        import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -48,10 +29,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.mskcc.cbio.oncokb.config.GoogleAuth;
 
 
-import org.springframework.stereotype.Controller;
+        import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -70,8 +50,18 @@ public class SendEmailController {
             @RequestParam(value="sendTo", required=false) String sendTo) throws IOException, MessagingException, GeneralSecurityException, ServiceException {
         
         if(subject != null && body != null) {
-            String from = "jackson.zhang.828@gmail.com";
-            String pass = "gmail_privatespace";
+            String propFileName = "/properties/config.properties";
+            Properties prop = new Properties();
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+
+            if (inputStream != null) {
+                prop.load(inputStream);
+            } else {
+                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            }
+
+            String from = prop.getProperty("google.username");
+            String pass = prop.getProperty("google.password");
             String[] to = new String[1]; // list of recipient email addresses
 
             if(sendTo != null) {

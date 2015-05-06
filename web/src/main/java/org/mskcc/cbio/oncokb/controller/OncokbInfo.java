@@ -39,7 +39,8 @@ public class OncokbInfo {
     public @ResponseBody Map OncokbInfo() throws MalformedURLException, ServiceException{
         try {
             URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + USER_SPREADSHEET);
-            SpreadsheetService service = GoogleAuth.getSpreadSheetService();
+            GoogleAuth auth = new GoogleAuth();
+            SpreadsheetService service = auth.getSpreadSheetService();
             SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
             
             WorksheetFeed worksheetFeed = service.getFeed(
