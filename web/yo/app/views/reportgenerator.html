@@ -10,8 +10,11 @@
         </div>
         <input type="file" nv-file-select="" uploader="uploader" />
 
+        <loading ng-model="status.rendering" is-a-class="false"></loading>
         <br/>
-        <tool-xlsx ng-if="status.isXLSX" open="status.isXLSX" file="fileItem"></tool-xlsx>
-        <tool-xml ng-if="status.isXML" open="status.isXML" file="fileItem"></tool-xml>
+        <div ng-show="!status.rendering">
+            <tool-xlsx ng-if="status.isXLSX" open="status.isXLSX" file="fileItem" rendering="status.rendering"></tool-xlsx>
+            <tool-xml ng-if="status.isXML" open="status.isXML" file="fileItem" rendering="status.rendering"></tool-xml>
+        </div>
     </div>
 </div>

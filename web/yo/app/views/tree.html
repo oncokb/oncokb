@@ -1,17 +1,17 @@
 <div id="mainTree" class="tab-pane fade in" ng-init='!initFlag?init():""'>
-  <div ng-hide="rendering"  class="row">
-    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback m-b-5">
-      <div class="input-group input-group-sm" id='tumor_search'>
-        <input type="text" class="form-control" placeholder="Search Term" ng-model='searchKeywords'/>
+    <div ng-hide="rendering"  class="row">
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback m-b-5">
+            <div class="input-group input-group-sm" id='tumor_search'>
+                <input type="text" class="form-control" placeholder="Search Term" ng-model='searchKeywords'/>
         <span id="searchRemoveIcon"  ng-click='removeSearchKeywords()' ng-show='keywordsExist()'
-            ng-class='{
+              ng-class='{
               "form-control-feedback": true,
               "fa": true,
               "fa-times-circle-o": true,
               "upper": keywordsExist()
             }'></span>
-        <span id="searchResult" ng-show='showSearchResult()' 
-            ng-class='{
+        <span id="searchResult" ng-show='showSearchResult()'
+              ng-class='{
               "form-control-feedback": true,
               "result": true,
               "upper": showSearchResult()
@@ -20,36 +20,28 @@
           <button type="button" ng-click='search()' class="btn btn-default">Search</button>
         </span>
 
-      </div>
-    </div>
-
-    <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12 m-b-5">
-        <div class="btn-group btn-group-sm">
-          <button type="button" class="btn btn-default" ng-class="{'active': treeType === 'separated'}" id='separated-variants-btn' ng-click='drawTree("separated")'>
-            <span>Separated Variants</span>
-          </button>
-          <button type="button" class="btn btn-default" ng-class="{'active': treeType === 'combined'}" id='combined-variants-btn' ng-click='drawTree("combined")'>
-            <span>Combined Variants</span>
-          </button>
+            </div>
         </div>
 
-        <div class="btn-group btn-group-sm">
-            <button type="button" ng-click='expandAll()' class="btn btn-default" id='expand-nodes-btn' tooltip='Expand all branches'><i class="fa fa-expand"></i></button>
-            <button type="button" ng-click='collapseAll()' class="btn btn-default" id='collapse-nodes-btn' tooltip='Collapse all branches'><i class="fa fa-compress"></i></button>
+        <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12 m-b-5">
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-default" ng-class="{'active': treeType === 'separated'}" id='separated-variants-btn' ng-click='drawTree("separated")'>
+                    <span>Separated Variants</span>
+                </button>
+                <button type="button" class="btn btn-default" ng-class="{'active': treeType === 'combined'}" id='combined-variants-btn' ng-click='drawTree("combined")'>
+                    <span>Combined Variants</span>
+                </button>
+            </div>
+
+            <div class="btn-group btn-group-sm">
+                <button type="button" ng-click='expandAll()' class="btn btn-default" id='expand-nodes-btn' tooltip='Expand all branches'><i class="fa fa-expand"></i></button>
+                <button type="button" ng-click='collapseAll()' class="btn btn-default" id='collapse-nodes-btn' tooltip='Collapse all branches'><i class="fa fa-compress"></i></button>
+            </div>
         </div>
     </div>
-  </div>
-  <div ng-hide="rendering" class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
-    <div id="tree" ></div>
-  </div>
-  <div ng-show="rendering" class="genesLoading">
-      <div class='sk-spinner sk-spinner-wave mskcc'>
-          <div class='sk-rect1'></div>
-          <div class='sk-rect2'></div>
-          <div class='sk-rect3'></div>
-          <div class='sk-rect4'></div>
-          <div class='sk-rect5'></div>
-      </div>
-      Please wait, we are loading evidences.
-  </div>
+    <div ng-hide="rendering" class="col-lg-4 col-md-6 col-sm-12 col-xs-12 has-addon-feedback">
+        <div id="tree" ></div>
+    </div>
+
+    <loading ng-model="rendering" content="Please wait, we are loading evidences."></loading>
 </div>

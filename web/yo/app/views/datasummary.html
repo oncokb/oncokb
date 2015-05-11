@@ -86,13 +86,5 @@
         </tbody>
     </table>
 </div>
-<div ng-show="rendering" class="genesLoading">
-    <div class='sk-spinner sk-spinner-wave mskcc'>
-        <div class='sk-rect1'></div>
-        <div class='sk-rect2'></div>
-        <div class='sk-rect3'></div>
-        <div class='sk-rect4'></div>
-        <div class='sk-rect5'></div>
-    </div>
-    Please wait, we are loading information.
-</div>
+
+<loading ng-model="rendering"></loading>

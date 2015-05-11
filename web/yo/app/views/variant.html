@@ -1,61 +1,64 @@
 <div id="variantDisplay" class="tab-pane fade in" ng-init="init()">
-    <div class="row" id='variantCriteria'>
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-            <select chosen ng-model='gene' id="variantGeneNameDropDown" ng-options='gene for gene in genes' allow-single-deselect="true" data-placeholder="Choose a gene (eg. BRAF)">
-            <option value=""></option>
-            </select>
-        </div>
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-            <div class="input-group input-group-sm">
-                <span class="input-group-addon"><b>Mutation:</b></span>
-                <input type="text" ng-model="alteration" id="variantMutation" style='width:100%' class="form-control" placeholder="(eg. V600E)">
+    <div ng-hide="loadingPage">
+        <div class="row" id='variantCriteria'>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                <select chosen ng-model='gene' id="variantGeneNameDropDown" ng-options='gene for gene in genes' allow-single-deselect="true" data-placeholder="Choose a gene (eg. BRAF)">
+                <option value=""></option>
+                </select>
             </div>
-            <!-- <select chosen ng-model='alteration' id="variantMutationDropDown" ng-options='alteration for alteration in alterations' allow-single-deselect="true" data-placeholder="Choose a mutation (eg. V600E)">
-            <option value=""></option>
-            </select> -->
-        </div>
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-            <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
-            <option value=""></option>
-            </select>
-        </div>
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-            <div class="btn-group btn-group-sm" style='width:100%'>
-                <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="searchVariantBtn" type="button" ng-disabled="rendering || !isSearchable()" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
-                <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="useExampleBtn" type="button" ng-disabled="rendering" ng-click="useExample()" class="btn btn-default"><span ng-hide="rendering">Example</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
-                <button ng-class="{'oneThird': true}" id="generateReport" type="button" ng-disabled="generaingReport" ng-show="annotation" ng-click="generateReport()" class="btn btn-default"><span ng-hide="generaingReport">Report</span><i ng-show="generaingReport" class="fa fa-spinner fa-spin"></i></button>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><b>Mutation:</b></span>
+                    <input type="text" ng-model="alteration" id="variantMutation" style='width:100%' class="form-control" placeholder="(eg. V600E)">
+                </div>
+                <!-- <select chosen ng-model='alteration' id="variantMutationDropDown" ng-options='alteration for alteration in alterations' allow-single-deselect="true" data-placeholder="Choose a mutation (eg. V600E)">
+                <option value=""></option>
+                </select> -->
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
+                <option value=""></option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                <div class="btn-group btn-group-sm" style='width:100%'>
+                    <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="searchVariantBtn" type="button" ng-disabled="rendering || !isSearchable()" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
+                    <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="useExampleBtn" type="button" ng-disabled="rendering" ng-click="useExample()" class="btn btn-default"><span ng-hide="rendering">Example</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
+                    <button ng-class="{'oneThird': true}" id="generateReport" type="button" ng-disabled="generaingReport" ng-show="annotation" ng-click="generateReport()" class="btn btn-default"><span ng-hide="generaingReport">Report</span><i ng-show="generaingReport" class="fa fa-spinner fa-spin"></i></button>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row" ng-show="annotation">
-        <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <table class='table'>
-                <thead>
-                    <tr style='background-color: lightgrey;font-weight: bold;'>
-                        <td>Gene Name</td>
-                        <td>Mutation</td>
-                        <td>Tumor Type</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{gene}}</td>
-                        <td>{{alteration}}</td>
-                        <td>{{selectedTumorType}}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="row" ng-show="annotation">
+            <div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <table class='table'>
+                    <thead>
+                        <tr style='background-color: lightgrey;font-weight: bold;'>
+                            <td>Gene Name</td>
+                            <td>Mutation</td>
+                            <td>Tumor Type</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{gene}}</td>
+                            <td>{{alteration}}</td>
+                            <td>{{selectedTumorType}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <tabset ng-show="annotation" justified="true" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <tab heading="Report" active="reportViewActive">
+                    <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
+                </tab>
+                <tab heading="Details" active="regularViewActive">
+                    <regular-view annotation="annotation" summary-table-titles-content="summaryTableTitlesContent" summary-table-titles="summaryTableTitles" special-attr="specialAttr" set-collapsed="setCollapsed" is-collapsed="isCollapsed" fda-approved="fdaApproved" generate-trail="generateTrail" display-process="displayProcess" display-parts="displayParts"></regular-view>
+                </tab>
+            </tabset>
+
         </div>
     </div>
-    <div class="row">
-        <tabset ng-show="annotation" justified="true" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <tab heading="Report" active="reportViewActive">
-                <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
-            </tab>
-            <tab heading="Details" active="regularViewActive">
-                <regular-view annotation="annotation" summary-table-titles-content="summaryTableTitlesContent" summary-table-titles="summaryTableTitles" special-attr="specialAttr" set-collapsed="setCollapsed" is-collapsed="isCollapsed" fda-approved="fdaApproved" generate-trail="generateTrail" display-process="displayProcess" display-parts="displayParts"></regular-view>
-            </tab>
-        </tabset>
-        
-    </div>
+    <loading ng-model="loadingPage"></loading>
 </div>
