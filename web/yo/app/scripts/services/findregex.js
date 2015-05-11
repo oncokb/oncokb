@@ -9,11 +9,20 @@
  */
 angular.module('oncokbApp')
   .factory('FindRegex', function (_) {
+    var allRegex = {
+        pmid: {
+            regex: /PMID:?\s*([0-9]+,?\s*)+/ig,
+            link: 'http://www.ncbi.nlm.nih.gov/pubmed/'
+        },
+        nct: {
+            regex: /NCT:?[0-9]+/ig,
+            link: 'http://clinicaltrials.gov/show/'
+        }
+    };
     function find(str, type) {
         if(typeof str === 'string' && str !== '') {
-            var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig],
-                links = ['http://www.ncbi.nlm.nih.gov/pubmed/',
-                         'http://clinicaltrials.gov/show/'];
+            var regex = [allRegex.pmid.regex, allRegex.nct.regex],
+                links = [allRegex.pmid.link, allRegex.nct.link];
             for (var j = 0, regexL = regex.length; j < regexL; j++) {
                 var result = str.match(regex[j]);
 
@@ -28,11 +37,19 @@ angular.module('oncokbApp')
 
                         switch(j) {
                             case 0:
-                                var _number = _datum.split(':')[1].trim();
+                                var _number = '';
+                                if(_datum.indexOf(':') !== -1){
+                                    _number = _datum.split(':')[1].trim();
+                                }else{
+                                    _number = _datum;
+                                }
                                 _number = _number.replace(/\s+/g, '');
                                 str = str.replace(new RegExp(_datum, 'g'), createTag(type, links[j] + _number, _datum));
                                 break;
                             default:
+                                if(_datum.indexOf(':') !== -1){
+                                    _datum = S(_datum).strip(':').s;
+                                }
                                 str = str.replace(_datum, createTag(type, links[j] + _datum, _datum));
                                 break;
                         }
@@ -47,7 +64,7 @@ angular.module('oncokbApp')
     function result(str) {
         var uniqueResultA = [];
         if(typeof str === 'string' && str !== '') {
-            var regex = [/PMID:\s*([0-9]+,*\s*)+/ig, /NCT[0-9]+/ig];
+            var regex = [allRegex.pmid.regex, allRegex.nct.regex];
             for (var j = 0, regexL = regex.length; j < regexL; j++) {
                 var resultMatch = str.match(regex[j]);
 
@@ -62,17 +79,23 @@ angular.module('oncokbApp')
                         switch(j) {
                             //pubmed PMID
                             case 0:
-                                _number = _datum.split(':')[1].trim();
-                                _number = _number.replace(/\s+/g, '');
+                                if(_datum.indexOf(':') !== -1){
+                                    _number = _datum.split(':')[1].trim();
+                                }else{
+                                    _number = _datum;
+                                }
                                 _number = _number.split(',');
                                 _number.forEach(function(e){
                                     if(e) {
-                                        uniqueResultA.push({type: 'pmid', id: e});
+                                        uniqueResultA.push({type: 'pmid', id: e.trim()});
                                     }
                                 });
                                 break;
                             //clinical trial NCT
                             case 1:
+                                if(_datum.indexOf(':') !== -1){
+                                    _datum = S(_datum).strip(':').s;
+                                }
                                 uniqueResultA.push({type: 'nct', id: _datum});
                                 break;
                             default:

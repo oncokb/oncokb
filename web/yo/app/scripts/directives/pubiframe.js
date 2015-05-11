@@ -15,6 +15,7 @@ angular.module('oncokbApp')
       link: function(scope, element, attr, ngModel) {
 
         function updatePubs(modelValue) {
+          modelValue = S(modelValue).decodeHTMLEntities().s;
           modelValue = S(modelValue).stripTags().s;
           modelValue = S(modelValue).collapseWhitespace().s;
           var pubs = FindRegex.result(modelValue);
