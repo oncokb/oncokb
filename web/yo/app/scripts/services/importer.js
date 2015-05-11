@@ -185,7 +185,7 @@ angular.module('oncokbApp')
           }
         }else{
           deferred.resolve();
-          console.log('\t\tAll permissions are assigned.')
+          console.log('\t\tAll permissions are assigned.');
         }
       }
 

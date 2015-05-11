@@ -58,7 +58,7 @@ angular.module('oncokbApp').factory('GeneStatus', ['$http',  function ($http) {
         console.log(params);
         return $http({
             url: 'geneStatus.json',
-            method: "GET",
+            method: 'GET',
             params: {geneId: params.geneId || ''}
         });
     }

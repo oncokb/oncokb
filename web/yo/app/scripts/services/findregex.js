@@ -8,7 +8,7 @@
  * Factory in the oncokb.
  */
 angular.module('oncokbApp')
-  .factory('FindRegex', function (_) {
+  .factory('FindRegex', function (_, S) {
     var allRegex = {
         pmid: {
             regex: /PMID:?\s*([0-9]+,?\s*)+/ig,
@@ -41,7 +41,13 @@ angular.module('oncokbApp')
                                 if(_datum.indexOf(':') !== -1){
                                     _number = _datum.split(':')[1].trim();
                                 }else{
-                                    _number = _datum;
+                                    if(isNaN(_datum)){
+                                        var tmpResult = _datum.match(/([0-9]+)/m);
+                                        if(tmpResult && tmpResult[1] && !isNaN(tmpResult[1]))
+                                            _number = tmpResult[1];
+                                    }else{
+                                        _number = _number.trim();
+                                    }
                                 }
                                 _number = _number.replace(/\s+/g, '');
                                 str = str.replace(new RegExp(_datum, 'g'), createTag(type, links[j] + _number, _datum));
@@ -87,7 +93,15 @@ angular.module('oncokbApp')
                                 _number = _number.split(',');
                                 _number.forEach(function(e){
                                     if(e) {
-                                        uniqueResultA.push({type: 'pmid', id: e.trim()});
+                                        if(isNaN(e)){
+                                            var tmpResult = e.match(/([0-9]+)/m);
+                                            if(tmpResult && tmpResult[1] && !isNaN(tmpResult[1]))
+                                            e = tmpResult[1];
+                                        }else{
+                                            e = e.trim();
+                                        }
+
+                                        uniqueResultA.push({type: 'pmid', id: e});
                                     }
                                 });
                                 break;

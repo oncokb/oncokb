@@ -308,7 +308,7 @@ angular.module('oncokbApp')
             $scope.test = function(event, a,b,c,d,e,f,g){
                 $scope.stopCollopse(event);
                 console.log(a,b,c,d,e,f,g);
-            }
+            };
             $scope.authorize = function(){
                 storage.requireAuth(false).then(function () {
                     var target = $location.search().target;
@@ -343,7 +343,7 @@ angular.module('oncokbApp')
                         _mutation.name.setText(newMutationName);
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[this.gene.mutations.length - 1] = new geneStatusSingleton();
+                        $scope.geneStatus[this.gene.mutations.length - 1] = new GeneStatusSingleton();
                         sendEmail(this.gene.name.text + ': new MUTATION added -> ' + newMutationName, ' ');
                     }
                 }
@@ -383,6 +383,7 @@ angular.module('oncokbApp')
 
             $scope.getData = function() {
                 var gene = importer.getData(this.gene);
+                console.log(gene);
             };
 
             $scope.updateGene = function() {
@@ -425,7 +426,7 @@ angular.module('oncokbApp')
                         }
                         mutation.tumors.push(_tumorType);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new geneStatusSingleton();
+                        $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new GeneStatusSingleton();
                         sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
                     }
                 }
@@ -462,7 +463,7 @@ angular.module('oncokbApp')
                         }
                         ti.treatments.push(_treatment);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = new geneStatusSingleton();
+                        $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = new GeneStatusSingleton();
                     }
                 }
             };
@@ -503,7 +504,7 @@ angular.module('oncokbApp')
                 /*jshint -W083 */
                 for(var key in cleanTrials) {
                     if(cleanTrials[key].length > 0) {
-                        cleanTrials[key].forEach(function(e){
+                        cleanTrials[key].forEach(function(){
                             trials.removeValue(key);
                         });
                     }
@@ -610,6 +611,7 @@ angular.module('oncokbApp')
                 var moveStatusIndex;
                 var indexes = [];
                 var geneStatus = angular.copy($scope.geneStatus);
+                var key, numKey;
                 $scope.stopCollopse(event);
 
                 index = parseInt(index);
@@ -633,27 +635,27 @@ angular.module('oncokbApp')
                 tmpStatus = angular.copy($scope.geneStatus[index]);
 
                 if(index < moveStatusIndex){
-                    for(var key in geneStatus){
+                    for(key in geneStatus){
                         if(!isNaN(key)){
-                            var numKey = Number(key);
+                            numKey = Number(key);
                             if(numKey <= moveStatusIndex && numKey > index){
                                 indexes.push(numKey);
-                            };
+                            }
                         }
                     }
-                    indexes.sort(function(a, b){return a-b}).forEach(function(e,i){
+                    indexes.sort(function(a, b){return a-b;}).forEach(function(e){
                         geneStatus[e-1] = geneStatus[e];
                     });
                 }else{
-                    for(var key in geneStatus){
+                    for(key in geneStatus){
                         if(!isNaN(key)){
-                            var numKey = Number(key);
+                            numKey = Number(key);
                             if(numKey >= moveStatusIndex && numKey < index){
                                 indexes.push(numKey);
-                            };
+                            }
                         }
                     }
-                    indexes.sort(function(a, b){return b-a}).forEach(function(e,i){
+                    indexes.sort(function(a, b){return b-a;}).forEach(function(e){
                         geneStatus[e+1] = geneStatus[e];
                     });
                 }
@@ -693,8 +695,9 @@ angular.module('oncokbApp')
                 var processKey = '';
                 var targetStatus = '';
                 var specialEscapeKeys = ['isOpen', 'hideEmpty'];
+                var flag;
                 if(type === 'expand'){
-                    targetStatus = true;;
+                    targetStatus = true;
                     processKey = 'isOpen';
                 }else if (type === 'collapse'){
                     targetStatus = false;
@@ -717,7 +720,7 @@ angular.module('oncokbApp')
                     for(var _key in $scope.geneStatus[key]) {
                         //for: therapeutic implications
                         if(specialEscapeKeys.indexOf(_key) === -1){
-                            var flag = targetStatus;
+                            flag = targetStatus;
                             if(isNaN(_key) && flag){
                                 flag = processKey === 'isOpen'?($scope.gene.mutations.get(Number(key))[_key].text ? targetStatus : false):targetStatus;
                             }
@@ -725,7 +728,7 @@ angular.module('oncokbApp')
 
 
                             for(var __key in $scope.geneStatus[key][_key]) {
-                                var flag = targetStatus;
+                                flag = targetStatus;
                                 if(specialEscapeKeys.indexOf(__key) === -1){
                                     if(isNaN(__key)){
                                         if(processKey === 'isOpen'){
@@ -776,7 +779,7 @@ angular.module('oncokbApp')
                 }else{
                     return false;
                 }
-            }
+            };
 
             $scope.hasNccn = function(nccn){
                 if(nccn){
@@ -785,7 +788,7 @@ angular.module('oncokbApp')
                     }
                 }
                 return false;
-            }
+            };
 
             function regenerateGeneStatus() {
                 var geneStatus = {};
@@ -793,22 +796,22 @@ angular.module('oncokbApp')
                 var tumorKeys = ['prevalence', 'progImp', 'nccn', 'trials'];
 
                 $scope.gene.mutations.asArray().forEach(function(mutation,mutationIndex){
-                    geneStatus[mutationIndex] = new geneStatusSingleton();
+                    geneStatus[mutationIndex] = new GeneStatusSingleton();
                     mutationKeys.forEach(function(key){
                         if(mutation[key]) {
-                            geneStatus[mutationIndex][key] = new geneStatusSingleton();
+                            geneStatus[mutationIndex][key] = new GeneStatusSingleton();
                         }
                     });
 
                     if(mutation.tumors.length > 0){
                         mutation.tumors.asArray().forEach(function(tumor, tumorIndex){
-                            geneStatus[mutationIndex][tumorIndex] = new geneStatusSingleton();
+                            geneStatus[mutationIndex][tumorIndex] = new GeneStatusSingleton();
                             tumorKeys.forEach(function(key){
                                 if(tumor[key]) {
-                                    geneStatus[mutationIndex][tumorIndex][key] = new geneStatusSingleton();
+                                    geneStatus[mutationIndex][tumorIndex][key] = new GeneStatusSingleton();
                                 }
                                 tumor.TI.asArray(function(therapyType, therapyTypeIndex){
-                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new geneStatusSingleton();
+                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new GeneStatusSingleton();
                                 });
                             });
                         });
@@ -826,7 +829,7 @@ angular.module('oncokbApp')
                         }
                     }
 
-                    indexes.sort(function(a, b){return a-b}).forEach(function(e,i){
+                    indexes.sort(function(a, b){return a-b;}).forEach(function(e){
                         object[e-1] = object[e];
                     });
 
@@ -1127,7 +1130,7 @@ angular.module('oncokbApp')
                 return levels;
             }
 
-            function geneStatusSingleton() {
+            function GeneStatusSingleton() {
                 this.isOpen = false;
                 this.hideEmpty = false;
             }
