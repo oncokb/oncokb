@@ -15,8 +15,8 @@ angular.module('oncokbApp')
       self.newFolder = '';
       // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
       //self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
-      //self.parentFolder = '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk'; //backup folder under knowledgebase
-      self.parentFolder = '0BzBfo69g8fP6fmttemU5Y3dEd2hZOVUyMmIzN2FDSlZKcks0N19wVmlvdUV1c2RaWDVUcFk'; //Curation documents folder
+      self.parentFolder = '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk'; //backup folder under knowledgebase
+      //self.parentFolder = '0BzBfo69g8fP6fmttemU5Y3dEd2hZOVUyMmIzN2FDSlZKcks0N19wVmlvdUV1c2RaWDVUcFk'; //Curation documents folder
       self.status = {
         backupIndex: -1,
         migrateIndex: -1
