@@ -50,7 +50,7 @@ public class SendEmailController {
             @RequestParam(value="sendTo", required=false) String sendTo) throws IOException, MessagingException, GeneralSecurityException, ServiceException {
         
         if(subject != null && body != null) {
-            String propFileName = "/properties/config.properties";
+            String propFileName = "properties/config.properties";
             Properties prop = new Properties();
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 

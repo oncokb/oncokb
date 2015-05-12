@@ -96,7 +96,7 @@ public class GoogleAuth {
     }
 
     private void getProperties() throws IOException {
-        String propFileName = "/properties/config.properties";
+        String propFileName = "properties/config.properties";
         PROPERTIES = new Properties();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 
