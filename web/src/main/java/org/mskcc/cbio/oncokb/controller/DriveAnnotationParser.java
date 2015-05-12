@@ -416,7 +416,7 @@ public class DriveAnnotationParser {
                 trial.getAlterations().addAll(alterations);
                 trial.getTumorTypes().add(tumorType);
                 trial.getGenes().add(gene);
-                clinicalTrialBo.save(trial);
+                clinicalTrialBo.saveOrUpdate(trial);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -605,16 +605,17 @@ public class DriveAnnotationParser {
             for (String pmid : pmids.split(", *(PMID:)? *")) {
                 if (pmid.startsWith("NCT")) {
                     // support NCT numbers
-                    String[] nctIds = pmid.split(", *");
-                    for (String nctId : nctIds) {
-                        ClinicalTrial ct = clinicalTrialBo.findClinicalTrialByNctId(nctId);
-                        if (ct==null) {
-                            ct = new ClinicalTrial();
-                            ct.setNctId(nctId);
-                            clinicalTrialBo.save(ct);
+                    Set<String> nctIds = new HashSet<String>(Arrays.asList(pmid.split(", *")));
+                    try {
+                        List<ClinicalTrial> trials = ClinicalTrialsImporter.importTrials(nctIds);
+                        for (ClinicalTrial trial : trials) {
+                            clinicalTrialBo.saveOrUpdate(trial);
+                            clinicalTrials.add(trial);
                         }
-                        clinicalTrials.add(ct);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+
                 }
                 
                 Article doc = articleBo.findArticleByPmid(pmid);
