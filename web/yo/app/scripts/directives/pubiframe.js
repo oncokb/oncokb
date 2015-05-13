@@ -7,7 +7,7 @@
  * # pubIframe
  */
 angular.module('oncokbApp')
-  .directive('pubIframe', function (FindRegex, S, sortPubsFilter) {
+  .directive('pubIframe', function (FindRegex, S, $timeout) {
     return {
       templateUrl: 'views/pubIframe.html',
       restrict: 'E',
@@ -15,6 +15,7 @@ angular.module('oncokbApp')
       link: function(scope, element, attr, ngModel) {
 
         function updatePubs(modelValue) {
+          modelValue = S(modelValue).decodeHTMLEntities().s;
           modelValue = S(modelValue).stripTags().s;
           modelValue = S(modelValue).collapseWhitespace().s;
           var pubs = FindRegex.result(modelValue);
@@ -24,7 +25,9 @@ angular.module('oncokbApp')
 
         // update the color picker whenever the value on the scope changes
         ngModel.$render = function() {
-          updatePubs(ngModel.$modelValue);
+          $timeout(function(){
+            updatePubs(ngModel.$modelValue);
+          }, 500);
         };
       },
       controller: function($scope){

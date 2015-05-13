@@ -260,9 +260,9 @@ angular.module('oncokbApp')
                 gene.positionedMutations.num = gene.positionedMutations.keys.length;
 
 
-                for(var key in therapies){
-                    gene[therapies[key]].keys = Object.keys(gene[therapies[key]]).sort();
-                    gene[therapies[key]].num = gene[therapies[key]].keys.length;
+                for(var _key in therapies){
+                    gene[therapies[_key]].keys = Object.keys(gene[therapies[_key]]).sort();
+                    gene[therapies[_key]].num = gene[therapies[_key]].keys.length;
                 }
                 for(var level in gene.treatmentLevels){
                     gene.treatmentLevels[level].keys = Object.keys(gene.treatmentLevels[level]).sort();
@@ -448,7 +448,7 @@ angular.module('oncokbApp')
                         break;
                 }
 
-                headers = tableKeys['common'].header;
+                headers = tableKeys.common.header;
                 switch(tableId) {
                     case 0:
                         headers = headers.concat(tableKeys['1'].header,tableKeys['2'].header,tableKeys['3'].header);

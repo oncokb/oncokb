@@ -818,7 +818,7 @@ public class VariantAnnotationXMLController {
         if (fda) {
             sb.append(" FDA approved");
         } else if (nccn) {
-            sb.append(" listed by NCCN Compendium");
+            sb.append(" listed by NCCN-compendium");
         }
         
         sb.append(" for treatment of patients ")

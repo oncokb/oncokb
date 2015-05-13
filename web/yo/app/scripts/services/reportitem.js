@@ -138,17 +138,35 @@ angular.module('oncokbApp')
                 treatment.push(object);
             }
 
-            if(cancerTypeInfo.standard_therapeutic_implications && cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)) {
-                description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
-                value = [];
+            if(cancerTypeInfo.standard_therapeutic_implications) {
                 object = {};
-                key = 'STANDARD THERAPEUTIC IMPLICATIONS';
-                if(typeof description === 'string') {
-                    description = description.trim();
+                object['STANDARD THERAPEUTIC IMPLICATIONS'] = [];
+                if(cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)){
+                    description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
+                    value = [];
+                    key = 'STANDARD THERAPEUTIC IMPLICATIONS';
+                    if(typeof description === 'string') {
+                        description = description.trim();
+                    }
+                    value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
+                    object[key] = value;
                 }
-                value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
-                object[key] = value;
                 treatment.push(object);
+
+                if(cancerTypeInfo.standard_therapeutic_implications.resistant_to) {
+                    var _datum = cancerTypeInfo.standard_therapeutic_implications.resistant_to;
+
+                    object = {};
+                    object = findByLevelEvidence(_datum, object, '', '', ' (Resistance)');
+
+                    for(var _key in object) {
+                        var _object = {},
+                            _newKey = _key.replace(specialKeyChars, '');
+                        _object[_newKey] = object[_key];
+                        treatment.push(_object);
+                        _object = null;
+                    }
+                }
             }
 
             if(cancerTypeInfo.prognostic_implications && checkDescription(cancerTypeInfo.prognostic_implications)) {
@@ -327,15 +345,12 @@ angular.module('oncokbApp')
                         object = {};
                         if(attrsToDisplay[i] === 'sensitive_to') {
                             object = findApprovedDrug(_datum, object);
-                        }else if(attrsToDisplay[i] === 'resistant_to'){
-                            object = findByLevelEvidence(_datum, object, '', '', ' (Resistance)');
-                        }else {
-                            object = findApprovedDrug(_datum, object, '', displayProcess(attrsToDisplay[i]) + ': ');
                         }
 
                         for(var _key in object) {
-                            var _object = {};
-                            _object[_key] = object[_key];
+                            var _object = {},
+                                _newKey = _key.replace(specialKeyChars, '');
+                            _object[_newKey] = object[_key];
                             fdaApproved.push(_object);
                             _object = null;
                         }
@@ -355,10 +370,6 @@ angular.module('oncokbApp')
                                     var _datum = annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]];
                                     if(attrsToDisplay[j] === 'sensitive_to') {
                                         object = findApprovedDrug(_datum, object, annotation.cancer_type[i].$type);
-                                    }else if(attrsToDisplay[j] === 'resistant_to'){
-                                        object = findByLevelEvidence(_datum, object, '', '', ' (Resistance)');
-                                    }else {
-                                        object = findApprovedDrug(_datum, object, annotation.cancer_type[i].$type, attrsToDisplay[j] + ': ');
                                     }
                                     /* jshint +W004 */
                                 }
@@ -369,12 +380,13 @@ angular.module('oncokbApp')
 
                 /* jshint -W004 */
                 for(var _key in object) {
-                    var _object = {};
-                    _object[_key] = object[_key];
+                    var _object = {},
+                        _newKey = _key.replace(specialKeyChars, '');
+                    _object[_newKey] = object[_key];
 
-                    for(i = 0; i < _object[_key].length; i++ ) {
-                        delete _object[_key][i]['Level of evidence'];
-                        delete _object[_key][i].description;
+                    for(i = 0; i < _object[_newKey].length; i++ ) {
+                        delete _object[_newKey][i]['Level of evidence'];
+                        delete _object[_newKey][i].description;
                     }
 
                     fdaApprovedInOther.push(_object);

@@ -19,7 +19,8 @@ angular.module('oncokbApp')
         restrict: 'E',
         scope: {
           file: '=',
-          open: '='
+          open: '=',
+          rendering: '='
         },
         link: function(scope) {
           scope.$watch('file', function(n){
@@ -99,9 +100,11 @@ angular.module('oncokbApp')
                 console.log(workers);
                 $scope.reportViewDatas = reportViewDatas;
                 $scope.status.isXML = true;
+                $scope.rendering = false;
                 $scope.$apply();
               }else{
                 $scope.status.isXML = false;
+                $scope.rendering = false;
                 $scope.$apply();
               }
             };

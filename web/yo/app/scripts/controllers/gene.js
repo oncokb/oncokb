@@ -57,7 +57,7 @@ angular.module('oncokbApp')
                 if(docs.length > 0) {
                     // $scope.$apply(function() {
                     $scope.documents = Documents.get();
-                    $scope.loaded = true;
+                    $scope.status.rendering = false;
                     // });
                 }else{
                     if(OncoKB.global.genes){
@@ -66,7 +66,7 @@ angular.module('oncokbApp')
                                 Documents.set(result);
                                 Documents.setStatus(OncoKB.global.genes);
                                 $scope.documents = Documents.get();
-                                $scope.loaded = true;
+                                $scope.status.rendering = false;
                                 // loading_screen.finish();
                             });
                         });
@@ -78,7 +78,7 @@ angular.module('oncokbApp')
                                     Documents.set(result);
                                     Documents.setStatus(OncoKB.global.genes);
                                     $scope.documents = Documents.get();
-                                    $scope.loaded = true;
+                                    $scope.status.rendering = false;
                                 });
                             });
                         });
@@ -133,11 +133,11 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(5),
                 DTColumnDefBuilder.newColumnDef(6)
             ];
-            $scope.loaded = false;
             $scope.status = {
                 backup: true,
                 saveAllGenes: true,
-                migrate: true
+                migrate: true,
+                rendering: true
             };
             $scope.getDocs();
             // var newGenes = ['RET','FGFR4','KIT','SMO','ALK1','ERBB2','PIK3CA','PIK3R1','PTEN','DDR2','FGFR3','IDH1','KRAS','MAP2K1','MET','NOTCH1','NRAS','AKT1','FBXW7','FGFR2','FOXL2','GNA11','GNAQ','GNAS','HRAS','PDGFRB','PTCH1','STK11','CTNNB1','ERBB4','IDH2','RAD21','TET1','TET2','GATA1','GATA2','MPL','B2M','BTK','HLA-A','PRDM1','SF3B1','EPHA7','HIST1H1C','REL','CREBBP','VHL','PBRM1','SETD2','AKT2','AKT3','ERBB3','FGFR1','BRIP1','ERCC4','FANCA','FANCC','EWSR1','MDM2','MDM4','ETV6','DNMT1','EZH2','WT1','EP300','MYD88','CARD11','CD79B','KEAP1','MYC','FH','SDHA','SDHAF2','SDHB','SDHC','SDHD','RASA1','FOXA1','AURKA','AURKB','CCND1','CCNE1','PPP2R1A','CCND2','CCND3','PAK1','ERG','ETV1','SPOP','SOX2','MYOD1','CTCF','MTOR','PDGFRA','DAXX','MLH1','MSH6','RAD54L','RECQL4','BCL2','RB1','EIF1AX','EIF4A2','EIF4E','EPCAM','FAT1','SMAD2','SMAD3','SMAD4','TGFBR1','TGFBR2','U2AF1','BMPR1A','XPO1','ATRX','SMARCB1','CD276','CD274','CTLA4','TNFRSF14','IL7R','JAK1','JAK2','JAK3','IKZF1','ACVR1','IGF1','IGF1R','IGF2','INHA','INHBA','BAP1','NF2','RAF1','CDKN1B','RHOA','RAC1','MEN1','CDH1','STAG2','MDC1','MRE11A','POLD1','SOX9','ZFHX3','NF1','RAD50','RAD51B','RAD51C','RAD51D','RAD52','TOP1','HIST1H3A','KDM5C','KDM6A','KMT2A','KMT2C','KMT2D','H3F3A','H3F3B','H3F3C','KDM5A','POLE','DNMT3A','DNMT3B','AR','E2F3','FOXP1','RYBP','SHQ1','PAX8','TCEB1','CDKN2A','SMARCA4','TERT','BRCA1','BRCA2','PALB2','RHEB','TSC1','TSC2','RICTOR','ARID1A','ERCC2','CIC','FUBP1','HNF1A','MED12','BCOR','YAP1','LATS1','LATS2','MST1','ESR1','ATM','CHEK1','CHEK2','ATR','CENPA','MITF','FLT3','CEBPA','NPM1','RBM10','APC','ARAF','ARID1B','ARID2','ARID5B','BCL2L11','BRD4','CASP8','CBL','CDK12','CDK4','CDK6','CDKN1A','CDKN2B','GATA3','KDR','MAP2K2','MAP2K4','MAP3K1','MAX','MSH2','MYCN','NFE2L2','NFKBIA','NTRK1','NTRK2','NTRK3','PIK3CB','PIK3R2','PMS2','PTPN11','PTPRD','ROS1','RUNX1','SRC','TMPRSS2','XRCC2'];
@@ -308,7 +308,7 @@ angular.module('oncokbApp')
             $scope.test = function(event, a,b,c,d,e,f,g){
                 $scope.stopCollopse(event);
                 console.log(a,b,c,d,e,f,g);
-            }
+            };
             $scope.authorize = function(){
                 storage.requireAuth(false).then(function () {
                     var target = $location.search().target;
@@ -343,7 +343,7 @@ angular.module('oncokbApp')
                         _mutation.name.setText(newMutationName);
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[this.gene.mutations.length - 1] = new geneStatusSingleton();
+                        $scope.geneStatus[this.gene.mutations.length - 1] = new GeneStatusSingleton();
                         sendEmail(this.gene.name.text + ': new MUTATION added -> ' + newMutationName, ' ');
                     }
                 }
@@ -383,6 +383,7 @@ angular.module('oncokbApp')
 
             $scope.getData = function() {
                 var gene = importer.getData(this.gene);
+                console.log(gene);
             };
 
             $scope.updateGene = function() {
@@ -425,7 +426,7 @@ angular.module('oncokbApp')
                         }
                         mutation.tumors.push(_tumorType);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new geneStatusSingleton();
+                        $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new GeneStatusSingleton();
                         sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
                     }
                 }
@@ -462,7 +463,7 @@ angular.module('oncokbApp')
                         }
                         ti.treatments.push(_treatment);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = new geneStatusSingleton();
+                        $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = new GeneStatusSingleton();
                     }
                 }
             };
@@ -503,7 +504,7 @@ angular.module('oncokbApp')
                 /*jshint -W083 */
                 for(var key in cleanTrials) {
                     if(cleanTrials[key].length > 0) {
-                        cleanTrials[key].forEach(function(e){
+                        cleanTrials[key].forEach(function(){
                             trials.removeValue(key);
                         });
                     }
@@ -610,6 +611,7 @@ angular.module('oncokbApp')
                 var moveStatusIndex;
                 var indexes = [];
                 var geneStatus = angular.copy($scope.geneStatus);
+                var key, numKey;
                 $scope.stopCollopse(event);
 
                 index = parseInt(index);
@@ -633,27 +635,27 @@ angular.module('oncokbApp')
                 tmpStatus = angular.copy($scope.geneStatus[index]);
 
                 if(index < moveStatusIndex){
-                    for(var key in geneStatus){
+                    for(key in geneStatus){
                         if(!isNaN(key)){
-                            var numKey = Number(key);
+                            numKey = Number(key);
                             if(numKey <= moveStatusIndex && numKey > index){
                                 indexes.push(numKey);
-                            };
+                            }
                         }
                     }
-                    indexes.sort(function(a, b){return a-b}).forEach(function(e,i){
+                    indexes.sort(function(a, b){return a-b;}).forEach(function(e){
                         geneStatus[e-1] = geneStatus[e];
                     });
                 }else{
-                    for(var key in geneStatus){
+                    for(key in geneStatus){
                         if(!isNaN(key)){
-                            var numKey = Number(key);
+                            numKey = Number(key);
                             if(numKey >= moveStatusIndex && numKey < index){
                                 indexes.push(numKey);
-                            };
+                            }
                         }
                     }
-                    indexes.sort(function(a, b){return b-a}).forEach(function(e,i){
+                    indexes.sort(function(a, b){return b-a;}).forEach(function(e){
                         geneStatus[e+1] = geneStatus[e];
                     });
                 }
@@ -693,8 +695,9 @@ angular.module('oncokbApp')
                 var processKey = '';
                 var targetStatus = '';
                 var specialEscapeKeys = ['isOpen', 'hideEmpty'];
+                var flag;
                 if(type === 'expand'){
-                    targetStatus = true;;
+                    targetStatus = true;
                     processKey = 'isOpen';
                 }else if (type === 'collapse'){
                     targetStatus = false;
@@ -717,7 +720,7 @@ angular.module('oncokbApp')
                     for(var _key in $scope.geneStatus[key]) {
                         //for: therapeutic implications
                         if(specialEscapeKeys.indexOf(_key) === -1){
-                            var flag = targetStatus;
+                            flag = targetStatus;
                             if(isNaN(_key) && flag){
                                 flag = processKey === 'isOpen'?($scope.gene.mutations.get(Number(key))[_key].text ? targetStatus : false):targetStatus;
                             }
@@ -725,7 +728,7 @@ angular.module('oncokbApp')
 
 
                             for(var __key in $scope.geneStatus[key][_key]) {
-                                var flag = targetStatus;
+                                flag = targetStatus;
                                 if(specialEscapeKeys.indexOf(__key) === -1){
                                     if(isNaN(__key)){
                                         if(processKey === 'isOpen'){
@@ -776,7 +779,7 @@ angular.module('oncokbApp')
                 }else{
                     return false;
                 }
-            }
+            };
 
             $scope.hasNccn = function(nccn){
                 if(nccn){
@@ -785,7 +788,7 @@ angular.module('oncokbApp')
                     }
                 }
                 return false;
-            }
+            };
 
             function regenerateGeneStatus() {
                 var geneStatus = {};
@@ -793,22 +796,22 @@ angular.module('oncokbApp')
                 var tumorKeys = ['prevalence', 'progImp', 'nccn', 'trials'];
 
                 $scope.gene.mutations.asArray().forEach(function(mutation,mutationIndex){
-                    geneStatus[mutationIndex] = new geneStatusSingleton();
+                    geneStatus[mutationIndex] = new GeneStatusSingleton();
                     mutationKeys.forEach(function(key){
                         if(mutation[key]) {
-                            geneStatus[mutationIndex][key] = new geneStatusSingleton();
+                            geneStatus[mutationIndex][key] = new GeneStatusSingleton();
                         }
                     });
 
                     if(mutation.tumors.length > 0){
                         mutation.tumors.asArray().forEach(function(tumor, tumorIndex){
-                            geneStatus[mutationIndex][tumorIndex] = new geneStatusSingleton();
+                            geneStatus[mutationIndex][tumorIndex] = new GeneStatusSingleton();
                             tumorKeys.forEach(function(key){
                                 if(tumor[key]) {
-                                    geneStatus[mutationIndex][tumorIndex][key] = new geneStatusSingleton();
+                                    geneStatus[mutationIndex][tumorIndex][key] = new GeneStatusSingleton();
                                 }
                                 tumor.TI.asArray(function(therapyType, therapyTypeIndex){
-                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new geneStatusSingleton();
+                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new GeneStatusSingleton();
                                 });
                             });
                         });
@@ -826,7 +829,7 @@ angular.module('oncokbApp')
                         }
                     }
 
-                    indexes.sort(function(a, b){return a-b}).forEach(function(e,i){
+                    indexes.sort(function(a, b){return a-b;}).forEach(function(e){
                         object[e-1] = object[e];
                     });
 
@@ -902,7 +905,7 @@ angular.module('oncokbApp')
                 file = file[0];
                 $scope.document = file;
                 $scope.fileEditable = file.editable?true:false;
-                $scope.loaded = true;
+                $scope.status.rendering = false;
                 displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
 
@@ -1127,12 +1130,11 @@ angular.module('oncokbApp')
                 return levels;
             }
 
-            function geneStatusSingleton() {
+            function GeneStatusSingleton() {
                 this.isOpen = false;
                 this.hideEmpty = false;
             }
 
-            $scope.loaded = false;
             $scope.fileTitle = $routeParams.geneName;
             $scope.gene = '';
             $scope.comments = '';
@@ -1209,7 +1211,8 @@ angular.module('oncokbApp')
 
             $scope.status = {
                 expandAll: false,
-                hideAllEmpty: false
+                hideAllEmpty: false,
+                rendering: true
             };
 
             $scope.$watch('status.hideAllEmpty', function(n, o){

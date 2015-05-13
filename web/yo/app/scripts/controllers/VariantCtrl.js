@@ -132,6 +132,9 @@ angular.module('oncokbApp')
             $scope.init = function () {
 
                 $scope.rendering = false;
+
+                $scope.loadingPage = true;
+
                 $scope.generaingReport =false;
 
                 //Control UI-Bootstrap angularjs, open one at a time
@@ -186,6 +189,7 @@ angular.module('oncokbApp')
                     $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
                     // $scope.alterations = getUnique(angular.copy(OncoKB.global.alterations), 'name');
                     $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
+                    $scope.loadingPage = false;
                 }else {
                     DatabaseConnector.getGeneAlterationTumortype(function(data){
                         OncoKB.global.genes = angular.copy(data.genes);
@@ -195,6 +199,7 @@ angular.module('oncokbApp')
                         $scope.genes = getUnique(data.genes, 'hugoSymbol');
                         // $scope.alterations = getUnique(data.alterations, 'name');
                         $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
+                        $scope.loadingPage = false;
                         checkUrl();
                     });
                 }

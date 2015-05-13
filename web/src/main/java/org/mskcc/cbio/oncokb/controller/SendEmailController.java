@@ -50,7 +50,7 @@ public class SendEmailController {
             @RequestParam(value="sendTo", required=false) String sendTo) throws IOException, MessagingException, GeneralSecurityException, ServiceException {
         
         if(subject != null && body != null) {
-            String propFileName = "/properties/config.properties";
+            String propFileName = "properties/config.properties";
             Properties prop = new Properties();
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 
@@ -59,6 +59,7 @@ public class SendEmailController {
             } else {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
+            inputStream.close();
 
             String from = prop.getProperty("google.username");
             String pass = prop.getProperty("google.password");

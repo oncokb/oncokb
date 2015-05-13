@@ -162,10 +162,16 @@ p.editableBox.doubleH {
   margin: 5px;
   width: 200px;
 }
-.genesLoading {
+.oncoKBALoading {
   position: absolute;
   top: 20%;
   left: calc(50% - 150px);
+  text-align: center;
+}
+.oncoKBLoading {
+  width: 100%;
+  position: relative;
+  text-align: center;
 }
 .geneComments {
   position: absolute;

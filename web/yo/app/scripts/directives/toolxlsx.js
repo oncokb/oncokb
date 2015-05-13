@@ -25,7 +25,8 @@ angular.module('oncokbApp')
         restrict: 'E',
         scope: {
           file: '=',
-          open: '='
+          open: '=',
+          rendering: '='
         },
         link: function(scope) {
           scope.$watch('file', function(n){
@@ -262,6 +263,7 @@ angular.module('oncokbApp')
               $scope.progress.dynamic = 0;
               $scope.progress.value = 0;
               $scope.status.isXLSX = true;
+              $scope.rendering = false;
               $scope.$apply();
             };
 

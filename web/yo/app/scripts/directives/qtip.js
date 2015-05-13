@@ -14,11 +14,11 @@ angular.module('oncokbApp')
                 var src = '';
                 var content = '';
                 var hideEvent = '';
-                var my= attrs.hasOwnProperty('my')?attrs.my: "bottom center";
-                var at= attrs.hasOwnProperty('at')?attrs.at: "top center";
+                var my= attrs.hasOwnProperty('my')?attrs.my: 'bottom center';
+                var at= attrs.hasOwnProperty('at')?attrs.at: 'top center';
 
                 if(attrs.type && ['pmid', 'nct'].indexOf(attrs.type) !== -1){
-                    var src = '<iframe width="600px" height="400px" src=\'';
+                    src = '<iframe width="600px" height="400px" src=\'';
                     if(attrs.type && attrs.number) {
                         switch (attrs.type) {
                             case 'pmid':

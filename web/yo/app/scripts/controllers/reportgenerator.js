@@ -22,7 +22,8 @@ angular.module('oncokbApp')
                 $scope.status = {
                     fileSelected: false,
                     isXLSX: false,
-                    isXML: false
+                    isXML: false,
+                    rendering: true
                 };
                 $scope.status.fileSelected = true;
                 $scope.fileItem = fileItem;
@@ -72,7 +73,8 @@ angular.module('oncokbApp')
             $scope.status = {
                 fileSelected: false,
                 isXLSX: false,
-                isXML: false
+                isXML: false,
+                rendering: false
             };
             initUploader();
         };
