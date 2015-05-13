@@ -105,6 +105,7 @@ public class GoogleAuth {
         } else {
             throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
         }
+        inputStream.close();
 
         SERVICE_ACCOUNT_EMAIL = PROPERTIES.getProperty("google.service_account_email");
         USERNAME = PROPERTIES.getProperty("google.username");

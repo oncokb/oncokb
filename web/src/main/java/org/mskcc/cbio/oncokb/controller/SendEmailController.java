@@ -59,6 +59,7 @@ public class SendEmailController {
             } else {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
+            inputStream.close();
 
             String from = prop.getProperty("google.username");
             String pass = prop.getProperty("google.password");
