@@ -48,12 +48,11 @@ public class GoogleAuth {
     
     
     public Drive getDriveService() throws GeneralSecurityException, IOException, URISyntaxException {
-        if(CLIENT_SECRET_FILE == null) {
-            openFile();
-        }
-
         if(PROPERTIES == null){
             getProperties();
+        }
+        if(CLIENT_SECRET_FILE == null) {
+            openFile();
         }
 
         if(DRIVESERVICE == null){
@@ -64,12 +63,12 @@ public class GoogleAuth {
     }
     
     public SpreadsheetService getSpreadSheetService() throws GeneralSecurityException, IOException, ServiceException {
-        if(CLIENT_SECRET_FILE == null) {
-            openFile();
-        }
-
         if(PROPERTIES == null){
             getProperties();
+        }
+
+        if(CLIENT_SECRET_FILE == null) {
+            openFile();
         }
         
         if(SPREADSHEETSERVICE == null){
@@ -80,14 +79,14 @@ public class GoogleAuth {
     }
     
     public Gmail getGmailService() throws GeneralSecurityException, IOException, ServiceException {
+        if(PROPERTIES == null){
+            getProperties();
+        }
+
         if(CLIENT_SECRET_FILE == null) {
             openFile();
         }
 
-        if(PROPERTIES == null){
-            getProperties();
-        }
-        
         if(GMAILSERVICE == null){
             createGmailService();
         }
@@ -113,10 +112,10 @@ public class GoogleAuth {
     }
 
     private void openFile() {
-        String SERVICE_ACCOUNT_PKCS12_FILE_PATH = "/OncoKB-Report-7c732673acd9.p12";
-        String CLIENT_SECRET_PATH = "/OncoKB-Report-ba65ac545ecb.json";
-        URL CLIENT_SECRET_PATH_URL= GoogleAuth.class.getResource(CLIENT_SECRET_PATH);
-        URL SERVICE_ACCOUNT_PKCS12_URL= GoogleAuth.class.getResource(SERVICE_ACCOUNT_PKCS12_FILE_PATH);
+        String SERVICE_ACCOUNT_PKCS12_FILE_PATH = PROPERTIES.getProperty("google.p_twelve");
+        String CLIENT_SECRET_PATH = PROPERTIES.getProperty("google.json");
+        URL CLIENT_SECRET_PATH_URL= getClass().getClassLoader().getResource(CLIENT_SECRET_PATH);
+        URL SERVICE_ACCOUNT_PKCS12_URL= getClass().getClassLoader().getResource(SERVICE_ACCOUNT_PKCS12_FILE_PATH);
         SERVICE_ACCOUNT_PKCS12_FILE = new java.io.File(SERVICE_ACCOUNT_PKCS12_URL.getPath());
         CLIENT_SECRET_FILE = new java.io.File(CLIENT_SECRET_PATH_URL.getPath());
     }
