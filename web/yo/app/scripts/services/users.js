@@ -6,6 +6,9 @@
  * @description
  * # user
  * Service in the oncokb.
+ *
+ * Google email account has two addresses: gmail.com and googlemail.com
+ * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
   .service('users', function user(config) {
@@ -80,7 +83,7 @@ angular.module('oncokbApp')
                                 _user[__key] = users[i][__key].split(',').map(function(d){ return d.toString().trim();});
                             }
                             if(__key === 'email') {
-                                _user[__key] =  _user[__key].toString().toLowerCase();
+                                _user.email = convertEmail(_user.email);
                             }
                         }
                     }
@@ -103,7 +106,7 @@ angular.module('oncokbApp')
 
     function setMe(user){
         if(angular.isString(user.email)) {
-            var email = user.email.toLowerCase();
+            var email = convertEmail(user.email);
             if(self.users.hasOwnProperty(email)) {
                 self.me = self.users[email];
             }else {
@@ -111,6 +114,14 @@ angular.module('oncokbApp')
                 self.me.role = config.userRoles.user;
             }
         }
+    }
+
+    function convertEmail(email) {
+        email =  email.toString().toLowerCase();
+        if(/@googlemail/.test(email)){
+            email = email.replace(/@googlemail/, '@gmail');
+        }
+        return email;
     }
 
     return {
