@@ -357,13 +357,13 @@ public class VariantAnnotationXMLController {
                         .append(" is oncogenic. ");
             }
 
-            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
-            if (!evidencesResistence.isEmpty()) {
-                // if resistance evidence is available in any tumor type
-                sb.append("It confers resistance to ")
-                        .append(treatmentsToString(evidencesResistence, null, null, false, false, false))
-                        .append(" ");
-            }
+//            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
+//            if (!evidencesResistence.isEmpty()) {
+//                // if resistance evidence is available in any tumor type
+//                sb.append("It confers resistance to ")
+//                        .append(treatmentsToString(evidencesResistence, null, null, false, false, false))
+//                        .append(" ");
+//            }
 
             Set<EvidenceType> sensitivityEvidenceTypes = 
                     EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
