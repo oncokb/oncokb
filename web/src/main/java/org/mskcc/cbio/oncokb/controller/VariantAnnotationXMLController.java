@@ -7,22 +7,8 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
@@ -222,6 +208,10 @@ public class VariantAnnotationXMLController {
             // STANDARD_THERAPEUTIC_IMPLICATIONS
             List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt));
             List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt));
+
+            //Remove level_R3
+            stdImpEbsResisitance = filterResistanceEvidence(stdImpEbsResisitance);
+
             exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ");
             
             // NCCN_GUIDELINES
@@ -264,6 +254,10 @@ public class VariantAnnotationXMLController {
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
             List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(tt));
             List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(tt));
+
+            //Remove level_R3
+            invImpEbsResisitance = filterResistanceEvidence(invImpEbsResisitance);
+
             exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sbTumorType, "    ");
             
             // CLINICAL_TRIAL
@@ -309,7 +303,20 @@ public class VariantAnnotationXMLController {
         
         return sb.toString();
     }
-    
+
+    private List<Evidence> filterResistanceEvidence(List<Evidence> resistanceEvidences){
+        if(resistanceEvidences != null) {
+            Iterator<Evidence> i = resistanceEvidences.iterator();
+            while (i.hasNext()) {
+                Evidence resistanceEvidence = i.next(); // must be called before you can call i.remove()
+                if (resistanceEvidence.getLevelOfEvidence() != null && resistanceEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R3)) {
+                    i.remove();
+                }
+            }
+        }
+        return resistanceEvidences;
+    }
+
     private void exportSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType, StringBuilder sb) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
