@@ -140,7 +140,8 @@ angular.module('oncokbApp')
 
             if(cancerTypeInfo.standard_therapeutic_implications) {
                 object = {};
-                object['STANDARD THERAPEUTIC IMPLICATIONS'] = [];
+
+                //Add standard therapy implication description
                 if(cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)){
                     description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
                     value = [];
@@ -150,8 +151,13 @@ angular.module('oncokbApp')
                     }
                     value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
                     object[key] = value;
+                }else if(cancerTypeInfo.standard_therapeutic_implications.resistant_to){
+                    //If cancer type does not have description but resistant to treatments, the header
+                    //should also be added
+
+                    object['STANDARD THERAPEUTIC IMPLICATIONS'] = [];
+                    treatment.push(object);
                 }
-                treatment.push(object);
 
                 if(cancerTypeInfo.standard_therapeutic_implications.resistant_to) {
                     var _datum = cancerTypeInfo.standard_therapeutic_implications.resistant_to;
