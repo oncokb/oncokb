@@ -646,17 +646,42 @@ angular.module('oncokbApp')
             }
 
             if(annotation.variant_effect) {
-                value = [];
-                key = 'MUTATION EFFECT';
-                object = {};
-                value.push({
-                    'effect': annotation.variant_effect.effect || '',
-                    'description': annotation.variant_effect.description? removeCharsInDescription(annotation.variant_effect.description) : ''
-                });
-                object[key] = value;
-                additionalInfo.push(object);
+                if(angular.isObject(annotation.variant_effect)) {
+                    if(angular.isArray(annotation.variant_effect)){
+                        annotation.variant_effect.forEach(function(effect){
+                            object = getMutationEffect(effect);
+
+                            if(object){
+                                additionalInfo.push(object);
+                            }
+                        });
+                    }else{
+                        object = getMutationEffect(annotation.variant_effect);
+
+                        if(object){
+                            additionalInfo.push(object);
+                        }
+                    }
+                }
             }
             return additionalInfo;
+        }
+
+        function getMutationEffect(variant_effect){
+            var key = 'MUTATION EFFECT';
+            var object = {};
+            var value = [];
+
+            if(angular.isObject(variant_effect) && !angular.isArray(variant_effect)) {
+                value.push({
+                    'effect': variant_effect.effect || '',
+                    'description': variant_effect.description? removeCharsInDescription(variant_effect.description) : ''
+                });
+                object[key] = value;
+                return object;
+            }else {
+                return false;
+            }
         }
 
         function removeCharsInDescription(str) {
