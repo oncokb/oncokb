@@ -338,7 +338,12 @@ public class VariantAnnotationXMLController {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         queryTumorType = queryTumorType.toLowerCase();
-        
+
+        Boolean appendThe = true;
+        if(queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification")){
+            appendThe = false;
+        }
+
         sb.append("<annotation_summary>");
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
@@ -372,15 +377,18 @@ public class VariantAnnotationXMLController {
             }
 
             if (oncogenic) {
-                if(!queryAlteration.toLowerCase().contains("deletion") && queryAlteration.toLowerCase().contains("deletion")){
+                if(appendThe){
                     sb.append("The ");
                 }
                 sb.append(queryAlteration)
                     .append(" is known to be oncogenic. ");
             } else {
-                sb.append("It is not known whether the ")
-                        .append(queryAlteration)
-                        .append(" is oncogenic. ");
+                sb.append("It is not known whether ");
+                if(appendThe){
+                    sb.append("the ");
+                }
+                sb.append(queryAlteration)
+                    .append(" is oncogenic. ");
             }
 
 //            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
@@ -462,9 +470,12 @@ public class VariantAnnotationXMLController {
                         // if there is no FDA or NCCN drugs for the gene at all
                         sb.append("There are no FDA approved or NCCN-compendium listed treatments specifically for patients with ")
                                 .append(queryTumorType)
-                                .append(" harboring the ")
-                                .append(queryAlteration)
-                                .append(". ");
+                                .append(" harboring ");
+                        if(appendThe){
+                            sb.append("the ");
+                        }
+                        sb.append(queryAlteration)
+                            .append(". ");
                     }
                 }
                     
