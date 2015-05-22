@@ -429,6 +429,24 @@ angular.module('oncokbApp')
             }
         }
 
+        function combineVariantsName(gene, alteration, tumorType) {
+            var name = '';
+
+            if(alteration) {
+                name = alteration;
+            }
+
+            if(gene && name.indexOf(gene.toLowerCase()) === -1) {
+                name += ' ' + gene.toUpperCase();
+            }
+
+            if(name && tumorType) {
+                name += ' in ' + tumorType;
+            }
+
+            return name;
+        }
+
         function constructClinicalTrial(annotation, geneName, mutation, tumorType, relevantCancerType) {
             var clinicalTrials = [],
                 key = '',
@@ -475,7 +493,9 @@ angular.module('oncokbApp')
             }
 
             if(cancerTypeInfo.investigational_therapeutic_implications) {
-                var hasdrugs = false;
+                var hasdrugs = false,
+                    emptyTreatmentStatement = 'There are no investigational therapies supported by levels 3 or 4 evidence for this ' + combineVariantsName(geneName, mutation, tumorType);
+
                 if(cancerTypeInfo.investigational_therapeutic_implications.general_statement && cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity) {
                     var description;
                     value = [];
@@ -521,11 +541,11 @@ angular.module('oncokbApp')
                         value = [];
                         object = {};
                         key = 'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS';
-                        value.push({'description': 'There are no investigational therapies that meet level 1, 2, 3, R1 or R2 evidence.'});
+                        value.push({'description': emptyTreatmentStatement});
                         object[key] = value;
                         clinicalTrials.push(object);
                     }else {
-                        clinicalTrials.push('There are no investigational therapies that meet level 1, 2, 3, R1 or R2 evidence.');
+                        clinicalTrials.push(emptyTreatmentStatement);
                     }
                 }
 
