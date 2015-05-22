@@ -125,9 +125,24 @@ public class VariantAnnotationXMLController {
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
         sortTumorType(tumorTypes, tumorType);
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
-        
+
+        //Gene + mutation name
+        String variantName = "";
+
+        if(alteration.contains(gene.getHugoSymbol())) {
+            variantName = alteration;
+        }else {
+            variantName = gene+" "+alteration;
+        }
+
+        if(alteration.contains("fusion")){
+            variantName = variantName.concat(" event");
+        }else{
+            variantName = variantName.concat(" mutation");
+        }
+
         // summary
-        exportSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, gene+" "+alteration+" mutation", relevantTumorTypes, tumorType, sb);
+        exportSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, variantName, relevantTumorTypes, tumorType, sb);
         
         // gene background
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
@@ -412,7 +427,7 @@ public class VariantAnnotationXMLController {
                             .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
-                    sb.append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A), queryAlteration, false, false, true))
+                    sb.append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A), queryAlteration, true, false, true))
                             .append(", ")
                             .append(" the clinical utility for these agents in patients with ")
                             .append(queryTumorType==null?"other":queryTumorType)
@@ -434,7 +449,7 @@ public class VariantAnnotationXMLController {
                                 .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
-                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, false, false, true))
+                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, true, false, true))
                                 .append(", ")
                                 .append(" the clinical utility for patients with ")
                                 .append(queryAlteration)

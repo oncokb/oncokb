@@ -142,7 +142,7 @@ angular.module('oncokbApp')
                 object = {};
 
                 //Add standard therapy implication description
-                if(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity){
+                if(cancerTypeInfo.standard_therapeutic_implications.general_statement && cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity){
                     if(!angular.isArray(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)) {
                         description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
                     }else{
@@ -476,7 +476,7 @@ angular.module('oncokbApp')
 
             if(cancerTypeInfo.investigational_therapeutic_implications) {
                 var hasdrugs = false;
-                if(cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity) {
+                if(cancerTypeInfo.investigational_therapeutic_implications.general_statement && cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity) {
                     var description;
                     value = [];
                     object = {};
