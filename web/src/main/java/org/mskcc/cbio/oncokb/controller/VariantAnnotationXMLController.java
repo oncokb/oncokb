@@ -129,14 +129,16 @@ public class VariantAnnotationXMLController {
         //Gene + mutation name
         String variantName = "";
 
-        if(alteration.contains(gene.getHugoSymbol())) {
+        if(alteration.toLowerCase().contains(gene.getHugoSymbol().toLowerCase())) {
             variantName = alteration;
         }else {
             variantName = gene+" "+alteration;
         }
 
-        if(alteration.contains("fusion")){
+        if(alteration.toLowerCase().contains("fusion")){
             variantName = variantName.concat(" event");
+        }else if(alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")){
+            //Keep the variant name
         }else{
             variantName = variantName.concat(" mutation");
         }
@@ -370,9 +372,11 @@ public class VariantAnnotationXMLController {
             }
 
             if (oncogenic) {
-                sb.append("The ")
-                        .append(queryAlteration)
-                        .append(" is known to be oncogenic. ");
+                if(!queryAlteration.toLowerCase().contains("deletion") && queryAlteration.toLowerCase().contains("deletion")){
+                    sb.append("The ");
+                }
+                sb.append(queryAlteration)
+                    .append(" is known to be oncogenic. ");
             } else {
                 sb.append("It is not known whether the ")
                         .append(queryAlteration)

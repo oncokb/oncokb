@@ -209,7 +209,7 @@ public class DriveAnnotationParser {
                     if(effectAddon != null && !effectAddon.isEmpty()) {
                         effect = effectAddon;
                     }else {
-                        effect = null;
+                        effect = "Other";
                     }
                 }else {
                     if(effectAddon != null && !effectAddon.isEmpty()) {
