@@ -429,22 +429,36 @@ angular.module('oncokbApp')
             }
         }
 
-        function combineVariantsName(gene, alteration, tumorType) {
-            var name = '';
+        function constructEmptyTreatmentStatment(gene, alteration, tumorType) {
+            var geneName = gene.toString().trim().toUpperCase();
+            var alterationName = alteration.toString().trim();
+            var tumorTypeName = tumorType.toString().trim();
 
-            if(alteration) {
-                name = alteration;
+            var statement = 'There are no investigational therapies for ';
+            var info = [];
+
+            if(alterationName.indexOf('amplification')) {
+                info.push(geneName);
+                info.push('amplified');
+                info.push(tumorTypeName);
+            }else if(alterationName.indexOf('deletion')) {
+                info.push(geneName);
+                info.push('deleted');
+                info.push(tumorTypeName);
+            }else if (alterationName.indexOf('fusion')) {
+                info.push(tumorTypeName);
+                info.push('with');
+                info.push(alterationName);
+            }else{
+                info.push(geneName);
+                info.push(alterationName);
+                info.push('mutant');
+                info.push(tumorTypeName);
             }
 
-            if(gene && name.indexOf(gene.toLowerCase()) === -1) {
-                name += ' ' + gene.toUpperCase();
-            }
+            statement += info.join(' ');
 
-            if(name && tumorType) {
-                name += ' in ' + tumorType;
-            }
-
-            return name;
+            return statement;
         }
 
         function constructClinicalTrial(annotation, geneName, mutation, tumorType, relevantCancerType) {
@@ -494,7 +508,7 @@ angular.module('oncokbApp')
 
             if(cancerTypeInfo.investigational_therapeutic_implications) {
                 var hasdrugs = false,
-                    emptyTreatmentStatement = 'There are no investigational therapies supported by levels 3 or 4 evidence for this ' + combineVariantsName(geneName, mutation, tumorType);
+                    emptyTreatmentStatement = constructEmptyTreatmentStatment(geneName, mutation, tumorType);
 
                 if(cancerTypeInfo.investigational_therapeutic_implications.general_statement && cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity) {
                     var description;
