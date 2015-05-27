@@ -437,15 +437,15 @@ angular.module('oncokbApp')
             var statement = 'There are no investigational therapies for ';
             var info = [];
 
-            if(alterationName.indexOf('amplification')) {
+            if(alterationName.toLowerCase().indexOf('amplification') !== -1) {
                 info.push(geneName);
                 info.push('amplified');
                 info.push(tumorTypeName);
-            }else if(alterationName.indexOf('deletion')) {
+            }else if(alterationName.toLowerCase().indexOf('deletion') !== -1) {
                 info.push(geneName);
                 info.push('deleted');
                 info.push(tumorTypeName);
-            }else if (alterationName.indexOf('fusion')) {
+            }else if (alterationName.toLowerCase().indexOf('fusion') !== -1) {
                 info.push(tumorTypeName);
                 info.push('with');
                 info.push(alterationName);
