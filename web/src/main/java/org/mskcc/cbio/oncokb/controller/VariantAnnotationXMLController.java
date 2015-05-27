@@ -136,7 +136,7 @@ public class VariantAnnotationXMLController {
         }
 
         if(alteration.toLowerCase().contains("fusion")){
-            variantName = variantName.concat(" event");
+//            variantName = variantName.concat(" event");
         }else if(alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")){
             //Keep the variant name
         }else{
@@ -340,8 +340,14 @@ public class VariantAnnotationXMLController {
         queryTumorType = queryTumorType.toLowerCase();
 
         Boolean appendThe = true;
-        if(queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification")){
+        Boolean isPlural = false;
+
+        if(queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion") ){
             appendThe = false;
+        }
+
+        if(queryAlteration.toLowerCase().contains("fusions")) {
+            isPlural = true;
         }
 
         sb.append("<annotation_summary>");
@@ -380,15 +386,28 @@ public class VariantAnnotationXMLController {
                 if(appendThe){
                     sb.append("The ");
                 }
-                sb.append(queryAlteration)
-                    .append(" is known to be oncogenic. ");
+                sb.append(queryAlteration);
+
+                if(isPlural){
+                    sb.append(" are");
+                }else{
+                    sb.append(" is");
+                }
+                sb.append(" known to be oncogenic. ");
             } else {
                 sb.append("It is not known whether ");
                 if(appendThe){
                     sb.append("the ");
                 }
-                sb.append(queryAlteration)
-                    .append(" is oncogenic. ");
+
+                sb.append(queryAlteration);
+
+                if(isPlural){
+                    sb.append(" are");
+                }else{
+                    sb.append(" is");
+                }
+                sb.append(" oncogenic. ");
             }
 
 //            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
@@ -551,7 +570,7 @@ public class VariantAnnotationXMLController {
             public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
                 return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
             }
-            
+
             private int phase2int(String phase) {
                 if (phase.matches("Phase [0-4]")) {
                     return 2*Integer.parseInt(phase.substring(6));
@@ -822,7 +841,7 @@ public class VariantAnnotationXMLController {
         
         return listToString(list);
     }
-    
+
     private String treatmentsToString(Collection<Evidence> evidences, String tumorType, String alteration, boolean capFirstLetter, boolean fda, boolean nccn) {
         Set<String> drugs = new TreeSet<String>();
         Set<Alteration> alterations = new LinkedHashSet<Alteration>();
@@ -834,7 +853,7 @@ public class VariantAnnotationXMLController {
             }
             alterations.addAll(ev.getAlterations());
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append(capFirstLetter?"T":"t").append("he drug");
         if (drugs.size()>1) {
