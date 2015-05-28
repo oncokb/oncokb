@@ -155,6 +155,7 @@ angular.module('oncokbApp')
                     }
                     value.push({'description': description});
                     object[key] = value;
+                    treatment.push(object);
                 }else if(cancerTypeInfo.standard_therapeutic_implications.resistant_to){
                     //If cancer type does not have description but resistant to treatments, the header
                     //should also be added
