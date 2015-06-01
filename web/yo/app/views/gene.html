@@ -7,7 +7,7 @@
         <img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
       </span>
       <span ng-if="document" class="geneLastModify">Last edit was made on {{document.modifiedDate | date : 'MMM d, h:mm a'}} by {{document.lastModifyingUserName}}</span>
-      <span class="btn-group pull-right" role="group">
+      <span class="btn-group btn-group-sm pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
@@ -15,7 +15,7 @@
           <i class="fa fa-eye-slash"></i>Hide all empty
         </button>
         <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
-          <i class="fa fa-eye-"></i>Show all empty
+          <i class="fa fa-eye"></i>Show all empty
         </button>
         <button type="button" class="btn btn-default"  ng-click="status.expandAll=true">
           <i class="fa fa-expand"></i>Expand all
@@ -397,7 +397,7 @@
     <i class="fa fa-eye-slash"></i>Hide all empty
   </button>
   <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
-    <i class="fa fa-eye-"></i>Show all empty
+    <i class="fa fa-eye"></i>Show all empty
   </button>
   <button type="button" class="btn btn-default"  ng-click="status.expandAll=true">
     <i class="fa fa-expand"></i>Expand all
