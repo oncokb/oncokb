@@ -7,22 +7,8 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
@@ -139,9 +125,26 @@ public class VariantAnnotationXMLController {
         List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
         sortTumorType(tumorTypes, tumorType);
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
-        
+
+        //Gene + mutation name
+        String variantName = "";
+
+        if(alteration.toLowerCase().contains(gene.getHugoSymbol().toLowerCase())) {
+            variantName = alteration;
+        }else {
+            variantName = gene+" "+alteration;
+        }
+
+        if(alteration.toLowerCase().contains("fusion")){
+//            variantName = variantName.concat(" event");
+        }else if(alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")){
+            //Keep the variant name
+        }else{
+            variantName = variantName.concat(" mutation");
+        }
+
         // summary
-        exportSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, gene+" "+alteration+" mutation", relevantTumorTypes, tumorType, sb);
+        exportSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, variantName, relevantTumorTypes, tumorType, sb);
         
         // gene background
         List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
@@ -222,6 +225,10 @@ public class VariantAnnotationXMLController {
             // STANDARD_THERAPEUTIC_IMPLICATIONS
             List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt));
             List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt));
+
+            //Remove level_R3
+            stdImpEbsResisitance = filterResistanceEvidence(stdImpEbsResisitance);
+
             exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ");
             
             // NCCN_GUIDELINES
@@ -264,6 +271,10 @@ public class VariantAnnotationXMLController {
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
             List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(tt));
             List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(tt));
+
+            //Remove level_R3
+            invImpEbsResisitance = filterResistanceEvidence(invImpEbsResisitance);
+
             exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sbTumorType, "    ");
             
             // CLINICAL_TRIAL
@@ -309,12 +320,36 @@ public class VariantAnnotationXMLController {
         
         return sb.toString();
     }
-    
+
+    private List<Evidence> filterResistanceEvidence(List<Evidence> resistanceEvidences){
+        if(resistanceEvidences != null) {
+            Iterator<Evidence> i = resistanceEvidences.iterator();
+            while (i.hasNext()) {
+                Evidence resistanceEvidence = i.next(); // must be called before you can call i.remove()
+                if (resistanceEvidence.getLevelOfEvidence() != null && resistanceEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R3)) {
+                    i.remove();
+                }
+            }
+        }
+        return resistanceEvidences;
+    }
+
     private void exportSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType, StringBuilder sb) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
         queryTumorType = queryTumorType.toLowerCase();
-        
+
+        Boolean appendThe = true;
+        Boolean isPlural = false;
+
+        if(queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion") ){
+            appendThe = false;
+        }
+
+        if(queryAlteration.toLowerCase().contains("fusions")) {
+            isPlural = true;
+        }
+
         sb.append("<annotation_summary>");
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
@@ -348,22 +383,40 @@ public class VariantAnnotationXMLController {
             }
 
             if (oncogenic) {
-                sb.append("The ")
-                        .append(queryAlteration)
-                        .append(" is known to be oncogenic. ");
+                if(appendThe){
+                    sb.append("The ");
+                }
+                sb.append(queryAlteration);
+
+                if(isPlural){
+                    sb.append(" are");
+                }else{
+                    sb.append(" is");
+                }
+                sb.append(" known to be oncogenic. ");
             } else {
-                sb.append("It is not known whether the ")
-                        .append(queryAlteration)
-                        .append(" is oncogenic. ");
+                sb.append("It is not known whether ");
+                if(appendThe){
+                    sb.append("the ");
+                }
+
+                sb.append(queryAlteration);
+
+                if(isPlural){
+                    sb.append(" are");
+                }else{
+                    sb.append(" is");
+                }
+                sb.append(" oncogenic. ");
             }
 
-            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
-            if (!evidencesResistence.isEmpty()) {
-                // if resistance evidence is available in any tumor type
-                sb.append("It confers resistance to ")
-                        .append(treatmentsToString(evidencesResistence, null, null, false, false, false))
-                        .append(" ");
-            }
+//            List<Evidence> evidencesResistence = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE));
+//            if (!evidencesResistence.isEmpty()) {
+//                // if resistance evidence is available in any tumor type
+//                sb.append("It confers resistance to ")
+//                        .append(treatmentsToString(evidencesResistence, null, null, false, false, false))
+//                        .append(" ");
+//            }
 
             Set<EvidenceType> sensitivityEvidenceTypes = 
                     EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
@@ -405,7 +458,7 @@ public class VariantAnnotationXMLController {
                             .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
-                    sb.append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A), queryAlteration, false, false, true))
+                    sb.append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A), queryAlteration, true, false, true))
                             .append(", ")
                             .append(" the clinical utility for these agents in patients with ")
                             .append(queryTumorType==null?"other":queryTumorType)
@@ -427,7 +480,7 @@ public class VariantAnnotationXMLController {
                                 .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
-                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, false, false, true))
+                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, true, false, true))
                                 .append(", ")
                                 .append(" the clinical utility for patients with ")
                                 .append(queryAlteration)
@@ -436,9 +489,12 @@ public class VariantAnnotationXMLController {
                         // if there is no FDA or NCCN drugs for the gene at all
                         sb.append("There are no FDA approved or NCCN-compendium listed treatments specifically for patients with ")
                                 .append(queryTumorType)
-                                .append(" harboring the ")
-                                .append(queryAlteration)
-                                .append(". ");
+                                .append(" harboring ");
+                        if(appendThe){
+                            sb.append("the ");
+                        }
+                        sb.append(queryAlteration)
+                            .append(". ");
                     }
                 }
                     
@@ -514,7 +570,7 @@ public class VariantAnnotationXMLController {
             public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
                 return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
             }
-            
+
             private int phase2int(String phase) {
                 if (phase.matches("Phase [0-4]")) {
                     return 2*Integer.parseInt(phase.substring(6));
@@ -785,7 +841,7 @@ public class VariantAnnotationXMLController {
         
         return listToString(list);
     }
-    
+
     private String treatmentsToString(Collection<Evidence> evidences, String tumorType, String alteration, boolean capFirstLetter, boolean fda, boolean nccn) {
         Set<String> drugs = new TreeSet<String>();
         Set<Alteration> alterations = new LinkedHashSet<Alteration>();
@@ -797,7 +853,7 @@ public class VariantAnnotationXMLController {
             }
             alterations.addAll(ev.getAlterations());
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append(capFirstLetter?"T":"t").append("he drug");
         if (drugs.size()>1) {

@@ -152,7 +152,6 @@ public class GoogleAuth {
       
         SPREADSHEETSERVICE = new SpreadsheetService("data");
         SPREADSHEETSERVICE.setOAuth2Credentials(credential);
-        SPREADSHEETSERVICE.setUserCredentials(USERNAME, PASSWORD);
     }
     
     private void createGmailService() throws GeneralSecurityException, IOException, ServiceException {

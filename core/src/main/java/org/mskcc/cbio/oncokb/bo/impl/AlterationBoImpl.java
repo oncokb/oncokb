@@ -91,6 +91,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         }
+
+        //If alteration contains 'fusion', the alteration 'fusions' should be injected into alteration list
+        if(alteration.getAlteration().toLowerCase().contains("fusion")) {
+            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
+            if (alt!=null) {
+                alterations.add(alt);
+            }
+        }
         
         if (inactivating) {
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "inactivating mutations");

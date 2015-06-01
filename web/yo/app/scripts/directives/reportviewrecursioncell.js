@@ -64,7 +64,7 @@ angular.module('oncokbApp')
                         return flag;
                 };
                 scope.show = function(key, value) {
-                        var disabledKey = ['description', 'trial', 'title', 'nccn_special', 'effect', 'recommendation category', 'value'],
+                        var disabledKey = ['description', 'trial', 'title', 'nccn_special', 'effect', 'recommendation category', 'value', 'no_evidence'],
                         str = '';
 
                         if(disabledKey.indexOf(key.toLowerCase()) === -1) {

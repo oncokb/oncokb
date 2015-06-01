@@ -9,7 +9,7 @@
  */
 angular.module('oncokbApp')
     .service('reportItem', function () {
-        var specialKeyChars = '#$%';
+        var specialKeyChars = 'o_n_c_o_k_b';
         function Item(geneName, mutation, tumorType){
             this.geneName = geneName || 'N/A';
             this.mutation = mutation || 'N/A';
@@ -140,18 +140,29 @@ angular.module('oncokbApp')
 
             if(cancerTypeInfo.standard_therapeutic_implications) {
                 object = {};
-                object['STANDARD THERAPEUTIC IMPLICATIONS'] = [];
-                if(cancerTypeInfo.standard_therapeutic_implications.general_statement && checkDescription(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)){
-                    description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
+
+                //Add standard therapy implication description
+                if(cancerTypeInfo.standard_therapeutic_implications.general_statement && cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity){
+                    if(!angular.isArray(cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity)) {
+                        description = cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description;
+                    }else{
+                        description = "NOTICE: Found multiple general statements.";
+                    }
                     value = [];
                     key = 'STANDARD THERAPEUTIC IMPLICATIONS';
                     if(typeof description === 'string') {
                         description = description.trim();
                     }
-                    value.push({'description': cancerTypeInfo.standard_therapeutic_implications.general_statement.sensitivity.description});
+                    value.push({'description': description});
                     object[key] = value;
+                    treatment.push(object);
+                }else if(cancerTypeInfo.standard_therapeutic_implications.resistant_to){
+                    //If cancer type does not have description but resistant to treatments, the header
+                    //should also be added
+
+                    object['STANDARD THERAPEUTIC IMPLICATIONS'] = [];
+                    treatment.push(object);
                 }
-                treatment.push(object);
 
                 if(cancerTypeInfo.standard_therapeutic_implications.resistant_to) {
                     var _datum = cancerTypeInfo.standard_therapeutic_implications.resistant_to;
@@ -161,7 +172,7 @@ angular.module('oncokbApp')
 
                     for(var _key in object) {
                         var _object = {},
-                            _newKey = _key.replace(specialKeyChars, '');
+                            _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                         _object[_newKey] = object[_key];
                         treatment.push(_object);
                         _object = null;
@@ -349,7 +360,7 @@ angular.module('oncokbApp')
 
                         for(var _key in object) {
                             var _object = {},
-                                _newKey = _key.replace(specialKeyChars, '');
+                                _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                             _object[_newKey] = object[_key];
                             fdaApproved.push(_object);
                             _object = null;
@@ -381,7 +392,7 @@ angular.module('oncokbApp')
                 /* jshint -W004 */
                 for(var _key in object) {
                     var _object = {},
-                        _newKey = _key.replace(specialKeyChars, '');
+                        _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                     _object[_newKey] = object[_key];
 
                     for(i = 0; i < _object[_newKey].length; i++ ) {
@@ -417,6 +428,38 @@ angular.module('oncokbApp')
             }else {
                 return null;
             }
+        }
+
+        function constructEmptyTreatmentStatment(gene, alteration, tumorType) {
+            var geneName = gene.toString().trim().toUpperCase();
+            var alterationName = alteration.toString().trim();
+            var tumorTypeName = tumorType.toString().trim();
+
+            var statement = 'There are no investigational therapies for ';
+            var info = [];
+
+            if(alterationName.toLowerCase().indexOf('amplification') !== -1) {
+                info.push(geneName);
+                info.push('amplified');
+                info.push(tumorTypeName);
+            }else if(alterationName.toLowerCase().indexOf('deletion') !== -1) {
+                info.push(geneName);
+                info.push('deleted');
+                info.push(tumorTypeName);
+            }else if (alterationName.toLowerCase().indexOf('fusion') !== -1) {
+                info.push(tumorTypeName);
+                info.push('with');
+                info.push(alterationName);
+            }else{
+                info.push(geneName);
+                info.push(alterationName);
+                info.push('mutant');
+                info.push(tumorTypeName);
+            }
+
+            statement += info.join(' ');
+
+            return statement;
         }
 
         function constructClinicalTrial(annotation, geneName, mutation, tumorType, relevantCancerType) {
@@ -465,12 +508,20 @@ angular.module('oncokbApp')
             }
 
             if(cancerTypeInfo.investigational_therapeutic_implications) {
-                var hasdrugs = false;
-                if(cancerTypeInfo.investigational_therapeutic_implications.general_statement) {
+                var hasdrugs = false,
+                    emptyTreatmentStatement = constructEmptyTreatmentStatment(geneName, mutation, tumorType);
+
+                if(cancerTypeInfo.investigational_therapeutic_implications.general_statement && cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity) {
+                    var description;
                     value = [];
                     object = {};
                     key = 'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS';
-                    object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description, value);
+                    if(!angular.isArray(cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity)) {
+                        description = cancerTypeInfo.investigational_therapeutic_implications.general_statement.sensitivity.description;
+                    }else{
+                        description = "NOTICE: Found multiple general statements.";
+                    }
+                    object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, description, value);
 
                     clinicalTrials.push(object);
                 }else if(Object.keys(cancerTypeInfo.investigational_therapeutic_implications).length > 0){
@@ -492,7 +543,7 @@ angular.module('oncokbApp')
                         }
                         for(var _key in object) {
                             var _object = {},
-                                _newKey = _key.replace(specialKeyChars, '');
+                                _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                             _object[_newKey] = object[_key];
                             clinicalTrials.push(_object);
                             _object = null;
@@ -505,11 +556,11 @@ angular.module('oncokbApp')
                         value = [];
                         object = {};
                         key = 'INVESTIGATIONAL THERAPEUTIC IMPLICATIONS';
-                        value.push({'description': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
+                        value.push({'description': emptyTreatmentStatement});
                         object[key] = value;
                         clinicalTrials.push(object);
                     }else {
-                        clinicalTrials.push({'no_evidence': 'There are no investigational therapies that meet level 1, 2 or 3 evidence.'});
+                        clinicalTrials.push(emptyTreatmentStatement);
                     }
                 }
 
@@ -573,25 +624,79 @@ angular.module('oncokbApp')
             }
 
             if(cancerTypeInfo.prevalence) {
+                var targetValue = cancerTypeInfo.prevalence.description;
+
                 value = [];
                 key = 'MUTATION PREVALENCE';
                 object = {};
-                object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, cancerTypeInfo.prevalence.description, value);
+
+                //Show all tumor info first
+                if(angular.isArray(cancerTypeInfo.prevalence.description)){
+                    var alltumor;
+                    targetValue = [];
+
+                    for(var i = 0; i < cancerTypeInfo.prevalence.description.length ; i++) {
+                        if(cancerTypeInfo.prevalence.description[i].hasOwnProperty('Cancer type') && /all tumor/ig.test(cancerTypeInfo.prevalence.description[i]['Cancer type'].toString().toLowerCase())){
+                            alltumor = cancerTypeInfo.prevalence.description[i];
+                            cancerTypeInfo.prevalence.description.splice(i);
+                        }
+                    }
+
+                    if(alltumor){
+                        cancerTypeInfo.prevalence.description.unshift(alltumor);
+                    }
+
+                    cancerTypeInfo.prevalence.description.forEach(function(e){
+                        if(e.hasOwnProperty('value')){
+                            targetValue.push(e.value);
+                        }
+                    });
+
+                    targetValue = targetValue.join(' ');
+                }
+
+                object[key] = addRecord({'array': ['Cancer type', 'value'], 'object':'description'}, targetValue, value);
+
                 additionalInfo.push(object);
             }
 
             if(annotation.variant_effect) {
-                value = [];
-                key = 'MUTATION EFFECT';
-                object = {};
-                value.push({
-                    'effect': annotation.variant_effect.effect || '',
-                    'description': annotation.variant_effect.description? removeCharsInDescription(annotation.variant_effect.description) : ''
-                });
-                object[key] = value;
-                additionalInfo.push(object);
+                if(angular.isObject(annotation.variant_effect)) {
+                    if(angular.isArray(annotation.variant_effect)){
+                        annotation.variant_effect.forEach(function(effect){
+                            object = getMutationEffect(effect);
+
+                            if(object){
+                                additionalInfo.push(object);
+                            }
+                        });
+                    }else{
+                        object = getMutationEffect(annotation.variant_effect);
+
+                        if(object){
+                            additionalInfo.push(object);
+                        }
+                    }
+                }
             }
             return additionalInfo;
+        }
+
+        function getMutationEffect(variant_effect){
+            var key = 'MUTATION EFFECT';
+            var object = {};
+            var value = [];
+
+            if(angular.isObject(variant_effect) && !angular.isArray(variant_effect)) {
+                value.push({
+                    'effect': variant_effect.effect || '',
+                    'description': variant_effect.description? removeCharsInDescription(variant_effect.description) : ''
+                });
+                object[key] = value;
+                return object;
+            }else {
+                return false;
+            }
         }
 
         function removeCharsInDescription(str) {
