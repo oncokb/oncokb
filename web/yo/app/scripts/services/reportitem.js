@@ -9,7 +9,7 @@
  */
 angular.module('oncokbApp')
     .service('reportItem', function () {
-        var specialKeyChars = '#$%';
+        var specialKeyChars = 'o_n_c_o_k_b';
         function Item(geneName, mutation, tumorType){
             this.geneName = geneName || 'N/A';
             this.mutation = mutation || 'N/A';
@@ -172,7 +172,7 @@ angular.module('oncokbApp')
 
                     for(var _key in object) {
                         var _object = {},
-                            _newKey = _key.replace(specialKeyChars, '');
+                            _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                         _object[_newKey] = object[_key];
                         treatment.push(_object);
                         _object = null;
@@ -360,7 +360,7 @@ angular.module('oncokbApp')
 
                         for(var _key in object) {
                             var _object = {},
-                                _newKey = _key.replace(specialKeyChars, '');
+                                _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                             _object[_newKey] = object[_key];
                             fdaApproved.push(_object);
                             _object = null;
@@ -392,7 +392,7 @@ angular.module('oncokbApp')
                 /* jshint -W004 */
                 for(var _key in object) {
                     var _object = {},
-                        _newKey = _key.replace(specialKeyChars, '');
+                        _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                     _object[_newKey] = object[_key];
 
                     for(i = 0; i < _object[_newKey].length; i++ ) {
@@ -543,7 +543,7 @@ angular.module('oncokbApp')
                         }
                         for(var _key in object) {
                             var _object = {},
-                                _newKey = _key.replace(specialKeyChars, '');
+                                _newKey = _key.replace(new RegExp(specialKeyChars, 'g'), '');
                             _object[_newKey] = object[_key];
                             clinicalTrials.push(_object);
                             _object = null;
