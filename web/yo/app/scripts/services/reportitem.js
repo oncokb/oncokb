@@ -410,22 +410,33 @@ angular.module('oncokbApp')
 
         //Is not relevant cancer type
         function isNRCT(relevent, type) {
-            if(typeof relevent === 'object') {
-                if(relevent instanceof Array) {
-                    for(var i=0; i<relevent.length; i++) {
-                        if(relevent[i]['Cancer type'] === type) {
+            if(angular.isString(type)) {
+                type = type.trim();
+                if(typeof relevent === 'object') {
+                    if(relevent instanceof Array) {
+                        for(var i=0; i<relevent.length; i++) {
+                            if(relevent[i]['Cancer type'] === type) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }else {
+                        if(relevent.type === type) {
                             return false;
+                        }else {
+                            return true;
                         }
                     }
-                    return true;
-                }else {
-                    if(relevent.type === type) {
+                }else if(angular.isString(relevent)) {
+                    if (relevent.trim() === type) {
                         return false;
-                    }else {
+                    } else {
                         return true;
                     }
+                }else{
+                    return null;
                 }
-            }else {
+            }else{
                 return null;
             }
         }
