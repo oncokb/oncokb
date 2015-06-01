@@ -117,7 +117,7 @@
               <i ng-click="remove($event, $parent.$index)" class="fa fa-trash-o"></i>
             </span>
           </accordion-heading>
-          <accordion ng-if="geneStatus[$index].isOpen" close-others="oneAtATime">
+          <accordion ng-if="geneStatus[$index].isOpen || gene.mutations.length < 5" close-others="oneAtATime">
             <!-- Mutation Effect -->
             <accordion-group ng-init="geneStatus[$parent.$parent.$index].oncogenic = {}" is-open="geneStatus[$parent.$parent.$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="(!!geneStatus[$parent.$parent.$index].oncogenic.hideEmpty) && mutationEffectEmpty(mutation)">
               <accordion-heading>
