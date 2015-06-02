@@ -358,6 +358,24 @@ public class VariantAnnotationXMLController {
             sb.append(geneSummary)
                     .append(" ");
         }
+
+        //Mutation summary
+        List<Evidence> mutationSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_SUMMARY));
+        if (!mutationSummaryEvs.isEmpty()) {
+            Evidence ev = mutationSummaryEvs.get(0);
+            String mutationSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            sb.append(mutationSummary)
+                    .append(" ");
+        }
+
+        //Tumor type summary
+        List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
+        if (!tumorTypeSummaryEvs.isEmpty()) {
+            Evidence ev = tumorTypeSummaryEvs.get(0);
+            String tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            sb.append(tumorTypeSummary)
+                    .append(" ");
+        }
 //            List<Evidence> cancerSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
 //            Map<TumorType, Evidence> mapTumorTypeSummaryEvs = new LinkedHashMap<TumorType, Evidence>();
 //            for (Evidence ev : cancerSummaryEvs) {

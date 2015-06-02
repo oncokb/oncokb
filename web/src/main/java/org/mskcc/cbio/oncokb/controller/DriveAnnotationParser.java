@@ -198,7 +198,23 @@ public class DriveAnnotationParser {
                 }
                 alterations.add(alteration);
             }
-            
+
+            // mutation summary
+            System.out.println("##    Summary");
+
+            if(mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.MUTATION_SUMMARY);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
+                evidence.setDescription(mutationObj.getString("summary"));
+                setDocuments(mutationObj.getString("summary"), evidence);
+                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                evidenceBo.save(evidence);
+            }else {
+                System.out.println("    No info...");
+            }
+
             // mutation effect
             JSONObject effectObject = mutationObj.getJSONObject("effect");
             String effect = effectObject.getString("value");
@@ -254,7 +270,7 @@ public class DriveAnnotationParser {
             System.out.println("##  Mutation does not have name skip...");
         }
     }
-    
+
     private static Map<String, String> parseMutationString(String mutationStr) {
         Map<String, String> ret = new HashMap<String, String>();
         
@@ -316,7 +332,23 @@ public class DriveAnnotationParser {
         }
         
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        
+
+        // cancer type summary
+        System.out.println("##      Summary");
+
+        if(cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.TUMOR_TYPE_SUMMARY);
+            evidence.setGene(gene);
+            evidence.setDescription(cancerObj.getString("summary"));
+            evidence.setAlterations(alterations);
+            evidence.setTumorType(tumorType);
+            setDocuments(cancerObj.getString("summary"), evidence);
+            evidenceBo.save(evidence);
+        }else {
+            System.out.println("    No info...");
+        }
+
         // Prevalance
         if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
             System.out.println("##      Prevalance: " + alterations.toString());
