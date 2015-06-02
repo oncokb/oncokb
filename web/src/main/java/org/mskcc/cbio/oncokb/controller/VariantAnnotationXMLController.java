@@ -658,13 +658,14 @@ public class VariantAnnotationXMLController {
     }
 
     private void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
+        LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
+
         for (Treatment treatment : evidence.getTreatments()) {
             sb.append(indent).append("<treatment>\n");
-            exportTreatment(treatment, sb, indent+"    ");
+            exportTreatment(treatment, sb, indent+"    ", levelOfEvidence);
             sb.append(indent).append("</treatment>\n");
         }
 
-        LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
         if (levelOfEvidence!=null) {
             if (levelOfEvidence==LevelOfEvidence.LEVEL_1 &&
                     !relevantTumorTypes.contains(evidence.getTumorType())) {
@@ -693,8 +694,8 @@ public class VariantAnnotationXMLController {
 
         exportRefereces(evidence, sb, indent);
     }
-
-    private void exportTreatment(Treatment treatment, StringBuilder sb, String indent) {
+    
+    private void exportTreatment(Treatment treatment, StringBuilder sb, String indent, LevelOfEvidence levelOfEvidence) {
         Set<Drug> drugs = treatment.getDrugs();
         for (Drug drug : drugs) {
             sb.append(indent).append("<drug>\n");
@@ -714,10 +715,17 @@ public class VariantAnnotationXMLController {
             }
 
             sb.append(indent).append("    <fda_approved>");
-            Boolean fdaApproved = drug.isFdaApproved();
-            if (fdaApproved!=null) {
-                sb.append(fdaApproved ? "Yes" : "No");
-            }
+
+            //FDA approved info based on evidence level. Temporaty solution. The info should be pulled up from database
+            //by using PI-helper
+//            Boolean fdaApproved = drug.isFdaApproved();
+//            if (fdaApproved!=null) {
+//                sb.append(fdaApproved ? "Yes" : "No");
+//            }
+
+            Boolean fdaApproved = levelOfEvidence == LevelOfEvidence.LEVEL_1 || levelOfEvidence == LevelOfEvidence.LEVEL_2A;
+            sb.append(fdaApproved ? "Yes" : "No");
+
             sb.append("</fda_approved>\n");
 
 //            sb.append(indent).append("    <description>");
