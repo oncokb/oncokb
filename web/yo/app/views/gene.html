@@ -119,6 +119,7 @@
           </accordion-heading>
           <accordion ng-if="geneStatus[$index].isOpen || gene.mutations.length < 5" close-others="oneAtATime">
             <!-- Mutation Effect -->
+            <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
             <accordion-group ng-init="geneStatus[$parent.$parent.$index].oncogenic = {}" is-open="geneStatus[$parent.$parent.$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="(!!geneStatus[$parent.$parent.$index].oncogenic.hideEmpty) && mutationEffectEmpty(mutation)">
               <accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[$parent.$index].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$index].oncogenic.isOpen)"></i>
@@ -181,6 +182,7 @@
                 </accordion-heading>
 
                 <accordion close-others="oneAtATime">
+                  <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional tumor type summary" ng-model="tumor.summary.text"></p></span>
                   <!-- Prevalence -->
                   <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence={}; geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence.isOpen" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence.hideEmpty) && !tumor.prevalence.text" class="levelThreeHeader">
                     <accordion-heading>
