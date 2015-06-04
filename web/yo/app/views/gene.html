@@ -7,19 +7,31 @@
         <img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
       </span>
       <span ng-if="document" class="geneLastModify">Last edit was made on {{document.modifiedDate | date : 'MMM d, h:mm a'}} by {{document.lastModifyingUserName}}</span>
-      <span class="btn-group pull-right" role="group">
+      <span class="btn-group btn-group-sm pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-        <button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">
-          <i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>
-          <span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true">
+          <i class="fa fa-eye-slash"></i>Hide all empty
         </button>
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
+          <i class="fa fa-eye"></i>Show all empty
+        </button>
+        <button type="button" class="btn btn-default"  ng-click="status.expandAll=true">
+          <i class="fa fa-expand"></i>Expand all
+        </button>
+        <button type="button" class="btn btn-default"  ng-click="status.expandAll=false">
+          <i class="fa fa-compress"></i>Collapse all
+        </button>
+        <!--<button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">-->
+          <!--<i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>-->
+          <!--<span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all-->
+        <!--</button>-->
 
-        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">
-          <i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>
-          <span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty
-        </button>
+        <!--<button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">-->
+          <!--<i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>-->
+          <!--<span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty-->
+        <!--</button>-->
         <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
       </span>
     </h2>
@@ -105,7 +117,7 @@
               <i ng-click="remove($event, $parent.$index)" class="fa fa-trash-o"></i>
             </span>
           </accordion-heading>
-          <accordion close-others="oneAtATime">
+          <accordion ng-if="geneStatus[$index].isOpen || gene.mutations.length < 5" close-others="oneAtATime">
             <!-- Mutation Effect -->
             <accordion-group ng-init="geneStatus[$parent.$parent.$index].oncogenic = {}" is-open="geneStatus[$parent.$parent.$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="(!!geneStatus[$parent.$parent.$index].oncogenic.hideEmpty) && mutationEffectEmpty(mutation)">
               <accordion-heading>
@@ -381,14 +393,26 @@
   <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
   <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-  <button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">
-    <i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>
-    <span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all
+  <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true">
+    <i class="fa fa-eye-slash"></i>Hide all empty
   </button>
-  <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">
-    <i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>
-    <span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty
+  <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
+    <i class="fa fa-eye"></i>Show all empty
   </button>
+  <button type="button" class="btn btn-default"  ng-click="status.expandAll=true">
+    <i class="fa fa-expand"></i>Expand all
+  </button>
+  <button type="button" class="btn btn-default"  ng-click="status.expandAll=false">
+    <i class="fa fa-compress"></i>Collapse all
+  </button>
+  <!--<button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">-->
+    <!--<i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>-->
+    <!--<span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all-->
+  <!--</button>-->
+  <!--<button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">-->
+    <!--<i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>-->
+    <!--<span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty-->
+  <!--</button>-->
   <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>-->
   <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
   <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>-->

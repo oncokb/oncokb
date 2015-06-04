@@ -369,11 +369,11 @@ angular.module('oncokbApp')
                 }
             }
 
-            if(annotation.cancer_type && relevantCancerType && relevantCancerType.$type) {
+            if(annotation.cancer_type) {
                 object = {};
 
                 for (i = 0; i < annotation.cancer_type.length; i++) {
-                    if(isNRCT(relevantCancerType.$type, annotation.cancer_type[i].$type)) {
+                    if(!(relevantCancerType && relevantCancerType.$type) || isNRCT(relevantCancerType.$type, annotation.cancer_type[i].$type)) {
                         if(annotation.cancer_type[i].standard_therapeutic_implications) {
                             for (var j = 0; j < attrsToDisplay.length; j++) {
                                 if(annotation.cancer_type[i].standard_therapeutic_implications[attrsToDisplay[j]]) {
@@ -410,22 +410,33 @@ angular.module('oncokbApp')
 
         //Is not relevant cancer type
         function isNRCT(relevent, type) {
-            if(typeof relevent === 'object') {
-                if(relevent instanceof Array) {
-                    for(var i=0; i<relevent.length; i++) {
-                        if(relevent[i]['Cancer type'] === type) {
+            if(angular.isString(type)) {
+                type = type.trim();
+                if(typeof relevent === 'object') {
+                    if(relevent instanceof Array) {
+                        for(var i=0; i<relevent.length; i++) {
+                            if(relevent[i]['Cancer type'] === type) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }else {
+                        if(relevent.type === type) {
                             return false;
+                        }else {
+                            return true;
                         }
                     }
-                    return true;
-                }else {
-                    if(relevent.type === type) {
+                }else if(angular.isString(relevent)) {
+                    if (relevent.trim() === type) {
                         return false;
-                    }else {
+                    } else {
                         return true;
                     }
+                }else{
+                    return null;
                 }
-            }else {
+            }else{
                 return null;
             }
         }
