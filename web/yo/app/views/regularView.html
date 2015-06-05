@@ -1,0 +1,64 @@
+<div >
+    <div ng-repeat="(key, value) in displayParts" ng-show="annotation[value.objectName]">
+        <div id="{{key}}">
+            <h2>{{value.displayName}}</h2>
+            <p ng-bind-html="findRegex(annotation[value.objectName].description) || findRegex(annotation[value.objectName])"></p>
+        </div>
+    </div>
+</div>
+<div class="variantDisplayResult"  ng-show="annotation.cancer_type">
+    <h2>Cancer Type</h2>
+
+    <accordion close-others="oneAtATime">
+        <accordion-group ng-repeat="cancerType in annotation.cancer_type">
+        <accordion-heading>
+            {{cancerType.$type}}&nbsp;&nbsp;&nbsp;<span ng-if="cancerType.$relevant_to_patient_disease && cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes'" style='color: green; font-size:12px; font-weight:bold'><i>RELEVANT</i></span>
+        </accordion-heading>
+        <table class='table table-bordered colorFirstCol'>
+            <tbody>
+                <tr ng-repeat="summaryTitle in summaryTableTitles">
+                    <td><h5>{{summaryTitle}}</h5></td>
+                    <td>
+                        <!--Generate multiple contents in one td cell-->
+                        <div ng-if='cancerType.hasOwnProperty(content)' ng-repeat="content in summaryTableTitlesContent[summaryTitle]">
+                            <h4>{{displayProcess(content)}}</h4>
+                            <!--Repeat by content attributes(sensitive_to, resistant_to)-->
+                            <p ng-if="hasGeneralStatement(cancerType[content])">{{cancerType[content].general_statement.sensitivity.description}}</p>
+                            
+                            <!--show investigational/standared therapy-->
+                            <div ng-if="specialAttr.indexOf(content) !== -1" ng-repeat="(key, value) in cancerType[content]">
+
+                                <!--Repeat by number of content attribute(first sensitive_to, second sensitive_to....)-->
+                                <div ng-if="key!=='general_statement'" ng-repeat="senitive in value">
+                                    <h5 ng-bind-html="getDrugHeader(key, senitive)"></h5>
+                                    <p ng-bind-html="getDrugBody(senitive)"></p>
+                                </div>
+                            </div>
+                            <div ng-if="content === 'nccn_guidelines'" ng-repeat="nccn in cancerType[content]">
+                            <p ng-bind-html="generateNCCN(nccn)"></p>
+                            </div>
+
+                            <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]" class="annotationClinicalTrial">
+                                <span ng-bind-html="generateTrial(trial)"></span>
+                                <span>PURPOSE</span><img  ng-click="setCollapsed(trial, 'purpose')" ng-src="{{getCollapseIcon(trial, 'purpose')}}" class='icon'></img>
+                                <div collapse="isCollapsed[trial.trial_id]['purpose']">
+                                    <div class="well well-lg">{{trial.purpose}}</div>
+                                </div>
+                                <span>ELIGIBILITY CRITERIA</span><img  ng-click="setCollapsed(trial, 'eligibility_criteria')" ng-src="{{getCollapseIcon(trial, 'eligibility_criteria')}}" class='icon'></img>
+                                <div collapse="isCollapsed[trial.trial_id]['eligibility_criteria']">
+                                    <div class="well well-lg">{{trial.eligibility_criteria}}</div>
+                                </div>
+                            </div>
+
+                            <div ng-if="content !== 'nccn_guidelines' && content !== 'clinical_trial' && content !== specialAttr.indexOf(content) === -1">
+                            <p ng-bind-html="findRegex(cancerType[content].description)"></p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        </accordion-group>
+    </accordion>
+</div>

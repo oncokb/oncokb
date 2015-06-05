@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- Article business object -->
+    <bean id="articleBo" class="org.mskcc.cbio.oncokb.bo.impl.ArticleBoImpl" >
+   		<property name="dao" ref="articleDao" />
+    </bean>
+ 
+    <!-- Article Data Access Object -->
+    <bean id="articleDao" class="org.mskcc.cbio.oncokb.dao.impl.ArticleDaoImpl" >
+   		<property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+   
+   		
+</beans>

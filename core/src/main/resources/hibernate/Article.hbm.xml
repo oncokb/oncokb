@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.Article" table="article">
+    <id name="articleId" type="java.lang.Integer">
+      <column name="article_id"/>
+      <generator class="identity"/>
+    </id>
+    <property name="pmid" type="string">
+      <column name="pmid" not-null="true"/>
+    </property>
+    <property name="title" type="string">
+      <column length="1000" name="title"/>
+    </property>
+    <property name="journal" type="string">
+      <column name="journal"/>
+    </property>
+    <property name="pubDate" type="string">
+      <column name="pub_date"/>
+    </property>
+    <property name="volume" type="string">
+      <column name="volume"/>
+    </property>
+    <property name="issue" type="string">
+      <column name="issue"/>
+    </property>
+    <property name="pages" type="string">
+      <column name="pages"/>
+    </property>
+    <property name="authors" type="string">
+      <column name="authors"/>
+    </property>
+    <property name="elocationId" type="string">
+      <column name="elocationId"/>
+    </property>
+  </class>
+  <query name="findArticleByPmid">
+        from Article a where a.pmid=?
+  </query>
+</hibernate-mapping>

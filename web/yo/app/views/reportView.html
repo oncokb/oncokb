@@ -1,0 +1,84 @@
+<div class="variantDisplayResult" ng-show="data">
+    <div id="questHeaderSwither"><button class="btn btn-default btn-xs" ng-click="fold()">Report Header<div class="fa" ng-class="{'fa-angle-double-down':hideQuestHeader, 'fa-angle-double-up': !hideQuestHeader}"></div></button></div>
+    <div ng-hide="hideQuestHeader" class="hide-animation">
+        <!-- Onco Vantage Logo-->
+        <div class="logo">
+            <img src="images/oncovantage.png" />
+        </div>
+
+        <!-- Overall interpretation-->
+        <report-info one-cell="true" title="OVERALL INTERPRETATION" content="data.overallInterpretation"></report-info>
+
+
+        <!-- Clinician provided information-->
+        <report-info one-cell="false" margin="false" title="CLINICIAN PROVIDED INFORMATION"></report-info>
+        <table class="table table-bordered">
+            <tr>
+                <td class='greyB'>Diagnosis</td>
+                <td colspan="5">{{(data.diagnosis && data.diagnosis !== "") ? data.diagnosis : ''}}</td>
+            </tr>
+            <tr>
+                <td class='greyB'>Tumor-Tissue Type</td>
+                <td colspan="2">{{(data.tumorTissueType && data.tumorTissueType !== "") ? data.tumorTissueType : ''}}</td>
+                <td class='greyB'>Specimen Source</td>
+                <td colspan="2">{{(data.specimenSource && data.specimenSource !== "") ? data.specimenSource : ''}}</td>
+            </tr>
+            <tr>
+                <td class='greyB'>Block/Specimen ID:</td>
+                <td>{{(data.blockId && data.blockId !== "") ? data.blockId : ''}}</td>
+                <td class='greyB'>Stage at Presentation</td>
+                <td>{{(data.stage && data.stage !== "") ? data.stage : ''}}</td>
+                <td class='greyB'>Grade</td>
+                <td>{{(data.grade && data.grade !== "") ? data.grade : ''}}</td>
+            </tr>
+        </table>
+
+        <!-- MSKCC Logo-->
+        <div class="logo">
+            <img src="images/mskcc.png" />
+        </div>
+
+        <!-- Result Summary-->
+        <report-info one-cell="false" title="RESULT SUMMARY"></report-info>
+        <table class="table table-bordered colorHeader">
+            <thead>
+                <tr>
+                    <th ng-repeat="value in resultSummaryInfoHeader">{{value}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td ng-repeat="(key,value) in resultSummaryInfoHeader">{{(data[resultSummaryInfoContent[key]] && data[resultSummaryInfoContent[key]] !== "") ? data[resultSummaryInfoContent[key]] : ''}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Additional mutations-->
+        <report-info title="ADDITIONAL MUTATIONS" content="data.additionalMutations"></report-info>
+
+        <!-- Interacting mutations-->
+        <report-info title="INTERACTING MUTATIONS" content="data.interactingMutations"></report-info>
+    </div>
+    <div>
+        <!-- Clinical Implication-->
+        <report-info margin="false" one-cell="false" title="{{data.geneName + ' ' + data.mutation + ' CLINICAL IMPLICATIONS'}}"></report-info>
+        <table class="table table-bordered colorFirstCol">
+            <tbody>
+                <tr ng-repeat="title in titles">
+                    <td><h5>{{title}}</h5></td>
+                    <td>
+                        <div ng-if="data[params[$index]] !== 'None.'">
+                            <report-view-recursion-cell data="data[params[$index]]" depth="depth"></report-view-recursion-cell >
+                        </div>
+                        <span ng-if="data[params[$index]] === 'None.'">None.</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Interacting mutations-->
+        <div ng-repeat="title in extraInfoTitles">
+            <report-info border="false" margin="false" title="{{title}}" content="extraInfoContents[$index]"></report-info>
+        </div>
+    </div>
+</div>

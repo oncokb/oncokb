@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="components/angular-dialog-service/dist/dialogs.min.css" />
+    <link rel="stylesheet" href="components/fontawesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="components/datatables/media/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="components/please-wait/build/please-wait.css" />
+    <link rel="stylesheet" href="components/spinkit/css/spinkit.css" />
+    <!-- endbower -->
+    <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css">
+    <link rel="stylesheet" href="_components/jquery.qtip.min.css">
+    <!-- endbuild -->
+    <!-- build:css styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+</head>
+<body>
+    <!-- build:js scripts/pleaseWait.js -->
+    <script src="components/please-wait/build/please-wait.js"></script>
+    <!-- endbuild -->
+
+    <script type="text/javascript">
+      window.loadingScreen = window.pleaseWait({
+        logo: "images/mskcc_full.png",
+        backgroundColor: '#2986e2',
+        loadingHtml: "<div class='sk-spinner sk-spinner-wave white margin'><div class='sk-rect1'></div><div class='sk-rect2'></div><div class='sk-rect3'></div><div class='sk-rect4'></div><div class='sk-rect5'></div></div>"
+    });
+    </script>
+    <div id="displayTabs">
+        <nav class="navbar navbar-default fixedNavbar" role="navigation" ng-controller="NavCtrl" ng-init="init()">
+        <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="container">
+                <div class="navbar-header">
+
+                    <button type="button" class="navbar-toggle" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" ng-href="#/">OncoKB</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
+
+                    <ul class="nav navbar-nav">
+                        <li ng-repeat="tab in tabs" ng-class="{active:tabIsActive('/'+tab.key)}"><a ng-href="#/{{tab.key}}">{{tab.value}}</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <!-- <span ng-if="!signedIn"><i class="fa fa-google fa-lg"></i> Login with Google</span>
+                            <span ng-if="signedIn">Welcome</span> -->
+                            
+                            <div ng-if="signedIn" style="float: left">
+                                <div  style="float: left; margin: 5px">
+                                    <span>{{user.email}}</span><br/>
+                                    <span id="signout" style="" ng-click="signOut()">Sign out</span>
+                                </div>
+                                <img style="float: left" ng-if="user.avatar !== ''" ng-src="{{user.avatar}}">
+                            </div>
+                            <div class="btn-group" role="group" ng-show="!signedIn" id="googleSignIn">
+                                <!-- <span id="signInButton">
+                                </span> -->
+                                <!-- <i class="fa fa-google"></i> -->
+                                <button class="btn btn-default" disabled><i class="fa fa-google"></i></button>
+                                <button class="btn btn-default" ng-click="renderSignInButton()">Sign in</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    
+                </div><!-- /.navbar-collapse -->
+            </div>
+        </nav>
+
+        <ie-warning></ie-warning>
+        <div ng-view="" class="container oncokbMainView"></div>
+    </div>
+
+    <!-- build:js scripts/common.js -->
+    <!-- bower:js -->
+    <script src="components/es5-shim/es5-shim.js"></script>
+    <script src="components/jquery/dist/jquery.js"></script>
+    <script src="components/angular/angular.js"></script>
+    <script src="components/json3/lib/json3.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/affix.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/alert.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/button.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/carousel.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/collapse.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/tab.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/transition.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/scrollspy.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js"></script>
+    <script src="components/bootstrap-sass-official/assets/javascripts/bootstrap/popover.js"></script>
+    <script src="components/angular-resource/angular-resource.js"></script>
+    <script src="components/angular-cookies/angular-cookies.js"></script>
+    <script src="components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="components/angular-animate/angular-animate.js"></script>
+    <script src="components/angular-touch/angular-touch.js"></script>
+    <script src="components/angular-route/angular-route.js"></script>
+    <script src="components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="components/angular-chosen/angular-chosen.js"></script>
+    <script src="components/angular-chosen-localytics/chosen.js"></script>
+    <script src="components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="components/angular-translate/angular-translate.js"></script>
+    <script src="components/angular-dialog-service/dist/dialogs.min.js"></script>
+    <script src="components/angular-dialog-service/dist/dialogs-default-translations.min.js"></script>
+    <script src="components/angular-recursion/angular-recursion.js"></script>
+    <script src="components/jszip/dist/jszip.js"></script>
+    <script src="components/js-xlsx/dist/xlsx.js"></script>
+    <script src="components/stringjs/lib/string.min.js"></script>
+    <script src="components/levenshtein/lib/levenshtein.js"></script>
+    <script src="components/oridomi/oridomi.js"></script>
+    <script src="components/x2js/xml2json.min.js"></script>
+    <script src="components/angular-xml/angular-xml.js"></script>
+    <script src="components/jspdf/dist/jspdf.min.js"></script>
+    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
+    <script src="components/underscore/underscore-min.js"></script>
+    <script src="components/datatables/media/js/jquery.dataTables.min.js"></script>
+    <script src="components/angular-datatables/dist/angular-datatables.js"></script>
+    <script src="components/lodash/lodash.js"></script>
+    <script src="components/jquery-ui/jquery-ui.js"></script>
+    <script src="components/angular-ui-sortable/sortable.js"></script>
+    <script src="components/d3/d3.js"></script>
+    <script src="components/angular-file-upload/angular-file-upload.js"></script>
+    <script src="components/file-saver.js/FileSaver.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <script src="//apis.google.com/js/api.js"></script>
+    <script src="//apis.google.com/js/client:platform.js"></script>
+
+    <!-- build:js scripts/oncokb.js -->
+    <script src="components/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js"></script>
+    <script src="components/d3/d3.min.js"></script>
+    <script src="components/chosen/chosen.jquery.min.js"></script>
+    <script src="_components/jquery.qtip.min.js"></script>
+    <script src="scripts/directives/Tree.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/factories/TreeFactory.js"></script>
+    <script src="scripts/factories/VariantFactory.js"></script>
+    <script src="scripts/controllers/TreeCtrl.js"></script>
+    <script src="scripts/controllers/VariantCtrl.js"></script>
+    <script src="scripts/controllers/emailDialogCtrl.js"></script>
+    <script src="scripts/filters/Filter.js"></script>
+    <script src="scripts/directives/regularview.js"></script>
+    <script src="scripts/directives/reportview.js"></script>
+    <script src="scripts/directives/reportinfo.js"></script>
+    <script src="scripts/directives/reportviewrecursioncell.js"></script>
+    <script src="scripts/controllers/reportgenerator.js"></script>
+    <script src="scripts/services/generatereportdataservice.js"></script>
+    <script src="scripts/services/databaseconnector.js"></script>
+    <script src="scripts/services/deepmerge.js"></script>
+    <script src="scripts/services/findregex.js"></script>
+    <script src="scripts/controllers/gene.js"></script>
+    <script src="scripts/services/storage.js"></script>
+    <script src="scripts/controllers/nav.js"></script>
+    <script src="scripts/services/users.js"></script>
+    <script src="scripts/services/documents.js"></script>
+    <script src="scripts/services/loadfile.js"></script>
+    <script src="scripts/services/access.js"></script>
+    <script src="scripts/directives/comments.js"></script>
+    <script src="scripts/directives/typeaheadfocus.js"></script>
+    <script src="scripts/services/importer.js"></script>
+    <script src="scripts/services/driveoncokbinfo.js"></script>
+    <script src="scripts/services/browser.js"></script>
+    <script src="scripts/directives/iewarning.js"></script>
+    <script src="scripts/directives/qtip.js"></script>
+    <script src="scripts/directives/pubiframe.js"></script>
+    <script src="scripts/services/jspdf.js"></script>
+    <script src="scripts/services/reportitem.js"></script>
+    <script src="scripts/services/reportgeneratoropenfile.js"></script>
+    <script src="scripts/services/reportgeneratorworker.js"></script>
+    <script src="scripts/directives/toolxlsx.js"></script>
+    <script src="scripts/directives/toolxml.js"></script>
+    <script src="scripts/services/reportviewfactory.js"></script>
+    <script src="scripts/controllers/datasummary.js"></script>
+    <script src="scripts/services/cbiodownloadutil.js"></script>
+    <script src="scripts/services/cbioutil.js"></script>
+    <script src="scripts/directives/loading.js"></script>
+    <!-- endbuild -->
+
+</body>
+</html>
