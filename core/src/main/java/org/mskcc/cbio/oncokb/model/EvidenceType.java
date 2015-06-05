@@ -6,6 +6,8 @@ package org.mskcc.cbio.oncokb.model;
  */
 public enum EvidenceType {
     GENE_SUMMARY("Gene summary"),
+    MUTATION_SUMMARY("Mutation summary"),
+    TUMOR_TYPE_SUMMARY("Tumor type summary"),
     GENE_TUMOR_TYPE_SUMMARY("Gene tumor type summary"),
     GENE_BACKGROUND("Gene background"),
     MUTATION_EFFECT ("Mutation effect"),

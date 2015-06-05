@@ -206,7 +206,7 @@ angular.module('oncokbApp')
 
         geneData.mutations.asArray().forEach(function(e){
           var _mutation = {};
-          _mutation = combineData(_mutation, e, ['name', 'oncogenic', 'description']);
+          _mutation = combineData(_mutation, e, ['name', 'summary', 'oncogenic', 'description']);
 
           _mutation.effect = {};
           _mutation.tumors = [];
@@ -219,7 +219,7 @@ angular.module('oncokbApp')
           e.tumors.asArray().forEach(function(e1){
             var __tumor = {};
 
-            __tumor = combineData(__tumor, e1, ['name', 'prevalence', 'progImp']);
+            __tumor = combineData(__tumor, e1, ['name', 'summary', 'prevalence', 'progImp']);
             __tumor.trials = [];
             __tumor.TI = [];
             __tumor.nccn = {};
