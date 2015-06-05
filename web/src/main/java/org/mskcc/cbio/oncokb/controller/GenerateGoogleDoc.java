@@ -85,8 +85,7 @@ public class GenerateGoogleDoc {
                     Date date = new Date();
                     String dateString = dateFormat.format(date);
 
-                    GoogleAuth auth = new GoogleAuth();
-                    Drive driveService = auth.getDriveService();
+                    Drive driveService = GoogleAuth.getDriveService();
                     System.out.println("Got drive service");
                     
                     String fileName = requestInfo.getString("fileName");
@@ -161,8 +160,7 @@ public class GenerateGoogleDoc {
     private static void addNewRecord(String reportDataFileId, String reportName, String user, String date, String email, String folderId, String folderName) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + REPORTS_INFO_SHEET_ID);
 
-        GoogleAuth auth = new GoogleAuth();
-        SpreadsheetService service = auth.getSpreadSheetService();
+        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
         
         WorksheetFeed worksheetFeed = service.getFeed(
@@ -195,8 +193,7 @@ public class GenerateGoogleDoc {
     private static void changeFileContent(String fileId, String fileName, JSONObject content, JSONArray records) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
 
-        GoogleAuth auth = new GoogleAuth();
-        SpreadsheetService service = auth.getSpreadSheetService();
+        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
 
         WorksheetFeed worksheetFeed = service.getFeed(
