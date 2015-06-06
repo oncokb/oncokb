@@ -1,0 +1,7 @@
+.idea
+web/yo/.tmp
+web/yo/app/components
+web/yo/node_modules
+web/yo/.sass-cache
+web/yo/app/data
+*.iml

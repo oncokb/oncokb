@@ -1,0 +1,1 @@
+{"users":[{"name":"Test","genes":null,"role":8,"email":"test@gmail.com","mskccEmail":"test@mskcc.org","phases":null}],"pubMed":[{"links":null,"gene":"BRAF","mutationLinks":"{\"D594G\": \"LINK\"}"}, {"links":null,"gene":"KRAS","mutationLinks":"{\"A146P\": \"LINK\"}"}],"suggestions":[{"mutations":"amplification","gene":"AKT2"}]}
