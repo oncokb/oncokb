@@ -1,12 +1,12 @@
 Repository for OncoKB, an oncogenomics knowledgebase.
 
-Multi-tier system for annotating and classifying mutation and copy number alteration events in cancer.
+Multi-tier system for annotating and classifying mutation and copying number alteration events in cancer.
 
 We use Google Reatime API to store all information curators generated.
 We use MySQL to store data after reviewing
 
 #Front-end
-OncoKB front-end is built with lots of great open source JS libraries. AngularJS is used to be framework. Bower is used to manage denpendencies. Yeoman is used to initial project, angular-generator is used to create angular directive/service/factory etc. 
+OncoKB front-end is built with lots of great open source JS libraries. AngularJS is used as framework. Bower is used to manage denpendencies. Yeoman is used to initiate project and angular-generator is used to create angular directive/service/factory etc.
 
 ##Install project
 1. Install npm & bower & yo (globally)
@@ -49,20 +49,20 @@ OncoKB.config = {
         'curator':4, // 0100
         'admin':  8  // 1000
     },
-    users: '', //Your user management Google Spreadsheet ID
+    users: '', //Your user management Google Spreadsheet ID, you need to share this file to the service email address. At least, give it view permission.
     accessLevels: {}
 };
 ```
 
 #Properties file
 1. database.properties
-    * jdbc.driverClassName : We use mysql as database. Here it will be com.mysql.jdbc.Driver
+    * jdbc.driverClassName : We use mysql as database. Here, it will be com.mysql.jdbc.Driver
     * jdbc.url: Databse : url
     * jdbc.username & jdbc.password: MySQL user name and password
 2. config.properties
     * google.p_twelve : Your P12 private key path (You can generate this file from google developer console, more detials in Wiki)
     * google.service_account_email : Your service account email from google developer console.
-    * google.username & google.password(Optional) : Google account info. They are used to send email
+    * google.username & google.password(Optional) : Google account info. It is used to send email
     * curation.log.email.to(Optional) : The email address where all emails will go
 
 
