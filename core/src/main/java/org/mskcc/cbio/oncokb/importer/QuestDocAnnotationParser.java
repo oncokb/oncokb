@@ -275,7 +275,7 @@ public final class QuestDocAnnotationParser {
         
         // oncogenic
         List<int[]> line = extractLines(lines, start, end, MUTATION_ONCOGENIC_P, TUMOR_TYPE_P, 1);
-        Boolean oncogenic = Boolean.FALSE;
+        int oncogenic = -1;
         if (line.isEmpty()) {
             System.err.println("Warning: no oncogenic line");
         } else {
@@ -285,7 +285,17 @@ public final class QuestDocAnnotationParser {
             if (!m.matches()) {
                 System.err.println("Error: wrong format of oncogenic line: "+oncogenicStr);
             } else {
-                oncogenic = m.group(1).equalsIgnoreCase("YES");
+                oncogenicStr = m.group(1).toLowerCase();
+                switch (oncogenicStr){
+                    case "yes": oncogenic = 1;
+                        break;
+                    case "likely": oncogenic = 2;
+                        break;
+                    case "no": oncogenic = 0;
+                        break;
+                    default: oncogenic = -1;
+                        break;
+                }
             }
         }
         
@@ -304,11 +314,10 @@ public final class QuestDocAnnotationParser {
                 alteration.setOncogenic(oncogenic);
                 AlterationUtils.annotateAlteration(alteration, proteinChange);
                 alterationBo.save(alteration);
-            }
-            
-            if (oncogenic && !alteration.getOncogenic()) {
+            }else if (oncogenic > 0) {
                 alterationBo.update(alteration);
             }
+
             alterations.add(alteration);
         }
         

@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
+import java.lang.Exception;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -171,10 +172,22 @@ public class DriveAnnotationParser {
             
             Set<Alteration> alterations = new HashSet<Alteration>();
             
-            Boolean oncogenic = false;
+            int oncogenic = -1;
             
             if(mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
-                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
+                String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
+
+                switch (oncogenicStr){
+                    case "yes": oncogenic = 1;
+                        break;
+                    case "likely": oncogenic = 2;
+                        break;
+                    case "no": oncogenic = 0;
+                        break;
+                    default: oncogenic = -1;
+                        break;
+                }
+//                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
             }
             
             Map<String,String> mutations = parseMutationString(mutationStr);
@@ -191,9 +204,7 @@ public class DriveAnnotationParser {
                     alteration.setOncogenic(oncogenic);
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                }
-
-                if (oncogenic && !alteration.getOncogenic()) {
+                }else if (oncogenic > 0) {
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
