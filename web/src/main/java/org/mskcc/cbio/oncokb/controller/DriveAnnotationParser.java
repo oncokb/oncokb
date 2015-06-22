@@ -399,17 +399,19 @@ public class DriveAnnotationParser {
                     if(implication.getString("status").equals("1")) {
                         if(implication.getString("type").equals("1")) {
                             evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
+                            type = "Sensitive";
                         }else if(implication.getString("type").equals("0")) {
-                            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;                        
+                            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
+                            type = "Resistant";
                         }
-                        type = "Sensitive";
                     }else if(implication.getString("status").equals("0")) {
                         if(implication.getString("type").equals("1")) {
                             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
+                            type = "Sensitive";
                         }else if(implication.getString("type").equals("0")) {
                             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
+                            type = "Resistant";
                         }
-                        type = "Resistant";
                     }
                 }
                 parseTherapeuticImplcations(gene, alterations, tumorType, implication, evidenceType, type);
