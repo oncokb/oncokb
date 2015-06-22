@@ -129,7 +129,6 @@
     <script src="components/x2js/xml2json.min.js"></script>
     <script src="components/angular-xml/angular-xml.js"></script>
     <script src="components/jspdf/dist/jspdf.min.js"></script>
-    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
     <script src="components/underscore/underscore.js"></script>
     <script src="components/datatables/media/js/jquery.dataTables.js"></script>
     <script src="components/angular-datatables/dist/angular-datatables.js"></script>
@@ -150,12 +149,16 @@
     <!-- endbower -->
     <!-- endbuild -->
 
+
+    <!-- Separate angular contenteditable to avoid the conflicts when concatenating js files -->
+    <!-- build:js scripts/contenteditable.js -->
+    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
+    <!-- endbuild -->
+
     <script src="//apis.google.com/js/api.js"></script>
     <script src="//apis.google.com/js/client:platform.js"></script>
 
     <!-- build:js scripts/oncokb.js -->
-    <script src="components/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js"></script>
-    <script src="components/d3/d3.min.js"></script>
     <script src="components/chosen/chosen.jquery.min.js"></script>
     <script src="_components/jquery.qtip.min.js"></script>
     <script src="scripts/directives/Tree.js"></script>
