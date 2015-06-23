@@ -487,15 +487,13 @@ public class VariantAnnotationXMLController {
                     if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                         // if there are FDA approved drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
                         sb.append("While ")
-                                .append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1), null, queryTumorType, false, true, false, false))
-                                .append(", ")
+                                .append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1), null, queryTumorType, false, true, false, true))
                                 .append(" the clinical utility for patients with ")
                                 .append(queryAlteration)
                                 .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
-                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, queryTumorType, true, false, true, false))
-                                .append(", ")
+                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, queryTumorType, true, false, true, true))
                                 .append(" the clinical utility for patients with ")
                                 .append(queryAlteration)
                                 .append(" is not known. ");
@@ -512,7 +510,7 @@ public class VariantAnnotationXMLController {
                     }
                 }
 
-                sb.append("Please refer to the clinical trials section. ");
+//                sb.append("Please refer to the clinical trials section. ");
             }
         }
 
@@ -870,7 +868,7 @@ public class VariantAnnotationXMLController {
         Map<String, Set<String>> drugs = (Map<String, Set<String>>)drugAlterationMap.get("drugs");
         Set<Alteration> alterations = (Set<Alteration>)drugAlterationMap.get("alterations");
 
-        if(inOtherTumorType && queryAlteration != null){
+        if(inOtherTumorType){
             return treatmentsToStringByDrugs(drugs, alterations, queryAlteration, queryTumorType, capFirstLetter, fda, nccn);
         }else{
             boolean first = true;
@@ -952,17 +950,29 @@ public class VariantAnnotationXMLController {
         boolean sameDrugs = drugsAreSame(drugs);
         boolean underTumorTypeLimit = tumorNames.size() <= 3;
         boolean underDrugLimit = drugNames.size() <= 3;
+        String alterationStr = queryAlteration;
+
+        List<String> alts = new ArrayList<String>();
+        List<String> genes = new ArrayList<String>();
+        Iterator<Alteration> i = alterations.iterator();
+        while (i.hasNext()) {
+            Alteration alt = i.next();
+            alts.add(alt.getName());
+            if(!genes.contains(alt.getGene().getHugoSymbol())){
+                genes.add(alt.getGene().getHugoSymbol());
+            }
+        }
 
         for (Map.Entry<String, Set<String>> entry : drugs.entrySet()) {
             drugNames.add(entry.getKey());
             for(String tumorName: entry.getValue()) {
                 if(!tumorNames.contains(tumorName)){
-                    tumorNames.add(tumorName);
+                    tumorNames.add(tumorName.toLowerCase());
                 }
             }
         }
 
-        if(sameDrugs && underTumorTypeLimit && underDrugLimit && alterations.size() == 1) {
+        if(sameDrugs && underTumorTypeLimit && underDrugLimit && (alts.size() > 0 || queryAlteration != null)) {
             sb.append(capFirstLetter?"T":"t").append("he drug");
             if (drugNames.size()>1) {
                 sb.append("s");
@@ -984,9 +994,24 @@ public class VariantAnnotationXMLController {
                 sb.append(" listed by NCCN-compendium");
             }
 
-            sb.append(" for treatment of patients ")
-                    .append("with "+ queryAlteration + " " + listToString(tumorNames) + ",");
+
+            sb.append(" for treatment of patients with ");
+            if(alterationStr == null){
+                if (alts.size() == 1) {
+                    sb.append(listToString(alts) + " " + listToString(tumorNames));
+                }else if(alts.size() > 1) {
+                    sb.append(listToString(tumorNames) + " harboring " + listToString(alts) + " mutations");
+                }
+            }else{
+                sb.append(alterationStr + " " + listToString(tumorNames));
+            }
+            sb.append(",");
         }else {
+
+            if(alterationStr == null){
+                alterationStr = listToString(genes) + " " + listToString(alts);
+            }
+
             sb.append("there " + (drugNames.size()>1?"are":"is"));
 
             if (fda) {
@@ -994,24 +1019,28 @@ public class VariantAnnotationXMLController {
             } else if (nccn) {
                 sb.append(" NCCN-compendium listed");
             }
-            if(queryAlteration.contains("mutant")) {
-                queryAlteration.replace("mutant", "mutation");
+            if(alterationStr != null && alterationStr.contains("mutant")) {
+                alterationStr.replace("mutant", "mutation");
             }
-            sb.append(" drug" + (drugNames.size() > 1 ? "s" : "") + " for treatment of patients with " + (underTumorTypeLimit?listToString(tumorNames):"specific cancers") + " harboring the " + queryAlteration);
+            sb.append(" drug" + (drugNames.size() > 1 ? "s" : "") + " for treatment of patients with " + (underTumorTypeLimit?listToString(tumorNames):"specific cancers") + " harboring the " + alterationStr);
 
-            if (fda) {
-                sb.append(" (please refer to FDA Approved Drugs in Other Tumor Type section)");
-            } else if (nccn) {
-                sb.append(" (please refer to Treatment Implications section)");
+            if(queryAlteration != null){
+                if (fda) {
+                    sb.append(" (please refer to FDA Approved Drugs in Other Tumor Type section)");
+                } else if (nccn) {
+                    sb.append(" (please refer to Treatment Implications section)");
+                }
             }
             sb.append(",");
         }
 
-        sb.append(" the clinical utility for " + (drugNames.size()>1?"these agents":"the agent") + " in patients with ")
-                .append(queryTumorType == null ? "other" : queryTumorType)
-                .append(" with ")
-                .append(queryAlteration)
-                .append(" is not known. ");
+        if(queryAlteration != null) {
+            sb.append(" the clinical utility for " + (drugNames.size() > 1 ? "these agents" : "the agent") + " in patients with ")
+                    .append(queryTumorType == null ? "other" : queryTumorType)
+                    .append(" with ")
+                    .append(queryAlteration)
+                    .append(" is not known. ");
+        }
 
         return sb.toString();
     }
