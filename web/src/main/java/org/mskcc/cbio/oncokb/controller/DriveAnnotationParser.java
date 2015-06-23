@@ -334,6 +334,12 @@ public class DriveAnnotationParser {
         
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
+
+        //Check tumor type ID
+        if(tumorType == null){
+            tumorType = tumorTypeBo.findTumorTypeById(cancer);
+        }
+
         if (tumorType==null) {
             tumorType = new TumorType();
             tumorType.setTumorTypeId(cancer);
