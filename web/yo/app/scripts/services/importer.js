@@ -13,34 +13,34 @@ angular.module('oncokbApp')
       self.docs = [];
       self.docsL = 0;
       self.newFolder = '';
-      // self.parentFolder = '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk'; // Oncokb annotation folder
-      //self.parentFolder = '0BzBfo69g8fP6fnFNendYd3UyMVMxcG9sd1N5TW04VnZPWE1BQVNHU2Y5YnNSNWVteDVmS1k'; //backup folder
-      self.parentFolder = '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk'; //backup folder under knowledgebase
-      //self.parentFolder = '0BzBfo69g8fP6fmttemU5Y3dEd2hZOVUyMmIzN2FDSlZKcks0N19wVmlvdUV1c2RaWDVUcFk'; //Curation documents folder
+      self.parentFolder = OncoKB.config.backupFolderId; //backup folder under knowledgebase
       self.status = {
         backupIndex: -1,
         migrateIndex: -1
       };
 
       function backup(callback) {
-        if(!angular.isFunction(callback)){
-          callback = undefined;
-        }
-
-        createFolder().then(function(result){
-          if(result && result.error){
-            console.error('Create folder failed.', result);
-            if(callback) {
-              callback();
-            }
-          }else{
-            // var docs = documents.get({title: 'BRAF'});
-            self.docs = documents.get();
-            self.docsL = self.docs.length;
-            // self.newFolder = '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8';
-            copyData(0, callback);
+        if(self.parentFolder){
+          if(!angular.isFunction(callback)){
+            callback = undefined;
           }
-        });
+
+          createFolder().then(function(result){
+            if(result && result.error){
+              console.error('Create folder failed.', result);
+              if(callback) {
+                callback();
+              }
+            }else{
+              // var docs = documents.get({title: 'BRAF'});
+              self.docs = documents.get();
+              self.docsL = self.docs.length;
+              copyData(0, callback);
+            }
+          });
+        }else{
+          console.log('Backup folder ID needed.');
+        }
       }
 
       function createFolder(){
@@ -206,7 +206,7 @@ angular.module('oncokbApp')
 
         geneData.mutations.asArray().forEach(function(e){
           var _mutation = {};
-          _mutation = combineData(_mutation, e, ['name', 'oncogenic', 'description']);
+          _mutation = combineData(_mutation, e, ['name', 'summary', 'oncogenic', 'description']);
 
           _mutation.effect = {};
           _mutation.tumors = [];
@@ -219,7 +219,7 @@ angular.module('oncokbApp')
           e.tumors.asArray().forEach(function(e1){
             var __tumor = {};
 
-            __tumor = combineData(__tumor, e1, ['name', 'prevalence', 'progImp']);
+            __tumor = combineData(__tumor, e1, ['name', 'summary', 'prevalence', 'progImp']);
             __tumor.trials = [];
             __tumor.TI = [];
             __tumor.nccn = {};

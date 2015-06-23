@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="components/angular-dialog-service/dist/dialogs.min.css" />
     <link rel="stylesheet" href="components/fontawesome/css/font-awesome.css" />
     <link rel="stylesheet" href="components/datatables/media/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.css" />
     <link rel="stylesheet" href="components/please-wait/build/please-wait.css" />
     <link rel="stylesheet" href="components/spinkit/css/spinkit.css" />
     <!-- endbower -->
@@ -128,10 +129,17 @@
     <script src="components/x2js/xml2json.min.js"></script>
     <script src="components/angular-xml/angular-xml.js"></script>
     <script src="components/jspdf/dist/jspdf.min.js"></script>
-    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
-    <script src="components/underscore/underscore-min.js"></script>
-    <script src="components/datatables/media/js/jquery.dataTables.min.js"></script>
+    <script src="components/underscore/underscore.js"></script>
+    <script src="components/datatables/media/js/jquery.dataTables.js"></script>
     <script src="components/angular-datatables/dist/angular-datatables.js"></script>
+    <script src="components/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.js"></script>
+    <script src="components/angular-datatables/dist/plugins/colreorder/angular-datatables.colreorder.js"></script>
+    <script src="components/angular-datatables/dist/plugins/columnfilter/angular-datatables.columnfilter.js"></script>
+    <script src="components/angular-datatables/dist/plugins/colvis/angular-datatables.colvis.js"></script>
+    <script src="components/angular-datatables/dist/plugins/fixedcolumns/angular-datatables.fixedcolumns.js"></script>
+    <script src="components/angular-datatables/dist/plugins/fixedheader/angular-datatables.fixedheader.js"></script>
+    <script src="components/angular-datatables/dist/plugins/scroller/angular-datatables.scroller.js"></script>
+    <script src="components/angular-datatables/dist/plugins/tabletools/angular-datatables.tabletools.js"></script>
     <script src="components/lodash/lodash.js"></script>
     <script src="components/jquery-ui/jquery-ui.js"></script>
     <script src="components/angular-ui-sortable/sortable.js"></script>
@@ -141,12 +149,16 @@
     <!-- endbower -->
     <!-- endbuild -->
 
+
+    <!-- Separate angular contenteditable to avoid the conflicts when concatenating js files -->
+    <!-- build:js scripts/contenteditable.js -->
+    <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
+    <!-- endbuild -->
+
     <script src="//apis.google.com/js/api.js"></script>
     <script src="//apis.google.com/js/client:platform.js"></script>
 
     <!-- build:js scripts/oncokb.js -->
-    <script src="components/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js"></script>
-    <script src="components/d3/d3.min.js"></script>
     <script src="components/chosen/chosen.jquery.min.js"></script>
     <script src="_components/jquery.qtip.min.js"></script>
     <script src="scripts/directives/Tree.js"></script>

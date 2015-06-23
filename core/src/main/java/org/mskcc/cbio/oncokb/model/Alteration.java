@@ -18,7 +18,7 @@ public class Alteration implements java.io.Serializable {
      private Integer proteinStart;
      private Integer proteinEnd;
      private String variantResidues;
-     private Boolean oncogenic;
+     private Integer oncogenic;
 
     public Alteration() {
     }
@@ -108,14 +108,14 @@ public class Alteration implements java.io.Serializable {
         this.variantResidues = variantResidues;
     }
 
-    public Boolean getOncogenic() {
+    public Integer getOncogenic() {
         if (oncogenic==null) {
-            return false;
+            return -1;
         }
         return oncogenic;
     }
 
-    public void setOncogenic(Boolean oncogenic) {
+    public void setOncogenic(Integer oncogenic) {
         this.oncogenic = oncogenic;
     }
 

@@ -359,6 +359,24 @@ public class VariantAnnotationXMLController {
             sb.append(geneSummary)
                     .append(" ");
         }
+
+        //Mutation summary
+        List<Evidence> mutationSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_SUMMARY));
+        if (!mutationSummaryEvs.isEmpty()) {
+            Evidence ev = mutationSummaryEvs.get(0);
+            String mutationSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            sb.append(mutationSummary)
+                    .append(" ");
+        }
+
+        //Tumor type summary
+        List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
+        if (!tumorTypeSummaryEvs.isEmpty()) {
+            Evidence ev = tumorTypeSummaryEvs.get(0);
+            String tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            sb.append(tumorTypeSummary)
+                    .append(" ");
+        }
 //            List<Evidence> cancerSummaryEvs = evidenceBo.findEvidencesByGene(gene, EvidenceType.GENE_TUMOR_TYPE_SUMMARY);
 //            Map<TumorType, Evidence> mapTumorTypeSummaryEvs = new LinkedHashMap<TumorType, Evidence>();
 //            for (Evidence ev : cancerSummaryEvs) {
@@ -375,15 +393,15 @@ public class VariantAnnotationXMLController {
         if (alterations.isEmpty()) {
             sb.append("The oncogenic activity of this variant is unknown. ");
         } else {
-            boolean oncogenic = false;
+            int oncogenic = -1;
             for (Alteration a : alterations) {
-                if (a.getOncogenic()) {
-                    oncogenic = true;
+                if (a.getOncogenic() > 0) {
+                    oncogenic = a.getOncogenic();
                     break;
                 }
             }
 
-            if (oncogenic) {
+            if (oncogenic > 0) {
                 if(appendThe){
                     sb.append("The ");
                 }
@@ -394,7 +412,14 @@ public class VariantAnnotationXMLController {
                 }else{
                     sb.append(" is");
                 }
-                sb.append(" known to be oncogenic. ");
+
+                if(oncogenic == 2) {
+                    sb.append(" likely");
+                }else if (oncogenic == 1){
+                    sb.append(" known");
+                }
+
+                sb.append(" to be oncogenic. ");
             } else {
                 sb.append("It is not known whether ");
                 if(appendThe){

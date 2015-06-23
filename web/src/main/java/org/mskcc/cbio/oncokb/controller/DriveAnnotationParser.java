@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
+import java.lang.Exception;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -171,10 +172,22 @@ public class DriveAnnotationParser {
             
             Set<Alteration> alterations = new HashSet<Alteration>();
             
-            Boolean oncogenic = false;
+            int oncogenic = -1;
             
             if(mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
-                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
+                String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
+
+                switch (oncogenicStr){
+                    case "yes": oncogenic = 1;
+                        break;
+                    case "likely": oncogenic = 2;
+                        break;
+                    case "no": oncogenic = 0;
+                        break;
+                    default: oncogenic = -1;
+                        break;
+                }
+//                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
             }
             
             Map<String,String> mutations = parseMutationString(mutationStr);
@@ -191,14 +204,28 @@ public class DriveAnnotationParser {
                     alteration.setOncogenic(oncogenic);
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                }
-
-                if (oncogenic && !alteration.getOncogenic()) {
+                }else if (oncogenic > 0) {
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
             }
-            
+
+            // mutation summary
+            System.out.println("##    Summary");
+
+            if(mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.MUTATION_SUMMARY);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
+                evidence.setDescription(mutationObj.getString("summary"));
+                setDocuments(mutationObj.getString("summary"), evidence);
+                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                evidenceBo.save(evidence);
+            }else {
+                System.out.println("    No info...");
+            }
+
             // mutation effect
             JSONObject effectObject = mutationObj.getJSONObject("effect");
             String effect = effectObject.getString("value");
@@ -254,7 +281,7 @@ public class DriveAnnotationParser {
             System.out.println("##  Mutation does not have name skip...");
         }
     }
-    
+
     private static Map<String, String> parseMutationString(String mutationStr) {
         Map<String, String> ret = new HashMap<String, String>();
         
@@ -307,6 +334,12 @@ public class DriveAnnotationParser {
         
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
+
+        //Check tumor type ID
+        if(tumorType == null){
+            tumorType = tumorTypeBo.findTumorTypeById(cancer);
+        }
+
         if (tumorType==null) {
             tumorType = new TumorType();
             tumorType.setTumorTypeId(cancer);
@@ -316,7 +349,23 @@ public class DriveAnnotationParser {
         }
         
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        
+
+        // cancer type summary
+        System.out.println("##      Summary");
+
+        if(cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.TUMOR_TYPE_SUMMARY);
+            evidence.setGene(gene);
+            evidence.setDescription(cancerObj.getString("summary"));
+            evidence.setAlterations(alterations);
+            evidence.setTumorType(tumorType);
+            setDocuments(cancerObj.getString("summary"), evidence);
+            evidenceBo.save(evidence);
+        }else {
+            System.out.println("    No info...");
+        }
+
         // Prevalance
         if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
             System.out.println("##      Prevalance: " + alterations.toString());
@@ -367,17 +416,19 @@ public class DriveAnnotationParser {
                     if(implication.getString("status").equals("1")) {
                         if(implication.getString("type").equals("1")) {
                             evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
+                            type = "Sensitive";
                         }else if(implication.getString("type").equals("0")) {
-                            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;                        
+                            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
+                            type = "Resistant";
                         }
-                        type = "Sensitive";
                     }else if(implication.getString("status").equals("0")) {
                         if(implication.getString("type").equals("1")) {
                             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
+                            type = "Sensitive";
                         }else if(implication.getString("type").equals("0")) {
                             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
+                            type = "Resistant";
                         }
-                        type = "Resistant";
                     }
                 }
                 parseTherapeuticImplcations(gene, alterations, tumorType, implication, evidenceType, type);

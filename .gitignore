@@ -1,0 +1,14 @@
+.idea
+web/yo/.tmp
+web/yo/app/components
+web/yo/node_modules
+web/yo/.sass-cache
+web/yo/app/data
+target
+dist
+*.iml
+core/src/main/resources/properties/config.properties
+core/src/main/resources/properties/database.properties
+core/src/main/resources/certificate
+web/src/main/resources/certificate
+core/src/main/resources/data
