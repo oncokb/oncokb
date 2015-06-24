@@ -93,7 +93,7 @@ public final class AlterationUtils {
 
                     consequence = "frameshift_variant";
                 }else {
-                    p = Pattern.compile("([A-Z]+)([0-9]+)((ins)|(del))");
+                    p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
                     m = p.matcher(proteinChange);
                     if (m.matches()) {
                         ref = m.group(1);
