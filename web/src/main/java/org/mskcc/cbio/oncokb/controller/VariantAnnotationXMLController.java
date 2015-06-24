@@ -490,12 +490,14 @@ public class VariantAnnotationXMLController {
                                 .append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1), null, queryTumorType, false, true, false, true))
                                 .append(" the clinical utility for patients with ")
                                 .append(queryAlteration)
+                                .append(queryTumorType == null ? "" : " " + queryTumorType)
                                 .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
                         sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, queryTumorType, true, false, true, true))
                                 .append(" the clinical utility for patients with ")
                                 .append(queryAlteration)
+                                .append(queryTumorType == null ? "" : " " + queryTumorType)
                                 .append(" is not known. ");
                     } else {
                         // if there is no FDA or NCCN drugs for the gene at all
@@ -998,9 +1000,9 @@ public class VariantAnnotationXMLController {
             sb.append(" for treatment of patients with ");
             if(alterationStr == null){
                 if (alts.size() == 1) {
-                    sb.append(listToString(alts) + " " + listToString(tumorNames));
+                    sb.append(listToString(alts) + " " + (tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)));
                 }else if(alts.size() > 1) {
-                    sb.append(listToString(tumorNames) + " harboring " + listToString(alts) + " mutations");
+                    sb.append((tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)) + " harboring " + (alts.size()>3?" multiple":listToString(alts)) + " mutations");
                 }
             }else{
                 sb.append(alterationStr + " " + listToString(tumorNames));
@@ -1024,21 +1026,20 @@ public class VariantAnnotationXMLController {
             }
             sb.append(" drug" + (drugNames.size() > 1 ? "s" : "") + " for treatment of patients with " + (underTumorTypeLimit?listToString(tumorNames):"specific cancers") + " harboring the " + alterationStr);
 
-            if(queryAlteration != null){
-                if (fda) {
-                    sb.append(" (please refer to FDA Approved Drugs in Other Tumor Type section)");
-                } else if (nccn) {
-                    sb.append(" (please refer to Treatment Implications section)");
-                }
-            }
+//            if(queryAlteration != null){
+//                if (fda) {
+//                    sb.append(" (please refer to FDA Approved Drugs in Other Tumor Type section)");
+//                } else if (nccn) {
+//                    sb.append(" (please refer to Treatment Implications section)");
+//                }
+//            }
             sb.append(",");
         }
 
         if(queryAlteration != null) {
             sb.append(" the clinical utility for " + (drugNames.size() > 1 ? "these agents" : "the agent") + " in patients with ")
-                    .append(queryTumorType == null ? "other" : queryTumorType)
-                    .append(" with ")
                     .append(queryAlteration)
+                    .append(queryTumorType == null ? "" : " " + queryTumorType)
                     .append(" is not known. ");
         }
 
