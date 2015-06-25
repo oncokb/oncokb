@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- ClinicalTrialMapping business object -->
+    <bean id="clinicalTrialMappingBo" class="org.mskcc.cbio.oncokb.bo.impl.ClinicalTrialMappingBoImpl" >
+   		<property name="dao" ref="clinicalTrialMappingDao" />
+    </bean>
+ 
+    <!-- ClinicalTrialMapping Data Access Object -->
+    <bean id="clinicalTrialMappingDao" class="org.mskcc.cbio.oncokb.dao.impl.ClinicalTrialMappingDaoImpl" >
+   		<property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+   
+   		
+</beans>

@@ -1,11 +1,8 @@
 package org.mskcc.cbio.oncokb.dao;
 
 import java.util.List;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.ClinicalTrial;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
+import org.mskcc.cbio.oncokb.model.*;
 
 
 /**
@@ -39,7 +36,14 @@ public interface ClinicalTrialDao extends GenericDao<ClinicalTrial, Integer> {
      * 
      * @param tumorType
      * @param alteration
-     * @return 
-     */
+     * @return
+    */
     List<ClinicalTrial> findClinicalTrialByTumorTypeAndAlteration(TumorType tumorType, Alteration alteration);
+
+    /**
+     *
+     * @param mapping
+     * @return
+     */
+    List<ClinicalTrial> findClinicalTrialByMapping(ClinicalTrialMapping mapping);
 }

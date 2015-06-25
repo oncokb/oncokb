@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.dao.ClinicalTrialDao;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.ClinicalTrial;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -59,6 +56,23 @@ public class ClinicalTrialBoImpl extends GenericBoImpl<ClinicalTrial, ClinicalTr
             }
         }
         return new ArrayList<ClinicalTrial>(trials);    
+    }
+
+    @Override
+    public List<ClinicalTrial> findClinicalTrialByMapping(Collection<ClinicalTrialMapping> mappings, boolean openTrialsOnly) {
+        Set<ClinicalTrial> trials = new LinkedHashSet<ClinicalTrial>();
+        for (ClinicalTrialMapping mapping : mappings) {
+            if (!openTrialsOnly) {
+                trials.addAll(getDao().findClinicalTrialByMapping(mapping));
+            } else {
+                for (ClinicalTrial trial : getDao().findClinicalTrialByMapping(mapping)) {
+                    if (trial.isOpen()) {
+                        trials.add(trial);
+                    }
+                }
+            }
+        }
+        return new ArrayList<ClinicalTrial>(trials);
     }
 
     @Override

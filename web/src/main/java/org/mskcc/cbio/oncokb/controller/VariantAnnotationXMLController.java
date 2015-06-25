@@ -11,24 +11,8 @@ import java.util.*;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Article;
-import org.mskcc.cbio.oncokb.model.ClinicalTrial;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.NccnGuideline;
-import org.mskcc.cbio.oncokb.model.Treatment;
-import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
@@ -303,7 +287,9 @@ public class VariantAnnotationXMLController {
 
                 if (tumorTypesForTrials!=null) {
                     ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(tumorTypesForTrials, alterations, true);
+                    ClinicalTrialMappingBo clinicalTrialMappingBo = ApplicationContextSingleton.getClinicalTrialMappingBo();
+                    Set<ClinicalTrialMapping> mappings = clinicalTrialMappingBo.findMappingByAlterationTumorType(alterations, tumorTypesForTrials);;
+                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByMapping(mappings, true);
                     clinicalTrials.removeAll(allTrails); // remove duplication
                     allTrails.addAll(clinicalTrials);
 
