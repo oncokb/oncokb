@@ -985,11 +985,7 @@ public class VariantAnnotationXMLController {
 
             sb.append(" for treatment of patients with ");
             if(alterationStr == null){
-                if (alts.size() == 1) {
-                    sb.append(listToString(alts) + " " + (tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)));
-                }else if(alts.size() > 1) {
-                    sb.append((tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)) + " harboring " + (alts.size()>3?" multiple":listToString(alts)) + " mutations");
-                }
+                sb.append((tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)) + " harboring " + (alts.size()>3?" multiple":listToString(alts)) + " mutation" + (alts.size()>1?"s":""));
             }else{
                 sb.append(alterationStr + " " + listToString(tumorNames));
             }

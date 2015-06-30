@@ -1106,6 +1106,7 @@ angular.module('oncokbApp')
             function getLevels() {
                 var desS = {
                     '': '',
+                    '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker.',
                     '1': 'FDA-approved biomarker and drug association in this indication.',
                     '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
                     '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
@@ -1123,7 +1124,7 @@ angular.module('oncokbApp')
                 var levels = {};
 
                 var levelsCategories = {
-                    SS: ['','1','2A'],
+                    SS: ['', '0', '1','2A'],
                     SR: ['R1'],
                     IS: ['','2B','3','4'],
                     IR: ['R2','R3']
