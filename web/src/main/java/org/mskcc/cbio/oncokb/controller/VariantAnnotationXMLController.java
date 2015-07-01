@@ -919,6 +919,7 @@ public class VariantAnnotationXMLController {
                         if(drugMap == null){
                             drugMap = new TreeMap<>();
                             ttMap.put(drugName, drugMap);
+                            drugMap.put("approvedIndications", t.getApprovedIndications());
                             drugMap.put("level", ev.getLevelOfEvidence());
                             drugMap.put("alteration", ev.getAlterations());
                         }
@@ -928,7 +929,7 @@ public class VariantAnnotationXMLController {
         }
 
         if(map.size() > 2){
-            list.add(treatmentsToStringAboveLimit(drugs, capFirstLetter, fda, nccn));
+            list.add(treatmentsToStringAboveLimit(drugs, capFirstLetter, fda, nccn, null));
         }else{
             boolean first = true;
             for (Map.Entry<String, Map<String, Map<String, Object>>> entry : map.entrySet()) {
@@ -966,18 +967,18 @@ public class VariantAnnotationXMLController {
         }
 
         if(sameDrugs) {
-            sb.append(drugStr(drugs.keySet(), capFirstLetter, true, false));
+            sb.append(drugStr(drugs.keySet(), capFirstLetter, true, false, null));
         }else{
             sb.append(capFirstLetter ? "T" : "t")
                 .append("here are multiple FDA-approved agents");
         }
         sb.append(" for treatment of patients with ");
-        sb.append(tumorTypes.size()>2?"multiple tumor types":listToString(new ArrayList<String>(tumorTypes)))
+        sb.append(tumorTypes.size()>2?"different tumor types":listToString(new ArrayList<String>(tumorTypes)))
                 .append(" irrespective of mutation status");
         return sb.toString();
     }
 
-    private String drugStr(Set<String> drugs, boolean capFirstLetter, boolean fda, boolean nccn) {
+    private String drugStr(Set<String> drugs, boolean capFirstLetter, boolean fda, boolean nccn, String approvedIndication) {
         int drugLimit = 3;
 
         StringBuilder sb = new StringBuilder();
@@ -1003,10 +1004,18 @@ public class VariantAnnotationXMLController {
 
         if (fda) {
             sb.append(" FDA-approved");
-        } else if (nccn && drugs.size() <= drugLimit) {
-            sb.append(" listed by NCCN-compendium");
-        } else if (nccn && drugs.size() > drugLimit) {
-            sb.append(" NCCN-compendium listed");
+        } else if (nccn){
+            if(approvedIndication != null){
+                sb.append("FDA-approved for the treatment of ")
+                        .append(approvedIndication)
+                        .append(" and");
+            }
+
+            if (drugs.size() > drugLimit || approvedIndication != null) {
+                sb.append(" NCCN-compendium listed");
+            }else if(drugs.size() <= drugLimit) {
+                sb.append(" listed by NCCN-compendium");
+            }
         }
 
         if (drugs.size() > drugLimit) {
@@ -1016,11 +1025,10 @@ public class VariantAnnotationXMLController {
         return sb.toString();
     }
 
-    private String treatmentsToStringAboveLimit(Set<String> drugs, boolean capFirstLetter, boolean fda, boolean nccn) {
+    private String treatmentsToStringAboveLimit(Set<String> drugs, boolean capFirstLetter, boolean fda, boolean nccn, String approvedIndication) {
         StringBuilder sb = new StringBuilder();
-        sb.append(drugStr(drugs, capFirstLetter, fda, nccn));
-        sb.append(" for treatment of patients with multiple tumor types harboring specific mutations");
-
+        sb.append(drugStr(drugs, capFirstLetter, fda, nccn, null));
+        sb.append(" for treatment of patients with different tumor types harboring specific mutations");
         return sb.toString();
     }
 
@@ -1058,11 +1066,21 @@ public class VariantAnnotationXMLController {
         Set<String> drugs = map.keySet();
         Map<String, Object> drugAltMap = drugsAreSameByAlteration(map);
         StringBuilder sb = new StringBuilder();
+        Map<String, Object> drugMap = map.get(drugs.iterator().next());
+        Set<String> approvedIndications = (Set<String>)drugMap.get("approvedIndications");
+        String aiStr = null;
 
-        sb.append(drugStr(drugs, capFirstLetter, fda, nccn))
+        for(String ai : approvedIndications){
+            if(ai !=null && !ai.isEmpty()){
+                aiStr = ai;
+                break;
+            }
+        }
+
+        sb.append(drugStr(drugs, capFirstLetter, fda, nccn, aiStr))
             .append(" for treatment of patients ")
             .append(tumorType == null ? "" : ("with " + tumorType + " "))
-            .append("harboring ");
+                .append("harboring ");
 
         if (alteration!=null) {
             sb.append("the ").append(alteration);

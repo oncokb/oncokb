@@ -186,6 +186,7 @@ public class DriveAnnotationParser {
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
                 }else if (oncogenic > 0) {
+                    alteration.setOncogenic(oncogenic);
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
