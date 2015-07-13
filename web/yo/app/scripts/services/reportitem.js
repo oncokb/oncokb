@@ -576,6 +576,7 @@ angular.module('oncokbApp')
                 object = {};
                 key = 'LEVELS OF EVIDENCE';
                 value =  [
+                    {'Level 0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker.'},
                     {'Level 1': 'FDA-approved biomarker and drug association in this indication.'},
                     {'Level 2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.'},
                     {'Level 2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.'},

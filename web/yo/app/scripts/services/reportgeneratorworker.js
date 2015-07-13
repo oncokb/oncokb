@@ -239,8 +239,8 @@ angular.module('oncokbApp')
                     var _b = b.phase? b.phase: '';
                     var regex = /\d|\d\/\d/igm;
 
-                    var matchA = _a.match(regex);
-                    var matchB = _b.match(regex);
+                    var matchA = _a.match(regex) || ['-1']; //If no match found, give lowest priority
+                    var matchB = _b.match(regex) || ['-1'];
 
                     var largestA = Math.max.apply(Math, matchA);
                     var largestB = Math.max.apply(Math, matchB);

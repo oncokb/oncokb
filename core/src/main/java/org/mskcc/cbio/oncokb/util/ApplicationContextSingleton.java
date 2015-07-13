@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.model.ClinicalTrialMapping;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -30,6 +31,10 @@ public final class ApplicationContextSingleton {
     
     public static ClinicalTrialBo getClinicalTrialBo() {
         return ClinicalTrialBo.class.cast(getApplicationContext().getBean("clinicalTrialBo"));
+    }
+
+    public static ClinicalTrialMappingBo getClinicalTrialMappingBo() {
+        return ClinicalTrialMappingBo.class.cast(getApplicationContext().getBean("clinicalTrialMappingBo"));
     }
     
     public static NccnGuidelineBo getNccnGuidelineBo() {

@@ -3,10 +3,8 @@ package org.mskcc.cbio.oncokb.bo;
 
 import java.util.Collection;
 import java.util.List;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.ClinicalTrial;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.TumorType;
+
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -44,4 +42,11 @@ public interface ClinicalTrialBo extends GenericBo<ClinicalTrial> {
      * @return 
      */
     List<ClinicalTrial> findClinicalTrialByTumorType(Collection<TumorType> tumorTypes, boolean openTrialsOnly);
+
+    /**
+     *
+     * @param mappings
+     * @return
+     */
+    List<ClinicalTrial> findClinicalTrialByMapping(Collection<ClinicalTrialMapping> mappings, boolean openTrialsOnly);
 }

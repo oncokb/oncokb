@@ -10,6 +10,7 @@ import java.util.Map;
  * @author jgao
  */
 public enum LevelOfEvidence {
+    LEVEL_0 ("0", "FDA-approved drug in this indication irrespective of gene/variant biomarker"),
     LEVEL_1 ("1", "FDA-approved biomarker and drug association in this indication"),
     LEVEL_2A ("2a", "FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication"),
     LEVEL_2B ("2b", "FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication"),

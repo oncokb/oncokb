@@ -17,28 +17,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.ArticleBo;
-import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
-import org.mskcc.cbio.oncokb.bo.DrugBo;
-import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
-import org.mskcc.cbio.oncokb.bo.TreatmentBo;
-import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
+import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Article;
-import org.mskcc.cbio.oncokb.model.ClinicalTrial;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.NccnGuideline;
-import org.mskcc.cbio.oncokb.model.Treatment;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
@@ -205,6 +186,7 @@ public class DriveAnnotationParser {
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
                 }else if (oncogenic > 0) {
+                    alteration.setOncogenic(oncogenic);
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
@@ -453,6 +435,7 @@ public class DriveAnnotationParser {
     
     private static void parseClinicalTrials(Gene gene, Set<Alteration> alterations, TumorType tumorType, JSONArray trialsArray) {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        ClinicalTrialMappingBo clinicalTrialMappingBo = ApplicationContextSingleton.getClinicalTrialMappingBo();
         Set<String> nctIds = new HashSet<String>();
         for(int i = 0; i < trialsArray.length(); i++) {
             String nctId = trialsArray.getString(i).trim();
@@ -464,9 +447,18 @@ public class DriveAnnotationParser {
         try {
             List<ClinicalTrial> trials = ClinicalTrialsImporter.importTrials(nctIds);
             for (ClinicalTrial trial : trials) {
+                Set<ClinicalTrialMapping> mappings = new HashSet<ClinicalTrialMapping>();
+                for(Alteration alt : alterations){
+                    ClinicalTrialMapping mapping = new ClinicalTrialMapping();
+                    mapping.setAlteration(alt);
+                    mapping.setTumorType(tumorType);
+                    clinicalTrialMappingBo.saveOrUpdate(mapping);
+                    mappings.add(mapping);
+                }
                 trial.getAlterations().addAll(alterations);
                 trial.getTumorTypes().add(tumorType);
                 trial.getGenes().add(gene);
+                trial.getMappings().addAll(mappings);
                 clinicalTrialBo.saveOrUpdate(trial);
             }
         } catch (Exception e) {

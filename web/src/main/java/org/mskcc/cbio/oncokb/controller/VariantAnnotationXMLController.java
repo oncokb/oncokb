@@ -11,24 +11,8 @@ import java.util.*;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Article;
-import org.mskcc.cbio.oncokb.model.ClinicalTrial;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.NccnGuideline;
-import org.mskcc.cbio.oncokb.model.Treatment;
-import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
@@ -303,7 +287,9 @@ public class VariantAnnotationXMLController {
 
                 if (tumorTypesForTrials!=null) {
                     ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(tumorTypesForTrials, alterations, true);
+                    ClinicalTrialMappingBo clinicalTrialMappingBo = ApplicationContextSingleton.getClinicalTrialMappingBo();
+                    Set<ClinicalTrialMapping> mappings = clinicalTrialMappingBo.findMappingByAlterationTumorType(alterations, tumorTypesForTrials);;
+                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByMapping(mappings, true);
                     clinicalTrials.removeAll(allTrails); // remove duplication
                     allTrails.addAll(clinicalTrials);
 
@@ -450,9 +436,14 @@ public class VariantAnnotationXMLController {
             Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
                     evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypes)
             );
+            List<Evidence> evidences = new ArrayList<>();
+            if(!evidencesByLevel.get(LevelOfEvidence.LEVEL_0).isEmpty()){
+                evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_0));
+            }
             if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                 // if there are FDA approved drugs in the patient tumor type with the variant
-                sb.append(treatmentsToStringbyTumorType(evidencesByLevel.get(LevelOfEvidence.LEVEL_1), queryAlteration, queryTumorType, true, true, false, false))
+                evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_1));
+                sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, true, false, false))
                         .append(". ");
             } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                 // if there are NCCN guidelines in the patient tumor type with the variant
@@ -465,39 +456,80 @@ public class VariantAnnotationXMLController {
 //                        .append(treatmentsToStringbyTumorType(otherEvidencesByLevel.get(LevelOfEvidence.LEVEL_1), queryAlteration))
 //                        .append(". ");
 //                }
-                sb.append(treatmentsToStringbyTumorType(evidencesByLevel.get(LevelOfEvidence.LEVEL_2A), queryAlteration, queryTumorType,true, false, true, false))
+                evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_2A));
+                sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, false, true, false))
+                        .append(". ");
+            } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
+                sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, true, false, false))
                         .append(". ");
             } else {
                 // no FDA or NCCN in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> evidencesByLevelOtherTumorType = groupEvidencesByLevel(
                         evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes)
                 );
+                evidences.clear();
+                if(!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_0).isEmpty()){
+                    evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_0));
+                }
+
                 if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                     // if there are FDA approved drugs in other tumor types with the variant
+                    evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1));
                     sb.append("While ")
-                            .append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1), queryAlteration, queryTumorType,false, true, false, true));
+                            .append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType,false, true, false, true))
+                            .append(", the clinical utility for patients with ")
+                            .append(queryTumorType == null ? "" : " " + queryTumorType)
+                            .append(" harboring the " + queryAlteration)
+                            .append(" is not known. ");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
-                    sb.append(treatmentsToStringbyTumorType(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A), queryAlteration, queryTumorType,true, false, true, true));
-                } else {
+                    evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A));
+                    sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType,true, false, true, true))
+                            .append(", the clinical utility for patients with ")
+                            .append(queryTumorType == null ? "" : " " + queryTumorType)
+                            .append(" harboring the " + queryAlteration)
+                            .append(" is not known. ");
+                } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
+                    // if there are NCCN drugs in other tumor types with the variant0
+                    sb.append("While ")
+                            .append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType,false, true, false, true))
+                            .append(", the clinical utility for patients with ")
+                            .append(queryTumorType == null ? "" : " " + queryTumorType)
+                            .append(" harboring the " + queryAlteration)
+                            .append(" is not known. ");
+                }else {
                     // no FDA or NCCN drugs for the variant in any tumor type
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
                             evidenceBo.findEvidencesByGene(Collections.singleton(gene), sensitivityEvidenceTypes)
                     );
+                    evidences.clear();
+                    if(!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0).isEmpty()){
+                        evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0));
+                    }
                     if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                         // if there are FDA approved drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
+                        evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1));
                         sb.append("While ")
-                                .append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1), null, queryTumorType, false, true, false, true))
-                                .append(" the clinical utility for patients with ")
-                                .append(queryAlteration)
+                                .append(treatmentsToStringByTumorType(evidences, null, queryTumorType, false, true, false, true))
+                                .append(", the clinical utility for patients with ")
                                 .append(queryTumorType == null ? "" : " " + queryTumorType)
+                                .append(" harboring the " + queryAlteration)
                                 .append(" is not known. ");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E 
-                        sb.append(treatmentsToStringbyTumorType(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A), null, queryTumorType, true, false, true, true))
-                                .append(" the clinical utility for patients with ")
-                                .append(queryAlteration)
+                        evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1));
+                        sb.append(treatmentsToStringByTumorType(evidences, null, queryTumorType, true, false, true, true))
+                                .append(", the clinical utility for patients with ")
                                 .append(queryTumorType == null ? "" : " " + queryTumorType)
+                                .append(" harboring the " + queryAlteration)
+                                .append(" is not known. ");
+                    } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
+                        // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E
+                        sb.append("While ")
+                                .append(treatmentsToStringByTumorType(evidences, null, queryTumorType, false, true, false, true))
+                                .append(", the clinical utility for patients with ")
+                                .append(queryTumorType == null ? "" : " " + queryTumorType)
+                                .append(" harboring the " + queryAlteration)
                                 .append(" is not known. ");
                     } else {
                         // if there is no FDA or NCCN drugs for the gene at all
@@ -841,231 +873,126 @@ public class VariantAnnotationXMLController {
     }
 
     //According to following ruls
-//    IF ≤3 SAME drug for ≤3 different cancer types
+//    IF ≤2 SAME drug for ≤2 different cancer types
 //            include
 //
 //    e.g. While the drugs dabrafenib, trametinib and vemurafenib are FDA-approved for patients with BRAF V600E mutant melanoma, bladder or breast cancer, the clinical utility for these agents in patients with BRAF V600E mutant low grade gliomas is not known.
 //
-//    IF >3 SAME drug for >3 different cancer types
+//    IF >2 SAME drug for >2 different cancer types
 //            include
 //
 //    While there are FDA-approved drugs for patients with specific cancers harboring the BRAF V600E mutation (please refer to FDA-approved drugs in Other Tumor types section), the clinical utility for these agents in patients with BRAF V600E mutant low grade gliomas is not known.
 //
-//    IF <3 DIFFERENT drugs for <3 different tumor types
+//    IF <2 DIFFERENT drugs for <2 different tumor types
 //
 //    While there are FDA-approved drugs for patients with lung and colorectal cancers harboring the EGFR L858R mutation (please refer to FDA-approved drugs in Other Tumor types section), the clinical utility for these agents in patients with EGFR L858R mutant low grade gliomas is not known.
-    private String treatmentsToStringbyTumorType(List<Evidence> evidences, String queryAlteration, String queryTumorType, boolean capFirstLetter, boolean fda, boolean nccn, boolean inOtherTumorType) {
-        Map<String, Set<Evidence>> map = new TreeMap<String, Set<Evidence>>();
+    private String treatmentsToStringByTumorType(List<Evidence> evidences, String queryAlteration, String queryTumorType, boolean capFirstLetter, boolean fda, boolean nccn, boolean inOtherTumorType) {
+        // Tumor type -> drug -> LevelOfEvidence and alteration set
+        Map<String, Map<String, Map<String, Object>>> map = new TreeMap<>();
+        Set<String> drugs= new HashSet<>();
+        Map<String, Set<String>> levelZeroDrugs= new HashMap<>();
+        List<String> list = new ArrayList<String>();
+
         for (Evidence ev : evidences) {
-            String tt = ev.getTumorType().getName();
-            Set<Evidence> set = map.get(tt);
-            if (set == null) {
-                set = new HashSet<Evidence>();
-                map.put(tt, set);
+            String tt = ev.getTumorType().getName().toLowerCase();
+            Map<String, Map<String, Object>> ttMap = map.get(tt);
+            if (ttMap == null && !ev.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_0)) {
+                ttMap = new TreeMap<String, Map<String, Object>>();
+                map.put(tt, ttMap);
             }
-            set.add(ev);
-        }
 
-        Map<String, Object> drugAlterationMap = getDrugAlterationMap(map);
-        Map<String, Set<String>> drugs = (Map<String, Set<String>>)drugAlterationMap.get("drugs");
-        Set<Alteration> alterations = (Set<Alteration>)drugAlterationMap.get("alterations");
-
-        if(inOtherTumorType){
-            return treatmentsToStringByDrugs(drugs, alterations, queryAlteration, queryTumorType, capFirstLetter, fda, nccn);
-        }else{
-            boolean first = true;
-            List<String> list = new ArrayList<String>();
-            for (Map.Entry<String, Set<Evidence>> entry : map.entrySet()) {
-                String tt = entry.getKey();
-                Set<Evidence> evs = entry.getValue();
-                list.add(treatmentsToString(evs, tt, queryAlteration, first & capFirstLetter, fda, nccn));
-                first = false;
-            }
-            return listToString(list);
-        }
-    }
-
-    private Map<String, Object> getDrugAlterationMap(Map<String, Set<Evidence>> evidenceMap) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        Map<String, Set<String>> drugs = new HashMap<String, Set<String>>();
-        Set<Alteration> alterations = new LinkedHashSet<Alteration>();
-        for (Map.Entry<String, Set<Evidence>> entry : evidenceMap.entrySet()) {
-            String tt = entry.getKey();
-            Set<Evidence> evs = entry.getValue();
-            for (Evidence ev : evs) {
-                for (Treatment t : ev.getTreatments()) {
-                    for (Drug drug : t.getDrugs()) {
-                        String drugName = drug.getDrugName().toLowerCase();
-                        if(!drugs.containsKey(drugName)){
-                            drugs.put(drugName,  new HashSet<String>());
+            for (Treatment t : ev.getTreatments()) {
+                for (Drug drug : t.getDrugs()) {
+                    String drugName = drug.getDrugName().toLowerCase();
+                    if(ev.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_0)){
+                        if(!levelZeroDrugs.containsKey(drugName)){
+                            levelZeroDrugs.put(drugName, new HashSet<String>());
                         }
-                        if(!drugs.get(drugName).contains(ev.getTumorType().getName())){
-                            drugs.get(drugName).add(ev.getTumorType().getName());
+                        if(!levelZeroDrugs.get(drugName).contains(tt)){
+                            levelZeroDrugs.get(drugName).add(tt);
+                        }
+                    }else{
+                        Map<String, Object> drugMap = ttMap.get(drugName);
+                        if(!drugs.contains(drugName)){
+                            drugs.add(drugName);
+                        }
+                        if(drugMap == null){
+                            drugMap = new TreeMap<>();
+                            ttMap.put(drugName, drugMap);
+                            drugMap.put("approvedIndications", t.getApprovedIndications());
+                            drugMap.put("level", ev.getLevelOfEvidence());
+                            drugMap.put("alteration", ev.getAlterations());
                         }
                     }
                 }
-                alterations.addAll(ev.getAlterations());
             }
         }
 
-        map.put("drugs", drugs);
-        map.put("alterations", alterations);
-
-        return map;
-    }
-
-    private Boolean drugsAreSame(Map<String, Set<String>> drugs) {
-        int tumorTypeSize = -1;
-
-        for (Map.Entry<String, Set<String>> entry : drugs.entrySet()) {
-            if(tumorTypeSize == -1) {
-                tumorTypeSize = entry.getValue().size();
-            }else{
-                if(entry.getValue().size() != tumorTypeSize) {
-                    return false;
-                }
+        if(map.size() > 2){
+            list.add(treatmentsToStringAboveLimit(drugs, capFirstLetter, fda, nccn, null));
+        }else{
+            boolean first = true;
+            for (Map.Entry<String, Map<String, Map<String, Object>>> entry : map.entrySet()) {
+                String tt = entry.getKey();
+                list.add(treatmentsToString(entry.getValue(), tt, queryAlteration, first & capFirstLetter, fda, nccn));
+                first = false;
             }
         }
-
-        return true;
+        if(levelZeroDrugs.size() > 0) {
+            list.add(treatmentsToStringLevelZero(levelZeroDrugs, list.size()==0 & capFirstLetter));
+        }
+        return listToString(list);
     }
 
-
-    private String treatmentsToStringByDrugs(Map<String, Set<String>> drugs, Set<Alteration> alterations, String queryAlteration, String queryTumorType, boolean capFirstLetter, boolean fda, boolean nccn) {
-        //    IF ≤3 SAME drug for ≤3 different cancer types
-//            include
-//
-//    e.g. While the drugs dabrafenib, trametinib and vemurafenib are FDA-approved for patients with BRAF V600E mutant melanoma, bladder or breast cancer, the clinical utility for these agents in patients with BRAF V600E mutant low grade gliomas is not known.
-//
-//    IF >3 SAME drug for >3 different cancer types
-//            include
-//
-//    While there are FDA-approved drugs for patients with specific cancers harboring the BRAF V600E mutation (please refer to FDA-approved drugs in Other Tumor types section), the clinical utility for these agents in patients with BRAF V600E mutant low grade gliomas is not known.
-//
-//    IF <3 DIFFERENT drugs for <3 different tumor types
-//
-//    While there are FDA-approved drugs for patients with lung and colorectal cancers harboring the EGFR L858R mutation (please refer to FDA-approved drugs in Other Tumor types section), the clinical utility for these agents in patients with EGFR L858R mutant low grade gliomas is not known.
-
+    private String treatmentsToStringLevelZero(Map<String, Set<String>> drugs, Boolean capFirstLetter){
         StringBuilder sb = new StringBuilder();
-        List<String> drugNames = new ArrayList<String>();
-        List<String> tumorNames = new ArrayList<String>();
-        boolean sameDrugs = drugsAreSame(drugs);
-        boolean underTumorTypeLimit = tumorNames.size() <= 3;
-        boolean underDrugLimit = drugNames.size() <= 3;
-        String alterationStr = queryAlteration;
+        Set<String> tumorTypes = new HashSet<>();
+        boolean sameDrugs = true;
 
-        List<String> alts = new ArrayList<String>();
-        List<String> genes = new ArrayList<String>();
-        Iterator<Alteration> i = alterations.iterator();
-        while (i.hasNext()) {
-            Alteration alt = i.next();
-            alts.add(alt.getName());
-            if(!genes.contains(alt.getGene().getHugoSymbol())){
-                genes.add(alt.getGene().getHugoSymbol());
-            }
-        }
-
-        for (Map.Entry<String, Set<String>> entry : drugs.entrySet()) {
-            drugNames.add(entry.getKey());
-            for(String tumorName: entry.getValue()) {
-                if(!tumorNames.contains(tumorName)){
-                    tumorNames.add(tumorName.toLowerCase());
-                }
-            }
-        }
-
-        if(sameDrugs && underTumorTypeLimit && underDrugLimit && (alts.size() > 0 || queryAlteration != null)) {
-            sb.append(capFirstLetter?"T":"t").append("he drug");
-            if (drugNames.size()>1) {
-                sb.append("s");
-            }
-            sb.append(" ");
-            sb.append(listToString(new ArrayList<String>(drugNames)));
-            if (fda || nccn) {
-                sb.append(" ");
-                if (drugNames.size()>1) {
-                    sb.append("are ");
-                } else {
-                    sb.append("is ");
-                }
-            }
-
-            if (fda) {
-                sb.append(" FDA-approved");
-            } else if (nccn) {
-                sb.append(" listed by NCCN-compendium");
-            }
-
-
-            sb.append(" for treatment of patients with ");
-            if(alterationStr == null){
-                if (alts.size() == 1) {
-                    sb.append(listToString(alts) + " " + (tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)));
-                }else if(alts.size() > 1) {
-                    sb.append((tumorNames.size()>3?" multiple tumor types":listToString(tumorNames)) + " harboring " + (alts.size()>3?" multiple":listToString(alts)) + " mutations");
-                }
+        for(String drugName : drugs.keySet()){
+            if(tumorTypes.isEmpty()){
+                tumorTypes = drugs.get(drugName);
             }else{
-                sb.append(alterationStr + " " + listToString(tumorNames));
+                if(tumorTypes.size() != drugs.get(drugName).size()){
+                    sameDrugs = false;
+                    break;
+                }
+                for(String tt : drugs.get(drugName)){
+                    if(!tumorTypes.contains(tt)){
+                        sameDrugs = false;
+                        break;
+                    }
+                }
             }
-            sb.append(",");
-        }else {
-
-            if(alterationStr == null){
-                alterationStr = listToString(genes) + " " + listToString(alts);
-            }
-
-            sb.append("there " + (drugNames.size()>1?"are":"is"));
-
-            if (fda) {
-                sb.append(" FDA-approved");
-            } else if (nccn) {
-                sb.append(" NCCN-compendium listed");
-            }
-            if(alterationStr != null && alterationStr.contains("mutant")) {
-                alterationStr.replace("mutant", "mutation");
-            }
-            sb.append(" drug" + (drugNames.size() > 1 ? "s" : "") + " for treatment of patients with " + (underTumorTypeLimit?listToString(tumorNames):"specific cancers") + " harboring the " + alterationStr);
-
-//            if(queryAlteration != null){
-//                if (fda) {
-//                    sb.append(" (please refer to FDA Approved Drugs in Other Tumor Type section)");
-//                } else if (nccn) {
-//                    sb.append(" (please refer to Treatment Implications section)");
-//                }
-//            }
-            sb.append(",");
         }
 
-        if(queryAlteration != null) {
-            sb.append(" the clinical utility for " + (drugNames.size() > 1 ? "these agents" : "the agent") + " in patients with ")
-                    .append(queryAlteration)
-                    .append(queryTumorType == null ? "" : " " + queryTumorType)
-                    .append(" is not known. ");
+        if(sameDrugs) {
+            sb.append(drugStr(drugs.keySet(), capFirstLetter, true, false, null));
+        }else{
+            sb.append(capFirstLetter ? "T" : "t")
+                .append("here are multiple FDA-approved agents");
         }
-
+        sb.append(" for treatment of patients with ");
+        sb.append(tumorTypes.size()>2?"different tumor types":listToString(new ArrayList<String>(tumorTypes)))
+                .append(" irrespective of mutation status");
         return sb.toString();
     }
 
-    private String treatmentsToString(Collection<Evidence> evidences, String tumorType, String alteration, boolean capFirstLetter, boolean fda, boolean nccn) {
-        Set<String> drugs = new TreeSet<String>();
-        Set<Alteration> alterations = new LinkedHashSet<Alteration>();
-        for (Evidence ev : evidences) {
-            for (Treatment t : ev.getTreatments()) {
-                for (Drug drug : t.getDrugs()) {
-                    drugs.add(drug.getDrugName().toLowerCase());
-                }
-            }
-            alterations.addAll(ev.getAlterations());
-        }
+    private String drugStr(Set<String> drugs, boolean capFirstLetter, boolean fda, boolean nccn, String approvedIndication) {
+        int drugLimit = 3;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(capFirstLetter?"T":"t").append("he drug");
-        if (drugs.size()>1) {
-            sb.append("s");
-        }
-        sb.append(" ");
-        sb.append(listToString(new ArrayList<String>(drugs)));
 
+        if(drugs.size() > drugLimit){
+            sb.append(capFirstLetter?"T":"t").append("here");
+        }else{
+            sb.append(capFirstLetter?"T":"t").append("he drug");
+            if (drugs.size()>1) {
+                sb.append("s");
+            }
+            sb.append(" ");
+            sb.append(listToString(new ArrayList<String>(drugs)));
+        }
         if (fda || nccn) {
             sb.append(" ");
             if (drugs.size()>1) {
@@ -1077,22 +1004,98 @@ public class VariantAnnotationXMLController {
 
         if (fda) {
             sb.append(" FDA-approved");
-        } else if (nccn) {
-            sb.append(" listed by NCCN-compendium");
+        } else if (nccn){
+            if(approvedIndication != null){
+                sb.append("FDA-approved for the treatment of ")
+                        .append(approvedIndication)
+                        .append(" and");
+            }
+
+            if (drugs.size() > drugLimit || approvedIndication != null) {
+                sb.append(" NCCN-compendium listed");
+            }else if(drugs.size() <= drugLimit) {
+                sb.append(" listed by NCCN-compendium");
+            }
         }
 
-        sb.append(" for treatment of patients ")
-                .append(tumorType==null?"":("with "+tumorType+" "));
+        if (drugs.size() > drugLimit) {
+            sb.append(" drugs");
+        }
 
-        sb.append("harboring ");
+        return sb.toString();
+    }
+
+    private String treatmentsToStringAboveLimit(Set<String> drugs, boolean capFirstLetter, boolean fda, boolean nccn, String approvedIndication) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(drugStr(drugs, capFirstLetter, fda, nccn, null));
+        sb.append(" for treatment of patients with different tumor types harboring specific mutations");
+        return sb.toString();
+    }
+
+    private Map<String, Object> drugsAreSameByAlteration(Map<String, Map<String, Object>> drugs){
+        Set<Alteration> alterations = new HashSet<>();
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("isSame", true);
+        map.put("alterations", alterations);
+
+        for (String drugName : drugs.keySet()) {
+            Map<String, Object> drug = drugs.get(drugName);
+            Set<Alteration> alts = (Set<Alteration>)drug.get("alteration");
+            if(alterations.isEmpty()){
+                alterations = alts;
+            }else{
+                if(alterations.size() != alts.size()) {
+                    map.put("isSame", false);
+                    return map;
+                }
+
+                for(Alteration alt : alts){
+                    if(!alterations.contains(alt)){
+                        map.put("isSame", false);
+                        return map;
+                    }
+                }
+            }
+        }
+        map.put("alterations", alterations);
+        return map;
+    }
+
+    private String treatmentsToString(Map<String, Map<String, Object>> map, String tumorType, String alteration, boolean capFirstLetter, boolean fda, boolean nccn) {
+        Set<String> drugs = map.keySet();
+        Map<String, Object> drugAltMap = drugsAreSameByAlteration(map);
+        StringBuilder sb = new StringBuilder();
+        Map<String, Object> drugMap = map.get(drugs.iterator().next());
+        Set<String> approvedIndications = (Set<String>)drugMap.get("approvedIndications");
+        String aiStr = null;
+
+        for(String ai : approvedIndications){
+            if(ai !=null && !ai.isEmpty()){
+                aiStr = ai;
+                break;
+            }
+        }
+
+        sb.append(drugStr(drugs, capFirstLetter, fda, nccn, aiStr))
+            .append(" for treatment of patients ")
+            .append(tumorType == null ? "" : ("with " + tumorType + " "))
+                .append("harboring ");
+
         if (alteration!=null) {
             sb.append("the ").append(alteration);
-        } else if (alterations.size()>2) {
-            sb.append("specific mutations");
-        } else if (alterations.size() == 1){
-            sb.append("the ").append(alterationsToString(alterations));
-        }
+        } else if ((Boolean)drugAltMap.get("isSame")){
+            Set<Alteration> alterations = (Set<Alteration>)drugAltMap.get("alterations");
 
+            if (alterations.size() <= 2){
+                sb.append("the ").append(alterationsToString(alterations));
+            }else {
+                sb.append("specific mutations");
+            }
+
+        } else{
+            sb.append("specific mutations");
+        }
         return sb.toString();
     }
 
@@ -1147,7 +1150,7 @@ public class VariantAnnotationXMLController {
             return ret;
         }
 
-        return ret + " mutation" + (list.size()>1?"s":"");
+        return ret + " mutation" + (alterations.size()>1?"s":"");
     }
     /**
      *
