@@ -118,8 +118,9 @@
             </span>
           </accordion-heading>
           <accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 100 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
-            <!-- Mutation Effect -->
             <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
+            <!-- Mutation Effect -->
+            <pub-iframe ng-model="mutation.summary.text"></pub-iframe>
             <accordion-group ng-init="geneStatus[$parent.$parent.$index].oncogenic = {}" is-open="geneStatus[$parent.$parent.$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="(!!geneStatus[$parent.$parent.$index].oncogenic.hideEmpty) && mutationEffectEmpty(mutation)">
               <accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[$parent.$index].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$index].oncogenic.isOpen)"></i>
@@ -183,6 +184,7 @@
 
                 <accordion close-others="false">
                   <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional tumor type summary" ng-model="tumor.summary.text"></p></span>
+                  <pub-iframe ng-model="tumor.summary.text"></pub-iframe>
                   <!-- Prevalence -->
                   <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence={}; geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence.isOpen" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$index].prevalence.hideEmpty) && !tumor.prevalence.text" class="levelThreeHeader">
                     <accordion-heading>
