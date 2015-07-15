@@ -117,7 +117,7 @@
               <i ng-click="remove($event, $parent.$index)" class="fa fa-trash-o"></i>
             </span>
           </accordion-heading>
-          <accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 100 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
+          <accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 300 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
             <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
             <!-- Mutation Effect -->
             <pub-iframe ng-model="mutation.summary.text"></pub-iframe>
