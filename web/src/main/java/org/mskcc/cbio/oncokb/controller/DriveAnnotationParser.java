@@ -434,7 +434,8 @@ public class DriveAnnotationParser {
     }
     
     private static void parseClinicalTrials(Gene gene, Set<Alteration> alterations, TumorType tumorType, JSONArray trialsArray) {
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+
         Set<String> nctIds = new HashSet<String>();
         for(int i = 0; i < trialsArray.length(); i++) {
             String nctId = trialsArray.getString(i).trim();
@@ -442,15 +443,22 @@ public class DriveAnnotationParser {
                 nctIds.add(nctId);
             }
         }
-        
+
+        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tumorType));
+
+        for (Evidence eve : evidences){
+            evidenceBo.delete(eve);
+        }
+
         try {
             List<ClinicalTrial> trials = ClinicalTrialsImporter.importTrials(nctIds);
-            for (ClinicalTrial trial : trials) {
-                trial.getAlterations().addAll(alterations);
-                trial.getTumorTypes().add(tumorType);
-                trial.getGenes().add(gene);
-                clinicalTrialBo.saveOrUpdate(trial);
-            }
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.CLINICAL_TRIAL);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
+            evidence.setClinicalTrials(new HashSet<ClinicalTrial>(trials));
+            evidenceBo.save(evidence);
         } catch (Exception e) {
             e.printStackTrace();
         }

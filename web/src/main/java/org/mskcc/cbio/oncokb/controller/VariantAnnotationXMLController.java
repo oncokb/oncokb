@@ -8,6 +8,7 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -286,11 +287,11 @@ public class VariantAnnotationXMLController {
                 }
 
                 if (tumorTypesForTrials!=null) {
-                    ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(tumorTypes, alterations, true);
-                    clinicalTrials.removeAll(allTrails); // remove duplication
-                    allTrails.addAll(clinicalTrials);
-
+                    List<Evidence> clinicalTrialEvidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tt));
+                    List<ClinicalTrial> clinicalTrials = new LinkedList<ClinicalTrial>();
+                    for (Evidence ev : clinicalTrialEvidences) {
+                        clinicalTrials.addAll(ev.getClinicalTrials());
+                    }
                     exportClinicalTrials(clinicalTrials, sbTumorType,  "    ");
                 }
             }
