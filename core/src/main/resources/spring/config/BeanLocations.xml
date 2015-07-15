@@ -18,6 +18,5 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<import resource="../beans/NccnGuideline.xml"/>
 	<import resource="../beans/Treatment.xml"/>
 	<import resource="../beans/Evidence.xml"/>
-	<import resource="../beans/ClinicalTrailMapping.xml"/>
 	
 </beans>

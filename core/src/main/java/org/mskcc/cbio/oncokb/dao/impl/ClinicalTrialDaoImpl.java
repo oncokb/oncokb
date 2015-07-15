@@ -32,9 +32,4 @@ public class ClinicalTrialDaoImpl
     public List<ClinicalTrial> findClinicalTrialByTumorTypeAndAlteration(TumorType tumorType, Alteration alteration) {
         return findByNamedQuery("findClinicalTrialByTumorTypeAndAlteration", tumorType.getTumorTypeId(), alteration.getAlterationId());
     }
-
-    @Override
-    public List<ClinicalTrial> findClinicalTrialByMapping(ClinicalTrialMapping mapping) {
-        return findByNamedQuery("findClinicalTrialByMapping", mapping.getMappingId());
-    }
 }

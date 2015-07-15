@@ -59,23 +59,6 @@ public class ClinicalTrialBoImpl extends GenericBoImpl<ClinicalTrial, ClinicalTr
     }
 
     @Override
-    public List<ClinicalTrial> findClinicalTrialByMapping(Collection<ClinicalTrialMapping> mappings, boolean openTrialsOnly) {
-        Set<ClinicalTrial> trials = new LinkedHashSet<ClinicalTrial>();
-        for (ClinicalTrialMapping mapping : mappings) {
-            if (!openTrialsOnly) {
-                trials.addAll(getDao().findClinicalTrialByMapping(mapping));
-            } else {
-                for (ClinicalTrial trial : getDao().findClinicalTrialByMapping(mapping)) {
-                    if (trial.isOpen()) {
-                        trials.add(trial);
-                    }
-                }
-            }
-        }
-        return new ArrayList<ClinicalTrial>(trials);
-    }
-
-    @Override
     public List<ClinicalTrial> findClinicalTrialByTumorTypeAndAlteration(Collection<TumorType> tumorTypes, Collection<Alteration> alterations, boolean openTrialsOnly) {
         Set<ClinicalTrial> trials = new LinkedHashSet<ClinicalTrial>();
         for (TumorType tumorType : tumorTypes) {

@@ -287,9 +287,7 @@ public class VariantAnnotationXMLController {
 
                 if (tumorTypesForTrials!=null) {
                     ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-                    ClinicalTrialMappingBo clinicalTrialMappingBo = ApplicationContextSingleton.getClinicalTrialMappingBo();
-                    Set<ClinicalTrialMapping> mappings = clinicalTrialMappingBo.findMappingByAlterationTumorType(alterations, tumorTypesForTrials);;
-                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByMapping(mappings, true);
+                    List<ClinicalTrial> clinicalTrials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(tumorTypes, alterations, true);
                     clinicalTrials.removeAll(allTrails); // remove duplication
                     allTrails.addAll(clinicalTrials);
 

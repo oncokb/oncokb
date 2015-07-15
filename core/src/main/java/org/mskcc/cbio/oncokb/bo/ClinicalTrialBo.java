@@ -42,11 +42,4 @@ public interface ClinicalTrialBo extends GenericBo<ClinicalTrial> {
      * @return 
      */
     List<ClinicalTrial> findClinicalTrialByTumorType(Collection<TumorType> tumorTypes, boolean openTrialsOnly);
-
-    /**
-     *
-     * @param mappings
-     * @return
-     */
-    List<ClinicalTrial> findClinicalTrialByMapping(Collection<ClinicalTrialMapping> mappings, boolean openTrialsOnly);
 }
