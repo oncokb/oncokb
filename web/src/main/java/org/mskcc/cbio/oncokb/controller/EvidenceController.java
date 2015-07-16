@@ -36,8 +36,9 @@ public class EvidenceController {
             @RequestParam(value="entrezGeneId", required=false) String entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
             @RequestParam(value="alteration", required=false) String alteration,
-            @RequestParam(value="evidenceType", required=false) String evidenceType) {
-        
+            @RequestParam(value="evidenceType", required=false) String evidenceType,
+            @RequestParam(value="geneStatus", required=false) String geneStatus) {
+
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         
@@ -45,12 +46,28 @@ public class EvidenceController {
         if (entrezGeneId!=null) {
             for (String id : entrezGeneId.split(",")) {
                 Gene gene = geneBo.findGeneByEntrezGeneId(Integer.parseInt(id));
-                genes.add(gene);
+                if(geneStatus != null && gene != null) {
+                    if(gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())){
+                        genes.add(gene);
+                    }else{
+                        genes.add(null);
+                    }
+                }else{
+                    genes.add(gene);
+                }
             }
         } else if (hugoSymbol!=null) {
             for (String symbol : hugoSymbol.split(",")) {
                 Gene gene = geneBo.findGeneByHugoSymbol(symbol);
-                genes.add(gene);
+                if(geneStatus != null && gene != null) {
+                    if(gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())){
+                        genes.add(gene);
+                    }else{
+                        genes.add(null);
+                    }
+                }else{
+                    genes.add(gene);
+                }
             }
         } else {
             return evidenceBo.findAll();

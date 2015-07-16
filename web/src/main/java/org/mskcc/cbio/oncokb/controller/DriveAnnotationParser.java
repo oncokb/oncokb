@@ -434,8 +434,8 @@ public class DriveAnnotationParser {
     }
     
     private static void parseClinicalTrials(Gene gene, Set<Alteration> alterations, TumorType tumorType, JSONArray trialsArray) {
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        ClinicalTrialMappingBo clinicalTrialMappingBo = ApplicationContextSingleton.getClinicalTrialMappingBo();
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+
         Set<String> nctIds = new HashSet<String>();
         for(int i = 0; i < trialsArray.length(); i++) {
             String nctId = trialsArray.getString(i).trim();
@@ -443,24 +443,22 @@ public class DriveAnnotationParser {
                 nctIds.add(nctId);
             }
         }
-        
+
+        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tumorType));
+
+        for (Evidence eve : evidences){
+            evidenceBo.delete(eve);
+        }
+
         try {
             List<ClinicalTrial> trials = ClinicalTrialsImporter.importTrials(nctIds);
-            for (ClinicalTrial trial : trials) {
-                Set<ClinicalTrialMapping> mappings = new HashSet<ClinicalTrialMapping>();
-                for(Alteration alt : alterations){
-                    ClinicalTrialMapping mapping = new ClinicalTrialMapping();
-                    mapping.setAlteration(alt);
-                    mapping.setTumorType(tumorType);
-                    clinicalTrialMappingBo.saveOrUpdate(mapping);
-                    mappings.add(mapping);
-                }
-                trial.getAlterations().addAll(alterations);
-                trial.getTumorTypes().add(tumorType);
-                trial.getGenes().add(gene);
-                trial.getMappings().addAll(mappings);
-                clinicalTrialBo.saveOrUpdate(trial);
-            }
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.CLINICAL_TRIAL);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
+            evidence.setClinicalTrials(new HashSet<ClinicalTrial>(trials));
+            evidenceBo.save(evidence);
         } catch (Exception e) {
             e.printStackTrace();
         }

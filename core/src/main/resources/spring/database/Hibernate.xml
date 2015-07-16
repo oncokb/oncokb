@@ -31,7 +31,6 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                                 <value>/hibernate/Evidence.hbm.xml</value>
                                 <value>/hibernate/Treatment.hbm.xml</value>
                                 <value>/hibernate/Gene.hbm.xml</value>
-                                <value>/hibernate/ClinicalTrialMapping.hbm.xml</value>
 			</list>
 		</property>
 		
