@@ -46,14 +46,26 @@ public class EvidenceController {
         if (entrezGeneId!=null) {
             for (String id : entrezGeneId.split(",")) {
                 Gene gene = geneBo.findGeneByEntrezGeneId(Integer.parseInt(id));
-                if(geneStatus == null || gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())) {
+                if(geneStatus != null && gene != null) {
+                    if(gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())){
+                        genes.add(gene);
+                    }else{
+                        genes.add(null);
+                    }
+                }else{
                     genes.add(gene);
                 }
             }
         } else if (hugoSymbol!=null) {
             for (String symbol : hugoSymbol.split(",")) {
                 Gene gene = geneBo.findGeneByHugoSymbol(symbol);
-                if(geneStatus == null || gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())) {
+                if(geneStatus != null && gene != null) {
+                    if(gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())){
+                        genes.add(gene);
+                    }else{
+                        genes.add(null);
+                    }
+                }else{
                     genes.add(gene);
                 }
             }
