@@ -1,15 +1,19 @@
 <div id="variantDisplay" class="tab-pane fade in" ng-init="init()">
     <div ng-hide="loadingPage">
         <div class="row" id='variantCriteria'>
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-                <select chosen ng-model='gene' id="variantGeneNameDropDown" ng-options='gene for gene in genes' allow-single-deselect="true" data-placeholder="Choose a gene (eg. BRAF)">
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-4">
+                <select chosen ng-model='gene' id="variantGeneNameDropDown" ng-options='gene for gene in genes' allow-single-deselect="true" data-placeholder="Choose a gene">
                 <option value=""></option>
                 </select>
             </div>
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <div class="col-lg-4 col-md-3 col-sm-8 col-xs-8">
                 <div class="input-group input-group-sm">
-                    <span class="input-group-addon"><b>Mutation:</b></span>
-                    <input type="text" ng-model="alteration" id="variantMutation" style='width:100%' class="form-control" placeholder="(eg. V600E)">
+                    <input type="text" ng-model="alteration" id="variantMutation" style='width:100%' class="form-control" placeholder="Type in mutation">
+                    <div class="input-group-btn" >
+                        <select chosen ng-model='selectedConsequence' id="consequencesDropDown" ng-options='key as value for (key, value) in consequences' allow-single-deselect="true" data-placeholder="Consequence">
+                            <option value=""></option>
+                        </select>
+                    </div>
                 </div>
                 <!-- <select chosen ng-model='alteration' id="variantMutationDropDown" ng-options='alteration for alteration in alterations' allow-single-deselect="true" data-placeholder="Choose a mutation (eg. V600E)">
                 <option value=""></option>

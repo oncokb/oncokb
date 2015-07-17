@@ -528,6 +528,16 @@ h5 {
 ,#curateTumorTypesDropdown_chosen {
   width: 100% !important;
 }
+
+#consequencesDropDown_chosen {
+  width: 160px !important;
+}
+
+#consequencesDropDown_chosen>a{
+  border-radius: 0 4px 4px 0;
+  border-left: 0;
+}
+
 #CurationNCCNDropDown_chosen {
   width: 80% !important;
 }
