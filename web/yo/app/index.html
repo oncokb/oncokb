@@ -64,7 +64,7 @@
                             
                             <div ng-if="signedIn" style="float: left">
                                 <div  style="float: left; margin: 5px">
-                                    <span>{{user.email}}</span><br/>
+                                    <span>{{user.email | cut:true:20}}</span><br/>
                                     <span id="signout" style="" ng-click="signOut()">Sign out</span>
                                 </div>
                                 <img style="float: left" ng-if="user.avatar !== ''" ng-src="{{user.avatar}}">
