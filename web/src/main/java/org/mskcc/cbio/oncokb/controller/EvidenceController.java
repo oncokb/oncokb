@@ -12,11 +12,8 @@ import java.util.Set;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
 import org.springframework.stereotype.Controller;
@@ -37,12 +34,13 @@ public class EvidenceController {
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
             @RequestParam(value="alteration", required=false) String alteration,
             @RequestParam(value="evidenceType", required=false) String evidenceType,
+            @RequestParam(value="consequence", required=false) String consequence,
             @RequestParam(value="geneStatus", required=false) String geneStatus) {
 
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        
-        List<Gene> genes = new ArrayList<Gene>(); 
+
+        ArrayList<Gene> genes = new ArrayList<Gene>();
         if (entrezGeneId!=null) {
             for (String id : entrezGeneId.split(",")) {
                 Gene gene = geneBo.findGeneByEntrezGeneId(Integer.parseInt(id));
@@ -87,7 +85,12 @@ public class EvidenceController {
         List<Gene> geneCopies = new ArrayList<Gene>(genes);
         geneCopies.removeAll(Collections.singleton(null));
         if (evienceTypes == null) {
-            evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies));
+            List<EvidenceType> et = new ArrayList<>();
+            // add a few Strings to it
+            et.add(EvidenceType.GENE_SUMMARY);
+            et.add(EvidenceType.GENE_BACKGROUND);
+
+            evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies, et));
         } else {
             evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies, evienceTypes));
         }
@@ -96,12 +99,32 @@ public class EvidenceController {
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
             List<Alteration> alterations = new ArrayList<Alteration>();
             String[] strAlts = alteration.split(",");
-            int n = strAlts.length;
+            VariantConsequence variantConsequence = null;
+            String[] strConsequences = null;
+
+            if(consequence != null){
+                strConsequences = consequence.split(",");
+            }
+            int n = genes.size();
             for (int i=0; i<n; i++) {
                 if (genes.get(i)!=null) {
-                    Alteration alt = alterationBo.findAlteration(genes.get(i), AlterationType.MUTATION, strAlts[i]);
-                    if (alt!=null) {
-                        alterations.add(alt);
+                    Alteration alt = new Alteration();
+                    if(strConsequences != null) {
+                        String cons = strConsequences[i];
+                        if (cons!=null) {
+                            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(cons);
+                            alt.setConsequence(variantConsequence);
+                        }
+                    }
+                    alt.setAlteration(strAlts[i]);
+                    alt.setAlterationType(AlterationType.MUTATION);
+                    alt.setGene(genes.get(i));
+
+                    AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+
+                    List<Alteration> alts = alterationBo.findRelevantAlterations(alt);
+                    if (!alts.isEmpty()) {
+                        alterations.addAll(alts);
                     }
                 }
             }
