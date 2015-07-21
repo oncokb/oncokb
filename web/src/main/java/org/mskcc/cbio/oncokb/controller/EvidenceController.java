@@ -108,23 +108,41 @@ public class EvidenceController {
             int n = genes.size();
             for (int i=0; i<n; i++) {
                 if (genes.get(i)!=null) {
-                    Alteration alt = new Alteration();
                     if(strConsequences != null) {
                         String cons = strConsequences[i];
                         if (cons!=null) {
-                            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(cons);
-                            alt.setConsequence(variantConsequence);
+                            for(String con : cons.split("\\+")){
+                                Alteration alt = new Alteration();
+                                if(con.toLowerCase().contains("fusion")){
+                                    alt.setAlteration("fusions");
+                                }else{
+                                    alt.setAlteration(strAlts[i]);
+                                    variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(con);
+                                    alt.setConsequence(variantConsequence);
+                                }
+                                alt.setAlterationType(AlterationType.MUTATION);
+                                alt.setGene(genes.get(i));
+
+                                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+
+                                List<Alteration> alts = alterationBo.findRelevantAlterations(alt);
+                                if (!alts.isEmpty()) {
+                                    alterations.addAll(alts);
+                                }
+                            }
                         }
-                    }
-                    alt.setAlteration(strAlts[i]);
-                    alt.setAlterationType(AlterationType.MUTATION);
-                    alt.setGene(genes.get(i));
+                    }else{
+                        Alteration alt = new Alteration();
+                        alt.setAlteration(strAlts[i]);
+                        alt.setAlterationType(AlterationType.MUTATION);
+                        alt.setGene(genes.get(i));
 
-                    AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                    List<Alteration> alts = alterationBo.findRelevantAlterations(alt);
-                    if (!alts.isEmpty()) {
-                        alterations.addAll(alts);
+                        List<Alteration> alts = alterationBo.findRelevantAlterations(alt);
+                        if (!alts.isEmpty()) {
+                            alterations.addAll(alts);
+                        }
                     }
                 }
             }
