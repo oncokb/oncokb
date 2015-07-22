@@ -1174,7 +1174,7 @@ public class VariantAnnotationXMLController {
 
     private static final String TUMOR_TYPE_ALL_TUMORS = "all tumors";
     private static Map<String, List<TumorType>> questTumorTypeMap = null;
-    private static Set<TumorType> fromQuestTumorType(String questTumorType) {
+    public static Set<TumorType> fromQuestTumorType(String questTumorType) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (questTumorTypeMap==null) {
             questTumorTypeMap = new HashMap<String, List<TumorType>>();
@@ -1224,7 +1224,9 @@ public class VariantAnnotationXMLController {
             System.out.print("not in our mapping file");
             TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
             ret = new LinkedList<TumorType>();
-            ret.add(tumorTypeAll);
+            if(tumorTypeAll != null) {
+                ret.add(tumorTypeAll);
+            }
         }
 
         TumorType extactMatchedTumorType = tumorTypeBo.findTumorTypeByName(questTumorType);
