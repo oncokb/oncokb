@@ -1224,7 +1224,9 @@ public class VariantAnnotationXMLController {
             System.out.print("not in our mapping file");
             TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
             ret = new LinkedList<TumorType>();
-            ret.add(tumorTypeAll);
+            if(tumorTypeAll != null) {
+                ret.add(tumorTypeAll);
+            }
         }
 
         TumorType extactMatchedTumorType = tumorTypeBo.findTumorTypeByName(questTumorType);
