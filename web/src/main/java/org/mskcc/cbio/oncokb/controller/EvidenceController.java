@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static org.mskcc.cbio.oncokb.controller.VariantAnnotationXMLController.fromCbioportalTumorType;
 import static org.mskcc.cbio.oncokb.controller.VariantAnnotationXMLController.fromQuestTumorType;
 
 /**
@@ -36,7 +37,8 @@ public class EvidenceController {
             @RequestParam(value="tumorType", required=false) String tumorType,
             @RequestParam(value="evidenceType", required=false) String evidenceType,
             @RequestParam(value="consequence", required=false) String consequence,
-            @RequestParam(value="geneStatus", required=false) String geneStatus) {
+            @RequestParam(value="geneStatus", required=false) String geneStatus,
+            @RequestParam(value="source", required=false) String source) {
 
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -150,8 +152,13 @@ public class EvidenceController {
             }
 
 
-            if(tumorType != null) {
-                Set<TumorType> relevantTumorTypes = fromQuestTumorType(tumorType);
+            if(tumorType != null && source != null) {
+                Set<TumorType> relevantTumorTypes = new HashSet<>();
+                if(source.equals("cbioportal")) {
+                    relevantTumorTypes.addAll(fromCbioportalTumorType(tumorType));
+                }else if(source.equals("quest")) {
+                    relevantTumorTypes.addAll(fromQuestTumorType(tumorType));
+                }
                 if(relevantTumorTypes != null) {
                     if (evienceTypes == null) {
                         evidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes)));
