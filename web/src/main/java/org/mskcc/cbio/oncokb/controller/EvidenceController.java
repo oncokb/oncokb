@@ -182,22 +182,39 @@ public class EvidenceController {
                     }
                     if (relevantTumorTypes != null) {
                         if (evidenceTypes == null) {
-                            evidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes)));
+                            List<Evidence> tumorTypeEvidences = new ArrayList<>();
+                            tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes)));
+                            evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
                         } else {
                             //Need to be implemented
                         }
                     }
                 } else {
                     if (evidenceTypes == null) {
-                        evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations));
+                        evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations), alterations));
                     } else {
-                        evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes));
+                        evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes), alterations));
                     }
                 }
             } else {
                 evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene)));
             }
         }
+        return evidences;
+    }
+
+    private List<Evidence> filterAlteration(List<Evidence> evidences, List<Alteration> alterations){
+        for(Evidence evidence : evidences) {
+            Set<Alteration> filterEvidences = new HashSet<>();
+            for(Alteration alt : evidence.getAlterations()) {
+                if(alterations.contains(alt)) {
+                    filterEvidences.add(alt);
+                }
+            }
+            evidence.getAlterations().clear();
+            evidence.setAlterations(filterEvidences);
+        }
+
         return evidences;
     }
 
