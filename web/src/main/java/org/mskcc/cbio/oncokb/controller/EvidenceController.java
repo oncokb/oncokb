@@ -30,7 +30,7 @@ import static org.mskcc.cbio.oncokb.controller.VariantAnnotationXMLController.fr
 public class EvidenceController {
     
     @RequestMapping(value="/evidence.json")
-    public @ResponseBody List<Evidence> getEvidence(
+    public @ResponseBody List<List<Evidence>> getEvidence(
             @RequestParam(value="entrezGeneId", required=false) String entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
             @RequestParam(value="alteration", required=false) String alteration,
@@ -40,10 +40,14 @@ public class EvidenceController {
             @RequestParam(value="geneStatus", required=false) String geneStatus,
             @RequestParam(value="source", required=false) String source) {
 
+        List<List<Evidence>> evidences = new ArrayList<>();
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
         ArrayList<Gene> genes = new ArrayList<Gene>();
+        String[] alterations = null;
+        String[] consequences = null;
+
         if (entrezGeneId!=null) {
             for (String id : entrezGeneId.split(",")) {
                 Gene gene = geneBo.findGeneByEntrezGeneId(Integer.parseInt(id));
@@ -71,75 +75,83 @@ public class EvidenceController {
                 }
             }
         } else {
-            return evidenceBo.findAll();
+            List<Evidence> evidenceList = new ArrayList<Evidence>(evidenceBo.findAll());
+            evidences.add(evidenceList);
+            return evidences;
         }
         
-        List<EvidenceType> evienceTypes = null;
+        List<EvidenceType> evidenceTypes = null;
         if (evidenceType!=null) {
-            evienceTypes = new ArrayList<EvidenceType>();
+            evidenceTypes = new ArrayList<EvidenceType>();
             for (String type : evidenceType.split(",")) {
                 EvidenceType et = EvidenceType.valueOf(type);
-                evienceTypes.add(et);
+                evidenceTypes.add(et);
             }
         }
-        
-        
-        Set<Evidence> evidences = new HashSet<Evidence>();
-        List<Gene> geneCopies = new ArrayList<Gene>(genes);
-        geneCopies.removeAll(Collections.singleton(null));
-        if (evienceTypes == null) {
-            List<EvidenceType> et = new ArrayList<>();
-            // add a few Strings to it
-            et.add(EvidenceType.GENE_SUMMARY);
-            et.add(EvidenceType.GENE_BACKGROUND);
 
-            evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies, et));
-        } else {
-            evidences.addAll(evidenceBo.findEvidencesByGene(geneCopies, evienceTypes));
+        if(alteration != null){
+            alterations = alteration.split(",");
         }
-        
-        if (alteration!=null) {
-            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            List<Alteration> alterations = new ArrayList<Alteration>();
-            String[] strAlts = alteration.split(",");
-            VariantConsequence variantConsequence = null;
-            String[] strConsequences = null;
 
-            if(consequence != null){
-                strConsequences = consequence.split(",");
+        if(consequence != null){
+            consequences = consequence.split(",");
+        }
+
+        if(genes.size() == alterations.length && alterations.length == consequences.length) {
+            List<Gene> geneCopies = new ArrayList<Gene>(genes);
+
+            for(int i = 0 ; i < genes.size(); i++){
+                List<Evidence> evidencesDatum = new ArrayList<>();
+
+                if(genes.get(i) == null) {
+                    evidences.add(evidencesDatum);
+                }else{
+                    evidences.add(getEvidence(genes.get(i), alterations[i], tumorType, source, evidenceTypes,consequences[i]));
+                }
             }
-            int n = genes.size();
-            for (int i=0; i<n; i++) {
-                if (genes.get(i)!=null) {
-                    if(strConsequences != null) {
-                        //Consequence format  a, b+c, d ... each variant pair (gene + alteration) could have one or multiple consequences. Multiple consequences are separated by '+'
-                        String cons = strConsequences[i];
-                        if (cons!=null) {
-                            for(String con : cons.split("\\+")){
-                                Alteration alt = new Alteration();
-                                if(con.toLowerCase().contains("fusion")){
-                                    alt.setAlteration("fusions");
-                                }else{
-                                    alt.setAlteration(strAlts[i]);
-                                    variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(con);
-                                    alt.setConsequence(variantConsequence);
-                                }
-                                alt.setAlterationType(AlterationType.MUTATION);
-                                alt.setGene(genes.get(i));
 
-                                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+            geneCopies.removeAll(Collections.singleton(null));
 
-                                List<Alteration> alts = alterationBo.findRelevantAlterations(alt);
-                                if (!alts.isEmpty()) {
-                                    alterations.addAll(alts);
-                                }
-                            }
-                        }
-                    }else{
+
+            return evidences;
+        }else{
+            return new ArrayList<>();
+        }
+    }
+
+    private List<Evidence> getEvidence(Gene gene, String alteration, String tumorType, String tumorTypeSource, List<EvidenceType> evidenceTypes, String consequence) {
+        List<Evidence> evidences = new ArrayList<>();
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        if(gene != null) {
+            if (evidenceTypes == null) {
+                List<EvidenceType> et = new ArrayList<>();
+                // add a few Strings to it
+                et.add(EvidenceType.GENE_SUMMARY);
+                et.add(EvidenceType.GENE_BACKGROUND);
+
+                evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), et));
+            } else {
+                evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), evidenceTypes));
+            }
+
+            if (alteration != null) {
+                AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+                List<Alteration> alterations = new ArrayList<Alteration>();
+                VariantConsequence variantConsequence = null;
+
+                if (consequence != null) {
+                    //Consequence format  a, b+c, d ... each variant pair (gene + alteration) could have one or multiple consequences. Multiple consequences are separated by '+'
+                    for (String con : consequence.split("\\+")) {
                         Alteration alt = new Alteration();
-                        alt.setAlteration(strAlts[i]);
+                        if (con.toLowerCase().contains("fusion")) {
+                            alt.setAlteration("fusions");
+                        } else {
+                            alt.setAlteration(alteration);
+                            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(con);
+                            alt.setConsequence(variantConsequence);
+                        }
                         alt.setAlterationType(AlterationType.MUTATION);
-                        alt.setGene(genes.get(i));
+                        alt.setGene(gene);
 
                         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -148,36 +160,45 @@ public class EvidenceController {
                             alterations.addAll(alts);
                         }
                     }
-                }
-            }
+                } else {
+                    Alteration alt = new Alteration();
+                    alt.setAlteration(alteration);
+                    alt.setAlterationType(AlterationType.MUTATION);
+                    alt.setGene(gene);
 
+                    AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-            if(tumorType != null && source != null) {
-                Set<TumorType> relevantTumorTypes = new HashSet<>();
-                if(source.equals("cbioportal")) {
-                    relevantTumorTypes.addAll(fromCbioportalTumorType(tumorType));
-                }else if(source.equals("quest")) {
-                    relevantTumorTypes.addAll(fromQuestTumorType(tumorType));
-                }
-                if(relevantTumorTypes != null) {
-                    if (evienceTypes == null) {
-                        evidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes)));
-                    } else {
-                        //Need to be implemented
+                    List<Alteration> alts = alterationBo.findRelevantAlterations(alt);
+                    if (!alts.isEmpty()) {
+                        alterations.addAll(alts);
                     }
                 }
-            }else{
-                if (evienceTypes == null) {
-                    evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations));
+                if (tumorType != null && tumorTypeSource != null) {
+                    Set<TumorType> relevantTumorTypes = new HashSet<>();
+                    if (tumorTypeSource.equals("cbioportal")) {
+                        relevantTumorTypes.addAll(fromCbioportalTumorType(tumorType));
+                    } else if (tumorTypeSource.equals("quest")) {
+                        relevantTumorTypes.addAll(fromQuestTumorType(tumorType));
+                    }
+                    if (relevantTumorTypes != null) {
+                        if (evidenceTypes == null) {
+                            evidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes)));
+                        } else {
+                            //Need to be implemented
+                        }
+                    }
                 } else {
-                    evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, evienceTypes));
+                    if (evidenceTypes == null) {
+                        evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations));
+                    } else {
+                        evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes));
+                    }
                 }
+            } else {
+                evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene)));
             }
-        }else {
-            evidences.addAll(evidenceBo.findEvidencesByGene(genes));
         }
-        
-        return new ArrayList<Evidence>(evidences);
+        return evidences;
     }
 
     private Set<Evidence> getTumorTypeEvidence(List<Alteration> alterations, List<TumorType> tumorTypes) {
