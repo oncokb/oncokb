@@ -1,14 +1,10 @@
 
 package org.mskcc.cbio.oncokb.importer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
+import java.io.FileWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -37,8 +33,9 @@ public final class DataAnalysis {
         throw new AssertionError();
     }
     
-    private static final String QUEST_CURATION_FOLDER = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/annotations_sample";
-    private static final String QUEST_CURATION_FILE = "/data/quest-curations.txt";
+    private static final String SUMMARY = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/summary.json";
+    private static final String SUMMARY_TUMOR = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/summary_tumor.json";
+    private static final String SUMMARY_DRUG = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/summary_drug.json";
     
     private static Map<String, Integer> TUMORS = new HashMap<>();
     private static Map<String, List> DRUGS = new HashMap<>();
@@ -54,13 +51,50 @@ public final class DataAnalysis {
         }
         
         JSONObject object = new JSONObject(genesMap);
-        System.out.println(object.toString());
+        FileWriter file = new FileWriter(SUMMARY);
+        try {
+            file.write(object.toString());
+            System.out.println("Successfully Copied JSON Object to summary.txt ...");
+            System.out.println("\nJSON Object: " + object.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } finally {
+            file.flush();
+            file.close();
+        }
+
         
         JSONObject tumors = new JSONObject(TUMORS);
-        System.out.println(tumors.toString());
-        
+        FileWriter fileTumor = new FileWriter(SUMMARY_TUMOR);
+        try {
+            fileTumor.write(tumors.toString());
+            System.out.println("Successfully Copied JSON Object to summary_tumor.txt ...");
+            System.out.println("\nJSON Object: " + tumors.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } finally {
+            fileTumor.flush();
+            fileTumor.close();
+        }
+
         JSONObject drugs = new JSONObject(DRUGS);
-        System.out.println(drugs.toString());
+        FileWriter fileDrug = new FileWriter(SUMMARY_DRUG);
+        try {
+            fileDrug.write(drugs.toString());
+            System.out.println("Successfully Copied JSON Object to summary_drug.txt ...");
+            System.out.println("\nJSON Object: " + drugs.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } finally {
+            fileDrug.flush();
+            fileDrug.close();
+        }
     }
     
     private static Map<String, Map> parseGene(Gene gene) {
@@ -183,8 +217,11 @@ public final class DataAnalysis {
                 evidencesMap.put(type.name(), evidenceIds);
             }
         }
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        List<ClinicalTrial> trials = clinicalTrialBo.findClinicalTrialByTumorTypeAndAlteration(Collections.singleton(tt), Collections.singleton(alt), true);
+        List<Evidence> clinicalTrialEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tt));
+        List<ClinicalTrial> trials = new ArrayList<>();
+        for (Evidence ev : clinicalTrialEvidences) {
+            trials.addAll(ev.getClinicalTrials());
+        }
         List<String> trialIds = new ArrayList();
         for(ClinicalTrial trial : trials){
             trialIds.add(trial.getNctId());
