@@ -91,31 +91,44 @@ public class EvidenceController {
 
         if(alteration != null){
             alterations = alteration.split(",");
-        }
+            if(genes.size() == alterations.length) {
+                List<Gene> geneCopies = new ArrayList<Gene>(genes);
+                Boolean consequenceLengthMatch = false;
 
-        if(consequence != null){
-            consequences = consequence.split(",");
-        }
+                if(consequence != null){
+                    consequences = consequence.split(",");
+                    if(consequences.length == alterations.length) {
+                        consequenceLengthMatch = true;
+                    }
+                }
 
-        if(genes.size() == alterations.length && alterations.length == consequences.length) {
-            List<Gene> geneCopies = new ArrayList<Gene>(genes);
+                for(int i = 0 ; i < genes.size(); i++){
+                    List<Evidence> evidencesDatum = new ArrayList<>();
 
+                    if(genes.get(i) == null) {
+                        evidences.add(evidencesDatum);
+                    }else{
+                        evidences.add(getEvidence(genes.get(i), alterations[i], tumorType, source, evidenceTypes, consequenceLengthMatch?consequences[i]:null, geneStatus));
+                    }
+                }
+
+                geneCopies.removeAll(Collections.singleton(null));
+
+
+                return evidences;
+            }else{
+                return new ArrayList<>();
+            }
+        }else{
             for(int i = 0 ; i < genes.size(); i++){
                 List<Evidence> evidencesDatum = new ArrayList<>();
 
-                if(genes.get(i) == null) {
-                    evidences.add(evidencesDatum);
-                }else{
-                    evidences.add(getEvidence(genes.get(i), alterations[i], tumorType, source, evidenceTypes,consequences[i], geneStatus));
+                if(genes.get(i) != null) {
+                    evidencesDatum = getEvidence(genes.get(i), null, null, null, null,null, null);
                 }
+                evidences.add(evidencesDatum);
             }
-
-            geneCopies.removeAll(Collections.singleton(null));
-
-
             return evidences;
-        }else{
-            return new ArrayList<>();
         }
     }
 
