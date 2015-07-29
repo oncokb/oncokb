@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.util.*;
 
+import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -14,7 +15,9 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,6 +34,7 @@ public class EvidenceController {
     
     @RequestMapping(value="/evidence.json")
     public @ResponseBody List<List<Evidence>> getEvidence(
+            HttpMethod method,
             @RequestParam(value="entrezGeneId", required=false) String entrezGeneId,
             @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
             @RequestParam(value="alteration", required=false) String alteration,
@@ -38,7 +42,36 @@ public class EvidenceController {
             @RequestParam(value="evidenceType", required=false) String evidenceType,
             @RequestParam(value="consequence", required=false) String consequence,
             @RequestParam(value="geneStatus", required=false) String geneStatus,
-            @RequestParam(value="source", required=false) String source) {
+            @RequestParam(value="source", required=false) String source,
+            @RequestBody String body) {
+
+        if(body != null && !body.isEmpty()){
+            JSONObject params = new JSONObject(body);
+            if(params.has("entrezGeneId")) {
+                entrezGeneId = params.getString("entrezGeneId");
+            }
+            if(params.has("hugoSymbol")) {
+                hugoSymbol = params.getString("hugoSymbol");
+            }
+            if(params.has("alteration")) {
+                alteration = params.getString("alteration");
+            }
+            if(params.has("tumorType")) {
+                tumorType = params.getString("tumorType");
+            }
+            if(params.has("evidenceType")) {
+                evidenceType = params.getString("evidenceType");
+            }
+            if(params.has("consequence")) {
+                consequence = params.getString("consequence");
+            }
+            if(params.has("geneStatus")) {
+                geneStatus = params.getString("geneStatus");
+            }
+            if(params.has("source")) {
+                source = params.getString("source");
+            }
+        }
 
         List<List<Evidence>> evidences = new ArrayList<>();
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
