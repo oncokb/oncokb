@@ -58,14 +58,18 @@ angular.module('oncokbApp')
                     same = true;
 
 
-                for(var key in params) {
-                    if(!location.hasOwnProperty(key)) {
-                        same = false;
-                        break;
-                    }else{
-                        if(location[key] !== params[key]) {
+                if(Object.keys(location).length !== Object.keys(params).length){
+                    same = false;
+                }else{
+                    for(var key in params) {
+                        if(!location.hasOwnProperty(key)) {
                             same = false;
                             break;
+                        }else{
+                            if(location[key] !== params[key]) {
+                                same = false;
+                                break;
+                            }
                         }
                     }
                 }
@@ -183,6 +187,17 @@ angular.module('oncokbApp')
                     'FDA Approved Drugs in Other Tumor Type': []
                 };
 
+                $scope.consequences = {
+                    'feature_truncation': 'Truncation',
+                    'frameshift_variant': 'Frame shift',
+                    'inframe_deletion': 'In frame deletion',
+                    'inframe_insertion': 'In frame insertion',
+                    'initiator_codon_variant': 'Initiator codon',
+                    'missense_variant': 'Missense',
+                    'stop_gained': 'Stop gained',
+                    'synonymous_variant': 'Synonymous'
+                };
+
                 $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
                 if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
@@ -227,7 +242,7 @@ angular.module('oncokbApp')
             };
 
             $scope.hasSelectedTumorType = function() {
-                if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType && $scope.selectedTumorType !== '') {
+                if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType) {
                     return true;
                 }else {
                     return false;
@@ -298,6 +313,9 @@ angular.module('oncokbApp')
                 if(hasSelectedTumorType) {
                     params.tumorType = $scope.selectedTumorType;
                 }
+                if($scope.hasOwnProperty('selectedConsequence') && $scope.selectedConsequence) {
+                    params.consequence = $scope.selectedConsequence;
+                }
 
                 changeUrl(params);
 
@@ -333,6 +351,7 @@ angular.module('oncokbApp')
                 // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'V600E')];
                 $scope.alteration = 'V600E';
                 $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'melanoma')];
+                $scope.selectedConsequence = '';
                 $scope.search();
             };
         }]);

@@ -23,6 +23,11 @@ public class EvidenceDaoImpl
     public List<Evidence> findEvidencesByAlteration(Alteration alteration) {
         return findByNamedQuery("findEvidencesByAlteration", alteration.getAlterationId());
     }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationAndTumorType(Alteration alteration, TumorType tumorType) {
+        return findByNamedQuery("findEvidencesByAlterationAndTumorType", alteration.getAlterationId(), tumorType);
+    }
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType) {

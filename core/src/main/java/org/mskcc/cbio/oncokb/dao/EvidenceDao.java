@@ -23,6 +23,14 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return 
      */
     List<Evidence> findEvidencesByAlteration(Alteration alteration);
+
+    /**
+     *
+     * @param alteration
+     * @param tumorType
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationAndTumorType(Alteration alteration, TumorType tumorType);
     /**
      * Find AlterationActivityEvidences by alterations
      * @param alteration
