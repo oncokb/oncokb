@@ -30,7 +30,7 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    //folderId: '0BzBfo69g8fP6aHpaRjgyZzRpcU0', //testing folder
+    //folderId: '0BzBfo69g8fP6ZXctbUZTYVM5Mk0', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
@@ -62,15 +62,21 @@ OncoKB.curateInfo = {
         'status': {
             type: 'string'
         },
+        'shortSummary': {
+            type: 'string',
+            display: 'Short description of summary'
+        },
         'summary': {
             type: 'string',
-            display: 'Summary',
-            comment: true
+            display: 'Summary'
+        },
+        'shortBackground': {
+            type: 'string',
+            display: 'Short description of background'
         },
         'background': {
             type: 'string',
-            display: 'Background',
-            comment: true
+            display: 'Background'
         },
         'mutations': {
             type: 'list'
@@ -84,21 +90,26 @@ OncoKB.curateInfo = {
             type: 'string'
         },
         'summary': {
+            type: 'string'
+        },
+        'shortSummary': {
             type: 'string',
-            comment: true
+            display: 'Description of summary'
         },
         'oncogenic': {
             type: 'string',
-            display: 'Oncogenic',
-            comment: true
+            display: 'Oncogenic'
         },
         'effect': {
             type: 'ME'
         },
+        'short': {
+            type: 'string',
+            display: 'Short description of mutation effect'
+        },
         'description': {
             type: 'string',
-            display: 'Description of mutation effect',
-            comment: true
+            display: 'Description of mutation effect'
         },
         'tumors': {
             type: 'list'
@@ -115,45 +126,45 @@ OncoKB.curateInfo = {
     'NCCN': {
         'therapy': {
             type: 'string',
-            display: 'Therapy',
-            comment: true
+            display: 'Therapy'
         },
         'disease': {
             type: 'string',
-            display: 'Disease',
-            comment: true
+            display: 'Disease'
         },
         'version': {
             type: 'string',
-            display: 'Version',
-            comment: true
+            display: 'Version'
         },
         'pages': {
             type: 'string',
-            display: 'Pages',
-            comment: true
+            display: 'Pages'
         },
         'category': {
             type: 'string',
-            display: 'NCCN category of evidence and consensus',
-            comment: true
+            display: 'NCCN category of evidence and consensus'
+        },
+        'short': {
+            type: 'string',
+            display: 'Short description of evidence'
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence',
-            comment: true
+            display: 'Description of evidence'
         }
     },
     'InteractAlts': {
         'alterations': {
             type: 'string',
-            display: 'Alterations',
-            comment: true
+            display: 'Alterations'
+        },
+        'short': {
+            type: 'string',
+            display: 'Short description'
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence',
-            comment: true
+            display: 'Description'
         }
     },
     'Tumor': {
@@ -161,18 +172,27 @@ OncoKB.curateInfo = {
             type: 'string'
         },
         'summary': {
+            type: 'string'
+        },
+        'shortSummary': {
             type: 'string',
-            comment: true
+            display: 'Short description of summary'
         },
         'prevalence': {
             type: 'string',
-            display: 'Prevalence',
-            comment: true
+            display: 'Prevalence'
+        },
+        'shortPrevalence': {
+            type: 'string',
+            display: 'Short prevalence'
         },
         'progImp': {
             type: 'string',
-            display: 'Prognostic implications',
-            comment: true
+            display: 'Prognostic implications'
+        },
+        'shortProgImp': {
+            type: 'string',
+            display: 'Short prognostic implications'
         },
         'trials': {
             type: 'list'
@@ -184,8 +204,7 @@ OncoKB.curateInfo = {
             type: 'NCCN'
         },
         'interactAlts': {
-            type: 'InteractAlts',
-            comment: true
+            type: 'InteractAlts'
         }
     },
     'TI': {
@@ -199,8 +218,11 @@ OncoKB.curateInfo = {
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence',
-            comment: true
+            display: 'Description of evidence'
+        },
+        'short': {
+            type: 'string',
+            display: 'Short description of evidence'
         }
     },
     'Treatment': {
@@ -212,32 +234,31 @@ OncoKB.curateInfo = {
         },
         'level': {
             type: 'string',
-            display: 'Highest level of evidence',
-            comment: true
+            display: 'Highest level of evidence'
         },
         'indication': {
             type: 'string',
-            display: 'Approved indications',
-            comment: true
+            display: 'Approved indications'
+        },
+        'short': {
+            type: 'string',
+            display: 'Short description of evidence'
         },
         'description': {
             type: 'string',
-            display: 'Description of evidence',
-            comment: true
+            display: 'Description of evidence'
         },
         'trials': {
-            type: 'string',
-            comment: true
+            type: 'string'
         }
     },
+    //Mutation effect
     'ME': {
         'value': {
-            type: 'string',
-            comment: true
+            type: 'string'
         },
         'addOn': {
-            type: 'string',
-            comment: true
+            type: 'string'
         }
     },
     'Comment': {
@@ -254,6 +275,26 @@ OncoKB.curateInfo = {
             type: 'string'
         },
         'resolved': {
+            type: 'string'
+        }
+    },
+    'TimeStamp': {
+        'value': {
+            type: 'string'
+        },
+        //Edit by
+        'by': {
+            type: 'string'
+        }
+    },
+    'EStatus': {
+        'value': {
+            type: 'string'
+        },
+        'by': {
+            type: 'string'
+        },
+        'date': {
             type: 'string'
         }
     }
@@ -308,8 +349,10 @@ OncoKB.initialize = function() {
                     this.types = model.createMap({'status': '0', 'type': '0'});
                 }else {
                     if(OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
-                        if(id !== 'Comment') {
+                        if(['Comment', 'TimeStamp', 'EStatus'].indexOf(id) === -1) {
                             this[__key + '_comments'] = model.createList();
+                            this[__key + '_timeStamp'] = model.createMap();
+                            this[__key + '_eStatus'] = model.createMap();
                         }
                         switch (OncoKB.curateInfo[id][__key].type) {
                             case 'string':
@@ -331,8 +374,10 @@ OncoKB.initialize = function() {
         //Register every field of OncoKB into document
         for(var j=0; j<_keysL; j++) {
             OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
-            if(_key !== 'Comment') {
+            if(['Comment', 'TimeStamp', 'EStatus'].indexOf(_key) === -1) {
                 OncoKB[_key].prototype[_keys[j] + '_comments'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_comments');
+                OncoKB[_key].prototype[_keys[j] + '_timeStamp'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_timeStamp');
+                OncoKB[_key].prototype[_keys[j] + '_eStatus'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_eStatus');
             }
         }
 
