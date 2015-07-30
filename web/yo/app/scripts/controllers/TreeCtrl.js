@@ -37,8 +37,8 @@ angular.module('oncokbApp').controller('TreeCtrl', [
             }, 100);
         }else {
             DatabaseConnector.getAllEvidence(function(data) {
-                OncoKB.global.treeEvidence = data;
-                drawTree(data);
+                OncoKB.global.treeEvidence = data[0];
+                drawTree(data[0]);
             });
         }
     };

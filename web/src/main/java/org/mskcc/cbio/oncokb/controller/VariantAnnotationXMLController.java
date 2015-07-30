@@ -1174,7 +1174,8 @@ public class VariantAnnotationXMLController {
 
     private static final String TUMOR_TYPE_ALL_TUMORS = "all tumors";
     private static Map<String, List<TumorType>> questTumorTypeMap = null;
-    private static Set<TumorType> fromQuestTumorType(String questTumorType) {
+    private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
+    public static Set<TumorType> fromQuestTumorType(String questTumorType) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (questTumorTypeMap==null) {
             questTumorTypeMap = new HashMap<String, List<TumorType>>();
@@ -1224,10 +1225,79 @@ public class VariantAnnotationXMLController {
             System.out.print("not in our mapping file");
             TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
             ret = new LinkedList<TumorType>();
-            ret.add(tumorTypeAll);
+            if(tumorTypeAll != null) {
+                ret.add(tumorTypeAll);
+            }
         }
 
         TumorType extactMatchedTumorType = tumorTypeBo.findTumorTypeByName(questTumorType);
+        if(extactMatchedTumorType!=null && !ret.contains(extactMatchedTumorType)) {
+            ret.add(0, extactMatchedTumorType);
+        }
+
+        return new LinkedHashSet<TumorType>(ret);
+    }
+
+    public static Set<TumorType> fromCbioportalTumorType(String cbioTumorType) {
+        TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
+        if (cbioTumorTypeMap==null) {
+            cbioTumorTypeMap = new HashMap<String, List<TumorType>>();
+
+            TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
+
+            List<String> lines;
+            try {
+                lines = FileUtils.readTrimedLinesStream(
+                        VariantAnnotationXMLController.class.getResourceAsStream("/data/cbioportal-tumor-types.txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Collections.singleton(tumorTypeAll);
+            }
+            for (String line : lines) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+
+                String[] parts = line.split("\t");
+                if(parts.length > 2) {
+                    String cbioType = parts[0].toLowerCase();
+                    List<TumorType> types = cbioTumorTypeMap.get(cbioType);
+                    if (types==null) {
+                        types = new LinkedList<TumorType>();
+                        cbioTumorTypeMap.put(cbioType, types);
+                    }
+
+                    for (int i = 1; i < parts.length; i++) {
+                        TumorType oncokbType = tumorTypeBo.findTumorTypeByName(parts[i]);
+                        if (oncokbType==null) {
+                            System.err.println("no " + parts[i] + " as tumor type in oncokb");
+                            continue;
+                        }
+                        types.add(oncokbType);
+                    }
+                }
+            }
+
+            if(tumorTypeAll != null) {
+                for (List<TumorType> list : cbioTumorTypeMap.values()) {
+                    list.add(tumorTypeAll);
+                }
+            }
+        }
+
+        cbioTumorType = cbioTumorType==null ? null : cbioTumorType.toLowerCase();
+
+        List<TumorType> ret = cbioTumorTypeMap.get(cbioTumorType);
+        if (ret == null) {
+            System.out.print("not in our mapping file");
+            TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
+            ret = new LinkedList<TumorType>();
+            if(tumorTypeAll != null) {
+                ret.add(tumorTypeAll);
+            }
+        }
+
+        TumorType extactMatchedTumorType = tumorTypeBo.findTumorTypeByName(cbioTumorType);
         if(extactMatchedTumorType!=null && !ret.contains(extactMatchedTumorType)) {
             ret.add(0, extactMatchedTumorType);
         }

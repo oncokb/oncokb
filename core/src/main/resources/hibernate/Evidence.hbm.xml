@@ -77,6 +77,9 @@
   <query name="findEvidencesByAlteration">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=?]]>
   </query>
+  <query name="findEvidencesByAlterationAndTumorType">
+    <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.tumorType=?]]>
+  </query>
   <query name="findEvidencesByAlterationAndEvidenceType">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?]]>
   </query>

@@ -43,6 +43,10 @@ angular.module('oncokbApp')
                 'false': {
                     keys: [],
                     num: 0
+                },
+                'unknown': {
+                    keys: [],
+                    num: 0
                 }
             };
 
@@ -145,14 +149,16 @@ angular.module('oncokbApp')
 
                             gene.mutations[mutation] = {
                                 effect: effects.join(', '),
-                                oncoGenic: mutationO.attrs.oncoGenic==='true'?true:false,
+                                oncoGenic: Number(mutationO.attrs.oncoGenic) ,
                                 type: mutationO.attrs.mutationType || 'MUTATION'
                             };
 
-                            if(gene.mutations[mutation].oncoGenic) {
+                            if([1, 2].indexOf(gene.mutations[mutation].oncoGenic) !== -1) {
                                 gene.oncoGenicVariants.true.keys.push(mutation);
-                            }else{
+                            }else if(gene.mutations[mutation].oncoGenic === -1){
                                 gene.oncoGenicVariants.false.keys.push(mutation);
+                            }else if(gene.mutations[mutation].oncoGenic === 0){
+                                gene.oncoGenicVariants.unknown.keys.push(mutation);
                             }
                         }
                         delete mutationO.attrs;
@@ -252,9 +258,11 @@ angular.module('oncokbApp')
                 gene.tumors.num = gene.tumors.keys.length;
                 gene.oncoGenicVariants.true.keys.sort();
                 gene.oncoGenicVariants.false.keys.sort();
+                gene.oncoGenicVariants.unknown.keys.sort();
                 gene.trials.keys = Object.keys(gene.trials).sort();
                 gene.oncoGenicVariants.true.num = gene.oncoGenicVariants.true.keys.length;
                 gene.oncoGenicVariants.false.num = gene.oncoGenicVariants.false.keys.length;
+                gene.oncoGenicVariants.unknown.num = gene.oncoGenicVariants.unknown.keys.length;
                 gene.trials.num = gene.trials.keys.length;
                 gene.positionedMutations.keys = Object.keys(gene.positionedMutations).sort();
                 gene.positionedMutations.num = gene.positionedMutations.keys.length;
