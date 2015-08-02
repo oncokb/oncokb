@@ -242,8 +242,8 @@ public class DriveAnnotationParser {
                     setDocuments(desc, evidence);
                 }
 
-                if((mutationObj.has("shortDescription") && !mutationObj.getString("shortDescription").trim().isEmpty())) {
-                    String desc = mutationObj.getString("shortDescription").trim();
+                if((mutationObj.has("short") && !mutationObj.getString("short").trim().isEmpty())) {
+                    String desc = mutationObj.getString("short").trim();
                     evidence.setShortDescription(desc);
                     setDocuments(desc, evidence);
                 }
@@ -364,7 +364,7 @@ public class DriveAnnotationParser {
                 evidence.setTumorType(tumorType);
 
                 if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
-                    String desc = cancerObj.getString("prevalence").trim();
+                    String desc = cancerObj.getString("shortPrevalence").trim();
                     evidence.setShortDescription(desc);
                     setDocuments(desc, evidence);
                 }
@@ -593,8 +593,8 @@ public class DriveAnnotationParser {
             // description
             if (drugObj.has("description") && !drugObj.getString("description").trim().isEmpty()) {
                 String desc = drugObj.getString("description").trim();
-                if (drugObj.has("shortProgImp") && !drugObj.getString("shortProgImp").trim().isEmpty()) {
-                    String shortDesc = drugObj.getString("shortProgImp").trim();
+                if (drugObj.has("short") && !drugObj.getString("short").trim().isEmpty()) {
+                    String shortDesc = drugObj.getString("short").trim();
                     evidence.setShortDescription(shortDesc);
                     setDocuments(shortDesc, evidence);
                 }
@@ -653,8 +653,8 @@ public class DriveAnnotationParser {
         nccnGuideline.setCategory(category);
         nccnGuideline.setDescription(nccnDescription);
 
-        if (nccnObj.has("shortDescription") && !nccnObj.getString("shortDescription").trim().isEmpty()) {
-            String shortDesc = nccnObj.getString("shortDescription").trim();
+        if (nccnObj.has("short") && !nccnObj.getString("short").trim().isEmpty()) {
+            String shortDesc = nccnObj.getString("short").trim();
             evidence.setShortDescription(shortDesc);
             nccnGuideline.setShortDescription(shortDesc);
         }

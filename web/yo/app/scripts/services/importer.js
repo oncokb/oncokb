@@ -206,7 +206,7 @@ angular.module('oncokbApp')
 
         geneData.mutations.asArray().forEach(function(e){
           var _mutation = {};
-          _mutation = combineData(_mutation, e, ['name', 'summary', 'oncogenic', 'description']);
+          _mutation = combineData(_mutation, e, ['name', 'summary', 'oncogenic', 'description', 'short']);
 
           _mutation.effect = {};
           _mutation.tumors = [];
@@ -219,7 +219,7 @@ angular.module('oncokbApp')
           e.tumors.asArray().forEach(function(e1){
             var __tumor = {};
 
-            __tumor = combineData(__tumor, e1, ['name', 'summary', 'prevalence', 'progImp']);
+            __tumor = combineData(__tumor, e1, ['name', 'summary', 'prevalence', 'progImp', 'shortPrevalence', 'shortProgImp']);
             __tumor.trials = [];
             __tumor.TI = [];
             __tumor.nccn = {};
@@ -234,7 +234,7 @@ angular.module('oncokbApp')
             e1.TI.asArray().forEach(function(e2){
               var ti = {};
 
-              ti = combineData(ti, e2, ['name', 'description']);
+              ti = combineData(ti, e2, ['name', 'description', 'short']);
               ti.status = getString(e2.types.get('status'));
               ti.type = getString(e2.types.get('type'));
               ti.treatments = [];
@@ -242,13 +242,13 @@ angular.module('oncokbApp')
               e2.treatments.asArray().forEach(function(e3){
                 var treatment = {};
 
-                treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description']);
+                treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short']);
                 ti.treatments.push(treatment);
               });
               __tumor.TI.push(ti);
             });
 
-            __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description']);
+            __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short']);
             __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description']);
             _mutation.tumors.push(__tumor);
           });
