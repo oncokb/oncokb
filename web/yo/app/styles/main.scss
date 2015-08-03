@@ -3,6 +3,7 @@ $icon-font-path: "app/components/bootstrap-sass-official/assets/fonts/bootstrap/
 @import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen.scss";
+@import "../components/fontawesome/scss/font-awesome.scss";
 // endbower
 body {
   margin-bottom: 20px;
@@ -173,7 +174,7 @@ p.editableBox.doubleH {
   position: relative;
   text-align: center;
 }
-.geneComments {
+.geneComments, .eStatusComments {
   position: absolute;
   width: 300px;
   border: 1px solid lightgrey;
@@ -184,6 +185,11 @@ p.editableBox.doubleH {
   display: none;
   z-index: 999;
   color: black;
+}
+.eStatusComments {
+  width: 165px;
+  right: 0;
+  top: 20px;
 }
 .reportGenerator .row{
   margin: 0;

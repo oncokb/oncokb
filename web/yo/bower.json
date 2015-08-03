@@ -24,7 +24,6 @@
     "stringjs": "~2.2.0",
     "levenshtein": "~1.0.5",
     "oridomi": "~1.1.5",
-    "fontawesome": "~4.2.0",
     "angular-xml": "~2.0.0",
     "jspdf": "~1.0.272",
     "angular-contenteditable": "~0.3.7",
@@ -37,7 +36,8 @@
     "angular-ui-sortable": "~0.13.3",
     "d3": "~3.5.5",
     "angular-file-upload": "~1.1.5",
-    "file-saver.js": "~1.20150304.1"
+    "file-saver.js": "~1.20150304.1",
+    "fontawesome": "~4.4.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",

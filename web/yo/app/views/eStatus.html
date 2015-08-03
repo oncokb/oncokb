@@ -1,0 +1,16 @@
+<span>
+  <status style="position: relative"><i class="fa {{status.icon}}" ng-style="{color: status.color}"></i>
+    <statusBody class="eStatusComments">
+      <span ng-repeat="checkbox in checkboxes">
+        <input
+              id="{{id}}-oncogenic-box{{$index}}"
+              type="checkbox"
+              ng-model="status.value"
+              ng-true-value="{{checkbox.value}}"
+              ng-false-value=""
+              >
+        <label ng-click="click(checkbox.value)" for="{{id}}-oncogenic-box{{$index}}" ng-style="{color: checkbox.color}">{{checkbox.display}}</label>
+      </span>
+    </statusBody>
+  </status>
+</span>

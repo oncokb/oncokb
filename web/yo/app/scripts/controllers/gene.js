@@ -363,6 +363,8 @@ angular.module('oncokbApp')
 
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
+                $scope.gene.name_timeStamp.set('lastUpdate', new Date().getTime());
+
                 var gene = importer.getData(this.gene);
                 // $timeout(function(){
                 DatabaseConnector.updateGene(JSON.stringify(gene), function(result){ $scope.docStatus.savedGene = true; console.log('success', result);}, function(result){ $scope.docStatus.savedGene = true; console.log('failed', result);});
