@@ -7,7 +7,7 @@
  * # eStatus
  */
 angular.module('oncokbApp')
-  .directive('eStatus', function () {
+  .directive('eStatus', function (gapi) {
     return {
       templateUrl: 'views/eStatus.html',
       restrict: 'AE',
@@ -17,26 +17,17 @@ angular.module('oncokbApp')
       },
       replace: true,
       link: function postLink(scope, element, attrs) {
-        scope.checkboxes = [
-          {
-            display: 'Obsolete',
-            value: 'o',
-            icon: 'fa-battery-1',
-            color: '#CC0000'
-          },
-          {
+        scope.checkboxes = [{
             display: 'Unvetted',
             value: 'uv',
             icon: 'fa-battery-0',
             color: '#808080'
-          },
-          {
+          },{
             display: 'Knowledgebase Vetted',
             value: 'kv',
-            icon: 'fa-battery-3',
+            icon: 'fa-battery-2',
             color: '#82E452'
-          },
-          {
+          },{
             display: 'Expert Vetted',
             value: 'ev',
             icon: 'fa-battery-4',
@@ -44,18 +35,27 @@ angular.module('oncokbApp')
           }
         ];
 
-        scope.$watch('status', function(n,o){
-          if(n !== o) {
-            console.log(n, o);
-          }
-        });
-
-        if(!scope.object.has('status')){
-          scope.object.set('status', 'uv');
-          scope.status = scope.getStatusByValue('uv');
+        if(!scope.object.has('vetted')){
+          scope.object.set('vetted', 'uv');
+          scope.vetted = scope.getStatusByValue('uv');
         }else{
-          scope.status = scope.getStatusByValue(scope.object.get('status'));
+          scope.vetted = scope.getStatusByValue(scope.object.get('vetted'));
         }
+
+        if(!scope.object.has('obsolete')){
+          scope.object.set('obsolete', 'false');
+          scope.obsolete = 'false';
+        }else{
+          scope.obsolete = scope.object.get('obsolete');
+        }
+
+        scope.object.addEventListener(
+            gapi.drive.realtime.EventType.VALUE_CHANGED, function(){
+              var vetted = scope.getStatusByValue(scope.object.get('vetted'));
+              if(vetted !== scope.vetted) {
+                scope.vetted = vetted;
+              }
+            });
 
         element.find('status').bind('mouseenter', function() {
           element.find('statusBody').show();
@@ -78,8 +78,18 @@ angular.module('oncokbApp')
         };
 
         $scope.click = function(newStatus) {
-          $scope.status = $scope.getStatusByValue(newStatus);
-          $scope.object.set('status', $scope.status.value);
+          console.log(newStatus);
+          if(newStatus !== 'o') {
+            $scope.vetted = $scope.getStatusByValue(newStatus);
+            $scope.object.set('vetted', $scope.vetted.value);
+          }else{
+            if($scope.obsolete === 'false'){
+              $scope.obsolete = 'true';
+            }else{
+              $scope.obsolete = 'false';
+            }
+            $scope.object.set('obsolete', $scope.obsolete);
+          }
         };
       }
     };

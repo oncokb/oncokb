@@ -6,8 +6,8 @@
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{collaborator.displayName}}">
       </span>
-      <span ng-if="document" class="geneLastModify">Last edit was made on {{document.modifiedDate | date : 'MMM d, h:mm a'}} by {{document.lastModifyingUserName}}</span>
-      <span ng-if="document" class="geneLastModify" ng-show="gene.name_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.name_timeStamp.get('lastUpdate') | date : 'MMM d, h:mm a'}}</span>
+      <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastEdit').by}}</span>
+      <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by}}</span>
       <span class="btn-group btn-group-sm pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
@@ -132,45 +132,24 @@
                 </span>
               </accordion-heading>
               <p>
-                <strong>{{mutation.oncogenic.display}}:</strong>
-                <span ng-repeat="checkbox in checkboxes['oncogenic']">
-                  <input
-                          id="{{mutation.name.text}}-oncogenic-box{{$index}}"
-                          type="checkbox"
-                          ng-model="mutation.oncogenic.text"
-                          ng-true-value="{{checkbox}}"
-                          ng-false-value=""
-                          >
-                  <label for="{{mutation.name.text}}-oncogenic-box{{$index}}">{{checkbox}}</label>
-                </span>
+                <strong style="float: left">{{mutation.oncogenic.display}}:</strong>
+                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-oncogenic-box-'"></drive-realtime-string>
               </p>
               <div class="mutationEffect">
                 <strong class="header">Mutation effect:</strong>
                 <div class="content">
-                  <span  ng-repeat="checkbox in checkboxes['mutation_effect']">
-                    <input
-                            id="{{mutation.name.text}}-mutation_effect-box{{$index}}"
-                            type="checkbox"
-                            ng-change="mutationEffectChanged(mutation.effect)"
-                            ng-model="mutation.effect.value.text"
-                            ng-true-value="{{checkbox}}"
-                            ng-false-value=""
-                            >
-                    <label for="{{mutation.name.text}}-mutation_effect-box{{$index}}">{{checkbox}}</label>
-                    <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-if="mutation.effect.value.text === checkbox && checkbox !== 'Other'" ng-model="mutation.effect.addOn.text" placeholder=" Optional text"/>
-                    <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-if="mutation.effect.value.text === checkbox && checkbox === 'Other'" ng-model="mutation.effect.addOn.text"/>
-                  </span>
+                  <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'s-checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutation_effect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
                 </div>
               </div>
               <span>
                 <strong>{{mutation.short.display}}:</strong>
                 <br/>
-                <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.short.text"></p>
+                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.short" io="geneStatus[$parent.$index].oncogenic.isOpen"></drive-realtime-string>
               </span>
               <span>
                 <strong>{{mutation.description.display}}:</strong>
                 <br/>
-                <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.description.text"></p>
+                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="geneStatus[$parent.$index].oncogenic.isOpen"></drive-realtime-string>
               </span>
               <pub-iframe ng-model="mutation.description.text"></pub-iframe>
             </accordion-group>
@@ -207,10 +186,8 @@
                         <e-status  ng-click="commentClick($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'"></e-status>
                       </span>
                     </accordion-heading>
-                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.shortPrevalence.text" placeholder="Short prevalence"></p>
-                    <pub-iframe ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].prevalence.isOpen" ng-model="tumor.shortPrevalence.text"></pub-iframe>
-                    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.prevalence.text" placeholder="Full prevalence"></p>
-                    <pub-iframe ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].prevalence.isOpen" ng-model="tumor.prevalence.text"></pub-iframe>
+                    <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].prevalence.isOpen" ph="'Short prevalence'"></drive-realtime-string>
+                    <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].prevalence.isOpen" ph="'Full prevalence'"></drive-realtime-string>
                   </accordion-group>
 
                   <!-- Prognostic implications -->
@@ -220,13 +197,11 @@
                       <span ng-click="stopCollopse($event)">{{tumor.progImp.display}}: </span>
                       <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === '' && tumor.shortProgImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
-                        <e-status  ng-click="commentClick($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'"></e-status>
+                        <e-status  ng-click="commentClick($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'"></e-status>
                       </span>
                     </accordion-heading>
-                    <p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.shortProgImp.text"  placeholder="Short prognostic implications"></p>
-                    <pub-iframe ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].progImp.isOpen" ng-model="tumor.shortProgImp.text" ></pub-iframe>
-                    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.progImp.text"  placeholder="Full prognostic implications"></p>
-                    <pub-iframe ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].progImp.isOpen" ng-model="tumor.progImp.text"></pub-iframe>
+                    <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].progImp.isOpen" ph="'Short prognostic implications'"></drive-realtime-string>
+                    <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].progImp.isOpen" ph="'Full prognostic implications'"></drive-realtime-string>
                   </accordion-group>
 
                   <!-- NCCN guidelines -->
@@ -236,44 +211,37 @@
                       <span ng-click="stopCollopse($event)">NCCN guidelines: </span>
                       <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict display-name="NCCN guidelines" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
-                        <e-status  ng-click="commentClick($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'"></e-status>
+                        <e-status  ng-click="commentClick($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'"></e-status>
                       </span>
                     </accordion-heading>
-                    <p>
-                      <strong>{{tumor.nccn.therapy.display}}:</strong>
-                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.therapy.text"/>
-                    </p>
+                    <strong>{{tumor.nccn.therapy.display}}:</strong>
+                    <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
                     <p>
                       <strong>{{tumor.nccn.disease.display}}:</strong>
-                      <select chosen id="CurationNCCNDropDown" allow-single-deselect="true" ng-model="tumor.nccn.disease.text" ng-options="opt for opt in nccnDiseaseTypes">
-                        <option value="NA"></option>
-                      </select>
+                      <drive-realtime-string es="tumor.nccn_eStatus" t="'select-chosen'" object="tumor.nccn.category" o="nccnDiseaseTypes" chosenid="'CurationNCCNDropDown'"></drive-realtime-string>
                     </p>
                     <p>
                       <strong>{{tumor.nccn.version.display}}:</strong>
-                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.version.text"/>
+                      <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.version"></drive-realtime-string>
                     </p>
                     <p>
                       <strong>{{tumor.nccn.pages.display}}:</strong>
-                      <input type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.pages.text"/>
+                      <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.pages"></drive-realtime-string>
                     </p>
                     <p>
                       <strong>{{tumor.nccn.category.display}}:</strong>
-                      <select style="width: 100%" ng-model="tumor.nccn.category.text" ng-options="opt.value as opt.label for opt in nccnCategories"></select>
+                      <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'select'" object="tumor.nccn.category" o="nccnCategories"></drive-realtime-string>
                     </p>
                     <span>
                     <strong>{{tumor.nccn.short.display}}:</strong>
                     <br/>
-                    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.short.text">
-                    </p>
+                    <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].nccn.isOpen"></drive-realtime-string>
                     </span>
                     <span>
                     <strong>{{tumor.nccn.description.display}}:</strong>
                     <br/>
-                    <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.nccn.description.text">
-                    </p>
+                    <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].nccn.isOpen"></drive-realtime-string>
                     </span>
-                    <pub-iframe ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index].nccn.isOpen" ng-model="tumor.nccn.description.text"></pub-iframe>
                   </accordion-group>
 
                   <!-- Theraputic implications -->
@@ -305,32 +273,24 @@
                                   <i class="fa fa-angle-double-up" ng-if="$parent.$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
                                   <i ng-if="$parent.$index !== ti.treatments.length-1" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
                                 </span>
-                                <e-status  ng-click="commentClick($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text"></e-status>
+                                <e-status  ng-click="commentClick($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text"></e-status>
                                 <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$index)" class="fa fa-trash-o"></i>
                               </span>
                             </accordion-heading>
                             <p>
                               <strong>{{treatment.level.display}}:</strong>
                               <span ng-if="checkTI(ti, 1, 1)">
-                                <select style="width: 90%" ng-model="treatment.level.text"
-                                        ng-options="opt.value as opt.label for opt in levels.SS">
-                                </select>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.SS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 1, 0)">
-                                <select style="width: 95%"  ng-model="treatment.level.text"
-                                        ng-options="opt.value as opt.label for opt in levels.SR">
-                                </select>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.SR"></drive-realtime-string>
                                 <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.SR}}"></i>
                               </span>
                               <span ng-if="checkTI(ti, 0, 1)">
-                                <select style="width: 100%" ng-model="treatment.level.text"
-                                        ng-options="opt.value as opt.label for opt in levels.IS">
-                                </select>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 0, 0)">
-                                <select style="width: 95%" ng-model="treatment.level.text"
-                                        ng-options="opt.value as opt.label for opt in levels.IR">
-                                </select>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IR"></drive-realtime-string>
                                 <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html-unsafe="{{levelExps.IR}}"></i>
                               </span>
                             </p>
@@ -339,23 +299,18 @@
                                 <strong>{{treatment.indication.display}}:</strong>
                               </div>
                               <div class="content">
-                                <p type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.indication.text"></p>
-                                <pub-iframe ng-model="treatment.indication.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$parent.$index].isOpen"></pub-iframe>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$parent.$index].isOpen"></drive-realtime-string>
                               </div>
                             </div>
                             <span>
                               <strong>{{treatment.short.display}}:</strong>
                               <br/>
-                              <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.short.text">
-                              </p>
-                              <pub-iframe ng-model="treatment.short.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$parent.$index].isOpen"></pub-iframe>
+                              <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$parent.$index].isOpen"></drive-realtime-string>
                             </span>
                             <span>
                               <strong>{{treatment.description.display}}:</strong>
                               <br/>
-                              <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.description.text">
-                              </p>
-                              <pub-iframe ng-model="treatment.description.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$parent.$index].isOpen"></pub-iframe>
+                              <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$parent.$index].isOpen"></drive-realtime-string>
                             </span>
                           </accordion-group>
                         </div>

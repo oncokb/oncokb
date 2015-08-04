@@ -1,15 +1,26 @@
 <span>
-  <status style="position: relative"><i class="fa {{status.icon}}" ng-style="{color: status.color}"></i>
+  <status style="position: relative"><i class="fa {{vetted.icon}}" ng-style="{color: obsolete==='true'?'red':vetted.color}"></i>
     <statusBody class="eStatusComments">
-      <span ng-repeat="checkbox in checkboxes">
+        <span>
+            <input
+                    id="{{id}}-obsolete"
+                    type="checkbox"
+                    ng-model="obsolete"
+                    ng-true-value="true"
+                    ng-false-value="false"
+                    >
+            <label ng-click="click('o')" for="{{id}}-obsolete" ng-style="{color: 'red'}">Obsolete</label>
+        </span>
+
+        <span ng-repeat="checkbox in checkboxes">
         <input
-              id="{{id}}-oncogenic-box{{$index}}"
+              id="{{id}}-{{$index}}"
               type="checkbox"
-              ng-model="status.value"
+              ng-model="vetted.value"
               ng-true-value="{{checkbox.value}}"
               ng-false-value=""
               >
-        <label ng-click="click(checkbox.value)" for="{{id}}-oncogenic-box{{$index}}" ng-style="{color: checkbox.color}">{{checkbox.display}}</label>
+        <label ng-click="click(checkbox.value)" for="{{id}}-{{$index}}" ng-style="{color: checkbox.color}">{{checkbox.display}}</label>
       </span>
     </statusBody>
   </status>
