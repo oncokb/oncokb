@@ -387,8 +387,8 @@ angular.module('oncokbApp')
                     $scope.realtimeDocument.getModel().endCompoundOperation();
 
                 }else{
-                    $scope.gene.status_timeStamp.get('lastUpdate').value = new Date().getTime();
-                    $scope.gene.status_timeStamp.get('lastUpdate').by = Users.getMe().name;
+                    $scope.gene.status_timeStamp.get('lastUpdate').value.setText(new Date().getTime().toString());
+                    $scope.gene.status_timeStamp.get('lastUpdate').by.setText(Users.getMe().name);
                 }
                 $scope.docStatus.updateGene = true;
             }
@@ -536,7 +536,7 @@ angular.module('oncokbApp')
 
             $scope.updateGeneColor = function() {
                 if($scope.gene) {
-                    if( Number($scope.gene.status_timeStamp.get('lastEdit').value) > Number($scope.gene.status_timeStamp.get('lastUpdate').value)){
+                    if( Number($scope.gene.status_timeStamp.get('lastEdit').value.text) > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)){
                         return 'red';
                     }else{
                         return 'black';
@@ -952,12 +952,7 @@ angular.module('oncokbApp')
                 var file = Documents.get({title: $scope.fileTitle});
                 var timeStamp;
                 file = file[0];
-                $scope.document = file;
-                $scope.fileEditable = file.editable?true:false;
-                $scope.status.rendering = false;
-                displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
                 if(!$scope.gene.status_timeStamp.has('lastEdit')){
-                    var timeStamp;
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
                     timeStamp.value.setText(new Date().getTime().toString());
@@ -965,6 +960,18 @@ angular.module('oncokbApp')
                     $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                 }
+                if(!$scope.gene.status_timeStamp.has('lastUpdate')){
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                    timeStamp.value.setText(new Date().getTime().toString());
+                    timeStamp.by.setText(Users.getMe().name);
+                    $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
+                }
+                $scope.document = file;
+                $scope.fileEditable = file.editable?true:false;
+                $scope.status.rendering = false;
+                displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
 
             function valueChangedEvent(evt) {
@@ -1072,8 +1079,8 @@ angular.module('oncokbApp')
 
             function documentSaved() {
                 if(!$scope.docStatus.updateGene){
-                    $scope.gene.status_timeStamp.get('lastEdit').value = new Date().getTime().toString();
-                    $scope.gene.status_timeStamp.get('lastEdit').by = Users.getMe().name;
+                    $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
+                    $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
                 }
                 $scope.docStatus.saving = false;
                 $scope.docStatus.saved = true;

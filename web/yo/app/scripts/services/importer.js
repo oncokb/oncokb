@@ -331,8 +331,11 @@ angular.module('oncokbApp')
                 _datum = e;
                 break;
               default:
-                _datum = rootModel.create('Comment');
                 break;
+            }
+
+            if(key.indexOf('_comments') !== -1) {
+              _datum = rootModel.create('Comment');
             }
 
             if(key === 'TI') {
@@ -361,10 +364,24 @@ angular.module('oncokbApp')
               _datum = rootModel.create('InteractAlts');
               break;
           }
-          for(var _key in value) {
-            _datum = setValue(rootModel, _datum, value[_key], _key);
+
+          if(key.indexOf('_eStatus') !== -1) {
+            for(var _key in value) {
+              model[key].set(_key, value[_key]);
+            }
+          }else if(key.indexOf('_timeStamp') !== -1) {
+            for(var _key in value) {
+              _datum = rootModel.create('TimeStamp');
+              _datum.value.setText(value[_key].value || '');
+              _datum.by.setText(value[_key].by || '');
+              model[key].set(_key, _datum);
+            }
+          }else{
+            for(var _key in value) {
+              _datum = setValue(rootModel, _datum, value[_key], _key);
+            }
+            model[key] = _datum;
           }
-          model[key] = _datum;
         }else {
           console.log('Error value type.');
         }
@@ -385,6 +402,12 @@ angular.module('oncokbApp')
             object[e] = getString(model[e].getText());
             if(model[e + '_comments']) {
               object[e + '_comments'] = getComments(model[e + '_comments']);
+            }
+            if(model[e + '_eStatus']) {
+              object[e + '_eStatus'] = getEvidenceStatus(model[e + '_eStatus']);
+            }
+            if(model[e + '_timeStamp']) {
+              object[e + '_timeStamp'] = getTimeStamp(model[e + '_timeStamp']);
             }
           }
         });
@@ -418,6 +441,29 @@ angular.module('oncokbApp')
           comments.push(_comment);
         });
         return comments;
+      }
+
+      function getEvidenceStatus(model) {
+        var keys = model.keys();
+        var status = {};
+
+        keys.forEach(function(e){
+          status[e] = model.get(e);
+        });
+        return status;
+      }
+
+      function getTimeStamp(model) {
+        var keys = model.keys();
+        var status = {};
+
+        keys.forEach(function(e){
+          status[e] = {
+            value: model.get(e).value.text,
+            by: model.get(e).by.text
+          };
+        });
+        return status;
       }
 
       return {
