@@ -46,6 +46,9 @@
         <param name="useNamed">true</param>
       </type>
     </property>
+    <property name="shortDescription" type="string">
+      <column length="65535" name="short_description"/>
+    </property>
     <property name="description" type="string">
       <column length="65535" name="description"/>
     </property>

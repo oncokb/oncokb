@@ -1,0 +1,64 @@
+<div>
+    <div ng-if="t === 'p'">
+        <p class="doubleH"
+           ng-class="{editableBox:fe, unEditableBox:!fe}"
+           contenteditable="{{fe}}"
+           placeholder="{{ph}}"
+           ng-model="content.stringO">
+        </p>
+        <pub-iframe
+                ng-model="content.stringO"
+                ng-if="io">
+
+        </pub-iframe>
+    </div>
+    <div ng-if="t === 'input'">
+        <input type='text' ng-class="{editableBox:fe, unEditableBox:!fe}" contenteditable="{{fe}}" placeholder="{{ph}}" ng-model="content.stringO"/>
+    </div>
+    <div ng-if="t === 'short'">
+        <p ng-class="{editableBox:fe, unEditableBox:!fe}"
+           contenteditable="{{fe}}"
+           placeholder="{{ph}}"
+           ng-model="content.stringO">
+        </p>
+    </div>
+    <div ng-if="t === 'select'">
+        <select style="width: 95%" ng-model="content.stringO"
+                ng-options="opt.value as opt.label for opt in o">
+        </select>
+    </div>
+    <div ng-if="t === 'select-chosen'" class="chosen-full-width">
+        <select chosen ng-attr-id="{{chosenid}}" allow-single-deselect="true" ng-model="content.stringO" ng-options="opt for opt in o">
+            <option value="NA"></option>
+        </select>
+    </div>
+    <div ng-if="t === 'checkbox'">
+        <span ng-repeat="checkbox in checkboxes">
+          <input
+                  id="{{checkboxid}}-{{$index}}"
+                  type="checkbox"
+                  ng-model="content.stringO"
+                  ng-true-value="{{checkbox}}"
+                  ng-false-value=""
+                  ng-disabled="!fe"
+                  >
+          <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
+        </span>
+    </div>
+    <div ng-if="t === 's-checkbox'">
+        <span  ng-repeat="checkbox in checkboxes">
+            <input
+                    id="{{checkboxid}}-{{$index}}"
+                    type="checkbox"
+                    ng-model="content.stringO"
+                    ng-true-value="{{checkbox}}"
+                    ng-change="sCheckboxChange()"
+                    ng-false-value=""
+                    ng-disabled="!fe"
+                    >
+            <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
+            <input type='text' ng-class="{editableBox:fe, unEditableBox:!fe}" contenteditable="{{fe}}" ng-if="content.stringO === checkbox && checkbox !== 'Other'" ng-model="content.addon" placeholder="{{ph}}"/>
+            <input type='text' ng-class="{editableBox:fe, unEditableBox:!fe}" contenteditable="{{fe}}" ng-if="content.stringO === checkbox && checkbox === 'Other'" ng-model="content.addon"/>
+        </span>
+    </div>
+</div>

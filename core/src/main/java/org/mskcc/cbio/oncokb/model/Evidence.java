@@ -16,6 +16,7 @@ public class Evidence implements java.io.Serializable {
     private TumorType tumorType;
     private Gene gene;
     private Set<Alteration> alterations;
+    private String shortDescription;
     private String description;
     private Set<Treatment> treatments;
     private String knownEffect;
@@ -33,6 +34,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setEvidenceId(Integer evidenceId) {
         this.evidenceId = evidenceId;
+    }
+
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
     }
 
     public EvidenceType getEvidenceType() {

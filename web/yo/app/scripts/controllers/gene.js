@@ -363,11 +363,35 @@ angular.module('oncokbApp')
 
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
+
                 var gene = importer.getData(this.gene);
                 // $timeout(function(){
-                DatabaseConnector.updateGene(JSON.stringify(gene), function(result){ $scope.docStatus.savedGene = true; console.log('success', result);}, function(result){ $scope.docStatus.savedGene = true; console.log('failed', result);});
+                DatabaseConnector.updateGene(JSON.stringify(gene), function(result){
+                    $scope.docStatus.savedGene = true; console.log('success', result);
+                    changeLastUpdate();
+                }, function(result){
+                    $scope.docStatus.savedGene = true; console.log('failed', result);
+                    changeLastUpdate();
+                });
                 // }, 1000);
             };
+
+            function changeLastUpdate() {
+                if(!$scope.gene.status_timeStamp.has('lastUpdate')){
+                    var timeStamp;
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                    timeStamp.value.setText(new Date().getTime().toString());
+                    timeStamp.by.setText(Users.getMe().name);
+                    $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
+
+                }else{
+                    $scope.gene.status_timeStamp.get('lastUpdate').value.setText(new Date().getTime().toString());
+                    $scope.gene.status_timeStamp.get('lastUpdate').by.setText(Users.getMe().name);
+                }
+                $scope.docStatus.updateGene = true;
+            }
 
             $scope.addTumorType = function(mutation, newTumorTypeName, mutationIndex) {
                 if (mutation && newTumorTypeName) {
@@ -505,7 +529,19 @@ angular.module('oncokbApp')
                 //console.log($scope.gene.mutations.get(0).tumors.get(0));
                 console.log($scope.geneStatus);
 
-                console.log('Num of watchers: ' + checkNumWatchers());
+                console.log('Num of watchers: ' + checkNumWatchers())
+                console.log($scope.gene.status_timeStamp.get('lastEdit').value);
+                console.log($scope.gene.status_timeStamp.get('lastUpdate').value);
+            };
+
+            $scope.updateGeneColor = function() {
+                if($scope.gene) {
+                    if( Number($scope.gene.status_timeStamp.get('lastEdit').value.text) > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)){
+                        return 'red';
+                    }else{
+                        return 'black';
+                    }
+                }
             };
 
             $scope.remove = function(event, mutationIndex, tumorTypeIndex, therapyCategoryIndex, therapyIndex) {
@@ -914,7 +950,24 @@ angular.module('oncokbApp')
 
             function afterCreateGeneModel() {
                 var file = Documents.get({title: $scope.fileTitle});
+                var timeStamp;
                 file = file[0];
+                if(!$scope.gene.status_timeStamp.has('lastEdit')){
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                    timeStamp.value.setText(new Date().getTime().toString());
+                    timeStamp.by.setText(Users.getMe().name);
+                    $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
+                }
+                if(!$scope.gene.status_timeStamp.has('lastUpdate')){
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                    timeStamp.value.setText(new Date().getTime().toString());
+                    timeStamp.by.setText(Users.getMe().name);
+                    $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
+                }
                 $scope.document = file;
                 $scope.fileEditable = file.editable?true:false;
                 $scope.status.rendering = false;
@@ -1025,9 +1078,14 @@ angular.module('oncokbApp')
             }
 
             function documentSaved() {
+                if(!$scope.docStatus.updateGene){
+                    $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
+                    $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
+                }
                 $scope.docStatus.saving = false;
                 $scope.docStatus.saved = true;
                 $scope.docStatus.closed = false;
+                $scope.docStatus.updateGene = false;
             }
 
             function documentClosed(){
@@ -1187,7 +1245,8 @@ angular.module('oncokbApp')
                 saved: true,
                 saving: false,
                 closed: false,
-                savedGene: true
+                savedGene: true,
+                updateGene: false
             };
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = Users.getMe().role;
