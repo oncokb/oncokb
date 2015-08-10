@@ -15,15 +15,13 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import static org.mskcc.cbio.oncokb.controller.VariantAnnotationXMLController.fromCbioportalTumorType;
-import static org.mskcc.cbio.oncokb.controller.VariantAnnotationXMLController.fromQuestTumorType;
 
 /**
  *
@@ -226,9 +224,9 @@ public class EvidenceController {
                     if (tumorType != null && tumorTypeSource != null) {
                         Set<TumorType> relevantTumorTypes = new HashSet<>();
                         if (tumorTypeSource.equals("cbioportal")) {
-                            relevantTumorTypes.addAll(fromCbioportalTumorType(tumorType));
+                            relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(tumorType));
                         } else if (tumorTypeSource.equals("quest")) {
-                            relevantTumorTypes.addAll(fromQuestTumorType(tumorType));
+                            relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
                         }
                         if (relevantTumorTypes != null) {
                             if (evidenceTypes == null) {
