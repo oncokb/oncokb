@@ -1288,6 +1288,12 @@ angular.module('oncokbApp')
                 numAccordion: 0
             };
 
+            if($scope.userRole === 8) {
+                $scope.status.hideAllObsolete = true;
+            }else{
+                $scope.status.hideAllObsolete = false;
+            }
+
             $scope.$watch('status.hideAllEmpty', function(n, o){
                 if(n !== o){
                     if(n){
