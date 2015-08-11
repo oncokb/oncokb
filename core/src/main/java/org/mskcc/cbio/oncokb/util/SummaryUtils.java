@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
@@ -15,7 +16,7 @@ public class SummaryUtils {
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        queryTumorType = queryTumorType == null? null : queryTumorType.toLowerCase();
+        queryTumorType = queryTumorType == null? null : (StringUtils.isAllUpperCase(queryTumorType)?queryTumorType:queryTumorType.toLowerCase());
 
         Boolean appendThe = true;
         Boolean isPlural = false;
@@ -199,7 +200,7 @@ public class SummaryUtils {
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        queryTumorType = queryTumorType.toLowerCase();
+        queryTumorType = StringUtils.isAllUpperCase(queryTumorType)?queryTumorType:queryTumorType.toLowerCase();
 
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
