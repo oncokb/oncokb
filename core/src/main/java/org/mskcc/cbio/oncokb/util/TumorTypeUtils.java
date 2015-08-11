@@ -60,7 +60,6 @@ public class TumorTypeUtils {
 
         List<TumorType> ret = questTumorTypeMap.get(questTumorType);
         if (ret == null) {
-            System.out.print("not in our mapping file");
             TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
             ret = new LinkedList<TumorType>();
             if(tumorTypeAll != null) {
@@ -127,7 +126,6 @@ public class TumorTypeUtils {
 
         List<TumorType> ret = cbioTumorTypeMap.get(cbioTumorType);
         if (ret == null) {
-            System.out.print("not in our mapping file");
             TumorType tumorTypeAll = tumorTypeBo.findTumorTypeByName(TUMOR_TYPE_ALL_TUMORS);
             ret = new LinkedList<TumorType>();
             if(tumorTypeAll != null) {

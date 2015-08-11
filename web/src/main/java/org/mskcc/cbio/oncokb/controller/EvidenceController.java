@@ -175,7 +175,14 @@ public class EvidenceController {
 
                 evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), et));
             } else {
-                evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), evidenceTypes));
+                List<EvidenceType> et = new ArrayList<>();
+                if(evidenceTypes.contains(EvidenceType.GENE_SUMMARY)){
+                    et.add(EvidenceType.GENE_SUMMARY);
+                }
+                if(evidenceTypes.contains(EvidenceType.GENE_SUMMARY)){
+                    et.add(EvidenceType.GENE_BACKGROUND);
+                }
+                evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), et));
             }
 
             if (alteration != null) {
@@ -218,6 +225,7 @@ public class EvidenceController {
                     }
                 }
 
+                //Only return mutation effect if the gene status is not matched
                 if(geneStatus != null && !gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())) {
                     evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)), alterations));
                 }else{
@@ -229,13 +237,12 @@ public class EvidenceController {
                             relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
                         }
                         if (relevantTumorTypes != null) {
-                            if (evidenceTypes == null) {
-                                List<Evidence> tumorTypeEvidences = new ArrayList<>();
-                                tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes)));
-                                evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
-                            } else {
-                                //Need to be implemented
-                            }
+                            List<Evidence> tumorTypeEvidences = new ArrayList<>();
+                            tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes), evidenceTypes));
+                            evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
+                        }else{
+                            //If no relevant tumor type has been found, return gene summary, background and mutation effect
+                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)), alterations));
                         }
                     } else {
                         if (evidenceTypes == null) {
@@ -246,7 +253,11 @@ public class EvidenceController {
                     }
                 }
             } else {
-                evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene)));
+                if(evidenceTypes == null) {
+                    evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene)));
+                }else{
+                    evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), evidenceTypes));
+                }
             }
         }
         return evidences;
@@ -267,13 +278,14 @@ public class EvidenceController {
         return evidences;
     }
 
-    private Set<Evidence> getTumorTypeEvidence(List<Alteration> alterations, List<TumorType> tumorTypes) {
+    private Set<Evidence> getTumorTypeEvidence(List<Alteration> alterations, List<TumorType> tumorTypes, List<EvidenceType> evidenceTypes) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         Set<Evidence> evidences = new HashSet<Evidence>();
         Set<Evidence> evidencesFromOtherTumroTypes = new HashSet<Evidence>();
 
         evidencesFromOtherTumroTypes.addAll(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)));
 
+        //Include all level 1 evidences from other tumor types
         for(Evidence evidence : evidencesFromOtherTumroTypes) {
             if(evidence.getLevelOfEvidence()!=null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)){
                 for(TumorType tumorType : tumorTypes) {
@@ -284,7 +296,7 @@ public class EvidenceController {
             }
         }
         evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)));
-        evidences.addAll(evidenceBo.findEvidencesByAlterationAndTumorTypes(alterations, tumorTypes));
+        evidences.addAll(evidenceBo.findEvidencesByAlterationAndTumorTypes(alterations, tumorTypes, evidenceTypes));
         return evidences;
     }
 }

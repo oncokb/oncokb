@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
 import org.springframework.http.HttpMethod;
@@ -70,8 +71,10 @@ public class SummaryController {
         List<String> summaryList = new ArrayList<>();
         List<Map<String, Object>> variantPairs = VariantPairUtils.getGeneAlterationTumorTypeConsequence(gene, alteration, tumorType, consequence, tumorTypeSource);
 
-        for(Map<String, Object> variantPair : variantPairs) {
-            summaryList.add(SummaryUtils.variantSummary((Gene) variantPair.get("gene"), (List<Alteration>) variantPair.get("alterations"), (String) variantPair.get("queryAlt"), (Set<TumorType>) variantPair.get("tumorTypes"), (String) variantPair.get("queryTumorType")));
+        if(variantPairs != null) {
+            for(Map<String, Object> variantPair : variantPairs) {
+                summaryList.add(SummaryUtils.variantSummary((Gene) variantPair.get("gene"), (List<Alteration>) variantPair.get("alterations"), AlterationUtils.getVariantName((Gene) variantPair.get("gene") == null?(String)variantPair.get("queryGene"):((Gene)variantPair.get("gene")).getHugoSymbol(), (String) variantPair.get("queryAlt")), (Set<TumorType>) variantPair.get("tumorTypes"), (String) variantPair.get("queryTumorType")));
+            }
         }
         return summaryList;
     }

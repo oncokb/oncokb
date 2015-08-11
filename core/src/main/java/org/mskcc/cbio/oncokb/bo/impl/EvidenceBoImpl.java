@@ -108,11 +108,17 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlterationAndTumorTypes(Collection<Alteration> alterations, Collection<TumorType> tumorTypes) {
+    public List<Evidence> findEvidencesByAlterationAndTumorTypes(Collection<Alteration> alterations, Collection<TumorType> tumorTypes, Collection<EvidenceType> evidenceTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
             for(TumorType tumorType : tumorTypes) {
-                set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
+                if(evidenceTypes == null) {
+                    set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
+                }else{
+                    for (EvidenceType evidenceType : evidenceTypes) {
+                        set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+                    }
+                }
             }
         }
         return new ArrayList<Evidence>(set);

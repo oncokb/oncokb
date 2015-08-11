@@ -46,6 +46,8 @@ public class VariantPairUtils {
             tumorTypes = tumorTypeStr.split(",");
             if(tumorTypes.length == 1) {
                 String tumorType = tumorTypes[0];
+                tumorTypes = new String[genes.length];
+                Arrays.fill(tumorTypes, tumorType);
             } else if(tumorTypes.length != genes.length) {
                 return null;
             }
@@ -74,31 +76,29 @@ public class VariantPairUtils {
             }
         }
 
-        if (alterationStr!=null) {
-            for(int i = 0; i < pairwiseLength; i++) {
-                pairs.get(i).put("queryAlt", alterations[i]);
-                pairs.get(i).put("alterations", alterationBo.findRelevantAlterations(alterationBo.findAlteration((Gene)pairs.get(i).get("gene"), AlterationType.MUTATION, alterations[i])));
-            }
-        }
-
-        if (tumorTypeStr!=null) {
-            for(int i = 0; i < pairwiseLength; i++) {
-                String tumorType = tumorTypes[i];
-                Set<TumorType> relevantTumorTypes = new HashSet<>();
-                if (tumorTypeSource.equals("cbioportal")) {
-                    relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(tumorType));
-                } else if (tumorTypeSource.equals("quest")) {
-                    relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
-                }
-                pairs.get(i).put("queryTumorType", tumorType);
-                pairs.get(i).put("tumorTypes", relevantTumorTypes);
-            }
-        }
-
         if (consequenceStr!=null) {
             for(int i = 0; i < pairwiseLength; i++) {
                 pairs.get(i).put("consequence", consequences[i]);
             }
+        }
+
+        if (alterationStr!=null) {
+            for(int i = 0; i < pairwiseLength; i++) {
+                pairs.get(i).put("queryAlt", alterations[i]);
+                pairs.get(i).put("alterations",alterationBo.findRelevantAlterations(AlterationUtils.getAlteration((String) pairs.get(i).get("queryGene"), alterations[i], "MUTATION", (String) pairs.get(i).get("consequence"), null, null)));
+            }
+        }
+
+        for(int i = 0; i < pairwiseLength; i++) {
+            String tumorType = tumorTypes == null? null : tumorTypes[i];
+            Set<TumorType> relevantTumorTypes = new HashSet<>();
+            if (tumorTypeSource.equals("cbioportal")) {
+                relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(tumorType));
+            } else if (tumorTypeSource.equals("quest")) {
+                relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
+            }
+            pairs.get(i).put("queryTumorType", tumorType);
+            pairs.get(i).put("tumorTypes", relevantTumorTypes);
         }
 
         return pairs;
