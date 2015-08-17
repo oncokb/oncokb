@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
@@ -15,6 +16,7 @@ public class SummaryUtils {
     public static String variantSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
         queryTumorType = queryTumorType == null? null : (StringUtils.isAllUpperCase(queryTumorType)?queryTumorType:queryTumorType.toLowerCase());
 
@@ -143,10 +145,12 @@ public class SummaryUtils {
                             .append(" harboring the " + queryAlteration)
                             .append(" is not known. ");
                 } else {
-                    // no FDA or NCCN drugs for the variant in any tumor type
+                    // no FDA or NCCN drugs for the variant in any tumor type -- remove wild type evidence
+                    Alteration alt = alterationBo.findAlteration(gene, AlterationType.MUTATION, "wildtype");
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
-                            evidenceBo.findEvidencesByGene(Collections.singleton(gene), sensitivityEvidenceTypes)
+                            EvidenceUtils.removeByAlterations( evidenceBo.findEvidencesByGene(Collections.singleton(gene), sensitivityEvidenceTypes), Collections.singleton(alt))
                     );
+
                     evidences.clear();
                     if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
                         evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0));
