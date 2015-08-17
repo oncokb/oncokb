@@ -6,11 +6,15 @@
 
 package org.mskcc.cbio.oncokb.util;
 
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -140,5 +144,64 @@ public final class AlterationUtils {
         if (alteration.getConsequence()==null && variantConsequence!=null) {
             alteration.setConsequence(variantConsequence);
         }
+    }
+
+    public static String getVariantName(String gene, String alteration) {
+        //Gene + mutation name
+        String variantName = "";
+
+        if(alteration.toLowerCase().contains(gene.toLowerCase())) {
+            variantName = alteration;
+        }else {
+            variantName = gene+" "+alteration;
+        }
+
+        if(alteration.toLowerCase().contains("fusion")){
+//            variantName = variantName.concat(" event");
+        }else if(alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")){
+            //Keep the variant name
+        }else{
+            variantName = variantName.concat(" mutation");
+        }
+        return variantName;
+    }
+
+    public static Alteration getAlteration(String hugoSymbol, String alteration, String alterationType, String consequence, Integer proteinStart, Integer proteinEnd) {
+        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+        Alteration alt = new Alteration();
+
+        if (alteration!=null) {
+            if (alteration.startsWith("p.")) {
+                alteration = alteration.substring(2);
+            }
+            alt.setAlteration(alteration);
+        }
+
+        Gene gene = null;
+        if (hugoSymbol!=null) {
+            gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
+        }
+        alt.setGene(gene);
+
+        AlterationType type = AlterationType.valueOf(alterationType.toUpperCase());
+        if (type == null) {
+            type = AlterationType.MUTATION;
+        }
+        alt.setAlterationType(type);
+
+        VariantConsequence variantConsequence = null;
+        if (consequence!=null) {
+            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(consequence);
+        }
+        alt.setConsequence(variantConsequence);
+
+        if (proteinEnd==null) {
+            proteinEnd = proteinStart;
+        }
+        alt.setProteinStart(proteinStart);
+        alt.setProteinEnd(proteinEnd);
+
+        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+        return alt;
     }
 }
