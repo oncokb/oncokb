@@ -274,9 +274,9 @@
                               <span class="pull-right" ng-show="fileEditable">
                                 <span style="margin-right: 20px">
                                   <i class="fa fa-angle-up" ng-if="$parent.$index !== 0" ng-click="move(ti.treatments, $parent.$index, $parent.$index, $event)"></i>
-                                  <i class="fa fa-angle-down" ng-if="$parent.$index < ti.treatments.length-2" ng-click="move(ti.treatments, $parent.$index, $parent.$index+2, $event)"></i>
+                                  <i class="fa fa-angle-down" ng-if="$parent.$index !== ti.treatments.length-1" ng-click="move(ti.treatments, $parent.$index, $parent.$index+2, $event)"></i>
                                   <i class="fa fa-angle-double-up" ng-if="$parent.$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
-                                  <i ng-if="$parent.$index !== ti.treatments.length-1" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
+                                  <i ng-if="$parent.$index < ti.treatments.length-2" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
                                 </span>
                                  <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text"></e-status>
                                 <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$index, $parent.$index)" class="fa fa-trash-o"></i>
