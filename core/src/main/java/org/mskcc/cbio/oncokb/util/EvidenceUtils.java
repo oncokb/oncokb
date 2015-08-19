@@ -22,15 +22,17 @@ public class EvidenceUtils {
                 Boolean contain = false;
                 Evidence evidence = i.next();
                 for(Alteration alteration : alterations) {
-                    for(Alteration eviAlt : evidence.getAlterations()) {
-                        if(alteration.equals(eviAlt)) {
-                            contain = true;
+                    if(alteration != null) {
+                        for(Alteration eviAlt : evidence.getAlterations()) {
+                            if(eviAlt != null && alteration.equals(eviAlt)) {
+                                contain = true;
+                                break;
+                            }
+                        }
+                        if(contain) {
+                            i.remove();
                             break;
                         }
-                    }
-                    if(contain) {
-                        i.remove();
-                        break;
                     }
                 }
             }

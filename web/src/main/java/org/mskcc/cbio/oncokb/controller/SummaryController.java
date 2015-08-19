@@ -73,7 +73,20 @@ public class SummaryController {
 
         if(variantPairs != null) {
             for(Map<String, Object> variantPair : variantPairs) {
-                summaryList.add(SummaryUtils.variantSummary((Gene) variantPair.get("gene"), (List<Alteration>) variantPair.get("alterations"), AlterationUtils.getVariantName((Gene) variantPair.get("gene") == null?(String)variantPair.get("queryGene"):((Gene)variantPair.get("gene")).getHugoSymbol(), (String) variantPair.get("queryAlt")), (Set<TumorType>) variantPair.get("tumorTypes"), (String) variantPair.get("queryTumorType")));
+                Gene geneV = (Gene)variantPair.get("gene");
+                List<Alteration> alterationsV = (List<Alteration>)variantPair.get("alterations");
+                Set<TumorType> tumorTypes = (Set<TumorType>)variantPair.get("tumorTypes");
+                String queryGene = (String)variantPair.get("queryGene");
+                String queryAlt = (String)variantPair.get("queryAlt");
+                String queryTumorType = (String)variantPair.get("queryTumorType");
+                String hugoSymbol = null;
+
+                if(geneV != null) {
+                    hugoSymbol = geneV.getHugoSymbol();
+                }else{
+                    hugoSymbol = queryGene;
+                }
+                summaryList.add(SummaryUtils.variantSummary(geneV, alterationsV, AlterationUtils.getVariantName(hugoSymbol, queryAlt), tumorTypes, queryTumorType));
             }
         }
         return summaryList;
