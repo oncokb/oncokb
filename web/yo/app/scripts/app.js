@@ -238,7 +238,7 @@ OncoKB.curateInfo = {
         },
         'indication': {
             type: 'string',
-            display: 'Approved indications'
+            display: 'FDA approved indications'
         },
         'short': {
             type: 'string',

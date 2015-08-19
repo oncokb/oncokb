@@ -290,6 +290,7 @@ public class EvidenceController {
             if(evidence.getLevelOfEvidence()!=null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)){
                 for(TumorType tumorType : tumorTypes) {
                     if(!evidence.getTumorType().equals(tumorType)){
+                        evidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
                         evidences.add(evidence);
                     }
                 }

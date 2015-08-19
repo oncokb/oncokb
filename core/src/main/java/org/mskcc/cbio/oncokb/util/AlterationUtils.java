@@ -150,18 +150,20 @@ public final class AlterationUtils {
         //Gene + mutation name
         String variantName = "";
 
-        if(alteration.toLowerCase().contains(gene.toLowerCase())) {
+        if(gene != null && alteration != null && alteration.toLowerCase().contains(gene.toLowerCase())) {
             variantName = alteration;
         }else {
-            variantName = gene+" "+alteration;
+            variantName = (gene != null ? (gene+" " ) : "") + (alteration != null ? alteration : "");
         }
 
-        if(alteration.toLowerCase().contains("fusion")){
+        if(alteration != null) {
+            if(alteration.toLowerCase().contains("fusion")){
 //            variantName = variantName.concat(" event");
-        }else if(alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")){
-            //Keep the variant name
-        }else{
-            variantName = variantName.concat(" mutation");
+            }else if(alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")){
+                //Keep the variant name
+            }else{
+                variantName = variantName.concat(" mutation");
+            }
         }
         return variantName;
     }
