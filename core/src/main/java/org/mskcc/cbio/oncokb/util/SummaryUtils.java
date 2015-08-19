@@ -183,7 +183,7 @@ public class SummaryUtils {
                     } else {
                         // if there is no FDA or NCCN drugs for the gene at all
                         sb.append("There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with ")
-                                .append(queryTumorType)
+                                .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
                                 .append(" harboring ");
                         if (appendThe) {
                             sb.append("the ");
