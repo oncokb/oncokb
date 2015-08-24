@@ -84,8 +84,9 @@ public class VariantPairUtils {
 
         if (alterationStr!=null) {
             for(int i = 0; i < pairwiseLength; i++) {
-                pairs.get(i).put("queryAlt", alterations[i]);
-                pairs.get(i).put("alterations",alterationBo.findRelevantAlterations(AlterationUtils.getAlteration((String) pairs.get(i).get("queryGene"), alterations[i], "MUTATION", (String) pairs.get(i).get("consequence"), null, null)));
+                Alteration alteration = AlterationUtils.getAlteration((String) pairs.get(i).get("queryGene"), alterations[i], "MUTATION", (String) pairs.get(i).get("consequence"), null, null);
+                pairs.get(i).put("queryAlt", alteration == null? alterations[i]: alteration.getAlteration());
+                pairs.get(i).put("alterations",alterationBo.findRelevantAlterations(alteration));
             }
         }
 
