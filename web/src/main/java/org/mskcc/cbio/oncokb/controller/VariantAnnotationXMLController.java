@@ -90,7 +90,7 @@ public class VariantAnnotationXMLController {
 
         // summary
         sb.append("<annotation_summary>");
-        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, AlterationUtils.getVariantName(gene.getHugoSymbol(), alteration), relevantTumorTypes, tumorType));
+        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, AlterationUtils.getVariantName(gene.getHugoSymbol(), alt == null ? alteration: alt.getAlteration()), relevantTumorTypes, tumorType));
         sb.append("</annotation_summary>\n");
 
         // gene background
