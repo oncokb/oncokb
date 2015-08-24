@@ -30,7 +30,7 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    //folderId: '0BzBfo69g8fP6ZXctbUZTYVM5Mk0', //testing folder
+    //folderId: '0BzBfo69g8fP6c1lDZXl2OWxwdDA', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
