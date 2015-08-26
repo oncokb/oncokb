@@ -113,5 +113,5 @@ angular.module('oncokbApp')
 
     $rootScope.$watch('user', setParams);
     // Call start function on load.
-    // $scope.init = $scope.renderSignInButton();
+     $scope.init = $scope.renderSignInButton();
 });
