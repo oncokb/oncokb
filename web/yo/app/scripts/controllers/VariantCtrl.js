@@ -14,7 +14,8 @@ angular.module('oncokbApp')
         'x2js',
         'FindRegex',
         'OncoKB',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, DeepMerge, x2js, FindRegex, OncoKB) {
+        'stringUtils',
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, DeepMerge, x2js, FindRegex, OncoKB, stringUtils) {
 
             'use strict';
 
@@ -42,7 +43,7 @@ angular.module('oncokbApp')
                         }
                         if(urlVars.hasOwnProperty('alteration')){
                             // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, urlVars.alteration || '')];
-                            $scope.alteration = urlVars.alteration;
+                            $scope.alteration = stringUtils.trimMutationName(urlVars.alteration);
                         }
                         if(urlVars.hasOwnProperty('tumorType')){
                             $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, urlVars.tumorType || '')];
@@ -299,6 +300,7 @@ angular.module('oncokbApp')
                 $scope.rendering = true;
                 $scope.reportViewActive = hasSelectedTumorType;
                 $scope.regularViewActive = !hasSelectedTumorType;
+                $scope.alteration = stringUtils.trimMutationName($scope.alteration);
                 var params = {'alterationType': 'MUTATION'};
                 var paramsContent = {
                     'hugoSymbol': $scope.gene || '',
@@ -312,6 +314,8 @@ angular.module('oncokbApp')
                 }
                 if(hasSelectedTumorType) {
                     params.tumorType = $scope.selectedTumorType;
+                }else{
+                    params.tumorType = '';
                 }
                 if($scope.hasOwnProperty('selectedConsequence') && $scope.selectedConsequence) {
                     params.consequence = $scope.selectedConsequence;
