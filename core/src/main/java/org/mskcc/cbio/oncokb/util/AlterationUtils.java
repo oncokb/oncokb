@@ -168,14 +168,21 @@ public final class AlterationUtils {
         return variantName;
     }
 
+    public static String trimAlterationName(String alteration) {
+        if (alteration!=null) {
+            if (alteration.startsWith("p.")) {
+                alteration = alteration.substring(2);
+            }
+        }
+        return alteration;
+    }
+
     public static Alteration getAlteration(String hugoSymbol, String alteration, String alterationType, String consequence, Integer proteinStart, Integer proteinEnd) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Alteration alt = new Alteration();
 
         if (alteration!=null) {
-            if (alteration.startsWith("p.")) {
-                alteration = alteration.substring(2);
-            }
+            alteration = AlterationUtils.trimAlterationName(alteration);
             alt.setAlteration(alteration);
         }
 

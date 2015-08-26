@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('reportItem', function () {
+    .service('reportItem', function (stringUtils) {
         var specialKeyChars = 'o_n_c_o_k_b';
         function Item(geneName, mutation, tumorType){
             this.geneName = geneName || 'N/A';
@@ -122,6 +122,7 @@ angular.module('oncokbApp')
                 for(i=0; i < _datumL; i++) {
                     if(!versions.hasOwnProperty(_datum[i].version)) {
                         versions[_datum[i].version] = {};
+                        versions[_datum[i].version].nccn_special = 'Version: ' + _datum[i].version + ', Cancer type: ' + _datum[i].disease || tumorType.toLowerCase();
                     }
                     if(checkDescription(_datum[i])) {
                         versions[_datum[i].version]['recommendation category'] = _datum[i].description;
@@ -130,7 +131,6 @@ angular.module('oncokbApp')
 
                 for(var versionKey in versions) {
                     var version = versions[versionKey];
-                    version.nccn_special = 'Version: ' + versionKey + ', Cancer type: ' + tumorType;
                     value.push(version);
                 }
 
@@ -441,8 +441,8 @@ angular.module('oncokbApp')
 
         function constructEmptyTreatmentStatment(gene, alteration, tumorType) {
             var geneName = gene.toString().trim().toUpperCase();
-            var alterationName = alteration.toString().trim();
-            var tumorTypeName = tumorType.toString().trim();
+            var alterationName = stringUtils.trimMutationName(alteration.toString().trim());
+            var tumorTypeName = tumorType.toString().toLowerCase().trim();
 
             var statement = 'There are no investigational therapies for ';
             var info = [];
@@ -698,8 +698,12 @@ angular.module('oncokbApp')
             var value = [];
 
             if(angular.isObject(variant_effect) && !angular.isArray(variant_effect)) {
+                var effect = variant_effect.effect || '';
+                if(effect === 'null') {
+                    effect = '';
+                }
                 value.push({
-                    'effect': variant_effect.effect || '',
+                    'effect': effect,
                     'description': variant_effect.description? removeCharsInDescription(variant_effect.description) : ''
                 });
                 object[key] = value;
@@ -708,7 +712,6 @@ angular.module('oncokbApp')
                 return false;
             }
         }
-
         function removeCharsInDescription(str) {
             if(typeof str !== 'undefined') {
                 str = str.trim();

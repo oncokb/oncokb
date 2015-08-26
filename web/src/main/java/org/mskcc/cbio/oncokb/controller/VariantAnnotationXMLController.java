@@ -50,7 +50,6 @@ public class VariantAnnotationXMLController {
             gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
         }
 
-        // find alteration
         if (entrezGeneId == null && hugoSymbol == null) {
             sb.append("<!-- no gene was specified --></xml>");
             return sb.toString();
@@ -59,6 +58,14 @@ public class VariantAnnotationXMLController {
         if (gene == null) {
             sb.append("<!-- cound not find gene --></xml>");
             return sb.toString();
+        }
+
+        if(alteration != null) {
+            alteration = AlterationUtils.trimAlterationName(alteration);
+        }
+
+        if(tumorType != null) {
+            tumorType = tumorType.toLowerCase();
         }
 
         Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, alterationType, consequence, proteinStart, proteinEnd);
