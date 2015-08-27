@@ -14,6 +14,8 @@ angular.module('oncokbApp')
       scope: {
         es: '=', //Evidence Status
         object: '=', //target object
+        objecttype: '=', // drive document attribute type; Default: string
+        objectkey: '=', //if the attribute type is object, it has to have a key
         addon: '=', //Special design for mutation effect
         fe: '=', //file editable
         io: '=', //isOpen
@@ -29,7 +31,11 @@ angular.module('oncokbApp')
         scope.addOnTimeoutPromise = '';
         scope.stringTimeoutPromise = '';
         scope.content = {};
-        scope.content.stringO = scope.object.text;
+        if(scope.objecttype === 'object' && scope.objectkey) {
+          scope.content.stringO = scope.object.get(scope.objectkey);
+        }else{
+          scope.content.stringO = scope.object.text;
+        }
 
         if(typeof scope.addon !== 'undefined') {
           scope.content.addon = scope.addon.text;
@@ -48,7 +54,11 @@ angular.module('oncokbApp')
           $timeout.cancel(scope.stringTimeoutPromise);  //does nothing, if timeout already done
           scope.stringTimeoutPromise = $timeout(function(){   //Set timeout
             if( n !== o) {
-              scope.object.text = n;
+              if(scope.objecttype === 'object' && scope.objectkey) {
+                scope.object.set(scope.objectkey, n);
+              }else{
+                scope.object.text = n;
+              }
               scope.valueChanged();
             }
           }, 1000);

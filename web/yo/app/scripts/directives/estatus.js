@@ -49,6 +49,10 @@ angular.module('oncokbApp')
           scope.obsolete = scope.object.get('obsolete');
         }
 
+        if(!scope.object.has('hotspot')){
+          scope.object.set('hotspot', 'FALSE');
+        }
+
         scope.object.addEventListener(
             gapi.drive.realtime.EventType.VALUE_CHANGED, function(){
               var vetted = scope.getStatusByValue(scope.object.get('vetted'));
