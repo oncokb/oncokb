@@ -154,6 +154,14 @@ public class DriveAnnotationParser {
             Set<Alteration> alterations = new HashSet<Alteration>();
 
             int oncogenic = -1;
+            int hotspot = 0;
+
+            if(mutationObj.has("oncogenic_eStatus") && mutationObj.getJSONObject("oncogenic_eStatus").has("hotspot")){
+                String hotspotStr = mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspot").toLowerCase();
+                if(hotspotStr.equals("true")){
+                    hotspot = 1;
+                }
+            }
 
             if(mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
                 String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
@@ -183,10 +191,12 @@ public class DriveAnnotationParser {
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
                     alteration.setOncogenic(oncogenic);
+                    alteration.setHotspot(hotspot);
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                }else if (oncogenic > 0) {
+                } else if (oncogenic > 0) {
                     alteration.setOncogenic(oncogenic);
+                    alteration.setHotspot(hotspot);
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);

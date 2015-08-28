@@ -209,8 +209,9 @@ angular.module('oncokbApp')
           _mutation.tumors = [];
           _mutation.effect = {};
           _mutation = combineData(_mutation, e, ['name', 'summary']);
-          if(!(e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
-              _mutation = combineData(_mutation, e, ['oncogenic', 'description', 'short']);
+          if(!(excludeObsolete !== undefined && excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
+            _mutation = combineData(_mutation, e, ['oncogenic', 'description', 'short']);
+            _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn']);
 
                 _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn']);
 
