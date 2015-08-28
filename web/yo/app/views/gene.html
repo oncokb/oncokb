@@ -115,7 +115,7 @@
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$index].isOpen}"></i>
             <span ng-click="stopCollopse($event)">Mutation: </span><span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.name.text"/></span>
             <comments-dict mutation="{{mutation.name.text}}" gene-name="{{gene.name.text}}" ng-click="commentClick($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-            <i class="fa fa-hand-o-left" tooltip-placement="top" tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===true || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===true}"></i>
+            <i class="fa fa-hand-o-left" tooltip-placement="top" tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===false || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===false}"></i>
             <span class="pull-right" ng-show="fileEditable">
               <span style="margin-right: 20px">
                 <i class="fa fa-angle-up" ng-if="$parent.$index !== 0" ng-click="move(gene.mutations, $parent.$index, $parent.$index, $event)"></i>

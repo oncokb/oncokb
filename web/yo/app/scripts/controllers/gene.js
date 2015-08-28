@@ -257,6 +257,55 @@ angular.module('oncokbApp')
                 });
             };
 
+            $scope.initialStatus = function() {
+                initial($scope.documents, 0, function(){ $scope.status.saveAllGenes = true;});
+            };
+
+            function initial(docs, docIndex, callback) {
+                if(docIndex < docs.length) {
+                    var fileId = docs[docIndex].id;
+                    storage.getRealtimeDocument(fileId).then(function (realtime){
+                        if(realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        }else{
+                            console.log(docs[docIndex].title, '\t\t', docIndex + 1);
+                            console.log('\t Initializing status...');
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if(gene) {
+
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function(e){
+                                    if(!e.oncogenic_eStatus.has('obsolete')){
+                                        e.oncogenic_eStatus.set('obsolete', 'false');
+                                    }
+                                    if(!e.oncogenic_eStatus.has('hotspot')){
+                                        e.oncogenic_eStatus.set('hotspot', 'FALSE');
+                                    }
+                                    if(!e.oncogenic_eStatus.has('curated')){
+                                        e.oncogenic_eStatus.set('curated', false);
+                                    }
+                                });
+                                model.endCompoundOperation();
+                                $timeout(function(){
+                                    initial(docs, ++docIndex, callback);
+                                }, 200, false);
+                            }else{
+                                console.log('\t\tNo gene model.');
+                                $timeout(function(){
+                                    initial(docs, ++docIndex, callback);
+                                }, 200, false);
+                            }
+                        }
+                    });
+                }else {
+                    if(callback) {
+                        callback();
+                    }
+                    console.log('finished.');
+                }
+            }
+
             function createDoc(index) {
                 if(index < newGenes.length) {
                     storage.requireAuth().then(function () {
@@ -368,6 +417,8 @@ angular.module('oncokbApp')
                 $scope.docStatus.savedGene = false;
 
                 var gene = importer.getData(this.gene, true);
+
+                console.log(gene);
                 // $timeout(function(){
                 DatabaseConnector.updateGene(JSON.stringify(gene), function(result){
                     $scope.docStatus.savedGene = true; console.log('success', result);
