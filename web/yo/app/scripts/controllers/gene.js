@@ -808,6 +808,11 @@ angular.module('oncokbApp')
                 return false;
             };
 
+            $scope.curatedIconClick = function(event, status){
+                $scope.stopCollopse(event);
+                status.set('curated', !status.get('curated'));
+            }
+
             function regenerateGeneStatus() {
                 var geneStatus = {};
                 var mutationKeys = ['oncogenic'];
