@@ -193,7 +193,7 @@ angular.module('oncokbApp')
         }
 
         function parse(data){
-            return parseJSON(processData(x2js.xml_str2json(data).xml));
+            return parseJSON(processData(data.xml));
         }
 
         function parseJSON(data){

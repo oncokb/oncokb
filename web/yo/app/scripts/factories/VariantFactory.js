@@ -145,7 +145,10 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http',  function ($htt
     };
 }]);
 
-angular.module('oncokbApp').factory(('SearchVariant'), ['$http', function($http) {
+angular.module('oncokbApp')
+    .config(function ($httpProvider) {
+        $httpProvider.interceptors.push('xmlHttpInterceptor');
+    }).factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {
         var _params = angular.copy(params),

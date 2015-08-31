@@ -1,6 +1,6 @@
 <div>
 
-    <div ng-if="status.fileSelected && status.isXML" class="col-md-12">
+    <div ng-if="status.fileSelected && status.isXML && status.validXML" class="col-md-12">
         <accordion close-others="oneAtATime">
             <accordion-group  ng-repeat="reportViewData in reportViewDatas" >
                 <accordion-heading>
@@ -11,7 +11,11 @@
         </accordion>
     </div>
 
-    <div ng-if="fileSelected && ! status.isXML" class="col-md-12">
+    <div ng-if="status.fileSelected && status.isXML && !status.validXML" class="col-md-12">
+        Invalid XML format.
+    </div>
+
+    <div ng-if="status.fileSelected && ! status.isXML" class="col-md-12">
         No info.
     </div>
 </div>
