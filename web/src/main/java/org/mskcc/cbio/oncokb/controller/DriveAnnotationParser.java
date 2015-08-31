@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
@@ -233,7 +235,11 @@ public class DriveAnnotationParser {
                         }
                     }else {
                         if(effectAddon != null && !effectAddon.isEmpty()) {
-                            effect = effect + " " + effectAddon;
+                            if(StringUtils.containsIgnoreCase(effectAddon, effect)){
+                                effect = effectAddon;
+                            }else{
+                                effect = effect + " " + effectAddon;
+                            }
                         }
                     }
                 }else {
