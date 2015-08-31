@@ -42,19 +42,14 @@
         <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
       </span>
     </h2>
-    <p ng-if="gene.curators && gene.curators.asArray().length > 0">
-      <span><strong>Curator name: <span ng-bind="curatorsName()"></span></strong></span><br/>
-      <span><strong>Curator email: <span ng-bind="curatorsEmail()"></span></strong></span>
-    </p>
     <p ng-if="userRole === 8">
       <strong>Status:</strong>
       <span ng-repeat="checkbox in checkboxes['geneStatus']">
         <input
                 id="{{gene.name.text}}-gene-status-box{{$index}}"
-                type="checkbox"
+                type="radio"
                 ng-model="gene.status.text"
-                ng-true-value="{{checkbox}}"
-                ng-false-value=""
+                ng-value="checkbox"
                 ng-change="setGeneStatus()"
                 >
         <label for="{{gene.name.text}}-gene-status-box{{$index}}">{{checkbox}}</label>

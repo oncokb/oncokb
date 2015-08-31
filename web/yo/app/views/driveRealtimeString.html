@@ -36,10 +36,9 @@
         <span ng-repeat="checkbox in checkboxes">
           <input
                   id="{{checkboxid}}-{{$index}}"
-                  type="checkbox"
+                  type="radio"
                   ng-model="content.stringO"
-                  ng-true-value="{{checkbox}}"
-                  ng-false-value=""
+                  ng-value="checkbox"
                   ng-disabled="!fe"
                   >
           <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
@@ -49,11 +48,10 @@
         <span  ng-repeat="checkbox in checkboxes">
             <input
                     id="{{checkboxid}}-{{$index}}"
-                    type="checkbox"
+                    type="radio"
                     ng-model="content.stringO"
-                    ng-true-value="{{checkbox}}"
+                    ng-value="checkbox"
                     ng-change="sCheckboxChange()"
-                    ng-false-value=""
                     ng-disabled="!fe"
                     >
             <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>

@@ -15,10 +15,9 @@
         <span ng-repeat="checkbox in checkboxes">
         <input
               id="{{id}}-{{$index}}"
-              type="checkbox"
+              type="radio"
               ng-model="vetted.value"
-              ng-true-value="{{checkbox.value}}"
-              ng-false-value=""
+              ng-value="checkbox.value"
               >
         <label ng-click="click(checkbox.value)" for="{{id}}-{{$index}}" ng-style="{color: checkbox.color}">{{checkbox.display}}</label>
       </span>
