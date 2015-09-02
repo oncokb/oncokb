@@ -253,3 +253,28 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($htt
         updateGene: updateGene
     };
 }]);
+
+angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer(type) {
+        if(type === 'hotspot') {
+            return $http.get('utils?cmd=hotspot');
+        }
+        return null;
+    }
+
+    function getFromFile(type) {
+        if(type === 'hotspot') {
+            return $http.get('data/hotspot.json');
+        }
+        return null;
+    }
+
+    return {
+        hotspot: {
+            getFromServer: function(){ return getFromServer('hotspot');},
+            getFromFile: function(){ return getFromFile('hotspot');}
+        }
+    };
+}]);

@@ -23,6 +23,7 @@ angular.module('oncokbApp')
         'SendEmail',
         'DataSummary',
         'GeneStatus',
+        'ServerUtils',
         function (
             $timeout,
             $q,
@@ -37,7 +38,8 @@ angular.module('oncokbApp')
             DriveAnnotation,
             SendEmail,
             DataSummary,
-            GeneStatus) {
+            GeneStatus,
+            ServerUtils) {
 
             var numOfLocks = {},
                 data = {};
@@ -310,6 +312,19 @@ angular.module('oncokbApp')
                     }
                 }, 100);
             }
+
+            function getHotspotList(callback) {
+                if(dataFromFile) {
+                    ServerUtils.hotspot.getFromFile().success(function(data) {
+                        callback(data);
+                    });
+                }else {
+                    ServerUtils.hotspot.getFromServer().success(function(data) {
+                        callback(data);
+                    });
+                }
+            }
+
             // Public API here
             return {
                 'getGeneAlterationTumortype': function(callback) {
@@ -342,6 +357,7 @@ angular.module('oncokbApp')
                 'updateGene': updateGene,
                 'sendEmail': sendEmail,
                 'setGeneStatus': setGeneStatus,
-                'getGeneStatus': getGeneStatus
+                'getGeneStatus': getGeneStatus,
+                'getHotspotList': getHotspotList
         };
 }]);

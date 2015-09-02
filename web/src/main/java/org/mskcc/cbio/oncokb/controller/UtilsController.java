@@ -50,7 +50,7 @@ public class UtilsController {
                     spreadSheetEntry.getWorksheetFeedUrl(), WorksheetFeed.class);
             List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
 
-            return getPMID(worksheets.get(0), service);
+            return getPMID(worksheets.get(0), service, getTCGAtumorTypes(worksheets.get(1), service));
         } catch (MalformedURLException ex) {
             Logger.getLogger(OncokbInfo.class.getName()).log(Level.SEVERE, null, ex);
         } catch (GeneralSecurityException ex) {
@@ -64,23 +64,58 @@ public class UtilsController {
         return null;
     }
 
-    private static List<Map<String, String>> getPMID(WorksheetEntry entry, SpreadsheetService service) throws IOException, ServiceException {
-        URL userUrl = entry.getListFeedUrl();
-        ListFeed list = service.getFeed(userUrl, ListFeed.class);
+    private static Map<String, String> getTCGAtumorTypes(WorksheetEntry entry, SpreadsheetService service) throws IOException, ServiceException {
+        Map<String, String> tumorTypes = new HashMap<>();
+        URL url = entry.getListFeedUrl();
+        ListFeed list = service.getFeed(url, ListFeed.class);
+
+        for (ListEntry row : list.getEntries()) {
+            tumorTypes.put(row.getCustomElements().getValue("short").toUpperCase(), row.getCustomElements().getValue("full"));
+        }
+        return tumorTypes;
+    }
+    private static List<Map<String, String>> getPMID(WorksheetEntry entry, SpreadsheetService service, Map<String, String> tumorTypes) throws IOException, ServiceException {
+        URL url = entry.getListFeedUrl();
+        ListFeed list = service.getFeed(url, ListFeed.class);
         // Create a local representation of the new row.
         List<Map<String, String>> hotspots = new ArrayList<>();
         // Iterate through each row, printing its cell values.
+
         for (ListEntry row : list.getEntries()) {
             Map<String, String> hotspot = new HashMap<>();
             hotspot.put("hugoSymbol", row.getCustomElements().getValue("hugosymbol"));
-            hotspot.put("alteration", getAlteration(row.getCustomElements().getValue("codon"), row.getCustomElements().getValue("variantaminoacid")));
+            hotspot.put("codon", row.getCustomElements().getValue("codon"));
+            hotspot.put("aa", row.getCustomElements().getValue("variantaminoacid"));
             hotspot.put("level", row.getCustomElements().getValue("validationlevel"));
             hotspot.put("pmid", row.getCustomElements().getValue("pmid"));
+            hotspot.put("qval", row.getCustomElements().getValue("qvalue"));
+            hotspot.put("tumorType", getTumorType(row.getCustomElements().getValue("tumortypecomposition"), tumorTypes));
             hotspots.add(hotspot);
         }
         return hotspots;
     }
 
+
+    private static String getTumorType(String ttStr, Map<String, String> tumorTypes) {
+        String tt = "";
+
+        if(ttStr != null && !ttStr.isEmpty()) {
+            String[] variants = ttStr.split("\\|");
+            List<String> filters = new ArrayList<>();
+            if(variants.length > 0){
+                String [] components = variants[0].split(":");
+                if(components.length == 2 ) {
+                    String match = tumorTypes.get(components[0].toUpperCase());
+                    if(match != null) {
+                        tt = match;
+                    }else{
+                        tt = components[0].toUpperCase();
+                    }
+                }
+            }
+        }
+        return tt;
+    }
     private static String getAlteration(String codon, String aa) {
         StringBuilder sb = new StringBuilder();
         if(codon != null && !codon.isEmpty()) {

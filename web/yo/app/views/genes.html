@@ -8,6 +8,7 @@
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="backup()"><span ng-show="!!!status.backup"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.backup">Backup</span></button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="initialStatus()">Initial status</button>
+            <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="initialHotspot()">Initial hotspot list</button>
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="migrate()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Migrate</span></button>-->
         </span>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
