@@ -272,7 +272,17 @@ angular.module('oncokbApp')
                     if (data) {
                         initHotspot(data, 0, function () {
                             console.log('finished......');
-                        })
+                        });
+                    }
+                });
+            };
+
+            $scope.initialAutoMutation = function () {
+                DatabaseConnector.getAutoMutationList(function (data) {
+                    if (data) {
+                        initAutoMutation(data, 0, function () {
+                            console.log('finished......');
+                        });
                     }
                 });
             };
@@ -293,7 +303,7 @@ angular.module('oncokbApp')
                         });
 
                         if(filters.length > 0) {
-                            alteration = filters.map(function(e){ return codon + e});
+                            alteration = filters.map(function(e){ return codon + e;});
                         }
                     } else {
                         alteration.push(codon);
@@ -345,6 +355,7 @@ angular.module('oncokbApp')
                                             _mutation.name.setText(e);
                                             _mutation.oncogenic_eStatus.set('obsolete', 'false');
                                             _mutation.oncogenic_eStatus.set('hotspot', 'TRUE');
+                                            _mutation.oncogenic_eStatus.set('vetted', 'uv');
                                             _mutation.effect.value.setText('Other');
                                             _mutation.effect.addOn.setText('Unknown');
                                             _mutation.oncogenic.setText('LIKELY');
@@ -360,10 +371,10 @@ angular.module('oncokbApp')
                                                 _mutation.description.setText((pmid !== 'mdanderson'?'PMID: ':'') + pmid);
                                                 _mutation.oncogenic_eStatus.set('curated', false);
                                             } else {
-                                                _mutation.description.setText('This mutation is hypothesized to be a hotspot in this gene based upon statistically significant recurrence'
-                                                    + (qval!==null?(' (q<'+qval+')'):'')
-                                                    + (tumorType!==null?('. This hotspot most commonly recurs in ' + tumorType + ' cancer type'):'')
-                                                    + '. (Chang M et al. 2015 Nature Biotechnology)');
+                                                _mutation.description.setText('This mutation is hypothesized to be a hotspot in this gene based upon statistically significant recurrence' +
+                                                    (qval!==null?(' (q<'+qval+')'):'') +
+                                                    (tumorType!==null?('. This hotspot most commonly recurs in ' + tumorType + ' cancer type'):'') +
+                                                    '. (Chang M et al. 2015 Nature Biotechnology)');
                                                 _mutation.oncogenic_eStatus.set('curated', true);
                                             }
 
@@ -386,6 +397,114 @@ angular.module('oncokbApp')
                             console.log('No document has been fount on gene: ', hugoSymbol);
                             $timeout(function () {
                                 initHotspot(list, ++listIndex, callback);
+                            }, 200, false);
+                        }
+                    }
+
+                } else {
+                    if (callback) {
+                        callback();
+                    }
+                    console.log('finished.');
+                }
+            }
+
+            function initAutoMutation(list, listIndex, callback) {
+                if (listIndex < list.length) {
+                    console.log(list[listIndex]);
+                    var hugoSymbol = list[listIndex].hugoSymbol || null;
+                    var mutation = list[listIndex].mutation || null;
+                    var mutationEffect = list[listIndex].mutationEffect || null;
+                    var mutationEffectAddon = list[listIndex].mutationEffectAddon || null;
+                    var oncogenic = list[listIndex].oncogenic || null;
+                    var curated = list[listIndex].curated || null;
+                    var hotspot = list[listIndex].hotspot || null;
+                    var shortDescription = list[listIndex].shortDescription || null;
+                    var fullDescription = list[listIndex].fullDescription || null;
+
+                    if (hugoSymbol) {
+                        var document = Documents.get({title: hugoSymbol});
+                        //console.log('Got gene document.', document);
+
+                        if (document instanceof Array && document.length > 0) {
+                            if (document.length > 1) {
+                                console.log('More than one matched document have been found: ', hugoSymbol);
+                            }
+                            if (mutation) {
+                                storage.getRealtimeDocument(document[0].id).then(function (realtime) {
+                                    if (realtime && realtime.error) {
+                                        console.log('did not get realtime document.');
+                                    } else {
+                                        console.log(list[listIndex].hugoSymbol, '\t\t', listIndex + 1);
+                                        console.log('\t Initializing status...');
+                                        var model = realtime.getModel();
+                                        var gene = model.getRoot().get('gene');
+                                        var exists = false;
+                                        //gene.mutations.clear();
+                                        gene.mutations.asArray().forEach(function (e, i) {
+                                            if(e.name.getText().toLowerCase() === mutation.toLowerCase()){
+                                                console.log('\t\tAlteration already exists, ignore.' + e.name.getText());
+                                            }
+                                        });
+                                        model.beginCompoundOperation();
+                                        var _mutation = '';
+                                        _mutation = model.create(OncoKB.Mutation);
+                                        _mutation.name.setText(mutation);
+                                        _mutation.oncogenic_eStatus.set('obsolete', 'false');
+                                        _mutation.oncogenic_eStatus.set('vetted', 'uv');
+
+                                        if(oncogenic) {
+                                            _mutation.oncogenic.setText(oncogenic);
+                                        }
+
+                                        if(hotspot) {
+                                            _mutation.oncogenic_eStatus.set('hotspot', hotspot);
+                                        }else{
+                                            _mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
+                                        }
+
+                                        if(curated !== null) {
+                                            if(curated.toLowerCase() === 'false') {
+                                                curated = false;
+                                            }else{
+                                                curated = true;
+                                            }
+                                            _mutation.oncogenic_eStatus.set('curated', curated);
+                                        }
+                                        if(mutationEffect) {
+                                            _mutation.effect.value.setText(mutationEffect);
+                                            if(mutationEffectAddon) {
+                                                _mutation.effect.addOn.setText(mutationEffectAddon);
+                                            }
+                                        }
+
+                                        if(shortDescription) {
+                                            _mutation.short.setText(shortDescription);
+                                        }
+
+                                        if(fullDescription) {
+                                            _mutation.description.setText(fullDescription);
+                                        }
+
+
+                                        gene.mutations.push(_mutation);
+                                        console.log('New mutation has been added: ', mutation);
+                                        model.endCompoundOperation();
+                                        $timeout(function () {
+                                            initAutoMutation(list, ++listIndex, callback);
+                                        }, 200, false);
+                                    }
+                                });
+                            } else {
+                                console.log('No alteration has been fount on gene: ', hugoSymbol);
+                                $timeout(function () {
+                                    initAutoMutation(list, ++listIndex, callback);
+                                }, 200, false);
+                            }
+                        } else {
+                            console.log('No document has been fount on gene: ', hugoSymbol);
+                            $timeout(function () {
+                                initAutoMutation(list, ++listIndex, callback);
                             }, 200, false);
                         }
                     }
@@ -722,7 +841,7 @@ angular.module('oncokbApp')
                 //console.log($scope.gene.mutations.get(0).tumors.get(0));
                 console.log($scope.geneStatus);
 
-                console.log('Num of watchers: ' + checkNumWatchers())
+                console.log('Num of watchers: ' + checkNumWatchers());
                 console.log($scope.gene.status_timeStamp.get('lastEdit').value);
                 console.log($scope.gene.status_timeStamp.get('lastUpdate').value);
 
@@ -1031,7 +1150,7 @@ angular.module('oncokbApp')
             $scope.curatedIconClick = function (event, status) {
                 $scope.stopCollopse(event);
                 status.set('curated', !status.get('curated'));
-            }
+            };
 
             function regenerateGeneStatus() {
                 var geneStatus = {};
@@ -1586,7 +1705,7 @@ angular.module('oncokbApp')
                                 tumor.TI.asArray().forEach(function (ti) {
                                     numAccordion += ti.treatments.length;
                                 });
-                            })
+                            });
                         });
                         console.log(numAccordion);
                         $scope.status.numAccordion = numAccordion;

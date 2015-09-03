@@ -32,6 +32,8 @@ public class UtilsController {
         if(cmd != null) {
             if(cmd.equals("hotspot")) {
                 return getHotSpot();
+            }else if(cmd.equals("autoMutation")){
+                return getGeneSpecificMutationList();
             }
         }
 
@@ -39,6 +41,55 @@ public class UtilsController {
     }
 
     private static Properties PROPERTIES;
+
+    private static List<Map<String, String>> getGeneSpecificMutationList() {
+        try {
+            String hotspotSpreadsheet = PropertiesUtils.getProperties("google.gene_mutation_list");
+            URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + hotspotSpreadsheet);
+            SpreadsheetService service = GoogleAuth.getSpreadSheetService();
+            SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
+
+            WorksheetFeed worksheetFeed = service.getFeed(
+                    spreadSheetEntry.getWorksheetFeedUrl(), WorksheetFeed.class);
+            List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
+
+            return getNewMutation(worksheets.get(0), service);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(OncokbInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (GeneralSecurityException ex) {
+            Logger.getLogger(OncokbInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(OncokbInfo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ServiceException ex) {
+            Logger.getLogger(OncokbInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+    }
+
+    private static List<Map<String, String>> getNewMutation(WorksheetEntry entry, SpreadsheetService service) throws IOException, ServiceException {
+        URL url = entry.getListFeedUrl();
+        ListFeed list = service.getFeed(url, ListFeed.class);
+        // Create a local representation of the new row.
+        List<Map<String, String>> mutations = new ArrayList<>();
+        // Iterate through each row, printing its cell values.
+
+        for (ListEntry row : list.getEntries()) {
+            Map<String, String> mutation = new HashMap<>();
+            mutation.put("hugoSymbol", row.getCustomElements().getValue("gene"));
+            mutation.put("mutation", row.getCustomElements().getValue("mutation"));
+            mutation.put("oncogenic", row.getCustomElements().getValue("oncogenic"));
+            mutation.put("mutationEffect", row.getCustomElements().getValue("mutationeffect"));
+            mutation.put("mutationEffectAddon", row.getCustomElements().getValue("mutationeffectaddon"));
+            mutation.put("hotspot", row.getCustomElements().getValue("hotspot"));
+            mutation.put("curated", row.getCustomElements().getValue("curated"));
+            mutation.put("shortDescription", row.getCustomElements().getValue("shortdescription"));
+            mutation.put("fullDescription", row.getCustomElements().getValue("fulldescription"));
+            mutations.add(mutation);
+        }
+        return mutations;
+    }
+
     private static List<Map<String, String>> getHotSpot(){
         try {
             String hotspotSpreadsheet = PropertiesUtils.getProperties("google.hotspot");

@@ -325,6 +325,18 @@ angular.module('oncokbApp')
                 }
             }
 
+            function getAutoMutationList(callback) {
+                if(dataFromFile) {
+                    ServerUtils.autoMutation.getFromFile().success(function(data) {
+                        callback(data);
+                    });
+                }else {
+                    ServerUtils.autoMutation.hotspot.getFromServer().success(function(data) {
+                        callback(data);
+                    });
+                }
+            }
+
             // Public API here
             return {
                 'getGeneAlterationTumortype': function(callback) {
@@ -358,6 +370,7 @@ angular.module('oncokbApp')
                 'sendEmail': sendEmail,
                 'setGeneStatus': setGeneStatus,
                 'getGeneStatus': getGeneStatus,
-                'getHotspotList': getHotspotList
+                'getHotspotList': getHotspotList,
+                'getAutoMutationList': getAutoMutationList
         };
 }]);

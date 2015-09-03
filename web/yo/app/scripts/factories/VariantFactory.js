@@ -260,6 +260,8 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
     function getFromServer(type) {
         if(type === 'hotspot') {
             return $http.get('utils?cmd=hotspot');
+        }else if(type === 'autoMutation') {
+            return $http.get('utils?cmd=autoMutation');
         }
         return null;
     }
@@ -267,6 +269,8 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
     function getFromFile(type) {
         if(type === 'hotspot') {
             return $http.get('data/hotspot.json');
+        }else if(type === 'autoMutation') {
+            return $http.get('data/autoMutation.json');
         }
         return null;
     }
@@ -275,6 +279,10 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
         hotspot: {
             getFromServer: function(){ return getFromServer('hotspot');},
             getFromFile: function(){ return getFromFile('hotspot');}
+        },
+        autoMutation: {
+            getFromServer: function(){ return getFromServer('autoMutation');},
+            getFromFile: function(){ return getFromFile('autoMutation');}
         }
     };
 }]);
