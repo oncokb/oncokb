@@ -209,13 +209,17 @@ public class SummaryUtils {
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
             Evidence ev = geneSummaryEvs.get(0);
-            String geneSummary = StringEscapeUtils.escapeXml(ev.getShortDescription()).trim();
+            String geneSummary = ev.getShortDescription();
 
-            if(geneSummary == null) {
-                geneSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            if(geneSummary == null){
+                geneSummary = ev.getDescription();
             }
-            sb.append(geneSummary)
-                    .append(" ");
+
+            if(geneSummary != null) {
+                geneSummary = StringEscapeUtils.escapeXml(geneSummary).trim();
+                sb.append(geneSummary)
+                        .append(" ");
+            }
         }
 
         //Mutation summary
@@ -235,12 +239,16 @@ public class SummaryUtils {
         List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
         if (!tumorTypeSummaryEvs.isEmpty()) {
             Evidence ev = tumorTypeSummaryEvs.get(0);
-            String tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getShortDescription()).trim();
-            if(tumorTypeSummary == null) {
-                tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            String tumorTypeSummary = ev.getShortDescription();
+
+            if(tumorTypeSummary == null){
+                tumorTypeSummary = ev.getDescription();
             }
-            sb.append(tumorTypeSummary)
-                    .append(" ");
+            if(tumorTypeSummary != null) {
+                tumorTypeSummary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
+                sb.append(tumorTypeSummary)
+                        .append(" ");
+            }
         }
 
         sb.append(SummaryUtils.variantSummary(gene, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
