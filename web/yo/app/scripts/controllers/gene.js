@@ -411,7 +411,6 @@ angular.module('oncokbApp')
 
             function initAutoMutation(list, listIndex, callback) {
                 if (listIndex < list.length) {
-                    console.log(list[listIndex]);
                     var hugoSymbol = list[listIndex].hugoSymbol || null;
                     var mutation = list[listIndex].mutation || null;
                     var mutationEffect = list[listIndex].mutationEffect || null;
@@ -444,65 +443,68 @@ angular.module('oncokbApp')
                                         gene.mutations.asArray().forEach(function (e, i) {
                                             if(e.name.getText().toLowerCase() === mutation.toLowerCase()){
                                                 console.log('\t\tAlteration already exists, ignore.' + e.name.getText());
+                                                exists=true;
                                             }
                                         });
-                                        model.beginCompoundOperation();
-                                        var _mutation = '';
-                                        _mutation = model.create(OncoKB.Mutation);
-                                        _mutation.name.setText(mutation);
-                                        _mutation.oncogenic_eStatus.set('obsolete', 'false');
-                                        _mutation.oncogenic_eStatus.set('vetted', 'uv');
+                                        if(!exists){
+                                            model.beginCompoundOperation();
+                                            var _mutation = '';
+                                            _mutation = model.create(OncoKB.Mutation);
+                                            _mutation.name.setText(mutation);
+                                            _mutation.oncogenic_eStatus.set('obsolete', 'false');
+                                            _mutation.oncogenic_eStatus.set('vetted', 'uv');
 
-                                        if(oncogenic) {
-                                            _mutation.oncogenic.setText(oncogenic);
-                                        }
+                                            if(oncogenic) {
+                                                _mutation.oncogenic.setText(oncogenic);
+                                            }
 
-                                        if(hotspot) {
-                                            _mutation.oncogenic_eStatus.set('hotspot', hotspot);
-                                        }else{
-                                            _mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
-                                        }
-
-                                        if(curated !== null) {
-                                            if(curated.toLowerCase() === 'false') {
-                                                curated = false;
+                                            if(hotspot) {
+                                                _mutation.oncogenic_eStatus.set('hotspot', hotspot);
                                             }else{
-                                                curated = true;
+                                                _mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
                                             }
-                                            _mutation.oncogenic_eStatus.set('curated', curated);
-                                        }
-                                        if(mutationEffect) {
-                                            _mutation.effect.value.setText(mutationEffect);
-                                            if(mutationEffectAddon) {
-                                                _mutation.effect.addOn.setText(mutationEffectAddon);
+
+                                            if(curated !== null) {
+                                                if(curated.toLowerCase() === 'false') {
+                                                    curated = false;
+                                                }else{
+                                                    curated = true;
+                                                }
+                                                _mutation.oncogenic_eStatus.set('curated', curated);
                                             }
+                                            if(mutationEffect) {
+                                                _mutation.effect.value.setText(mutationEffect);
+                                                if(mutationEffectAddon) {
+                                                    _mutation.effect.addOn.setText(mutationEffectAddon);
+                                                }
+                                            }
+
+                                            if(shortDescription) {
+                                                _mutation.short.setText(shortDescription);
+                                            }
+
+                                            if(fullDescription) {
+                                                _mutation.description.setText(fullDescription);
+                                            }
+
+
+                                            gene.mutations.push(_mutation);
+                                            model.endCompoundOperation();
+                                            console.log('\t\tNew mutation has been added: ', mutation);
                                         }
-
-                                        if(shortDescription) {
-                                            _mutation.short.setText(shortDescription);
-                                        }
-
-                                        if(fullDescription) {
-                                            _mutation.description.setText(fullDescription);
-                                        }
-
-
-                                        gene.mutations.push(_mutation);
-                                        console.log('New mutation has been added: ', mutation);
-                                        model.endCompoundOperation();
                                         $timeout(function () {
                                             initAutoMutation(list, ++listIndex, callback);
                                         }, 200, false);
                                     }
                                 });
                             } else {
-                                console.log('No alteration has been fount on gene: ', hugoSymbol);
+                                console.log('\tNo alteration has been fount on gene: ', hugoSymbol);
                                 $timeout(function () {
                                     initAutoMutation(list, ++listIndex, callback);
                                 }, 200, false);
                             }
                         } else {
-                            console.log('No document has been fount on gene: ', hugoSymbol);
+                            console.log('\tNo document has been fount on gene: ', hugoSymbol);
                             $timeout(function () {
                                 initAutoMutation(list, ++listIndex, callback);
                             }, 200, false);
