@@ -526,6 +526,15 @@ angular.module('oncokbApp')
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
+                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function(evt){
+                                if(!evt.isSaving){
+                                    realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
+                                    storage.closeDocument();
+                                    $timeout(function () {
+                                        initial(docs, ++docIndex, callback);
+                                    }, 200, false);
+                                }
+                            });
                             console.log(docs[docIndex].title, '\t\t', docIndex + 1);
                             console.log('\t Initializing status...');
                             var model = realtime.getModel();
@@ -533,21 +542,46 @@ angular.module('oncokbApp')
                             if (gene) {
 
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function (e) {
-                                    if (!e.oncogenic_eStatus.has('obsolete')) {
-                                        e.oncogenic_eStatus.set('obsolete', 'false');
+                                gene.mutations.asArray().forEach(function (mutation) {
+                                    if (!mutation.oncogenic_eStatus.has('obsolete')) {
+                                        mutation.oncogenic_eStatus.set('obsolete', 'false');
                                     }
-                                    if (!e.oncogenic_eStatus.has('hotspot')) {
-                                        e.oncogenic_eStatus.set('hotspot', 'FALSE');
+                                    if (!mutation.oncogenic_eStatus.has('hotspot')) {
+                                        mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
                                     }
-                                    //if (!e.oncogenic_eStatus.has('curated')) {
-                                        e.oncogenic_eStatus.set('curated', true);
-                                    //}
+                                    if (!mutation.oncogenic_eStatus.has('curated')) {
+                                        mutation.oncogenic_eStatus.set('curated', true);
+                                    }
+                                    //console.log('Add mutation estatus');
+                                    mutation.tumors.asArray().forEach(function (tumor) {
+                                        if (!tumor.prevalence_eStatus.has('obsolete')) {
+                                            tumor.prevalence_eStatus.set('obsolete', 'false');
+                                        }
+                                        if (!tumor.prevalence_eStatus.has('hotspot')) {
+                                            tumor.prevalence_eStatus.set('hotspot', 'FALSE');
+                                        }
+                                        if (!tumor.progImp_eStatus.has('obsolete')) {
+                                            tumor.progImp_eStatus.set('obsolete', 'false');
+                                        }
+                                        if (!tumor.nccn_eStatus.has('hotspot')) {
+                                            tumor.nccn_eStatus.set('hotspot', 'FALSE');
+                                        }
+
+                                        //console.log('Add tumor estatus');
+                                        tumor.TI.asArray().forEach(function (ti) {
+                                           ti.treatments.asArray().forEach(function (treatment) {
+                                               if (!treatment.name_eStatus.has('obsolete')) {
+                                                   treatment.name_eStatus.set('obsolete', 'false');
+                                               }
+                                               if (!treatment.name_eStatus.has('hotspot')) {
+                                                   treatment.name_eStatus.set('hotspot', 'FALSE');
+                                               }
+                                               //console.log('Add treatment estatus');
+                                           })
+                                        });
+                                    });
                                 });
                                 model.endCompoundOperation();
-                                $timeout(function () {
-                                    initial(docs, ++docIndex, callback);
-                                }, 200, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
