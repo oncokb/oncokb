@@ -32,7 +32,11 @@ angular.module('oncokbApp')
         scope.stringTimeoutPromise = '';
         scope.content = {};
         if(scope.objecttype === 'object' && scope.objectkey) {
-          scope.content.stringO = scope.object.get(scope.objectkey);
+          if(scope.object.has(scope.objectkey)) {
+            scope.content.stringO = scope.object.get(scope.objectkey);
+          }else{
+            scope.content.stringO = '';
+          }
         }else{
           scope.content.stringO = scope.object.text;
         }
