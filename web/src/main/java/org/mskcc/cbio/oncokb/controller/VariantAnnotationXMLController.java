@@ -106,7 +106,11 @@ public class VariantAnnotationXMLController {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");
             sb.append("    <description>");
-            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+            if(ev.getShortDescription()!=null) {
+                sb.append(StringEscapeUtils.escapeXml(ev.getShortDescription()).trim());
+            }else{
+                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+            }
             sb.append("</description>\n");
             exportRefereces(ev, sb, "    ");
             sb.append("</gene_annotation>\n");
@@ -126,8 +130,11 @@ public class VariantAnnotationXMLController {
             }
             sb.append("</effect>\n");
             sb.append("    <description>");
-            if (ev.getDescription()!=null)
+            if (ev.getShortDescription()!=null) {
+                sb.append(StringEscapeUtils.escapeXml(ev.getShortDescription()).trim());
+            }else if(ev.getDescription()!=null){
                 sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+            }
             sb.append("</description>\n");
             if (ev!=null) {
                 exportRefereces(ev, sb, "    ");
@@ -166,7 +173,10 @@ public class VariantAnnotationXMLController {
                 sbTumorType.append("    <prognostic_implications>\n");
                 sbTumorType.append("        <description>\n");
                 for (Evidence ev : prognosticEbs) {
-                    sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(ev.getDescription()).trim()).append("\n");
+                    String description = ev.getShortDescription();
+                    if(description==null)
+                        description = ev.getDescription();
+                    sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
                 }
                 sbTumorType.append("</description>\n");
 
@@ -482,8 +492,11 @@ public class VariantAnnotationXMLController {
         }
 
         sb.append(indent).append("<description>");
-        if (evidence.getDescription()!=null)
+        if (evidence.getShortDescription()!=null) {
+            sb.append(StringEscapeUtils.escapeXml(evidence.getShortDescription()).trim());
+        }else if(evidence.getDescription()!=null){
             sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
+        }
         sb.append("</description>\n");
 
         exportRefereces(evidence, sb, indent);

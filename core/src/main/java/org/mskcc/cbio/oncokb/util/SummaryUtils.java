@@ -209,7 +209,11 @@ public class SummaryUtils {
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
             Evidence ev = geneSummaryEvs.get(0);
-            String geneSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            String geneSummary = StringEscapeUtils.escapeXml(ev.getShortDescription()).trim();
+
+            if(geneSummary == null) {
+                geneSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            }
             sb.append(geneSummary)
                     .append(" ");
         }
@@ -218,7 +222,11 @@ public class SummaryUtils {
         List<Evidence> mutationSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_SUMMARY));
         if (!mutationSummaryEvs.isEmpty()) {
             Evidence ev = mutationSummaryEvs.get(0);
-            String mutationSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            String mutationSummary = StringEscapeUtils.escapeXml(ev.getShortDescription()).trim();
+
+            if(mutationSummary == null) {
+                mutationSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            }
             sb.append(mutationSummary)
                     .append(" ");
         }
@@ -227,7 +235,10 @@ public class SummaryUtils {
         List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
         if (!tumorTypeSummaryEvs.isEmpty()) {
             Evidence ev = tumorTypeSummaryEvs.get(0);
-            String tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            String tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getShortDescription()).trim();
+            if(tumorTypeSummary == null) {
+                tumorTypeSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+            }
             sb.append(tumorTypeSummary)
                     .append(" ");
         }
