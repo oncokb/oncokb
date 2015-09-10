@@ -288,11 +288,9 @@ public class EvidenceController {
         //Include all level 1 evidences from other tumor types
         for(Evidence evidence : evidencesFromOtherTumroTypes) {
             if(evidence.getLevelOfEvidence()!=null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)){
-                for(TumorType tumorType : tumorTypes) {
-                    if(!evidence.getTumorType().equals(tumorType)){
-                        evidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                        evidences.add(evidence);
-                    }
+                if(!tumorTypes.contains(evidence.getTumorType())){
+                    evidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+                    evidences.add(evidence);
                 }
             }
         }
