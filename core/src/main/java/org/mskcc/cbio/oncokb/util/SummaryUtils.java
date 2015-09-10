@@ -46,13 +46,16 @@ public class SummaryUtils {
             List<Evidence> mutationSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_SUMMARY));
             if (!mutationSummaryEvs.isEmpty()) {
                 Evidence ev = mutationSummaryEvs.get(0);
-                String mutationSummary = StringEscapeUtils.escapeXml(ev.getShortDescription()).trim();
+                String mutationSummary = ev.getShortDescription();
 
                 if(mutationSummary == null) {
-                    mutationSummary = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+                    mutationSummary = ev.getDescription();
                 }
-                sb.append(mutationSummary)
-                        .append(" ");
+                if(mutationSummary != null) {
+                    mutationSummary = StringEscapeUtils.escapeXml(mutationSummary).trim();
+                    sb.append(mutationSummary)
+                            .append(" ");
+                }
             }else{
                 if (oncogenic > 0) {
                     if (appendThe) {
