@@ -2,51 +2,52 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 /**
- * 
  * @author jgao
  */
 public class Alteration implements java.io.Serializable {
 
-     private Integer alterationId;
-     private Gene gene;
-     private AlterationType alterationType;
-     private VariantConsequence consequence;
-     
-     private String alteration;
-     private String name;
-     private String refResidues;
-     private Integer proteinStart;
-     private Integer proteinEnd;
-     private String variantResidues;
-     private Integer oncogenic;
+    private Integer alterationId;
+    private Gene gene;
+    private AlterationType alterationType;
+    private VariantConsequence consequence;
+
+    private String alteration;
+    private String name;
+    private String refResidues;
+    private Integer proteinStart;
+    private Integer proteinEnd;
+    private String variantResidues;
+    private Integer oncogenic;
+    private Integer hotspot;
+    private String hotspotAddon;
 
     public Alteration() {
     }
-   
-    
+
+
     public Integer getAlterationId() {
         return this.alterationId;
     }
-    
-    
+
+
     public void setAlterationId(Integer alterationId) {
         this.alterationId = alterationId;
     }
-    
+
     public Gene getGene() {
         return this.gene;
     }
-    
-    
+
+
     public void setGene(Gene gene) {
         this.gene = gene;
     }
-    
+
     public String getAlteration() {
         return this.alteration;
     }
-    
-    
+
+
     public void setAlteration(String alteration) {
         this.alteration = alteration;
     }
@@ -58,12 +59,12 @@ public class Alteration implements java.io.Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public AlterationType getAlterationType() {
         return this.alterationType;
     }
-    
-    
+
+
     public void setAlterationType(AlterationType alterationType) {
         this.alterationType = alterationType;
     }
@@ -109,7 +110,7 @@ public class Alteration implements java.io.Serializable {
     }
 
     public Integer getOncogenic() {
-        if (oncogenic==null) {
+        if (oncogenic == null) {
             return -1;
         }
         return oncogenic;
@@ -117,6 +118,22 @@ public class Alteration implements java.io.Serializable {
 
     public void setOncogenic(Integer oncogenic) {
         this.oncogenic = oncogenic;
+    }
+
+    public Integer getHotspot() {
+        return hotspot;
+    }
+
+    public void setHotspot(Integer hotspot) {
+        this.hotspot = hotspot;
+    }
+
+    public String getHotspotAddon() {
+        return hotspotAddon;
+    }
+
+    public void setHotspotAddon(String hotspotAddon) {
+        this.hotspotAddon = hotspotAddon;
     }
 
     @Override
@@ -128,8 +145,8 @@ public class Alteration implements java.io.Serializable {
         return hash;
     }
 
-    
-     @Override
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;

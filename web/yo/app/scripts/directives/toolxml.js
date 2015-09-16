@@ -63,7 +63,7 @@ angular.module('oncokbApp')
               var reportViewData = [];
               var variants = [];
               var reportViewDatas = [];
-              if(angular.isDefined(full.document.sample.test.variant)) {
+              if(full && full.document && full.document.sample && full.document.sample.test && full.document.sample.test.variant) {
                 if(angular.isArray(full.document.sample.test.variant)) {
                   variants = full.document.sample.test.variant;
                 }else {
@@ -100,10 +100,17 @@ angular.module('oncokbApp')
                 console.log(workers);
                 $scope.reportViewDatas = reportViewDatas;
                 $scope.status.isXML = true;
+                $scope.status.validXML = true;
                 $scope.rendering = false;
                 $scope.$apply();
               }else{
-                $scope.status.isXML = false;
+                if(full) {
+                  $scope.status.isXML = true;
+                  $scope.status.validXML = false;
+                }else{
+                  $scope.status.isXML = false;
+                  $scope.status.validXML = null;
+                }
                 $scope.rendering = false;
                 $scope.$apply();
               }

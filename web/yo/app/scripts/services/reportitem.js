@@ -44,9 +44,9 @@ angular.module('oncokbApp')
                 params.clinicalTrials = 'None.';
             }
 
-            if(params.hasClinicalTrial === 'NO') {
-                annotation.annotation_summary = annotation.annotation_summary.toString().replace('Please refer to the clinical trials section.', '');
-            }
+            //if(params.hasClinicalTrial === 'NO') {
+            //    annotation.annotation_summary = annotation.annotation_summary.toString().replace('Please refer to the clinical trials section.', '');
+            //}
 
             params.overallInterpretation = (geneName + ' ' + mutation + ' SUMMARY\n' +
             annotation.annotation_summary) || 'None.';

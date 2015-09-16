@@ -145,7 +145,10 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http',  function ($htt
     };
 }]);
 
-angular.module('oncokbApp').factory(('SearchVariant'), ['$http', function($http) {
+angular.module('oncokbApp')
+    .config(function ($httpProvider) {
+        $httpProvider.interceptors.push('xmlHttpInterceptor');
+    }).factory(('SearchVariant'), ['$http', function($http) {
     'use strict';
     function getAnnotation(params) {
         var _params = angular.copy(params),
@@ -248,5 +251,38 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($htt
     }
     return {
         updateGene: updateGene
+    };
+}]);
+
+angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
+    'use strict';
+
+    function getFromServer(type) {
+        if(type === 'hotspot') {
+            return $http.get('utils?cmd=hotspot');
+        }else if(type === 'autoMutation') {
+            return $http.get('utils?cmd=autoMutation');
+        }
+        return null;
+    }
+
+    function getFromFile(type) {
+        if(type === 'hotspot') {
+            return $http.get('data/hotspot.json');
+        }else if(type === 'autoMutation') {
+            return $http.get('data/autoMutation.json');
+        }
+        return null;
+    }
+
+    return {
+        hotspot: {
+            getFromServer: function(){ return getFromServer('hotspot');},
+            getFromFile: function(){ return getFromFile('hotspot');}
+        },
+        autoMutation: {
+            getFromServer: function(){ return getFromServer('autoMutation');},
+            getFromFile: function(){ return getFromFile('autoMutation');}
+        }
     };
 }]);

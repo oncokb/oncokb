@@ -18,6 +18,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.gmail.Gmail;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.util.ServiceException;
+import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -40,7 +41,6 @@ public final class GoogleAuth {
     private static Drive DRIVE_SERVICE;
     private static SpreadsheetService SPREADSHEET_SERVICE;
     private static File SERVICE_ACCOUNT_PKCS12_FILE;
-    private static Properties PROPERTIES;
 
     private static GoogleCredential CREDENTIAL;
 
@@ -70,25 +70,8 @@ public final class GoogleAuth {
         return SPREADSHEET_SERVICE;
     }
 
-    private static void getProperties() throws IOException {
-        if(PROPERTIES == null) {
-            String propFileName = "properties/config.properties";
-            PROPERTIES = new Properties();
-            InputStream inputStream = GoogleAuth.class.getClassLoader().getResourceAsStream(propFileName);
-
-            if (inputStream != null) {
-                PROPERTIES.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-            }
-            inputStream.close();
-
-            SERVICE_ACCOUNT_EMAIL = PROPERTIES.getProperty("google.service_account_email");
-        }
-    }
-
-    private static void openFile() {
-        String SERVICE_ACCOUNT_PKCS12_FILE_PATH = PROPERTIES.getProperty("google.p_twelve");
+    private static void openFile() throws IOException {
+        String SERVICE_ACCOUNT_PKCS12_FILE_PATH = PropertiesUtils.getProperties("google.p_twelve");
         URL SERVICE_ACCOUNT_PKCS12_URL= GoogleAuth.class.getClassLoader().getResource(SERVICE_ACCOUNT_PKCS12_FILE_PATH);
         SERVICE_ACCOUNT_PKCS12_FILE = new java.io.File(SERVICE_ACCOUNT_PKCS12_URL.getPath());
     }
@@ -104,8 +87,8 @@ public final class GoogleAuth {
 
     private static void createGoogleCredential() throws GeneralSecurityException, IOException {
 
-        if(PROPERTIES == null){
-            getProperties();
+        if(SERVICE_ACCOUNT_EMAIL == null){
+            SERVICE_ACCOUNT_EMAIL = PropertiesUtils.getProperties("google.service_account_email");
         }
 
         if(SERVICE_ACCOUNT_PKCS12_FILE == null) {

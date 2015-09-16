@@ -61,8 +61,11 @@ angular.module('oncokbApp')
     }
 
     // Render the sign in button.
-    $scope.renderSignInButton = function() {
-        storage.requireAuth().then(function(result){
+    $scope.renderSignInButton = function(immediateMode) {
+        if(immediateMode !== false) {
+            immediateMode = true;
+        }
+        storage.requireAuth(immediateMode).then(function(result){
             $scope.signInCallback(result);
         });
     };

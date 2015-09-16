@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
@@ -154,6 +156,18 @@ public class DriveAnnotationParser {
             Set<Alteration> alterations = new HashSet<Alteration>();
 
             int oncogenic = -1;
+            int hotspot = 0;
+            String hotspotAddon = null;
+
+            if(mutationObj.has("oncogenic_eStatus") && mutationObj.getJSONObject("oncogenic_eStatus").has("hotspot")){
+                String hotspotStr = mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspot").toLowerCase();
+                if(hotspotStr.equals("true")){
+                    hotspot = 1;
+                }
+                if(mutationObj.getJSONObject("oncogenic_eStatus").has("hotspotAddon") && mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspotAddon") != null) {
+                    hotspotAddon = mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspotAddon");
+                }
+            }
 
             if(mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
                 String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
@@ -183,10 +197,22 @@ public class DriveAnnotationParser {
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
                     alteration.setOncogenic(oncogenic);
+                    alteration.setHotspot(hotspot);
+                    if(hotspotAddon != null){
+                        alteration.setHotspotAddon(hotspotAddon);
+                    }
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                }else if (oncogenic > 0) {
-                    alteration.setOncogenic(oncogenic);
+                } else {
+                    if (oncogenic > 0) {
+                        alteration.setOncogenic(oncogenic);
+                    }
+                    if (hotspot > 0) {
+                        alteration.setHotspot(hotspot);
+                    }
+                    if (hotspotAddon != null) {
+                        alteration.setHotspotAddon(hotspotAddon);
+                    }
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
@@ -223,7 +249,11 @@ public class DriveAnnotationParser {
                         }
                     }else {
                         if(effectAddon != null && !effectAddon.isEmpty()) {
-                            effect = effect + " " + effectAddon;
+                            if(StringUtils.containsIgnoreCase(effectAddon, effect)){
+                                effect = effectAddon;
+                            }else{
+                                effect = effect + " " + effectAddon;
+                            }
                         }
                     }
                 }else {
