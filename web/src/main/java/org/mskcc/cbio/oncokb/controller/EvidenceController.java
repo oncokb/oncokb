@@ -229,28 +229,17 @@ public class EvidenceController {
                 if(geneStatus != null && !gene.getStatus().toLowerCase().equals(geneStatus.toLowerCase())) {
                     evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)), alterations));
                 }else{
+                    Set<TumorType> relevantTumorTypes = new HashSet<>();
                     if (tumorType != null && tumorTypeSource != null) {
-                        Set<TumorType> relevantTumorTypes = new HashSet<>();
                         if (tumorTypeSource.equals("cbioportal")) {
                             relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(tumorType));
                         } else if (tumorTypeSource.equals("quest")) {
                             relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
                         }
-                        if (relevantTumorTypes != null) {
-                            List<Evidence> tumorTypeEvidences = new ArrayList<>();
-                            tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes), evidenceTypes));
-                            evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
-                        }else{
-                            //If no relevant tumor type has been found, return gene summary, background and mutation effect
-                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)), alterations));
-                        }
-                    } else {
-                        if (evidenceTypes == null) {
-                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations), alterations));
-                        } else {
-                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes), alterations));
-                        }
                     }
+                    List<Evidence> tumorTypeEvidences = new ArrayList<>();
+                    tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations,relevantTumorTypes.isEmpty()?null:new ArrayList<TumorType>(relevantTumorTypes), evidenceTypes));
+                    evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
                 }
             } else {
                 if(evidenceTypes == null) {
@@ -288,14 +277,14 @@ public class EvidenceController {
         //Include all level 1 evidences from other tumor types
         for(Evidence evidence : evidencesFromOtherTumroTypes) {
             if(evidence.getLevelOfEvidence()!=null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)){
-                if(!tumorTypes.contains(evidence.getTumorType())){
+                if(tumorTypes == null || !tumorTypes.contains(evidence.getTumorType())){
                     evidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
                     evidences.add(evidence);
                 }
             }
         }
         evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)));
-        evidences.addAll(evidenceBo.findEvidencesByAlterationAndTumorTypes(alterations, tumorTypes, evidenceTypes));
+            evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes));
         return evidences;
     }
 }
