@@ -34,15 +34,6 @@ public interface EvidenceBo extends GenericBo<Evidence> {
     List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes);
 
     /**
-     * Find Evidences by alteration ID and tumor types
-     * @param alterations
-     * @param tumorTypes
-     * @param evidenceTypes
-     * @return
-     */
-    List<Evidence> findEvidencesByAlterationAndTumorTypes(Collection<Alteration> alterations, Collection<TumorType> tumorTypes, Collection<EvidenceType> evidenceTypes);
-
-    /**
      * 
      * @param alterations
      * @param evidenceType
