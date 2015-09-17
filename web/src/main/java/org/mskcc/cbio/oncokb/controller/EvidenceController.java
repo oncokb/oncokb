@@ -113,6 +113,9 @@ public class EvidenceController {
                 JSONObject pair = params.getJSONObject(i);
                 EvidenceQuery query = new EvidenceQuery();
 
+                if(pair.has("id")) {
+                    query.setId(pair.getString("id"));
+                }
                 if(pair.has("entrezGeneId")) {
                     query.setEntrezGeneId(pair.getString("entrezGeneId"));
                 }
