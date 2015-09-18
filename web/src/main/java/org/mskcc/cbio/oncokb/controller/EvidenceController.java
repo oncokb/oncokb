@@ -107,43 +107,46 @@ public class EvidenceController {
             @RequestBody String body) {
         List<EvidenceQuery> result = new ArrayList<>();
         if(body != null && !body.isEmpty()){
-            JSONArray params = new JSONArray(body);
+            JSONObject querys = new JSONObject(body);
+            if(querys.has("query")) {
+                JSONArray params = new JSONArray(querys.getString("query"));
 
-            for(int i = 0; i < params.length(); i++) {
-                JSONObject pair = params.getJSONObject(i);
-                EvidenceQuery query = new EvidenceQuery();
+                for(int i = 0; i < params.length(); i++) {
+                    JSONObject pair = params.getJSONObject(i);
+                    EvidenceQuery query = new EvidenceQuery();
 
-                if(pair.has("id")) {
-                    query.setId(pair.getString("id"));
-                }
-                if(pair.has("entrezGeneId")) {
-                    query.setEntrezGeneId(pair.getString("entrezGeneId"));
-                }
-                if(pair.has("hugoSymbol")) {
-                    query.setHugoSymbol(pair.getString("hugoSymbol"));
-                }
-                if(pair.has("alteration")) {
-                    query.setAlteration(pair.getString("alteration"));
-                }
-                if(pair.has("tumorType")) {
-                    query.setTumorType(pair.getString("tumorType"));
-                }
-                if(pair.has("evidenceType")) {
-                    query.setEvidenceType(pair.getString("evidenceType"));
-                }
-                if(pair.has("consequence")) {
-                    query.setConsequence(pair.getString("consequence"));
-                }
-                if(pair.has("geneStatus")) {
-                    query.setGeneStatus(pair.getString("geneStatus"));
-                }
-                if(pair.has("source")) {
-                    query.setSource(pair.getString("source"));
-                }
+                    if(pair.has("id")) {
+                        query.setId(pair.getString("id"));
+                    }
+                    if(pair.has("entrezGeneId")) {
+                        query.setEntrezGeneId(pair.getString("entrezGeneId"));
+                    }
+                    if(pair.has("hugoSymbol")) {
+                        query.setHugoSymbol(pair.getString("hugoSymbol"));
+                    }
+                    if(pair.has("alteration")) {
+                        query.setAlteration(pair.getString("alteration"));
+                    }
+                    if(pair.has("tumorType")) {
+                        query.setTumorType(pair.getString("tumorType"));
+                    }
+                    if(pair.has("evidenceType")) {
+                        query.setEvidenceType(pair.getString("evidenceType"));
+                    }
+                    if(pair.has("consequence")) {
+                        query.setConsequence(pair.getString("consequence"));
+                    }
+                    if(pair.has("geneStatus")) {
+                        query.setGeneStatus(pair.getString("geneStatus"));
+                    }
+                    if(pair.has("source")) {
+                        query.setSource(pair.getString("source"));
+                    }
 
-                query.setEvidences(getEvidence(query));
+                    query.setEvidences(getEvidence(query));
 
-                result.add(query);
+                    result.add(query);
+                }
             }
         }
 
