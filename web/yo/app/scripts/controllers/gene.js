@@ -168,7 +168,9 @@ angular.module('oncokbApp')
                         return e.trim();
                     });
                     _genes.forEach(function (_gene) {
-                        genes.push({'email': key, 'gene': _gene});
+                        if(_gene) {
+                            genes.push({'email': key, 'gene': _gene});
+                        }
                     });
                     /* jshint +W083 */
                 }
@@ -183,7 +185,7 @@ angular.module('oncokbApp')
                     console.log(permission.gene, '\t', permission.email);
                     var _docs = Documents.get({title: permission.gene});
                     var _doc = _docs[0];
-                    if (_doc.id) {
+                    if (_doc && _doc.id) {
                         storage.requireAuth().then(function () {
                             storage.getPermission(_doc.id).then(function (result) {
                                 if (result.items && angular.isArray(result.items)) {
@@ -210,7 +212,7 @@ angular.module('oncokbApp')
                                             if (result && result.error) {
                                                 console.log('Error when update permission.');
                                             } else {
-                                                console.log('\tupdat  writer to', permission.gene);
+                                                console.log('\tupdate  writer to', permission.gene);
                                                 $timeout(function () {
                                                     givePermissionSub(++index);
                                                 }, 100);
@@ -220,6 +222,11 @@ angular.module('oncokbApp')
                                 }
                             });
                         });
+                    }else {
+                        console.log('\tThis gene document is not available');
+                        $timeout(function () {
+                            givePermissionSub(++index);
+                        }, 100);
                     }
                 } else {
                     console.info('Done.....');
