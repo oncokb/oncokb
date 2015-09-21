@@ -47,11 +47,21 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
+        if(tumorTypes == null) {
+            if (evidenceTypes == null) {
+                return findEvidencesByAlteration(alterations);
+            }
+            return findEvidencesByAlteration(alterations, evidenceTypes);
+        }
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
             for (TumorType tumorType : tumorTypes) {
-                for (EvidenceType evidenceType : evidenceTypes) {
-                    set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+                if(evidenceTypes == null) {
+                    set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
+                }else{
+                    for (EvidenceType evidenceType : evidenceTypes) {
+                        set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+                    }
                 }
             }
         }
@@ -105,22 +115,5 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
             }
         }
         return new ArrayList<Drug>(set);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByAlterationAndTumorTypes(Collection<Alteration> alterations, Collection<TumorType> tumorTypes, Collection<EvidenceType> evidenceTypes) {
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-        for (Alteration alteration : alterations) {
-            for(TumorType tumorType : tumorTypes) {
-                if(evidenceTypes == null) {
-                    set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
-                }else{
-                    for (EvidenceType evidenceType : evidenceTypes) {
-                        set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
-                    }
-                }
-            }
-        }
-        return new ArrayList<Evidence>(set);
     }
 }

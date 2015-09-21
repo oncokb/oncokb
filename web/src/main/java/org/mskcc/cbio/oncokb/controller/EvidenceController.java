@@ -22,24 +22,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
- *
  * @author jgao
  */
 @Controller
-@RequestMapping(value="/evidence.json")
+@RequestMapping(value = "/evidence.json")
 public class EvidenceController {
 
     @RequestMapping(method = RequestMethod.GET)
-    public @ResponseBody List<List<Evidence>> getEvidence(
+    public
+    @ResponseBody
+    List<List<Evidence>> getEvidence(
             HttpMethod method,
-            @RequestParam(value="entrezGeneId", required=false) String entrezGeneId,
-            @RequestParam(value="hugoSymbol", required=false) String hugoSymbol,
-            @RequestParam(value="alteration", required=false) String alteration,
-            @RequestParam(value="tumorType", required=false) String tumorType,
-            @RequestParam(value="evidenceType", required=false) String evidenceType,
-            @RequestParam(value="consequence", required=false) String consequence,
-            @RequestParam(value="geneStatus", required=false) String geneStatus,
-            @RequestParam(value="source", required=false) String source) {
+            @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
+            @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
+            @RequestParam(value = "alteration", required = false) String alteration,
+            @RequestParam(value = "tumorType", required = false) String tumorType,
+            @RequestParam(value = "evidenceType", required = false) String evidenceType,
+            @RequestParam(value = "consequence", required = false) String consequence,
+            @RequestParam(value = "geneStatus", required = false) String geneStatus,
+            @RequestParam(value = "source", required = false) String source) {
 
         List<List<Evidence>> evidences = new ArrayList<>();
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
@@ -47,13 +48,13 @@ public class EvidenceController {
 
         List<EvidenceQuery> queries = new ArrayList<>();
 
-        if (entrezGeneId!=null) {
+        if (entrezGeneId != null) {
             for (String id : entrezGeneId.split(",")) {
                 EvidenceQuery query = new EvidenceQuery();
                 query.setEntrezGeneId(id);
                 queries.add(query);
             }
-        } else if (hugoSymbol!=null) {
+        } else if (hugoSymbol != null) {
             for (String symbol : hugoSymbol.split(",")) {
                 EvidenceQuery query = new EvidenceQuery();
                 query.setHugoSymbol(symbol);
@@ -65,37 +66,37 @@ public class EvidenceController {
             return evidences;
         }
 
-        if (evidenceType!=null) {
-            for(EvidenceQuery query : queries) {
+        if (evidenceType != null) {
+            for (EvidenceQuery query : queries) {
                 query.setEvidenceType(evidenceType);
             }
         }
 
-        if(alteration != null){
+        if (alteration != null) {
             String[] alts = alteration.split(",");
             String[] consequences = null;
-            if(queries.size() == alts.length) {
+            if (queries.size() == alts.length) {
                 Boolean consequenceLengthMatch = false;
 
-                if(consequence != null){
+                if (consequence != null) {
                     consequences = consequence.split(",");
-                    if(consequences.length == alts.length) {
+                    if (consequences.length == alts.length) {
                         consequenceLengthMatch = true;
                     }
                 }
 
-                for(int i = 0 ; i < queries.size(); i++){
-                    queries.get(i).setConsequence(consequenceLengthMatch?consequences[i]:null);
+                for (int i = 0; i < queries.size(); i++) {
+                    queries.get(i).setConsequence(consequenceLengthMatch ? consequences[i] : null);
                     queries.get(i).setAlteration(alts[i]);
                     evidences.add(getEvidence(queries.get(i)));
                 }
 
                 return evidences;
-            }else{
+            } else {
                 return new ArrayList<>();
             }
-        }else{
-            for(EvidenceQuery query : queries){
+        } else {
+            for (EvidenceQuery query : queries) {
                 evidences.add(getEvidence(query));
             }
             return evidences;
@@ -103,43 +104,45 @@ public class EvidenceController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public @ResponseBody List<EvidenceQuery> getEvidence(
+    public
+    @ResponseBody
+    List<EvidenceQuery> getEvidence(
             @RequestBody String body) {
         List<EvidenceQuery> result = new ArrayList<>();
-        if(body != null && !body.isEmpty()){
+        if (body != null && !body.isEmpty()) {
             JSONObject querys = new JSONObject(body);
-            if(querys.has("query")) {
+            if (querys.has("query")) {
                 JSONArray params = new JSONArray(querys.getString("query"));
 
-                for(int i = 0; i < params.length(); i++) {
+                for (int i = 0; i < params.length(); i++) {
                     JSONObject pair = params.getJSONObject(i);
                     EvidenceQuery query = new EvidenceQuery();
 
-                    if(pair.has("id")) {
+                    if (pair.has("id")) {
                         query.setId(pair.getString("id"));
                     }
-                    if(pair.has("entrezGeneId")) {
+                    if (pair.has("entrezGeneId")) {
                         query.setEntrezGeneId(pair.getString("entrezGeneId"));
                     }
-                    if(pair.has("hugoSymbol")) {
+                    if (pair.has("hugoSymbol")) {
                         query.setHugoSymbol(pair.getString("hugoSymbol"));
                     }
-                    if(pair.has("alteration")) {
+                    if (pair.has("alteration")) {
                         query.setAlteration(pair.getString("alteration"));
                     }
-                    if(pair.has("tumorType")) {
+                    if (pair.has("tumorType")) {
                         query.setTumorType(pair.getString("tumorType"));
                     }
-                    if(pair.has("evidenceType")) {
+                    if (pair.has("evidenceType")) {
                         query.setEvidenceType(pair.getString("evidenceType"));
                     }
-                    if(pair.has("consequence")) {
+                    if (pair.has("consequence")) {
                         query.setConsequence(pair.getString("consequence"));
                     }
-                    if(pair.has("geneStatus")) {
+                    if (pair.has("geneStatus")) {
                         query.setGeneStatus(pair.getString("geneStatus"));
                     }
-                    if(pair.has("source")) {
+                    if (pair.has("source")) {
                         query.setSource(pair.getString("source"));
                     }
 
@@ -159,12 +162,12 @@ public class EvidenceController {
 
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Gene gene = null;
-        if (query.getEntrezGeneId()!=null) {
+        if (query.getEntrezGeneId() != null) {
             gene = geneBo.findGeneByEntrezGeneId(Integer.parseInt(query.getEntrezGeneId()));
-        } else if (query.getHugoSymbol()!=null) {
+        } else if (query.getHugoSymbol() != null) {
             gene = geneBo.findGeneByHugoSymbol(query.getHugoSymbol());
         }
-        if(gene != null) {
+        if (gene != null) {
             List<EvidenceType> evidenceTypes = null;
             if (query.getEvidenceType() != null) {
                 evidenceTypes = new ArrayList<EvidenceType>();
@@ -182,10 +185,10 @@ public class EvidenceController {
                 evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), et));
             } else {
                 List<EvidenceType> et = new ArrayList<>();
-                if(evidenceTypes.contains(EvidenceType.GENE_SUMMARY)){
+                if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
                     et.add(EvidenceType.GENE_SUMMARY);
                 }
-                if(evidenceTypes.contains(EvidenceType.GENE_SUMMARY)){
+                if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
                     et.add(EvidenceType.GENE_BACKGROUND);
                 }
                 evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), et));
@@ -232,36 +235,25 @@ public class EvidenceController {
                 }
 
                 //Only return mutation effect if the gene status is not matched
-                if(query.getGeneStatus() != null && !gene.getStatus().toLowerCase().equals(query.getGeneStatus().toLowerCase())) {
+                if (query.getGeneStatus() != null && !gene.getStatus().toLowerCase().equals(query.getGeneStatus().toLowerCase())) {
                     evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)), alterations));
-                }else{
+                } else {
+                    Set<TumorType> relevantTumorTypes = new HashSet<>();
                     if (query.getTumorType() != null && query.getSource() != null) {
-                        Set<TumorType> relevantTumorTypes = new HashSet<>();
                         if (query.getSource().equals("cbioportal")) {
                             relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(query.getTumorType()));
                         } else if (query.getSource().equals("quest")) {
                             relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(query.getTumorType()));
                         }
-                        if (relevantTumorTypes != null) {
-                            List<Evidence> tumorTypeEvidences = new ArrayList<>();
-                            tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations, new ArrayList<TumorType>(relevantTumorTypes), evidenceTypes));
-                            evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
-                        }else{
-                            //If no relevant tumor type has been found, return gene summary, background and mutation effect
-                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)), alterations));
-                        }
-                    } else {
-                        if (evidenceTypes == null) {
-                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations), alterations));
-                        } else {
-                            evidences.addAll(filterAlteration(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes), alterations));
-                        }
                     }
+                    List<Evidence> tumorTypeEvidences = new ArrayList<>();
+                    tumorTypeEvidences.addAll(getTumorTypeEvidence(alterations, relevantTumorTypes.isEmpty() ? null : new ArrayList<TumorType>(relevantTumorTypes), evidenceTypes));
+                    evidences.addAll(filterAlteration(tumorTypeEvidences, alterations));
                 }
             } else {
-                if(evidenceTypes == null) {
+                if (evidenceTypes == null) {
                     evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene)));
-                }else{
+                } else {
                     evidences.addAll(evidenceBo.findEvidencesByGene(Collections.singleton(gene), evidenceTypes));
                 }
             }
@@ -269,11 +261,11 @@ public class EvidenceController {
         return evidences;
     }
 
-    private List<Evidence> filterAlteration(List<Evidence> evidences, List<Alteration> alterations){
-        for(Evidence evidence : evidences) {
+    private List<Evidence> filterAlteration(List<Evidence> evidences, List<Alteration> alterations) {
+        for (Evidence evidence : evidences) {
             Set<Alteration> filterEvidences = new HashSet<>();
-            for(Alteration alt : evidence.getAlterations()) {
-                if(alterations.contains(alt)) {
+            for (Alteration alt : evidence.getAlterations()) {
+                if (alterations.contains(alt)) {
                     filterEvidences.add(alt);
                 }
             }
@@ -292,16 +284,16 @@ public class EvidenceController {
         evidencesFromOtherTumroTypes.addAll(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)));
 
         //Include all level 1 evidences from other tumor types
-        for(Evidence evidence : evidencesFromOtherTumroTypes) {
-            if(evidence.getLevelOfEvidence()!=null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)){
-                if(!tumorTypes.contains(evidence.getTumorType())){
+        for (Evidence evidence : evidencesFromOtherTumroTypes) {
+            if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)) {
+                if (tumorTypes == null || !tumorTypes.contains(evidence.getTumorType())) {
                     evidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
                     evidences.add(evidence);
                 }
             }
         }
         evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT)));
-        evidences.addAll(evidenceBo.findEvidencesByAlterationAndTumorTypes(alterations, tumorTypes, evidenceTypes));
+        evidences.addAll(evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes));
         return evidences;
     }
 }
