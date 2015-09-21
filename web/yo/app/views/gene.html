@@ -121,7 +121,7 @@
               <i ng-click="remove($event, $index)" class="fa fa-trash-o"></i>
             </span>
           </accordion-heading>
-          <accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 300 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
+          <accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 100 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
             <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short mutation summary" ng-model="mutation.shortSummary.text"></p></span>-->
             <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
             <!-- Mutation Effect -->
@@ -134,27 +134,22 @@
                    <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'"></e-status>
                 </span>
               </accordion-heading>
-              <p ng-if="mutation.oncogenic_eStatus.get('hotspot')==='FALSE' || userRole === 8">
+              <p>
                 <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
                 <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-oncogenic-box-'"></drive-realtime-string>
               </p>
-              <div class="mutationEffect" ng-if="mutation.oncogenic_eStatus.get('hotspot')==='FALSE' || userRole === 8">
+              <div class="mutationEffect">
                 <strong class="header">Mutation effect:</strong>
                 <div class="content">
                   <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'s-checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutation_effect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
                 </div>
               </div>
-              <div>
-                <strong style="float: left">Putative hotspot:</strong>
-                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic_eStatus" objecttype="'object'" objectkey="'hotspot'" checkboxes="checkboxes['hotspot']" checkboxid="mutation.name.text + '-hotspot-box-'"></drive-realtime-string>
-                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" ph="'Optional text for hotspot'" object="mutation.oncogenic_eStatus" io="geneStatus[$index].oncogenic.isOpen" objecttype="'object'" objectkey="'hotspotAddon'"></drive-realtime-string>
-              </div>
-              <span ng-if="mutation.oncogenic_eStatus.get('hotspot')==='FALSE' || userRole === 8">
+              <span>
                 <strong>{{::mutation.short.display}}:</strong>
                 <br/>
                 <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.short" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>
               </span>
-              <span ng-if="mutation.oncogenic_eStatus.get('hotspot')==='FALSE' || userRole === 8">
+              <span>
                 <strong>{{::mutation.description.display}}:</strong>
                 <br/>
                 <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>

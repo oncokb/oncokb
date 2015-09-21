@@ -267,6 +267,11 @@ angular.module('oncokbApp')
                 });
             };
 
+            $scope.removeHotspot = function () {
+                removeHotspot($scope.documents, 0, function () {
+                });
+            };
+
             $scope.initialHotspot = function () {
                 DatabaseConnector.getHotspotList(function (data) {
                     if (data) {
@@ -355,7 +360,7 @@ angular.module('oncokbApp')
                                             });
                                             if (index > -1) {
                                                 var _mutation = gene.mutations.get(index);
-                                                if(_mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
+                                                if (_mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
                                                     console.log('\t\t\t\tCONTENT::::');
                                                     console.log('\t\t\t\tmutation effect: ', _mutation.effect.value.getText());
                                                     _mutation.effect.value.setText('');
@@ -373,7 +378,7 @@ angular.module('oncokbApp')
                                                         _mutation.oncogenic_eStatus.set('hotspotAddon', 'This mutated amino acid was identified as a recurrent hotspot (statistical significance, q-value < 0.01) in a set of 11,119 tumor samples of various cancer types (based on Chang M. et al. Nature Biotech. 2015).');
                                                         _mutation.oncogenic_eStatus.set('curated', true);
                                                     }
-                                                }else{
+                                                } else {
                                                     console.log('\t\tThis mutation exists, but has hotspot marked as false change the mutation to hotspot mutation ', alt);
 
                                                     _mutation.oncogenic_eStatus.set('hotspot', 'TRUE');
@@ -388,7 +393,6 @@ angular.module('oncokbApp')
                                                 _mutation = model.create(OncoKB.Mutation);
                                                 _mutation.name.setText(alt);
                                                 _mutation.oncogenic_eStatus.set('obsolete', 'false');
-                                                _mutation.oncogenic_eStatus.set('hotspot', 'TRUE');
                                                 _mutation.oncogenic_eStatus.set('vetted', 'uv');
 
                                                 //if (qval !== null) {
@@ -446,7 +450,6 @@ angular.module('oncokbApp')
                     var mutationEffectAddon = list[listIndex].mutationEffectAddon || null;
                     var oncogenic = list[listIndex].oncogenic || null;
                     var curated = list[listIndex].curated || null;
-                    var hotspot = list[listIndex].hotspot || null;
                     var shortDescription = list[listIndex].shortDescription || null;
                     var fullDescription = list[listIndex].fullDescription || null;
 
@@ -485,12 +488,6 @@ angular.module('oncokbApp')
 
                                             if (oncogenic) {
                                                 _mutation.oncogenic.setText(oncogenic);
-                                            }
-
-                                            if (hotspot) {
-                                                _mutation.oncogenic_eStatus.set('hotspot', hotspot);
-                                            } else {
-                                                _mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
                                             }
 
                                             if (curated !== null) {
@@ -615,6 +612,114 @@ angular.module('oncokbApp')
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
                                     initial(docs, ++docIndex, callback);
+                                }, 200, false);
+                            }
+                        }
+                    });
+                } else {
+                    if (callback) {
+                        callback();
+                    }
+                    console.log('finished.');
+                }
+            }
+
+            function removeHotspot(docs, docIndex, callback) {
+                if (docIndex < docs.length) {
+                    var fileId = docs[docIndex].id;
+                    storage.getRealtimeDocument(fileId).then(function (realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        } else {
+                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function (evt) {
+                                if (!evt.isSaving) {
+                                    realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
+                                    storage.closeDocument();
+                                    $timeout(function () {
+                                        removeHotspot(docs, ++docIndex, callback);
+                                    }, 200, false);
+                                }
+                            });
+                            console.log(docs[docIndex].title, '\t\t', docIndex + 1);
+                            console.log('\t Removing hotspot...');
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                var removeIndice = [];
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function (mutation, index) {
+                                    if (mutation.oncogenic_eStatus.has('hotspot')) {
+                                        if (mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
+                                            console.log('\t\tMutation: ', mutation.name.getText());
+                                            if (mutation.tumors.length === 0 && mutation.effect.value.getText().trim() === '' && mutation.effect.addOn.getText().trim() === '' && mutation.oncogenic.getText().trim() === '' && mutation.short.getText().trim() === '' && mutation.description.getText().trim() === '') {
+                                                removeIndice.push(index);
+                                                console.log('\t\t\tFound empty hotspot mutation.');
+                                            } else {
+                                                console.log('\t\t\tHotspot mutation, but has content in it');
+                                                console.log('\t\t\t\tCONTENT::::');
+                                                console.log('\t\t\t\tNumber of tumors:', mutation.tumors.length);
+                                                console.log('\t\t\t\tmutation effect: "' + mutation.effect.value.getText() + '"');
+                                                console.log('\t\t\t\tmutation effect addon: "' + mutation.effect.addOn.getText() + '"');
+                                                console.log('\t\t\t\toncogenic: "' + mutation.oncogenic.getText() + '"');
+                                                console.log('\t\t\t\tShort description: "' + mutation.short.getText() + '"');
+                                                console.log('\t\t\t\tdescription: "' + mutation.description.getText() + '"');
+
+                                                if (mutation.oncogenic_eStatus.has('hotspot')) {
+                                                    console.log('\t\t\t\t\tRemove hotspot.', mutation.oncogenic_eStatus.get('hotspot'));
+                                                    mutation.oncogenic_eStatus.delete('hotspot');
+                                                }
+                                                if (mutation.oncogenic_eStatus.has('hotspotQvalue')) {
+                                                    console.log('\t\t\t\t\tRemove hotspot qvalue.', mutation.oncogenic_eStatus.get('hotspotQvalue'));
+                                                    mutation.oncogenic_eStatus.delete('hotspotQvalue');
+                                                }
+                                                if (mutation.oncogenic_eStatus.has('hotspotTumorType')) {
+                                                    console.log('\t\t\t\t\tRemove hotspot tumor type.', mutation.oncogenic_eStatus.get('hotspotTumorType'));
+                                                    mutation.oncogenic_eStatus.delete('hotspotTumorType');
+                                                }
+                                                if (mutation.oncogenic_eStatus.has('hotspotAddon')) {
+                                                    console.log('\t\t\t\t\tRemove hotspot addon.', mutation.oncogenic_eStatus.get('hotspotAddon'));
+                                                    mutation.oncogenic_eStatus.delete('hotspotAddon');
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    mutation.tumors.asArray().forEach(function (tumor) {
+                                        if (tumor.prevalence_eStatus.has('hotspot')) {
+                                            tumor.prevalence_eStatus.delete('hotspot');
+                                        }
+                                        if (tumor.progImp_eStatus.has('hotspot')) {
+                                            tumor.progImp_eStatus.set('hotspot');
+                                        }
+                                        if (tumor.nccn_eStatus.has('hotspot')) {
+                                            tumor.nccn_eStatus.set('hotspot');
+                                        }
+
+                                        //console.log('Add tumor estatus');
+                                        tumor.TI.asArray().forEach(function (ti) {
+                                            ti.treatments.asArray().forEach(function (treatment) {
+                                                if (treatment.name_eStatus.has('hotspot')) {
+                                                    treatment.name_eStatus.delete('hotspot');
+                                                }
+                                            })
+                                        });
+                                    });
+                                });
+                                removeIndice.sort(function (a, b) {
+                                    return b - a;
+                                });
+                                removeIndice.forEach(function (index) {
+                                    gene.mutations.remove(index);
+                                });
+                                console.log(removeIndice);
+                                model.endCompoundOperation();
+                                //$timeout(function () {
+                                //    removeHotspot(docs, ++docIndex, callback);
+                                //}, 200, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function () {
+                                    removeHotspot(docs, ++docIndex, callback);
                                 }, 200, false);
                             }
                         }
