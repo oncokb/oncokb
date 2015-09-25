@@ -13,8 +13,6 @@ OncoKB front-end is built with lots of great open source JS libraries. AngularJS
 2. Go to web/yo folder
 3. npm install
 4. bower install
-    * Choose 2.  es5-shim#>=3.4.0
-    * Choose 1.  angular#1.2.28
 
 ##Use website without back-end
 1. Copy data-EXAMPLE to data under web/yo/app/scripts/
