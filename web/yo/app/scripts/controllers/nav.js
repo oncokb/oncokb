@@ -20,7 +20,7 @@ angular.module('oncokbApp')
     var accessLevels = config.accessLevels;
 
     function loginCallback() {
-        // console.log('In login callback.')
+         console.log('In login callback.')
         if(!$scope.$$phase) {
             $scope.$apply(setParams);
         }else {
@@ -28,15 +28,20 @@ angular.module('oncokbApp')
         }
         $rootScope.$apply(function() {
             var url = access.getURL();
+            console.log('Current URL:', url);
             if(url) {
+                console.log('is logged in? ', access.isLoggedIn());
                 if(access.isLoggedIn()){
                     access.setURL('');
                     $location.path(url);
                 }
             }else {
-                if (access.isLoggedIn() && !access.getURL() && access.authorize(config.accessLevels.curator)) {
+                if (access.isLoggedIn() && access.authorize(config.accessLevels.curator)) {
+                    console.log('logged in and has authorize.');
                     $location.path('/genes');
                 }else {
+                    console.log('is logged in? ', access.isLoggedIn());
+                    console.log('does not have access? ', access.authorize(config.accessLevels.curator));
                     $location.path('/');
                 }
             }
@@ -99,14 +104,17 @@ angular.module('oncokbApp')
         if(authResult.access_token) {
             // Successful sign in.
             // $scope.signedIn = true;
-            // console.log('access success', authResult);
+             console.log('access success', authResult);
             access.login(loginCallback);
         } else if(authResult.error) {
             // Error while signing in.
             // $scope.signedIn = false;
-            // console.log('access failed', authResult);
+            console.log('access failed', authResult);
             loginCallback();
             // Report error.
+        } else {
+            console.log('access failed and does not have error.', authResult);
+            loginCallback();
         }
     };
 
@@ -115,6 +123,10 @@ angular.module('oncokbApp')
     $scope.user = $rootScope.user;
 
     $rootScope.$watch('user', setParams);
-    // Call start function on load.
-     $scope.init = $scope.renderSignInButton();
+
+    $rootScope.$watch('dataLoaded', function (n, o) {
+        if(n) {
+            $scope.renderSignInButton();
+        }
+    });
 });

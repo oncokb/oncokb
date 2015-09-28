@@ -1199,7 +1199,7 @@ angular.module('oncokbApp')
                 if (event.stopPropagation) {
                     event.stopPropagation();
                 }
-                if (event.preventDefault) {
+                if (event.preventDefault && event.type !== 'keypress') {
                     event.preventDefault();
                 }
             };
