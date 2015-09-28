@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
@@ -91,8 +92,47 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        //If alteration contains 'fusion', the alteration 'fusions' should be injected into alteration list
+        //If alteration contains 'fusion'
         if(alteration.getAlteration().toLowerCase().contains("fusion")) {
+            String fusion = alteration.getAlteration(); // e.g. TRB-NKX2-1 fusion
+            int ix = fusion.toLowerCase().indexOf("fusion");
+            if (ix>0) {
+                // find fusions annotated in the other gene
+                String gene = alteration.getGene().getHugoSymbol();
+                String genes = fusion.substring(0,ix);
+                int ixg = genes.indexOf(gene);
+                if (ixg<0) {
+                    System.err.println(fusion + " was under " + gene);
+                } else {
+                    String theOtherGene = genes.replace(gene, "")
+                            .replaceAll("-", " ").trim() // trim -
+                            .replaceAll(" ", "-");
+                    
+                    GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+                    Gene tog = geneBo.findGeneByHugoSymbol(theOtherGene);
+                    if (tog!=null) {
+                        String reverse;
+                        if (ixg==0) {
+                            reverse = tog.getHugoSymbol()+"-"+gene+" fusion";
+                        } else {
+                            reverse = gene+"-"+tog.getHugoSymbol()+" fusion";
+                        }
+                        
+                        Alteration toa = findAlteration(tog, alteration.getAlterationType(), reverse);
+                        if (toa!=null) {
+                            alterations.add(toa);
+                        }
+                        
+                        toa = findAlteration(tog, alteration.getAlterationType(), "fusions");
+                        if (toa!=null) {
+                            alterations.add(toa);
+                        }
+                    }
+                }
+                
+            }
+            
+            //the alteration 'fusions' should be injected into alteration list
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
             if (alt!=null) {
                 alterations.add(alt);

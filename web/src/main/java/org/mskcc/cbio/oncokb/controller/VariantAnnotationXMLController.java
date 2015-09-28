@@ -36,11 +36,34 @@ public class VariantAnnotationXMLController {
             @RequestParam(value="proteinStart", required=false) Integer proteinStart,
             @RequestParam(value="proteinEnd", required=false) Integer proteinEnd,
             @RequestParam(value="tumorType", required=false) String tumorType) {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xlm>\n" 
+                + VariantAnnotationXMLController.annotate(entrezGeneId, hugoSymbol,
+                   alterationType, alteration, consequence, proteinStart, proteinEnd, tumorType)
+                + "\n</xml>";
+    }
+    
+    static String annotate(Alteration alteration, String tumorType) {
+        return annotate(alteration.getGene().getEntrezGeneId(),
+                alteration.getGene().getHugoSymbol(),
+                alteration.getAlterationType()==null?null:alteration.getAlterationType().label(),
+                alteration.getAlteration(),
+                alteration.getConsequence()==null?null:alteration.getConsequence().getTerm(),
+                alteration.getProteinStart(),
+                alteration.getProteinEnd(),
+                tumorType);
+    }
+    
+    static String annotate(Integer entrezGeneId,
+             String hugoSymbol,
+             String alterationType,
+             String alteration,
+             String consequence,
+             Integer proteinStart,
+             Integer proteinEnd,
+             String tumorType) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        sb.append("<xml>\n");
 
 
         Gene gene = null;
@@ -280,12 +303,10 @@ public class VariantAnnotationXMLController {
             }
         }
 
-        sb.append("</xml>");
-
         return sb.toString();
     }
 
-    private List<Evidence> filterResistanceEvidence(List<Evidence> resistanceEvidences){
+    private static List<Evidence> filterResistanceEvidence(List<Evidence> resistanceEvidences){
         if(resistanceEvidences != null) {
             Iterator<Evidence> i = resistanceEvidences.iterator();
             while (i.hasNext()) {
@@ -298,7 +319,7 @@ public class VariantAnnotationXMLController {
         return resistanceEvidences;
     }
 
-    private void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -342,7 +363,7 @@ public class VariantAnnotationXMLController {
         sb.append(indent).append("</").append(tagTherapeuticImp).append(">\n");
     }
 
-    private List<List<Evidence>> seperateGeneralAndSpecificEvidencesForTherapeuticImplications (List<Evidence> evs) {
+    private static List<List<Evidence>> seperateGeneralAndSpecificEvidencesForTherapeuticImplications (List<Evidence> evs) {
         List<List<Evidence>> ret = new ArrayList<List<Evidence>>();
         ret.add(new ArrayList<Evidence>());
         ret.add(new ArrayList<Evidence>());
@@ -358,7 +379,7 @@ public class VariantAnnotationXMLController {
         return ret;
     }
 
-    private void exportClinicalTrials(List<ClinicalTrial> clinicalTrials, StringBuilder sb, String indent) {
+    private static void exportClinicalTrials(List<ClinicalTrial> clinicalTrials, StringBuilder sb, String indent) {
         Collections.sort(clinicalTrials, new Comparator<ClinicalTrial>() {
             public int compare(ClinicalTrial trial1, ClinicalTrial trial2) {
                 return phase2int(trial2.getPhase()) - phase2int(trial1.getPhase());
@@ -382,7 +403,7 @@ public class VariantAnnotationXMLController {
         }
     }
 
-    private boolean filterClinicalTrials(ClinicalTrial clinicalTrial) {
+    private static boolean filterClinicalTrials(ClinicalTrial clinicalTrial) {
 //        if (!clinicalTrial.isInUSA()) {
 //            return false;
 //        }
@@ -401,7 +422,7 @@ public class VariantAnnotationXMLController {
         return true;
     }
 
-    private void exportClinicalTrial(ClinicalTrial trial, StringBuilder sb, String indent) {
+    private static void exportClinicalTrial(ClinicalTrial trial, StringBuilder sb, String indent) {
         sb.append(indent).append("<clinical_trial>\n");
 
         sb.append(indent).append("    <trial_id>");
@@ -458,10 +479,10 @@ public class VariantAnnotationXMLController {
             sb.append("</condition>\n");
         }
 
-        sb.append(indent).append("</clinical_trial>\n");
+        sb.append(indent).append("</clinical_trial>");
     }
 
-    private void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
 
         for (Treatment treatment : evidence.getTreatments()) {
@@ -502,7 +523,7 @@ public class VariantAnnotationXMLController {
         exportRefereces(evidence, sb, indent);
     }
     
-    private void exportTreatment(Treatment treatment, StringBuilder sb, String indent, LevelOfEvidence levelOfEvidence) {
+    private static void exportTreatment(Treatment treatment, StringBuilder sb, String indent, LevelOfEvidence levelOfEvidence) {
         Set<Drug> drugs = treatment.getDrugs();
         for (Drug drug : drugs) {
             sb.append(indent).append("<drug>\n");
@@ -547,7 +568,7 @@ public class VariantAnnotationXMLController {
         }
     }
 
-    private void exportRefereces(Evidence evidence, StringBuilder sb, String indent) {
+    private static void exportRefereces(Evidence evidence, StringBuilder sb, String indent) {
         Set<Article> articles = evidence.getArticles();
         for (Article article : articles) {
             sb.append(indent).append("<reference>\n");
@@ -616,7 +637,7 @@ public class VariantAnnotationXMLController {
      * @param patientTumorType
      * @return the number of relevant tumor types
      */
-    private void sortTumorType(List<TumorType> tumorTypes, String patientTumorType) {
+    private static void sortTumorType(List<TumorType> tumorTypes, String patientTumorType) {
         Set<TumorType> relevantTumorTypes = TumorTypeUtils.fromQuestTumorType(patientTumorType);
 //        relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
         tumorTypes.removeAll(relevantTumorTypes); // other tumor types
