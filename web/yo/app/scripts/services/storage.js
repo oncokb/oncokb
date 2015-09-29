@@ -156,6 +156,28 @@ angular.module('oncokbApp')
         return deferred.promise;
     };
 
+
+      this.deletePermission = function (fileId, permissionId) {
+          var deferred = $q.defer();
+          var onComplete = function (result) {
+              // console.log(result);
+              if (result && !result.error) {
+                  deferred.resolve(result);
+              } else {
+                  deferred.reject(result);
+              }
+              $rootScope.$digest();
+          };
+
+          var request = gapi.client.drive.permissions.delete({
+              'fileId': fileId,
+              'permissionId': permissionId
+          });
+          request.execute(onComplete);
+
+          return deferred.promise;
+      };
+
     this.getUserInfo = function (userId) {
         var deferred = $q.defer();
         var onComplete = function (result) {
@@ -245,7 +267,7 @@ angular.module('oncokbApp')
               }
             });
         };
-        
+
         var deferred = $q.defer();
         gapi.client.load('drive', 'v2', function() {
             var initialRequest = gapi.client.drive.children.list({
@@ -351,7 +373,7 @@ angular.module('oncokbApp')
           'user_id': userId
         };
         var deferred = $q.defer();
-        
+
         console.log('token expired, call authorize function');
         gapi.auth.authorize(params, function (result) {
           // console.log('get authorize', result);
