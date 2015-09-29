@@ -6,6 +6,9 @@
 
 package org.mskcc.cbio.oncokb.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,6 +21,7 @@ import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,10 +59,11 @@ public class VariantAnnotationXMLV2Controller {
                 String diagnosis = document.selectSingleNode("//xml/diagnosis").getText();
                 
                 // Somatic variants
-                List<Node> vcfNodes = document.selectNodes("//xml/somatic_variants/data");
-                for (Node vcfNode : vcfNodes) {
-                    handleSomaticVariants(vcfNode, alterations, alterationXmls, diagnosis);
-                }
+                runVcf2Maf(document.asXML(),alterations, alterationXmls, diagnosis);
+//                List<Node> vcfNodes = document.selectNodes("//xml/somatic_variants/data");
+//                for (Node vcfNode : vcfNodes) {
+//                    handleSomaticVariants(vcfNode, alterations, alterationXmls, diagnosis);
+//                }
                 
                 // Copy number alterations
                 List<Node> cnaNodes = document.selectNodes("//xml/copy_number_alterations/copy_number_alteration");
@@ -80,7 +85,7 @@ public class VariantAnnotationXMLV2Controller {
                 sb.append("<document>\n");
                 sb.append("<date_generated>2015-01-09</date_generated>\n");
                 sb.append("<oncokb_api_version>0.2</oncokb_api_version>\n");
-                sb.append("<ensembl_version>81</ensembl_version>\n");
+                sb.append("<ensembl_version>79</ensembl_version>\n");
                 sb.append("<sample>");
                 sb.append("<sample_id>").append(sampleId).append("</sample_id>\n");
                 sb.append("<diagnosis>").append(diagnosis).append("</diagnosis>\n");
@@ -107,7 +112,48 @@ public class VariantAnnotationXMLV2Controller {
     }
     
     private void handleSomaticVariants(Node vcfNode, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) {
+        // do it here
+    }
+    
+    /**
+     * This is a hacky way to run VEP. We should switch to web service once that is ready.
+     */
+    private void runVcf2Maf(String inputXml, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) throws IOException, DocumentException {
+        File tmpFile = File.createTempFile("temp-oncokb-input-", ".xml");
+        String inputPath = tmpFile.getAbsolutePath();
+        String outputPath = inputPath.substring(0,inputPath.length()-3) + "oncokb.xml";
         
+        FileWriter writer = new FileWriter(tmpFile);
+        writer.append(inputXml);
+        writer.close();
+        
+        Process proc = Runtime.getRuntime().exec("perl $VEP_MAF_XML_PL "+inputPath);
+        
+        SAXReader reader = new SAXReader();
+        Document document = reader.read(outputPath);
+        
+        List<Node> variantNodes = document.selectNodes("//document/sample/variant");
+        for (Node node : variantNodes) {
+            String alterationXml = "<variant_type>small_nucleotide_variant</variant_type>\n"
+                    + node.selectSingleNode("genomic_locus").asXML()
+                    + node.selectSingleNode("allele").asXML();
+            alterationXmls.add(alterationXml);
+            
+            String geneSymbol = node.selectSingleNode("allele/transcript/hgnc_symbol").getText();
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            Gene gene = geneBo.findGeneByHugoSymbol(geneSymbol);
+            
+            String proteinChange = node.selectSingleNode("allele/transcript/hgvs_p_short").getText();
+            
+            Alteration alteration = new Alteration();
+            alteration.setAlterationType(AlterationType.MUTATION);
+            alteration.setGene(gene);
+            alteration.setName(proteinChange);
+            
+            AlterationUtils.annotateAlteration(alteration, proteinChange);
+            alterations.add(alteration);
+        }
+
     }
     
     private void handleCNA(Node cnaNode, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) {
