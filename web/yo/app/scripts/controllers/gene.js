@@ -136,6 +136,7 @@ angular.module('oncokbApp')
                 migrate: true,
                 rendering: true
             };
+            $scope.adminEmails = [];
             $scope.getDocs();
 
             var newGenes = [];
@@ -181,9 +182,9 @@ angular.module('oncokbApp')
 
             function givePermissionSub(index) {
                 if (index < $scope.genesPermissions.length) {
-                    var permission = $scope.genesPermissions[index];
-                    console.log(permission.gene, '\t', permission.email);
-                    var _docs = Documents.get({title: permission.gene});
+                    var genePermission = $scope.genesPermissions[index];
+                    console.log(genePermission.gene, '\t', genePermission.email);
+                    var _docs = Documents.get({title: genePermission.gene});
                     var _doc = _docs[0];
                     if (_doc && _doc.id) {
                         storage.requireAuth().then(function () {
@@ -191,17 +192,17 @@ angular.module('oncokbApp')
                                 if (result.items && angular.isArray(result.items)) {
                                     var permissionIndex = -1;
                                     result.items.forEach(function (permission, _index) {
-                                        if (permission.emailAddress && permission.emailAddress === permission.email) {
+                                        if (permission.emailAddress && permission.emailAddress === genePermission.email) {
                                             permissionIndex = _index;
                                         }
                                     });
 
                                     if (permissionIndex === -1) {
-                                        storage.insertPermission(_doc.id, permission.email, 'user', 'writer').then(function (result) {
+                                        storage.insertPermission(_doc.id, genePermission.email, 'user', 'writer').then(function (result) {
                                             if (result && result.error) {
                                                 console.log('Error when insert permission.');
                                             } else {
-                                                console.log('\tinsert writer to', permission.gene);
+                                                console.log('\tinsert writer to', genePermission.gene);
                                                 $timeout(function () {
                                                     givePermissionSub(++index);
                                                 }, 100);
@@ -212,12 +213,17 @@ angular.module('oncokbApp')
                                             if (result && result.error) {
                                                 console.log('Error when update permission.');
                                             } else {
-                                                console.log('\tupdate  writer to', permission.gene);
+                                                console.log('\tupdate  writer to', genePermission.gene);
                                                 $timeout(function () {
                                                     givePermissionSub(++index);
                                                 }, 100);
                                             }
                                         });
+                                    }else {
+                                        console.log('\tDont need to do anything on ', genePermission.email);
+                                        $timeout(function () {
+                                            givePermissionSub(++index);
+                                        }, 100);
                                     }
                                 }
                             });
@@ -226,6 +232,48 @@ angular.module('oncokbApp')
                         console.log('\tThis gene document is not available');
                         $timeout(function () {
                             givePermissionSub(++index);
+                        }, 100);
+                    }
+                } else {
+                    console.info('Done.....');
+                }
+            }
+
+            $scope.resetPermission = function () {
+                resetPermissionSub(0);
+            }
+
+            function resetPermissionSub(index) {
+                if (index < $scope.documents.length) {
+                    var _doc = $scope.documents[index];
+                    if (_doc && _doc.id) {
+                        storage.requireAuth().then(function () {
+                            storage.getPermission(_doc.id).then(function (result) {
+                                if (result.items && angular.isArray(result.items)) {
+                                    result.items.forEach(function (permission, _index) {
+                                        if (permission.emailAddress && $scope.adminEmails.indexOf(permission.emailAddress) === -1 && permission.role === 'writer') {
+                                            console.log('\tUpdating permission to reader: ', _doc.title, permission.emailAddress);
+                                            storage.updatePermission(_doc.id, permission.id, 'reader').then(function (result) {
+                                                if (result && result.error) {
+                                                    console.log('Error when update permission.');
+                                                } else {
+                                                    console.log('\tFinish update permission to reader: ', _doc.title, permission.emailAddress);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        });
+
+
+                        $timeout(function () {
+                            resetPermissionSub(++index);
+                        }, 100);
+                    }else {
+                        console.log('\tThis gene document is not available');
+                        $timeout(function () {
+                            resetPermissionSub(++index);
                         }, 100);
                     }
                 } else {
@@ -1199,7 +1247,7 @@ angular.module('oncokbApp')
                 if (event.stopPropagation) {
                     event.stopPropagation();
                 }
-                if (event.preventDefault) {
+                if (event.preventDefault && event.type !== 'keypress') {
                     event.preventDefault();
                 }
             };

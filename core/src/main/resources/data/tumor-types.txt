@@ -1,0 +1,55 @@
+#Tumor Type	Name	Tissue	Clinical trial keywords
+AML	acute myeloid leukemia	blood	myeloid leukemia
+ACYC	adenoid cystic carcinoma	head and neck	adenoid cystic,solid tumor
+ALCL	anaplastic large cell lymphoma	Lymph	lymphoma,lymphoid,solid tumor
+AITL/ACTL	angioimmunoblastic t cell lymphoma	Lymph	lymphoma,lymphoid,solid tumor
+B-ALL	b cell acute lymphoblastic leukemia	blood	Acute Lymphoblastic
+SKBC	skin basal cell carcinoma	skin	basal cell,solid tumor
+BLADDER	bladder cancer	bladder	bladder,solid tumor
+BREAST	breast cancer	breast	breast,solid tumor
+CERVIX	cervical cancer	cervix	cervical,solid tumor
+cholangiocarcinoma	cholangiocarcinoma	bile	cholangiocarcinoma,bile,solid tumor
+CHS	chondrosarcoma	bone	chondrosarcoma,solid tumor
+CLL	chronic lymphocytic leukemia	blood	chronic lymphocytic
+CML	chronic myelomonocytic leukemia	blood	chronic myelomonocytic
+CRC	colorectal cancer	colon and rectum	colon,rectum,colorectal,solid tumor
+cscc	cutaneous squamous cell carcinoma	skin	cutaneous squamous cell,solid tumor
+desmoid	desmoid tumors		Desmoid,solid tumor
+ESCC	esophageal squamous cell carcinoma	esophagus	esophageal,solid tumor
+UCEC	endometrial carcinoma	uterus	uterine,endometrioid,endometrial,solid tumor
+gastric	gastric cancer	stomach	stomach,gastric,solid tumor
+GIST	gastrointestinal stromal tumor	Esophagus/Stomach	gastrointestinal stromal,GIST,solid tumor
+GBM	glioblastoma	brain	glioblastoma,solid tumor	brain cancer
+GLIO	glioma	brain	glioma,solid tumor
+HCL	hairy cell leukemia	blood	hairy cell leukemia
+head and neck	head and neck cancer	head and neck	head and neck,solid tumor
+HNSC	head and neck squamous cell carcinoma	head and neck	head and neck,solid tumor
+HCC	hepatocellular carcinoma	liver	liver,hepatocellular
+IMT	inflammatory myofibroblastic tumor		inflammatory myofibroblastic,solid tumor
+liver	liver cancer	liver	liver,hepatocellular,solid tumor
+LGG	low grade glioma	brain	glioma,solid tumor
+LUSC	lung squamous cell carcinoma	lung	lung,lung squamous,solid tumor
+lung	lung cancer	lung	lung,solid tumor
+MBL	medulloblastoma	brain	medulloblastoma,solid tumor
+SKCM	melanoma	melanoma	skin,melanoma,solid tumor
+MENG	meningioma	brain	meningioma,solid tumor
+MM	multiple myeloma	blood	multiple myeloma
+MPNs	myeloproliferative neoplasms	blood	myeloproliferative
+NBL	neuroblastoma	Nervous system	neuroblastoma,solid tumor
+NSCLC	non-small cell lung cancer	lung	lung,solid tumor
+GCT-ovary	ovarian granulosa cell tumors	ovary	ovary,ovarian,solid tumor
+ovary	ovarian cancer	ovary	ovary,ovarian,solid tumor
+pancreas	pancreatic cancer	pancreas	pancreatic,pancreas,solid tumor
+PHC	pheochromocytoma	Nervous system	pheochromocytoma,solid tumor
+pituitary	pituitary tumors	pituitary gland	pituitary,solid tumor
+pituitary_adeno	pituitary adenomas	pituitary gland	pituitary,solid tumor
+prostate	prostate cancer	prostate	prostate,solid tumor
+RCC	renal cell carcinoma	kidney	renal cell,kidney,solid tumor
+RMS	rhabdomyosarcoma		rhabdomyosarcoma,solid tumor
+STAD	stomach cancer	stomach	stomach,solid tumor
+THYMC	thymic carcinoma	thymus	thymic,thymus,solid tumor
+T-ALL	t cell acute lymphoblastic leukemia	blood	acute lymphoblastic leukemia
+THCA	thyroid cancer	thyroid	thyroid,solid tumor
+BLCA	bladder urothelial carcinoma	bladder	bladder,solid tumor
+uterine	uterine cancer	uterine	uterine,endometrioid,endometrial,solid tumor
+UM	uveal melanoma	Eye	uveal melanoma,solid tumor
