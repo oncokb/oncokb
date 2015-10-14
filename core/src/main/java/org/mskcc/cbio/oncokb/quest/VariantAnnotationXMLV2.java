@@ -167,7 +167,7 @@ public final class VariantAnnotationXMLV2 {
         SAXReader reader = new SAXReader();
         Document document = reader.read(outputPath);
         
-        List<Node> variantNodes = document.selectNodes("//document/sample/variant");
+        List<Node> variantNodes = document.selectNodes("//document/sample/test/variant");
         for (Node node : variantNodes) {
             String alterationXml = "<variant_type>small_nucleotide_variant</variant_type>\n"
                     + node.selectSingleNode("genomic_locus").asXML()
