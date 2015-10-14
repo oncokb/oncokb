@@ -11,16 +11,10 @@ import java.util.Set;
  */
 public class EvidenceQuery implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
-    private String entrezGeneId;
-    private String hugoSymbol;
-    private String alteration;
-    private String tumorType;
-    private String evidenceType;
-    private String consequence;
-    private String geneStatus;
-    private String source;
+    private Gene gene;
+    private List<Alteration> alterations;
+    private List<TumorType> tumorTypes;
     private List<Evidence> evidences;
-
 
     public EvidenceQuery() {
     }
@@ -33,76 +27,36 @@ public class EvidenceQuery implements java.io.Serializable {
         this.id = id;
     }
 
+    public Gene getGene() {
+        return gene;
+    }
+
+    public void setGene(Gene gene) {
+        this.gene = gene;
+    }
+
+    public List<Alteration> getAlterations() {
+        return alterations;
+    }
+
+    public void setAlterations(List<Alteration> alterations) {
+        this.alterations = alterations;
+    }
+
+    public List<TumorType> getTumorTypes() {
+        return tumorTypes;
+    }
+
+    public void setTumorTypes(List<TumorType> tumorTypes) {
+        this.tumorTypes = tumorTypes;
+    }
+
     public List<Evidence> getEvidences() {
         return evidences;
     }
 
     public void setEvidences(List<Evidence> evidences) {
         this.evidences = evidences;
-    }
-
-    public String getEntrezGeneId() {
-        return entrezGeneId;
-    }
-
-    public void setEntrezGeneId(String entrezGeneId) {
-        this.entrezGeneId = entrezGeneId;
-    }
-
-    public String getHugoSymbol() {
-        return hugoSymbol;
-    }
-
-    public void setHugoSymbol(String hugoSymbol) {
-        this.hugoSymbol = hugoSymbol;
-    }
-
-    public String getAlteration() {
-        return alteration;
-    }
-
-    public void setAlteration(String alteration) {
-        this.alteration = alteration;
-    }
-
-    public String getTumorType() {
-        return tumorType;
-    }
-
-    public void setTumorType(String tumorType) {
-        this.tumorType = tumorType;
-    }
-
-    public String getEvidenceType() {
-        return evidenceType;
-    }
-
-    public void setEvidenceType(String evidenceType) {
-        this.evidenceType = evidenceType;
-    }
-
-    public String getConsequence() {
-        return consequence;
-    }
-
-    public void setConsequence(String consequence) {
-        this.consequence = consequence;
-    }
-
-    public String getGeneStatus() {
-        return geneStatus;
-    }
-
-    public void setGeneStatus(String geneStatus) {
-        this.geneStatus = geneStatus;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
     }
 }
 

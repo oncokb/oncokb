@@ -82,7 +82,7 @@ public class VariantAnnotationXMLController {
         }
 
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
+        List<Alteration> alterations = alterationBo.findRelevantAlterations(alt, null);
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
