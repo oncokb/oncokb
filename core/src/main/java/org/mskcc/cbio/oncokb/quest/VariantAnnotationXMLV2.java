@@ -6,15 +6,19 @@
 
 package org.mskcc.cbio.oncokb.quest;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.dom4j.Document;
@@ -141,19 +145,24 @@ public final class VariantAnnotationXMLV2 {
         writer.append(inputXml);
         writer.close();
         
-        Process proc = Runtime.getRuntime().exec("perl $VEP_MAF_XML_PL "+inputPath);
-        //proc.waitFor(); // this does not work
-        
-        File outputFile = new File(outputPath);
-        
-        int n = 50;
-        while (!outputFile.exists() && --n >= 0) { // try n times
-            Thread.sleep(1000);  
+        String vepMafXmlPl = System.getenv("VEP_MAF_XML_PL");
+        if (null==vepMafXmlPl) {
+            throw new IOException("VEP_MAF_XML_PL was not defined");
         }
         
-        if (n<0) {
-            throw new java.lang.IllegalStateException("VCF to MAF failed.");
-        }
+        Process proc = Runtime.getRuntime().exec(new String[]{"perl",vepMafXmlPl,inputPath});
+        proc.waitFor();
+        
+        InputStream stderr = proc.getErrorStream();
+        InputStreamReader isr = new InputStreamReader(stderr);
+        BufferedReader br = new BufferedReader(isr);
+        String line = null;
+        System.out.println("<ERROR>");
+        while ( (line = br.readLine()) != null)
+            System.out.println(line);
+        System.out.println("</ERROR>");
+        int exitVal = proc.waitFor();
+        System.out.println("Process exitValue: " + exitVal);
         
         SAXReader reader = new SAXReader();
         Document document = reader.read(outputPath);
