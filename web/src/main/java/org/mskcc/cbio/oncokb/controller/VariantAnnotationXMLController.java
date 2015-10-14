@@ -6,7 +6,12 @@
 
 package org.mskcc.cbio.oncokb.controller;
 
+import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.quest.VariantAnnotationXML;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,9 +33,43 @@ public class VariantAnnotationXMLController {
             @RequestParam(value="proteinStart", required=false) Integer proteinStart,
             @RequestParam(value="proteinEnd", required=false) Integer proteinEnd,
             @RequestParam(value="tumorType", required=false) String tumorType) {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xlm>\n" 
-                + VariantAnnotationXML.annotate(entrezGeneId, hugoSymbol,
-                   alterationType, alteration, consequence, proteinStart, proteinEnd, tumorType)
-                + "\n</xml>";
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.append("<xml>\n");
+        
+        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+
+        Gene gene = null;
+        if (entrezGeneId!=null) {
+            gene = geneBo.findGeneByEntrezGeneId(entrezGeneId);
+        } else if (hugoSymbol!=null) {
+            gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
+        }
+
+        if (entrezGeneId == null && hugoSymbol == null) {
+            sb.append("<!-- no gene was specified --></xml>");
+            return sb.toString();
+        }
+
+        if (gene == null) {
+            sb.append("<!-- cound not find gene --></xml>");
+            return sb.toString();
+        }
+
+        if(alteration != null) {
+            alteration = AlterationUtils.trimAlterationName(alteration);
+        }
+
+        if(tumorType != null) {
+            tumorType = tumorType.toLowerCase();
+        }
+
+        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, alterationType, consequence, proteinStart, proteinEnd);
+
+        sb.append(VariantAnnotationXML.annotate(alt, tumorType));
+        
+        sb.append("\n</xml>");
+        
+        return sb.toString();
     }
 }

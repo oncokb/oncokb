@@ -223,9 +223,16 @@ public final class VariantAnnotationXMLV2 {
         
 //        String type = fusionNode.selectSingleNode("type").getText();
         
+        String symbol1 = gene1.getHugoSymbol();
+        String symbol2 = gene2.getHugoSymbol();
+        String symbol = gene1.getHugoSymbol()+"-"+gene2.getHugoSymbol();
+        Gene gene = new Gene(-1, symbol, symbol);
+        gene.getGeneAliases().add(symbol1);
+        gene.getGeneAliases().add(symbol2);
+        
         Alteration alteration = new Alteration();
-        alteration.setGene(gene2);
-        alteration.setAlteration(gene1.getHugoSymbol()+"-"+gene2.getHugoSymbol()+" fusion");
+        alteration.setGene(gene);
+        alteration.setAlteration("fusion");
         alteration.setAlterationType(AlterationType.MUTATION); // TODO: this needs to be fixed
         
         alterations.add(alteration);

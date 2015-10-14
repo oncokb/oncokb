@@ -22,68 +22,31 @@ import org.springframework.stereotype.Controller;
 @Controller
 public final class VariantAnnotationXML {
     
-    public static String annotate(Alteration alteration, String tumorType) {
-        return annotate(alteration.getGene().getEntrezGeneId(),
-                alteration.getGene().getHugoSymbol(),
-                alteration.getAlterationType()==null?null:alteration.getAlterationType().label(),
-                alteration.getAlteration(),
-                alteration.getConsequence()==null?null:alteration.getConsequence().getTerm(),
-                alteration.getProteinStart(),
-                alteration.getProteinEnd(),
-                tumorType);
-    }
-    
-    public static String annotate(Integer entrezGeneId,
-             String hugoSymbol,
-             String alterationType,
-             String alteration,
-             String consequence,
-             Integer proteinStart,
-             Integer proteinEnd,
-             String tumorType) {
+    public static String annotate(Alteration alt, String tumorType) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
 
         StringBuilder sb = new StringBuilder();
 
-
-        Gene gene = null;
-        if (entrezGeneId!=null) {
-            gene = geneBo.findGeneByEntrezGeneId(entrezGeneId);
-        } else if (hugoSymbol!=null) {
-            gene = geneBo.findGeneByHugoSymbol(hugoSymbol);
-        }
-
-        if (entrezGeneId == null && hugoSymbol == null) {
-            sb.append("<!-- no gene was specified --></xml>");
-            return sb.toString();
-        }
-
-        if (gene == null) {
-            sb.append("<!-- cound not find gene --></xml>");
-            return sb.toString();
-        }
-
-        if(alteration != null) {
-            alteration = AlterationUtils.trimAlterationName(alteration);
-        }
-
-        if(tumorType != null) {
-            tumorType = tumorType.toLowerCase();
-        }
-
-        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, alterationType, consequence, proteinStart, proteinEnd);
-
-        Set<TumorType> relevantTumorTypes = TumorTypeUtils.fromQuestTumorType(tumorType);
-
-        VariantConsequence variantConsequence = null;
-        if (consequence!=null) {
-            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(consequence);
-            if (variantConsequence==null) {
-                sb.append("<!-- could not find the specified variant consequence --></xml>");
-                return sb.toString();
+        Gene gene = alt.getGene();
+        
+        Set<Gene> genes = new HashSet<Gene>();
+        if (gene.getEntrezGeneId()>0) {
+            genes.add(gene);
+        } else {
+            // fake gene... could be a fusion gene
+            Set<String> aliases = gene.getGeneAliases();
+            for (String alias : aliases) {
+                Gene g = geneBo.findGeneByHugoSymbol(alias);
+                if (g!=null) {
+                    genes.add(g);
+                }
             }
         }
 
+        Set<TumorType> relevantTumorTypes = TumorTypeUtils.fromQuestTumorType(tumorType);
+
+        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+        
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
 
@@ -100,11 +63,11 @@ public final class VariantAnnotationXML {
 
         // summary
         sb.append("<annotation_summary>");
-        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty()?Collections.singletonList(alt):alterations, AlterationUtils.getVariantName(gene.getHugoSymbol(), alt == null ? alteration: alt.getAlteration()), relevantTumorTypes, tumorType));
+        sb.append(SummaryUtils.fullSummary(genes, alterations.isEmpty()?Collections.singletonList(alt):alterations, AlterationUtils.getVariantName(gene.getHugoSymbol(),  alt.getAlteration()), relevantTumorTypes, tumorType));
         sb.append("</annotation_summary>\n");
 
         // gene background
-        List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
+        List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(genes, Collections.singleton(EvidenceType.GENE_BACKGROUND));
         if (!geneBgEvs.isEmpty()) {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");
