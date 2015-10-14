@@ -521,6 +521,9 @@ angular.module('oncokbApp').run(
         function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs) {
             $rootScope.errors = [];
 
+            //If data is loaded, the watch in nav controller should be triggered.
+            $rootScope.dataLoaded = false;
+
             $rootScope.user = {
                 role: config.userRoles.public
             };
@@ -552,6 +555,8 @@ angular.module('oncokbApp').run(
                 }else{
                     dialogs.error('Error', 'OncoKB has error. Refresh page might solve the problem.');
                 }
+                console.log('Data loaded.');
+                $rootScope.dataLoaded = true;
                 loadingScreen.finish();
             });
 
