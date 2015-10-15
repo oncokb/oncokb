@@ -192,9 +192,12 @@ public final class AlterationUtils {
         }
         alt.setGene(gene);
 
-        AlterationType type = AlterationType.valueOf(alterationType.toUpperCase());
-        if (type == null) {
-            type = AlterationType.MUTATION;
+        AlterationType type = AlterationType.MUTATION;
+        if (alterationType != null) {
+            AlterationType t = AlterationType.valueOf(alterationType.toUpperCase());
+            if (t!=null) {
+                type = t;
+            }
         }
         alt.setAlterationType(type);
 

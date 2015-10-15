@@ -86,7 +86,7 @@ public class SummaryController {
                 }else{
                     hugoSymbol = queryGene;
                 }
-                summaryList.add(SummaryUtils.variantSummary(geneV, alterationsV, AlterationUtils.getVariantName(hugoSymbol, queryAlt), tumorTypes, queryTumorType));
+                summaryList.add(SummaryUtils.variantSummary(Collections.singleton(geneV), alterationsV, AlterationUtils.getVariantName(hugoSymbol, queryAlt), tumorTypes, queryTumorType));
             }
         }
         return summaryList;
