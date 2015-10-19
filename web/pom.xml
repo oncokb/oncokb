@@ -87,6 +87,11 @@
 			<version>2.1</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>apache-log4j-extras</artifactId>
+			<version>1.1</version>
+		</dependency>
 	 <dependency>
 	  <groupId>org.hibernate</groupId>
 	  <artifactId>hibernate</artifactId>
@@ -193,7 +198,7 @@
 		   <encoding>${project.build.sourceEncoding}</encoding>
 		  </configuration>
 		 </plugin>
-                 <plugin>    
+                 <plugin>
                     <groupId>com.github.trecloux</groupId>
                     <artifactId>yeoman-maven-plugin</artifactId>
                     <version>0.4</version>

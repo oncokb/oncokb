@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;

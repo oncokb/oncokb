@@ -11,10 +11,11 @@ import java.util.Set;
  */
 public class EvidenceQuery implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
-    private Gene gene;
-    private List<Alteration> alterations;
-    private List<TumorType> tumorTypes;
-    private List<Evidence> evidences;
+    private String hugoSymbol;
+    private Integer entrezGeneId;
+    private String alteration;
+    private String tumorType;
+    private String consequence;
 
     public EvidenceQuery() {
     }
@@ -27,36 +28,44 @@ public class EvidenceQuery implements java.io.Serializable {
         this.id = id;
     }
 
-    public Gene getGene() {
-        return gene;
+    public String getHugoSymbol() {
+        return hugoSymbol;
     }
 
-    public void setGene(Gene gene) {
-        this.gene = gene;
+    public void setHugoSymbol(String hugoSymbol) {
+        this.hugoSymbol = hugoSymbol;
     }
 
-    public List<Alteration> getAlterations() {
-        return alterations;
+    public Integer getEntrezGeneId() {
+        return entrezGeneId;
     }
 
-    public void setAlterations(List<Alteration> alterations) {
-        this.alterations = alterations;
+    public void setEntrezGeneId(Integer entrezGeneId) {
+        this.entrezGeneId = entrezGeneId;
     }
 
-    public List<TumorType> getTumorTypes() {
-        return tumorTypes;
+    public String getAlteration() {
+        return alteration;
     }
 
-    public void setTumorTypes(List<TumorType> tumorTypes) {
-        this.tumorTypes = tumorTypes;
+    public void setAlteration(String alteration) {
+        this.alteration = alteration;
     }
 
-    public List<Evidence> getEvidences() {
-        return evidences;
+    public String getTumorType() {
+        return tumorType;
     }
 
-    public void setEvidences(List<Evidence> evidences) {
-        this.evidences = evidences;
+    public void setTumorType(String tumorType) {
+        this.tumorType = tumorType;
+    }
+
+    public String getConsequence() {
+        return consequence;
+    }
+
+    public void setConsequence(String consequence) {
+        this.consequence = consequence;
     }
 }
 
