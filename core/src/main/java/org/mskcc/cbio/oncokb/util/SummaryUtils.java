@@ -32,7 +32,7 @@ public class SummaryUtils {
             isPlural = true;
         }
 
-        if (genes.isEmpty() || alterations.isEmpty()) {
+        if (gene == null || alterations==null || alterations.isEmpty()) {
             sb.append("The oncogenic activity of this variant is unknown. ");
         } else {
             int oncogenic = -1;
@@ -158,7 +158,7 @@ public class SummaryUtils {
                         sb.append("While ")
                                 .append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, false, true, false, true))
                                 .append(", the clinical utility for patients with ")
-                                .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                .append(queryTumorType == null ? "tumors" : queryTumorType)
                                 .append(" harboring the " + queryAlteration)
                                 .append(" is unknown. ");
                     } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
@@ -166,7 +166,7 @@ public class SummaryUtils {
                         evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A));
                         sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, false, true, true))
                                 .append(", the clinical utility for patients with ")
-                                .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                .append(queryTumorType == null ? "tumors" : queryTumorType)
                                 .append(" harboring the " + queryAlteration)
                                 .append(" is unknown. ");
                     } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -174,7 +174,7 @@ public class SummaryUtils {
                         sb.append("While ")
                                 .append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, false, true, false, true))
                                 .append(", the clinical utility for patients with ")
-                                .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                .append(queryTumorType == null ? "tumors" : queryTumorType)
                                 .append(" harboring the " + queryAlteration)
                                 .append(" is unknown. ");
                     } else {
@@ -196,7 +196,7 @@ public class SummaryUtils {
                             sb.append("While ")
                                     .append(treatmentsToStringByTumorType(evidences, null, queryTumorType, false, true, false, true))
                                     .append(", the clinical utility for patients with ")
-                                    .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                    .append(queryTumorType == null ? "tumors" : queryTumorType)
                                     .append(" harboring the " + queryAlteration)
                                     .append(" is unknown. ");
                         } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
@@ -204,7 +204,7 @@ public class SummaryUtils {
                             evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1));
                             sb.append(treatmentsToStringByTumorType(evidences, null, queryTumorType, true, false, true, true))
                                     .append(", the clinical utility for patients with ")
-                                    .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                    .append(queryTumorType == null ? "tumors" : queryTumorType)
                                     .append(" harboring the " + queryAlteration)
                                     .append(" is unknown. ");
                         } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -212,13 +212,13 @@ public class SummaryUtils {
                             sb.append("While ")
                                     .append(treatmentsToStringByTumorType(evidences, null, queryTumorType, false, true, false, true))
                                     .append(", the clinical utility for patients with ")
-                                    .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                    .append(queryTumorType == null ? "tumors" : queryTumorType)
                                     .append(" harboring the " + queryAlteration)
                                     .append(" is unknown. ");
                         } else {
                             // if there is no FDA or NCCN drugs for the gene at all
                             sb.append("There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with ")
-                                    .append(queryTumorType == null ? "tumors" : " " + queryTumorType)
+                                    .append(queryTumorType == null ? "tumors" : queryTumorType)
                                     .append(" harboring ");
                             if (appendThe) {
                                 sb.append("the ");
@@ -233,14 +233,14 @@ public class SummaryUtils {
             }
         }
 
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        queryTumorType = StringUtils.isAllUpperCase(queryTumorType)?queryTumorType:queryTumorType.toLowerCase();
+        queryTumorType = queryTumorType!=null?StringUtils.isAllUpperCase(queryTumorType)?queryTumorType:queryTumorType.toLowerCase():null;
 
         List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(genes, Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
@@ -443,9 +443,9 @@ public class SummaryUtils {
         if (fda || nccn) {
             sb.append(" ");
             if (drugs.size()>1) {
-                sb.append("are ");
+                sb.append("are");
             } else {
-                sb.append("is ");
+                sb.append("is");
             }
         }
 
@@ -453,7 +453,7 @@ public class SummaryUtils {
             sb.append(" FDA-approved");
         } else if (nccn){
             if(approvedIndication != null){
-                sb.append("FDA-approved for the treatment of ")
+                sb.append(" FDA-approved for the treatment of ")
                         .append(approvedIndication)
                         .append(" and");
             }
