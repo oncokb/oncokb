@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
@@ -103,8 +104,63 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        //If alteration contains 'fusion', the alteration 'fusions' should be injected into alteration list
-        if (alteration.getAlteration().toLowerCase().contains("fusion")) {
+        //If alteration contains 'fusion'
+        if(alteration.getAlteration().toLowerCase().contains("fusion")) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            String fusion = alteration.getAlteration(); // e.g. TRB-NKX2-1 fusion
+            int ix = fusion.toLowerCase().indexOf("fusion");
+            if (ix>=0) {
+                Gene gene = alteration.getGene();
+                if (gene.getEntrezGeneId()>0) {
+                    // find fusions annotated in the other gene
+                    String symbol = gene.getHugoSymbol();
+                    String genes = fusion.substring(0,ix);
+                    int ixg = genes.indexOf(symbol);
+                    if (ixg<0) {
+                        System.err.println(fusion + " was under " + symbol);
+                    } else {
+                        String theOtherGene = genes.replace(symbol, "")
+                                .replaceAll("-", " ").trim() // trim -
+                                .replaceAll(" ", "-");
+
+                        Gene tog = geneBo.findGeneByHugoSymbol(theOtherGene);
+                        if (tog!=null) {
+                            String reverse;
+                            if (ixg==0) {
+                                reverse = tog.getHugoSymbol()+"-"+symbol+" fusion";
+                            } else {
+                                reverse = symbol+"-"+tog.getHugoSymbol()+" fusion";
+                            }
+
+                            Alteration toa = findAlteration(tog, alteration.getAlterationType(), reverse);
+                            if (toa!=null) {
+                                alterations.add(toa);
+                            }
+
+                            toa = findAlteration(tog, alteration.getAlterationType(), "fusions");
+                            if (toa!=null) {
+                                alterations.add(toa);
+                            }
+                        }
+                    }
+                } else {
+                    if (gene.getGeneAliases().size()==2) {
+                        String[] aliases = gene.getGeneAliases().toArray(new String[0]);
+                        Gene gene0 = geneBo.findGeneByHugoSymbol(aliases[0]);
+                        Gene gene1 = geneBo.findGeneByHugoSymbol(aliases[1]);
+                        Alteration toa = findAlteration(gene1, alteration.getAlterationType(), aliases[0]+"-"+aliases[1]+" fusion");
+                        if (toa!=null) {
+                            alterations.add(toa);
+                        }
+                        toa = findAlteration(gene0, alteration.getAlterationType(), aliases[1]+"-"+aliases[0]+" fusion");
+                        if (toa!=null) {
+                            alterations.add(toa);
+                        }
+                    }
+                }
+            }
+            
+            //the alteration 'fusions' should be injected into alteration list
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
             if (alt != null) {
                 alterations.add(alt);

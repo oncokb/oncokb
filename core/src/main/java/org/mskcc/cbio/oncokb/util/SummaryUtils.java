@@ -7,13 +7,14 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
+import org.mskcc.cbio.oncokb.bo.GeneBo;
 
 /**
  * Created by Hongxin on 8/10/15.
  */
 public class SummaryUtils {
 
-    public static String variantSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -31,7 +32,7 @@ public class SummaryUtils {
             isPlural = true;
         }
 
-        if (gene == null || alterations==null || alterations.isEmpty()) {
+        if (genes.isEmpty() || alterations==null || alterations.isEmpty()) {
             sb.append("The oncogenic activity of this variant is unknown. ");
         } else {
             int oncogenic = -1;
@@ -178,10 +179,12 @@ public class SummaryUtils {
                                 .append(" is unknown. ");
                     } else {
                         // no FDA or NCCN drugs for the variant in any tumor type -- remove wild type evidence
-                        Alteration alt = alterationBo.findAlteration(gene, AlterationType.MUTATION, "wildtype");
-                        Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(
-                                EvidenceUtils.removeByAlterations( evidenceBo.findEvidencesByGene(Collections.singleton(gene), sensitivityEvidenceTypes), Collections.singleton(alt))
-                        );
+                        List<Evidence> evs = evidenceBo.findEvidencesByGene(genes, sensitivityEvidenceTypes);
+                        for (Gene gene : genes) {
+                            Alteration alt = alterationBo.findAlteration(gene, AlterationType.MUTATION, "wildtype");
+                            EvidenceUtils.removeByAlterations(evs , Collections.singleton(alt));
+                        }
+                        Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(evs);
 
                         evidences.clear();
                         if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -233,13 +236,13 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String fullSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
         queryTumorType = queryTumorType!=null?StringUtils.isAllUpperCase(queryTumorType)?queryTumorType:queryTumorType.toLowerCase():null;
 
-        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
+        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(genes, Collections.singleton(EvidenceType.GENE_SUMMARY));
         if (!geneSummaryEvs.isEmpty()) {
             Evidence ev = geneSummaryEvs.get(0);
             String geneSummary = ev.getShortDescription();
@@ -255,7 +258,7 @@ public class SummaryUtils {
             }
         }
 
-        sb.append(SummaryUtils.variantSummary(gene, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
+        sb.append(SummaryUtils.variantSummary(genes, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
 
         return sb.toString();
     }

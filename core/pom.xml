@@ -51,6 +51,12 @@
                         <version>1.4.2</version>
                 </dependency>
                 
+                <dependency>
+                        <groupId>dom4j</groupId>
+                        <artifactId>dom4j</artifactId>
+                        <version>1.6.1</version>
+                </dependency>
+                
         <dependency>
 	  <groupId>org.hibernate</groupId>
 	  <artifactId>hibernate</artifactId>
@@ -106,6 +112,28 @@
             <type>jar</type>
         </dependency>
     </dependencies>
+    
+    <build>
+        <plugins>
+          <!-- any other plugins -->
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+          </plugin>
+        </plugins>
+    </build>
     
     <repositories>
 		<repository>
