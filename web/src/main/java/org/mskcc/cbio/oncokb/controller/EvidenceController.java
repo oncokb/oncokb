@@ -6,11 +6,8 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.util.*;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -49,7 +46,7 @@ public class EvidenceController {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        List<EvidenceQuery> requestQueries = new ArrayList<>();
+        List<Query> requestQueries = new ArrayList<>();
         List<EvidenceType> evidenceTypes = new ArrayList<>();
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
@@ -57,13 +54,13 @@ public class EvidenceController {
 
         if (entrezGeneId != null) {
             for (String id : entrezGeneId.split(",")) {
-                EvidenceQuery requestQuery = new EvidenceQuery();
+                Query requestQuery = new Query();
                 requestQuery.setEntrezGeneId(Integer.parseInt(id));
                 requestQueries.add(requestQuery);
             }
         } else if (hugoSymbol != null) {
             for (String symbol : hugoSymbol.split(",")) {
-                EvidenceQuery requestQuery = new EvidenceQuery();
+                Query requestQuery = new Query();
                 requestQuery.setHugoSymbol(symbol);
                 requestQueries.add(requestQuery);
             }
@@ -127,7 +124,7 @@ public class EvidenceController {
             @RequestBody EvidenceQueries body) {
         List<EvidenceQueryRes> result = new ArrayList<>();
         if (body.getQueries().size() > 0) {
-            List<EvidenceQuery> requestQueries = body.getQueries();
+            List<Query> requestQueries = body.getQueries();
             List<EvidenceType> evidenceTypes = new ArrayList<>();
 
             if (body.getEvidenceTypes() != null) {
@@ -146,14 +143,14 @@ public class EvidenceController {
         return result;
     }
 
-    private List<EvidenceQueryRes> processRequest(List<EvidenceQuery> requestQueries, List<EvidenceType> evidenceTypes, String geneStatus, String source) {
+    private List<EvidenceQueryRes> processRequest(List<Query> requestQueries, List<EvidenceType> evidenceTypes, String geneStatus, String source) {
         Map<Integer, List<Alteration>> mappedGeneAlterations = new HashMap<>();
         Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
         Map<String, List<Alteration>> mappedAlterations = new HashMap<>();
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-        for (EvidenceQuery requestQuery : requestQueries) {
+        for (Query requestQuery : requestQueries) {
             EvidenceQueryRes query = new EvidenceQueryRes();
 
             query.setId(requestQuery.getId());
