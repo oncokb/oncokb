@@ -276,19 +276,17 @@ Return all tumor types
 
         [{"tumorType":{"tissue":"melanoma","tumorTypeId":"SKCM","shortName":null,"clinicalTrialKeywords":["melanoma","solid tumor","skin"],"name":"melanoma"},"clinicalTrials":[],"gene":{"entrezGeneId":673,"summary":"Summary","geneLabels":[],"geneAliases":["B-RAF1","BRAF1","RAFB1","NS7"],"name":"B-Raf proto-oncogene, serine/threonine kinase","hugoSymbol":"BRAF","status":""},"evidenceType":"INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY","evidenceId":4685,"knownEffect":"Sensitive","nccnGuidelines":[],"levelOfEvidence":"LEVEL_4","treatments":[{"drugs":[{"synonyms":["Buparsilib"],"drugId":8360,"fdaApproved":null,"atcCodes":[],"drugName":"BKM120","description":null},{"synonyms":[],"drugId":8242,"fdaApproved":null,"atcCodes":[],"drugName":"MEK162","description":null},{"synonyms":[],"drugId":8635,"fdaApproved":null,"atcCodes":[],"drugName":"LGX818","description":null}],"treatmentId":1701,"approvedIndications":[]},{"drugs":[{"synonyms":["Buparsilib"],"drugId":8360,"fdaApproved":null,"atcCodes":[],"drugName":"BKM120","description":null},{"synonyms":["RG7204","Vemurafenib","PLX4032","Zelboraf","RO5185426","BRAF(V600E) Kinase Inhibitor RO5185426"],"drugId":6519,"fdaApproved":true,"atcCodes":["L01XE15"],"drugName":"Vemurafenib","description":"Description"}],"treatmentId":1702,"approvedIndications":[]}],"articles":[{"title":"B-Raf and the inhibitors: from bench to bedside.","pmid":"23617957","articleId":1148,"pages":"30","authors":"Huang T et al","journal":"Journal of hematology &amp; oncology","pubDate":"2013 Apr 25","volume":"6","issue":"","elocationId":"doi: 10.1186/1756-8722-6-30","reference":"Huang T et al. Journal of hematology &amp; oncology. 2013 Apr 25;6()30."}],"description":"Desription","alterations":[{"alterationId":645,"alteration":"V600E","gene":{"entrezGeneId":673,"summary":"Gene summary","geneLabels":[],"geneAliases":["B-RAF1","BRAF1","RAFB1","NS7"],"name":"B-Raf proto-oncogene, serine/threonine kinase","hugoSymbol":"BRAF","status":""},"alterationType":"MUTATION","consequence":{"term":"missense_variant","isGenerallyTruncating":false,"description":"Descriptiion"},"refResidues":"V","proteinStart":600,"proteinEnd":600,"variantResidues":"E","name":"V600E","oncogenic":1},{"alterationId":646,"alteration":"V600K","gene":{"entrezGeneId":673,"summary":"gene summary","geneLabels":[],"geneAliases":["B-RAF1","BRAF1","RAFB1","NS7"],"name":"B-Raf proto-oncogene, serine/threonine kinase","hugoSymbol":"BRAF","status":""},"alterationType":"MUTATION","consequence":{"term":"missense_variant","isGenerallyTruncating":false,"description":"Descriptiion"},"refResidues":"V","proteinStart":600,"proteinEnd":600,"variantResidues":"K","name":"V600K","oncogenic":1}]}]
 
-### Specific evidence inforamtion [/evidence.json?{&query,entrezGeneId,hugoSymbol,alteration,tumorType,consequence,evidenceType,geneStatus,source}]
+### Specific evidence inforamtion [/evidence.json?{&id,query,entrezGeneId,hugoSymbol,alteration,tumorType,consequence,evidenceType,geneStatus,source}]
 Gene + Alteration + tumorType + consequence  = Variant pair
 The query can has multiple genes, alterations and consequences but can only has one tumor type.
 
 
 #### GET [GET]
 
-+ Response 200 (application/json)
-
 + Parameters
-    + entrezGeneId: 673 (string, optional)
-        Gene ID.
-    + hugoSymbol: BRAF (string, optional)
+    + entrezGeneId: 673 (string)
+        Gene ID. (You have to choose use entrezGeneId or hugoSymbol)
+    + hugoSymbol: BRAF (string)
         Gene hugo symbol. Multiple genese are separated by comma.
     + alteration: V600E (string, optional)
         Mutation name.  Multiple mutations are separated by comma.
@@ -316,39 +314,134 @@ The query can has multiple genes, alterations and consequences but can only has 
     + source (string, optional)
         Tumor type mapping set name
         + Members
-            + oncokb - This the mapping file we used to map OncoKB tumor type to Quest tumor type
+            + quest - This the mapping file we used to map OncoKB tumor type to Quest tumor type
             + cbioportal - This the mapping file we used to map OncoKB tumor type to cBioPortal tumor type
     
-#### POST [POST]
 
 + Response 200 (application/json)
 
-+ Parameters
-    + query (array)
-    + evidenceType: GENE_SUMMARY (string, optional)
-        Evidence types.
-        + Members
-            + GENE_SUMMARY 
-            + GENE_BACKGROUND 
-            + MUTATION_SUMMARY 
-            + TUMOR_TYPE_SUMMARY 
-            + MUTATION_EFFECT 
-            + PREVALENCE 
-            + PROGNOSTIC_IMPLICATION 
-            + NCCN_GUIDELINES 
-            + STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY 
-            + STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE 
-            + INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY 
-            + INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE 
-            + CLINICAL_TRIAL 
-    + geneStatus: Complete (string, optional)
-        Only get genes under specific status.
-    + source (string, optional)
-        Tumor type mapping set name
-        + Members
-            + oncokb - This the mapping file we used to map OncoKB tumor type to Quest tumor type
-            + cbioportal - This the mapping file we used to map OncoKB tumor type to cBioPortal tumor type
+        {
+
+        }
+
+### Specific evidence POST [POST]
+
+List of evidence with specific queries. Suggest assagin each query with unique ID.
+
++ id (string) - Unique Id which used to distinguish the queries. It will be usually used in POST method.
     
++ Request (application/json)
+
+        {
+          "geneStatus": "all",
+          "evidenceTypes": "GENE_SUMMARY",
+          "source": "cbioportal",
+          "queries": [
+            {
+              "hugoSymbol": "KIT",
+              "alteration": "W557S",
+              "tumorType": "Thymic Tumor",
+              "consequence": "",
+              "id": "test"
+            }
+          ]
+        }
+        
++ Response 200 (application/json)
+
+        [
+          {
+            "id": "test",
+            "alterations": [
+              {
+                "name": "W557",
+                "alterationId": 718,
+                "alteration": "W557",
+                "alterationType": "MUTATION",
+                "consequence": {
+                  "description": "...",
+                  "isGenerallyTruncating": false
+                },
+                "refResidues": "W",
+                "proteinStart": 557,
+                "proteinEnd": 557,
+                "variantResidues": null,
+                "oncogenic": -1,
+                "hotspot": 0,
+                "hotspotAddon": null,
+                "gene": {
+                  "name": "v-kit Hardy-Zuckerman 4 feline sarcoma viral oncogene homolog",
+                  "status": "",
+                  "hugoSymbol": "KIT",
+                  "summary": "...",
+                  "geneLabels": [],
+                  "geneAliases": [
+                    "PBT",
+                    "C-Kit",
+                    "CD117",
+                    "SCFR"
+                  ],
+                  "entrezGeneId": 3815
+                }
+              }
+            ],
+            "tumorTypes": [
+              {
+                "name": "Thymic Cancer",
+                "clinicalTrialKeywords": [
+                  "Thymic Cancer"
+                ],
+                "tumorTypeId": "Thymic Cancer",
+                "shortName": null,
+                "tissue": null
+              }
+            ],
+            "evidences": [
+              {
+                "description": "KIT ...",
+                "alterations": [],
+                "levelOfEvidence": null,
+                "shortDescription": null,
+                "gene": {
+                  "name": "v-kit Hardy-Zuckerman 4 feline sarcoma viral oncogene homolog",
+                  "status": "",
+                  "hugoSymbol": "KIT",
+                  "summary": "...",
+                  "geneLabels": [],
+                  "geneAliases": [
+                    "PBT",
+                    "C-Kit",
+                    "CD117",
+                    "SCFR"
+                  ],
+                  "entrezGeneId": 3815
+                },
+                "tumorType": null,
+                "evidenceId": 47614,
+                "evidenceType": "GENE_SUMMARY",
+                "knownEffect": null,
+                "nccnGuidelines": [],
+                "clinicalTrials": [],
+                "treatments": [],
+                "articles": []
+              }
+            ],
+            "gene": {
+              "name": "v-kit Hardy-Zuckerman 4 feline sarcoma viral oncogene homolog",
+              "status": "",
+              "hugoSymbol": "KIT",
+              "summary": "...",
+              "geneLabels": [],
+              "geneAliases": [
+                "PBT",
+                "C-Kit",
+                "CD117",
+                "SCFR"
+              ],
+              "entrezGeneId": 3815
+            }
+          }
+        ]
 
 ## Group Summary
 
