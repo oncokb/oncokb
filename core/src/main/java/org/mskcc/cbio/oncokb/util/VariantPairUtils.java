@@ -12,15 +12,16 @@ public class VariantPairUtils {
 
     /**
      * All four input should be separated by comma. If multi-variants will be included in single search, please use plus symbol(Only will be supported in consequence)
-     *
-     * @param geneStr
+     * @param entrezGeneIdStr
+     * @param hugoSymbolStr
      * @param alterationStr
      * @param tumorTypeStr
      * @param consequenceStr
-     * @return Pairwise variants
+     * @param tumorTypeSource
+     * @return
      */
-    public static List<Map<String, Object>> getGeneAlterationTumorTypeConsequence(String geneStr, String alterationStr, String tumorTypeStr, String consequenceStr, String tumorTypeSource) {
-        List<Map<String, Object>> pairs = new ArrayList<>();
+    public static List<VariantQuery> getGeneAlterationTumorTypeConsequence(String entrezGeneIdStr, String hugoSymbolStr, String alterationStr, String tumorTypeStr, String consequenceStr, String tumorTypeSource) {
+        List<VariantQuery> pairs = new ArrayList<>();
 
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -33,9 +34,14 @@ public class VariantPairUtils {
         int pairwiseLength = 0;
 
         //Number of variants should be exactly matched with each other.
-        if(geneStr != null) {
-            genes = geneStr.split(",");
+        if(entrezGeneIdStr != null) {
+            genes = entrezGeneIdStr.split(",");
+        }else if(hugoSymbolStr != null){
+            genes = hugoSymbolStr.split(",");
+        }else {
+            return pairs;
         }
+
         if(alterationStr != null) {
             alterations = alterationStr.split(",");
             if(alterations.length != genes.length) {
@@ -66,40 +72,39 @@ public class VariantPairUtils {
         pairwiseLength = genes.length;
 
         //Organise data into List Map structure
-        if (geneStr!=null) {
-            for (String symbol : genes) {
-                Map<String, Object> variantPair = new HashMap<>();
-                Gene gene = geneBo.findGeneByHugoSymbol(symbol);
-                variantPair.put("queryGene", symbol);
-                variantPair.put("gene", gene);
-                pairs.add(variantPair);
-            }
+        for (String symbol : genes) {
+            VariantQuery query = new VariantQuery();
+            Gene gene = entrezGeneIdStr==null?geneBo.findGeneByHugoSymbol(symbol):geneBo.findGeneByEntrezGeneId(Integer.parseInt(symbol));
+            query.setGene(gene);
+            query.setQueryGene(symbol);
+            pairs.add(query);
         }
 
         if (consequenceStr!=null) {
             for(int i = 0; i < pairwiseLength; i++) {
-                pairs.get(i).put("consequence", consequences[i]);
+                pairs.get(i).setConsequence(consequences[i]);
             }
         }
 
         if (alterationStr!=null) {
             for(int i = 0; i < pairwiseLength; i++) {
-                Alteration alteration = AlterationUtils.getAlteration((String) pairs.get(i).get("queryGene"), alterations[i], "MUTATION", (String) pairs.get(i).get("consequence"), null, null);
-                pairs.get(i).put("queryAlt", alteration == null? alterations[i]: alteration.getAlteration());
-                pairs.get(i).put("alterations",alterationBo.findRelevantAlterations(alteration));
+                Alteration alteration = AlterationUtils.getAlteration((String) pairs.get(i).getQueryGene(), alterations[i], "MUTATION", (String) pairs.get(i).getConsequence(), null, null);
+                pairs.get(i).setQueryAlteration(alteration == null ? alterations[i] : alteration.getAlteration());
+                pairs.get(i).setAlterations(alterationBo.findRelevantAlterations(alteration, null));
             }
         }
 
         for(int i = 0; i < pairwiseLength; i++) {
             String tumorType = tumorTypes == null? null : tumorTypes[i];
-            Set<TumorType> relevantTumorTypes = new HashSet<>();
+            List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (tumorTypeSource.equals("cbioportal")) {
                 relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(tumorType));
-            } else if (tumorTypeSource.equals("quest")) {
+            } else {
+                //By default, use quest tumor types
                 relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
             }
-            pairs.get(i).put("queryTumorType", tumorType);
-            pairs.get(i).put("tumorTypes", relevantTumorTypes);
+            pairs.get(i).setQueryTumorType(tumorType);
+            pairs.get(i).setTumorTypes(relevantTumorTypes);
         }
 
         return pairs;

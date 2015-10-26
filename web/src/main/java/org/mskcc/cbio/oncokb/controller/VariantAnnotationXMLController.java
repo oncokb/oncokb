@@ -6,12 +6,28 @@
 
 package org.mskcc.cbio.oncokb.controller;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.*;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.quest.VariantAnnotationXML;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
