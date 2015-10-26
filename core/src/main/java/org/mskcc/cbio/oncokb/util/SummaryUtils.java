@@ -32,7 +32,7 @@ public class SummaryUtils {
             isPlural = true;
         }
 
-        if (gene == null || alterations==null || alterations.isEmpty()) {
+        if (genes.isEmpty() || alterations==null || alterations.isEmpty()) {
             sb.append("The oncogenic activity of this variant is unknown. ");
         } else {
             int oncogenic = -1;

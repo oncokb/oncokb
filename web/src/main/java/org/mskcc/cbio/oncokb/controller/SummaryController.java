@@ -76,13 +76,13 @@ public class SummaryController {
         if (query != null) {
             switch (summaryType) {
                 case "variant":
-                    summary = SummaryUtils.variantSummary(query.getGene(), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "full":
-                    summary = SummaryUtils.fullSummary(query.getGene(), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.fullSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 default:
-                    summary = SummaryUtils.variantSummary(query.getGene(), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
             }
         }
