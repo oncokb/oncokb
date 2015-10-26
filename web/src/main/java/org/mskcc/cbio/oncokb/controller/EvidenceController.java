@@ -164,7 +164,7 @@ public class EvidenceController {
                     String consequence = requestQuery.getConsequence();
                     String alteration = requestQuery.getAlteration();
                     Gene gene = query.getGene();
-                    String id = gene.getHugoSymbol() + alteration + consequence == null ? "" : consequence;
+                    String id = gene.getHugoSymbol() + alteration + (consequence == null ? "" : consequence);
                     if (!mappedAlterations.containsKey(id)) {
                         mappedAlterations.put(id, getAlterations(query.getGene(), alteration, consequence, mappedGeneAlterations.get(gene.getEntrezGeneId())));
                     }
