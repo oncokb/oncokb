@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/evidence.json")
+@RequestMapping(value = "/api/evidence.json")
 public class EvidenceController {
     private static Logger logger = Logger.getLogger(EvidenceController.class);
 

@@ -20,7 +20,7 @@ import java.util.*;
  * Created by Hongxin on 8/10/15.
  */
 @Controller
-@RequestMapping(value = "/summary.json")
+@RequestMapping(value = "/api/summary.json")
 public class SummaryController {
     @RequestMapping(method = RequestMethod.GET)
     public
