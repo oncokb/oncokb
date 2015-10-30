@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 @Controller
 public class UtilsController {
-    @RequestMapping(value="/utils")
+    @RequestMapping(value="/api/utils")
     public @ResponseBody List<Map<String, String>> utils(
             @RequestParam(value="cmd", required=false) String cmd ) throws MalformedURLException, ServiceException {
         if(cmd != null) {
