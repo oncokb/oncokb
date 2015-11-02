@@ -24,22 +24,23 @@ angular.module('oncokbApp')
         'DataSummary',
         'GeneStatus',
         'ServerUtils',
-        function (
-            $timeout,
-            $q,
-            Gene,
-            Alteration,
-            TumorType,
-            Evidence,
-            SearchVariant,
-            GenerateDoc,
-            DriveOncokbInfo,
-            OncoTreeTumorTypes,
-            DriveAnnotation,
-            SendEmail,
-            DataSummary,
-            GeneStatus,
-            ServerUtils) {
+        'InternalAccess',
+        function ($timeout,
+                  $q,
+                  Gene,
+                  Alteration,
+                  TumorType,
+                  Evidence,
+                  SearchVariant,
+                  GenerateDoc,
+                  DriveOncokbInfo,
+                  OncoTreeTumorTypes,
+                  DriveAnnotation,
+                  SendEmail,
+                  DataSummary,
+                  GeneStatus,
+                  ServerUtils,
+                  InternalAccess) {
 
             var numOfLocks = {},
                 data = {};
@@ -48,39 +49,53 @@ angular.module('oncokbApp')
             var dataFromFile = false;
 
             function getAllGene(callback, timestamp) {
-                if(dataFromFile) {
-                    Gene.getFromFile().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
-                }else {
-                    Gene.getFromServer().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    Gene.getFromFile()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
+                } else {
+                    Gene.getFromServer()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
                 }
             }
 
             function getDataSummary() {
                 var deferred = $q.defer();
-                if(dataFromFile) {
+                if (dataFromFile) {
                     DataSummary.getFromFile()
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(result){
+                        .error(function (result) {
                             deferred.reject(result);
                         });
-                }else {
+                } else {
                     DataSummary.getFromFile()
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(result){
+                        .error(function (result) {
                             deferred.reject(result);
                         });
                 }
@@ -89,20 +104,20 @@ angular.module('oncokbApp')
 
             function getGeneStatus(params) {
                 var deferred = $q.defer();
-                if(dataFromFile) {
+                if (dataFromFile) {
                     GeneStatus.getFromFile(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(result){
+                        .error(function (result) {
                             deferred.reject(result);
                         });
-                }else {
+                } else {
                     GeneStatus.getFromServer(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(result){
+                        .error(function (result) {
                             deferred.reject(result);
                         });
                 }
@@ -111,20 +126,20 @@ angular.module('oncokbApp')
 
             function setGeneStatus(params) {
                 var deferred = $q.defer();
-                if(dataFromFile) {
+                if (dataFromFile) {
                     GeneStatus.setToFile(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(result){
+                        .error(function (result) {
                             deferred.reject(result);
                         });
-                }else {
+                } else {
                     GeneStatus.setToServer(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(result){
+                        .error(function (result) {
                             deferred.reject(result);
                         });
                 }
@@ -132,107 +147,181 @@ angular.module('oncokbApp')
             }
 
             function getAllAlteration(callback, timestamp) {
-                if(dataFromFile) {
-                    Alteration.getFromFile().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
-                }else {
-                    Alteration.getFromServer().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    Alteration.getFromFile()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
+                } else {
+                    Alteration.getFromServer()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
                 }
             }
 
             function getAllOncoTreeTumorTypes(callback, timestamp) {
-                if(dataFromFile) {
-                    OncoTreeTumorTypes.getFromFile().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
-                }else {
-                    OncoTreeTumorTypes.getFromServer().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    OncoTreeTumorTypes.getFromFile()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
+                } else {
+                    OncoTreeTumorTypes.getFromServer()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
                 }
             }
 
             function getOncokbInfo(callback, timestamp) {
-                if(dataFromFile) {
-                    DriveOncokbInfo.getFromFile().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
-                }else {
-                    DriveOncokbInfo.getFromServer().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    DriveOncokbInfo.getFromFile()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
+                } else {
+                    DriveOncokbInfo.getFromServer()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
                 }
             }
 
             function getAllTumorType(callback, timestamp) {
-                if(dataFromFile) {
-                    TumorType.getFromFile().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
-                }else {
-                    TumorType.getFromServer().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    TumorType.getFromFile()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
+                } else {
+                    TumorType.getFromServer()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
                 }
             }
 
             function getAllEvidence(callback, timestamp) {
-                if(dataFromFile) {
-                    Evidence.getFromFile().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
-                }else {
-                    Evidence.getFromServer().success(function(data) {
-                        if (timestamp) {
-                            numOfLocks[timestamp]--;
-                        }
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    Evidence.getFromFile()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
+                } else {
+                    Evidence.getFromServer()
+                        .success(function (data) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback(data);
+                        })
+                        .error(function (result) {
+                            if (timestamp) {
+                                numOfLocks[timestamp]--;
+                            }
+                            callback();
+                        });
                 }
             }
 
             function searchVariant(params, success, fail) {
-                if(dataFromFile) {
-                    SearchVariant.annotationFromFile(params).success(function(data) {
-                        success(data);
-                    });
-                }else {
-                    SearchVariant
-                        .getAnnotation(params)
-                        .success(function(data) {
+                if (dataFromFile) {
+                    SearchVariant.annotationFromFile(params)
+                        .success(function (data) {
                             success(data);
                         })
-                        .error(function(){
+                        .error(function (result) {
+                            fail();
+                        });
+                } else {
+                    SearchVariant
+                        .getAnnotation(params)
+                        .success(function (data) {
+                            success(data);
+                        })
+                        .error(function () {
                             fail();
                         });
                 }
@@ -240,30 +329,30 @@ angular.module('oncokbApp')
 
             function generateGoogleDoc(params, success, fail) {
                 console.log(params);
-                if(dataFromFile) {
+                if (dataFromFile) {
                     success('');
-                }else {
+                } else {
                     GenerateDoc
                         .getDoc(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             success(data);
                         })
-                        .error(function(){
+                        .error(function () {
                             fail();
                         });
                 }
             }
 
             function updateGene(geneString, success, fail) {
-                if(dataFromFile) {
+                if (dataFromFile) {
                     success('');
-                }else {
+                } else {
                     DriveAnnotation
                         .updateGene(geneString)
-                        .success(function(data) {
+                        .success(function (data) {
                             success(data);
                         })
-                        .error(function(){
+                        .error(function () {
                             fail();
                         });
                 }
@@ -272,15 +361,15 @@ angular.module('oncokbApp')
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
-                if(dataFromFile) {
+                if (dataFromFile) {
                     deferred.resolve('test name');
-                }else {
+                } else {
                     GenerateDoc
                         .createFolder(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             deferred.resolve(data);
                         })
-                        .error(function(){
+                        .error(function () {
                             deferred.reject();
                         });
                 }
@@ -288,70 +377,114 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                if(dataFromFile) {
+                if (dataFromFile) {
                     success(true);
-                }else {
+                } else {
                     console.log(params);
                     SendEmail
                         .init(params)
-                        .success(function(data) {
+                        .success(function (data) {
                             success(data);
                         })
-                        .error(function(){
+                        .error(function () {
                             fail();
                         });
                 }
             }
 
             function timeout(callback, timestamp) {
-                $timeout(function(){
-                    if(numOfLocks[timestamp] === 0) {
+                $timeout(function () {
+                    if (numOfLocks[timestamp] === 0) {
                         callback(data[timestamp]);
-                    }else{
+                    } else {
                         timeout(callback, timestamp);
                     }
                 }, 100);
             }
 
             function getHotspotList(callback) {
-                if(dataFromFile) {
-                    ServerUtils.hotspot.getFromFile().success(function(data) {
-                        callback(data);
-                    });
-                }else {
-                    ServerUtils.hotspot.getFromServer().success(function(data) {
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    ServerUtils.hotspot.getFromFile()
+                        .success(function (data) {
+                            callback(data);
+                        })
+                        .error(function () {
+                            callback();
+                        });
+                } else {
+                    ServerUtils.hotspot.getFromServer()
+                        .success(function (data) {
+                            callback(data);
+                        })
+                        .error(function () {
+                            callback();
+                        });
                 }
             }
 
             function getAutoMutationList(callback) {
-                if(dataFromFile) {
-                    ServerUtils.autoMutation.getFromFile().success(function(data) {
-                        callback(data);
-                    });
-                }else {
-                    ServerUtils.autoMutation.hotspot.getFromServer().success(function(data) {
-                        callback(data);
-                    });
+                if (dataFromFile) {
+                    ServerUtils.autoMutation.getFromFile()
+                        .success(function (data) {
+                            callback(data);
+                        })
+                        .error(function () {
+                            callback();
+                        });
+                } else {
+                    ServerUtils.autoMutation.hotspot.getFromServer()
+                        .success(function (data) {
+                            callback(data);
+                        })
+                        .error(function () {
+                            callback();
+                        });
+                }
+            }
+
+            function testAccess(successCallback, failCallback) {
+                if (dataFromFile) {
+                    //InternalAccess
+                    //    .success(function (data) {
+                    //        if (angular.isFunction(successCallback)) {
+                    failCallback();
+                        //    }
+                        //})
+                        //.error(function (error) {
+                        //    if (angular.isFunction(failCallback)) {
+                        //        failCallback(error);
+                        //    }
+                        //});
+                } else {
+                    InternalAccess
+                        .success(function (data) {
+                            if (angular.isFunction(successCallback)) {
+                                successCallback(data);
+                            }
+                        })
+                        .error(function (error) {
+                            if (angular.isFunction(failCallback)) {
+                                failCallback(error);
+                            }
+                        });
                 }
             }
 
             // Public API here
             return {
-                'getGeneAlterationTumortype': function(callback) {
+                'getGeneAlterationTumorType': function (callback) {
                     var timestamp = new Date().getTime().toString();
 
                     numOfLocks[timestamp] = 3;
                     data[timestamp] = {};
 
-                    getAllGene(function(d){
+                    getAllGene(function (d) {
                         data[timestamp].genes = d;
                     }, timestamp);
-                    getAllAlteration(function(d){
+                    getAllAlteration(function (d) {
                         data[timestamp].alterations = d;
                     }, timestamp);
-                    getAllTumorType(function(d){
+                    getAllTumorType(function (d) {
                         data[timestamp].tumorTypes = d;
                     }, timestamp);
 
@@ -371,6 +504,7 @@ angular.module('oncokbApp')
                 'setGeneStatus': setGeneStatus,
                 'getGeneStatus': getGeneStatus,
                 'getHotspotList': getHotspotList,
-                'getAutoMutationList': getAutoMutationList
-        };
-}]);
+                'getAutoMutationList': getAutoMutationList,
+                'testAccess': testAccess
+            };
+        }]);

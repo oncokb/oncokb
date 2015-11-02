@@ -207,7 +207,7 @@ angular.module('oncokbApp')
                     $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
                     $scope.loadingPage = false;
                 }else {
-                    DatabaseConnector.getGeneAlterationTumortype(function(data){
+                    DatabaseConnector.getGeneAlterationTumorType(function(data){
                         OncoKB.global.genes = angular.copy(data.genes);
                         OncoKB.global.alterations = angular.copy(data.alterations);
                         OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);

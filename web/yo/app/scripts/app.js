@@ -437,38 +437,45 @@ angular.module('oncokbApp', [
         $routeProvider
             .when('/', {
                 templateUrl: 'views/welcome.html',
-                access: access.public
+                access: access.public,
+                internalUse: false
             })
             .when('/tree', {
                 templateUrl: 'views/tree.html',
                 controller: 'TreeCtrl',
-                access: access.admin
+                access: access.admin,
+                internalUse: true
             })
             .when('/variant', {
                 templateUrl: 'views/variant.html',
                 controller: 'VariantCtrl',
                 reloadOnSearch: false,
-                access: access.admin
+                access: access.admin,
+                internalUse: true
             })
             .when('/reportGenerator', {
                 templateUrl: 'views/reportgenerator.html',
                 controller: 'ReportgeneratorCtrl',
-                access: access.admin
+                access: access.admin,
+                internalUse: true
             })
             .when('/genes', {
                 templateUrl: 'views/genes.html',
                 controller: 'GenesCtrl',
-                access: access.curator
+                access: access.curator,
+                internalUse: false
             })
             .when('/gene/:geneName', {
                 templateUrl: 'views/gene.html',
                 controller: 'GeneCtrl',
-                access: access.curator
+                access: access.curator,
+                internalUse: false
             })
             .when('/dataSummary', {
                 templateUrl: 'views/datasummary.html',
                 controller: 'DatasummaryCtrl',
-                access: access.admin
+                access: access.admin,
+                internalUse: true
 
             })
             .otherwise({
@@ -525,6 +532,8 @@ angular.module('oncokbApp').run(
             //If data is loaded, the watch in nav controller should be triggered.
             $rootScope.dataLoaded = false;
 
+            $rootScope.internal = true;
+
             $rootScope.user = {
                 role: config.userRoles.public
             };
@@ -567,6 +576,9 @@ angular.module('oncokbApp').run(
             });
 
             $rootScope.$on('$routeChangeStart', function (event, next) {
+                if ( next.internalUse && !$rootScope.internal) {
+                    $location.path('/');
+                }
                 if (!Access.authorize(next.access)) {
                     if(!Access.isLoggedIn()) {
                         Access.setURL($location.path());
@@ -587,6 +599,12 @@ angular.module('oncokbApp').run(
             $rootScope.$on('oncokbError', function (data) {
                 DatabaseConnector.sendEmail({'sendTo': 'bugs.pro.exterminator', 'subject': 'OncoKB Bug: ' + data.reason, 'content': 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.reason + '\n\n' + 'Error message - cause:\n' + data.cause}, function(){}, function(){});
             });
+
+            $rootScope.$watch('internal', function (n, o) {
+                if(!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
+                    dialogs.error('Error', 'Please notice you are in external network. All admin features will not available at this moment. Please switch to internal network and refresh the page if you want to use them. Thanks.');
+                }
+            })
         }]);
 
 /**
