@@ -254,6 +254,11 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($htt
     };
 }]);
 
+angular.module('oncokbApp').factory('InternalAccess', ['$http',  function ($http) {
+    'use strict';
+    return $http.get('api/access');
+}]);
+
 angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
     'use strict';
 

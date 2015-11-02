@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-.controller('NavCtrl', function ($scope, $location, $rootScope, config, gapi, user, storage, access) {
+.controller('NavCtrl', function ($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector) {
     var tabs = {
         'tree': 'Tree',
         'variant': 'Variant Annotation',
@@ -20,31 +20,34 @@ angular.module('oncokbApp')
     var accessLevels = config.accessLevels;
 
     function loginCallback() {
-         console.log('In login callback.')
-        if(!$scope.$$phase) {
-            $scope.$apply(setParams);
-        }else {
-            setParams();
-        }
-        $rootScope.$apply(function() {
-            var url = access.getURL();
-            console.log('Current URL:', url);
-            if(url) {
-                console.log('is logged in? ', access.isLoggedIn());
-                if(access.isLoggedIn()){
-                    access.setURL('');
-                    $location.path(url);
-                }
+         console.log('In login callback.');
+
+        testInternal(function () {
+            if(!$scope.$$phase) {
+                $scope.$apply(setParams);
             }else {
-                if (access.isLoggedIn() && access.authorize(config.accessLevels.curator)) {
-                    console.log('logged in and has authorize.');
-                    $location.path('/genes');
-                }else {
-                    console.log('is logged in? ', access.isLoggedIn());
-                    console.log('does not have access? ', access.authorize(config.accessLevels.curator));
-                    $location.path('/');
-                }
+                setParams();
             }
+            $rootScope.$apply(function() {
+                var url = access.getURL();
+                console.log('Current URL:', url);
+                if(url) {
+                    console.log('is logged in? ', access.isLoggedIn());
+                    if(access.isLoggedIn()){
+                        access.setURL('');
+                        $location.path(url);
+                    }
+                }else {
+                    if (access.isLoggedIn() && access.authorize(config.accessLevels.curator)) {
+                        console.log('logged in and has authorize.');
+                        $location.path('/genes');
+                    }else {
+                        console.log('is logged in? ', access.isLoggedIn());
+                        console.log('does not have access? ', access.authorize(config.accessLevels.curator));
+                        $location.path('/');
+                    }
+                }
+            });
         });
     }
 
@@ -54,7 +57,7 @@ angular.module('oncokbApp')
         if(access.authorize(accessLevels.curator)) {
             filterTabs.push({key: 'genes', value: tabs.genes});
         }
-        if(access.authorize(accessLevels.admin)) {
+        if(access.authorize(accessLevels.admin) && $rootScope.internal) {
             var keys = ['tree', 'variant', 'dataSummary', 'reportGenerator'];
 
             keys.forEach(function(e){
@@ -64,7 +67,23 @@ angular.module('oncokbApp')
         $scope.signedIn = access.isLoggedIn();
         $scope.tabs = filterTabs;
     }
-
+    function testInternal(callback) {
+        DatabaseConnector.testAccess(function (result) {
+            if(!$rootScope.internal) {
+                $rootScope.internal = true;
+            }
+            if(angular.isFunction(callback)) {
+                callback();
+            }
+        }, function (error){
+            if($rootScope.internal) {
+                $rootScope.internal = false;
+            }
+            if(angular.isFunction(callback)) {
+                callback();
+            }
+        });
+    }
     // Render the sign in button.
     $scope.renderSignInButton = function(immediateMode) {
         if(immediateMode !== false) {
