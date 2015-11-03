@@ -83,7 +83,7 @@ public final class VariantAnnotationXML {
         }
 
         if (alterations.isEmpty()) {
-            sb.append("<!-- There is no information about the function of this variant in the MSKCC OncoKB. --></xml>");
+            sb.append("<!-- There is no information about the function of this variant in the MSKCC OncoKB. -->");
             return sb.toString();
         }
 
