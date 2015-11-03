@@ -43,7 +43,7 @@ angular.module('oncokbApp')
               attr: ['sheet1'],
               arr: {},
               folder: {},
-              email: 'jackson.zhang.828@gmail.com'
+              email: $rootScope.user.email
             };
 
             //Group workers by patient id
@@ -271,7 +271,7 @@ angular.module('oncokbApp')
           }
 
           function initializeWorkersData(){
-            $scope.workers[$scope.status.initializingIndex].email = $scope.sheets.email || 'jackson.zhang.828@gmail.com';
+            $scope.workers[$scope.status.initializingIndex].email = $scope.sheets.email || $rootScope.user.email;
             $scope.workers[$scope.status.initializingIndex].folderName = $scope.sheets.folder[$scope.workers[$scope.status.initializingIndex].parent.name].name || '';
             $scope.workers[$scope.status.initializingIndex].folderId = $scope.sheets.folder[$scope.workers[$scope.status.initializingIndex].parent.name].id || '';
             $scope.workers[$scope.status.initializingIndex].status.generate = 2;
