@@ -214,6 +214,10 @@ public final class VariantAnnotationXMLV2 {
     }
     
     private static void handleFusion(Node fusionNode, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<variant_type>fusion_gene</variant_type>\n");
+        sb.append(fusionNode.asXML()).append("\n");
+
         Gene gene1 = parseGene(fusionNode, "gene_1");
         Gene gene2 = parseGene(fusionNode, "gene_2");
         
@@ -223,23 +227,14 @@ public final class VariantAnnotationXMLV2 {
         
 //        String type = fusionNode.selectSingleNode("type").getText();
         
-        String symbol1 = gene1.getHugoSymbol();
-        String symbol2 = gene2.getHugoSymbol();
-        String symbol = gene1.getHugoSymbol()+"-"+gene2.getHugoSymbol();
-        Gene gene = new Gene(-1, symbol, symbol);
-        gene.getGeneAliases().add(symbol1);
-        gene.getGeneAliases().add(symbol2);
+        String fusion = gene1.getHugoSymbol()+"-"+gene2.getHugoSymbol()+" fusion";
         
         Alteration alteration = new Alteration();
-        alteration.setGene(gene);
-        alteration.setAlteration("fusion");
+        alteration.setGene(gene2);
+        alteration.setAlteration(fusion);
         alteration.setAlterationType(AlterationType.MUTATION); // TODO: this needs to be fixed
         
         alterations.add(alteration);
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append("<variant_type>fusion_gene</variant_type>\n");
-        sb.append(fusionNode.asXML()).append("\n");
         sb.append(VariantAnnotationXML.annotate(alteration, diagnosis));
         alterationXmls.add(sb.toString());
     }
@@ -248,30 +243,33 @@ public final class VariantAnnotationXMLV2 {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Gene gene = null;
         Node entrezGeneIdNode = node.selectSingleNode(genePath+"/entrez_gene_id");
+        Node hugoSymbolNode = node.selectSingleNode(genePath+"/hgnc_symbol");
         if (entrezGeneIdNode!=null) {
             int entrezId = Integer.parseInt(entrezGeneIdNode.getText());
-            gene = geneBo.findGeneByEntrezGeneId(entrezId);
-            if (gene==null) {
-                try {
-                    gene = GeneAnnotatorMyGeneInfo2.readByEntrezId(entrezId);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        } else {
-            Node hugoSymbolNode = node.selectSingleNode(genePath+"/hgnc_symbol");
-            if (hugoSymbolNode!=null) {
-                String symbol = hugoSymbolNode.getText();
-                gene = geneBo.findGeneByHugoSymbol(symbol);
-                if (gene==null) {
-                    try {
-                        gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(symbol);
-                    } catch (IOException ex) {
-                        Logger.getLogger(VariantAnnotationXMLV2.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
+            return geneBo.findGeneByEntrezGeneId(entrezId);
+//            if (gene==null) {
+//                try {
+//                    gene = GeneAnnotatorMyGeneInfo2.readByEntrezId(entrezId);
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
+        } else if (hugoSymbolNode!=null) {
+            String symbol = hugoSymbolNode.getText();
+            return geneBo.findGeneByHugoSymbol(symbol);
+//            if (gene==null) {
+//                try {
+//                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(symbol);
+//                } catch (IOException ex) {
+//                    Logger.getLogger(VariantAnnotationXMLV2.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
         }
+        
+        gene = new Gene();
+        gene.setEntrezGeneId(Integer.parseInt(entrezGeneIdNode.getText()));
+        gene.setHugoSymbol(hugoSymbolNode.getText());
+        
         return gene;
     }
     
