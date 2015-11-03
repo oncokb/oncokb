@@ -221,10 +221,6 @@ public final class VariantAnnotationXMLV2 {
         Gene gene1 = parseGene(fusionNode, "gene_1");
         Gene gene2 = parseGene(fusionNode, "gene_2");
         
-        if (gene1==null || gene2==null) {
-            return;
-        }
-        
 //        String type = fusionNode.selectSingleNode("type").getText();
         
         String fusion = gene1.getHugoSymbol()+"-"+gene2.getHugoSymbol()+" fusion";
@@ -246,29 +242,20 @@ public final class VariantAnnotationXMLV2 {
         Node hugoSymbolNode = node.selectSingleNode(genePath+"/hgnc_symbol");
         if (entrezGeneIdNode!=null) {
             int entrezId = Integer.parseInt(entrezGeneIdNode.getText());
-            return geneBo.findGeneByEntrezGeneId(entrezId);
-//            if (gene==null) {
-//                try {
-//                    gene = GeneAnnotatorMyGeneInfo2.readByEntrezId(entrezId);
-//                } catch (IOException ex) {
-//                    ex.printStackTrace();
-//                }
-//            }
-        } else if (hugoSymbolNode!=null) {
-            String symbol = hugoSymbolNode.getText();
-            return geneBo.findGeneByHugoSymbol(symbol);
-//            if (gene==null) {
-//                try {
-//                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(symbol);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(VariantAnnotationXMLV2.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
+            gene = geneBo.findGeneByEntrezGeneId(entrezId);
         }
         
-        gene = new Gene();
-        gene.setEntrezGeneId(Integer.parseInt(entrezGeneIdNode.getText()));
-        gene.setHugoSymbol(hugoSymbolNode.getText());
+        if (gene==null && hugoSymbolNode!=null) {
+            String symbol = hugoSymbolNode.getText();
+            gene = geneBo.findGeneByHugoSymbol(symbol);
+        }
+        
+        if (gene==null) {
+            // a gene not in system
+            gene = new Gene();
+            gene.setEntrezGeneId(Integer.parseInt(entrezGeneIdNode.getText()));
+            gene.setHugoSymbol(hugoSymbolNode.getText());
+        }
         
         return gene;
     }
