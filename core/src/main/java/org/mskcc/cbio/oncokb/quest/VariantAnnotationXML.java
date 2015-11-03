@@ -156,6 +156,9 @@ public final class VariantAnnotationXML {
             List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt));
             List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt));
 
+            //Remove level_0
+            stdImpEbsSensitivity = filterLevelZeroEvidence(stdImpEbsSensitivity);
+
             //Remove level_R3
             stdImpEbsResisitance = filterResistanceEvidence(stdImpEbsResisitance);
 
@@ -247,6 +250,19 @@ public final class VariantAnnotationXML {
         }
 
         return sb.toString();
+    }
+
+    private static List<Evidence> filterLevelZeroEvidence(List<Evidence> sensitivityEvidences){
+        if(sensitivityEvidences != null) {
+            Iterator<Evidence> i = sensitivityEvidences.iterator();
+            while (i.hasNext()) {
+                Evidence sensitivityEvidence = i.next(); // must be called before you can call i.remove()
+                if (sensitivityEvidence.getLevelOfEvidence() != null && sensitivityEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_0)) {
+                    i.remove();
+                }
+            }
+        }
+        return sensitivityEvidences;
     }
 
     private static List<Evidence> filterResistanceEvidence(List<Evidence> resistanceEvidences){
@@ -456,7 +472,7 @@ public final class VariantAnnotationXML {
         }
 
         sb.append(indent).append("<description>");
-        if (evidence.getShortDescription()!=null) {
+        if (evidence.getShortDescription() != null) {
             sb.append(StringEscapeUtils.escapeXml(evidence.getShortDescription()).trim());
         }else if(evidence.getDescription()!=null){
             sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
