@@ -48,7 +48,7 @@ public final class VariantAnnotationXML {
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        List<Alteration> alterations = alterationBo.findRelevantAlterations(alt);
+        List<Alteration> alterations = alterationBo.findRelevantAlterations(alt, null);
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 

@@ -4,7 +4,7 @@ angular.module('oncokbApp').factory('TumorType', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('tumorType.json');
+        return $http.get('api/tumorType.json');
     }
 
     function getFromFile() {
@@ -57,7 +57,7 @@ angular.module('oncokbApp').factory('GeneStatus', ['$http',  function ($http) {
     function getFromServer(params) {
         console.log(params);
         return $http({
-            url: 'geneStatus.json',
+            url: 'api/geneStatus.json',
             method: 'GET',
             params: {geneId: params.geneId || ''}
         });
@@ -69,7 +69,7 @@ angular.module('oncokbApp').factory('GeneStatus', ['$http',  function ($http) {
             return $.param(data);
         };
         return $http.post(
-            'geneStatus.json',
+            'api/geneStatus.json',
             {geneId: params.geneId || '', status: params.status || 'Not ready'},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -98,7 +98,7 @@ angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('alteration.json');
+        return $http.get('api/alteration.json');
     }
 
     function getFromFile() {
@@ -115,7 +115,7 @@ angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http',  function ($
     'use strict';
 
     function getFromServer() {
-        return $http.get('oncoTreeTumorTypes.json');
+        return $http.get('api/oncoTreeTumorTypes.json');
     }
 
     function getFromFile() {
@@ -152,7 +152,7 @@ angular.module('oncokbApp')
     'use strict';
     function getAnnotation(params) {
         var _params = angular.copy(params),
-            _url = 'var_annotation?';
+            _url = 'api/var_annotation?';
 
         for(var _key in _params) {
             if(typeof _params[_key] !== 'undefined' && _params[_key] && _params[_key] !== '') {
@@ -165,7 +165,7 @@ angular.module('oncokbApp')
 
     function postAnnotation(params) {
         return $http({
-            url: 'var_annotation', 
+            url: 'api/var_annotation',
             method: 'POST',
             params: params
         });
@@ -190,7 +190,7 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
 
     function getDoc(params) {
         return $http.post(
-            'generateGoogleDoc', 
+            'api/generateGoogleDoc',
             {'reportParams':JSON.stringify(params)},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -200,7 +200,7 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
 
     function createFolder(params) {
         return $http.post(
-            'createGoogleFolder',
+            'api/createGoogleFolder',
             params,
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -221,7 +221,7 @@ angular.module('oncokbApp').factory('SendEmail', ['$http',  function ($http) {
 
     function init(params) {
         return $http.post(
-            'sendEmail', 
+            'api/sendEmail',
             params,
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -242,7 +242,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($htt
 
     function updateGene(geneString) {
         return $http.post(
-            'driveAnnotation',
+            'api/driveAnnotation',
             {'gene': geneString},
             {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -259,9 +259,9 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
 
     function getFromServer(type) {
         if(type === 'hotspot') {
-            return $http.get('utils?cmd=hotspot');
+            return $http.get('api/utils?cmd=hotspot');
         }else if(type === 'autoMutation') {
-            return $http.get('utils?cmd=autoMutation');
+            return $http.get('api/utils?cmd=autoMutation');
         }
         return null;
     }
