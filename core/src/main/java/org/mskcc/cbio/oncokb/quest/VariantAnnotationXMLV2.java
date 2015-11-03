@@ -105,7 +105,7 @@ public final class VariantAnnotationXMLV2 {
             sb.append("<date_generated>2015-01-09</date_generated>\n");
             sb.append("<oncokb_api_version>0.2</oncokb_api_version>\n");
             sb.append("<ensembl_version>79</ensembl_version>\n");
-            sb.append("<sample>");
+            sb.append("<sample>\n");
             sb.append("<sample_id>").append(sampleId).append("</sample_id>\n");
             sb.append("<diagnosis>").append(diagnosis).append("</diagnosis>\n");
             sb.append("<test>\n");
@@ -124,7 +124,7 @@ public final class VariantAnnotationXMLV2 {
             return sb.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return "<xml>Failed to upload file.</xml>";
+            return "<document>Failed to upload file.</document>";
         }
     }
     
