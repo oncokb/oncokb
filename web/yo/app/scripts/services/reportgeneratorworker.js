@@ -290,13 +290,11 @@ angular.module('oncokbApp')
         var genes, alterations, tumorTypes;
         function init(){
             var defer = $q.defer();
-            DatabaseConnector.getGeneAlterationTumorType(function(data){
+            DatabaseConnector.getGeneTumorType(function(data){
                 OncoKB.global.genes = angular.copy(data.genes);
-                OncoKB.global.alterations = angular.copy(data.alterations);
                 OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
                 genes = getUnique(data.genes, 'hugoSymbol');
-                alterations = getUnique(data.alterations, 'name');
                 tumorTypes = getUnique(data.tumorTypes, 'name');
                 defer.resolve();
             });

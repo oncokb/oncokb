@@ -1,6 +1,6 @@
 var $ = window.$;
 
-angular.module('oncokbApp').factory('TumorType', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('TumorType', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -17,7 +17,7 @@ angular.module('oncokbApp').factory('TumorType', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('Gene', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('Gene', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -34,7 +34,7 @@ angular.module('oncokbApp').factory('Gene', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('DataSummary', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('DataSummary', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -51,7 +51,7 @@ angular.module('oncokbApp').factory('DataSummary', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('GeneStatus', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('GeneStatus', ['$http', function ($http) {
     'use strict';
 
     function getFromServer(params) {
@@ -65,14 +65,14 @@ angular.module('oncokbApp').factory('GeneStatus', ['$http',  function ($http) {
 
     function setToServer(params) {
         console.log(params);
-        var transform = function(data){
+        var transform = function (data) {
             return $.param(data);
         };
         return $http.post(
             OncoKB.config.apiLink + 'geneStatus.json',
             {geneId: params.geneId || '', status: params.status || 'Not ready'},
             {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform
             });
     }
@@ -94,7 +94,7 @@ angular.module('oncokbApp').factory('GeneStatus', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('Alteration', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -111,7 +111,7 @@ angular.module('oncokbApp').factory('Alteration', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -128,7 +128,7 @@ angular.module('oncokbApp').factory('OncoTreeTumorTypes', ['$http',  function ($
     };
 }]);
 
-angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
@@ -148,52 +148,52 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http',  function ($htt
 angular.module('oncokbApp')
     .config(function ($httpProvider) {
         $httpProvider.interceptors.push('xmlHttpInterceptor');
-    }).factory(('SearchVariant'), ['$http', function($http) {
-    'use strict';
-    function getAnnotation(params) {
-        var _params = angular.copy(params),
-            _url = OncoKB.config.apiLink + 'var_annotation?';
+    }).factory(('SearchVariant'), ['$http', function ($http) {
+        'use strict';
+        function getAnnotation(params) {
+            var _params = angular.copy(params),
+                _url = OncoKB.config.apiLink + 'var_annotation?';
 
-        for(var _key in _params) {
-            if(typeof _params[_key] !== 'undefined' && _params[_key] && _params[_key] !== '') {
-                _url += _key + '=' + _params[_key] + '&';
+            for (var _key in _params) {
+                if (typeof _params[_key] !== 'undefined' && _params[_key] && _params[_key] !== '') {
+                    _url += _key + '=' + _params[_key] + '&';
+                }
             }
+            _url = _url.substring(0, _url.length - 1);
+            return $http.get(_url);
         }
-        _url = _url.substring(0, _url.length - 1);
-        return $http.get(_url);
-    }
 
-    function postAnnotation(params) {
-        return $http({
-            url: OncoKB.config.apiLink + 'var_annotation',
-            method: 'POST',
-            params: params
-        });
-    }
+        function postAnnotation(params) {
+            return $http({
+                url: OncoKB.config.apiLink + 'var_annotation',
+                method: 'POST',
+                params: params
+            });
+        }
 
-    function annotationFromFile() {
-        return $http.get('data/annotation.xml');
-    }
+        function annotationFromFile() {
+            return $http.get('data/annotation.xml');
+        }
 
-    return {
-        getAnnotation: getAnnotation,
-        postAnnotation: postAnnotation,
-        annotationFromFile: annotationFromFile
-    };
-}]);
+        return {
+            getAnnotation: getAnnotation,
+            postAnnotation: postAnnotation,
+            annotationFromFile: annotationFromFile
+        };
+    }]);
 
-angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('GenerateDoc', ['$http', function ($http) {
     'use strict';
-    var transform = function(data){
+    var transform = function (data) {
         return $.param(data);
     };
 
     function getDoc(params) {
         return $http.post(
             OncoKB.config.apiLink + 'generateGoogleDoc',
-            {'reportParams':JSON.stringify(params)},
+            {'reportParams': JSON.stringify(params)},
             {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform
             });
     }
@@ -203,19 +203,20 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http',  function ($http) {
             OncoKB.config.apiLink + 'createGoogleFolder',
             params,
             {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform
             });
     }
+
     return {
         getDoc: getDoc,
         createFolder: createFolder
     };
 }]);
 
-angular.module('oncokbApp').factory('SendEmail', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('SendEmail', ['$http', function ($http) {
     'use strict';
-    var transform = function(data){
+    var transform = function (data) {
         return $.param(data);
     };
 
@@ -224,7 +225,7 @@ angular.module('oncokbApp').factory('SendEmail', ['$http',  function ($http) {
             OncoKB.config.apiLink + 'sendEmail',
             params,
             {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform
             });
     }
@@ -234,9 +235,9 @@ angular.module('oncokbApp').factory('SendEmail', ['$http',  function ($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('DriveAnnotation', ['$http', function ($http) {
     'use strict';
-    var transform = function(data){
+    var transform = function (data) {
         return $.param(data);
     };
 
@@ -245,36 +246,37 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http',  function ($htt
             OncoKB.config.apiLink + 'driveAnnotation',
             {'gene': geneString},
             {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform
             });
     }
+
     return {
         updateGene: updateGene
     };
 }]);
 
-angular.module('oncokbApp').factory('InternalAccess', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('InternalAccess', ['$http', function ($http) {
     'use strict';
-    return $http.get('api/access');
+    return $http.get(OncoKB.config.apiLink + 'access');
 }]);
 
-angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
+angular.module('oncokbApp').factory('ServerUtils', ['$http', function ($http) {
     'use strict';
 
     function getFromServer(type) {
-        if(type === 'hotspot') {
+        if (type === 'hotspot') {
             return $http.get(OncoKB.config.apiLink + 'utils?cmd=hotspot');
-        }else if(type === 'autoMutation') {
+        } else if (type === 'autoMutation') {
             return $http.get(OncoKB.config.apiLink + 'utils?cmd=autoMutation');
         }
         return null;
     }
 
     function getFromFile(type) {
-        if(type === 'hotspot') {
+        if (type === 'hotspot') {
             return $http.get('data/hotspot.json');
-        }else if(type === 'autoMutation') {
+        } else if (type === 'autoMutation') {
             return $http.get('data/autoMutation.json');
         }
         return null;
@@ -282,12 +284,20 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http',  function ($http) {
 
     return {
         hotspot: {
-            getFromServer: function(){ return getFromServer('hotspot');},
-            getFromFile: function(){ return getFromFile('hotspot');}
+            getFromServer: function () {
+                return getFromServer('hotspot');
+            },
+            getFromFile: function () {
+                return getFromFile('hotspot');
+            }
         },
         autoMutation: {
-            getFromServer: function(){ return getFromServer('autoMutation');},
-            getFromFile: function(){ return getFromFile('autoMutation');}
+            getFromServer: function () {
+                return getFromServer('autoMutation');
+            },
+            getFromFile: function () {
+                return getFromFile('autoMutation');
+            }
         }
     };
 }]);

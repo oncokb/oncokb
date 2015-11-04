@@ -203,17 +203,14 @@ angular.module('oncokbApp')
 
                 if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
                     $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
-                    // $scope.alterations = getUnique(angular.copy(OncoKB.global.alterations), 'name');
                     $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
                     $scope.loadingPage = false;
                 }else {
-                    DatabaseConnector.getGeneAlterationTumorType(function(data){
+                    DatabaseConnector.getGeneTumorType(function(data){
                         OncoKB.global.genes = angular.copy(data.genes);
-                        OncoKB.global.alterations = angular.copy(data.alterations);
                         OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
                         $scope.genes = getUnique(data.genes, 'hugoSymbol');
-                        // $scope.alterations = getUnique(data.alterations, 'name');
                         $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
                         $scope.loadingPage = false;
                         checkUrl();

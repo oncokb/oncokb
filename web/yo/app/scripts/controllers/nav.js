@@ -69,16 +69,14 @@ angular.module('oncokbApp')
     }
     function testInternal(callback) {
         DatabaseConnector.testAccess(function (result) {
-            if(!$rootScope.internal) {
-                $rootScope.internal = true;
-            }
+            console.log(result);
+            $rootScope.internal = true;
             if(angular.isFunction(callback)) {
                 callback();
             }
         }, function (error){
-            if($rootScope.internal) {
-                $rootScope.internal = false;
-            }
+            console.log(error);
+            $rootScope.internal = false;
             if(angular.isFunction(callback)) {
                 callback();
             }

@@ -444,25 +444,23 @@ angular.module('oncokbApp')
 
             function testAccess(successCallback, failCallback) {
                 if (dataFromFile) {
-                    //InternalAccess
-                    //    .success(function (data) {
-                    //        if (angular.isFunction(successCallback)) {
-                    failCallback();
-                        //    }
-                        //})
-                        //.error(function (error) {
-                        //    if (angular.isFunction(failCallback)) {
-                        //        failCallback(error);
-                        //    }
-                        //});
+                    InternalAccess
+                        .then(function (data) {
+                            if (angular.isFunction(successCallback)) {
+                                failCallback();
+                            }
+                        }, function (error) {
+                            if (angular.isFunction(failCallback)) {
+                                failCallback(error);
+                            }
+                        });
                 } else {
                     InternalAccess
-                        .success(function (data) {
+                        .then(function (data) {
                             if (angular.isFunction(successCallback)) {
                                 successCallback(data);
                             }
-                        })
-                        .error(function (error) {
+                        }, function (error) {
                             if (angular.isFunction(failCallback)) {
                                 failCallback(error);
                             }
@@ -483,6 +481,21 @@ angular.module('oncokbApp')
                     }, timestamp);
                     getAllAlteration(function (d) {
                         data[timestamp].alterations = d;
+                    }, timestamp);
+                    getAllTumorType(function (d) {
+                        data[timestamp].tumorTypes = d;
+                    }, timestamp);
+
+                    timeout(callback, timestamp);
+                },
+                'getGeneTumorType': function (callback) {
+                    var timestamp = new Date().getTime().toString();
+
+                    numOfLocks[timestamp] = 2;
+                    data[timestamp] = {};
+
+                    getAllGene(function (d) {
+                        data[timestamp].genes = d;
                     }, timestamp);
                     getAllTumorType(function (d) {
                         data[timestamp].tumorTypes = d;
