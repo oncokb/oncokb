@@ -443,29 +443,17 @@ angular.module('oncokbApp')
             }
 
             function testAccess(successCallback, failCallback) {
-                if (dataFromFile) {
-                    InternalAccess
-                        .then(function (data) {
-                            if (angular.isFunction(successCallback)) {
-                                failCallback();
-                            }
-                        }, function (error) {
-                            if (angular.isFunction(failCallback)) {
-                                failCallback(error);
-                            }
-                        });
-                } else {
-                    InternalAccess
-                        .then(function (data) {
-                            if (angular.isFunction(successCallback)) {
-                                successCallback(data);
-                            }
-                        }, function (error) {
-                            if (angular.isFunction(failCallback)) {
-                                failCallback(error);
-                            }
-                        });
-                }
+                InternalAccess
+                    .success(function (data, status, headers, config) {
+                        if (angular.isFunction(successCallback)) {
+                            successCallback(data, status, headers, config);
+                        }
+                    })
+                    .error(function (data, status, headers, config) {
+                        if (angular.isFunction(failCallback)) {
+                            failCallback(data, status, headers, config);
+                        }
+                    });
             }
 
             // Public API here

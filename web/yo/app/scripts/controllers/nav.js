@@ -68,14 +68,14 @@ angular.module('oncokbApp')
         $scope.tabs = filterTabs;
     }
     function testInternal(callback) {
-        DatabaseConnector.testAccess(function (result) {
-            console.log(result);
+        DatabaseConnector.testAccess(function (data, status, headers, config) {
+            console.log(data, status, headers, config);
             $rootScope.internal = true;
             if(angular.isFunction(callback)) {
                 callback();
             }
-        }, function (error){
-            console.log(error);
+        }, function (data, status, headers, config){
+            console.log(data, status, headers, config);
             $rootScope.internal = false;
             if(angular.isFunction(callback)) {
                 callback();

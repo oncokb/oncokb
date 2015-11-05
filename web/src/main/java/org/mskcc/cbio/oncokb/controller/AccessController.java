@@ -6,8 +6,11 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import java.util.Date;
+
+import org.mskcc.cbio.oncokb.model.StringResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -16,10 +19,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class AccessController {
-    @RequestMapping(value="/api/access")
-    public @ResponseBody String getAlteration() {
-        
+    @RequestMapping(value="/api/access", method = RequestMethod.GET, produces = "application/json")
+    public @ResponseBody
+    StringResponse getAlteration() {
         Date date = new Date();
-        return date.toString();
+        StringResponse response = new StringResponse(date.toString());
+
+        return response;
     }
 }
