@@ -142,19 +142,26 @@ public final class DataAnalysis {
         System.out.println("\tAlteration:" + alt.getName());
         
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(EvidenceType.MUTATION_EFFECT));
+        List<Evidence> mutationEffectEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(EvidenceType.MUTATION_EFFECT));
+        List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alt), Collections.singleton(EvidenceType.ONCOGENIC));
         Map<Integer, String> mutationEffect = new HashMap();
-        for(Evidence evidence : evidences){
+        Map<Integer, String> oncogenic = new HashMap();
+        for(Evidence evidence : mutationEffectEvidences){
             mutationEffect.put(evidence.getEvidenceId(), evidence.getKnownEffect());
         }
-        if(evidences.size() > 1){
+        if(mutationEffectEvidences.size() > 1){
             System.out.println("******* Warning**** multi mutation effects");
         }
-        
+        for(Evidence evidence : oncogenicEvidences){
+            oncogenic.put(evidence.getEvidenceId(), evidence.getKnownEffect());
+        }
+        if(oncogenicEvidences.size() > 1){
+            System.out.println("******* Warning**** multi oncogenic");
+        }
         Map<String, Map> ttsMap = new HashMap<>();
         Map<String, Object> attrs = new HashMap<>();
         attrs.put("mutationEffect", mutationEffect);
-        attrs.put("oncoGenic", alt.getOncogenic().toString());
+        attrs.put("oncoGenic", oncogenic);
         attrs.put("mutationType", alt.getAlterationType().name());
         ttsMap.put("attrs", attrs);
         

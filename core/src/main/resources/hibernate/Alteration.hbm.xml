@@ -52,18 +52,6 @@
         <property name="variantResidues" type="string">
           <column name="variant_residues"/>
         </property>
-
-        <property name="oncogenic" type="int">
-            <column name="oncogenic" not-null="true" default="-1"/>
-        </property>
-
-        <property name="hotspot" type="int">
-            <column name="hotspot" not-null="true" default="0"/>
-        </property>
-
-        <property name="hotspotAddon" type="string">
-            <column name="hotspotAddon"/>
-        </property>
     </class>
     
     <query name="findAlterationsByGene">

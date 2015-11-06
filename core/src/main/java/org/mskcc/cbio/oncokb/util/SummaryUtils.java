@@ -37,8 +37,9 @@ public class SummaryUtils {
         } else {
             int oncogenic = -1;
             for (Alteration a : alterations) {
-                if (a.getOncogenic() > 0) {
-                    oncogenic = a.getOncogenic();
+                List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
+                if (oncogenicEvidences.size() > 0 && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) > 0) {
+                    oncogenic = Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect());
                     break;
                 }
             }

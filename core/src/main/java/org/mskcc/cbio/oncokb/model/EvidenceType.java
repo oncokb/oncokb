@@ -10,6 +10,7 @@ public enum EvidenceType {
     TUMOR_TYPE_SUMMARY("Tumor type summary"),
     GENE_TUMOR_TYPE_SUMMARY("Gene tumor type summary"),
     GENE_BACKGROUND("Gene background"),
+    ONCOGENIC ("Oncogenic"),
     MUTATION_EFFECT ("Mutation effect"),
 //    DRUG_SENSITIVITY("Drug sensivity"),
     PREVALENCE ("Prevalence"),

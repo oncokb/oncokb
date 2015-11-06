@@ -6,13 +6,7 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
 import java.lang.Exception;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -158,6 +152,7 @@ public class DriveAnnotationParser {
             int oncogenic = -1;
             int hotspot = 0;
             String hotspotAddon = null;
+            String oncogenicSummaryStr = null;
 
             if(mutationObj.has("oncogenic_eStatus") && mutationObj.getJSONObject("oncogenic_eStatus").has("hotspot")){
                 String hotspotStr = mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspot").toLowerCase();
@@ -184,6 +179,9 @@ public class DriveAnnotationParser {
                 }
 //                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
             }
+            if(mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
+                oncogenicSummaryStr = mutationObj.getString("shortSummary");
+            }
 
             Map<String,String> mutations = parseMutationString(mutationStr);
             for (Map.Entry<String,String> mutation : mutations.entrySet()) {
@@ -196,26 +194,13 @@ public class DriveAnnotationParser {
                     alteration.setAlterationType(type);
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
-                    alteration.setOncogenic(oncogenic);
-                    alteration.setHotspot(hotspot);
-                    if(hotspotAddon != null){
-                        alteration.setHotspotAddon(hotspotAddon);
-                    }
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
                 } else {
-                    if (oncogenic > 0) {
-                        alteration.setOncogenic(oncogenic);
-                    }
-                    if (hotspot > 0) {
-                        alteration.setHotspot(hotspot);
-                    }
-                    if (hotspotAddon != null) {
-                        alteration.setHotspotAddon(hotspotAddon);
-                    }
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
+                setOncogenic(gene, alteration, oncogenic, oncogenicSummaryStr);
             }
 
             // mutation summary
@@ -297,6 +282,27 @@ public class DriveAnnotationParser {
             }
         }else {
             System.out.println("##  Mutation does not have name skip...");
+        }
+    }
+
+    private static void setOncogenic(Gene gene, Alteration alteration, int oncogenic, String oncogenicSummary) {
+        if(alteration != null && gene != null) {
+            List<Evidence> evidences = new ArrayList<>();
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
+            if(evidences.size() == 0) {
+                Evidence evidence = new Evidence();
+                evidence.setGene(gene);
+                evidence.setAlterations(Collections.singleton(alteration));
+                evidence.setEvidenceType(EvidenceType.ONCOGENIC);
+                evidence.setKnownEffect(Integer.toString(oncogenic));
+                evidence.setDescription(oncogenicSummary);
+                evidenceBo.save(evidence);
+            }else if (oncogenic > 0) {
+                evidences.get(0).setKnownEffect(Integer.toString(oncogenic));
+                evidences.get(0).setDescription(oncogenicSummary);
+                evidenceBo.update(evidences.get(0));
+            }
         }
     }
 
