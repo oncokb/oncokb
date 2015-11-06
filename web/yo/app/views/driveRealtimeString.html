@@ -40,6 +40,7 @@
                   ng-model="content.stringO"
                   ng-value="checkbox"
                   ng-disabled="!fe"
+                  ng-click="uncheck($event)"
                   >
           <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
         </span>
@@ -52,6 +53,7 @@
                     ng-model="content.stringO"
                     ng-value="checkbox"
                     ng-change="sCheckboxChange()"
+                    ng-click="uncheck($event)"
                     ng-disabled="!fe"
                     >
             <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
