@@ -1355,10 +1355,20 @@ angular.module('oncokbApp')
                 target = !target;
             };
 
-            $scope.mutationEffectEmpty = function (mutation) {
-                if (mutation.oncogenic.text === '' && mutation.effect.value.text === '' && mutation.description.text === '') {
-                    return true;
-                } else {
+            $scope.checkEmpty = function (mutation, type) {
+                if(type === 'mutationEffect') {
+                    if (mutation.effect.value.text === '' && mutation.description.text === '') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }else if(type === 'oncogenicity') {
+                    if (mutation.oncogenic.text === '' && mutation.shortSummary.text === '') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }else {
                     return false;
                 }
             };

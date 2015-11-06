@@ -28,7 +28,7 @@ angular.module('oncokbApp')
             }else {
                 setParams();
             }
-            $rootScope.$apply(function() {
+            //$rootScope.$apply(function() {
                 var url = access.getURL();
                 console.log('Current URL:', url);
                 if(url) {
@@ -47,7 +47,7 @@ angular.module('oncokbApp')
                         $location.path('/');
                     }
                 }
-            });
+            //});
         });
     }
 

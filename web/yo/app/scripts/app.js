@@ -91,11 +91,12 @@ OncoKB.curateInfo = {
             type: 'string'
         },
         'summary': {
-            type: 'string'
+            type: 'string',
+            display: 'Description of summary'
         },
         'shortSummary': {
             type: 'string',
-            display: 'Description of summary'
+            display: 'Description of oncogenicity'
         },
         'oncogenic': {
             type: 'string',
@@ -576,18 +577,15 @@ angular.module('oncokbApp').run(
             });
 
             $rootScope.$on('$routeChangeStart', function (event, next) {
-                if ( next.internalUse && !$rootScope.internal) {
-                    $location.path('/');
-                }
-                if (!Access.authorize(next.access)) {
+                if (!Access.authorize(next.access) || (next.internalUse && !$rootScope.internal)) {
                     if(!Access.isLoggedIn()) {
                         Access.setURL($location.path());
                     }
                     $location.path('/');
                 }
                 if(Access.isLoggedIn() && Access.getURL()){
-                    Access.setURL('');
                     $location.path(Access.getURL());
+                    Access.setURL('');
                 }else {
                     if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl ==='views/welcome.html') {
                         $location.path('/genes');
