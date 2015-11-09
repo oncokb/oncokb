@@ -23,21 +23,24 @@ import org.mskcc.cbio.oncokb.util.NcbiEUtils;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
  * @author jgao
  */
 @Controller
 public class DriveAnnotationParser {
     private static final String DO_NOT_IMPORT = "DO NOT IMPORT";
 
-    @RequestMapping(value="/api/driveAnnotation", method = POST)
-    public @ResponseBody void getEvidence(
-            @RequestParam(value="gene", required=true) String gene) throws IOException {
+    @RequestMapping(value = "/api/driveAnnotation", method = POST)
+    public
+    @ResponseBody
+    void getEvidence(
+            @RequestParam(value = "gene", required = true) String gene) throws IOException {
 
         JSONObject jsonObj = new JSONObject(gene);
         parseGene(jsonObj);
@@ -46,48 +49,54 @@ public class DriveAnnotationParser {
 
     private static void parseGene(JSONObject geneInfo) throws IOException {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-        if(geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
+        if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
             String hugo = geneInfo.getString("name").trim();
-            String status = geneInfo.has("status")? geneInfo.getString("status").trim(): null;
+            String status = geneInfo.has("status") ? geneInfo.getString("status").trim() : null;
             Gene gene = geneBo.findGeneByHugoSymbol(hugo);
 
 
             if (gene == null) {
-                System.out.println("Could not find gene "+hugo+". Loading from MyGene.Info...");
+                System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
                 gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
                 if (gene == null) {
 //                    throw new RuntimeException("Could not find gene "+hugo+" either.");
-                    System.out.println("!!!!!!!!!Could not find gene "+hugo+" either.");
-                }else{
-                    if(status != null){
+                    System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+                } else {
+                    if (status != null) {
                         gene.setStatus(status);
                     }
                     geneBo.save(gene);
                 }
-            }else {
-                if(status != null){
+            } else {
+                if (status != null) {
                     gene.setStatus(status);
                     geneBo.saveOrUpdate(gene);
                 }
             }
 
-            if(gene != null) {
+            if (gene != null) {
                 EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-                List<Evidence> evidences =  evidenceBo.findEvidencesByGene(Collections.singleton(gene));
+                AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+                List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene));
+                List<Alteration> alterations = alterationBo.findAlterationsByGene(Collections.singleton(gene));
 
-                for(Evidence evidence : evidences){
+                for (Evidence evidence : evidences) {
                     evidenceBo.delete(evidence);
                 }
 
+                for (Alteration alteration : alterations) {
+                    alterationBo.delete(alteration);
+                }
+
                 // summary
-                parseSummary(gene, geneInfo.has("summary")? geneInfo.getString("summary").trim() : null);
+                parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null);
 
                 // background
-                parseGeneBackground(gene, geneInfo.has("background")? geneInfo.getString("background").trim() : null);
+                parseGeneBackground(gene, geneInfo.has("background") ? geneInfo.getString("background").trim() : null);
 
                 // mutations
-                parseMutations(gene, geneInfo.has("mutations")? geneInfo.getJSONArray("mutations") : null);
-            }else {
+                parseMutations(gene, geneInfo.has("mutations") ? geneInfo.getJSONArray("mutations") : null);
+            } else {
                 System.out.print("No gene name available");
             }
         }
@@ -97,7 +106,7 @@ public class DriveAnnotationParser {
         System.out.println("##  Summary");
 
         // gene summary
-        if(geneSummary != null && !geneSummary.isEmpty()) {
+        if (geneSummary != null && !geneSummary.isEmpty()) {
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(EvidenceType.GENE_SUMMARY);
             evidence.setGene(gene);
@@ -105,7 +114,7 @@ public class DriveAnnotationParser {
             setDocuments(geneSummary, evidence);
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidenceBo.save(evidence);
-        }else {
+        } else {
             System.out.println("    No info...");
         }
     }
@@ -113,7 +122,7 @@ public class DriveAnnotationParser {
     private static void parseGeneBackground(Gene gene, String bg) {
         System.out.println("##  Background");
 
-        if(bg != null && !bg.isEmpty()){
+        if (bg != null && !bg.isEmpty()) {
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(EvidenceType.GENE_BACKGROUND);
             evidence.setGene(gene);
@@ -122,73 +131,66 @@ public class DriveAnnotationParser {
 
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidenceBo.save(evidence);
-        }else {
+        } else {
             System.out.println("    No info...");
         }
     }
 
     private static void parseMutations(Gene gene, JSONArray mutations) {
         System.out.println("##  Mutations");
-        if(mutations != null) {
-            for(int i = 0 ; i < mutations.length(); i++){
+        if (mutations != null) {
+            for (int i = 0; i < mutations.length(); i++) {
                 parseMutation(gene, mutations.getJSONObject(i));
             }
-        }else {
+        } else {
             System.out.println("    no muation available.");
         }
     }
 
     private static void parseMutation(Gene gene, JSONObject mutationObj) {
-        String mutationStr = mutationObj.has("name")?mutationObj.getString("name").trim():null;
+        String mutationStr = mutationObj.has("name") ? mutationObj.getString("name").trim() : null;
 
-        if(mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
-            System.out.println("##  Mutation: "+mutationStr);
+        if (mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
+            System.out.println("##  Mutation: " + mutationStr);
 
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
             AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
 
             Set<Alteration> alterations = new HashSet<Alteration>();
 
-            int oncogenic = -1;
-            int hotspot = 0;
-            String hotspotAddon = null;
+            String oncogenic = null;
             String oncogenicSummaryStr = null;
 
-            if(mutationObj.has("oncogenic_eStatus") && mutationObj.getJSONObject("oncogenic_eStatus").has("hotspot")){
-                String hotspotStr = mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspot").toLowerCase();
-                if(hotspotStr.equals("true")){
-                    hotspot = 1;
-                }
-                if(mutationObj.getJSONObject("oncogenic_eStatus").has("hotspotAddon") && mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspotAddon") != null) {
-                    hotspotAddon = mutationObj.getJSONObject("oncogenic_eStatus").getString("hotspotAddon");
-                }
-            }
-
-            if(mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
+            if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
                 String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
 
-                switch (oncogenicStr){
-                    case "yes": oncogenic = 1;
+                switch (oncogenicStr) {
+                    case "yes":
+                        oncogenic = "1";
                         break;
-                    case "likely": oncogenic = 2;
+                    case "likely":
+                        oncogenic = "2";
                         break;
-                    case "no": oncogenic = 0;
+                    case "no":
+                        oncogenic = "0";
                         break;
-                    default: oncogenic = -1;
+                    case "unknown":
+                        oncogenic = "-1";
+                        break;
+                    default:
                         break;
                 }
-//                oncogenic = mutationObj.getString("oncogenic").equalsIgnoreCase("YES");
             }
-            if(mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
+            if (mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
                 oncogenicSummaryStr = mutationObj.getString("shortSummary");
             }
 
-            Map<String,String> mutations = parseMutationString(mutationStr);
-            for (Map.Entry<String,String> mutation : mutations.entrySet()) {
+            Map<String, String> mutations = parseMutationString(mutationStr);
+            for (Map.Entry<String, String> mutation : mutations.entrySet()) {
                 String proteinChange = mutation.getKey();
                 String displayName = mutation.getValue();
                 Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
-                if (alteration==null) {
+                if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
                     alteration.setAlterationType(type);
@@ -206,7 +208,7 @@ public class DriveAnnotationParser {
             // mutation summary
             System.out.println("##    Summary");
 
-            if(mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
+            if (mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
                 Evidence evidence = new Evidence();
                 evidence.setEvidenceType(EvidenceType.MUTATION_SUMMARY);
                 evidence.setAlterations(alterations);
@@ -215,50 +217,50 @@ public class DriveAnnotationParser {
                 setDocuments(mutationObj.getString("summary"), evidence);
                 EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
                 evidenceBo.save(evidence);
-            }else {
+            } else {
                 System.out.println("    No info...");
             }
 
             // mutation effect
-            JSONObject effectObject = mutationObj.has("effect")?mutationObj.getJSONObject("effect"):null;
-            if(effectObject != null) {
-                String effect = effectObject.has("value")?effectObject.getString("value"):null;
+            JSONObject effectObject = mutationObj.has("effect") ? mutationObj.getJSONObject("effect") : null;
+            if (effectObject != null) {
+                String effect = effectObject.has("value") ? effectObject.getString("value") : null;
 
-                if(effect != null && !effect.isEmpty()) {
-                    String effectAddon = effectObject.has("addOn")? effectObject.getString("addOn"):null;
-                    if(effect.equalsIgnoreCase("other")){
-                        if(effectAddon != null && !effectAddon.isEmpty()) {
+                if (effect != null && !effect.isEmpty()) {
+                    String effectAddon = effectObject.has("addOn") ? effectObject.getString("addOn") : null;
+                    if (effect.equalsIgnoreCase("other")) {
+                        if (effectAddon != null && !effectAddon.isEmpty()) {
                             effect = effectAddon;
-                        }else {
+                        } else {
                             effect = "Other";
                         }
-                    }else {
-                        if(effectAddon != null && !effectAddon.isEmpty()) {
-                            if(StringUtils.containsIgnoreCase(effectAddon, effect)){
+                    } else {
+                        if (effectAddon != null && !effectAddon.isEmpty()) {
+                            if (StringUtils.containsIgnoreCase(effectAddon, effect)) {
                                 effect = effectAddon;
-                            }else{
+                            } else {
                                 effect = effect + " " + effectAddon;
                             }
                         }
                     }
-                }else {
+                } else {
                     effect = null;
                 }
 
                 // save
-                if (effect!=null) {
+                if (effect != null) {
                     Evidence evidence = new Evidence();
                     evidence.setEvidenceType(EvidenceType.MUTATION_EFFECT);
                     evidence.setAlterations(alterations);
                     evidence.setGene(gene);
 
-                    if((mutationObj.has("description") && !mutationObj.getString("description").trim().isEmpty())) {
+                    if ((mutationObj.has("description") && !mutationObj.getString("description").trim().isEmpty())) {
                         String desc = mutationObj.getString("description").trim();
                         evidence.setDescription(desc);
                         setDocuments(desc, evidence);
                     }
 
-                    if((mutationObj.has("short") && !mutationObj.getString("short").trim().isEmpty())) {
+                    if ((mutationObj.has("short") && !mutationObj.getString("short").trim().isEmpty())) {
                         String desc = mutationObj.getString("short").trim();
                         evidence.setShortDescription(desc);
                         setDocuments(desc, evidence);
@@ -272,34 +274,34 @@ public class DriveAnnotationParser {
             }
 
             // cancers
-            if(mutationObj.has("tumors")) {
+            if (mutationObj.has("tumors")) {
                 JSONArray cancers = mutationObj.getJSONArray("tumors");
-                for(int i = 0 ; i < cancers.length(); i++){
+                for (int i = 0; i < cancers.length(); i++) {
                     parseCancer(gene, alterations, cancers.getJSONObject(i));
                 }
-            }else {
+            } else {
                 System.out.println("    No tumor available.");
             }
-        }else {
+        } else {
             System.out.println("##  Mutation does not have name skip...");
         }
     }
 
-    private static void setOncogenic(Gene gene, Alteration alteration, int oncogenic, String oncogenicSummary) {
-        if(alteration != null && gene != null) {
+    private static void setOncogenic(Gene gene, Alteration alteration, String oncogenic, String oncogenicSummary) {
+        if (alteration != null && gene != null && (oncogenic != null || oncogenicSummary != null)) {
             List<Evidence> evidences = new ArrayList<>();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
-            if(evidences.size() == 0) {
+            if (evidences.size() == 0) {
                 Evidence evidence = new Evidence();
                 evidence.setGene(gene);
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                evidence.setKnownEffect(Integer.toString(oncogenic));
+                evidence.setKnownEffect(oncogenic);
                 evidence.setDescription(oncogenicSummary);
                 evidenceBo.save(evidence);
-            }else if (oncogenic > 0) {
-                evidences.get(0).setKnownEffect(Integer.toString(oncogenic));
+            } else if (oncogenic.equals("1") || oncogenic.equals("2")) {
+                evidences.get(0).setKnownEffect(oncogenic);
                 evidences.get(0).setDescription(oncogenicSummary);
                 evidenceBo.update(evidences.get(0));
             }
@@ -321,7 +323,7 @@ public class DriveAnnotationParser {
                 int l = part.indexOf("[");
                 int r = part.indexOf("]");
                 proteinChange = part.substring(0, l).trim();
-                displayName = part.substring(l+1, r).trim();
+                displayName = part.substring(l + 1, r).trim();
             } else {
                 proteinChange = part;
                 displayName = part;
@@ -331,7 +333,7 @@ public class DriveAnnotationParser {
             if (m.find()) {
                 String ref = m.group(1);
                 for (String var : m.group(2).split("/")) {
-                    ret.put(ref+var, ref+var);
+                    ret.put(ref + var, ref + var);
                 }
             } else {
                 ret.put(proteinChange, displayName);
@@ -343,14 +345,14 @@ public class DriveAnnotationParser {
     private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj) {
         String cancer = "";
 
-        if(cancerObj.has("name")) {
+        if (cancerObj.has("name")) {
             cancer = cancerObj.getString("name").trim();
-        }else {
+        } else {
             return;
         }
 
         if (cancer.isEmpty() || cancer.endsWith(DO_NOT_IMPORT)) {
-            System.out.println("##    Cancer type: " + cancer+ " -- skip");
+            System.out.println("##    Cancer type: " + cancer + " -- skip");
             return;
         }
 
@@ -360,11 +362,11 @@ public class DriveAnnotationParser {
         TumorType tumorType = tumorTypeBo.findTumorTypeByName(cancer);
 
         //Check tumor type ID
-        if(tumorType == null){
+        if (tumorType == null) {
             tumorType = tumorTypeBo.findTumorTypeById(cancer);
         }
 
-        if (tumorType==null) {
+        if (tumorType == null) {
             tumorType = new TumorType();
             tumorType.setTumorTypeId(cancer);
             tumorType.setName(cancer);
@@ -377,7 +379,7 @@ public class DriveAnnotationParser {
         // cancer type summary
         System.out.println("##      Summary");
 
-        if(cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
+        if (cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(EvidenceType.TUMOR_TYPE_SUMMARY);
             evidence.setGene(gene);
@@ -386,7 +388,7 @@ public class DriveAnnotationParser {
             evidence.setTumorType(tumorType);
             setDocuments(cancerObj.getString("summary"), evidence);
             evidenceBo.save(evidence);
-        }else {
+        } else {
             System.out.println("    No info...");
         }
 
@@ -440,30 +442,30 @@ public class DriveAnnotationParser {
                 evidenceBo.save(evidence);
             }
         } else {
-            System.out.println("##      No Proganostic implications "+alterations.toString());
+            System.out.println("##      No Proganostic implications " + alterations.toString());
         }
 
         JSONArray implications = cancerObj.getJSONArray("TI");
 
-        for(int i = 0; i < implications.length(); i++) {
+        for (int i = 0; i < implications.length(); i++) {
             JSONObject implication = implications.getJSONObject(i);
-            if((implication.has("description") && !implication.getString("description").trim().isEmpty()) || (implication.has("treatments") && implication.getJSONArray("treatments").length() > 0)) {
+            if ((implication.has("description") && !implication.getString("description").trim().isEmpty()) || (implication.has("treatments") && implication.getJSONArray("treatments").length() > 0)) {
                 EvidenceType evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
                 String type = "";
-                if(implication.has("status") && implication.has("type")) {
-                    if(implication.getString("status").equals("1")) {
-                        if(implication.getString("type").equals("1")) {
+                if (implication.has("status") && implication.has("type")) {
+                    if (implication.getString("status").equals("1")) {
+                        if (implication.getString("type").equals("1")) {
                             evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
                             type = "Sensitive";
-                        }else if(implication.getString("type").equals("0")) {
+                        } else if (implication.getString("type").equals("0")) {
                             evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
                             type = "Resistant";
                         }
-                    }else if(implication.getString("status").equals("0")) {
-                        if(implication.getString("type").equals("1")) {
+                    } else if (implication.getString("status").equals("0")) {
+                        if (implication.getString("type").equals("1")) {
                             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
                             type = "Sensitive";
-                        }else if(implication.getString("type").equals("0")) {
+                        } else if (implication.getString("type").equals("0")) {
                             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
                             type = "Resistant";
                         }
@@ -475,17 +477,17 @@ public class DriveAnnotationParser {
 
         // NCCN
         if (cancerObj.has("nccn") && cancerObj.getJSONObject("nccn").has("disease") && !cancerObj.getJSONObject("nccn").getString("disease").isEmpty()) {
-            System.out.println("##      NCCN for "+alterations.toString());
+            System.out.println("##      NCCN for " + alterations.toString());
             parseNCCN(gene, alterations, tumorType, cancerObj.getJSONObject("nccn"));
         } else {
-            System.out.println("##      No NCCN for "+alterations.toString());
+            System.out.println("##      No NCCN for " + alterations.toString());
         }
 
         if (cancerObj.has("trials") && cancerObj.getJSONArray("trials").length() > 0) {
-            System.out.println("##      Clincial trials for "+alterations.toString());
+            System.out.println("##      Clincial trials for " + alterations.toString());
             parseClinicalTrials(gene, alterations, tumorType, cancerObj.getJSONArray("trials"));
         } else {
-            System.out.println("##      No Clincial trials for "+alterations.toString());
+            System.out.println("##      No Clincial trials for " + alterations.toString());
         }
     }
 
@@ -493,16 +495,16 @@ public class DriveAnnotationParser {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
         Set<String> nctIds = new HashSet<String>();
-        for(int i = 0; i < trialsArray.length(); i++) {
+        for (int i = 0; i < trialsArray.length(); i++) {
             String nctId = trialsArray.getString(i).trim();
-            if(!nctId.isEmpty()) {
+            if (!nctId.isEmpty()) {
                 nctIds.add(nctId);
             }
         }
 
         List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tumorType));
 
-        for (Evidence eve : evidences){
+        for (Evidence eve : evidences) {
             evidenceBo.delete(eve);
         }
 
@@ -521,12 +523,12 @@ public class DriveAnnotationParser {
     }
 
     private static void parseTherapeuticImplcations(Gene gene, Set<Alteration> alterations, TumorType tumorType, JSONObject implicationObj,
-            EvidenceType evidenceType, String knownEffectOfEvidence) {
-        System.out.println("##      "+evidenceType+" for "+alterations.toString()+" "+tumorType.getName());
+                                                    EvidenceType evidenceType, String knownEffectOfEvidence) {
+        System.out.println("##      " + evidenceType + " for " + alterations.toString() + " " + tumorType.getName());
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        if(implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()){
+        if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
             // general description
             String desc = implicationObj.getString("description");
             if (!desc.isEmpty()) {
@@ -554,7 +556,7 @@ public class DriveAnnotationParser {
 
         for (int i = 0; i < drugsArray.length(); i++) {
             JSONObject drugObj = drugsArray.getJSONObject(i);
-            if(!drugObj.has("name") || drugObj.getString("name").trim().isEmpty()){
+            if (!drugObj.has("name") || drugObj.getString("name").trim().isEmpty()) {
                 System.out.println("##        drug dpes not have name, skip... ");
                 continue;
             }
@@ -585,7 +587,7 @@ public class DriveAnnotationParser {
                 for (String drugName : drugNames) {
                     drugName = drugName.trim();
                     Drug drug = drugBo.guessUnambiguousDrug(drugName);
-                    if (drug==null) {
+                    if (drug == null) {
                         drug = new Drug(drugName);
                         drugBo.save(drug);
                     }
@@ -603,7 +605,7 @@ public class DriveAnnotationParser {
             evidence.setTreatments(treatments);
 
             // highest level of evidence
-            if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()){
+            if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
                 System.err.println("Error: no level of evidence");
                 // TODO:
                 //throw new RuntimeException("no level of evidence");
@@ -612,7 +614,7 @@ public class DriveAnnotationParser {
                 if (level.equals("2")) {
 
                     if (evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE
-                        || evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY) {
+                            || evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY) {
                         level = "2a";
                     } else {
                         level = "2b";
@@ -620,8 +622,8 @@ public class DriveAnnotationParser {
                 }
 
                 LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level);
-                if (levelOfEvidence==null) {
-                    System.err.println("Errow: wrong level of evidence: "+level);
+                if (levelOfEvidence == null) {
+                    System.err.println("Errow: wrong level of evidence: " + level);
                     // TODO:
                     //throw new RuntimeException("wrong level of evidence: "+level);
                 }
@@ -706,7 +708,7 @@ public class DriveAnnotationParser {
     }
 
     private static void setDocuments(String str, Evidence evidence) {
-        if (str==null) return;
+        if (str == null) return;
         Set<Article> docs = new HashSet<Article>();
         Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
@@ -733,7 +735,7 @@ public class DriveAnnotationParser {
                 }
 
                 Article doc = articleBo.findArticleByPmid(pmid);
-                if (doc==null) {
+                if (doc == null) {
                     doc = NcbiEUtils.readPubmedArticle(pmid);
                     articleBo.save(doc);
                 }
