@@ -624,43 +624,30 @@ angular.module('oncokbApp')
 
                                 model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function (mutation) {
-                                    if (!mutation.oncogenic_eStatus.has('obsolete')) {
-                                        mutation.oncogenic_eStatus.set('obsolete', 'false');
+                                    if (!mutation.shortSummary_eStatus.has('obsolete')) {
+                                        mutation.shortSummary_eStatus.set('obsolete', 'false');
                                     }
-                                    if (!mutation.oncogenic_eStatus.has('hotspot')) {
-                                        mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
+                                    if (!mutation.shortSummary_eStatus.has('vetted')) {
+                                        mutation.shortSummary_eStatus.set('vetted', 'uv');
                                     }
-                                    if (!mutation.oncogenic_eStatus.has('curated')) {
-                                        mutation.oncogenic_eStatus.set('curated', true);
-                                    }
-                                    //console.log('Add mutation estatus');
-                                    mutation.tumors.asArray().forEach(function (tumor) {
-                                        if (!tumor.prevalence_eStatus.has('obsolete')) {
-                                            tumor.prevalence_eStatus.set('obsolete', 'false');
-                                        }
-                                        if (!tumor.prevalence_eStatus.has('hotspot')) {
-                                            tumor.prevalence_eStatus.set('hotspot', 'FALSE');
-                                        }
-                                        if (!tumor.progImp_eStatus.has('obsolete')) {
-                                            tumor.progImp_eStatus.set('obsolete', 'false');
-                                        }
-                                        if (!tumor.nccn_eStatus.has('hotspot')) {
-                                            tumor.nccn_eStatus.set('hotspot', 'FALSE');
-                                        }
-
-                                        //console.log('Add tumor estatus');
-                                        tumor.TI.asArray().forEach(function (ti) {
-                                            ti.treatments.asArray().forEach(function (treatment) {
-                                                if (!treatment.name_eStatus.has('obsolete')) {
-                                                    treatment.name_eStatus.set('obsolete', 'false');
-                                                }
-                                                if (!treatment.name_eStatus.has('hotspot')) {
-                                                    treatment.name_eStatus.set('hotspot', 'FALSE');
-                                                }
-                                                //console.log('Add treatment estatus');
-                                            })
-                                        });
-                                    });
+                                    ////console.log('Add mutation estatus');
+                                    //mutation.tumors.asArray().forEach(function (tumor) {
+                                    //    if (!tumor.prevalence_eStatus.has('obsolete')) {
+                                    //        tumor.prevalence_eStatus.set('obsolete', 'false');
+                                    //    }
+                                    //    if (!tumor.progImp_eStatus.has('obsolete')) {
+                                    //        tumor.progImp_eStatus.set('obsolete', 'false');
+                                    //    }
+                                    //
+                                    //    //console.log('Add tumor estatus');
+                                    //    tumor.TI.asArray().forEach(function (ti) {
+                                    //        ti.treatments.asArray().forEach(function (treatment) {
+                                    //            if (!treatment.name_eStatus.has('obsolete')) {
+                                    //                treatment.name_eStatus.set('obsolete', 'false');
+                                    //            }
+                                    //        })
+                                    //    });
+                                    //});
                                 });
                                 model.endCompoundOperation();
                             } else {
@@ -1073,14 +1060,9 @@ angular.module('oncokbApp')
                 $scope.gene.mutations.asArray().forEach(function (e) {
                     console.log('------------------');
                     console.log(e);
-                    console.log(e.oncogenic_eStatus);
-                    console.log(e.oncogenic_eStatus.get('curated'));
-                    if (e.oncogenic_eStatus.has('hotspotQvalue')) {
-                        console.log(e.oncogenic_eStatus.get('hotspotQvalue'));
-                    }
-                    if (e.oncogenic_eStatus.has('hotspotTumorType')) {
-                        console.log(e.oncogenic_eStatus.get('hotspotTumorType'));
-                    }
+                    console.log(e.shortSummary);
+                    console.log(e.shortSummary_eStatus);
+                    console.log(e.shortSummary_eStatus.get('curated'));
                     console.log(e.effect);
                     console.log(e.oncogenic);
                     console.log(e.description);
@@ -1363,7 +1345,7 @@ angular.module('oncokbApp')
                         return false;
                     }
                 }else if(type === 'oncogenicity') {
-                    if (mutation.oncogenic.text === '' && mutation.shortSummary.text === '') {
+                    if ((mutation.oncogenic.text === '' || mutation.oncogenic.text === 'false') && mutation.shortSummary.text === '') {
                         return true;
                     } else {
                         return false;
