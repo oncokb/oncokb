@@ -600,7 +600,7 @@ angular.module('oncokbApp').run(
 
             $rootScope.$watch('internal', function (n, o) {
                 if(!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
-                    dialogs.error('Error', 'Please notice you are in external network. All admin features will not available at this moment. Please switch to internal network and refresh the page if you want to use them. Thanks.');
+                    dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
                 }
             })
         }]);
