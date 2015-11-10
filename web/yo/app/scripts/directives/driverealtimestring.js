@@ -53,6 +53,7 @@ angular.module('oncokbApp')
             }, 1000);
           });
         }
+        scope.content.preStringO = scope.content.stringO;
 
         scope.$watch("content.stringO", function (n, o) {
           $timeout.cancel(scope.stringTimeoutPromise);  //does nothing, if timeout already done
@@ -76,6 +77,14 @@ angular.module('oncokbApp')
         $scope.sCheckboxChange = function() {
           $scope.content.addon = '';
         };
+
+        $scope.uncheck = function (event) {
+          if($scope.content.preStringO === $scope.content.stringO && $scope.content.preStringO !== false) {
+            $scope.content.stringO = 'false';
+          }
+          $scope.content.preStringO = $scope.content.stringO;
+          console.log(event, $scope.content.stringO);
+        }
       }
     };
   });

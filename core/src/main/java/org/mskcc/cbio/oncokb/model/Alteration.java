@@ -17,9 +17,6 @@ public class Alteration implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String variantResidues;
-    private Integer oncogenic;
-    private Integer hotspot;
-    private String hotspotAddon;
 
     public Alteration() {
     }
@@ -107,33 +104,6 @@ public class Alteration implements java.io.Serializable {
 
     public void setVariantResidues(String variantResidues) {
         this.variantResidues = variantResidues;
-    }
-
-    public Integer getOncogenic() {
-        if (oncogenic == null) {
-            return -1;
-        }
-        return oncogenic;
-    }
-
-    public void setOncogenic(Integer oncogenic) {
-        this.oncogenic = oncogenic;
-    }
-
-    public Integer getHotspot() {
-        return hotspot;
-    }
-
-    public void setHotspot(Integer hotspot) {
-        this.hotspot = hotspot;
-    }
-
-    public String getHotspotAddon() {
-        return hotspotAddon;
-    }
-
-    public void setHotspotAddon(String hotspotAddon) {
-        this.hotspotAddon = hotspotAddon;
     }
 
     @Override

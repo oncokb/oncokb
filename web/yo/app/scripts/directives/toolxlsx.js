@@ -200,7 +200,7 @@ angular.module('oncokbApp')
                       }else if(/gene/i.test(key)) {
                         datum.gene = check(e[key], 'genes');
                       }else if(/alteration/i.test(key)) {
-                        var _alteration = check(trimAlteration(e[key]), 'alterations');
+                        var _alteration = trimAlteration(e[key]);
                         datum.alteration = _alteration;
                       }else if(/tumor/i.test(key)) {
                         var _tumorType = check(e[key], 'tumorTypes');

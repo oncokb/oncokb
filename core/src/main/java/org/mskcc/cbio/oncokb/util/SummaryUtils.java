@@ -37,8 +37,9 @@ public class SummaryUtils {
         } else {
             int oncogenic = -1;
             for (Alteration a : alterations) {
-                if (a.getOncogenic() > 0) {
-                    oncogenic = a.getOncogenic();
+                List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
+                if (oncogenicEvidences.size() > 0 && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) > 0) {
+                    oncogenic = Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect());
                     break;
                 }
             }
@@ -190,7 +191,7 @@ public class SummaryUtils {
                                     .append(" is unknown. ");
                         } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                             // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E
-                            evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_1));
+                            evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A));
                             sb.append(treatmentsToStringByTumorType(evidences, null, queryTumorType, true, false, true, true))
                                     .append(", the clinical utility for patients with ")
                                     .append(queryTumorType == null ? "tumors" : queryTumorType)

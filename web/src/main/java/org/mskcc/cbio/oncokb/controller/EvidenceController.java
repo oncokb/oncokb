@@ -359,6 +359,13 @@ public class EvidenceController {
             alts.addAll(alterationsME.values());
             evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.MUTATION_EFFECT)));
         }
+        if (evidenceTypes.contains(EvidenceType.ONCOGENIC)) {
+            filteredETs.add(EvidenceType.ONCOGENIC);
+            List<Alteration> alts = new ArrayList<>();
+            alts.addAll(alterations.values());
+            alts.addAll(alterationsME.values());
+            evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.ONCOGENIC)));
+        }
         if (evidenceTypes.size() != filteredETs.size()) {
             //Include all level 1 evidences
             evidences.addAll(evidenceBo.findEvidencesByAlteration(new ArrayList<Alteration>(alterations.values()), Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)));
