@@ -370,6 +370,7 @@ public class EvidenceController {
             //Include all level 1 evidences
             evidences.addAll(evidenceBo.findEvidencesByAlteration(new ArrayList<Alteration>(alterations.values()), Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)));
 
+            evidenceTypes.remove(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
             evidences.addAll(evidenceBo.findEvidencesByAlteration(new ArrayList<Alteration>(alterations.values()), evidenceTypes, tumorTypes.isEmpty() ? null : new ArrayList<TumorType>(tumorTypes.values())));
         }
         return evidences;

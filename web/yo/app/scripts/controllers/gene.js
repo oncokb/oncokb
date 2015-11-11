@@ -52,6 +52,13 @@ angular.module('oncokbApp')
                 }
             }
 
+            $scope.showDocs = function () {
+                $scope.documents.forEach(function (item) {
+                    console.log(item.title);
+                })
+                //console.log($scope.documents);
+            };
+
             $scope.getDocs = function () {
                 var docs = Documents.get();
                 if (docs.length > 0) {
