@@ -38,7 +38,7 @@
         <key>
             <column name="trial_id" not-null="true" />
         </key>
-        <element column="country" type="string"></element> 
+        <element column="country" type="string"></element>
     </set>
     <set lazy="false" name="tumorTypes" table="clinical_trial_tumor_type">
       <key>

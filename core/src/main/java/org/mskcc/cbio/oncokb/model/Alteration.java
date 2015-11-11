@@ -1,6 +1,9 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author jgao
  */
@@ -17,10 +20,18 @@ public class Alteration implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String variantResidues;
+    private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
 
     public Alteration() {
     }
 
+    public Set<ClinicalTrial> getClinicalTrials() {
+        return clinicalTrials;
+    }
+
+    public void setClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
+        this.clinicalTrials = clinicalTrials;
+    }
 
     public Integer getAlterationId() {
         return this.alterationId;
