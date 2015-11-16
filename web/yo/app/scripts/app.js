@@ -473,13 +473,13 @@ angular.module('oncokbApp', [
                 access: access.curator,
                 internalUse: false
             })
-            .when('/dataSummary', {
-                templateUrl: 'views/datasummary.html',
-                controller: 'DatasummaryCtrl',
-                access: access.admin,
-                internalUse: true
-
-            })
+            //.when('/dataSummary', {
+            //    templateUrl: 'views/datasummary.html',
+            //    controller: 'DatasummaryCtrl',
+            //    access: access.admin,
+            //    internalUse: true
+            //
+            //})
             .otherwise({
                 redirectTo: '/'
             });
