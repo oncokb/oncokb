@@ -481,6 +481,11 @@ a:hover {
 h5 {
   margin-bottom: 0;
 }
+.vus-table thead, .vus-table tbody tr td:nth-child(1){
+  text-align: center;
+  font-style: italic;
+  font-weight: bold;
+}
 
 //Change sk-spinner style
 .sk-spinner-wave.mskcc div {
