@@ -841,7 +841,7 @@ angular.module('oncokbApp')
                         _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
                         _mutation.name.setText(newMutationName);
                         _mutation.oncogenic_eStatus.set('obsolete', 'false');
-                        _mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
+                        _mutation.shortSummary_eStatus.set('obsolete', 'false');
 
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
