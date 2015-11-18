@@ -1,4 +1,4 @@
-$icon-font-path: "app/components/bootstrap-sass-official/assets/fonts/bootstrap/";
+$icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/";
 // bower:scss
 @import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
@@ -150,7 +150,7 @@ p.editableBox {
 p.editableBox.doubleH {
   min-height: 40px;
 }
-.curateTrialItem {
+.curateTrialItem, .vusItem {
   float: left;
   height: 30px;
   margin: 5px;
@@ -158,10 +158,16 @@ p.editableBox.doubleH {
   padding: 3px 8px;
   border-radius: 3px;
 }
-.trialsInputGroup {
+.trialsInputGroup, .vusGroup {
   float: left;
   margin: 5px;
   width: 200px;
+}
+.vusItemDate {
+  margin-left: 5px;
+  font-size: 12px;
+  font-style: italic;
+  color: grey
 }
 .oncoKBALoading {
   position: absolute;
@@ -262,7 +268,7 @@ p.editableBox.doubleH {
   color: grey;
 }
 .geneMainDiv {
-  margin-bottom: 40px;
+  margin-bottom: 120px;
 }
 .accordionMarginTop {
   margin-top: 5px;

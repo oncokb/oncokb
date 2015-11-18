@@ -1,0 +1,14 @@
+<div class="input-group  input-group-sm vusGroup">
+    <span class="input-group-addon">{{::variant.name.getText()}}</span>
+    <input type="date"
+           class="form-control ng-isolate-scope ng-touched ng-dirty ng-valid-date ng-valid ng-valid-required"
+           uib-datepicker-popup="" ng-model="dt" is-open="status.opened"
+           datepicker-options="dateOptions"
+           ng-required="true" close-text="Close" required="required" style="">
+    <!--<span ng-click="openDatePicker(variant, variant.time.get(variant.time.length - 1).value.getText())" class="vusItemDate" tooltip-placement="top" tooltip="Last modified Date">{{variant.time.get(variant.time.length - 1).value.getText() | date:'medium'}}</span>-->
+    <span class="input-group-btn" ng-show="fileEditable">
+        <button class="btn btn-default" type="button" ng-click="remove()">
+            <i class="fa fa-trash-o"></i>
+        </button>
+    </span>
+</div>

@@ -300,6 +300,14 @@ OncoKB.curateInfo = {
         'date': {
             type: 'string'
         }
+    },
+    'VUSItem': {
+        name: {
+            type: 'string'
+        },
+        time: {
+            type: 'list'
+        }
     }
 };
 
@@ -493,7 +501,7 @@ angular.module('oncokbApp', [
         dialogsProvider.useBackdrop(true);
         dialogsProvider.useEscClose(true);
         dialogsProvider.useCopy(false);
-        dialogsProvider.setSize('md');
+        dialogsProvider.setSize('sm');
 
         $animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
 
