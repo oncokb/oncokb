@@ -1022,6 +1022,37 @@ angular.module('oncokbApp')
                 }
             };
 
+            $scope.addVUSItem = function (newVUSName, newVUSTime) {
+                if (newVUSName) {
+                    var notExist = true;
+                    newVUSName = newVUSName.trim();
+                    $scope.gene.mutations.asArray().forEach(function (e, i) {
+                        if (e.name.getText().trim().toLowerCase() === newVUSName.toLowerCase()) {
+                            notExist = false;
+                        }
+                    });
+
+                    if (notExist && !containVariantInVUS(newVUSName)) {
+                        $scope.realtimeDocument.getModel().beginCompoundOperation();
+                        var vus = $scope.realtimeDocument.getModel().create(OncoKB.VUSItem);
+                        var timeStamp = $scope.realtimeDocument.getModel().create(OncoKB.TimeStamp);
+
+                        if (!newVUSTime) {
+                            newVUSTime = new Date().getTime().toString();
+                        }
+
+                        timeStamp.value.setText(newVUSTime);
+                        timeStamp.by.setText(User.email);
+                        vus.name.setText(newVUSName);
+                        vus.time.push(timeStamp);
+                        $scope.vus.push(vus);
+                        $scope.realtimeDocument.getModel().endCompoundOperation();
+                    } else {
+                        dialogs.notify('Warning', 'Variant exists.');
+                    }
+                }
+            };
+
             $scope.cleanTrial = function (trials) {
                 var cleanTrials = {};
                 trials.asArray().forEach(function (e, index) {
@@ -1548,6 +1579,7 @@ angular.module('oncokbApp')
                 }
                 $scope.document = file;
                 $scope.fileEditable = file.editable ? true : false;
+                addVUS();
                 $scope.status.rendering = false;
                 displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
@@ -1784,8 +1816,33 @@ angular.module('oncokbApp')
                 this.hideEmpty = false;
             }
 
+            function containVariantInVUS(variantName) {
+                var size = $scope.vus.length;
+
+                for (var i = 0; i < size; i++) {
+                    if ($scope.vus.get(i).name.getText() === variantName) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            function addVUS() {
+                var model = $scope.realtimeDocument.getModel();
+                var vus;
+                if (!model.getRoot().get('vus')) {
+                    vus = model.createList();
+                    model.getRoot().set('vus', vus);
+                } else {
+                    vus = model.getRoot().get('vus');
+                }
+                $scope.vus = vus;
+            }
+
             $scope.fileTitle = $routeParams.geneName;
             $scope.gene = '';
+            $scope.vus = '';
             $scope.comments = '';
             $scope.newGene = {};
             $scope.collaborators = {};
