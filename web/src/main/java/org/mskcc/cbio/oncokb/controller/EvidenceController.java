@@ -16,6 +16,7 @@ import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -211,7 +212,7 @@ public class EvidenceController {
                         alt.setAlteration("fusions");
                     } else {
                         alt.setAlteration(alteration);
-                        variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(con);
+                        variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(con);
                         alt.setConsequence(variantConsequence);
                     }
                     alt.setAlterationType(AlterationType.MUTATION);

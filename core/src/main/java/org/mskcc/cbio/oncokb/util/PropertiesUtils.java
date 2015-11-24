@@ -6,19 +6,10 @@
 
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
