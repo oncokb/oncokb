@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -20,6 +21,7 @@ public class Evidence implements java.io.Serializable {
     private String description;
     private Set<Treatment> treatments;
     private String knownEffect;
+    private Date lastEdit;
     private LevelOfEvidence levelOfEvidence;
     private Set<Article> articles;
     private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
@@ -98,6 +100,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setKnownEffect(String knownEffect) {
         this.knownEffect = knownEffect;
+    }
+
+    public Date getLastEdit() {
+        return lastEdit;
+    }
+
+    public void setLastEdit(Date lastEdit) {
+        this.lastEdit = lastEdit;
     }
 
     public LevelOfEvidence getLevelOfEvidence() {

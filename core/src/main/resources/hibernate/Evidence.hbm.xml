@@ -52,6 +52,9 @@
     <property name="description" type="string">
       <column length="65535" name="description"/>
     </property>
+    <property name="lastEdit" type="date">
+      <column name="last_edit"/>
+    </property>
     <set lazy="false" name="articles" table="evidence_article">
       <key>
         <column name="evidence_id" not-null="true"/>
