@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- Status business object -->
+    <bean id="statusBo" class="org.mskcc.cbio.oncokb.bo.impl.StatusBoImpl">
+        <property name="dao" ref="statusDao"/>
+    </bean>
+
+    <!-- Status Data Access Object -->
+    <bean id="statusDao" class="org.mskcc.cbio.oncokb.dao.impl.StatusDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+
+</beans>

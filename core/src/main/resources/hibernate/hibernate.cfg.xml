@@ -19,5 +19,6 @@
     <mapping resource="hibernate/Treatment.hbm.xml"/>
     <mapping resource="hibernate/Gene.hbm.xml"/>
     <mapping resource="hibernate/VariantConsequence.hbm.xml"/>
+    <mapping resource="hibernate/Status.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>
