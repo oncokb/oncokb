@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                             console.log('\t copying');
                             var gene = realtime.getModel().getRoot().get('gene');
                             if (gene) {
-                                var geneData = importer.getData(gene, excludeObsolete);
+                                var geneData = importer.getGeneData(gene, excludeObsolete);
                                 DatabaseConnector.updateGene(JSON.stringify(geneData),
                                     function (result) {
                                         console.log('\t success', result);
@@ -884,14 +884,14 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function () {
-                var gene = importer.getData(this.gene);
+                var gene = importer.getGeneData(this.gene);
                 console.log(gene);
             };
 
             $scope.updateGene = function () {
                 $scope.docStatus.savedGene = false;
 
-                var gene = importer.getData(this.gene, true);
+                var gene = importer.getGeneData(this.gene, true);
 
                 console.log(gene);
                 // $timeout(function(){
@@ -1289,7 +1289,7 @@ angular.module('oncokbApp')
             };
 
             $scope.generatePDF = function () {
-                jspdf.create(importer.getData(this.gene, true));
+                jspdf.create(importer.getGeneData(this.gene, true));
             };
 
             $scope.isOpenFunc = function (type) {

@@ -493,6 +493,6 @@ angular.module('oncokbApp')
       return {
         backup: backup,
         migrate: migrate,
-        getData: getData
+        getGeneData: getGeneData
       };
     });
