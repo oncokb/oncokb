@@ -103,10 +103,10 @@
     </div>
   </div>
   <div id="mutation">
-    <accordion close-others="false">
+    <uib-accordion close-others="false">
       <div ng-repeat="mutation in gene.mutations.asArray()" ng-init="geneStatus[$index] = {}; geneStatus[$index].isOpen=false; geneStatus[$index].oncogenic = false; geneStatus[$index] = {}" class="accordionMarginTop">
-        <accordion-group is-open="geneStatus[$index].isOpen" class="levelOneHeader">
-          <accordion-heading >
+        <uib-accordion-group is-open="geneStatus[$index].isOpen" class="levelOneHeader">
+          <uib-accordion-heading >
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
             <span ng-click="stopCollopse($event)">Mutation: </span><span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.name.text"/></span>
             <comments-dict mutation="{{mutation.name.text}}" gene-name="{{::gene.name.text}}" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
@@ -120,21 +120,21 @@
               </span>
               <i ng-click="remove($event, $index)" class="fa fa-trash-o"></i>
             </span>
-          </accordion-heading>
-          <accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 100 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
+          </uib-accordion-heading>
+          <uib-accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 100 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
             <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short mutation summary" ng-model="mutation.shortSummary.text"></p></span>-->
             <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
             <pub-iframe ng-model="mutation.summary.text"></pub-iframe>
 
             <!-- Mutation Effect -->
-            <accordion-group ng-init="geneStatus[$index].oncogenic = {}" is-open="geneStatus[$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].oncogenic.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
-              <accordion-heading>
+            <uib-accordion-group ng-init="geneStatus[$index].oncogenic = {}" is-open="geneStatus[$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].oncogenic.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
+              <uib-accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[$index].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[$index].oncogenic.isOpen)"></i>
                 <span ng-click="stopCollopse($event)"> Summary of biological effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'mutationEffect')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                 <span class="pull-right" ng-show="fileEditable">
                    <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'"></e-status>
                 </span>
-              </accordion-heading>
+              </uib-accordion-heading>
               <div class="mutationEffect">
                 <strong class="header">Mutation effect:</strong>
                 <div class="content">
@@ -151,17 +151,17 @@
                 <br/>
                 <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>
               </span>
-            </accordion-group>
+            </uib-accordion-group>
 
             <!-- Oncogenicity -->
-            <accordion-group ng-init="geneStatus[$index].shortSummary = {}" is-open="geneStatus[$index].shortSummary.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].shortSummary.hideEmpty) && checkEmpty(mutation, 'oncogenicity'))">
-              <accordion-heading>
+            <uib-accordion-group ng-init="geneStatus[$index].shortSummary = {}" is-open="geneStatus[$index].shortSummary.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].shortSummary.hideEmpty) && checkEmpty(mutation, 'oncogenicity'))">
+              <uib-accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].shortSummary.isOpen, 'fa-chevron-right': !geneStatus[$index].shortSummary.isOpen}" ng-click="changeIsOpen(geneStatus[$index].shortSummary.isOpen)"></i>
                 <span ng-click="stopCollopse($event)"> Summary of clinical effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                 <span class="pull-right" ng-show="fileEditable">
                    <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" object="mutation.shortSummary_eStatus" id="mutation.name.text  + '-shortSummary'"></e-status>
                 </span>
-              </accordion-heading>
+              </uib-accordion-heading>
               <p>
                 <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
                 <drive-realtime-string es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
@@ -169,12 +169,12 @@
               <span>
                 <drive-realtime-string es="mutation.shortSummary_eStatus" fe="fileEditable" t="'p'" object="mutation.shortSummary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
               </span>
-            </accordion-group>
+            </uib-accordion-group>
 
             <!-- tumor types -->
             <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="geneStatus[$parent.$index][$index] = {}; geneStatus[$parent.$index][$index].isOpen = false;" class="accordionMarginTop">
-              <accordion-group is-open="geneStatus[$parent.$index][$index].isOpen" class="levelTwoHeader">
-                <accordion-heading >
+              <uib-accordion-group is-open="geneStatus[$parent.$index][$index].isOpen" class="levelTwoHeader">
+                <uib-accordion-heading >
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen}"></i>
                   <span ng-click="stopCollopse($event)">Tumor type: </span>
                   <span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
@@ -187,51 +187,51 @@
                     </span>
                     <i ng-click="remove($event, $parent.$parent.$parent.$parent.$index, $index)" class="fa fa-trash-o pull-right"></i>
                   </span>
-                </accordion-heading>
+                </uib-accordion-heading>
 
-                <accordion close-others="false">
+                <uib-accordion close-others="false">
                   <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short tumor type summary" ng-model="tumor.shortSummary.text"></p></span>-->
                   <!--<pub-iframe ng-model="tumor.shortSummary.text"></pub-iframe>-->
                   <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional tumor type summary" ng-model="tumor.summary.text"></p></span>
                   <pub-iframe ng-model="tumor.summary.text"></pub-iframe>
                   <!-- Prevalence -->
-                  <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence.hideEmpty) && !tumor.prevalence.text && !tumor.shortPrevalence.text) || (status.hideAllObsolete && tumor.prevalence_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
-                    <accordion-heading>
+                  <uib-accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].prevalence.hideEmpty) && !tumor.prevalence.text && !tumor.shortPrevalence.text) || (status.hideAllObsolete && tumor.prevalence_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                    <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].isOpen)"></i>
                       <span ng-click="stopCollopse($event)">{{::tumor.prevalence.display}}: </span>
                       <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === '' && tumor.shortPrevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'"></e-status>
                       </span>
-                    </accordion-heading>
+                    </uib-accordion-heading>
                     <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ph="'Short prevalence'"></drive-realtime-string>
                     <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ph="'Full prevalence'"></drive-realtime-string>
-                  </accordion-group>
+                  </uib-accordion-group>
 
                   <!-- Prognostic implications -->
-                  <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp.hideEmpty) && !tumor.progImp.text && !tumor.shortProgImp.text) || (status.hideAllObsolete && tumor.progImp_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
-                    <accordion-heading>
+                  <uib-accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].progImp.hideEmpty) && !tumor.progImp.text && !tumor.shortProgImp.text) || (status.hideAllObsolete && tumor.progImp_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                    <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen)"></i>
                       <span ng-click="stopCollopse($event)">{{::tumor.progImp.display}}: </span>
                       <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === '' && tumor.shortProgImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'"></e-status>
                       </span>
-                    </accordion-heading>
+                    </uib-accordion-heading>
                     <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ph="'Short prognostic implications'"></drive-realtime-string>
                     <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ph="'Full prognostic implications'"></drive-realtime-string>
-                  </accordion-group>
+                  </uib-accordion-group>
 
                   <!-- NCCN guidelines -->
-                  <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn.hideEmpty) && !tumor.nccn.disease.text) || (status.hideAllObsolete && tumor.nccn_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
-                    <accordion-heading>
+                  <uib-accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].nccn.hideEmpty) && !tumor.nccn.disease.text) || (status.hideAllObsolete && tumor.nccn_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                    <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen)"></i>
                       <span ng-click="stopCollopse($event)">NCCN guidelines: </span>
                       <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict display-name="NCCN guidelines" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'"></e-status>
                       </span>
-                    </accordion-heading>
+                    </uib-accordion-heading>
                     <strong>{{::tumor.nccn.therapy.display}}:</strong>
                     <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
                     <p>
@@ -260,25 +260,25 @@
                     <br/>
                     <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen"></drive-realtime-string>
                     </span>
-                  </accordion-group>
+                  </uib-accordion-group>
 
                   <!-- Theraputic implications -->
                   <div ng-repeat="ti in tumor.TI.asArray()" class="accordionMarginTop" ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index] = {}; geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen = false;">
-                    <accordion-group is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].hideEmpty) && !ti.short.text && !ti.description.text && ti.treatments.length === 0">
-                      <accordion-heading>
+                    <uib-accordion-group is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].hideEmpty) && !ti.short.text && !ti.description.text && ti.treatments.length === 0">
+                      <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen)"></i>
                         <span ng-click="stopCollopse($event)">{{::ti.name.text}}: </span>
                         <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.short.text && !ti.description.text && ti.treatments.length === 0">No Entry</span>
                         <comments-dict display-name="{{::ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
-                      </accordion-heading>
+                      </uib-accordion-heading>
                       <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short general summary" ng-model="ti.short.text"></p></span>-->
                       <!--<pub-iframe ng-model="ti.short.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></pub-iframe>-->
                       <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional general summary" ng-model="ti.description.text"></p></span>
                       <pub-iframe ng-model="ti.description.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></pub-iframe>
-                      <accordion close-others="false">
+                      <uib-accordion close-others="false">
                         <div ng-repeat="treatment in ti.treatments.asArray()" ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index]={}; geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen = false;" class="accordionMarginTop">
-                          <accordion-group is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelFourHeader" ng-hide="(status.hideAllObsolete && treatment.name_eStatus.get('obsolete') === 'true')">
-                            <accordion-heading>
+                          <uib-accordion-group is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index].isOpen" class="levelFourHeader" ng-hide="(status.hideAllObsolete && treatment.name_eStatus.get('obsolete') === 'true')">
+                            <uib-accordion-heading>
                               <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatusgeneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen}"></i>
                               <span ng-click="stopCollopse($event)">{{treatment.type.text}}: </span>
                               <span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="treatment.name.text"/></span>
@@ -294,7 +294,7 @@
                                  <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text"></e-status>
                                 <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $index)" class="fa fa-trash-o"></i>
                               </span>
-                            </accordion-heading>
+                            </uib-accordion-heading>
                             <p>
                               <strong>{{::treatment.level.display}}:</strong>
                               <span ng-if="checkTI(ti, 1, 1)">
@@ -330,7 +330,7 @@
                               <br/>
                               <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></drive-realtime-string>
                             </span>
-                          </accordion-group>
+                          </uib-accordion-group>
                         </div>
                         <div class="input-group input-group-sm accordionMarginTop">
                           <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
@@ -340,18 +340,18 @@
                             </button>
                           </span>
                         </div>
-                      </accordion>
-                    </accordion-group>
+                      </uib-accordion>
+                    </uib-accordion-group>
                   </div>
 
                   <!-- Trials -->
                   <div class="accordionMarginTop">
-                    <accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.hideEmpty) && tumor.trials.length === 0">
-                      <accordion-heading>
+                    <uib-accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials={}; geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.isOpen = false" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.isOpen" class="levelThreeHeader" ng-hide="(!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.hideEmpty) && tumor.trials.length === 0">
+                      <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].trials.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].trials.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].trials.isOpen)"></i>
                         <span ng-click="stopCollopse($event)">Ongoing clinical trials: </span>
                         <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict display-name="Ongoing clinical trials" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
-                      </accordion-heading>
+                      </uib-accordion-heading>
                       <div>
                       <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">
                         <a ng-href="https://clinicaltrials.gov/show/{{::trial}}" target="_blank">{{::trial}}</a>
@@ -369,9 +369,9 @@
                         </span>
                         </div>
                       </div>
-                    </accordion-group>
+                    </uib-accordion-group>
                   </div>
-                </accordion>
+                </uib-accordion>
                 <!-- <hr/>
                           <h4>Interacting alterations:</h4>
                           <p>
@@ -382,23 +382,23 @@
                       <strong><comments-dict file-editable="fileEditable" comments="tumor.interactAlts.description_comments" object="tumor.interactAlts" key="description" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>{{tumor.interactAlts.description.display}}:</strong>
                       <p class="doubleH" type='text' ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="tumor.interactAlts.description.text"></p>
                 </span> -->
-              </accordion-group>
+              </uib-accordion-group>
             </div>
-          </accordion>
+          </uib-accordion>
           <div style="width: 100%" class="input-group input-group-sm accordionMarginTop">
-            <input type="text" ng-model="newTumorTypeName" typeahead="tumorType for tumorType in tumorTypes | typeaheadFilter:$viewValue | limitTo: 10" class="form-control" placeholder="Free text or choose from the dropdown list">
+            <input type="text" ng-model="newTumorTypeName" uib-typeahead="tumorType for tumorType in tumorTypes | typeaheadFilter:$viewValue | limitTo: 10" class="form-control" placeholder="Free text or choose from the dropdown list">
             <span class="input-group-btn">
               <button type="button" class="btn btn-default" ng-disabled="!(!!newTumorTypeName)" ng-click="addTumorType(mutation, newTumorTypeName, $index); newTumorTypeName=''">
                 <i class="fa fa-plus"></i> Add Tumor Type
               </button>
             </span>
           </div>
-        </accordion-group>
+        </uib-accordion-group>
       </div>
-    </accordion>
+    </uib-accordion>
   </div>
   <div class="input-group input-group-sm accordionMarginTop">
-    <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{addMutationPlaceholder}}"  typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
+    <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{addMutationPlaceholder}}"  uib-typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
     <span class="input-group-btn">
       <button type="button" class="btn btn-default" ng-disabled="!(!!newMutationName)" ng-click="addMutation(newMutationName); newMutationName=''">
         <i class="fa fa-plus"></i> Add Mutation

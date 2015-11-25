@@ -1,14 +1,14 @@
 <div>
 
     <div ng-if="status.fileSelected && status.isXML && status.validXML" class="col-md-12">
-        <accordion close-others="oneAtATime">
-            <accordion-group  ng-repeat="reportViewData in reportViewDatas" >
-                <accordion-heading>
+        <uib-accordion close-others="oneAtATime">
+            <uib-accordion-group  ng-repeat="reportViewData in reportViewDatas" >
+                <uib-accordion-heading>
                     <span>{{reportViewData.geneName}}&nbsp;&nbsp;&nbsp;{{reportViewData.mutation}}&nbsp;&nbsp;&nbsp;{{reportViewData.tumorTissueType}}</span>
-                </accordion-heading>
+                </uib-accordion-heading>
                 <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
-            </accordion-group>
-        </accordion>
+            </uib-accordion-group>
+        </uib-accordion>
     </div>
 
     <div ng-if="status.fileSelected && status.isXML && !status.validXML" class="col-md-12">

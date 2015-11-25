@@ -53,14 +53,14 @@
             <!--</div>-->
         <!--</div>-->
         <div class="row" ng-hide="rendering" style="margin-top: 20px">
-            <tabset ng-show="annotation" justified="true" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <tab heading="Report" active="reportViewActive">
+            <uib-tabset ng-show="annotation" justified="true" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <uib-tab heading="Report" active="reportViewActive">
                     <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
-                </tab>
-                <tab heading="Details" active="regularViewActive">
+                </uib-tab>
+                <uib-tab heading="Details" active="regularViewActive">
                     <regular-view annotation="annotation" summary-table-titles-content="summaryTableTitlesContent" summary-table-titles="summaryTableTitles" special-attr="specialAttr" set-collapsed="setCollapsed" is-collapsed="isCollapsed" fda-approved="fdaApproved" generate-trail="generateTrail" display-process="displayProcess" display-parts="displayParts"></regular-view>
-                </tab>
-            </tabset>
+                </uib-tab>
+            </uib-tabset>
         </div>
     </div>
     <loading ng-model="loadingPage"></loading>
