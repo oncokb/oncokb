@@ -290,6 +290,15 @@ OncoKB.curateInfo = {
             type: 'string'
         }
     },
+    'TimeStampWithCurator': {
+        'value': {
+            type: 'string'
+        },
+        //Edit by
+        'by': {
+            type: 'Curator'
+        }
+    },
     'EStatus': {
         'value': {
             type: 'string'

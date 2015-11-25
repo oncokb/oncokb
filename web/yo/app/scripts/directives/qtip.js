@@ -10,16 +10,20 @@ angular.module('oncokbApp')
     .directive('qtip', function () {
         return {
             restrict: 'A',
+            scope: {
+                time: '=',
+                by: '='
+            },
             link: function (scope, element, attrs) {
                 var src = '';
                 var content = '';
-                var hideEvent = '';
-                var my= attrs.hasOwnProperty('my')?attrs.my: 'bottom center';
-                var at= attrs.hasOwnProperty('at')?attrs.at: 'top center';
+                var hideEvent = 'mouseleave';
+                var my = attrs.hasOwnProperty('my') ? attrs.my : 'bottom center';
+                var at = attrs.hasOwnProperty('at') ? attrs.at : 'top center';
 
-                if(attrs.type && ['pmid', 'nct'].indexOf(attrs.type) !== -1){
+                if (attrs.type && ['pmid', 'nct'].indexOf(attrs.type) !== -1) {
                     src = '<iframe width="600px" height="400px" src=\'';
-                    if(attrs.type && attrs.number) {
+                    if (attrs.type && attrs.number) {
                         switch (attrs.type) {
                             case 'pmid':
                                 src += 'http://www.ncbi.nlm.nih.gov/pubmed/' + attrs.number;
@@ -36,14 +40,14 @@ angular.module('oncokbApp')
                     hideEvent = 'unfocus';
                     my = 'top left';
                     at = 'bottom right';
+                } else if (attrs.type === 'vusItem') {
+                    content = '<span>Last edit: ' + new Date(scope.time).toLocaleDateString() + '</span><br/><span>By: ' + scope.by + '</span>';
                 }
 
-                if(!attrs.type){
+                if (!attrs.type) {
                     hideEvent = 'mouseleave';
                     content = attrs.content;
                 }
-
-
 
                 var options = {
                     content: content,
@@ -55,6 +59,7 @@ angular.module('oncokbApp')
                     style: {
                         classes: 'qtip-light qtip-rounded'
                     },
+                    show: 'mouseover',
                     hide: {
                         event: hideEvent,
                         fixed: true,
@@ -62,6 +67,11 @@ angular.module('oncokbApp')
                     }
                 };
                 $(element).qtip(options);
+
+
+                scope.$watch("time", function (n, o) {
+                    $(element).qtip('api').set('content.text', '<span>Last edit: ' + new Date(scope.time).toLocaleDateString() + '</span><br/><span>By: ' + scope.by + '</span>')
+                });
             }
         };
     });

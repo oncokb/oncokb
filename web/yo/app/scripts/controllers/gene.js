@@ -1035,14 +1035,15 @@ angular.module('oncokbApp')
                     if (notExist && !containVariantInVUS(newVUSName)) {
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
                         var vus = $scope.realtimeDocument.getModel().create(OncoKB.VUSItem);
-                        var timeStamp = $scope.realtimeDocument.getModel().create(OncoKB.TimeStamp);
+                        var timeStamp = $scope.realtimeDocument.getModel().create(OncoKB.TimeStampWithCurator);
 
                         if (!newVUSTime) {
                             newVUSTime = new Date().getTime().toString();
                         }
 
                         timeStamp.value.setText(newVUSTime);
-                        timeStamp.by.setText(User.email);
+                        timeStamp.by.name.setText(User.name);
+                        timeStamp.by.email.setText(User.email);
                         vus.name.setText(newVUSName);
                         vus.time.push(timeStamp);
                         $scope.vus.push(vus);
