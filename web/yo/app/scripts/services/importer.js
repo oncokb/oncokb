@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('importer', function importer($timeout, documents, S, storage, OncoKB, $q) {
+    .service('importer', function importer($timeout, documents, S, storage, OncoKB, $q, _) {
         var self = this;
         self.docs = [];
         self.docsL = 0;
@@ -187,6 +187,21 @@ angular.module('oncokbApp')
                 deferred.resolve();
                 console.log('\t\tAll permissions are assigned.');
             }
+        }
+
+        function getVUSData(vus) {
+            var vusData = [];
+            if (vus) {
+                vus.asArray().forEach(function (vusItem) {
+                    var datum = {};
+                    datum.name = vusItem.name.getText();
+                    if(vusItem.time.length > 0) {
+                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
+                    }
+                    vusData.push(datum);
+                });
+            }
+            return vusData;
         }
 
         function getGeneData(realtime, excludeObsolete) {
@@ -493,6 +508,7 @@ angular.module('oncokbApp')
         return {
             backup: backup,
             migrate: migrate,
-            getGeneData: getGeneData
+            getGeneData: getGeneData,
+            getVUSData: getVUSData
         };
     });
