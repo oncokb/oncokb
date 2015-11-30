@@ -52,6 +52,21 @@ angular.module('oncokbApp')
                 $scope.open = function ($event) {
                     $scope.status.opened = true;
                 };
+                $scope.update = function () {
+                    $scope.dt = new Date();
+                };
+                $scope.getClass = function (dt) {
+                    if (dt instanceof Date) {
+                        var _date = new Date().getMonth();
+                        if (_date - dt.getMonth() > 3) {
+                            return 'danger'
+                        } else if (_date - dt.getMonth() > 1) {
+                            return 'warning'
+                        }
+                    }
+
+                    return '';
+                }
             }
         }
     });
