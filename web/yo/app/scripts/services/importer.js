@@ -189,6 +189,29 @@ angular.module('oncokbApp')
             }
         }
 
+        //Return all info
+        function getVUSFullData(vus) {
+            var vusData = [];
+            if (vus) {
+                vus.asArray().forEach(function (vusItem) {
+                    var datum = {};
+                    datum.name = vusItem.name.getText();
+                    datum.time = [];
+                    vusItem.time.asArray().forEach(function (time) {
+                        var _time = {};
+                        _time.value = time.value.getText();
+                        _time.by = {};
+                        _time.by.name = time.by.name.getText();
+                        _time.by.email = time.by.email.getText();
+                        datum.time.push(_time);
+                    });
+                    vusData.push(datum);
+                });
+            }
+            return vusData;
+        }
+
+        //Only return last edit info
         function getVUSData(vus) {
             var vusData = [];
             if (vus) {
@@ -298,6 +321,20 @@ angular.module('oncokbApp')
             /* jshint +W106 */
         }
 
+        function createVUSItem(vusItem, vusModel, model) {
+            var vus = model.create(OncoKB.VUSItem);
+
+            vus.name.setText(vusItem.name);
+            _.each(vusItem.time, function (time) {
+                var timeStamp = model.create(OncoKB.TimeStampWithCurator);
+                timeStamp.value.setText(time.value);
+                timeStamp.by.name.setText(time.by.name);
+                timeStamp.by.email.setText(time.by.email);
+                vus.time.push(timeStamp);
+            });
+            vusModel.push(vus);
+        }
+
         function copyFileData(folderId, fileId, fileTitle, docIndex) {
             var deferred = $q.defer();
             storage.requireAuth(true).then(function () {
@@ -309,17 +346,26 @@ angular.module('oncokbApp')
                         } else {
                             console.log('\t Copying');
                             var gene = realtime.getModel().getRoot().get('gene');
+                            var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = getData(gene);
+                                var geneData = getGeneData(gene);
+                                var vusData = getVUSFullData(vus);
                                 storage.getRealtimeDocument(file.id).then(function (newRealtime) {
-                                    var model = createGeneModel(newRealtime.getModel());
+                                    var model = createModel(newRealtime.getModel());
                                     var geneModel = model.getRoot().get('gene');
+                                    var vusModel = model.getRoot().get('vus');
 
                                     model.beginCompoundOperation();
                                     for (var key in geneData) {
                                         if (geneModel[key]) {
                                             geneModel = setValue(model, geneModel, geneData[key], key);
                                         }
+                                    }
+
+                                    if (vusData) {
+                                        _.each(vusData, function (vusItem) {
+                                            createVUSItem(vusItem, vusModel, newRealtime.getModel());
+                                        });
                                     }
                                     model.endCompoundOperation();
                                     console.log('\t Done.');
@@ -427,10 +473,24 @@ angular.module('oncokbApp')
             return model;
         }
 
+        function createModel(model) {
+            model = createGeneModel(model);
+            model = createVUSModel(model);
+            return model;
+        }
+
         function createGeneModel(model) {
             if (!model.getRoot().get('gene')) {
                 var gene = model.create('Gene');
                 model.getRoot().set('gene', gene);
+            }
+            return model;
+        }
+
+        function createVUSModel(model) {
+            if (!model.getRoot().get('vus')) {
+                var vus = model.createList();
+                model.getRoot().set('vus', vus);
             }
             return model;
         }
@@ -509,6 +569,7 @@ angular.module('oncokbApp')
             backup: backup,
             migrate: migrate,
             getGeneData: getGeneData,
-            getVUSData: getVUSData
+            getVUSData: getVUSData,
+            getVUSFullData: getVUSFullData
         };
     });
