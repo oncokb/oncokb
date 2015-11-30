@@ -1,14 +1,14 @@
 'use strict';
 angular.module('oncokbApp')
-  .controller('emailDialogCtrl',function($scope,$modalInstance){
+  .controller('emailDialogCtrl',function($scope,$uibModalInstance){
   $scope.user = {email : ''};
 
   $scope.cancel = function(){
-    $modalInstance.dismiss('canceled');  
+    $uibModalInstance.dismiss('canceled');
   }; // end cancel
   
   $scope.done = function(){
-    $modalInstance.close($scope.user.email);
+    $uibModalInstance.close($scope.user.email);
   }; // end save
 })
   .run(function($templateCache){

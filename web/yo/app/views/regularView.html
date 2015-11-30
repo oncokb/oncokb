@@ -9,11 +9,11 @@
 <div class="variantDisplayResult"  ng-show="annotation.cancer_type">
     <h2>Cancer Type</h2>
 
-    <accordion close-others="oneAtATime">
-        <accordion-group ng-repeat="cancerType in annotation.cancer_type">
-        <accordion-heading>
+    <uib-accordion close-others="oneAtATime">
+        <uib-accordion-group ng-repeat="cancerType in annotation.cancer_type">
+        <uib-accordion-heading>
             {{cancerType.$type}}&nbsp;&nbsp;&nbsp;<span ng-if="cancerType.$relevant_to_patient_disease && cancerType.$relevant_to_patient_disease.toLowerCase() === 'yes'" style='color: green; font-size:12px; font-weight:bold'><i>RELEVANT</i></span>
-        </accordion-heading>
+        </uib-accordion-heading>
         <table class='table table-bordered colorFirstCol'>
             <tbody>
                 <tr ng-repeat="summaryTitle in summaryTableTitles">
@@ -41,11 +41,11 @@
                             <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]" class="annotationClinicalTrial">
                                 <span ng-bind-html="generateTrial(trial)"></span>
                                 <span>PURPOSE</span><img  ng-click="setCollapsed(trial, 'purpose')" ng-src="{{getCollapseIcon(trial, 'purpose')}}" class='icon'></img>
-                                <div collapse="isCollapsed[trial.trial_id]['purpose']">
+                                <div uib-collapse="isCollapsed[trial.trial_id]['purpose']">
                                     <div class="well well-lg">{{trial.purpose}}</div>
                                 </div>
                                 <span>ELIGIBILITY CRITERIA</span><img  ng-click="setCollapsed(trial, 'eligibility_criteria')" ng-src="{{getCollapseIcon(trial, 'eligibility_criteria')}}" class='icon'></img>
-                                <div collapse="isCollapsed[trial.trial_id]['eligibility_criteria']">
+                                <div uib-collapse="isCollapsed[trial.trial_id]['eligibility_criteria']">
                                     <div class="well well-lg">{{trial.eligibility_criteria}}</div>
                                 </div>
                             </div>
@@ -59,6 +59,6 @@
             </tbody>
         </table>
 
-        </accordion-group>
-    </accordion>
+        </uib-accordion-group>
+    </uib-accordion>
 </div>

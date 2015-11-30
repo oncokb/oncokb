@@ -343,12 +343,12 @@ angular.module('oncokbApp')
                 }
             }
 
-            function updateGene(geneString, success, fail) {
+            function updateGene(data, success, fail) {
                 if (dataFromFile) {
                     success('');
                 } else {
                     DriveAnnotation
-                        .updateGene(geneString)
+                        .updateGene(data)
                         .success(function (data) {
                             success(data);
                         })

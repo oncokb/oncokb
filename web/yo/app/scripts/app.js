@@ -290,6 +290,15 @@ OncoKB.curateInfo = {
             type: 'string'
         }
     },
+    'TimeStampWithCurator': {
+        'value': {
+            type: 'string'
+        },
+        //Edit by
+        'by': {
+            type: 'Curator'
+        }
+    },
     'EStatus': {
         'value': {
             type: 'string'
@@ -299,6 +308,14 @@ OncoKB.curateInfo = {
         },
         'date': {
             type: 'string'
+        }
+    },
+    'VUSItem': {
+        name: {
+            type: 'string'
+        },
+        time: {
+            type: 'list'
         }
     }
 };
@@ -473,13 +490,19 @@ angular.module('oncokbApp', [
                 access: access.curator,
                 internalUse: false
             })
-            .when('/dataSummary', {
-                templateUrl: 'views/datasummary.html',
-                controller: 'DatasummaryCtrl',
-                access: access.admin,
-                internalUse: true
-
-            })
+            //.when('/vus', {
+            //    templateUrl: 'views/vus.html',
+            //    controller: 'VUSCtrl',
+            //    access: access.admin,
+            //    internalUse: true
+            //})
+            //.when('/dataSummary', {
+            //    templateUrl: 'views/datasummary.html',
+            //    controller: 'DatasummaryCtrl',
+            //    access: access.admin,
+            //    internalUse: true
+            //
+            //})
             .otherwise({
                 redirectTo: '/'
             });
@@ -487,7 +510,7 @@ angular.module('oncokbApp', [
         dialogsProvider.useBackdrop(true);
         dialogsProvider.useEscClose(true);
         dialogsProvider.useCopy(false);
-        dialogsProvider.setSize('md');
+        dialogsProvider.setSize('sm');
 
         $animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
 

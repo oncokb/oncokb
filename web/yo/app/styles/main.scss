@@ -1,4 +1,4 @@
-$icon-font-path: "app/components/bootstrap-sass-official/assets/fonts/bootstrap/";
+$icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/";
 // bower:scss
 @import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
@@ -150,7 +150,7 @@ p.editableBox {
 p.editableBox.doubleH {
   min-height: 40px;
 }
-.curateTrialItem {
+.curateTrialItem, .vusItem {
   float: left;
   height: 30px;
   margin: 5px;
@@ -158,10 +158,16 @@ p.editableBox.doubleH {
   padding: 3px 8px;
   border-radius: 3px;
 }
-.trialsInputGroup {
+.trialsInputGroup, .vusGroup {
   float: left;
   margin: 5px;
   width: 200px;
+}
+.vusItemDate {
+  margin-left: 5px;
+  font-size: 12px;
+  font-style: italic;
+  color: grey
 }
 .oncoKBALoading {
   position: absolute;
@@ -262,7 +268,7 @@ p.editableBox.doubleH {
   color: grey;
 }
 .geneMainDiv {
-  margin-bottom: 40px;
+  margin-bottom: 70px;
 }
 .accordionMarginTop {
   margin-top: 5px;
@@ -301,6 +307,7 @@ p.editableBox.doubleH {
   box-shadow: 0 0 4px rgba(0,0,0,.3);
   padding-top: 70px;
   min-height: 400px;
+  margin-bottom: 200px;
 }
 .ieWarning {
   width: 100%;
@@ -481,6 +488,11 @@ a:hover {
 h5 {
   margin-bottom: 0;
 }
+.vus-table thead, .vus-table tbody tr td:nth-child(1){
+  text-align: center;
+  font-style: italic;
+  font-weight: bold;
+}
 
 //Change sk-spinner style
 .sk-spinner-wave.mskcc div {
@@ -528,6 +540,35 @@ h5 {
   transition: all linear 0.5s;
 }
 
+.input-group-addon.primary {
+  color: rgb(255, 255, 255);
+  background-color: rgb(50, 118, 177);
+  border-color: rgb(40, 94, 142);
+}
+
+.input-group-addon.success {
+  color: rgb(255, 255, 255);
+  background-color: rgb(92, 184, 92);
+  border-color: rgb(76, 174, 76);
+}
+
+.input-group-addon.info {
+  color: rgb(255, 255, 255);
+  background-color: rgb(57, 179, 215);
+  border-color: rgb(38, 154, 188);
+}
+
+.input-group-addon.warning {
+  color: rgb(255, 255, 255);
+  background-color: rgb(240, 173, 78);
+  border-color: rgb(238, 162, 54);
+}
+
+.input-group-addon.danger {
+  color: rgb(255, 255, 255);
+  background-color: rgb(217, 83, 79);
+  border-color: rgb(212, 63, 58);
+}
 
 
 //Make sure the chosen dropdown always 100% no matter how the bower size changes

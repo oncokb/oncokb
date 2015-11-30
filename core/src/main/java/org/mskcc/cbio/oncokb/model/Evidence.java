@@ -1,10 +1,10 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
 
 
 /**
@@ -20,6 +20,8 @@ public class Evidence implements java.io.Serializable {
     private String description;
     private Set<Treatment> treatments;
     private String knownEffect;
+    private String status;
+    private Date lastEdit;
     private LevelOfEvidence levelOfEvidence;
     private Set<Article> articles;
     private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
@@ -100,6 +102,22 @@ public class Evidence implements java.io.Serializable {
         this.knownEffect = knownEffect;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getLastEdit() {
+        return lastEdit;
+    }
+
+    public void setLastEdit(Date lastEdit) {
+        this.lastEdit = lastEdit;
+    }
+
     public LevelOfEvidence getLevelOfEvidence() {
         return levelOfEvidence;
     }
@@ -135,7 +153,7 @@ public class Evidence implements java.io.Serializable {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 67 * hash + Objects.hashCode(this.evidenceId==null?this:this.evidenceId);
+        hash = 67 * hash + Objects.hashCode(this.evidenceId == null ? this : this.evidenceId);
         return hash;
     }
 
@@ -148,14 +166,14 @@ public class Evidence implements java.io.Serializable {
             return false;
         }
         final Evidence other = (Evidence) obj;
-        if (this.evidenceId==null || other.evidenceId==null ||
+        if (this.evidenceId == null || other.evidenceId == null ||
                 !Objects.equals(this.evidenceId, other.evidenceId)) {
             return false;
         }
         return true;
     }
 
-    
+
 }
 
 

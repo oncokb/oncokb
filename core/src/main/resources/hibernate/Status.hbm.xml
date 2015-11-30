@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.Status" table="status">
+        <id name="StatusId" type="java.lang.Integer">
+            <column name="status_id"/>
+            <generator class="identity"/>
+        </id>
+        <property name="statusType" column="status_type">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.mskcc.cbio.oncokb.model.StatusType</param>
+                <param name="type">12</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="status" type="string">
+            <column length="255" name="status"/>
+        </property>
+        <property name="timeStamp" type="string">
+            <column length="255" name="time_stamp"/>
+        </property>
+        <property name="user" type="string">
+            <column length="255" name="user"/>
+        </property>
+        <set lazy="false" name="genes" table="status_gene">
+            <key>
+                <column name="status_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Gene">
+                <column name="entrezGeneId" not-null="true"/>
+            </many-to-many>
+        </set>
+        <set lazy="false" name="alterations" table="status_alteration">
+            <key>
+                <column name="status_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
+                <column name="alteration_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <set lazy="false" name="tumorTypes" table="status_tumor_type">
+            <key>
+                <column name="status_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.TumorType">
+                <column name="tumor_type_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <set lazy="false" name="evidences" table="status_evidence">
+            <key>
+                <column name="status_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Evidence">
+                <column name="evidence_id" not-null="true"/>
+            </many-to-many>
+        </set>
+    </class>
+    <query name="findStatusByAlteration">
+        <![CDATA[select e from Status e join e.alterations a where a.alterationId=?]]>
+    </query>
+    <query name="findStatusByAlterationAndStatusType">
+        <![CDATA[select e from Status e join e.alterations a where a.alterationId=? and e.statusType=?]]>
+    </query>
+</hibernate-mapping>

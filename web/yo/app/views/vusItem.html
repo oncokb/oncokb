@@ -1,0 +1,14 @@
+<div class="input-group  input-group-sm vusGroup">
+    <span class="input-group-addon" ng-class="getClass(dt)" qtip type="vusItem" time="dt" by="dtBy">{{::variant.name.getText()}}</span>
+    <span class="input-group-btn" ng-show="fileEditable">
+        <button class="btn btn-default"
+                type="button" ng-click="update()" qtip content="Recheck: set the date to today">
+            <i class="fa fa-refresh"></i>
+        </button>
+        <!--<button type="button" class="btn btn-default" uib-datepicker-popup="" ng-model="dt" is-open="status.opened"-->
+                <!--datepicker-options="dateOptions" ng-click="open($event)"><i class="fa fa-calendar"></i></button>-->
+        <button class="btn btn-default" type="button" ng-click="remove()">
+            <i class="fa fa-trash-o"></i>
+        </button>
+    </span>
+</div>
