@@ -302,14 +302,14 @@
                               </span>
                               <span ng-if="checkTI(ti, 1, 0)">
                                 <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.SR"></drive-realtime-string>
-                                <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html="{{::levelExps.SR}}"></i>
+                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="{{levelExps.SR}}"></i>
                               </span>
                               <span ng-if="checkTI(ti, 0, 1)">
                                 <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 0, 0)">
                                 <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IR"></drive-realtime-string>
-                                <i class="fa fa-question-circle" style="color: grey;" tooltip-placement="top" tooltip-html="{{::levelExps.IR}}"></i>
+                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="{{levelExps.IR}}"></i>
                               </span>
                             </p>
                             <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">

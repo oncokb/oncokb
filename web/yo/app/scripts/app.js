@@ -490,12 +490,12 @@ angular.module('oncokbApp', [
                 access: access.curator,
                 internalUse: false
             })
-            .when('/vus', {
-                templateUrl: 'views/vus.html',
-                controller: 'VUSCtrl',
-                access: access.admin,
-                internalUse: true
-            })
+            //.when('/vus', {
+            //    templateUrl: 'views/vus.html',
+            //    controller: 'VUSCtrl',
+            //    access: access.admin,
+            //    internalUse: true
+            //})
             //.when('/dataSummary', {
             //    templateUrl: 'views/datasummary.html',
             //    controller: 'DatasummaryCtrl',
