@@ -20,9 +20,19 @@ angular.module('oncokbApp')
                             console.log(docs[docIndex].title, '\t\t', docIndex);
                             console.log('\t copying');
                             var gene = realtime.getModel().getRoot().get('gene');
+                            var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
                                 var geneData = importer.getGeneData(gene, excludeObsolete);
-                                DatabaseConnector.updateGene(JSON.stringify(geneData),
+                                var vusData = importer.getVUSData(vus);
+                                var params = {};
+
+                                if(geneData) {
+                                    params.gene = JSON.stringify(geneData);
+                                }
+                                if(vusData) {
+                                    params.vus = JSON.stringify(vusData);
+                                }
+                                DatabaseConnector.updateGene(params,
                                     function (result) {
                                         console.log('\t success', result);
                                         $timeout(function () {
