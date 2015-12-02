@@ -70,8 +70,10 @@ angular.module('oncokbApp')
 
 
                 scope.$watch("time", function (n, o) {
-                    if($(element).data('qtip')) {
-                        $(element).qtip('api').set('content.text', '<span>Last edit: ' + new Date(scope.time).toLocaleDateString() + '</span><br/><span>By: ' + scope.by + '</span>');
+                    if(n) {
+                        if($(element).data('qtip')) {
+                            $(element).qtip('api').set('content.text', '<span>Last edit: ' + new Date(scope.time).toLocaleDateString() + '</span><br/><span>By: ' + scope.by + '</span>');
+                        }
                     }
                 });
             }

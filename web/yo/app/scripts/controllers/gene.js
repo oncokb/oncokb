@@ -1942,9 +1942,9 @@ angular.module('oncokbApp')
             };
 
             if ($scope.userRole === 8) {
-                $scope.status.hideAllObsolete = true;
-            } else {
                 $scope.status.hideAllObsolete = false;
+            } else {
+                $scope.status.hideAllObsolete = true;
             }
 
             $scope.$watch('status.hideAllEmpty', function (n, o) {
