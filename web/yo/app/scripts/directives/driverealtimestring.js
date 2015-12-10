@@ -79,8 +79,8 @@ angular.module('oncokbApp')
         };
 
         $scope.uncheck = function (event) {
-          if($scope.content.preStringO === $scope.content.stringO && $scope.content.preStringO !== false) {
-            $scope.content.stringO = 'false';
+          if($scope.content.preStringO === $scope.content.stringO && $scope.content.preStringO !== '') {
+            $scope.content.stringO = '';
           }
           $scope.content.preStringO = $scope.content.stringO;
           console.log(event, $scope.content.stringO);
