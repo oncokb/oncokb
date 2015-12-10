@@ -466,6 +466,7 @@ angular.module('oncokbApp')
                 info.push(tumorTypeName);
             }
 
+            info.push('.');
             statement += info.join(' ');
 
             return statement;
