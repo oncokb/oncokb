@@ -153,7 +153,7 @@ public class ClinicalTrialsImporter {
         trial.setEligibilityCriteria(eligibility);
         trial.setCountries(countries);
         trial.setDrugs(parseDrugs(docEle));
-        trial.setAlterations(parseAlterations(docEle));
+//        trial.setAlterations(parseAlterations(docEle));
         
         clinicalTrialBo.saveOrUpdate(trial);
         
