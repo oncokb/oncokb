@@ -64,7 +64,7 @@ public class ClinicalTrialsImporter {
     }
     
     public static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
-        setAllTrials();
+//        setAllTrials();
         
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -116,16 +116,17 @@ public class ClinicalTrialsImporter {
         Element docEle = doc.getDocumentElement();
         
         String lastChangedDate = getText(docEle, "lastchanged_date");
-        ClinicalTrial trial = allTrials.get(nctId);
+        ClinicalTrial trial = clinicalTrialBo.findClinicalTrialByNctId(nctId);
         if (trial==null) {
             System.out.print(" new");
             
             trial = new ClinicalTrial();
             trial.setNctId(nctId);
-            allTrials.put(nctId, trial);
         } else if ( !lastChangedDate.equalsIgnoreCase(trial.getLastChangedDate())) {
             // updated
             System.out.print(" updated");
+            trial.setLastChangedDate(lastChangedDate);
+            clinicalTrialBo.saveOrUpdate(trial);
         } else {
             // if no update
             return trial;
@@ -152,7 +153,7 @@ public class ClinicalTrialsImporter {
         trial.setEligibilityCriteria(eligibility);
         trial.setCountries(countries);
         trial.setDrugs(parseDrugs(docEle));
-        trial.setAlterations(parseAlterations(docEle));
+//        trial.setAlterations(parseAlterations(docEle));
         
         clinicalTrialBo.saveOrUpdate(trial);
         
@@ -319,6 +320,8 @@ public class ClinicalTrialsImporter {
         
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
+
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         
         for (String url : urls) {
             int pg = 1;
@@ -348,7 +351,7 @@ public class ClinicalTrialsImporter {
                     }
                         
                     String lastChangedDate = getText(el, "last_changed");
-                    ClinicalTrial trial = allTrials.get(nctId);
+                    ClinicalTrial trial = clinicalTrialBo.findClinicalTrialByNctId(nctId);
                     if (trial == null) {
 //                        Element e = getElement(el, "status");
 //                        if (e!=null && "Y".equals(e.getAttribute("open"))) {

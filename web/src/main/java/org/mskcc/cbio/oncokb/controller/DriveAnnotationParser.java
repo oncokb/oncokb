@@ -457,55 +457,58 @@ public class DriveAnnotationParser {
             System.out.println("    No info...");
         }
 
-        // Prevalance
-        if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
-            System.out.println("##      Prevalance: " + alterations.toString());
-            String prevalenceTxt = cancerObj.getString("prevalence");
-            if (!prevalenceTxt.isEmpty()) {
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.PREVALENCE);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setTumorType(tumorType);
+        // Prevalence
+        if ((cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) || (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty())) {
+            System.out.println("##      Prevalence: " + alterations.toString());
 
-                if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
-                    String desc = cancerObj.getString("shortPrevalence").trim();
-                    evidence.setShortDescription(desc);
-                    setDocuments(desc, evidence);
-                }
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.PREVALENCE);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
 
-                evidence.setDescription(prevalenceTxt);
-                setDocuments(prevalenceTxt, evidence);
-
-                evidenceBo.save(evidence);
+            if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
+                System.out.println("###         Short prevalence: " + alterations.toString());
+                String desc = cancerObj.getString("shortPrevalence").trim();
+                evidence.setShortDescription(desc);
+                setDocuments(desc, evidence);
             }
+
+            if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
+                System.out.println("###         Full prevalence: " + alterations.toString());
+                String desc = cancerObj.getString("prevalence").trim();
+                evidence.setDescription(desc);
+                setDocuments(desc, evidence);
+            }
+            evidenceBo.save(evidence);
         } else {
             System.out.println("##      No Prevalance for " + alterations.toString());
         }
 
         // Prognostic implications
-        if (cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) {
-            System.out.println("##      Proganostic implications:" + alterations.toString());
-            String prognosticTxt = cancerObj.getString("progImp");
-            if (!prognosticTxt.isEmpty()) {
+        if ((cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) || (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty())) {
+            System.out.println("##      Prognostic implications:" + alterations.toString());
 
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.PROGNOSTIC_IMPLICATION);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setTumorType(tumorType);
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.PROGNOSTIC_IMPLICATION);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
 
-                if (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty()) {
-                    String desc = cancerObj.getString("shortProgImp").trim();
-                    evidence.setShortDescription(desc);
-                    setDocuments(desc, evidence);
-                }
-
-                evidence.setDescription(prognosticTxt);
-                setDocuments(prognosticTxt, evidence);
-
-                evidenceBo.save(evidence);
+            if (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty()) {
+                System.out.println("###         Short prognostic implications: " + alterations.toString());
+                String desc = cancerObj.getString("shortProgImp").trim();
+                evidence.setShortDescription(desc);
+                setDocuments(desc, evidence);
             }
+
+            if (cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) {
+                System.out.println("###         Full prognostic implications: " + alterations.toString());
+                String desc = cancerObj.getString("progImp").trim();
+                evidence.setDescription(desc);
+                setDocuments(desc, evidence);
+            }
+            evidenceBo.save(evidence);
         } else {
             System.out.println("##      No Proganostic implications " + alterations.toString());
         }

@@ -24,7 +24,7 @@
                     <td>{{gene.phase}}</a></td>
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.name}}</span><br ng-if="$index<curator.length-1"/></div></td>
                     <td><div ng-repeat="curator in gene.curators"><span>{{curator.mskccEmail}}</span><br ng-if="$index<curator.length-1"/></div></td>
-                    <td>{{gene.modifiedDate | date : 'MMM d, h:mm a'}}</a></td>
+                    <td>{{gene.modifiedDate | date : 'MMM d, h:mm a yyyy'}}</a></td>
                     <td ng-show="userRole === 8">{{gene.oncokbStatus}}</a></td>
                     <td>
                         <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">1</span></i>

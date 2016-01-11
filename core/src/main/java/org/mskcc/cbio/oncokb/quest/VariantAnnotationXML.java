@@ -122,7 +122,13 @@ public final class VariantAnnotationXML {
                 sbTumorType.append("    <prevalence>\n");
                 sbTumorType.append("        <description>\n");
                 for (Evidence ev : prevalanceEbs) {
-                    sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(ev.getDescription()).trim()).append("\n");
+                    String description = ev.getShortDescription();
+                    if (description == null) {
+                        description = ev.getDescription();
+                    }
+                    if (description != null) {
+                        sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
+                    }
                 }
 
                 sbTumorType.append("</description>\n");
@@ -140,9 +146,12 @@ public final class VariantAnnotationXML {
                 sbTumorType.append("        <description>\n");
                 for (Evidence ev : prognosticEbs) {
                     String description = ev.getShortDescription();
-                    if(description==null)
+                    if(description==null) {
                         description = ev.getDescription();
-                    sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
+                    }
+                    if (description != null) {
+                        sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
+                    }
                 }
                 sbTumorType.append("</description>\n");
 
