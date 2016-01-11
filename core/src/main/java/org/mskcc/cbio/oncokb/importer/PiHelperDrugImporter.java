@@ -13,6 +13,7 @@ import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
+import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 
 /**
  *
@@ -23,12 +24,11 @@ public class PiHelperDrugImporter {
         throw new AssertionError();
     }
     
-    private static final String DRUG_FILE = "/Users/zhangh2/Desktop/INFO_SITES/oncokb/drugs.tsv";
-    
     public static void main(String[] args) throws IOException {
+        String drugFilePath = PropertiesUtils.getProperties("importer.drugs");
         List<String> lines = FileUtils.readTrimedLinesStream(
-                new FileInputStream(DRUG_FILE));
-	
+                new FileInputStream(drugFilePath));
+
     	DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         
         System.out.println("importing...");
