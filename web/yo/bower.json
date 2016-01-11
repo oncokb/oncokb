@@ -48,5 +48,14 @@
   "resolutions": {
     "angular": "~1.4.8",
     "angular-bootstrap": "~0.14.3"
+  },
+  "overrides": {
+    "angular-dialog-service": {
+      "main": [
+        "dist/dialogs.min.css",
+        "dist/dialogs.min.js",
+        "dist/dialogs-default-translations.min.js"
+      ]
+    }
   }
 }
