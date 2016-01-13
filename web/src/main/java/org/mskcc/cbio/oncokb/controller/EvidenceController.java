@@ -353,25 +353,20 @@ public class EvidenceController {
         }
         evidences.addAll(evidenceBo.findEvidencesByGene(genes.values(), filteredETs));
 
+        List<Alteration> alts = new ArrayList<>();
+        alts.addAll(alterations.values());
+        alts.addAll(alterationsME.values());
+
         if (evidenceTypes.contains(EvidenceType.MUTATION_EFFECT)) {
             filteredETs.add(EvidenceType.MUTATION_EFFECT);
-            List<Alteration> alts = new ArrayList<>();
-            alts.addAll(alterations.values());
-            alts.addAll(alterationsME.values());
             evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.MUTATION_EFFECT)));
         }
         if (evidenceTypes.contains(EvidenceType.ONCOGENIC)) {
             filteredETs.add(EvidenceType.ONCOGENIC);
-            List<Alteration> alts = new ArrayList<>();
-            alts.addAll(alterations.values());
-            alts.addAll(alterationsME.values());
             evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.ONCOGENIC)));
         }
         if (evidenceTypes.contains(EvidenceType.VUS)) {
             filteredETs.add(EvidenceType.VUS);
-            List<Alteration> alts = new ArrayList<>();
-            alts.addAll(alterations.values());
-            alts.addAll(alterationsME.values());
             evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.VUS)));
         }
         if (evidenceTypes.size() != filteredETs.size()) {
