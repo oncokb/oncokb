@@ -16,8 +16,16 @@ OncoKB front-end is built with lots of great open source JS libraries. AngularJS
 
 ##Use website without back-end
 1. Copy data-EXAMPLE to data under web/yo/app/scripts/
-2. Set parameter 'dataFromFile' to true in web/yo/app/scripts/services/dataconnector.js
-3. Under web/yo/, run 'grunt serve'
+2. Prepare properties files  
+    ```c
+    cd core/src/main/resources/properties/
+    cp config-EXAMPLE.properties config.properties
+    cp database-EXAMPLE.properties database.properties
+    cp log4j-EXAMPLE.properties log4j.properties
+    ```
+
+3. Set parameter 'dataFromFile' to true in web/yo/app/scripts/services/dataconnector.js
+4. Under web/yo/, run 'grunt serve'
 
 ## Show error in console
 Uncomment the $delegate
