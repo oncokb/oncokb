@@ -449,7 +449,7 @@ angular.module('oncokbApp', [
     .constant('Levenshtein', window.Levenshtein)
     .constant('XLSX', window.XLSX)
     .constant('PDF', window.jsPDF)
-    .config(function ($provide, $locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
+    .config(function ($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
         var access = config.accessLevels;
 
         // $locationProvider.html5Mode(true);
@@ -543,6 +543,8 @@ angular.module('oncokbApp', [
                 //$delegate(exception, cause);
             };
         });
+
+        $sceProvider.enabled(false);
     });
 
 /**
