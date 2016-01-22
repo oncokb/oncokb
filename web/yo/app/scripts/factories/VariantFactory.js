@@ -241,10 +241,10 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', function ($http
         return $.param(data);
     };
 
-    function updateGene(geneString) {
+    function updateGene(data) {
         return $http.post(
             OncoKB.config.apiLink + 'driveAnnotation',
-            {'gene': geneString},
+            data,
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform

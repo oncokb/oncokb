@@ -6,14 +6,9 @@
 
 package org.mskcc.cbio.oncokb.util;
 
-import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 /**
@@ -49,7 +44,7 @@ public final class AlterationUtils {
             start = Integer.valueOf(m.group(2));
             end = start;
             var = m.group(3);
-            
+
             if (ref.equals(var)) {
                 consequence = "synonymous_variant";
             } else if (ref.equals("*")) {
@@ -112,6 +107,12 @@ public final class AlterationUtils {
                                 consequence = "inframe_deletion";
                                 break;
                         }
+                    }else {
+                        p = Pattern.compile("_splice");
+                        m = p.matcher(proteinChange);
+                        if (m.find()) {
+                            consequence = "splice_region_variant";
+                        }
                     }
                 }
             }
@@ -122,8 +123,7 @@ public final class AlterationUtils {
             consequence = "feature_truncation";
         }
         
-        VariantConsequenceBo variantConsequenceBo = ApplicationContextSingleton.getVariantConsequenceBo();
-        VariantConsequence variantConsequence = variantConsequenceBo.findVariantConsequenceByTerm(consequence);
+        VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
         
         if (alteration.getRefResidues()==null && ref!=null && !ref.isEmpty()) {
             alteration.setRefResidues(ref);
@@ -203,7 +203,7 @@ public final class AlterationUtils {
 
         VariantConsequence variantConsequence = null;
         if (consequence!=null) {
-            variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(consequence);
+            variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
         }
         alt.setConsequence(variantConsequence);
 

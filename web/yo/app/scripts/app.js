@@ -46,6 +46,7 @@ OncoKB.config = {
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/api/',
+    //apiLink: 'http://localhost:8080/oncokb/api/',
     accessLevels: {}
 };
 
@@ -289,6 +290,15 @@ OncoKB.curateInfo = {
             type: 'string'
         }
     },
+    'TimeStampWithCurator': {
+        'value': {
+            type: 'string'
+        },
+        //Edit by
+        'by': {
+            type: 'Curator'
+        }
+    },
     'EStatus': {
         'value': {
             type: 'string'
@@ -298,6 +308,14 @@ OncoKB.curateInfo = {
         },
         'date': {
             type: 'string'
+        }
+    },
+    'VUSItem': {
+        name: {
+            type: 'string'
+        },
+        time: {
+            type: 'list'
         }
     }
 };
@@ -431,7 +449,7 @@ angular.module('oncokbApp', [
     .constant('Levenshtein', window.Levenshtein)
     .constant('XLSX', window.XLSX)
     .constant('PDF', window.jsPDF)
-    .config(function ($provide, $locationProvider, $routeProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
+    .config(function ($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
         var access = config.accessLevels;
 
         // $locationProvider.html5Mode(true);
@@ -472,13 +490,19 @@ angular.module('oncokbApp', [
                 access: access.curator,
                 internalUse: false
             })
-            .when('/dataSummary', {
-                templateUrl: 'views/datasummary.html',
-                controller: 'DatasummaryCtrl',
-                access: access.admin,
-                internalUse: true
-
-            })
+            //.when('/vus', {
+            //    templateUrl: 'views/vus.html',
+            //    controller: 'VUSCtrl',
+            //    access: access.admin,
+            //    internalUse: true
+            //})
+            //.when('/dataSummary', {
+            //    templateUrl: 'views/datasummary.html',
+            //    controller: 'DatasummaryCtrl',
+            //    access: access.admin,
+            //    internalUse: true
+            //
+            //})
             .otherwise({
                 redirectTo: '/'
             });
@@ -486,7 +510,7 @@ angular.module('oncokbApp', [
         dialogsProvider.useBackdrop(true);
         dialogsProvider.useEscClose(true);
         dialogsProvider.useCopy(false);
-        dialogsProvider.setSize('md');
+        dialogsProvider.setSize('sm');
 
         $animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
 
@@ -519,6 +543,8 @@ angular.module('oncokbApp', [
                 //$delegate(exception, cause);
             };
         });
+
+        $sceProvider.enabled(false);
     });
 
 /**

@@ -6,6 +6,8 @@ package org.mskcc.cbio.oncokb.controller;
 
 import java.io.IOException;
 import java.lang.Exception;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,14 +42,74 @@ public class DriveAnnotationParser {
     public
     @ResponseBody
     void getEvidence(
-            @RequestParam(value = "gene", required = true) String gene) throws IOException {
+            @RequestParam(value = "gene", required = true) String gene,
+            @RequestParam(value = "vus", required = false) String vus
+    ) throws IOException {
 
-        JSONObject jsonObj = new JSONObject(gene);
-        parseGene(jsonObj);
+        if (gene == null) {
+            System.out.println("#No gene info available.");
+        } else {
+            JSONObject jsonObj = new JSONObject(gene);
+            JSONArray jsonArray = null;
+            if (vus != null) {
+                jsonArray = new JSONArray(vus);
+            }
+            parseGene(jsonObj, jsonArray);
+        }
     }
 
+    private static void parseVUS(Gene gene, JSONArray vus) {
+        System.out.println("##    Variants of unknown significance");
+        if (gene != null && vus != null) {
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
 
-    private static void parseGene(JSONObject geneInfo) throws IOException {
+            for (int i = 0; i < vus.length(); i++) {
+                JSONObject variant = vus.getJSONObject(i);
+                String mutationStr = variant.getString("name");
+                String lastEdit = variant.getString("lastEdit");
+
+                Map<String, String> mutations = parseMutationString(mutationStr);
+                Set<Alteration> alterations = new HashSet<Alteration>();
+
+                for (Map.Entry<String, String> mutation : mutations.entrySet()) {
+                    String proteinChange = mutation.getKey();
+                    String displayName = mutation.getValue();
+                    Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                    if (alteration == null) {
+                        alteration = new Alteration();
+                        alteration.setGene(gene);
+                        alteration.setAlterationType(type);
+                        alteration.setAlteration(proteinChange);
+                        alteration.setName(displayName);
+                        AlterationUtils.annotateAlteration(alteration, proteinChange);
+                        alterationBo.save(alteration);
+                    }
+                    alterations.add(alteration);
+                }
+
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.VUS);
+                evidence.setGene(gene);
+                evidence.setAlterations(alterations);
+                if (lastEdit != null) {
+                    Date date = new Date(Long.valueOf(lastEdit).longValue());
+                    evidence.setLastEdit(date);
+                }
+                evidenceBo.save(evidence);
+            }
+        } else {
+            if (gene == null) {
+                System.out.println("###      No gene available.");
+            }
+            if (vus == null) {
+                System.out.println("###      No VUS available.");
+            }
+        }
+    }
+
+    private static void parseGene(JSONObject geneInfo, JSONArray vus) throws IOException {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
             String hugo = geneInfo.getString("name").trim();
@@ -96,6 +158,9 @@ public class DriveAnnotationParser {
 
                 // mutations
                 parseMutations(gene, geneInfo.has("mutations") ? geneInfo.getJSONArray("mutations") : null);
+
+                // Variants of unknown significance
+                parseVUS(gene, vus);
             } else {
                 System.out.print("No gene name available");
             }
@@ -143,7 +208,7 @@ public class DriveAnnotationParser {
                 parseMutation(gene, mutations.getJSONObject(i));
             }
         } else {
-            System.out.println("    no muation available.");
+            System.out.println("    no mutation available.");
         }
     }
 
@@ -392,55 +457,58 @@ public class DriveAnnotationParser {
             System.out.println("    No info...");
         }
 
-        // Prevalance
-        if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
-            System.out.println("##      Prevalance: " + alterations.toString());
-            String prevalenceTxt = cancerObj.getString("prevalence");
-            if (!prevalenceTxt.isEmpty()) {
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.PREVALENCE);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setTumorType(tumorType);
+        // Prevalence
+        if ((cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) || (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty())) {
+            System.out.println("##      Prevalence: " + alterations.toString());
 
-                if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
-                    String desc = cancerObj.getString("shortPrevalence").trim();
-                    evidence.setShortDescription(desc);
-                    setDocuments(desc, evidence);
-                }
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.PREVALENCE);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
 
-                evidence.setDescription(prevalenceTxt);
-                setDocuments(prevalenceTxt, evidence);
-
-                evidenceBo.save(evidence);
+            if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
+                System.out.println("###         Short prevalence: " + alterations.toString());
+                String desc = cancerObj.getString("shortPrevalence").trim();
+                evidence.setShortDescription(desc);
+                setDocuments(desc, evidence);
             }
+
+            if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
+                System.out.println("###         Full prevalence: " + alterations.toString());
+                String desc = cancerObj.getString("prevalence").trim();
+                evidence.setDescription(desc);
+                setDocuments(desc, evidence);
+            }
+            evidenceBo.save(evidence);
         } else {
             System.out.println("##      No Prevalance for " + alterations.toString());
         }
 
         // Prognostic implications
-        if (cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) {
-            System.out.println("##      Proganostic implications:" + alterations.toString());
-            String prognosticTxt = cancerObj.getString("progImp");
-            if (!prognosticTxt.isEmpty()) {
+        if ((cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) || (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty())) {
+            System.out.println("##      Prognostic implications:" + alterations.toString());
 
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.PROGNOSTIC_IMPLICATION);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setTumorType(tumorType);
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(EvidenceType.PROGNOSTIC_IMPLICATION);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setTumorType(tumorType);
 
-                if (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty()) {
-                    String desc = cancerObj.getString("shortProgImp").trim();
-                    evidence.setShortDescription(desc);
-                    setDocuments(desc, evidence);
-                }
-
-                evidence.setDescription(prognosticTxt);
-                setDocuments(prognosticTxt, evidence);
-
-                evidenceBo.save(evidence);
+            if (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty()) {
+                System.out.println("###         Short prognostic implications: " + alterations.toString());
+                String desc = cancerObj.getString("shortProgImp").trim();
+                evidence.setShortDescription(desc);
+                setDocuments(desc, evidence);
             }
+
+            if (cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) {
+                System.out.println("###         Full prognostic implications: " + alterations.toString());
+                String desc = cancerObj.getString("progImp").trim();
+                evidence.setDescription(desc);
+                setDocuments(desc, evidence);
+            }
+            evidenceBo.save(evidence);
         } else {
             System.out.println("##      No Proganostic implications " + alterations.toString());
         }

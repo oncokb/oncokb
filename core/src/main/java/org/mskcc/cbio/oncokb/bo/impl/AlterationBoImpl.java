@@ -20,6 +20,7 @@ import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
 /**
  * @author jgao
@@ -80,12 +81,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
 
             if (alteration.getConsequence().getIsGenerallyTruncating()) {
-                VariantConsequence truncatingVariantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm("feature_truncation");
+                VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
                 alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
             }
         }
 
-        VariantConsequence anyConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm("any");
+        VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
         //TODO: add activating or inactivating alterations

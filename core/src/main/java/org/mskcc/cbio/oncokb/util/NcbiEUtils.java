@@ -39,7 +39,7 @@ public final class NcbiEUtils {
                 String pubdate = (String)(articleInfo.get("pubdate"));
                 article.setPubDate(pubdate);
 
-                if(!articleInfo.get("authors").getClass().equals(String.class) ){
+                if(articleInfo.get("authors") != null && !articleInfo.get("authors").getClass().equals(String.class) ){
                     List<Map<String, String>> authors = (List)(articleInfo.get("authors"));
                     article.setAuthors(formatAuthors(authors));
                 }else{

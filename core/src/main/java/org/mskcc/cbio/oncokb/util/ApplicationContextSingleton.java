@@ -59,4 +59,8 @@ public final class ApplicationContextSingleton {
     public static TumorTypeBo getTumorTypeBo() {
         return TumorTypeBo.class.cast(getApplicationContext().getBean("tumorTypeBo"));
     }
+
+    public static StatusBo getStatusBo() {
+        return StatusBo.class.cast(getApplicationContext().getBean("statusBo"));
+    }
 }

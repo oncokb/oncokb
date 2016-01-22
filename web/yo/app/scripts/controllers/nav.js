@@ -10,10 +10,11 @@
 angular.module('oncokbApp')
 .controller('NavCtrl', function ($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector) {
     var tabs = {
+        //'vus': 'VUS',
         'tree': 'Tree',
         'variant': 'Variant Annotation',
         'genes': 'Genes',
-        'dataSummary': 'Summary',
+        //'dataSummary': 'Summary',
         'reportGenerator': 'Tools'
     };
 
@@ -58,7 +59,8 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'genes', value: tabs.genes});
         }
         if(access.authorize(accessLevels.admin) && $rootScope.internal) {
-            var keys = ['tree', 'variant', 'dataSummary', 'reportGenerator'];
+            var keys = ['tree', 'variant','reportGenerator'];
+            //var keys = ['vus', 'tree', 'variant','reportGenerator'];
 
             keys.forEach(function(e){
                 filterTabs.push({'key': e, 'value': tabs[e]});

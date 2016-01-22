@@ -20,9 +20,19 @@ angular.module('oncokbApp')
                             console.log(docs[docIndex].title, '\t\t', docIndex);
                             console.log('\t copying');
                             var gene = realtime.getModel().getRoot().get('gene');
+                            var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = importer.getData(gene, excludeObsolete);
-                                DatabaseConnector.updateGene(JSON.stringify(geneData),
+                                var geneData = importer.getGeneData(gene, excludeObsolete);
+                                var vusData = importer.getVUSData(vus);
+                                var params = {};
+
+                                if(geneData) {
+                                    params.gene = JSON.stringify(geneData);
+                                }
+                                if(vusData) {
+                                    params.vus = JSON.stringify(vusData);
+                                }
+                                DatabaseConnector.updateGene(params,
                                     function (result) {
                                         console.log('\t success', result);
                                         $timeout(function () {
@@ -353,6 +363,62 @@ angular.module('oncokbApp')
                     }
                 });
             };
+
+            $scope.convertLevels = function () {
+                console.info('Converting levels...');
+
+                convertLevels(0, function () {
+                    console.info('Finished.');
+                });
+            };
+
+            function convertLevels(index, callback) {
+                if(index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function (realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        } else {
+                            console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function (mutation, index) {
+                                    mutation.tumors.asArray().forEach(function (tumor) {
+                                        tumor.TI.asArray().forEach(function (ti) {
+                                            ti.treatments.asArray().forEach(function (treatment) {
+                                                if(treatment.level.getText() === '3') {
+                                                    console.log('\t', mutation.name.getText());
+                                                    console.log('\t\t', tumor.name.getText());
+                                                    console.log('\t\t\t', ti.name.getText());
+                                                    console.log('\t\t\t\t', 'Drug:', treatment.name.getText(), 'Level:', treatment.level.getText(), '\t converting to ', '3B');
+                                                    treatment.level.setText('3B');
+                                                }else {
+                                                    //console.log('\t\t\t\t', 'Drug:', treatment.name.getText(), 'Level:', treatment.level.getText());
+                                                }
+                                            })
+                                        });
+                                    });
+                                });
+                                model.endCompoundOperation();
+                                $timeout(function () {
+                                    convertLevels(++index, callback);
+                                }, 200, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function () {
+                                    convertLevels(++index, callback);
+                                }, 200, false);
+                            }
+                        }
+                    });
+                }else {
+                    if(_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
 
             function getAlteration(codon, aa) {
                 var alteration = [];
@@ -802,8 +868,8 @@ angular.module('oncokbApp')
             }
         }]
 )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', 'jspdf',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, jspdf) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf) {
             $scope.test = function (event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
@@ -841,7 +907,7 @@ angular.module('oncokbApp')
                         _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
                         _mutation.name.setText(newMutationName);
                         _mutation.oncogenic_eStatus.set('obsolete', 'false');
-                        _mutation.oncogenic_eStatus.set('hotspot', 'FALSE');
+                        _mutation.shortSummary_eStatus.set('obsolete', 'false');
 
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
@@ -884,18 +950,24 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function () {
-                var gene = importer.getData(this.gene);
+                var gene = importer.getGeneData(this.gene);
                 console.log(gene);
             };
 
             $scope.updateGene = function () {
                 $scope.docStatus.savedGene = false;
 
-                var gene = importer.getData(this.gene, true);
+                var gene = importer.getGeneData(this.gene, true);
+                var vus = importer.getVUSData(this.vus);
+                var params = {};
 
-                console.log(gene);
-                // $timeout(function(){
-                DatabaseConnector.updateGene(JSON.stringify(gene), function (result) {
+                if(gene) {
+                    params.gene = JSON.stringify(gene);
+                }
+                if(vus) {
+                    params.vus = JSON.stringify(vus);
+                }
+                DatabaseConnector.updateGene(params, function (result) {
                     $scope.docStatus.savedGene = true;
                     console.log('success', result);
                     changeLastUpdate();
@@ -1018,6 +1090,38 @@ angular.module('oncokbApp')
                         }
                     } else {
                         dialogs.notify('Warning', 'Trial exists.');
+                    }
+                }
+            };
+
+            $scope.addVUSItem = function (newVUSName, newVUSTime) {
+                if (newVUSName) {
+                    var notExist = true;
+                    newVUSName = newVUSName.trim();
+                    $scope.gene.mutations.asArray().forEach(function (e, i) {
+                        if (e.name.getText().trim().toLowerCase() === newVUSName.toLowerCase()) {
+                            notExist = false;
+                        }
+                    });
+
+                    if (notExist && !containVariantInVUS(newVUSName)) {
+                        $scope.realtimeDocument.getModel().beginCompoundOperation();
+                        var vus = $scope.realtimeDocument.getModel().create(OncoKB.VUSItem);
+                        var timeStamp = $scope.realtimeDocument.getModel().create(OncoKB.TimeStampWithCurator);
+
+                        if (!newVUSTime) {
+                            newVUSTime = new Date().getTime().toString();
+                        }
+
+                        timeStamp.value.setText(newVUSTime);
+                        timeStamp.by.name.setText(User.name);
+                        timeStamp.by.email.setText(User.email);
+                        vus.name.setText(newVUSName);
+                        vus.time.push(timeStamp);
+                        $scope.vus.push(vus);
+                        $scope.realtimeDocument.getModel().endCompoundOperation();
+                    } else {
+                        dialogs.notify('Warning', 'Variant exists.');
                     }
                 }
             };
@@ -1257,7 +1361,7 @@ angular.module('oncokbApp')
             };
 
             $scope.generatePDF = function () {
-                jspdf.create(importer.getData(this.gene, true));
+                jspdf.create(importer.getGeneData(this.gene, true));
             };
 
             $scope.isOpenFunc = function (type) {
@@ -1548,6 +1652,7 @@ angular.module('oncokbApp')
                 }
                 $scope.document = file;
                 $scope.fileEditable = file.editable ? true : false;
+                addVUS();
                 $scope.status.rendering = false;
                 displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
             }
@@ -1743,11 +1848,13 @@ angular.module('oncokbApp')
                 var desS = {
                     '': '',
                     '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker.',
-                    '1': 'FDA-approved biomarker and drug association in this indication.',
-                    '2A': 'FDA-approved biomarker and drug association in another indication, and NCCN-compendium listed for this indication.',
-                    '2B': 'FDA-approved biomarker in another indication, but not FDA or NCCN-compendium-listed for this indication.',
+                    '1': 'FDA-approved biomarker and drug in this indication.',
+                    '2A': 'Standard-of-care biomarker and drug in this indication but not FDA-approved.',
+                    '2B': 'FDA-approved biomarker and drug in another indication, but not FDA or NCCN compendium-listed for this indication.',
                     '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
-                    '4': 'Preclinical evidence potentially links this biomarker to response but no FDA-approved or NCCN compendium-listed biomarker and drug association.'
+                    '3A': 'Clinical evidence links biomarker to drug response in this indication but neither biomarker or drug are FDA-approved or NCCN compendium-listed.',
+                    '3B': 'Clinical evidence links biomarker to drug response in another indication but neither biomarker or drug are FDA-approved or NCCN compendium-listed.',
+                    '4': 'Preclinical evidence associates this biomarker to drug response, where the biomarker and drug are NOT FDA-approved or NCCN compendium-listed.'
                 };
 
                 var desR = {
@@ -1762,7 +1869,7 @@ angular.module('oncokbApp')
                 var levelsCategories = {
                     SS: ['', '0', '1', '2A'],
                     SR: ['R1'],
-                    IS: ['', '2B', '3', '4'],
+                    IS: ['', '2B', '3A', '3B', '4'],
                     IR: ['R2', 'R3']
                 };
 
@@ -1784,8 +1891,33 @@ angular.module('oncokbApp')
                 this.hideEmpty = false;
             }
 
+            function containVariantInVUS(variantName) {
+                var size = $scope.vus.length;
+
+                for (var i = 0; i < size; i++) {
+                    if ($scope.vus.get(i).name.getText() === variantName) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            function addVUS() {
+                var model = $scope.realtimeDocument.getModel();
+                var vus;
+                if (!model.getRoot().get('vus')) {
+                    vus = model.createList();
+                    model.getRoot().set('vus', vus);
+                } else {
+                    vus = model.getRoot().get('vus');
+                }
+                $scope.vus = vus;
+            }
+
             $scope.fileTitle = $routeParams.geneName;
             $scope.gene = '';
+            $scope.vus = '';
             $scope.comments = '';
             $scope.newGene = {};
             $scope.collaborators = {};
@@ -1830,8 +1962,8 @@ angular.module('oncokbApp')
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = Users.getMe().role;
             $scope.levelExps = {
-                SR: '<strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib',
-                IR: '<strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/>'
+                SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
+                IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
             };
             $scope.showHideButtons = [
                 {'key': 'prevelenceShow', 'display': 'Prevalence'},
@@ -1868,9 +2000,9 @@ angular.module('oncokbApp')
             };
 
             if ($scope.userRole === 8) {
-                $scope.status.hideAllObsolete = true;
-            } else {
                 $scope.status.hideAllObsolete = false;
+            } else {
+                $scope.status.hideAllObsolete = true;
             }
 
             $scope.$watch('status.hideAllEmpty', function (n, o) {

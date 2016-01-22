@@ -4,21 +4,18 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import java.util.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 /**
  * @author jgao
@@ -154,6 +151,9 @@ public class EvidenceController {
             EvidenceQueryRes query = new EvidenceQueryRes();
 
             query.setId(requestQuery.getId());
+            query.setQueryGene(requestQuery.getHugoSymbol());;
+            query.setQueryAlteration(requestQuery.getAlteration());;
+            query.setQueryTumorType(requestQuery.getTumorType());
             query.setGene(getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
             if (query.getGene() != null) {
@@ -211,7 +211,7 @@ public class EvidenceController {
                         alt.setAlteration("fusions");
                     } else {
                         alt.setAlteration(alteration);
-                        variantConsequence = ApplicationContextSingleton.getVariantConsequenceBo().findVariantConsequenceByTerm(con);
+                        variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(con);
                         alt.setConsequence(variantConsequence);
                     }
                     alt.setAlterationType(AlterationType.MUTATION);
@@ -280,6 +280,13 @@ public class EvidenceController {
                     } else {
                         if (!CollectionUtils.intersection(evidence.getAlterations(), evidenceQuery.getAlterations()).isEmpty()) {
                             if (evidence.getTumorType() == null) {
+                                if(evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+                                    if (evidence.getDescription() == null) {
+                                        List<Alteration> alterations = new ArrayList<>();
+                                        alterations.addAll(evidence.getAlterations());
+                                        evidence.setDescription(SummaryUtils.variantSummary(Collections.singleton(evidence.getGene()), alterations, evidenceQuery.getQueryAlteration(), Collections.singleton(evidence.getTumorType()), evidenceQuery.getQueryTumorType()));
+                                    }
+                                }
                                 filtered.add(evidence);
                             } else {
                                 if (evidenceQuery.getTumorTypes().contains(evidence.getTumorType())) {
@@ -352,19 +359,21 @@ public class EvidenceController {
         }
         evidences.addAll(evidenceBo.findEvidencesByGene(genes.values(), filteredETs));
 
+        List<Alteration> alts = new ArrayList<>();
+        alts.addAll(alterations.values());
+        alts.addAll(alterationsME.values());
+
         if (evidenceTypes.contains(EvidenceType.MUTATION_EFFECT)) {
             filteredETs.add(EvidenceType.MUTATION_EFFECT);
-            List<Alteration> alts = new ArrayList<>();
-            alts.addAll(alterations.values());
-            alts.addAll(alterationsME.values());
             evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.MUTATION_EFFECT)));
         }
         if (evidenceTypes.contains(EvidenceType.ONCOGENIC)) {
             filteredETs.add(EvidenceType.ONCOGENIC);
-            List<Alteration> alts = new ArrayList<>();
-            alts.addAll(alterations.values());
-            alts.addAll(alterationsME.values());
             evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.ONCOGENIC)));
+        }
+        if (evidenceTypes.contains(EvidenceType.VUS)) {
+            filteredETs.add(EvidenceType.VUS);
+            evidences.addAll(evidenceBo.findEvidencesByAlteration(alts, Collections.singleton(EvidenceType.VUS)));
         }
         if (evidenceTypes.size() != filteredETs.size()) {
             //Include all level 1 evidences

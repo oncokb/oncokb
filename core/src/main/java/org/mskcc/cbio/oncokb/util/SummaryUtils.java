@@ -74,10 +74,10 @@ public class SummaryUtils {
                     if (oncogenic == 2) {
                         sb.append(" likely");
                     } else if (oncogenic == 1) {
-                        sb.append(" known");
+                        sb.append(" known to be");
                     }
 
-                    sb.append(" to be oncogenic. ");
+                    sb.append(" oncogenic. ");
                 } else {
                     sb.append("It is unknown whether ");
                     if (appendThe) {
