@@ -9,7 +9,7 @@ We use MySQL to store data after reviewing
 OncoKB front-end is built with lots of great open source JS libraries. AngularJS is used as framework. Bower is used to manage denpendencies. Yeoman is used to initiate project and angular-generator is used to create angular directive/service/factory etc.
 
 ##Install project
-1. Install npm & bower & yo (globally)
+1. Install npm & bower & yo & grunt-cli (globally)
 2. Go to web/yo folder
 3. npm install
 4. bower install
