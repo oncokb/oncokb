@@ -208,13 +208,9 @@ public class EvidenceController {
                 //Consequence format  a, b+c, d ... each variant pair (gene + alteration) could have one or multiple consequences. Multiple consequences are separated by '+'
                 for (String con : consequence.split("\\+")) {
                     Alteration alt = new Alteration();
-                    if (con.toLowerCase().contains("fusion")) {
-                        alt.setAlteration("fusions");
-                    } else {
-                        alt.setAlteration(alteration);
-                        variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(con);
-                        alt.setConsequence(variantConsequence);
-                    }
+                    alt.setAlteration(alteration);
+                    variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(con);
+                    alt.setConsequence(variantConsequence);
                     alt.setAlterationType(AlterationType.MUTATION);
                     alt.setGene(gene);
 
