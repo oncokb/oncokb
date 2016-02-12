@@ -16,6 +16,10 @@ public final class ApplicationContextSingleton {
     private final static ApplicationContext appContext = 
     		new ClassPathXmlApplicationContext("spring/config/BeanLocations.xml");
     
+    public static void main(String[] args) {
+        System.out.println(getGeneBo().findGeneByHugoSymbol("BRAF").getHugoSymbol());
+    }
+    
     private static ApplicationContext getApplicationContext() {
         return appContext;
     }

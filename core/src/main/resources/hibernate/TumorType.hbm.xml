@@ -4,6 +4,7 @@
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncokb.model.TumorType" table="tumor_type" catalog="oncokb">
+        <cache usage="nonstrict-read-write"/>
         <id name="tumorTypeId" type="string">
             <column name="tumor_type_id" length="100" />
             <generator class="assigned" />
