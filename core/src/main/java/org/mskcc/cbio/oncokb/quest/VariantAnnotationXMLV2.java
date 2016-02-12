@@ -14,13 +14,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -31,7 +30,6 @@ import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -60,8 +58,7 @@ public final class VariantAnnotationXMLV2 {
     
     public static String getVariantAnnotation(InputStream isXml) {
         try {
-            List<Alteration> alterations = new ArrayList<Alteration>();
-            List<String> alterationXmls = new ArrayList<String>();
+            Map<Alteration, String> mapAlterationXml = new LinkedHashMap<Alteration, String>();
 
             SAXReader reader = new SAXReader();
             Document document = reader.read(isXml);
@@ -71,6 +68,9 @@ public final class VariantAnnotationXMLV2 {
 
             // test id
             String testId = document.selectSingleNode("//xml/test_id").getText();
+            
+            // project id / test name
+            String testName = document.selectSingleNode("//xml/project_id").getText();
 
             // diagnosis
             String diagnosis = document.selectSingleNode("//xml/diagnosis").getText();
@@ -78,7 +78,7 @@ public final class VariantAnnotationXMLV2 {
             // Somatic variants
             List<Node> vcfNodes = document.selectNodes("//xml/somatic_variants/data");
             if (!vcfNodes.isEmpty()) {
-                runVcf2Maf(document.asXML(),alterations, alterationXmls, diagnosis);
+                runVcf2Maf(document.asXML(), mapAlterationXml, diagnosis);
             }
 //                for (Node vcfNode : vcfNodes) {
 //                    handleSomaticVariants(vcfNode, alterations, alterationXmls, diagnosis);
@@ -87,14 +87,19 @@ public final class VariantAnnotationXMLV2 {
             // Copy number alterations
             List<Node> cnaNodes = document.selectNodes("//xml/copy_number_alterations/copy_number_alteration");
             for (Node cnaNode : cnaNodes) {
-                handleCNA(cnaNode, alterations, alterationXmls, diagnosis);
+                handleCNA(cnaNode, mapAlterationXml, diagnosis);
             }
 
             // fusions
             List<Node> fusionNodes = document.selectNodes("//xml/fusion_genes/fusion_gene");
             for (Node fusionNode : fusionNodes) {
-                handleFusion(fusionNode, alterations, alterationXmls, diagnosis);
+                handleFusion(fusionNode, mapAlterationXml, diagnosis);
             }
+            
+            // identify other related variants such as TP53 wildtype
+            identifyAdditionalVariants(mapAlterationXml, diagnosis, getSequencedGenes(testName));
+            
+            List<Alteration> alterations = getAlterationOrderByLevelOfEvidence(mapAlterationXml);
 
             // exporting
             StringBuilder sb = new StringBuilder();
@@ -112,7 +117,7 @@ public final class VariantAnnotationXMLV2 {
             sb.append("<test_id>").append(testId).append("</test_id>\n");
 
             // variants
-            sb.append(exportVariants(alterationXmls));
+            sb.append(exportVariants(alterations, mapAlterationXml));
 
             // variant_interation
 
@@ -128,14 +133,14 @@ public final class VariantAnnotationXMLV2 {
         }
     }
     
-    private static void handleSomaticVariants(Node vcfNode, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) {
+    private static void handleSomaticVariants(Node vcfNode, Map<Alteration, String> mapAlterationXml, String diagnosis) {
         // do it here
     }
     
     /**
      * This is a hacky way to run VEP. We should switch to web service once that is ready.
      */
-    private static void runVcf2Maf(String inputXml, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) throws IOException, DocumentException, InterruptedException {
+    private static void runVcf2Maf(String inputXml, Map<Alteration, String> mapAlterationXml, String diagnosis) throws IOException, DocumentException, InterruptedException {
         File tmpFile = File.createTempFile("temp-oncokb-input-", ".xml");
         tmpFile.deleteOnExit();
         String inputPath = tmpFile.getAbsolutePath();
@@ -172,7 +177,6 @@ public final class VariantAnnotationXMLV2 {
             String alterationXml = "<variant_type>small_nucleotide_variant</variant_type>\n"
                     + node.selectSingleNode("genomic_locus").asXML()
                     + node.selectSingleNode("allele").asXML();
-            alterationXmls.add(alterationXml);
             
             String geneSymbol = node.selectSingleNode("allele/transcript/hgnc_symbol").getText();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
@@ -186,12 +190,13 @@ public final class VariantAnnotationXMLV2 {
             alteration.setName(proteinChange);
             
             AlterationUtils.annotateAlteration(alteration, proteinChange);
-            alterations.add(alteration);
+            
+            mapAlterationXml.put(alteration, alterationXml);
         }
 
     }
     
-    private static void handleCNA(Node cnaNode, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) {
+    private static void handleCNA(Node cnaNode, Map<Alteration, String> mapAlterationXml, String diagnosis) {
         Gene gene = parseGene(cnaNode, "gene");
         if (gene==null) {
             return;
@@ -204,16 +209,15 @@ public final class VariantAnnotationXMLV2 {
         alteration.setAlteration(type);
         alteration.setAlterationType(AlterationType.MUTATION); // TODO: this needs to be fixed
         
-        alterations.add(alteration);
-        
         StringBuilder sb = new StringBuilder();
         sb.append("<variant_type>copy_number_alteration</variant_type>\n");
         sb.append(cnaNode.asXML()).append("\n");
         sb.append(VariantAnnotationXML.annotate(alteration, diagnosis));
-        alterationXmls.add(sb.toString());
+        
+        mapAlterationXml.put(alteration, sb.toString());
     }
     
-    private static void handleFusion(Node fusionNode, List<Alteration> alterations, List<String> alterationXmls, String diagnosis) {
+    private static void handleFusion(Node fusionNode, Map<Alteration, String> mapAlterationXml, String diagnosis) {
         StringBuilder sb = new StringBuilder();
         sb.append("<variant_type>fusion_gene</variant_type>\n");
         sb.append(fusionNode.asXML()).append("\n");
@@ -230,9 +234,22 @@ public final class VariantAnnotationXMLV2 {
         alteration.setAlteration(fusion);
         alteration.setAlterationType(AlterationType.MUTATION); // TODO: this needs to be fixed
         
-        alterations.add(alteration);
         sb.append(VariantAnnotationXML.annotate(alteration, diagnosis));
-        alterationXmls.add(sb.toString());
+        
+        mapAlterationXml.put(alteration, sb.toString());
+
+    }
+    
+    private static List<Gene> getSequencedGenes(String testName) {
+        return Collections.emptyList();
+    }
+    
+    private static void identifyAdditionalVariants(Map<Alteration, String> mapAlterationXml, String diagnosis, List<Gene> sequencedGenes) {
+        
+    }
+    
+    private static List<Alteration> getAlterationOrderByLevelOfEvidence(Map<Alteration, String> mapAlterationXml) {
+        return new ArrayList<Alteration>(mapAlterationXml.keySet());
     }
     
     private static Gene parseGene(Node node, String genePath) {
@@ -260,10 +277,11 @@ public final class VariantAnnotationXMLV2 {
         return gene;
     }
     
-    private static String exportVariants(List<String> alterationXmls) {
+    private static String exportVariants(List<Alteration> alterations, Map<Alteration, String> mapAlterationXml) {
         StringBuilder sb = new StringBuilder();
-        for (int i=0; i<alterationXmls.size(); i++) {
-            String xml = alterationXmls.get(i);
+        for (int i=0; i<alterations.size(); i++) {
+            Alteration alt = alterations.get(i);
+            String xml = mapAlterationXml.get(alt);
             sb.append("<variant no=\"").append(i+1).append("\">\n").append(xml).append("</variant>\n");
         }
         return sb.toString();
