@@ -298,7 +298,7 @@ angular.module('oncokbApp')
             n = String(n);
             o = String(o);
 
-            var levelS = ['4', '3', '2b', '2a', '1'];
+            var levelS = ['4', '3b', '3a', '3', '2b', '2a', '1'];
             var levelR = ['r3', 'r2', 'r1'];
             var levels = type === 'sensitivity'?levelS:levelR;
             var nI = levels.indexOf(n);
@@ -559,7 +559,7 @@ angular.module('oncokbApp')
         ];
 
         $scope.therapyCategories = ['SS','SR','IS','IR'];
-        $scope.levelCategories = ['1', '2a', '2b', '3', '4', 'r1', 'r2', 'r3'];
+        $scope.levelCategories = ['1', '2a', '2b', '3', '3a', '3b', '4', 'r1', 'r2', 'r3'];
         $scope.data = [];
         $scope.rendering = false;
         $scope.init = init;

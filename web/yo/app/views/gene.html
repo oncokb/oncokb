@@ -121,7 +121,7 @@
               <i ng-click="remove($event, $index)" class="fa fa-trash-o"></i>
             </span>
           </uib-accordion-heading>
-          <uib-accordion ng-if="geneStatus[$index].isOpen || status.numAccordion < 100 || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
+          <uib-accordion ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
             <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short mutation summary" ng-model="mutation.shortSummary.text"></p></span>-->
             <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
             <pub-iframe ng-model="mutation.summary.text"></pub-iframe>
@@ -296,20 +296,20 @@
                               </span>
                             </uib-accordion-heading>
                             <p>
-                              <strong>{{::treatment.level.display}}:</strong>
+                              <strong>{{::treatment.level.display}}:</strong><br/>
                               <span ng-if="checkTI(ti, 1, 1)">
                                 <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.SS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 1, 0)">
-                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.SR"></drive-realtime-string>
-                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="{{levelExps.SR}}"></i>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.SR" class="floatLeft"></drive-realtime-string>
+                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i>
                               </span>
                               <span ng-if="checkTI(ti, 0, 1)">
                                 <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 0, 0)">
-                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IR"></drive-realtime-string>
-                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="{{levelExps.IR}}"></i>
+                                <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'select'" o="levels.IR" class="floatLeft"></drive-realtime-string>
+                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
                               </span>
                             </p>
                             <div class="approvedIndication" ng-if="checkTI(ti, 1, 1)">
