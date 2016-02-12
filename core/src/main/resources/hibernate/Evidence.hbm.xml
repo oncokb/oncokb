@@ -3,6 +3,7 @@
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
   <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence">
+    <cache usage="nonstrict-read-write"/>
     <id name="EvidenceId" type="java.lang.Integer">
       <column name="evidence_id"/>
       <generator class="identity"/>

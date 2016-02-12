@@ -44,18 +44,18 @@
 			<scope>test</scope>
 		</dependency>
                 
-                <!-- jackson -->
-                <dependency>
-                        <groupId>org.codehaus.jackson</groupId>
-                        <artifactId>jackson-mapper-asl</artifactId>
-                        <version>1.4.2</version>
-                </dependency>
-                
-                <dependency>
-                        <groupId>dom4j</groupId>
-                        <artifactId>dom4j</artifactId>
-                        <version>1.6.1</version>
-                </dependency>
+        <!-- jackson -->
+        <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>1.4.2</version>
+        </dependency>
+
+        <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>1.6.1</version>
+        </dependency>
                 
         <dependency>
 	  <groupId>org.hibernate</groupId>
@@ -67,6 +67,26 @@
 	  <artifactId>hibernate-entitymanager</artifactId>
 	  <version>3.3.2.GA</version>
 	 </dependency>
+     
+             <!-- Hibernate EHCache API -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <version>3.3.2.GA</version>
+        </dependency>
+        <!-- EHCache Core APIs -->
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>2.6.11</version>
+        </dependency>
+        <!-- EHCache uses slf4j for logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.14</version>
+        </dependency>
+     
 	 <dependency>
 	  <groupId>javax.sql</groupId>
 	  <artifactId>jdbc-stdext</artifactId>

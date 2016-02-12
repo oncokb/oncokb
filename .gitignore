@@ -1,4 +1,6 @@
 .idea
+web/nb-configuration.xml
+web/nbactions.xml
 web/yo/.tmp
 web/yo/app/components
 web/yo/node_modules

@@ -16,6 +16,11 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                 <prop key="hibernate.connection.characterEncoding">utf8</prop>
                 <prop key="hibernate.connection.charSet">utf8</prop>
                 <!--<prop key="hibernate.hbm2ddl.auto">create</prop>-->
+                
+                <prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">/hibernate/ehcache.conf.xml</prop>
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.use_query_cache">true</prop>
             </props>
         </property>
 
