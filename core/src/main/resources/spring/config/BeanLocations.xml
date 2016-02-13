@@ -3,9 +3,9 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<!-- Database Configuration -->
-	<import resource="../database/DataSource.xml"/>
-	<import resource="../database/Hibernate.xml"/>
+	<!-- Hibernate Configuration -->
+	<import resource="../beans/DataSource.xml"/>
+	<import resource="../beans/Hibernate.xml"/>
 	
 	<!-- Beans Declaration -->
 	<import resource="../beans/Gene.xml"/>
