@@ -1,4 +1,5 @@
 .idea
+nbactions.xml
 web/nb-configuration.xml
 web/nbactions.xml
 web/yo/.tmp
