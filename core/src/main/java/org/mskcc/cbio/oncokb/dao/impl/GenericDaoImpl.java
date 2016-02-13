@@ -7,9 +7,7 @@ package org.mskcc.cbio.oncokb.dao.impl;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import org.mskcc.cbio.oncokb.dao.GenericDao;
@@ -139,5 +137,10 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
         if(obj != null) {
             getHibernateTemplate().delete(obj);
         }
+    }
+    
+    @Override
+    public void setCacheQueries(boolean cacheQueries) {
+        getHibernateTemplate().setCacheQueries(cacheQueries);
     }
 }
