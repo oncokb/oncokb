@@ -287,7 +287,7 @@ public class EvidenceController {
                                     filtered.add(evidence);
                                 } else {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)) {
-                                        Evidence tempEvidence = evidence.CloneEvidence();
+                                        Evidence tempEvidence = new Evidence(evidence);
                                         tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
                                         filtered.add(tempEvidence);
                                     }
