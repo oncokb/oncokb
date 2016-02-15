@@ -172,27 +172,23 @@ public class Evidence implements java.io.Serializable {
         }
         return true;
     }
-
-    public Evidence CloneEvidence(){
-            Evidence another = new Evidence();
-            another.evidenceId = this.getEvidenceId();
-            another.evidenceType = this.getEvidenceType();
-            another.tumorType = this.getTumorType();
-            another.gene = this.getGene();
-            another.alterations = this.getAlterations();
-            another.shortDescription = this.getShortDescription();
-            another.description = this.getDescription();
-            another.treatments = this.getTreatments();
-            another.knownEffect = this.getKnownEffect();
-            another.status = this.getStatus();
-            another.lastEdit = this.getLastEdit();
-            another.levelOfEvidence = this.getLevelOfEvidence();
-            another.articles = this.getArticles();
-            another.nccnGuidelines = this.getNccnGuidelines();
-            another.clinicalTrials = this.getClinicalTrials();
-
-            return another;
-        }
+    public Evidence(Evidence e){
+            evidenceId = e.evidenceId;
+            evidenceType = e.evidenceType;
+            tumorType = e.tumorType;
+            gene = e.gene;
+            alterations = e.alterations;
+            shortDescription = e.shortDescription;
+            description = e.description;
+            treatments = e.treatments;
+            knownEffect = e.knownEffect;
+            status = e.status;
+            lastEdit = e.lastEdit;
+            levelOfEvidence = e.levelOfEvidence;
+            articles = e.articles;
+            nccnGuidelines = e.nccnGuidelines;
+            clinicalTrials = e.clinicalTrials;
+    }
     
 }
 
