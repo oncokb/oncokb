@@ -293,8 +293,9 @@ public class EvidenceController {
                                     filtered.add(evidence);
                                 } else {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)) {
-                                        evidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                                        filtered.add(evidence);
+                                        Evidence tempEvidence = new Evidence(evidence);
+                                        tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+                                        filtered.add(tempEvidence);
                                     }
                                 }
                             }
