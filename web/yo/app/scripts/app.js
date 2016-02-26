@@ -490,6 +490,12 @@ angular.module('oncokbApp', [
                 access: access.curator,
                 internalUse: false
             })
+            .when('/feedback', {
+                 templateUrl: 'views/feedback.html',
+                 //controller: 'FeedbackCtrl',
+                 access: access.admin,
+                 internalUse: true
+             })
             //.when('/vus', {
             //    templateUrl: 'views/vus.html',
             //    controller: 'VUSCtrl',

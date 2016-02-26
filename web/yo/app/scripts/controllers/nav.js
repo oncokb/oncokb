@@ -15,7 +15,8 @@ angular.module('oncokbApp')
         'variant': 'Variant Annotation',
         'genes': 'Genes',
         //'dataSummary': 'Summary',
-        'reportGenerator': 'Tools'
+        'reportGenerator': 'Tools',
+        'feedback': 'Feedback'
     };
 
     var accessLevels = config.accessLevels;
@@ -59,7 +60,7 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'genes', value: tabs.genes});
         }
         if(access.authorize(accessLevels.admin) && $rootScope.internal) {
-            var keys = ['tree', 'variant','reportGenerator'];
+            var keys = ['tree', 'variant','reportGenerator', 'feedback'];
             //var keys = ['vus', 'tree', 'variant','reportGenerator'];
 
             keys.forEach(function(e){
