@@ -269,27 +269,27 @@ public class EvidenceController {
 
         if (evidenceQuery.getGene() != null) {
             for (Evidence evidence : evidences) {
-                if (evidence.getGene().equals(evidenceQuery.getGene())) {
+                Evidence tempEvidence = new Evidence(evidence);
+                if (tempEvidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
-                    if (evidence.getAlterations().isEmpty()) {
-                        filtered.add(evidence);
+                    if (tempEvidence.getAlterations().isEmpty()) {
+                        filtered.add(tempEvidence);
                     } else {
-                        if (!CollectionUtils.intersection(evidence.getAlterations(), evidenceQuery.getAlterations()).isEmpty()) {
-                            if (evidence.getTumorType() == null) {
-                                if(evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                                    if (evidence.getDescription() == null) {
+                        if (!CollectionUtils.intersection(tempEvidence.getAlterations(), evidenceQuery.getAlterations()).isEmpty()) {
+                            if (tempEvidence.getTumorType() == null) {
+                                if(tempEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+                                    if (tempEvidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
-                                        alterations.addAll(evidence.getAlterations());
-                                        evidence.setDescription(SummaryUtils.variantSummary(Collections.singleton(evidence.getGene()), alterations, evidenceQuery.getQueryAlteration(), Collections.singleton(evidence.getTumorType()), evidenceQuery.getQueryTumorType()));
+                                        alterations.addAll(tempEvidence.getAlterations());
+                                        tempEvidence.setDescription(SummaryUtils.variantSummary(Collections.singleton(tempEvidence.getGene()), alterations, evidenceQuery.getQueryAlteration(), Collections.singleton(tempEvidence.getTumorType()), evidenceQuery.getQueryTumorType()));
                                     }
                                 }
-                                filtered.add(evidence);
+                                filtered.add(tempEvidence);
                             } else {
-                                if (evidenceQuery.getTumorTypes().contains(evidence.getTumorType())) {
-                                    filtered.add(evidence);
+                                if (evidenceQuery.getTumorTypes().contains(tempEvidence.getTumorType())) {
+                                    filtered.add(tempEvidence);
                                 } else {
-                                    if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)) {
-                                        Evidence tempEvidence = new Evidence(evidence);
+                                    if (tempEvidence.getLevelOfEvidence() != null && tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)) {
                                         tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
                                         filtered.add(tempEvidence);
                                     }
