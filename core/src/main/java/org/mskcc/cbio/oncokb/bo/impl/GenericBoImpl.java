@@ -18,6 +18,7 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
     
     public void setDao(DAO dao) {
         this.dao = dao;
+        this.dao.setCacheQueries(true);
     }
     
     protected DAO getDao() {

@@ -131,4 +131,10 @@ public interface GenericDao<T, ID extends Serializable> {
      * @param t 
      */
     void delete(T t);
+    
+    /**
+     * 
+     * @param cacheQueries 
+     */
+    void setCacheQueries(boolean cacheQueries);
 }

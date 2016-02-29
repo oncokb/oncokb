@@ -172,8 +172,24 @@ public class Evidence implements java.io.Serializable {
         }
         return true;
     }
-
-
+    public Evidence(Evidence e){
+            evidenceId = e.evidenceId;
+            evidenceType = e.evidenceType;
+            tumorType = e.tumorType;
+            gene = e.gene;
+            alterations = e.alterations;
+            shortDescription = e.shortDescription;
+            description = e.description;
+            treatments = e.treatments;
+            knownEffect = e.knownEffect;
+            status = e.status;
+            lastEdit = e.lastEdit;
+            levelOfEvidence = e.levelOfEvidence;
+            articles = e.articles;
+            nccnGuidelines = e.nccnGuidelines;
+            clinicalTrials = e.clinicalTrials;
+    }
+    
 }
 
 
