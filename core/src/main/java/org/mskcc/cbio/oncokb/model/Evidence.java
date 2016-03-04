@@ -134,6 +134,18 @@ public class Evidence implements java.io.Serializable {
         this.articles = articles;
     }
 
+    public void addArticles(Set<Article> articles) {
+        if (this.articles == null) {
+            this.articles = articles;
+        } else {
+            for(Article article : articles) {
+                if(!this.articles.contains(article)) {
+                    this.articles.add(article);
+                }
+            }
+        }
+    }
+
     public Set<NccnGuideline> getNccnGuidelines() {
         return nccnGuidelines;
     }
@@ -148,6 +160,18 @@ public class Evidence implements java.io.Serializable {
 
     public void setClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
         this.clinicalTrials = clinicalTrials;
+    }
+
+    public void addClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
+        if (this.clinicalTrials == null) {
+            this.clinicalTrials = clinicalTrials;
+        } else {
+            for(ClinicalTrial trial : clinicalTrials) {
+                if(!this.clinicalTrials.contains(trial)) {
+                    this.clinicalTrials.add(trial);
+                }
+            }
+        }
     }
 
     @Override
