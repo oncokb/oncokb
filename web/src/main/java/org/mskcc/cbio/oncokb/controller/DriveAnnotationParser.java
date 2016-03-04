@@ -812,7 +812,7 @@ public class DriveAnnotationParser {
             start = m.end();
         }
 
-        evidence.setArticles(docs);
-        evidence.setClinicalTrials(clinicalTrials);
+        evidence.addArticles(docs);
+        evidence.addClinicalTrials(clinicalTrials);
     }
 }
