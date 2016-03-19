@@ -289,9 +289,15 @@ public class EvidenceController {
                                 if (evidenceQuery.getTumorTypes().contains(tempEvidence.getTumorType())) {
                                     filtered.add(tempEvidence);
                                 } else {
-                                    if (tempEvidence.getLevelOfEvidence() != null && tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)) {
-                                        tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                                        filtered.add(tempEvidence);
+                                    if (tempEvidence.getLevelOfEvidence() != null) {
+                                        if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
+                                            tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+                                            tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+                                            filtered.add(tempEvidence);
+                                        } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
+                                            tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+                                            filtered.add(tempEvidence);
+                                        }
                                     }
                                 }
                             }
@@ -374,9 +380,11 @@ public class EvidenceController {
         }
         if (evidenceTypes.size() != filteredETs.size()) {
             //Include all level 1 evidences
-            evidences.addAll(evidenceBo.findEvidencesByAlteration(new ArrayList<Alteration>(alterations.values()), Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY)));
+            evidences.addAll(evidenceBo.findEvidencesByAlteration(new ArrayList<Alteration>(alterations.values()),
+                    Arrays.asList(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY)));
 
             evidenceTypes.remove(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+            evidenceTypes.remove(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
             evidences.addAll(evidenceBo.findEvidencesByAlteration(new ArrayList<Alteration>(alterations.values()), evidenceTypes, tumorTypes.isEmpty() ? null : new ArrayList<TumorType>(tumorTypes.values())));
         }
         return evidences;
