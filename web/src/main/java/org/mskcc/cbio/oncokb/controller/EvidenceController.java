@@ -36,6 +36,8 @@ public class EvidenceController {
             @RequestParam(value = "tumorType", required = false) String tumorType,
             @RequestParam(value = "evidenceType", required = false) String evidenceType,
             @RequestParam(value = "consequence", required = false) String consequence,
+            @RequestParam(value = "proteinStart", required = false) String proteinStart,
+            @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
             @RequestParam(value = "geneStatus", required = false) String geneStatus,
             @RequestParam(value = "source", required = false) String source) {
 
@@ -79,21 +81,17 @@ public class EvidenceController {
 
         if (alteration != null) {
             String[] alts = alteration.split(",");
-            String[] consequences = null;
             if (requestQueries.size() == alts.length) {
-                Boolean consequenceLengthMatch = false;
-
-                if (consequence != null) {
-                    consequences = consequence.split(",");
-                    if (consequences.length == alts.length) {
-                        consequenceLengthMatch = true;
-                    }
-                }
+                String[] consequences = consequence==null ? new String[0] : consequence.split(",");
+                String[] proteinStarts = proteinStart==null ? new String[0] : proteinStart.split(",");
+                String[] proteinEnds = proteinEnd==null ? new String[0] : proteinEnd.split(",");
 
                 for (int i = 0; i < requestQueries.size(); i++) {
                     requestQueries.get(i).setTumorType(tumorType);
                     requestQueries.get(i).setAlteration(alts[i]);
-                    requestQueries.get(i).setConsequence(consequenceLengthMatch ? consequences[i] : null);
+                    requestQueries.get(i).setConsequence(consequences.length==alts.length ? consequences[i] : null);
+                    requestQueries.get(i).setProteinStart(proteinStarts.length==alts.length ? Integer.valueOf(proteinStarts[i]) : null);
+                    requestQueries.get(i).setProteinEnd(proteinEnds.length==alts.length ? Integer.valueOf(proteinEnds[i]) : null);
                 }
 
                 evidenceQueries = processRequest(requestQueries, evidenceTypes, geneStatus, source);
@@ -166,7 +164,7 @@ public class EvidenceController {
                     Gene gene = query.getGene();
                     String id = gene.getHugoSymbol() + alteration + (consequence == null ? "" : consequence);
                     if (!mappedAlterations.containsKey(id)) {
-                        mappedAlterations.put(id, getAlterations(query.getGene(), alteration, consequence, mappedGeneAlterations.get(gene.getEntrezGeneId())));
+                        mappedAlterations.put(id, getAlterations(query.getGene(), alteration, consequence, requestQuery.getProteinStart(), requestQuery.getProteinEnd(), mappedGeneAlterations.get(gene.getEntrezGeneId())));
                     }
                     query.setAlterations(mappedAlterations.get(id));
                 }
@@ -197,7 +195,7 @@ public class EvidenceController {
         return gene;
     }
 
-    private List<Alteration> getAlterations(Gene gene, String alteration, String consequence, List<Alteration> fullAlterations) {
+    private List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, List<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         VariantConsequence variantConsequence = null;
@@ -212,6 +210,8 @@ public class EvidenceController {
                     alt.setConsequence(variantConsequence);
                     alt.setAlterationType(AlterationType.MUTATION);
                     alt.setGene(gene);
+                    alt.setProteinStart(proteinStart);
+                    alt.setProteinEnd(proteinEnd);
 
                     AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -225,6 +225,8 @@ public class EvidenceController {
                 alt.setAlteration(alteration);
                 alt.setAlterationType(AlterationType.MUTATION);
                 alt.setGene(gene);
+                alt.setProteinStart(proteinStart);
+                alt.setProteinEnd(proteinEnd);
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
