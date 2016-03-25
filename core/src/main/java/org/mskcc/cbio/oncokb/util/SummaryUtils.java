@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.Observer.CacheSubject;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -14,7 +15,16 @@ import org.mskcc.cbio.oncokb.bo.GeneBo;
  */
 public class SummaryUtils {
 
+    public static long lastUpdateVariantSummaries = new Date().getTime();
+
     public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+        String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
+        String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
+
+        if(CacheUtils.summaryCacheObserver.containSummary(geneId, key)) {
+            return CacheUtils.summaryCacheObserver.getSummary(geneId, key);
+        }
+
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -215,6 +225,7 @@ public class SummaryUtils {
             }
         }
 
+        CacheUtils.summaryCacheObserver.setSummary(geneId, key, sb.toString().trim());
         return sb.toString().trim();
     }
 
