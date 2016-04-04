@@ -8,7 +8,20 @@ import java.util.*;
 
 /**
  * Created by Hongxin on 4/1/16.
+ *
+ * CacheUtils is used to manage cached variant summaries, relevant alterations, alterations which all gene based.
+ * It also includes mapped tumor types which is based on query tumor type name + source.
+ *
+ * The GeneObservable manages all gene based caches. Any updates happen on gene will automatically trigger
+ * GeneObservable to notify all observers to update relative cache.
+ *
+ * TODO:
+ * Ideally, we should place cache functions in the cache BAO with a factory which controls the source of data.
+ * In this way, user can easily to choose to get data from cache or database directly.
+ *
  */
+
+
 public class CacheUtils {
     private static Map<String, Map<String, String>> variantSummary = new HashMap<>();
     private static Map<String, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
