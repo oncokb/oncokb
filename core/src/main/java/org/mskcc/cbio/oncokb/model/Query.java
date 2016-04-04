@@ -16,6 +16,8 @@ public class Query implements java.io.Serializable {
     private String alteration;
     private String tumorType;
     private String consequence;
+    private Integer proteinStart;
+    private Integer proteinEnd;
 
     public Query() {
     }
@@ -66,6 +68,22 @@ public class Query implements java.io.Serializable {
 
     public void setConsequence(String consequence) {
         this.consequence = consequence;
+    }
+
+    public Integer getProteinStart() {
+        return proteinStart;
+    }
+
+    public void setProteinStart(Integer proteinStart) {
+        this.proteinStart = proteinStart;
+    }
+
+    public Integer getProteinEnd() {
+        return proteinEnd;
+    }
+
+    public void setProteinEnd(Integer proteinEnd) {
+        this.proteinEnd = proteinEnd;
     }
 }
 
