@@ -154,8 +154,8 @@ public class EvidenceController {
             query.setQueryTumorType(requestQuery.getTumorType());
             query.setGene(getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
-            String geneId = Integer.toString(query.getGene().getEntrezGeneId());
             if (query.getGene() != null) {
+                String geneId = Integer.toString(query.getGene().getEntrezGeneId());
                 if (!CacheUtils.containAlterations(geneId)) {
                     CacheUtils.setAlterations(geneId, alterationBo.findAlterationsByGene(Collections.singleton(query.getGene())));
                 }
