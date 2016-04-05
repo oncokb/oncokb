@@ -4,32 +4,24 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import java.io.IOException;
-import java.lang.Exception;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
-import org.mskcc.cbio.oncokb.util.NcbiEUtils;
-
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * @author jgao
@@ -161,6 +153,8 @@ public class DriveAnnotationParser {
 
                 // Variants of unknown significance
                 parseVUS(gene, vus);
+
+                CacheUtils.updateGene(Integer.toString(gene.getEntrezGeneId()));
             } else {
                 System.out.print("No gene name available");
             }
