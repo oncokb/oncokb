@@ -6,12 +6,8 @@ package org.mskcc.cbio.oncokb.bo;
 
 import java.util.Collection;
 import java.util.List;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.TumorType;
+
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -41,7 +37,16 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @return 
      */
     List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes);
-    
+
+    /**
+     *
+     * @param alterations
+     * @param evidenceType
+     * @param tumorTypes
+     * @return
+     */
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
+
     /**
      * Find Evidences by Entrez Gene ID
      * @param genes

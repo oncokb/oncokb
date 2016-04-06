@@ -9,9 +9,7 @@ import java.util.List;
  */
 public class EvidenceQueryRes implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
-    private String queryGene;
-    private String queryAlteration;
-    private String queryTumorType;
+    private Query query;
     private Gene gene;
     private List<Alteration> alterations;
     private List<TumorType> tumorTypes;
@@ -28,28 +26,12 @@ public class EvidenceQueryRes implements java.io.Serializable {
         this.id = id;
     }
 
-    public String getQueryGene() {
-        return queryGene;
+    public Query getQuery() {
+        return query;
     }
 
-    public void setQueryGene(String queryGene) {
-        this.queryGene = queryGene;
-    }
-
-    public String getQueryAlteration() {
-        return queryAlteration;
-    }
-
-    public void setQueryAlteration(String queryAlteration) {
-        this.queryAlteration = queryAlteration;
-    }
-
-    public String getQueryTumorType() {
-        return queryTumorType;
-    }
-
-    public void setQueryTumorType(String queryTumorType) {
-        this.queryTumorType = queryTumorType;
+    public void setQuery(Query query) {
+        this.query = query;
     }
 
     public Gene getGene() {

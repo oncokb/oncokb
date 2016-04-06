@@ -11,11 +11,7 @@ import java.util.Objects;
 
 import org.hibernate.Query;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -45,6 +41,19 @@ public class EvidenceDaoImpl
         List[] values = {alterationIds, tumorTypes, evidenceTypes};
 
         return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes", params, values);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<TumorType> tumorTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
+        List<Integer> alterationIds = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alterationIds.add(alteration.getAlterationId());
+        }
+
+        String[] params = {"alts", "tts", "ets", "les"};
+        List[] values = {alterationIds, tumorTypes, evidenceTypes, levelOfEvidences};
+
+        return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence", params, values);
     }
     
     @Override
