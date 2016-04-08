@@ -54,7 +54,15 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return 
      */
     List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType);
-    
+
+    /**
+     * Find AlterationActivityEvidences by alterations
+     * @param alteration
+     * @param evidenceType
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationAndLevels(Alteration alteration, EvidenceType evidenceType, LevelOfEvidence levelOfEvidence);
+
     /**
      * 
      * @param alteration

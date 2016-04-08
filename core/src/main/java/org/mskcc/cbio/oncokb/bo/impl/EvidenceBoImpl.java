@@ -40,6 +40,22 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         }
         return new ArrayList<Evidence>(set);
     }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationWithLevels(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        if (evidenceTypes == null) {
+            return findEvidencesByAlteration(alterations, evidenceTypes);
+        }
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+        for (Alteration alteration : alterations) {
+            for (EvidenceType evidenceType : evidenceTypes) {
+                for (LevelOfEvidence levelOfEvidence : levelOfEvidences) {
+                    set.addAll(getDao().findEvidencesByAlterationAndLevels(alteration, evidenceType, levelOfEvidence));
+                }
+            }
+        }
+        return new ArrayList<Evidence>(set);
+    }
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {

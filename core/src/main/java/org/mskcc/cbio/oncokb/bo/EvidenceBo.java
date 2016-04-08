@@ -20,14 +20,22 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @return 
      */
     List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations);
-    
+
     /**
      * Find Evidences by alteration ID and evidence type
      * @param alterations
      * @param evidenceType
-     * @return 
+     * @return
      */
     List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes);
+
+    /**
+     * Find Evidences by alteration ID and evidence type
+     * @param alterations
+     * @param evidenceType
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationWithLevels(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<LevelOfEvidence> levelOfEvidences);
 
     /**
      * 

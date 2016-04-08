@@ -91,14 +91,18 @@ public class EvidenceUtils {
         return evidenceBo.findEvidencesByAlteration(alterations);
     }
 
-    private static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes) {
+    private static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
         if (evidenceTypes == null || evidenceTypes.size() == 0) {
             return getEvidence(alterations);
         }
-        return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes);
+        if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
+            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes);
+        }else {
+            return evidenceBo.findEvidencesByAlterationWithLevels(alterations, evidenceTypes, levelOfEvidences);
+        }
     }
 
     private static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<TumorType> tumorTypes, List<LevelOfEvidence> levelOfEvidences) {
@@ -109,7 +113,7 @@ public class EvidenceUtils {
             return getEvidence(alterations);
         }
         if (tumorTypes == null || tumorTypes.size() == 0) {
-            return getEvidence(alterations, evidenceTypes);
+            return getEvidence(alterations, evidenceTypes, levelOfEvidences);
         }
         if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
             return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes);
@@ -175,22 +179,22 @@ public class EvidenceUtils {
 
         if (evidenceTypes.contains(EvidenceType.MUTATION_EFFECT)) {
             filteredETs.add(EvidenceType.MUTATION_EFFECT);
-            evidences.addAll(getEvidence(alts, Arrays.asList(EvidenceType.MUTATION_EFFECT)));
+            evidences.addAll(getEvidence(alts, Arrays.asList(EvidenceType.MUTATION_EFFECT), null));
         }
         if (evidenceTypes.contains(EvidenceType.ONCOGENIC)) {
             filteredETs.add(EvidenceType.ONCOGENIC);
-            evidences.addAll(getEvidence(alts, Arrays.asList(EvidenceType.ONCOGENIC)));
+            evidences.addAll(getEvidence(alts, Arrays.asList(EvidenceType.ONCOGENIC), null));
         }
         if (evidenceTypes.contains(EvidenceType.VUS)) {
             filteredETs.add(EvidenceType.VUS);
-            evidences.addAll(getEvidence(alts, Arrays.asList(EvidenceType.VUS)));
+            evidences.addAll(getEvidence(alts, Arrays.asList(EvidenceType.VUS), null));
         }
         if (evidenceTypes.size() != filteredETs.size()) {
             //Include all level 1 evidences
             List<EvidenceType> tmpTypes = new ArrayList<>();
             tmpTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
             tmpTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-            evidences.addAll(getEvidence(new ArrayList<>(alterations.values()), tmpTypes));
+            evidences.addAll(getEvidence(new ArrayList<>(alterations.values()), tmpTypes, levelOfEvidences));
 
             evidenceTypes.remove(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
             evidenceTypes.remove(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);

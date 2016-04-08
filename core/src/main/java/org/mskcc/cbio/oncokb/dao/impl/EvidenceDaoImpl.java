@@ -61,7 +61,15 @@ public class EvidenceDaoImpl
         if (evidenceType==null) return findEvidencesByAlteration(alteration);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType);
     }
-    
+
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationAndLevels(Alteration alteration, EvidenceType evidenceType, LevelOfEvidence levelOfEvidence) {
+        if (evidenceType == null) return findEvidencesByAlteration(alteration);
+        if (levelOfEvidence == null) return findEvidencesByAlteration(alteration, evidenceType);
+        return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndLevels", alteration.getAlterationId(), evidenceType, levelOfEvidence);
+    }
+
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType, TumorType tumorType) {
         if (tumorType==null) return findEvidencesByAlteration(alteration, evidenceType);
