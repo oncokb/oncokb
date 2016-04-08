@@ -12,15 +12,56 @@ import java.util.List;
  * @author jiaojiao
  */
 public class PortalAlteration {
-    
-    private String cancertype;
+    private String cancerType;
+    private String cancerStudy;
     private Integer numberOfSamples;
     private Gene gene;
     private String proteinChange;
     private Integer startPosition;
     private Integer endPosition;
-    private List<String> variants; 
-    
+    private List<Alteration> oncoKBAlterations;
+    private String alterationType;
+
+    public String getCancerType() {
+        return cancerType;
+    }
+
+    public void setCancerType(String cancerType) {
+        this.cancerType = cancerType;
+    }
+
+    public String getCancerStudy() {
+        return cancerStudy;
+    }
+
+    public void setCancerStudy(String cancerStudy) {
+        this.cancerStudy = cancerStudy;
+    }
+
+    public Integer getNumberOfSamples() {
+        return numberOfSamples;
+    }
+
+    public void setNumberOfSamples(Integer numberOfSamples) {
+        this.numberOfSamples = numberOfSamples;
+    }
+
+    public Gene getGene() {
+        return gene;
+    }
+
+    public void setGene(Gene gene) {
+        this.gene = gene;
+    }
+
+    public String getProteinChange() {
+        return proteinChange;
+    }
+
+    public void setProteinChange(String proteinChange) {
+        this.proteinChange = proteinChange;
+    }
+
     public Integer getStartPosition() {
         return startPosition;
     }
@@ -36,44 +77,21 @@ public class PortalAlteration {
     public void setEndPosition(Integer endPosition) {
         this.endPosition = endPosition;
     }
-    
 
-    public String getCancertype() {
-        return cancertype;
-    }
-
-    public void setCancertype(String cancertype) {
-        this.cancertype = cancertype;
+    public List<Alteration> getOncoKBAlterations() {
+        return oncoKBAlterations;
     }
 
-    public Integer getNumberOfSamples() {
-        return numberOfSamples;
+    public void setOncoKBAlterations(List<Alteration> oncoKBAlterations) {
+        this.oncoKBAlterations = oncoKBAlterations;
     }
 
-    public void setNumberOfSamples(Integer numberOfSamples) {
-        this.numberOfSamples = numberOfSamples;
-    }
-    public Gene getGene() {
-        return gene;
+    public String getAlterationType() {
+        return alterationType;
     }
 
-    public void setGene(Gene gene) {
-        this.gene = gene;
-    }
-    public String getProteinChange() {
-        return proteinChange;
-    }
-
-    public void setProteinChange(String proteinChange) {
-        this.proteinChange = proteinChange;
-    }
-
-    public List<String> getVariants() {
-        return variants;
-    }
-
-    public void setVariants(List<String> variants) {
-        this.variants = variants;
+    public void setAlterationType(String alterationType) {
+        this.alterationType = alterationType;
     }
     
     
