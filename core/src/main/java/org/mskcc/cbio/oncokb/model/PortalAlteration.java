@@ -15,7 +15,7 @@ public class PortalAlteration {
     
     private String cancertype;
     private Integer numberOfSamples;
-    private Integer entrezID;
+    private Gene gene;
     private String proteinChange;
     private Integer startPosition;
     private Integer endPosition;
@@ -53,15 +53,13 @@ public class PortalAlteration {
     public void setNumberOfSamples(Integer numberOfSamples) {
         this.numberOfSamples = numberOfSamples;
     }
-
-    public Integer getEntrezID() {
-        return entrezID;
+    public Gene getGene() {
+        return gene;
     }
 
-    public void setEntrezID(Integer entrezID) {
-        this.entrezID = entrezID;
+    public void setGene(Gene gene) {
+        this.gene = gene;
     }
-
     public String getProteinChange() {
         return proteinChange;
     }
