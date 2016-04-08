@@ -73,7 +73,7 @@ public class SummaryController {
     private String getSummary(VariantQuery query, String summaryType) {
         String summary = null;
 
-        if (query != null) {
+        if (query != null && query.getGene() != null) {
             switch (summaryType) {
                 case "variant":
                     summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
