@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +113,7 @@ public class Query implements java.io.Serializable {
             content.add(Integer.toString(proteinEnd));
         }
 
-        return String.join("&", content);
+        return StringUtils.join(content.toArray(), "&");
     }
 }
 
