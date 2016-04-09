@@ -8,7 +8,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Summary APIs
@@ -33,10 +36,12 @@ public class SummaryController {
             @RequestParam(value = "alteration", required = false) String alteration,
             @RequestParam(value = "tumorType", required = false) String tumorType,
             @RequestParam(value = "consequence", required = false) String consequence,
+            @RequestParam(value = "proteinStart", required = false) String proteinStart,
+            @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
             @RequestParam(value = "source", required = false) String source) {
 
         List<String> summaryList = new ArrayList<>();
-        List<VariantQuery> variantQueries = VariantPairUtils.getGeneAlterationTumorTypeConsequence(entrezGeneId, hugoSymbol, alteration, tumorType, consequence, source);
+        List<VariantQuery> variantQueries = VariantPairUtils.getGeneAlterationTumorTypeConsequence(entrezGeneId, hugoSymbol, alteration, tumorType, consequence, proteinStart, proteinEnd, source);
         if (type == null) {
             type = "full";
         }
@@ -63,7 +68,11 @@ public class SummaryController {
         for (Query query : body.getQueries()) {
             SummaryQueryRes queryRes = new SummaryQueryRes();
             queryRes.setId(query.getId());
-            VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null, query.getHugoSymbol(), query.getAlteration(), query.getTumorType(), query.getConsequence(), body.getSource()).get(0);
+            VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
+                    query.getHugoSymbol(), query.getAlteration(), query.getTumorType(), query.getConsequence(),
+                    query.getProteinStart() != null ? Integer.toString(query.getProteinStart()) : null,
+                    query.getProteinEnd() != null ? Integer.toString(query.getProteinEnd()) : null,
+                    body.getSource()).get(0);
             queryRes.setSummary(getSummary(variantQuery, body.getType()));
             res.add(queryRes);
         }

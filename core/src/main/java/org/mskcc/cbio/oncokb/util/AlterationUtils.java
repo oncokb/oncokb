@@ -292,6 +292,9 @@ public final class AlterationUtils {
     public static List<Alteration> getRelevantAlterations(
             Gene gene, String alteration, String consequence,
             Integer proteinStart, Integer proteinEnd) {
+        if(gene == null) {
+            return new ArrayList<>();
+        }
         String id = gene.getHugoSymbol() + alteration + (consequence == null ? "" : consequence);
         String geneId = Integer.toString(gene.getEntrezGeneId());
 
