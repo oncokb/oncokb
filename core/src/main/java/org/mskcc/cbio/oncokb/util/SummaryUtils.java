@@ -67,40 +67,7 @@ public class SummaryUtils {
 //                            .append(" ");
 //                }
 //            } else {
-                if (oncogenic > 0) {
-                    if (appendThe) {
-                        sb.append("The ");
-                    }
-                    sb.append(queryAlteration);
-
-                    if (isPlural) {
-                        sb.append(" are");
-                    } else {
-                        sb.append(" is");
-                    }
-
-                    if (oncogenic == 2) {
-                        sb.append(" likely");
-                    } else if (oncogenic == 1) {
-                        sb.append(" known to be");
-                    }
-
-                    sb.append(" oncogenic. ");
-                } else {
-                    sb.append("It is unknown whether ");
-                    if (appendThe) {
-                        sb.append("the ");
-                    }
-
-                    sb.append(queryAlteration);
-
-                    if (isPlural) {
-                        sb.append(" are");
-                    } else {
-                        sb.append(" is");
-                    }
-                    sb.append(" oncogenic. ");
-                }
+            sb.append(oncogenicSummary(oncogenic, queryAlteration, appendThe, isPlural));
 //            }
 
             List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.ONCOGENIC));
@@ -245,27 +212,148 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+        String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
+        String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
+
+        if (CacheUtils.containVariantCustomizedSummary(geneId, key)) {
+            return CacheUtils.getVariantCustomizedSummary(geneId, key);
+        }
+
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
+        Boolean appendThe = true;
+        Boolean isPlural = false;
 
-        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(genes, Collections.singleton(EvidenceType.GENE_SUMMARY));
-        if (!geneSummaryEvs.isEmpty()) {
-            Evidence ev = geneSummaryEvs.get(0);
-            String geneSummary = ev.getShortDescription();
+        sb.append(geneSummary(genes.iterator().next()));
 
-            if (geneSummary == null) {
-                geneSummary = ev.getDescription();
+        if (queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion")) {
+            appendThe = false;
+        }
+
+        if (queryAlteration.toLowerCase().contains("fusions")) {
+            isPlural = true;
+        }
+
+        if (genes.isEmpty() || alterations == null || alterations.isEmpty()) {
+            sb.append(" The oncogenic activity of this variant is unknown.");
+        } else {
+            int oncogenic = -1;
+            for (Alteration a : alterations) {
+                List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
+                if (oncogenicEvidences.size() > 0 && oncogenicEvidences.get(0) != null && oncogenicEvidences.get(0).getKnownEffect() != null && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) > 0) {
+                    oncogenic = Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect());
+                    break;
+                }
             }
 
-            if (geneSummary != null) {
-                geneSummary = StringEscapeUtils.escapeXml(geneSummary).trim();
-                sb.append(geneSummary)
-                        .append(" ");
+            sb.append(" ").append(oncogenicSummary(oncogenic, queryAlteration, appendThe, isPlural));
+
+            List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.ONCOGENIC));
+            List<String> clinicalSummaries = new ArrayList<>();
+
+            for (Evidence evidence : oncogenicEvs) {
+                if (evidence.getDescription() != null && !evidence.getDescription().isEmpty()) {
+                    clinicalSummaries.add(evidence.getDescription());
+                }
+            }
+
+            if (clinicalSummaries.size() > 0) {
+                if (clinicalSummaries.size() > 1) {
+                    sb.append("Warning: variant has multiple clinical summaries.");
+                } else {
+                    sb.append(clinicalSummaries.get(0));
+                }
+            } else {
+                //Tumor type summary
+                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
+                if (!tumorTypeSummaryEvs.isEmpty()) {
+                    Evidence ev = tumorTypeSummaryEvs.get(0);
+                    String tumorTypeSummary = ev.getShortDescription();
+
+                    if (tumorTypeSummary == null) {
+                        tumorTypeSummary = ev.getDescription();
+                    }
+                    if (tumorTypeSummary != null) {
+                        tumorTypeSummary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
+                        sb.append(tumorTypeSummary);
+                    }
+                }
             }
         }
+
+        CacheUtils.setVariantCustomizedSummary(geneId, key, sb.toString().trim());
+        return sb.toString().trim();
+    }
+
+    public static String oncogenicSummary(Integer oncogenic, String queryAlteration, Boolean appendThe, Boolean isPlural) {
+        StringBuilder sb = new StringBuilder();
+        if (oncogenic >= 0) {
+            if (appendThe) {
+                sb.append("The ");
+            }
+            sb.append(queryAlteration);
+
+            if (isPlural) {
+                sb.append(" are");
+            } else {
+                sb.append(" is");
+            }
+
+            if (oncogenic == 2) {
+                sb.append(" likely");
+            } else if (oncogenic == 1) {
+                sb.append(" known to be");
+            } else if (oncogenic == 0) {
+                sb.append(" known to be not");
+            }
+
+            sb.append(" oncogenic. ");
+        } else {
+            sb.append("It is unknown whether ");
+            if (appendThe) {
+                sb.append("the ");
+            }
+
+            sb.append(queryAlteration);
+
+            if (isPlural) {
+                sb.append(" are");
+            } else {
+                sb.append(" is");
+            }
+            sb.append(" oncogenic. ");
+        }
+
+        return sb.toString();
+    }
+
+    public static String geneSummary(Gene gene) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
+        String summary = "";
+        if (!geneSummaryEvs.isEmpty()) {
+            Evidence ev = geneSummaryEvs.get(0);
+            summary = ev.getShortDescription();
+
+            if (summary == null) {
+                summary = ev.getDescription();
+            }
+
+            if (summary != null) {
+                summary = StringEscapeUtils.escapeXml(summary).trim();
+            }
+        }
+        return summary;
+    }
+
+    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+        StringBuilder sb = new StringBuilder();
+
+        queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
+
+        sb.append(geneSummary(genes.iterator().next()));
 
         sb.append(SummaryUtils.variantSummary(genes, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
 

@@ -26,6 +26,7 @@ import java.util.*;
 
 public class CacheUtils {
     private static Map<String, Map<String, String>> variantSummary = new HashMap<>();
+    private static Map<String, Map<String, String>> variantCustomizedSummary = new HashMap<>();
     private static Map<String, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
     private static Map<String, List<Alteration>> alterations = new HashMap<>();
     private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
@@ -38,6 +39,13 @@ public class CacheUtils {
         @Override
         public void update(Observable o, Object arg) {
             variantSummary.remove((String) arg);
+        }
+    };
+
+    private static Observer variantCustomizedSummaryObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            variantCustomizedSummary.remove((String) arg);
         }
     };
 
@@ -80,6 +88,7 @@ public class CacheUtils {
 
     static {
         GeneObservable.getInstance().addObserver(variantSummaryObserver);
+        GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
         GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
         GeneObservable.getInstance().addObserver(alterationsObserver);
         GeneObservable.getInstance().addObserver(geneObserver);
@@ -177,6 +186,26 @@ public class CacheUtils {
             variantSummary.put(gene, new HashMap<String, String>());
         }
         variantSummary.get(gene).put(variant, summary);
+    }
+
+    public static String getVariantCustomizedSummary(String gene, String variant) {
+        if (variantCustomizedSummary.containsKey(gene) && variantCustomizedSummary.get(gene).containsKey(variant)) {
+            return variantCustomizedSummary.get(gene).get(variant);
+        } else {
+            return null;
+        }
+    }
+
+    public static Boolean containVariantCustomizedSummary(String gene, String variant) {
+        return (variantCustomizedSummary.containsKey(gene) &&
+                variantCustomizedSummary.get(gene).containsKey(variant)) ? true : false;
+    }
+
+    public static void setVariantCustomizedSummary(String gene, String variant, String summary) {
+        if (!variantCustomizedSummary.containsKey(gene)) {
+            variantCustomizedSummary.put(gene, new HashMap<String, String>());
+        }
+        variantCustomizedSummary.get(gene).put(variant, summary);
     }
 
     public static List<Alteration> getRelevantAlterations(String gene, String variant) {
