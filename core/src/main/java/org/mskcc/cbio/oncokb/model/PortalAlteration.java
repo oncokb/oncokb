@@ -5,13 +5,15 @@
  */
 package org.mskcc.cbio.oncokb.model;
 
-import java.util.List;
+import java.util.Set;
+
 
 /**
  *
  * @author jiaojiao
  */
 public class PortalAlteration {
+    private Integer portalAlterationID;
     private String cancerType;
     private String cancerStudy;
     private Integer numberOfSamples;
@@ -19,9 +21,28 @@ public class PortalAlteration {
     private String proteinChange;
     private Integer startPosition;
     private Integer endPosition;
-    private List<Alteration> oncoKBAlterations;
+    private Set<Alteration> oncoKBAlterations;
     private String alterationType;
 
+    public PortalAlteration(String cancerType, String cancerStudy, Integer numberOfSamples, Gene gene, String proteinChange, Integer startPosition, Integer endPosition,Set<Alteration> oncoKBAlterations,String alterationType) {
+        this.cancerType = cancerType;
+        this.cancerStudy = cancerStudy;
+        this.numberOfSamples = numberOfSamples;
+        this.gene = gene;
+        this.proteinChange = proteinChange;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.oncoKBAlterations = oncoKBAlterations;
+        this.alterationType = alterationType;
+    }
+
+    public Integer getPortalAlterationID() {
+        return portalAlterationID;
+    }
+
+    public void setPortalAlterationID(Integer portalAlterationID) {
+        this.portalAlterationID = portalAlterationID;
+    }
     public String getCancerType() {
         return cancerType;
     }
@@ -78,14 +99,6 @@ public class PortalAlteration {
         this.endPosition = endPosition;
     }
 
-    public List<Alteration> getOncoKBAlterations() {
-        return oncoKBAlterations;
-    }
-
-    public void setOncoKBAlterations(List<Alteration> oncoKBAlterations) {
-        this.oncoKBAlterations = oncoKBAlterations;
-    }
-
     public String getAlterationType() {
         return alterationType;
     }
@@ -93,7 +106,13 @@ public class PortalAlteration {
     public void setAlterationType(String alterationType) {
         this.alterationType = alterationType;
     }
-    
+    public Set<Alteration> getOncoKBAlterations() {
+        return oncoKBAlterations;
+    }
+
+    public void setOncoKBAlterations(Set<Alteration> oncoKBAlterations) {
+        this.oncoKBAlterations = oncoKBAlterations;
+    }
     
     
 }
