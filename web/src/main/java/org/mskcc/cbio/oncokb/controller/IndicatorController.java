@@ -90,7 +90,7 @@ public class IndicatorController {
     }
     private String findHighestOncogenic(List<Evidence> evidences) {
         List<String> levels = Arrays.asList("-1", "0", "2", "1");
-        List<String> levelsExplanation = Arrays.asList("Unknown", "Not Oncogenic", "Likely Oncogenic", "Oncogenic");
+        List<String> levelsExplanation = Arrays.asList("Unknown", "Likely Neutral", "Likely Oncogenic", "Oncogenic");
 
         int index = -1;
 

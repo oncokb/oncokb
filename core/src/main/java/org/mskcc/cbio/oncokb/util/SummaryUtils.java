@@ -46,7 +46,7 @@ public class SummaryUtils {
             int oncogenic = -1;
             for (Alteration a : alterations) {
                 List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
-                if (oncogenicEvidences.size() > 0 && oncogenicEvidences.get(0) != null && oncogenicEvidences.get(0).getKnownEffect() != null && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) > 0) {
+                if (oncogenicEvidences.size() > 0 && oncogenicEvidences.get(0) != null && oncogenicEvidences.get(0).getKnownEffect() != null && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) >= 0) {
                     oncogenic = Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect());
                     break;
                 }
@@ -242,7 +242,7 @@ public class SummaryUtils {
             int oncogenic = -1;
             for (Alteration a : alterations) {
                 List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
-                if (oncogenicEvidences.size() > 0 && oncogenicEvidences.get(0) != null && oncogenicEvidences.get(0).getKnownEffect() != null && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) > 0) {
+                if (oncogenicEvidences.size() > 0 && oncogenicEvidences.get(0) != null && oncogenicEvidences.get(0).getKnownEffect() != null && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) >= 0) {
                     oncogenic = Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect());
                     break;
                 }
@@ -250,37 +250,37 @@ public class SummaryUtils {
 
             sb.append(" ").append(oncogenicSummary(oncogenic, queryAlteration, appendThe, isPlural));
 
-            List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.ONCOGENIC));
-            List<String> clinicalSummaries = new ArrayList<>();
-
-            for (Evidence evidence : oncogenicEvs) {
-                if (evidence.getDescription() != null && !evidence.getDescription().isEmpty()) {
-                    clinicalSummaries.add(evidence.getDescription());
-                }
-            }
-
-            if (clinicalSummaries.size() > 0) {
-                if (clinicalSummaries.size() > 1) {
-                    sb.append("Warning: variant has multiple clinical summaries.");
-                } else {
-                    sb.append(clinicalSummaries.get(0));
-                }
-            } else {
-                //Tumor type summary
-                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
-                if (!tumorTypeSummaryEvs.isEmpty()) {
-                    Evidence ev = tumorTypeSummaryEvs.get(0);
-                    String tumorTypeSummary = ev.getShortDescription();
-
-                    if (tumorTypeSummary == null) {
-                        tumorTypeSummary = ev.getDescription();
-                    }
-                    if (tumorTypeSummary != null) {
-                        tumorTypeSummary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
-                        sb.append(tumorTypeSummary);
-                    }
-                }
-            }
+//            List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.ONCOGENIC));
+//            List<String> clinicalSummaries = new ArrayList<>();
+//
+//            for (Evidence evidence : oncogenicEvs) {
+//                if (evidence.getDescription() != null && !evidence.getDescription().isEmpty()) {
+//                    clinicalSummaries.add(evidence.getDescription());
+//                }
+//            }
+//
+//            if (clinicalSummaries.size() > 0) {
+//                if (clinicalSummaries.size() > 1) {
+//                    sb.append("Warning: variant has multiple clinical summaries.");
+//                } else {
+//                    sb.append(clinicalSummaries.get(0));
+//                }
+//            } else {
+//                //Tumor type summary
+//                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
+//                if (!tumorTypeSummaryEvs.isEmpty()) {
+//                    Evidence ev = tumorTypeSummaryEvs.get(0);
+//                    String tumorTypeSummary = ev.getShortDescription();
+//
+//                    if (tumorTypeSummary == null) {
+//                        tumorTypeSummary = ev.getDescription();
+//                    }
+//                    if (tumorTypeSummary != null) {
+//                        tumorTypeSummary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
+//                        sb.append(tumorTypeSummary);
+//                    }
+//                }
+//            }
         }
 
         CacheUtils.setVariantCustomizedSummary(geneId, key, sb.toString().trim());
@@ -301,15 +301,17 @@ public class SummaryUtils {
                 sb.append(" is");
             }
 
-            if (oncogenic == 2) {
-                sb.append(" likely");
-            } else if (oncogenic == 1) {
-                sb.append(" known to be");
-            } else if (oncogenic == 0) {
-                sb.append(" known to be not");
-            }
+            if(oncogenic == 0) {
+                sb.append(" likely neutral.");
+            }else {
+                if (oncogenic == 2) {
+                    sb.append(" likely");
+                } else if (oncogenic == 1) {
+                    sb.append(" known to be");
+                }
 
-            sb.append(" oncogenic. ");
+                sb.append(" oncogenic. ");
+            }
         } else {
             sb.append("It is unknown whether ");
             if (appendThe) {

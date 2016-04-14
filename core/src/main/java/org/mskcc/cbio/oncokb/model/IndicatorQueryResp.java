@@ -12,7 +12,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Query query;
     private Boolean geneExist;
     private Boolean variantExist;
-    private String oncogenic; //1: Oncogenic; 2: Likely Oncogenic; 0:Not oncogenic -1: Unknown
+    private String oncogenic; //1: Oncogenic; 2: Likely Oncogenic; 0: Likely Neutral -1: Unknown
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
     private Boolean VUS;
