@@ -12,10 +12,12 @@ public class VariantQuery implements java.io.Serializable {
     private String queryGene; //HugoSymbol only
     private Gene gene;
     private String queryAlteration;
-    private List<Alteration> alterations;
     private String queryTumorType;
-    private List<TumorType> tumorTypes;
     private String consequence;
+    private Integer proteinStart;
+    private Integer proteinEnd;
+    private List<Alteration> alterations;
+    private List<TumorType> tumorTypes;
 
     public VariantQuery() {
     }
@@ -82,6 +84,22 @@ public class VariantQuery implements java.io.Serializable {
 
     public void setConsequence(String consequence) {
         this.consequence = consequence;
+    }
+
+    public Integer getProteinStart() {
+        return proteinStart;
+    }
+
+    public void setProteinStart(Integer proteinStart) {
+        this.proteinStart = proteinStart;
+    }
+
+    public Integer getProteinEnd() {
+        return proteinEnd;
+    }
+
+    public void setProteinEnd(Integer proteinEnd) {
+        this.proteinEnd = proteinEnd;
     }
 }
 

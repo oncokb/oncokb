@@ -5,11 +5,8 @@
 package org.mskcc.cbio.oncokb.dao;
 
 import java.util.List;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.TumorType;
+
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -40,6 +37,16 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return
      */
     List<Evidence> findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes(List<Alteration> alterations, List<TumorType> tumorTypes, List<EvidenceType> evidenceTypes);
+
+    /**
+     *
+     * @param alterations
+     * @param tumorTypes
+     * @param evidenceTypes
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<TumorType> tumorTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences);
+
     /**
      * Find AlterationActivityEvidences by alterations
      * @param alteration
@@ -47,7 +54,15 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return 
      */
     List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType);
-    
+
+    /**
+     * Find AlterationActivityEvidences by alterations
+     * @param alteration
+     * @param evidenceType
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationAndLevels(Alteration alteration, EvidenceType evidenceType, LevelOfEvidence levelOfEvidence);
+
     /**
      * 
      * @param alteration

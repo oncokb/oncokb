@@ -11,11 +11,7 @@ import java.util.Objects;
 
 import org.hibernate.Query;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -46,13 +42,34 @@ public class EvidenceDaoImpl
 
         return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes", params, values);
     }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<TumorType> tumorTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
+        List<Integer> alterationIds = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alterationIds.add(alteration.getAlterationId());
+        }
+
+        String[] params = {"alts", "tts", "ets", "les"};
+        List[] values = {alterationIds, tumorTypes, evidenceTypes, levelOfEvidences};
+
+        return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence", params, values);
+    }
     
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType) {
         if (evidenceType==null) return findEvidencesByAlteration(alteration);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType);
     }
-    
+
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationAndLevels(Alteration alteration, EvidenceType evidenceType, LevelOfEvidence levelOfEvidence) {
+        if (evidenceType == null) return findEvidencesByAlteration(alteration);
+        if (levelOfEvidence == null) return findEvidencesByAlteration(alteration, evidenceType);
+        return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndLevels", alteration.getAlterationId(), evidenceType, levelOfEvidence);
+    }
+
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType, TumorType tumorType) {
         if (tumorType==null) return findEvidencesByAlteration(alteration, evidenceType);

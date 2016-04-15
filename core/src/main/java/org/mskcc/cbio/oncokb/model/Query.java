@@ -1,6 +1,9 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,6 +87,33 @@ public class Query implements java.io.Serializable {
 
     public void setProteinEnd(Integer proteinEnd) {
         this.proteinEnd = proteinEnd;
+    }
+
+    public String getQueryId() {
+        List<String> content = new ArrayList<>();
+        if(entrezGeneId != null) {
+            content.add(Integer.toString(entrezGeneId));
+        }
+        if(hugoSymbol != null) {
+            content.add(hugoSymbol);
+        }
+        if(alteration != null) {
+            content.add(alteration);
+        }
+        if(tumorType != null) {
+            content.add(tumorType);
+        }
+        if(consequence != null) {
+            content.add(consequence);
+        }
+        if(proteinStart != null) {
+            content.add(Integer.toString(proteinStart));
+        }
+        if(proteinEnd != null) {
+            content.add(Integer.toString(proteinEnd));
+        }
+
+        return StringUtils.join(content.toArray(), "&");
     }
 }
 

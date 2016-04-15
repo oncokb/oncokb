@@ -10,15 +10,11 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.Treatment;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 
 /**
  *
@@ -40,6 +36,22 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         for (Alteration alteration : alterations) {
             for (EvidenceType evidenceType : evidenceTypes) {
                 set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType));
+            }
+        }
+        return new ArrayList<Evidence>(set);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationWithLevels(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        if (evidenceTypes == null) {
+            return findEvidencesByAlteration(alterations, evidenceTypes);
+        }
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+        for (Alteration alteration : alterations) {
+            for (EvidenceType evidenceType : evidenceTypes) {
+                for (LevelOfEvidence levelOfEvidence : levelOfEvidences) {
+                    set.addAll(getDao().findEvidencesByAlterationAndLevels(alteration, evidenceType, levelOfEvidence));
+                }
             }
         }
         return new ArrayList<Evidence>(set);
@@ -72,6 +84,38 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         tts.addAll(tumorTypes);
         ets.addAll(evidenceTypes);
         set.addAll(getDao().findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes(alts, tts, ets));
+        return new ArrayList<Evidence>(set);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        if(tumorTypes == null) {
+            if (evidenceTypes == null) {
+                return findEvidencesByAlteration(alterations);
+            }
+            return findEvidencesByAlteration(alterations, evidenceTypes);
+        }
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+//        for (Alteration alteration : alterations) {
+//            for (TumorType tumorType : tumorTypes) {
+//                if(evidenceTypes == null) {
+//                    set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
+//                }else{
+//                    for (EvidenceType evidenceType : evidenceTypes) {
+//                        set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
+//                    }
+//                }
+//            }
+//        }
+        List<Alteration> alts = new ArrayList<>();
+        List<TumorType> tts = new ArrayList<>();
+        List<EvidenceType> ets = new ArrayList<>();
+        List<LevelOfEvidence> les = new ArrayList<>();
+        alts.addAll(alterations);
+        tts.addAll(tumorTypes);
+        ets.addAll(evidenceTypes);
+        les.addAll(levelOfEvidences);
+        set.addAll(getDao().findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence(alts, tts, ets, les));
         return new ArrayList<Evidence>(set);
     }
     
