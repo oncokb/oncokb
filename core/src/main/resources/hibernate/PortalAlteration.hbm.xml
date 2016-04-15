@@ -20,8 +20,8 @@
             </column>
         </property>
         
-        <property name="numberOfSamples" type="int">
-          <column name="numberOfSamples"/>
+        <property name="sampleId" type="string">
+          <column name="sampleId"/>
         </property>
         
         <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
@@ -32,12 +32,12 @@
           <column name="proteinChange"/>
         </property>
         
-        <property name="startPosition" type="int">
-          <column name="startPosition"/>
+        <property name="proteinStartPosition" type="int">
+          <column name="proteinStartPosition"/>
         </property>
         
-        <property name="endPosition" type="int">
-          <column name="endPosition"/>
+        <property name="proteinEndPosition" type="int">
+          <column name="proteinEndPosition"/>
         </property>
         
         <property name="alterationType" type="string">
