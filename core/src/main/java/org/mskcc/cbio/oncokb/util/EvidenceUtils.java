@@ -141,9 +141,9 @@ public class EvidenceUtils {
                 for (Alteration alt : query.getAlterations()) {
                     int altId = alt.getAlterationId();
 
-                    if (geneStatus == null || geneStatus == "") {
+//                    if (geneStatus == null || geneStatus == "") {
                         geneStatus = "all";
-                    }
+//                    }
                     geneStatus = geneStatus.toLowerCase();
                     if (geneStatus.equals("all") || query.getGene().getStatus().toLowerCase().equals(geneStatus)) {
                         if (!alterations.containsKey(altId)) {
