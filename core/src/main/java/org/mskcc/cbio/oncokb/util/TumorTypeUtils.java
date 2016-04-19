@@ -14,6 +14,7 @@ public class TumorTypeUtils {
     private static final String TUMOR_TYPE_ALL_TUMORS = "all tumors";
     private static Map<String, List<TumorType>> questTumorTypeMap = null;
     private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
+
     public static Set<TumorType> fromQuestTumorType(String questTumorType) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (questTumorTypeMap==null) {
@@ -139,5 +140,26 @@ public class TumorTypeUtils {
         }
 
         return new LinkedHashSet<TumorType>(ret);
+    }
+
+    public static List<TumorType> getTumorTypes(String tumorType, String source) {
+        if (!CacheUtils.containMappedTumorTypes(tumorType, source)) {
+            CacheUtils.setMappedTumorTypes(tumorType, source, findTumorTypes(tumorType, source));
+        }
+        return  CacheUtils.getMappedTumorTypes(tumorType, source);
+    }
+
+    private static List<TumorType> findTumorTypes(String tumorType, String source) {
+        List<TumorType> tumorTypes = new ArrayList<>();
+        switch (source) {
+            case "cbioportal":
+                tumorTypes.addAll(fromCbioportalTumorType(tumorType));
+                break;
+            default:
+                tumorTypes.addAll(fromQuestTumorType(tumorType));
+                break;
+        }
+
+        return tumorTypes;
     }
 }

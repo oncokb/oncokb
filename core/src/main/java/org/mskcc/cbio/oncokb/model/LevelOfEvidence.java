@@ -53,4 +53,13 @@ public enum LevelOfEvidence {
     public static LevelOfEvidence getByLevel(String level) {
         return map.get(level);
     }
+
+    public static LevelOfEvidence getByName(String name) {
+        for (LevelOfEvidence levelOfEvidence : LevelOfEvidence.values()) {
+            if(levelOfEvidence.name().equals(name)) {
+                return levelOfEvidence;
+            }
+        }
+        return null;
+    }
 }

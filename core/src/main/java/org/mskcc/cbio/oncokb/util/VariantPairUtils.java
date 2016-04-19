@@ -2,9 +2,13 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.VariantQuery;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 /**
  * Created by Hongxin on 8/10/15.
  */
@@ -20,7 +24,9 @@ public class VariantPairUtils {
      * @param tumorTypeSource
      * @return
      */
-    public static List<VariantQuery> getGeneAlterationTumorTypeConsequence(String entrezGeneIdStr, String hugoSymbolStr, String alterationStr, String tumorTypeStr, String consequenceStr, String tumorTypeSource) {
+    public static List<VariantQuery> getGeneAlterationTumorTypeConsequence(
+            String entrezGeneIdStr, String hugoSymbolStr, String alterationStr, String tumorTypeStr,
+            String consequenceStr, String proteinStartStr, String proteinEndStr, String tumorTypeSource) {
         List<VariantQuery> pairs = new ArrayList<>();
 
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
@@ -30,6 +36,8 @@ public class VariantPairUtils {
         String[] alterations = null;
         String[] tumorTypes = null;
         String[] consequences = null;
+        List<Integer> proteinStarts = new ArrayList<>();
+        List<Integer> proteinEnds = new ArrayList<>();
 
         int pairwiseLength = 0;
 
@@ -64,6 +72,22 @@ public class VariantPairUtils {
                 return null;
             }
         }
+        if(proteinStartStr != null) {
+            for(String item : proteinStartStr.split(",")) {
+                proteinStarts.add(Integer.parseInt(item));
+            }
+            if(proteinStarts.size() != genes.length) {
+                return null;
+            }
+        }
+        if(proteinEndStr != null) {
+            for(String item : proteinEndStr.split(",")) {
+                proteinEnds.add(Integer.parseInt(item));
+            }
+            if(proteinEnds.size() != genes.length) {
+                return null;
+            }
+        }
 
         if(tumorTypeSource == null) {
             tumorTypeSource = "quest";
@@ -86,23 +110,32 @@ public class VariantPairUtils {
             }
         }
 
+        if (proteinStartStr!=null) {
+            for(int i = 0; i < proteinStarts.size(); i++) {
+                pairs.get(i).setProteinStart(proteinStarts.get(i));
+            }
+        }
+
+        if (proteinEndStr!=null) {
+            for(int i = 0; i < proteinEnds.size(); i++) {
+                pairs.get(i).setProteinEnd(proteinEnds.get(i));
+            }
+        }
+
         if (alterationStr!=null) {
             for(int i = 0; i < pairwiseLength; i++) {
-                Alteration alteration = AlterationUtils.getAlteration((String) pairs.get(i).getQueryGene(), alterations[i], "MUTATION", (String) pairs.get(i).getConsequence(), null, null);
-                pairs.get(i).setQueryAlteration(alteration == null ? alterations[i] : alteration.getAlteration());
-                pairs.get(i).setAlterations(alterationBo.findRelevantAlterations(alteration, null));
+                VariantQuery query = pairs.get(i);
+                pairs.get(i).setQueryAlteration(alterations[i]);
+                pairs.get(i).setAlterations(
+                        AlterationUtils.getRelevantAlterations(query.getGene(), query.getQueryAlteration(),
+                                query.getConsequence(), query.getProteinStart(), query.getProteinEnd())
+                );
             }
         }
 
         for(int i = 0; i < pairwiseLength; i++) {
             String tumorType = tumorTypes == null? null : tumorTypes[i];
-            List<TumorType> relevantTumorTypes = new ArrayList<>();
-            if (tumorTypeSource.equals("cbioportal")) {
-                relevantTumorTypes.addAll(TumorTypeUtils.fromCbioportalTumorType(tumorType));
-            } else {
-                //By default, use quest tumor types
-                relevantTumorTypes.addAll(TumorTypeUtils.fromQuestTumorType(tumorType));
-            }
+            List<TumorType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(tumorType, tumorTypeSource);
             pairs.get(i).setQueryTumorType(tumorType);
             pairs.get(i).setTumorTypes(relevantTumorTypes);
         }

@@ -93,9 +93,15 @@
   <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes">
     <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.tumorType in (:tts) and  e.evidenceType in (:ets)]]>
   </query>
+  <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence">
+    <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.tumorType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+  </query>
   <query name="findEvidencesByAlterationAndEvidenceType">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?]]>
   </query>
+    <query name="findEvidencesByAlterationAndEvidenceTypeAndLevels">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.levelOfEvidence=?]]>
+    </query>
   <query name="findEvidencesByAlterationAndEvidenceTypeAndTumorType">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?]]>
   </query>
