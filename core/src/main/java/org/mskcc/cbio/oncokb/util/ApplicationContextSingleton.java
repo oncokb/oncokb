@@ -67,4 +67,8 @@ public final class ApplicationContextSingleton {
     public static StatusBo getStatusBo() {
         return StatusBo.class.cast(getApplicationContext().getBean("statusBo"));
     }
+    
+    public static PortalAlterationBo getPortalAlterationBo() {
+        return PortalAlterationBo.class.cast(getApplicationContext().getBean("portalAlterationBo"));
+    }
 }

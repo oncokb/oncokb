@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class name="org.mskcc.cbio.oncokb.model.PortalAlteration" table="portal_alteration" catalog="oncokb">
+        <cache usage="nonstrict-read-write"/>
+        <id name="portalAlterationID" type="java.lang.Integer">
+            <column name="portalAlterationID" />
+            <generator class="identity" />
+        </id>
+        
+        <property name="cancerType" type="string">
+            <column name="cancerType" length="300" not-null="true">
+            </column>
+        </property>
+
+        <property name="cancerStudy" type="string">
+            <column name="cancerStudy" length="300" not-null="true">
+            </column>
+        </property>
+        
+        <property name="sampleId" type="string">
+            <column name="sampleId"/>
+        </property>
+        
+        <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
+            <column name="entrez_gene_id" not-null="true" />
+        </many-to-one>
+        
+        <property name="proteinChange" type="string">
+            <column name="proteinChange"/>
+        </property>
+        
+        <property name="proteinStartPosition" type="int">
+            <column name="proteinStartPosition"/>
+        </property>
+        
+        <property name="proteinEndPosition" type="int">
+            <column name="proteinEndPosition"/>
+        </property>
+        
+        <property name="alterationType" type="string">
+            <column name="alterationType" length="300" not-null="true">
+            </column>
+        </property>
+        
+        <set lazy="false" name="oncoKBAlterations" table="portalAlt_oncoKBAlt">
+            <key>
+                <column name="portalAlterationID" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
+                <column name="alteration_id" not-null="true"/>
+            </many-to-many>
+        </set>
+    </class>
+    <query name="findPortalAlterationCountByGene">
+        <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa where pa.gene=? group by cancerStudy]]>
+    </query>
+    <query name="findPortalAlterationCount">
+        <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy]]>
+    </query>
+
+</hibernate-mapping>
