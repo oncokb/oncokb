@@ -21,23 +21,23 @@
         </property>
         
         <property name="sampleId" type="string">
-          <column name="sampleId"/>
+            <column name="sampleId"/>
         </property>
         
         <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
-                <column name="entrez_gene_id" not-null="true" />
+            <column name="entrez_gene_id" not-null="true" />
         </many-to-one>
         
         <property name="proteinChange" type="string">
-          <column name="proteinChange"/>
+            <column name="proteinChange"/>
         </property>
         
         <property name="proteinStartPosition" type="int">
-          <column name="proteinStartPosition"/>
+            <column name="proteinStartPosition"/>
         </property>
         
         <property name="proteinEndPosition" type="int">
-          <column name="proteinEndPosition"/>
+            <column name="proteinEndPosition"/>
         </property>
         
         <property name="alterationType" type="string">
@@ -47,12 +47,18 @@
         
         <set lazy="false" name="oncoKBAlterations" table="portalAlt_oncoKBAlt">
             <key>
-              <column name="portalAlterationID" not-null="true"/>
+                <column name="portalAlterationID" not-null="true"/>
             </key>
             <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
-              <column name="alteration_id" not-null="true"/>
+                <column name="alteration_id" not-null="true"/>
             </many-to-many>
         </set>
     </class>
+    <query name="findPortalAlterationCountByGene">
+        <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa where pa.gene=? group by cancerStudy]]>
+    </query>
+    <query name="findPortalAlterationCount">
+        <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy]]>
+    </query>
 
 </hibernate-mapping>

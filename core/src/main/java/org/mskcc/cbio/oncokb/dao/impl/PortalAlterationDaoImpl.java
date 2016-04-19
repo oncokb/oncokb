@@ -6,16 +6,23 @@
 package org.mskcc.cbio.oncokb.dao.impl;
 
 import java.util.List;
-import org.hibernate.SessionFactory;
-import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.dao.PortalAlterationDao;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.PortalAlteration;
 
 /**
  *
  * @author jiaojiao
  */
-
 public class PortalAlterationDaoImpl extends GenericDaoImpl<PortalAlteration, Integer> implements PortalAlterationDao {
 
+    public List<PortalAlteration> findPortalAlterationCountByGene(Gene gene) {
+        List<PortalAlteration> PortalAlteration = findByNamedQuery("findPortalAlterationCountByGene", gene);
+        return PortalAlteration;
+    }
+
+    public List<PortalAlteration> findPortalAlterationCount() {
+        List<PortalAlteration> PortalAlteration = findByNamedQuery("findPortalAlterationCount");
+        return PortalAlteration;
+    }
 }

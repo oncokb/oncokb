@@ -7,12 +7,12 @@ package org.mskcc.cbio.oncokb.model;
 
 import java.util.Set;
 
-
 /**
  *
  * @author jiaojiao
  */
 public class PortalAlteration {
+
     private Integer portalAlterationID;
     private String cancerType;
     private String cancerStudy;
@@ -24,7 +24,10 @@ public class PortalAlteration {
     private Set<Alteration> oncoKBAlterations;
     private String alterationType;
 
-    public PortalAlteration(String cancerType, String cancerStudy, String sampleId, Gene gene, String proteinChange, Integer proteinStartPosition, Integer proteinEndPosition,Set<Alteration> oncoKBAlterations,String alterationType) {
+    public PortalAlteration() {
+    }
+
+    public PortalAlteration(String cancerType, String cancerStudy, String sampleId, Gene gene, String proteinChange, Integer proteinStartPosition, Integer proteinEndPosition, Set<Alteration> oncoKBAlterations, String alterationType) {
         this.cancerType = cancerType;
         this.cancerStudy = cancerStudy;
         this.sampleId = sampleId;
@@ -115,6 +118,5 @@ public class PortalAlteration {
     public void setAlterationType(String alterationType) {
         this.alterationType = alterationType;
     }
-    
-    
+
 }

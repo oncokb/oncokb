@@ -5,12 +5,17 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
+import java.util.List;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.PortalAlteration;
 
 /**
  *
  * @author jiaojiao
  */
+public interface PortalAlterationBo extends GenericBo<PortalAlteration> {
 
-public interface PortalAlterationBo  extends GenericBo<PortalAlteration> {
+    List<PortalAlteration> findPortalAlterationCountByGene(Gene gene);
+
+    List<PortalAlteration> findPortalAlterationCount();
 }

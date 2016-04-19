@@ -5,12 +5,17 @@
  */
 package org.mskcc.cbio.oncokb.dao;
 
+import java.util.List;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.PortalAlteration;
 
 /**
  *
  * @author jiaojiao
  */
-
 public interface PortalAlterationDao extends GenericDao<PortalAlteration, Integer> {
+
+    List<PortalAlteration> findPortalAlterationCountByGene(Gene gene);
+
+    List<PortalAlteration> findPortalAlterationCount();
 }
