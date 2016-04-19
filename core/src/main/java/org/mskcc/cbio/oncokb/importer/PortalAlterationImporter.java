@@ -8,13 +8,12 @@ package org.mskcc.cbio.oncokb.importer;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -22,6 +21,7 @@ import org.mskcc.cbio.oncokb.model.PortalAlteration;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
 
 /**
  *
@@ -29,104 +29,38 @@ import org.mskcc.cbio.oncokb.util.FileUtils;
  */
 public class PortalAlterationImporter {
 
-    public static List<Alteration> findAlterationList(String hugo_gene_symbol, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
-        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        Alteration alteration, alteration1 = new Alteration(), alteration2, alteration3;
-        List<Alteration> alterations = null, alterationList = new ArrayList<>();
-        Boolean flag = false;
-        if (mutation_type.equals("Targeted_Region") || mutation_type.equals("COMPLEX_INDEL")) {
-            alteration1 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "inframe_deletion", proteinStartPosition, proteinEndPosition);
-            alteration2 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "inframe_insertion", proteinStartPosition, proteinEndPosition);
+    public static List<Alteration> findAlterationList(Gene gene, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
+        List<Alteration> alterations = new ArrayList<>();
+        HashMap<String, String[]> mapper = new HashMap<>();
+        mapper.put("Targeted_Region", new String[]{"inframe_deletion", "inframe_insertion"});
+        mapper.put("COMPLEX_INDEL", new String[]{"inframe_deletion", "inframe_insertion"});
+        mapper.put("Indel", new String[]{"frameshift_variant", "inframe_deletion", "inframe_insertion"});
+        mapper.put("In_Frame_Del", new String[]{"inframe_deletion", "feature_truncation"});
+        mapper.put("3'Flank", new String[]{"any"});
+        mapper.put("5'Flank", new String[]{"any"});
+        mapper.put("ESSENTIAL_SPLICE_SITE", new String[]{"feature_truncation"});
+        mapper.put("Exon skipping", new String[]{"inframe_deletion"});
+        mapper.put("Frameshift deletion", new String[]{"frameshift_variant"});
+        mapper.put("Frameshift insertion", new String[]{"frameshift_variant"});
+        mapper.put("FRAMESHIFT_CODING", new String[]{"frameshift_variant"});
+        mapper.put("Frame_Shift_Del", new String[]{"frameshift_variant"});
+        mapper.put("Frame_Shift_Ins", new String[]{"frameshift_variant"});
+        mapper.put("Fusion", new String[]{"fusion"});
+        mapper.put("In_Frame_Ins", new String[]{"inframe_insertion"});
+        mapper.put("Missense", new String[]{"missense_variant"});
+        mapper.put("Missense_Mutation", new String[]{"missense_variant"});
+        mapper.put("Nonsense_Mutation", new String[]{"stop_gained"});
+        mapper.put("Nonstop_Mutation", new String[]{"stop_lost"});
+        mapper.put("Splice_Site", new String[]{"splice_region_variant"});
+        mapper.put("Splice_Site_Del", new String[]{"splice_region_variant"});
+        mapper.put("Splice_Site_SNP", new String[]{"splice_region_variant"});
+        mapper.put("splicing", new String[]{"splice_region_variant"});
+        mapper.put("Translation_Start_Site", new String[]{"start_lost"});
+        mapper.put("vIII deletion", new String[]{"any"});
 
-            alterationList.add(alteration2);
-
-        } else if (mutation_type.equals("Indel")) {
-            alteration1 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "frameshift_variant", proteinStartPosition, proteinEndPosition);
-            alteration2 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "inframe_deletion", proteinStartPosition, proteinEndPosition);
-            alteration3 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "inframe_insertion", proteinStartPosition, proteinEndPosition);
-
-            alterationList.add(alteration2);
-            alterationList.add(alteration3);
-
-        } else if (mutation_type.equals("In_Frame_Del")) {
-            alteration1 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "inframe_deletion", proteinStartPosition, proteinEndPosition);
-            alteration2 = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", "feature_truncation", proteinStartPosition, proteinEndPosition);
-
-            alterationList.add(alteration2);
-
-        } else {
-            flag = true;
-        }
-
-        if (!flag) {
-            alterations = alterationBo.findRelevantAlterations(alteration1, alterationList);
-        } else {
-            String consequence = "";
-            switch (mutation_type) {
-                case "3'Flank":
-                    consequence = "any";
-                    break;
-                case "5'Flank":
-                    consequence = "any";
-                    break;
-                case "ESSENTIAL_SPLICE_SITE":
-                    consequence = "feature_truncation";
-                    break;
-                case "Exon skipping":
-                    consequence = "inframe_deletion";
-                    break;
-                case "Frameshift deletion":
-                    consequence = "frameshift_variant";
-                    break;
-                case "Frameshift insertion":
-                    consequence = "frameshift_variant";
-                    break;
-                case "FRAMESHIFT_CODING":
-                    consequence = "frameshift_variant";
-                    break;
-                case "Frame_Shift_Del":
-                    consequence = "frameshift_variant";
-                case "Frame_Shift_Ins":
-                    consequence = "frameshift_variant";
-                case "Fusion":
-                    consequence = "fusion";
-                    break;
-                case "In_Frame_Ins":
-                    consequence = "inframe_insertion";
-                    break;
-                case "Missense":
-                    consequence = "missense_variant";
-                    break;
-                case "Missense_Mutation":
-                    consequence = "missense_variant";
-                    break;
-                case "Nonsense_Mutation":
-                    consequence = "stop_gained";
-                    break;
-                case "Nonstop_Mutation":
-                    consequence = "stop_lost";
-                    break;
-                case "Splice_Site":
-                    consequence = "splice_region_variant";
-                    break;
-                case "Splice_Site_Del":
-                    consequence = "splice_region_variant";
-                    break;
-                case "Splice_Site_SNP":
-                    consequence = "splice_region_variant";
-                    break;
-                case "splicing":
-                    consequence = "splice_region_variant";
-                    break;
-                case "Translation_Start_Site":
-                    consequence = "start_lost";
-                    break;
-                case "vIII deletion":
-                    consequence = "any";
-                    break;
-            }
-            alteration = AlterationUtils.getAlteration(hugo_gene_symbol, proteinChange, "MUTATION", consequence, null, null);
-            alterations = alterationBo.findRelevantAlterations(alteration, null);
+        String[] consequences = mapper.get(mutation_type);
+        for (String consequence : consequences) {
+            alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
         }
 
         return alterations;
@@ -135,7 +69,6 @@ public class PortalAlterationImporter {
     public static void main(String[] args) throws IOException {
         JSONObject jObject = null;
         PortalAlteration portalAlteration = null;
-
         String geneUrl = "http://oncokb.org/gene.json";
         String geneResult = FileUtils.readRemote(geneUrl);
         JSONArray geneJSONResult = new JSONArray(geneResult);
@@ -143,9 +76,7 @@ public class PortalAlterationImporter {
         for (int i = 0; i < geneJSONResult.length(); i++) {
             jObject = geneJSONResult.getJSONObject(i);
             genes[i] = jObject.get("hugoSymbol").toString();
-
         }
-
         String joinedGenes = String.join(",", genes);
 
         String studies[] = {"skcm_tcga", "lusc_tcga", "luad_tcga", "coadread_tcga", "brca_tcga", "gbm_tcga", "hnsc_tcga", "kirc_tcga", "ov_tcga"};
@@ -154,7 +85,7 @@ public class PortalAlterationImporter {
         String studyUrl = "http://www.cbioportal.org/api/studies?study_ids=" + joinedStudies;
         String studyResult = FileUtils.readRemote(studyUrl);
         JSONArray studyJSONResult = new JSONArray(studyResult);
-
+        PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
         for (int j = 0; j < studyJSONResult.length(); j++) {
             jObject = studyJSONResult.getJSONObject(j);
             if (jObject.has("id") && jObject.has("type_of_cancer")) {
@@ -176,13 +107,12 @@ public class PortalAlterationImporter {
                     Integer proteinEndPosition = jObject.getInt("protein_end_position");
                     String mutation_type = jObject.getString("mutation_type");
                     String hugo_gene_symbol = jObject.getString("hugo_gene_symbol");
+                    Integer entrez_gene_id = jObject.getInt("entrez_gene_id");
                     String sampleId = jObject.getString("sample_id");
-                    GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-                    Gene gene = geneBo.findGeneByHugoSymbol(hugo_gene_symbol);
 
-                    Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(hugo_gene_symbol, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
+                    Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
+                    Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
 
-                    PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
                     portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, oncoKBAlterations, mutation_type);
                     portalAlterationBo.save(portalAlteration);
 
