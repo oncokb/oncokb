@@ -24,6 +24,7 @@ angular.module('oncokbApp')
         'DataSummary',
         'GeneStatus',
         'ServerUtils',
+        'Cache',
         'InternalAccess',
         function ($timeout,
                   $q,
@@ -40,6 +41,7 @@ angular.module('oncokbApp')
                   DataSummary,
                   GeneStatus,
                   ServerUtils,
+                  Cache,
                   InternalAccess) {
 
             var numOfLocks = {},
@@ -456,6 +458,65 @@ angular.module('oncokbApp')
                     });
             }
 
+            function getCacheStatus() {
+                var deferred = $q.defer();
+                if (dataFromFile) {
+                    deferred.resolve('enabled');
+                } else {
+                    Cache.getStatus()
+                        .success(function(data) {
+                            deferred.resolve(data);
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                }
+                return deferred.promise;
+            }
+
+            function setCache(operation) {
+                var deferred = $q.defer();
+                if (dataFromFile) {
+                    if(operation === 'enable')
+                        deferred.resolve('enabled');
+                    if(operation === 'disable')
+                        deferred.resolve('disabled');
+                } else {
+                    switch (operation) {
+                        case 'disable':
+                            Cache.disable()
+                                .success(function(data) {
+                                    deferred.resolve(data);
+                                })
+                                .error(function(result) {
+                                    deferred.reject(result);
+                                });
+                            break;
+                        case 'enable':
+                            Cache.enable()
+                                .success(function(data) {
+                                    deferred.resolve(data);
+                                })
+                                .error(function(result) {
+                                    deferred.reject(result);
+                                });
+                            break;
+                        case 'reset':
+                            Cache.reset()
+                                .success(function(data) {
+                                    deferred.resolve(data);
+                                })
+                                .error(function(result) {
+                                    deferred.reject(result);
+                                });
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return deferred.promise;
+            }
+            
             // Public API here
             return {
                 'getGeneAlterationTumorType': function (callback) {
@@ -506,6 +567,16 @@ angular.module('oncokbApp')
                 'getGeneStatus': getGeneStatus,
                 'getHotspotList': getHotspotList,
                 'getAutoMutationList': getAutoMutationList,
+                'getCacheStatus': getCacheStatus,
+                'disableCache': function() {
+                    return setCache('disable');
+                },
+                'enableCache': function() {
+                    return setCache('enable');
+                },
+                'resetCache': function() {
+                    return setCache('reset');
+                },
                 'testAccess': testAccess
             };
         }]);

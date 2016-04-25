@@ -6,14 +6,17 @@
 
 package org.mskcc.cbio.oncokb.util;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author jgao
@@ -240,11 +243,16 @@ public final class AlterationUtils {
 
     public static List<Alteration> getAllAlterations(Gene gene) {
         String geneId = Integer.toString(gene.getEntrezGeneId());
-        if (!CacheUtils.containAlterations(geneId)) {
-            CacheUtils.setAlterations(geneId, alterationBo.findAlterationsByGene(Collections.singleton(gene)));
+        if (CacheUtils.isEnabled()) {
+            if (!CacheUtils.containAlterations(geneId)) {
+                CacheUtils.setAlterations(geneId, alterationBo.findAlterationsByGene(Collections.singleton(gene)));
+            }
+            return CacheUtils.getAlterations(geneId);
+        } else {
+            return alterationBo.findAlterationsByGene(Collections.singleton(gene));
         }
-        return CacheUtils.getAlterations(geneId);
     }
+
     public static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, List<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
         VariantConsequence variantConsequence = null;
@@ -292,21 +300,28 @@ public final class AlterationUtils {
     public static List<Alteration> getRelevantAlterations(
             Gene gene, String alteration, String consequence,
             Integer proteinStart, Integer proteinEnd) {
-        if(gene == null) {
+        if (gene == null) {
             return new ArrayList<>();
         }
         String id = gene.getHugoSymbol() + alteration + (consequence == null ? "" : consequence);
         String geneId = Integer.toString(gene.getEntrezGeneId());
 
-        if (!CacheUtils.containRelevantAlterations(geneId, id)) {
-            CacheUtils.setRelevantAlterations(
-                    geneId, id,
-                    getAlterations(
-                            gene, alteration, consequence,
-                            proteinStart, proteinEnd,
-                            getAllAlterations(gene)));
-        }
+        if (CacheUtils.isEnabled()) {
+            if (!CacheUtils.containRelevantAlterations(geneId, id)) {
+                CacheUtils.setRelevantAlterations(
+                        geneId, id,
+                        getAlterations(
+                                gene, alteration, consequence,
+                                proteinStart, proteinEnd,
+                                getAllAlterations(gene)));
+            }
 
-        return CacheUtils.getRelevantAlterations(geneId, id);
+            return CacheUtils.getRelevantAlterations(geneId, id);
+        }else {
+            return getAlterations(
+                    gene, alteration, consequence,
+                    proteinStart, proteinEnd,
+                    getAllAlterations(gene));
+        }
     }
 }

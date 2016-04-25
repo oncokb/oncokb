@@ -8,6 +8,14 @@
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkError()">Check errors</button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="backup()"><span ng-show="!!!status.backup"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.backup">Backup</span></button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
+            <button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="resetCache()"><span>Reset Cache</span></button>
+            <button ng-if="status.hasOwnProperty('cache') && (status.cache === 'enabled' || status.cache === 'disabled')"  type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="changeCacheStatus()">
+                <span ng-show="status.cache === 'enabled'">Disable Cache</span>
+                <span ng-show="status.cache === 'disabled'">Enable Cache</span>
+            </button>
+            <button ng-if="status.hasOwnProperty('cache') && status.cache==='unknown'" type="button"
+                    class="btn btn-default" ng-if="userRole === 8 && $root.internal" disabled>Unknown Cache status
+            </button>
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="initialStatus()">Initial status</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="showDocs()">Get docs info</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="initialHotspot()">Initial hotspot list</button>-->

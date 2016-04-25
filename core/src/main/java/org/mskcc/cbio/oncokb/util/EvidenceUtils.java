@@ -56,29 +56,32 @@ public class EvidenceUtils {
                     "&" + evidenceTypes.toString() +
                     (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
 
-            if (!CacheUtils.containRelevantEvidences(strEntrezId, variantId)) {
-                List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
-                        gene, query.getAlteration(), query.getConsequence(),
-                        query.getProteinStart(), query.getProteinEnd());
-
-                List<Evidence> relevantEvidences;
-                List<TumorType> relevantTumorTypes = new ArrayList<> ();
-                if(query.getTumorType() != null) {
-                    relevantTumorTypes = TumorTypeUtils.getTumorTypes(query.getTumorType(), source);
-                }
-                EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
-                evidenceQueryRes.setGene(gene);
-                evidenceQueryRes.setQuery(query);
-                evidenceQueryRes.setAlterations(relevantAlterations);
-                evidenceQueryRes.setTumorTypes(relevantTumorTypes);
-                List<EvidenceQueryRes> evidenceQueryResList = new ArrayList<>();
-                evidenceQueryResList.add(evidenceQueryRes);
-                relevantEvidences = filterEvidence(getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences), evidenceQueryRes);
-
-                CacheUtils.setRelevantEvidences(strEntrezId, variantId, relevantEvidences);
+            if(CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(strEntrezId, variantId)) {
+                return CacheUtils.getRelevantEvidences(strEntrezId, variantId);
             }
 
-            return CacheUtils.getRelevantEvidences(strEntrezId, variantId);
+            List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
+                    gene, query.getAlteration(), query.getConsequence(),
+                    query.getProteinStart(), query.getProteinEnd());
+
+            List<Evidence> relevantEvidences;
+            List<TumorType> relevantTumorTypes = new ArrayList<> ();
+            if(query.getTumorType() != null) {
+                relevantTumorTypes = TumorTypeUtils.getTumorTypes(query.getTumorType(), source);
+            }
+            EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
+            evidenceQueryRes.setGene(gene);
+            evidenceQueryRes.setQuery(query);
+            evidenceQueryRes.setAlterations(relevantAlterations);
+            evidenceQueryRes.setTumorTypes(relevantTumorTypes);
+            List<EvidenceQueryRes> evidenceQueryResList = new ArrayList<>();
+            evidenceQueryResList.add(evidenceQueryRes);
+            relevantEvidences = filterEvidence(getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences), evidenceQueryRes);
+
+            if(CacheUtils.isEnabled()) {
+                CacheUtils.setRelevantEvidences(strEntrezId, variantId, relevantEvidences);
+            }
+            return relevantEvidences;
         } else {
             return new ArrayList<>();
         }
