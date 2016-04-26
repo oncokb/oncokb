@@ -26,4 +26,9 @@ public class PortalAlterationBoImpl extends GenericBoImpl<PortalAlteration, Port
     public List<PortalAlteration> findPortalAlterationCount() {
         return getDao().findPortalAlterationCount();
     }
+    
+    @Override
+    public List<PortalAlteration> findMutationMapperData(Gene gene) {
+        return getDao().findMutationMapperData(gene);
+    }
 }

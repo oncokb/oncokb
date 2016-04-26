@@ -18,4 +18,6 @@ public interface PortalAlterationBo extends GenericBo<PortalAlteration> {
     List<PortalAlteration> findPortalAlterationCountByGene(Gene gene);
 
     List<PortalAlteration> findPortalAlterationCount();
+    
+    List<PortalAlteration> findMutationMapperData(Gene gene);
 }

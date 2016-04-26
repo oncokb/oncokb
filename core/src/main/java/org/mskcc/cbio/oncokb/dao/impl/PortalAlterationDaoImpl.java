@@ -25,4 +25,9 @@ public class PortalAlterationDaoImpl extends GenericDaoImpl<PortalAlteration, In
         List<PortalAlteration> PortalAlteration = findByNamedQuery("findPortalAlterationCount");
         return PortalAlteration;
     }
+    
+    public List<PortalAlteration> findMutationMapperData(Gene gene) {
+        List<PortalAlteration> PortalAlteration = findByNamedQuery("findMutationMapperData", gene);
+        return PortalAlteration;
+    }
 }
