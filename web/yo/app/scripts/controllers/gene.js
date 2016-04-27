@@ -155,6 +155,7 @@ angular.module('oncokbApp')
             };
             $scope.adminEmails = [];
             $scope.getDocs();
+            getCacheStatus();
 
             var newGenes = [];
 
@@ -371,6 +372,41 @@ angular.module('oncokbApp')
                     console.info('Finished.');
                 });
             };
+
+            $scope.changeCacheStatus = function() {
+                if ($scope.status.cache === 'enabled') {
+                    DatabaseConnector.disableCache()
+                        .then(function() {
+                            $scope.status.cache = 'disabled';
+                        }, function() {
+                            $scope.status.cache = 'unknown';
+                        });
+                } else if ($scope.status.cache === 'disabled') {
+                    DatabaseConnector.enableCache()
+                        .then(function() {
+                            $scope.status.cache = 'enabled';
+                        }, function() {
+                            $scope.status.cache = 'unknown';
+                        });
+                }
+            };
+
+            $scope.resetCache = function() {
+                DatabaseConnector.resetCache()
+                    .then(function() {
+                        console.log('succeed.');
+                    }, function() {
+                        console.log('failed.');
+                    });
+            };
+
+            function getCacheStatus() {
+                DatabaseConnector.getCacheStatus().then(function(result) {
+                    $scope.status.cache = result.hasOwnProperty('status') ? result.status : 'unknown';
+                }, function(result) {
+                    $scope.status.cache = 'unknown';
+                })
+            }
 
             function convertLevels(index, callback) {
                 if(index < $scope.documents.length) {

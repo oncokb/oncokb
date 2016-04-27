@@ -10,17 +10,16 @@ import java.util.*;
 
 /**
  * Created by Hongxin on 4/1/16.
- *
+ * <p/>
  * CacheUtils is used to manage cached variant summaries, relevant alterations, alterations which all gene based.
  * It also includes mapped tumor types which is based on query tumor type name + source.
- *
+ * <p/>
  * The GeneObservable manages all gene based caches. Any updates happen on gene will automatically trigger
  * GeneObservable to notify all observers to update relative cache.
- *
+ * <p/>
  * TODO:
  * Ideally, we should place cache functions in the cache BAO with a factory which controls the source of data.
  * In this way, user can easily to choose to get data from cache or database directly.
- *
  */
 
 
@@ -32,57 +31,81 @@ public class CacheUtils {
     private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Gene> genesByHugoSymbol = new HashMap<>();
-//    private static Map<String, Map<String, List<Evidence>>> alterationRelevantEvidences = new HashMap<>();
     private static Map<String, Map<String, List<Evidence>>> relevantEvidences = new HashMap<>();
+    private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
     private static Observer variantSummaryObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            variantSummary.remove((String) arg);
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                variantSummary.remove(operation.get("val"));
+            } else if (operation.get("cmd") == "reset") {
+                variantSummary.clear();
+            }
         }
     };
 
     private static Observer variantCustomizedSummaryObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            variantCustomizedSummary.remove((String) arg);
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                variantCustomizedSummary.remove(operation.get("val"));
+            } else if (operation.get("cmd") == "reset") {
+                variantCustomizedSummary.clear();
+            }
         }
     };
 
     private static Observer relevantAlterationsObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            relevantAlterations.remove((String) arg);
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                relevantAlterations.remove(operation.get("val"));
+            } else if (operation.get("cmd") == "reset") {
+                relevantAlterations.clear();
+            }
         }
     };
 
     private static Observer alterationsObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            alterations.remove((String) arg);
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                alterations.remove(operation.get("val"));
+            } else if (operation.get("cmd") == "reset") {
+                alterations.clear();
+            }
         }
     };
 
     private static Observer geneObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            genesByEntrezId.remove((String) arg);
-            genesByHugoSymbol.remove((String) arg);
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                String gene = operation.get("val");
+                genesByEntrezId.remove(gene);
+                genesByHugoSymbol.remove(gene);
+            } else if (operation.get("cmd") == "reset") {
+                genesByEntrezId.clear();
+                genesByHugoSymbol.clear();
+            }
         }
     };
-
-
-//    private static Observer alterationRelevantEvidencesObserver = new Observer() {
-//        @Override
-//        public void update(Observable o, Object arg) {
-//            alterationRelevantEvidences.remove((String) arg);
-//        }
-//    };
 
     private static Observer relevantEvidencesObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            relevantEvidences.remove((String) arg);
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                relevantEvidences.remove(operation.get("val"));
+            } else if (operation.get("cmd") == "reset") {
+                relevantEvidences.clear();
+            }
         }
     };
 
@@ -93,7 +116,6 @@ public class CacheUtils {
         GeneObservable.getInstance().addObserver(alterationsObserver);
         GeneObservable.getInstance().addObserver(geneObserver);
         GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
-//        GeneObservable.getInstance().addObserver(alterationRelevantEvidencesObserver);
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
@@ -147,26 +169,6 @@ public class CacheUtils {
         }
         relevantEvidences.get(gene).put(variant, evidences);
     }
-
-//    public static List<Evidence> getAlterationRelevantEvidences(String gene, String alteration) {
-//        if (alterationRelevantEvidences.containsKey(gene) && alterationRelevantEvidences.get(gene).containsKey(alteration)) {
-//            return alterationRelevantEvidences.get(gene).get(alteration);
-//        } else {
-//            return null;
-//        }
-//    }
-//
-//    public static Boolean containAlterationRelevantEvidences(String gene, String alteration) {
-//        return (alterationRelevantEvidences.containsKey(gene) &&
-//                alterationRelevantEvidences.get(gene).containsKey(alteration)) ? true : false;
-//    }
-//
-//    public static void setAlterationRelevantEvidences(String gene, String alteration, List<Evidence> evidences) {
-//        if (!alterationRelevantEvidences.containsKey(gene)) {
-//            alterationRelevantEvidences.put(gene, new HashMap<String, List<Evidence>>());
-//        }
-//        alterationRelevantEvidences.get(gene).put(alteration, evidences);
-//    }
 
     public static String getVariantSummary(String gene, String variant) {
         if (variantSummary.containsKey(gene) && variantSummary.get(gene).containsKey(variant)) {
@@ -253,6 +255,38 @@ public class CacheUtils {
     }
 
     public static void updateGene(String gene) {
-        GeneObservable.getInstance().update(gene);
+        GeneObservable.getInstance().update("update", gene);
+    }
+
+    public static void resetAll() {
+        GeneObservable.getInstance().update("reset", null);
+    }
+
+    public static void enableCacheUtils() {
+        status = "enabled";
+    }
+
+    public static void disableCacheUtils() {
+        status = "disabled";
+    }
+
+    public static String getCacheUtilsStatus() {
+        return status;
+    }
+
+    public static Boolean isEnabled() {
+        if (status == "enabled") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static Boolean isDisabled() {
+        if (status == "disabled") {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 
 /**
@@ -14,9 +16,14 @@ public class GeneObservable extends Observable {
         super.setChanged();
     }
 
-    public void update(String gene) {
-        setChanged();
-        notifyObservers(gene);
+    public void update(String cmd, String value) {
+        if(CacheUtils.isEnabled() && cmd != null) {
+            Map<String, String> operation = new HashMap<>();
+            operation.put("cmd", cmd);
+            operation.put("val", value);
+            setChanged();
+            notifyObservers(operation);
+        }
     }
 
     public static GeneObservable getInstance() {

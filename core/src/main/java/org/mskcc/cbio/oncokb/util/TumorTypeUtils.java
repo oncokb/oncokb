@@ -143,10 +143,14 @@ public class TumorTypeUtils {
     }
 
     public static List<TumorType> getTumorTypes(String tumorType, String source) {
-        if (!CacheUtils.containMappedTumorTypes(tumorType, source)) {
-            CacheUtils.setMappedTumorTypes(tumorType, source, findTumorTypes(tumorType, source));
+        if(CacheUtils.isEnabled()) {
+            if (!CacheUtils.containMappedTumorTypes(tumorType, source)) {
+                CacheUtils.setMappedTumorTypes(tumorType, source, findTumorTypes(tumorType, source));
+            }
+            return  CacheUtils.getMappedTumorTypes(tumorType, source);
+        }else {
+            return findTumorTypes(tumorType, source);
         }
-        return  CacheUtils.getMappedTumorTypes(tumorType, source);
     }
 
     private static List<TumorType> findTumorTypes(String tumorType, String source) {

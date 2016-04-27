@@ -30,15 +30,23 @@ public class GeneUtils {
     public static Gene getGene(Integer entrezId, String hugoSymbol) {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         if (entrezId != null) {
-            if(CacheUtils.getGeneByEntrezId(entrezId) == null) {
-                CacheUtils.setGeneByEntrezId(entrezId, geneBo.findGeneByEntrezGeneId(entrezId));
+            if(CacheUtils.isEnabled()) {
+                if (CacheUtils.getGeneByEntrezId(entrezId) == null) {
+                    CacheUtils.setGeneByEntrezId(entrezId, geneBo.findGeneByEntrezGeneId(entrezId));
+                }
+                return CacheUtils.getGeneByEntrezId(entrezId);
+            }else {
+                geneBo.findGeneByEntrezGeneId(entrezId);
             }
-            return CacheUtils.getGeneByEntrezId(entrezId);
         } else if (hugoSymbol != null) {
-            if(CacheUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
-                CacheUtils.setGeneByHugoSymbol(hugoSymbol, geneBo.findGeneByHugoSymbol(hugoSymbol));
+            if(CacheUtils.isEnabled()) {
+                if (CacheUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
+                    CacheUtils.setGeneByHugoSymbol(hugoSymbol, geneBo.findGeneByHugoSymbol(hugoSymbol));
+                }
+                return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
+            }else {
+                return geneBo.findGeneByHugoSymbol(hugoSymbol);
             }
-            return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
         }
         return null;
     }

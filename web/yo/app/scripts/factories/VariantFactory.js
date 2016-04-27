@@ -301,3 +301,42 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http', function ($http) {
         }
     };
 }]);
+
+angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
+    'use strict';
+    var transform = function(data) {
+        return $.param(data);
+    };
+
+    function setStatus(status) {
+        return $http.post(
+            OncoKB.config.apiLink + 'cache',
+            {cmd: status},
+            {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            }
+        );
+    }
+
+    function getStatus() {
+        return $http({
+            url: OncoKB.config.apiLink + 'cache',
+            method: 'GET',
+            params: {cmd: 'getStatus'}
+        });
+    }
+
+    return {
+        reset: function() {
+            return setStatus('reset');
+        },
+        enable: function() {
+            return setStatus('enable');
+        },
+        disable: function() {
+            return setStatus('disable');
+        },
+        getStatus: getStatus
+    };
+}]);

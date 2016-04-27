@@ -19,7 +19,7 @@ public class SummaryUtils {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
-        if (CacheUtils.containVariantSummary(geneId, key)) {
+        if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(geneId, key)) {
             return CacheUtils.getVariantSummary(geneId, key);
         }
 
@@ -208,7 +208,9 @@ public class SummaryUtils {
             }
         }
 
-        CacheUtils.setVariantSummary(geneId, key, sb.toString().trim());
+        if (CacheUtils.isEnabled()) {
+            CacheUtils.setVariantSummary(geneId, key, sb.toString().trim());
+        }
         return sb.toString().trim();
     }
 
@@ -216,7 +218,7 @@ public class SummaryUtils {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
-        if (CacheUtils.containVariantCustomizedSummary(geneId, key)) {
+        if (CacheUtils.isEnabled() && CacheUtils.containVariantCustomizedSummary(geneId, key)) {
             return CacheUtils.getVariantCustomizedSummary(geneId, key);
         }
 
@@ -283,7 +285,9 @@ public class SummaryUtils {
 //            }
         }
 
-        CacheUtils.setVariantCustomizedSummary(geneId, key, sb.toString().trim());
+        if(CacheUtils.isEnabled()) {
+            CacheUtils.setVariantCustomizedSummary(geneId, key, sb.toString().trim());
+        }
         return sb.toString().trim();
     }
 
