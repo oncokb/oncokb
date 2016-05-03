@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
@@ -77,11 +78,11 @@ public class PortalAlterationImporter {
             jObject = geneJSONResult.getJSONObject(i);
             genes[i] = jObject.get("hugoSymbol").toString();
         }
-        String joinedGenes = String.join(",", genes);
+        String joinedGenes = StringUtils.join(",", genes);
 
         String studies[] = {"skcm_tcga", "lusc_tcga", "luad_tcga", "coadread_tcga", "brca_tcga", "gbm_tcga", "hnsc_tcga", "kirc_tcga", "ov_tcga"};
 
-        String joinedStudies = String.join(",", studies);
+        String joinedStudies = StringUtils.join(",", studies);
         String studyUrl = "http://www.cbioportal.org/api/studies?study_ids=" + joinedStudies;
         String studyResult = FileUtils.readRemote(studyUrl);
         JSONArray studyJSONResult = new JSONArray(studyResult);
