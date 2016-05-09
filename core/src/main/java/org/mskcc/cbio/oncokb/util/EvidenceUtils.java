@@ -5,7 +5,6 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -46,27 +45,34 @@ public class EvidenceUtils {
     }
 
     public static List<Evidence> getRelevantEvidences(
-            Query query, String source, String geneStatus,
-            List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
-        Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
+        Query query, String source, String geneStatus,
+        List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
+        Gene gene = null;
+
+        if (query.getEntrezGeneId() != null) {
+            gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        } else if (query.getHugoSymbol() != null) {
+            gene = GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
+        }
+
         if (gene != null) {
             String strEntrezId = Integer.toString(gene.getEntrezGeneId());
             String variantId = query.getQueryId() +
-                    (source != null ? ("&" + source) : "") +
-                    "&" + evidenceTypes.toString() +
-                    (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
+                (source != null ? ("&" + source) : "") +
+                "&" + evidenceTypes.toString() +
+                (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
 
-            if(CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(strEntrezId, variantId)) {
+            if (CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(strEntrezId, variantId)) {
                 return CacheUtils.getRelevantEvidences(strEntrezId, variantId);
             }
 
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
-                    gene, query.getAlteration(), query.getConsequence(),
-                    query.getProteinStart(), query.getProteinEnd());
+                gene, query.getAlteration(), query.getConsequence(),
+                query.getProteinStart(), query.getProteinEnd());
 
             List<Evidence> relevantEvidences;
-            List<TumorType> relevantTumorTypes = new ArrayList<> ();
-            if(query.getTumorType() != null) {
+            List<TumorType> relevantTumorTypes = new ArrayList<>();
+            if (query.getTumorType() != null) {
                 relevantTumorTypes = TumorTypeUtils.getTumorTypes(query.getTumorType(), source);
             }
             EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
@@ -78,7 +84,7 @@ public class EvidenceUtils {
             evidenceQueryResList.add(evidenceQueryRes);
             relevantEvidences = filterEvidence(getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences), evidenceQueryRes);
 
-            if(CacheUtils.isEnabled()) {
+            if (CacheUtils.isEnabled()) {
                 CacheUtils.setRelevantEvidences(strEntrezId, variantId, relevantEvidences);
             }
             return relevantEvidences;
@@ -103,7 +109,7 @@ public class EvidenceUtils {
         }
         if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
             return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes);
-        }else {
+        } else {
             return evidenceBo.findEvidencesByAlterationWithLevels(alterations, evidenceTypes, levelOfEvidences);
         }
     }
@@ -120,7 +126,7 @@ public class EvidenceUtils {
         }
         if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
             return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes);
-        }else {
+        } else {
             return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes, levelOfEvidences);
         }
     }
@@ -145,7 +151,7 @@ public class EvidenceUtils {
                     int altId = alt.getAlterationId();
 
 //                    if (geneStatus == null || geneStatus == "") {
-                        geneStatus = "all";
+                    geneStatus = "all";
 //                    }
                     geneStatus = geneStatus.toLowerCase();
                     if (geneStatus.equals("all") || query.getGene().getStatus().toLowerCase().equals(geneStatus)) {
@@ -207,6 +213,19 @@ public class EvidenceUtils {
         return evidences;
     }
 
+    public static Map<Gene, Set<Evidence>> getEvidenceByGenes(Set<Gene> genes) {
+        Map<Gene, Set<Evidence>> evidences = new HashMap<>();
+        if (CacheUtils.isEnabled()) {
+            for (Gene gene : genes) {
+                if (gene != null) {
+                    evidences.put(gene, CacheUtils.getEvidences(gene));
+                }
+            }
+        } else {
+            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<Evidence>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+        }
+        return evidences;
+    }
 
     public static List<Evidence> filterEvidence(List<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         List<Evidence> filtered = new ArrayList<>();
@@ -235,7 +254,7 @@ public class EvidenceUtils {
                                 } else {
                                     if (tempEvidence.getLevelOfEvidence() != null) {
                                         if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
-                                                tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+                                            tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
                                             tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
                                             filtered.add(tempEvidence);
                                         } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
@@ -267,5 +286,18 @@ public class EvidenceUtils {
         }
 
         return evidences;
+    }
+
+    public static Map<Gene, Set<Evidence>> separateEvidencesByGene(Set<Gene> genes, Set<Evidence> evidences) {
+        Map<Gene, Set<Evidence>> result = new HashMap<>();
+
+        for (Gene gene : genes) {
+            result.put(gene, new HashSet<Evidence>());
+        }
+
+        for (Evidence evidence : evidences) {
+            result.get(evidence.getGene()).add(evidence);
+        }
+        return result;
     }
 }
