@@ -3,32 +3,29 @@ package org.mskcc.cbio.oncokb.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.RespMeta;
+import org.mskcc.cbio.oncokb.model.ShortGene;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 
 @ApiModel(description = "")
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
-public class ApiSearchEvidences {
+public class ApiGene {
 
-    private Set<Evidence> data = new HashSet<Evidence>();
-    private RespMeta meta = null;
-
+    private ShortGene data = new ShortGene();
+    private RespMeta meta = new RespMeta();
 
     /**
      **/
     @ApiModelProperty(value = "")
     @JsonProperty("data")
-    public Set<Evidence> getData() {
+    public ShortGene getData() {
         return data;
     }
 
-    public void setData(Set<Evidence> data) {
+    public void setData(ShortGene data) {
         this.data = data;
     }
 
@@ -44,30 +41,33 @@ public class ApiSearchEvidences {
         this.meta = meta;
     }
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ApiSearchEvidences response = (ApiSearchEvidences) o;
-        return Objects.equals(data, response.data);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ApiGene apiGenes = (ApiGene) o;
+
+        if (data != null ? !data.equals(apiGenes.data) : apiGenes.data != null) return false;
+        if (meta != null ? !meta.equals(apiGenes.meta) : apiGenes.meta != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(data);
+        int result = data != null ? data.hashCode() : 0;
+        result = 31 * result + (meta != null ? meta.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("class ApiSearchEvidences {\n");
+        sb.append("class ApiGenes {\n");
 
         sb.append("  data: ").append(data).append("\n");
+        sb.append("  data: ").append(meta).append("\n");
         sb.append("}\n");
         return sb.toString();
     }

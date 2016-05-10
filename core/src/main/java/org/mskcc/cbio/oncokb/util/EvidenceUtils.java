@@ -227,6 +227,36 @@ public class EvidenceUtils {
         return evidences;
     }
 
+    public static Map<Gene, Set<Evidence>> getEvidenceByGenesAndEvidenceTypes(Set<Gene> genes, Set<EvidenceType> evidenceTypes) {
+        Map<Gene, Set<Evidence>> result = new HashMap<>();
+        if (CacheUtils.isEnabled()) {
+            for (Gene gene : genes) {
+                if (gene != null) {
+                    Set<Evidence> evidences = CacheUtils.getEvidences(gene);
+                    Set<Evidence> filtered = new HashSet<>();
+                    for (Evidence evidence : evidences) {
+                        if (evidenceTypes.contains(evidence.getEvidenceType())) {
+                            filtered.add(evidence);
+                        }
+                    }
+                    result.put(gene, filtered);
+                }
+            }
+        } else {
+            result = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<Evidence>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+            for (Gene gene : genes) {
+                Set<Evidence> evidences = result.get(gene);
+
+                for (Evidence evidence : evidences) {
+                    if (!evidenceTypes.contains(evidence.getEvidenceType())) {
+                        evidences.remove(evidence);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     public static List<Evidence> filterEvidence(List<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         List<Evidence> filtered = new ArrayList<>();
 
