@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
@@ -67,6 +68,7 @@ public class PortalAlterationImporter {
     }
 
     public static void main(String[] args) throws IOException {
+
         JSONObject jObject = null;
         PortalAlteration portalAlteration = null;
         String geneUrl = "http://oncokb.org/gene.json";
@@ -77,11 +79,10 @@ public class PortalAlterationImporter {
             jObject = geneJSONResult.getJSONObject(i);
             genes[i] = jObject.get("hugoSymbol").toString();
         }
-        String joinedGenes = String.join(",", genes);
+        String joinedGenes = StringUtils.join(genes, ",");
+        String studies[] = {"skcm_tcga", "lusc_tcga", "luad_tcga", "coadread_tcga", "brca_tcga", "gbm_tcga", "hnsc_tcga", "kirc_tcga", "ov_tcga", "blca_tcga", "lgg_tcga", "cesc_tcga", "stad_tcga", "kirp_tcga", "kich_tcga", "lihc_tcga", "prad_tcga", "sarc_tcga", "ucec_tcga", "thca_tcga", "tgct_tcga"};
 
-        String studies[] = {"skcm_tcga", "lusc_tcga", "luad_tcga", "coadread_tcga", "brca_tcga", "gbm_tcga", "hnsc_tcga", "kirc_tcga", "ov_tcga"};
-
-        String joinedStudies = String.join(",", studies);
+        String joinedStudies = StringUtils.join(studies, ",");
         String studyUrl = "http://www.cbioportal.org/api/studies?study_ids=" + joinedStudies;
         String studyResult = FileUtils.readRemote(studyUrl);
         JSONArray studyJSONResult = new JSONArray(studyResult);
@@ -93,6 +94,11 @@ public class PortalAlterationImporter {
                 String cancerType = jObject.get("type_of_cancer").toString();
                 System.out.println("*****************************************************************************");
                 System.out.println("Importing portal alteration data for " + jObject.get("name").toString());
+                //get sequenced sample list for one study
+                String sequencedSamplesUrl = "http://www.cbioportal.org/api/samplelists?sample_list_ids=" + cancerStudy + "_sequenced";
+                String sequencedSamplesResult = FileUtils.readRemote(sequencedSamplesUrl);
+                JSONArray sequencedSamplesJSONResult = new JSONArray(sequencedSamplesResult);
+                JSONArray sequencedSamples = (JSONArray) sequencedSamplesJSONResult.getJSONObject(0).get("sample_ids");
 
                 String genetic_profile_id = cancerStudy + "_mutations";
                 String sample_list_id = cancerStudy + "_sequenced";
@@ -115,8 +121,24 @@ public class PortalAlterationImporter {
 
                     portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, oncoKBAlterations, mutation_type);
                     portalAlterationBo.save(portalAlteration);
-
+                    //remove saved sample from sequenced sample list 
+                    for (int n = 0; n < sequencedSamples.length(); n++) {
+                        if (sequencedSamples.get(n).equals(sampleId)) {
+                            sequencedSamples.remove(n);
+                            break;
+                        }
+                    }
                 }
+                //save samples that don't have mutations
+                if(sequencedSamples.length() > 0)
+                {
+                    for (int p = 0; p < sequencedSamples.length(); p++) {
+                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null, null);
+                        portalAlterationBo.save(portalAlteration);
+                    }
+                }
+                
+                
                 DecimalFormat myFormatter = new DecimalFormat("##.##");
                 String output = myFormatter.format(100 * (j + 1) / studyJSONResult.length());
                 System.out.println("Importing " + output + "% done.");
