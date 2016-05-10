@@ -140,8 +140,11 @@ public class CacheUtils {
         GeneObservable.getInstance().addObserver(genesObserver);
         GeneObservable.getInstance().addObserver(evidencesObserver);
 
+        Long oldTime = new Date().getTime();
         genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
+        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
         evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {

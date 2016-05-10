@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
@@ -327,6 +328,43 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             result.get(evidence.getGene()).add(evidence);
+        }
+        return result;
+    }
+
+    public static String getKnownEffectFromEvidence(EvidenceType evidenceType, Set<Evidence> evidences) {
+        Set<String> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getEvidenceType().equals(evidenceType) && evidence.getKnownEffect() != null) {
+                result.add(evidence.getKnownEffect());
+            }
+        }
+        return StringUtils.join(result, ", ");
+    }
+
+    public static Set<String> getPmids(Set<Evidence> evidences) {
+        Set<String> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            for (Article article : evidence.getArticles()) {
+                result.add(article.getPmid());
+            }
+        }
+        return result;
+    }
+
+    public static Set<String> getDrugs(Set<Evidence> evidences) {
+        Set<String> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            for (Treatment treatment : evidence.getTreatments()) {
+                Set<String> drugsInTreatment = new HashSet<>();
+                for (Drug drug : treatment.getDrugs()) {
+                    drugsInTreatment.add(drug.getDrugName());
+                }
+                result.add(StringUtils.join(drugsInTreatment, " + "));
+            }
         }
         return result;
     }
