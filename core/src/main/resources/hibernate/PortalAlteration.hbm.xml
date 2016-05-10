@@ -25,7 +25,7 @@
         </property>
         
         <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
-            <column name="entrez_gene_id" not-null="true" />
+            <column name="entrez_gene_id"/>
         </many-to-one>
         
         <property name="proteinChange" type="string">
@@ -41,7 +41,7 @@
         </property>
         
         <property name="alterationType" type="string">
-            <column name="alterationType" length="300" not-null="true">
+            <column name="alterationType" length="300" >
             </column>
         </property>
         
@@ -55,10 +55,12 @@
         </set>
     </class>
     <query name="findPortalAlterationCountByGene">
-        <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa where pa.gene=? group by cancerStudy]]>
+        <![CDATA[select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa inner join pa.oncoKBAlterations oa where pa.gene=? group by pa.cancerStudy]]>
     </query>
     <query name="findPortalAlterationCount">
         <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy]]>
     </query>
-
+    <query name="findMutationMapperData">
+        <![CDATA[select distinct pa from PortalAlteration pa inner join pa.oncoKBAlterations where pa.gene=?]]>
+    </query>
 </hibernate-mapping>

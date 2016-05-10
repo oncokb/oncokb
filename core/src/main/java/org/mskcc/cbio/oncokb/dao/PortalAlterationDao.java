@@ -18,4 +18,6 @@ public interface PortalAlterationDao extends GenericDao<PortalAlteration, Intege
     List<PortalAlteration> findPortalAlterationCountByGene(Gene gene);
 
     List<PortalAlteration> findPortalAlterationCount();
+    
+    List<PortalAlteration> findMutationMapperData(Gene gene);
 }

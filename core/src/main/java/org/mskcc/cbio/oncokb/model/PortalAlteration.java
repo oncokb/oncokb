@@ -38,7 +38,17 @@ public class PortalAlteration {
         this.oncoKBAlterations = oncoKBAlterations;
         this.alterationType = alterationType;
     }
-
+    public PortalAlteration(PortalAlteration pa) {
+        cancerType = pa.cancerType;
+        cancerStudy = pa.cancerStudy;
+        sampleId = pa.sampleId;
+        gene = pa.gene;
+        proteinChange = pa.proteinChange;
+        proteinStartPosition = pa.proteinStartPosition;
+        proteinEndPosition = pa.proteinEndPosition;
+        oncoKBAlterations = pa.oncoKBAlterations;
+        alterationType = pa.alterationType;
+    }
     public Integer getPortalAlterationID() {
         return portalAlterationID;
     }
