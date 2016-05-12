@@ -16,7 +16,7 @@
     "angular-bootstrap": "~0.14.3",
     "angular-chosen": "*",
     "bootstrap-chosen": "*",
-    "angular-chosen-localytics": "~1.0.7",
+    "angular-chosen-localytics": "^1.4.0",
     "angular-dialog-service": "~5.2.8",
     "angular-recursion": "~1.0.5",
     "jszip": "Stuk/jszip#~2.4.0",

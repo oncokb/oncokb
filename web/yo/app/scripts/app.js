@@ -46,7 +46,8 @@ OncoKB.config = {
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/api/',
-    //apiLink: 'http://localhost:8080/oncokb/api/',
+    // apiLink: 'http://localhost:8080/oncokb/api/',
+    oncoTreeLink: 'http://localhost:8080/oncotree/api/',
     accessLevels: {}
 };
 
@@ -172,6 +173,9 @@ OncoKB.curateInfo = {
     },
     'Tumor': {
         'name': {
+            type: 'string'
+        },
+        'oncoTreeCode': {
             type: 'string'
         },
         'summary': {
@@ -433,6 +437,7 @@ angular.module('oncokbApp', [
     'contenteditable',
     'datatables',
     'datatables.bootstrap',
+    'localytics.directives',
     'ui.sortable'
 ])
     .value('user', {
