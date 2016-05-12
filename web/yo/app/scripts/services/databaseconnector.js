@@ -18,13 +18,13 @@ angular.module('oncokbApp')
         'SearchVariant',
         'GenerateDoc',
         'DriveOncokbInfo',
-        'OncoTreeTumorTypes',
         'DriveAnnotation',
         'SendEmail',
         'DataSummary',
         'GeneStatus',
         'ServerUtils',
         'Cache',
+        'OncoTree',
         'InternalAccess',
         function ($timeout,
                   $q,
@@ -35,20 +35,20 @@ angular.module('oncokbApp')
                   SearchVariant,
                   GenerateDoc,
                   DriveOncokbInfo,
-                  OncoTreeTumorTypes,
                   DriveAnnotation,
                   SendEmail,
                   DataSummary,
                   GeneStatus,
                   ServerUtils,
                   Cache,
+                  OncoTree,
                   InternalAccess) {
 
             var numOfLocks = {},
                 data = {};
 
             //When running locally, set this to true, all servlet will read data from relative files.
-            var dataFromFile = false;
+            var dataFromFile = true;
 
             function getAllGene(callback, timestamp) {
                 if (dataFromFile) {
@@ -165,38 +165,6 @@ angular.module('oncokbApp')
                         });
                 } else {
                     Alteration.getFromServer()
-                        .success(function (data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function (result) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                }
-            }
-
-            function getAllOncoTreeTumorTypes(callback, timestamp) {
-                if (dataFromFile) {
-                    OncoTreeTumorTypes.getFromFile()
-                        .success(function (data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function (result) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                } else {
-                    OncoTreeTumorTypes.getFromServer()
                         .success(function (data) {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
@@ -379,6 +347,9 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
+                //Disable send email service
+                success(true);
+                
                 if (dataFromFile) {
                     success(true);
                 } else {
@@ -516,7 +487,30 @@ angular.module('oncokbApp')
                 }
                 return deferred.promise;
             }
-            
+
+            function getOncoTreeMainTypes() {
+                var deferred = $q.defer();
+                OncoTree.getMainType()
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+
+            function getOncoTreeTumorTypesByMainType(mainType) {
+                var deferred = $q.defer();
+                OncoTree.getTumorTypeByMainType(mainType)
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
             // Public API here
             return {
                 'getGeneAlterationTumorType': function (callback) {
@@ -560,7 +554,6 @@ angular.module('oncokbApp')
                 'createGoogleFolder': createGoogleFolder,
                 'getOncokbInfo': getOncokbInfo,
                 'getAllTumorType': getAllTumorType,
-                'getAllOncoTreeTumorTypes': getAllOncoTreeTumorTypes,
                 'updateGene': updateGene,
                 'sendEmail': sendEmail,
                 'setGeneStatus': setGeneStatus,
@@ -577,6 +570,8 @@ angular.module('oncokbApp')
                 'resetCache': function() {
                     return setCache('reset');
                 },
+                'getOncoTreeMainTypes': getOncoTreeMainTypes,
+                'getOncoTreeTumorTypesByMainType': getOncoTreeTumorTypesByMainType,
                 'testAccess': testAccess
             };
         }]);

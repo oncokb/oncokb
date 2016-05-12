@@ -1032,14 +1032,13 @@ angular.module('oncokbApp')
                 $scope.docStatus.updateGene = true;
             }
 
-            $scope.addTumorType = function (mutation, newTumorTypeName, mutationIndex) {
-                if (mutation && newTumorTypeName) {
+            $scope.addTumorType = function (mutation, newMainType, newTumorType, mutationIndex) {
+                if (mutation && newMainType) {
                     var _tumorType = '';
                     var exists = false;
-                    newTumorTypeName = newTumorTypeName.toString().trim();
 
                     mutation.tumors.asArray().forEach(function (e) {
-                        if (e.name.getText().toLowerCase() === newTumorTypeName.toLowerCase()) {
+                        if (e.name.getText().toLowerCase() === ((newTumorType && newTumorType.name) ? newTumorType.name.toLowerCase() : newMainType.name.toLowerCase())) {
                             exists = true;
                         }
                     });
@@ -1049,7 +1048,12 @@ angular.module('oncokbApp')
                     } else {
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
                         _tumorType = $scope.realtimeDocument.getModel().create(OncoKB.Tumor);
-                        _tumorType.name.setText(newTumorTypeName);
+                        if(newTumorType && newTumorType.code) {
+                            _tumorType.name.setText(newTumorType.code ? newTumorType.name : newMainType.name);
+                            _tumorType.oncoTreeCode.setText(newTumorType.code);
+                        }else {
+                            _tumorType.name.setText(newMainType.name);
+                        }
                         _tumorType.nccn.category.setText('2A');
                         for (var i = 0; i < 4; i++) {
                             var __ti = $scope.realtimeDocument.getModel().create(OncoKB.TI);
@@ -1065,7 +1069,6 @@ angular.module('oncokbApp')
                         mutation.tumors.push(_tumorType);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
                         $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new GeneStatusSingleton();
-                        sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
                     }
                 }
             };
@@ -1814,70 +1817,16 @@ angular.module('oncokbApp')
                 $scope.fileEditable = false;
             }
 
-            function getOncoTreeTumortypes() {
-                $scope.tumorTypes = ['Adrenocortical Carcinoma',
-                    'Pheochromocytoma',
-                    'Ampullary Carcinoma',
-                    'Biliary Cancer',
-                    'Bladder Cancer',
-                    'Blastic Plasmacytoid Dendritic Cell Neoplasm',
-                    'Histiocytosis',
-                    'Leukemia',
-                    'Multiple Myeloma',
-                    'Myelodysplasia',
-                    'Myeloproliferative Neoplasm',
-                    'Chondroblastoma',
-                    'Chondrosarcoma',
-                    'Chordoma',
-                    'Ewing Sarcoma',
-                    'Giant Cell Tumor',
-                    'Osteosarcoma',
-                    'Anal Cancer',
-                    'Melanoma',
-                    'Appendiceal Cancer',
-                    'Colorectal Cancer',
-                    'Gastrointestinal Neuroendocrine Tumor',
-                    'Small Bowel Cancer',
-                    'Diffuse Glioma',
-                    'Encapsulated Glioma',
-                    'Ependymomal Tumor',
-                    'Miscellaneous Neuroepithelial Tumor',
-                    'Meningothelial Tumor',
-                    'Embryonal Tumor',
-                    'Sellar Tumor',
-                    'Nerve Sheath Tumor',
-                    'Choroid Plexus Tumor',
-                    'Pineal Tumor',
-                    'Germ Cell Tumor',
-                    'Miscellaneous Brain Tumor',
-                    'Breast Carcinoma',
-                    'Cervical Cancer',
-                    'Esophagogastric Carcinoma',
-                    'Retinoblastoma',
-                    'Head and Neck Carcinoma',
-                    'Renal Cell Carcinoma',
-                    'Wilms Tumor',
-                    'Hepatocellular Carcinoma',
-                    'Hodgkin\'s Lymphoma',
-                    'Non-Hodgkin’s Lymphoma',
-                    'Lung cancer',
-                    'Mesothelioma',
-                    'Ovarian Cancer',
-                    'Pancreatic Cancer',
-                    'Penile Cancer',
-                    'Prostate Cancer',
-                    'Skin Cancer, Non-Melanoma',
-                    'Soft Tissue Sarcoma',
-                    'Gastrointestinal Stromal Tumor',
-                    'Thymic Tumor',
-                    'Thyroid Cancer',
-                    'Gestational Trophoblastic Disease',
-                    'Endometrial Cancer',
-                    'Uterine Sarcoma',
-                    'Vulvar Carcinoma',
-                    'Cancer of Unknown Primary',
-                    'Mixed Cancer Types',
-                    'Unknown Cancer Type'];
+            function getOncoTreeMainTypes() {
+                DatabaseConnector.getOncoTreeMainTypes()
+                    .then(function(result) {
+                        if(result.data) {
+                            console.log(result.data);
+                            $scope.oncoTree.mainTypes = result.data;
+                        }
+                    }, function(error) {
+                        console.log(error);
+                    });
             }
 
             function getLevels() {
@@ -2027,6 +1976,14 @@ angular.module('oncokbApp')
             };
             $scope.selfParams = {};
             $scope.geneStatus = {};
+            $scope.oncoTree = {
+                mainTypes: {},
+                tumorTypes: {}
+            };
+            $scope.meta = {
+                newMainType: {},
+                newTumorType: {}
+            };
 
             $scope.status = {
                 expandAll: false,
@@ -2061,8 +2018,18 @@ angular.module('oncokbApp')
                 }
             });
 
+            $scope.$watch('meta.newMainType',function(n, o) {
+               if(_.isObject(n) && n.name) {
+                   DatabaseConnector.getOncoTreeTumorTypesByMainType(n.name)
+                       .then(function(result) {
+                           if(result.data) {
+                               $scope.oncoTree.tumorTypes = result.data;
+                           }
+                       });
+               }
+            });
             getDriveOncokbInfo();
-            getOncoTreeTumortypes();
+            getOncoTreeMainTypes();
             var clock;
             clock = $interval(function () {
                 storage.requireAuth(true).then(function (result) {
@@ -2144,42 +2111,5 @@ angular.module('oncokbApp')
                 storage.closeDocument();
                 documentClosed();
             });
-
-            // Get OncoTree primary/secondary/tertiary/quaternary types
-            // DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
-            //   var tumorTypes = {};
-
-            //   data.forEach(function(e, i){
-            //     var key = e.primary;
-
-            //     if(!_.endsWith(key, 'cancer')) {
-            //       key += ' cancer';
-            //     }
-
-            //     if(tumorTypes.hasOwnProperty(key)) {
-            //       var loop=['secondary', 'tertiary', 'quaternary'];
-            //       loop.forEach(function(e1, i1){
-            //         if(e[e1] && tumorTypes[key].indexOf(e[e1]) === -1) {
-            //           tumorTypes[key].push(e[e1]);
-            //         }
-            //       });
-            //     }else {
-            //       tumorTypes[key] = [];
-            //     }
-            //   });
-
-            //   var newTumorTypes = []
-            //   for(var key in tumorTypes) {
-            //     for(var i = 0; i < tumorTypes[key].length; i++) {
-            //       var __datum = {
-            //         'name': tumorTypes[key][i],
-            //         'tissue': key
-            //       }
-            //       newTumorTypes.push(__datum);
-            //     }
-            //   }
-            //   $scope.tumorTypes = newTumorTypes;
-            // });
-
         }]
 );
