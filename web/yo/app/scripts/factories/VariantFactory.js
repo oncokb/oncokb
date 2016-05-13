@@ -336,8 +336,18 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
             'tumorTypes/search/maintype/' + mainType + '?exactMatch=true');
     }
 
+    function getTumorType(type, query, exactMatch) {
+        if(!tyep || !query) {
+            return null;
+        }
+        exactMatch = _.isBoolean(exactMatch) ? true : exactMatch;
+        return $http.get(OncoKB.config.oncoTreeLink +
+            'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch);
+    }
+
     return {
         getMainType: getMainType,
-        getTumorTypeByMainType: getTumorTypeByMainType
+        getTumorTypeByMainType: getTumorTypeByMainType,
+        getTumorType: getTumorType
     };
 }]);
