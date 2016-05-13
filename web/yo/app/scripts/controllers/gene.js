@@ -155,7 +155,13 @@ angular.module('oncokbApp')
             };
             $scope.adminEmails = [];
             $scope.getDocs();
+            $scope.oncoTree = {
+                mainTypes: {}
+            };
+            $scope.tumorTypes = [];
             getCacheStatus();
+            getAllMainTypes();
+            getAllOncoTreeTumorTypes();
 
             var newGenes = [];
 
@@ -373,6 +379,14 @@ angular.module('oncokbApp')
                 });
             };
 
+            $scope.convertTumorTypes = function () {
+                console.info('Converting tumor types to OncoTree tumor types...');
+
+                convertTumorTypeToOncoTree(0, function () {
+                    console.info('Finished.');
+                });
+            };
+
             $scope.changeCacheStatus = function() {
                 if ($scope.status.cache === 'enabled') {
                     DatabaseConnector.disableCache()
@@ -456,6 +470,128 @@ angular.module('oncokbApp')
                 }
             }
 
+            function convertTumorTypeToOncoTree(index, callback) {
+                if (index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        } else {
+                            console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function(mutation, index) {
+                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                        //Convert to desired OncoTree tumor types
+                                        console.log('Original tumor type: ', tumor.name.getText());
+                                        var oncoTreeTumorType = getOncoTreeTumorType(tumor.name.getText());
+                                        if(oncoTreeTumorType) {
+                                            tumor.name.setText(oncoTreeTumorType.name);
+                                            if(oncoTreeTumorType.hasOwnProperty('code')) {
+                                                tumor.oncoTreeCode.setText(oncoTreeTumorType.code);
+                                            }
+                                        }else {
+                                            
+                                        }
+                                    });
+                                });
+                                model.endCompoundOperation();
+                                $timeout(function() {
+                                    convertTumorTypeToOncoTree(++index, callback);
+                                }, 200, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function() {
+                                    convertTumorTypeToOncoTree(++index, callback);
+                                }, 200, false);
+                            }
+                        }
+                    });
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function getOncoTreeTumorType(tumorType) {
+                if(tumorType) {
+                    tumorType = tumorType.toString().trim();
+                    if($scope.tumorTypes.hasOwnProperty(tumorType)) {
+                        return $scope.tumorTypes[tumorType];
+                    }else {
+                        console.log('Could not find mapping for tumor type: ', tumorType);
+                        return null;
+                    }
+                }else {
+                    console.log('There is no tumor type provided.');
+                    return null;
+                }
+            }
+            
+            function getAllOncoTreeTumorTypes(index, callback) {
+                if (index < $scope.tumorTypes.length) {
+                    var _tumorType = $scope.tumorTypes[index];
+                    
+                    DatabaseConnector.getOncoTreeTumorTypeByName(_tumorType)
+                        .then(function(result) {
+                            if(result & _.isArray(result.data)) {
+                                if(result.data.length === 0) {
+                                    console.log('Could not find tumor type, looking for main type.');
+                                    var mainType = findMainType(_tumorType);
+                                    if(mainType) {
+                                        $scope.tumorTypes[index] = mainType;
+                                    }else {
+                                        console.error('Cannot find tumor type in OncoTree database.')
+                                    }
+                                } else if (result.data.length === 0){
+                                    $scope.tumorTypes[index] = result.data[0];
+                                } else {
+                                    console.error('There are multiple tumor types found in OncoTree database.')
+                                }
+                                $timeout(function() {
+                                    getAllOncoTreeTumorTypes(++index, callback);
+                                }, 200, false);
+                            }else {
+                                console.log('No data available.');
+                            }
+                        }, function() {
+                            console.error('API error for tumor:', _tumorType);
+                            $timeout(function() {
+                                getAllOncoTreeTumorTypes(++index, callback);
+                            }, 200, false);
+                        })
+                }else {
+                    console.log('All tumor types have been mapped with OncoTree tumor type.')
+                    if(_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function findMainType(mainType) {
+                for(var i = 0 ; i < $scope.oncoTree.mainTypes.length ; i ++) {
+                    if($scope.oncoTree.mainTypes[i].name === mainType) {
+                        return $scope.oncoTree.mainTypes[i];
+                        break;
+                    }
+                }
+                return null;
+            }
+            
+            function getAllMainTypes() {
+                DatabaseConnector.getOncoTreeMainTypes()
+                    .then(function(result) {
+                        if(result & _.isArray(result.data)) {
+                            $scope.oncoTree.mainTypes = result.data;
+                        }else {
+                            console.log('No data available.');
+                        }
+                    })
+            }
+            
             function getAlteration(codon, aa) {
                 var alteration = [];
                 if (codon) {

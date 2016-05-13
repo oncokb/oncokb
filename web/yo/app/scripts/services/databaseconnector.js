@@ -511,6 +511,19 @@ angular.module('oncokbApp')
                     });
                 return deferred.promise;
             }
+
+            function getOncoTreeTumorTypeByName(name) {
+                var deferred = $q.defer();
+                OncoTree.getTumorType('name', name)
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+            
             // Public API here
             return {
                 'getGeneAlterationTumorType': function (callback) {
@@ -572,6 +585,7 @@ angular.module('oncokbApp')
                 },
                 'getOncoTreeMainTypes': getOncoTreeMainTypes,
                 'getOncoTreeTumorTypesByMainType': getOncoTreeTumorTypesByMainType,
+                'getOncoTreeTumorTypeByName': getOncoTreeTumorTypeByName,
                 'testAccess': testAccess
             };
         }]);
