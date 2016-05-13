@@ -4,24 +4,24 @@
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncokb.model.PortalAlteration" table="portal_alteration" catalog="oncokb">
-        <cache usage="nonstrict-read-write"/>
+<!--        <cache usage="nonstrict-read-write"/>-->
         <id name="portalAlterationID" type="java.lang.Integer">
-            <column name="portalAlterationID" />
+            <column name="portalAlteration_id" />
             <generator class="identity" />
         </id>
         
         <property name="cancerType" type="string">
-            <column name="cancerType" length="300" not-null="true">
+            <column name="cancer_type" length="300" not-null="true">
             </column>
         </property>
 
         <property name="cancerStudy" type="string">
-            <column name="cancerStudy" length="300" not-null="true">
+            <column name="cancer_study" length="300" not-null="true">
             </column>
         </property>
         
         <property name="sampleId" type="string">
-            <column name="sampleId"/>
+            <column name="sample_id"/>
         </property>
         
         <many-to-one name="gene" class="org.mskcc.cbio.oncokb.model.Gene" lazy="false" fetch="join">
@@ -29,38 +29,31 @@
         </many-to-one>
         
         <property name="proteinChange" type="string">
-            <column name="proteinChange"/>
+            <column name="protein_change"/>
         </property>
         
         <property name="proteinStartPosition" type="int">
-            <column name="proteinStartPosition"/>
+            <column name="protein_start"/>
         </property>
         
         <property name="proteinEndPosition" type="int">
-            <column name="proteinEndPosition"/>
+            <column name="protein_end"/>
         </property>
         
         <property name="alterationType" type="string">
-            <column name="alterationType" length="300" >
+            <column name="alteration_type" length="300" >
             </column>
         </property>
         
-        <set lazy="false" name="oncoKBAlterations" table="portalAlt_oncoKBAlt">
-            <key>
-                <column name="portalAlterationID" not-null="true"/>
-            </key>
-            <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
-                <column name="alteration_id" not-null="true"/>
-            </many-to-many>
-        </set>
+        
     </class>
     <query name="findPortalAlterationCountByGene">
-        <![CDATA[select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa inner join pa.oncoKBAlterations oa where pa.gene=? group by pa.cancerStudy]]>
+        <![CDATA[select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.portalAlterationID = ap.portalAlterationID and pa.gene=? group by pa.cancerStudy]]>
     </query>
     <query name="findPortalAlterationCount">
         <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy]]>
     </query>
     <query name="findMutationMapperData">
-        <![CDATA[select distinct pa from PortalAlteration pa inner join pa.oncoKBAlterations where pa.gene=?]]>
+        <![CDATA[select distinct pa from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.portalAlterationID = ap.portalAlterationID and pa.gene=?]]>
     </query>
 </hibernate-mapping>

@@ -62,6 +62,15 @@
                 <column name="alteration_id" not-null="true"/>
             </many-to-many>
         </set>
+        
+        <set lazy="false" name="portalAlterations" table="portalAlt_oncoKBAlt">
+            <key>
+                <column name="alteration_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.PortalAlteration">
+                <column name="portalAlteration_id" not-null="true"/>
+            </many-to-many>
+        </set>
     </class>
     
     <query name="findAlterationsByGene">
