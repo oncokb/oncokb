@@ -512,9 +512,9 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
-            function getOncoTreeTumorTypeByName(name) {
+            function getOncoTreeTumorTypeByName(name, exactMatch) {
                 var deferred = $q.defer();
-                OncoTree.getTumorType('name', name)
+                OncoTree.getTumorType('name', name, exactMatch)
                     .success(function(data) {
                         deferred.resolve(data);
                     })
