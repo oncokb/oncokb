@@ -108,7 +108,7 @@ public class NumbersApi {
         mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
         mainNumber.setAlteration(ApplicationContextSingleton.getAlterationBo().countAll());
         mainNumber.setTumorType(ApplicationContextSingleton.getTumorTypeBo().countAll());
-        mainNumber.setDrug(ApplicationContextSingleton.getDrugBo().countAll());
+        mainNumber.setDrug(NumberUtils.getDrugsCount());
         apiNumbersMain.setData(mainNumber);
 
         RespMeta meta = new RespMeta();

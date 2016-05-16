@@ -58,4 +58,26 @@ public class NumberUtils {
     public static Set<GeneNumber> getGeneNumberList() {
         return getGeneNumberList(GeneUtils.getAllGenes());
     }
+    
+    public static Integer getDrugsCount() {
+        Set<Gene> genes = GeneUtils.getAllGenes();
+        Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
+
+        Map<Drug, Boolean> drugs = new HashMap<>();
+        Set<LevelNumber> levelList = new HashSet<>();
+
+        for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+            for (Evidence evidence : entry.getValue()) {
+                for (Treatment treatment : evidence.getTreatments()) {
+                    for (Drug drug : treatment.getDrugs()) {
+                        if (!drugs.containsKey(drug)) {
+                            drugs.put(drug, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        return drugs.size();
+    }
 }
