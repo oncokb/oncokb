@@ -4,10 +4,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.model.GeneNumber;
+import org.mskcc.cbio.oncokb.model.LevelNumber;
 import org.mskcc.cbio.oncokb.model.MainNumber;
 import org.mskcc.cbio.oncokb.model.RespMeta;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGene;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGenes;
+import org.mskcc.cbio.oncokb.response.ApiNumbersLeves;
 import org.mskcc.cbio.oncokb.response.ApiNumbersMain;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
@@ -114,5 +116,26 @@ public class NumbersApi {
         apiNumbersMain.setRespMeta(meta);
 
         return new ResponseEntity<ApiNumbersMain>(apiNumbersMain, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = ApiNumbersGenes.class)
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/levels/",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    public ResponseEntity<ApiNumbersLeves> numbersLevelsGet()
+        throws NotFoundException {
+        
+        ApiNumbersLeves apiNumbersGenes = new ApiNumbersLeves();
+
+        Set<LevelNumber> genes = NumberUtils.getLevelNumberList();
+        apiNumbersGenes.setData(genes);
+
+        RespMeta meta = new RespMeta();
+        meta.setCode(HttpStatus.OK.value());
+        apiNumbersGenes.setRespMeta(meta);
+        
+        return new ResponseEntity<ApiNumbersLeves>(apiNumbersGenes, HttpStatus.OK);
     }
 }

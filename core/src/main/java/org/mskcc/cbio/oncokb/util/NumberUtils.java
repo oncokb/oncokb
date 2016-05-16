@@ -1,14 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.GeneNumber;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -35,6 +30,31 @@ public class NumberUtils {
         return geneNumbers;
     }
 
+    public static Set<LevelNumber> getLevelNumberList() {
+        Set<Gene> genes = GeneUtils.getAllGenes();
+        Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
+        
+        Map<LevelOfEvidence, Set<Gene>> levelNumbers = new HashMap<>();
+        Set<LevelNumber> levelList = new HashSet<>();
+        
+        for(Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+            LevelOfEvidence levelOfEvidence = LevelUtils.getHighestLevelFromEvidence(entry.getValue());
+            
+            if(!levelNumbers.containsKey(levelOfEvidence)) {
+                levelNumbers.put(levelOfEvidence, new HashSet<Gene>());
+            }
+            levelNumbers.get(levelOfEvidence).add(entry.getKey());
+        }
+            
+        for(Map.Entry<LevelOfEvidence, Set<Gene>> entry : levelNumbers.entrySet()) {
+            LevelNumber levelNumber = new LevelNumber();
+            levelNumber.setLevel(entry.getKey());
+            levelNumber.setGenes(entry.getValue());
+            levelList.add(levelNumber);
+        }
+        
+        return levelList;
+    }
     public static Set<GeneNumber> getGeneNumberList() {
         return getGeneNumberList(GeneUtils.getAllGenes());
     }
