@@ -87,17 +87,25 @@ public class SearchApi {
     @ApiOperation(value = "", notes = "Search to find gene. Code 204 will be returned in the META if no gene matched.", response = ApiGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/gene/{hugoSymbol}",
+    @RequestMapping(value = "/gene",
         produces = {"application/json"},
         method = RequestMethod.GET)
     public ResponseEntity<ApiGenes> searchGeneHugoSymbolGet(
-        @ApiParam(value = "The gene symbol used in Human Genome Organisation.", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
+        @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.", required = true) @RequestParam(value = "query", required = false) String query,
         @ApiParam(value = "Find the exact match with query.", defaultValue = "false") @RequestParam(value = "exactMatch", required = false, defaultValue = "false") Boolean exactMatch
     ) throws NotFoundException {
         ApiGenes instance = new ApiGenes();
         RespMeta meta = new RespMeta();
         HttpStatus status = HttpStatus.OK;
-
+        Set<ShortGene> genes = GeneUtils.searchShortGene(query);
+        
+        if(genes.size() == 0) {
+            status = HttpStatus.NO_CONTENT;
+        }
+        
+        meta.setCode(status.value());
+        instance.setRespMeta(meta);
+        instance.setData(genes);
         return new ResponseEntity<ApiGenes>(instance, status);
     }
 
