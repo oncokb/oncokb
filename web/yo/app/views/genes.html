@@ -22,7 +22,8 @@
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="removeHotspot()">Remove hotspot list</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="initialAutoMutation()">Initial auto-mutation</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="convertLevels()">Convert levels</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="convertLevels()">Convert to OncoTree tumor types</button>-->
+            <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="loopTumorTypes()">Get OncoTree tumor types</button>
+            <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="convertTumorTypes()">Convert to OncoTree tumor types</button>
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="migrate()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Migrate</span></button>-->
         </span>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
