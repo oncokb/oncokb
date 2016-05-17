@@ -672,6 +672,9 @@ h5 {
 .floatLeft {
   float: left;
 }
+.add-button {
+    margin-left: 10px;
+}
 /*** custom checkboxes ***/
 input[type=radio], input[type=checkbox] { display:none; } /* to hide the checkbox itself */
 input[type=radio] + label:before, input[type=checkbox] + label:before {
