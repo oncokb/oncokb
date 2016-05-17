@@ -122,10 +122,12 @@ public class PortalAlterationImporter {
                     portalAlterationBo.save(portalAlteration);
                     
                     Set<PortalAlteration> portalAlterations = new HashSet<>();
-                    portalAlterations.add(portalAlteration);
-                    
+                                         
                     Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
                     for(Alteration oncoKBAlteration : oncoKBAlterations){
+                        portalAlterations = oncoKBAlteration.getPortalAlterations();
+                        portalAlterations.add(portalAlteration);
+                        
                         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
                         oncoKBAlteration.setPortalAlterations(portalAlterations);
                         alterationBo.update(oncoKBAlteration);
