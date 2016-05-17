@@ -1693,7 +1693,7 @@ angular.module('oncokbApp')
                                         var tt = tumor.name.getText().toString().trim().toLowerCase().replace('’',"'");
                                         var message = '\tGene: ' + gene.name.getText() +
                                             '\tMutation: ' + mutation.name.getText() +
-                                            '\tTumor type: ' + tt;
+                                            '\tTumor type: ' + tumor.name.getText();
                                         var mapped = $scope.mappedTumorTypes[tt];
                                         if (mapped) {
                                             message += '\tMapped: ' + mapped.name;
@@ -1705,14 +1705,16 @@ angular.module('oncokbApp')
                                     });
                                 });
                                 // model.endCompoundOperation();
+                                
+                                //Google has limitation for numbere of requests within one second
                                 $timeout(function() {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                }, 10, false);
+                                }, 200, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                }, 10, false);
+                                }, 200, false);
                             }
                         }
                     });
