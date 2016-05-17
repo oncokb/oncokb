@@ -3172,6 +3172,26 @@ angular.module('oncokbApp')
                         if(result.data) {
                             console.log(result.data);
                             $scope.oncoTree.mainTypes = result.data;
+                            $scope.oncoTree.mainTypes.push({
+                                id: -1,
+                                name: "All liquid tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -2,
+                                name: "All solid tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -3,
+                                name: "All tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -4,
+                                name: "Germline disposition"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -5,
+                                name: "All pediatric tumors"
+                            });
                         }
                     }, function(error) {
                         console.log(error);
@@ -3330,9 +3350,10 @@ angular.module('oncokbApp')
                 tumorTypes: {}
             };
             $scope.meta = {
-                newMainType: {},
-                newTumorType: {}
-            };
+                newMainType: [],
+                newTumorType: [],
+                currentOncoTreeTumorTypes: []
+            }
 
             $scope.status = {
                 expandAll: false,
@@ -3368,13 +3389,32 @@ angular.module('oncokbApp')
             });
 
             $scope.$watch('meta.newMainType',function(n, o) {
-               if(_.isObject(n) && n.name) {
-                   DatabaseConnector.getOncoTreeTumorTypesByMainType(n.name)
-                       .then(function(result) {
-                           if(result.data) {
-                               $scope.oncoTree.tumorTypes = result.data;
-                           }
-                       });
+               if(_.isArray(n) && n.length > 0) {
+                   var _tumorTypes = [];
+                   var locks = 0;
+                   _.each(n, function(mainType) {
+                       if($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
+                           _tumorTypes = _.union(_tumorTypes, $scope.oncoTree.tumorTypes[mainType.name]);
+                       }else {
+                           locks++;
+                           DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
+                               .then(function(result) {
+                                   if(result.data) {
+                                       $scope.oncoTree.tumorTypes[mainType.name] = result.data;
+                                       _tumorTypes = _.union(_tumorTypes, result.data);
+                                   }
+                                   locks--;
+                               }, function() {
+                                   locks--;
+                               });
+                       }
+                   });
+                   var interval = $interval(function() {
+                       if(locks === 0) {
+                           $scope.meta.currentOncoTreeTumorTypes = _tumorTypes;
+                           $interval.cancel(interval);
+                       }
+                   }, 100);
                }
             });
             getDriveOncokbInfo();

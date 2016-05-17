@@ -5,7 +5,7 @@
         <div style="width: 100%; float: left; margin: 5px 0;">
           <div style="width: 45%; float: left;" class="title">
             <span style="width: 100%; float: left;">{{comment.userName.text}}</span>
-            <span style="width: 100%; float: left;">{{comment.date.text | date:'h:mma MMM dd'}}</span>
+            <span style="width: 100%; float: left;">{{comment.date.text | date:'h:mma MMM dd yyyy'}}</span>
           </div>
           <div ng-if="fileEditable" style="width: 55%; float: left;">
             <span class="btn-group btn-group-sm pull-right" role="group">

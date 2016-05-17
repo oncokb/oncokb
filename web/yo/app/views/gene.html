@@ -6,7 +6,7 @@
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{::collaborator.displayName}}">
       </span>
-      <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
+      <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
       <span ng-if="document && userRole === 8" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
       <span class="btn-group btn-group-sm pull-right" role="group">
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
@@ -385,26 +385,26 @@
               </uib-accordion-group>
             </div>
           </uib-accordion>
-          <div style="width: 100%" class="input-group input-group-sm accordionMarginTop">
+          <div style="width: 100%" class="input-group input-group-sm accordionMarginTop" ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" >
             <!--<input type="text" ng-model="newTumorTypeName" uib-typeahead="tumorType for tumorType in tumorTypes | typeaheadFilter:$viewValue | limitTo: 10" class="form-control" placeholder="Free text or choose from the dropdown list">-->
               Main Type: <select chosen
-                      data-placeholder="Choose a main tumor type"
+                                 multiple
+                                 data-placeholder="Choose a main tumor type"
                       no-results-text="'Could not find any'"
                       ng-model="meta.newMainType"
                       ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name' track by tt.id">
               </select>
               Tumor Types:
               <select style="width: 400px" chosen
+                      multiple
                       data-placeholder="Choose a tumor type"
                       no-results-text="'Could not find any'"
                       ng-model="meta.newTumorType"
-                      ng-options="(tt.name + ' ( ' + tt.code + ' )') for tt in oncoTree.tumorTypes | orderBy: 'name' track by tt.code">
+                      ng-options="(tt.name + ' in ' + tt.code + ')') for tt in meta.currentOncoTreeTumorTypes | orderBy: 'name' track by tt.code">
               </select>
-              <span class="input-group-btn">
-              <button type="button" class="btn btn-default" ng-disabled="!(!!meta.newMainType)" ng-click="addTumorType(mutation, meta.newMainType, meta.newTumorType, $index); meta.newTumorType=''">
-                <i class="fa fa-plus"></i> Add Tumor Type
+              <button type="button" class="btn btn-default btn-sm add-button" ng-disabled="meta.newMainType.length === 0" ng-click="addTumorType(mutation, meta.newMainType, meta.newTumorType, $index); meta.newTumorType=''">
+                Add Tumor Type
               </button>
-            </span>
           </div>
         </uib-accordion-group>
       </div>
