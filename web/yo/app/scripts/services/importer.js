@@ -273,6 +273,13 @@ angular.module('oncokbApp')
                         selectedAttrs.push('progImp', 'shortProgImp');
                     }
                     __tumor = combineData(__tumor, e1, selectedAttrs);
+                    
+                    // __tumor.cancerTypes =  __tumor.name.split(',').map(function(item) {
+                    //     return {
+                    //         cancerType: item.toString().trim()
+                    //     };
+                    // });
+                    __tumor.cancerTypes = [];
                     __tumor.trials = [];
                     __tumor.TI = [];
                     __tumor.nccn = {};
@@ -411,6 +418,9 @@ angular.module('oncokbApp')
                             break;
                         case 'treatments':
                             _datum = rootModel.create('Treatment');
+                            break;
+                        case 'cancerTypes':
+                            _datum = rootModel.create('CancerType');
                             break;
                         case 'trials':
                             _datum = e;
