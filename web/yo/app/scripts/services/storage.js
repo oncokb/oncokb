@@ -363,7 +363,7 @@ angular.module('oncokbApp')
       var now = Date.now() / 1000;
 
       if (token && ((token.expires_at - now) > (600))) {
-        console.log('token unexpires');
+        // console.log('token unexpires');
         return $q.when(token);
       } else {
         var params = {

@@ -176,6 +176,10 @@ angular.module('oncokbApp')
                     "oncotree": "Leukemia"
                 },
                 {
+                    "name": "Acute Lymphoblastic Leukemia (ALL)",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "Acute Lymphocytic Leukemia",
                     "oncotree": "Leukemia"
                 },
@@ -188,6 +192,10 @@ angular.module('oncokbApp')
                     "oncotree": "Leukemia"
                 },
                 {
+                    "name": "acute myeloid leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "Acute Myeloid Leukemia (AML)",
                     "oncotree": "Leukemia"
                 },
@@ -196,8 +204,20 @@ angular.module('oncokbApp')
                     "oncotree": "Leukemia"
                 },
                 {
+                    "name": "Acute Myeloid Leukemia, Myelodysplastic Syndromes, Myeloproliferative Neoplasms",
+                    "oncotree": "Leukemia, Myelodysplasia, Myeloproliferative Neoplasm"
+                },
+                {
                     "name": "Acute promyelocytic leukemia (APL)",
                     "oncotree": "Leukemia"
+                },
+                {
+                    "name": "adenoid cystic carcinoma",
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Adrenal Carcinoma",
+                    "oncotree": "Adrenocortical Carcinoma"
                 },
                 {
                     "name": "Adrenocortical Carcinoma",
@@ -205,31 +225,43 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Advanced Solid Tumors",
-                    "oncotree": "All solid tumors"
+                    "oncotree": "All Solid Tumors"
                 },
                 {
                     "name": "All Solid Tumors",
-                    "oncotree": "All solid tumors"
+                    "oncotree": "All Solid Tumors"
                 },
                 {
                     "name": "All Tumor Types",
-                    "oncotree": "All tumors"
+                    "oncotree": "All Tumors"
                 },
                 {
                     "name": "All Tumors",
-                    "oncotree": "All tumors"
+                    "oncotree": "All Tumors"
                 },
                 {
                     "name": "All Types",
-                    "oncotree": "All tumors"
+                    "oncotree": "All Tumors"
                 },
                 {
                     "name": "Anaplastic Glioma, Glioblastoma",
                     "oncotree": "Glioma"
                 },
                 {
+                    "name": "anaplastic large cell lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
                     "name": "Anaplastic Thyroid Cancer",
                     "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "angioimmunoblastic t cell lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Angiomatoid Fibrous Histiocytoma",
+                    "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
                     "name": "Angiosarcoma",
@@ -248,6 +280,14 @@ angular.module('oncokbApp')
                     "oncotree": "Embryonal Tumor"
                 },
                 {
+                    "name": "b cell acute lymphoblastic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "B-ALL (B-cell acute lymphoblastic leukemia)",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "B-cell lymphocytosis",
                     "oncotree": "Non-Hodgkin Lymphoma"
                 },
@@ -260,16 +300,36 @@ angular.module('oncokbApp')
                     "oncotree": "Hepatobiliary Cancer"
                 },
                 {
+                    "name": "bladder cancer",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "bladder urothelial carcinoma",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
                     "name": "Brain Tumors",
                     "oncotree": "Glioma"
                 },
                 {
+                    "name": "breast cancer",
+                    "oncotree": "Breast Cancer"
+                },
+                {
                     "name": "Breast Carcinoma",
-                    "oncotree": "Breast Carcinoma"
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Breast Carcinoma, Ovarian Cancer",
+                    "oncotree": "Breast Cancer, Ovarian Cancer"
+                },
+                {
+                    "name": "Breast Carcinoma, Prostate",
+                    "oncotree": "Breast Cancer"
                 },
                 {
                     "name": "Breast Fibroadenoma",
-                    "oncotree": "Breast Carcinoma"
+                    "oncotree": "Breast Cancer"
                 },
                 {
                     "name": "Burkitt Lymphoma",
@@ -284,8 +344,20 @@ angular.module('oncokbApp')
                     "oncotree": "Cancer of Unknown Primary"
                 },
                 {
+                    "name": "Cardio-facio-cutaneous syndrome",
+                    "oncotree": "Germline disposition"
+                },
+                {
+                    "name": "cervical cancer",
+                    "oncotree": "Cervical Cancer"
+                },
+                {
                     "name": "Cervical Carcinoma",
                     "oncotree": "Cervical Cancer"
+                },
+                {
+                    "name": "Childhood B cell lineage ALL",
+                    "oncotree": "Leukemia"
                 },
                 {
                     "name": "Childhood Brain Tumor (Astrocytoma)",
@@ -300,6 +372,10 @@ angular.module('oncokbApp')
                     "oncotree": "Myelodysplasia"
                 },
                 {
+                    "name": "Childhood Precursor B Cell Acute Lymphoid Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "Chilhood Brain Tumor (Astrocytoma)",
                     "oncotree": "Glioma"
                 },
@@ -308,7 +384,15 @@ angular.module('oncokbApp')
                     "oncotree": "Hepatobiliary Cancer"
                 },
                 {
+                    "name": "chondrosarcoma",
+                    "oncotree": "Bone Cancer"
+                },
+                {
                     "name": "Chronic Eosinophilic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "chronic lymphocytic leukemia",
                     "oncotree": "Leukemia"
                 },
                 {
@@ -324,6 +408,14 @@ angular.module('oncokbApp')
                     "oncotree": "Leukemia"
                 },
                 {
+                    "name": "Chronic Myeloid Leukemia (CML)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "chronic myelomonocytic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "Clear Cell Renal Cell Carcinoma",
                     "oncotree": "Renal Cell Carcinoma"
                 },
@@ -332,11 +424,47 @@ angular.module('oncokbApp')
                     "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
+                    "name": "Colon Adenocarcinoma",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
                     "name": "Colon Cancer",
                     "oncotree": "Colorectal Cancer"
                 },
                 {
+                    "name": "colorectal adenocarcinoma",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "colorectal cancer",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "Colorectal Carcinoma",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
                     "name": "Congenital Fibrosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Congenital Mesoblastic Nephroma",
+                    "oncotree": "Renal Cell Carcinoma"
+                },
+                {
+                    "name": "cutaneous squamous cell carcinoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Cutaneous Squamous Cell Carcinoma and Keratoacanthomas",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Dermatofibrosarcoma Protuberans",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "desmoid tumors",
                     "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
@@ -372,6 +500,14 @@ angular.module('oncokbApp')
                     "oncotree": "Non-Hodgkin Lymphoma"
                 },
                 {
+                    "name": "Diffuse Large Cell B Cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Duodenal Adenocarcinoma",
+                    "oncotree": "Small Bowel Cancer"
+                },
+                {
                     "name": "Embryonal Rhabdomyosarcoma",
                     "oncotree": "Soft Tissue Sarcoma"
                 },
@@ -384,12 +520,32 @@ angular.module('oncokbApp')
                     "oncotree": "Endometrial Cancer"
                 },
                 {
+                    "name": "endometrial carcinoma",
+                    "oncotree": "Endometrial Cancer"
+                },
+                {
                     "name": "Endometrial stromal sarcoma",
                     "oncotree": "Uterine Sarcoma"
                 },
                 {
+                    "name": "Epedymoma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Ependymoma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
                     "name": "Epithelioid Sarcoma",
                     "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Epitheloid haemangioendothelioma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Erdheim Chester Disease",
+                    "oncotree": "Histiocytosis"
                 },
                 {
                     "name": "Erdheim-Chester Disease",
@@ -397,35 +553,47 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Esophageal Adenocarcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Esophageal and Gastric adenocarcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Esophageal Cancer",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Esophageal Carcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Esophageal Squamous Carcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "esophageal squamous cell carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Esophagogastric Cancer",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Esophagogastric Carcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Essential Thrombocythemia",
+                    "oncotree": "Myeloproliferative Neoplasm"
                 },
                 {
                     "name": "Ewing Sarcoma",
                     "oncotree": "Bone Cancer"
+                },
+                {
+                    "name": "Ewing Sarcoma, Acute Myelogenous Leukemia",
+                    "oncotree": "Bone Cancer, Leukemia"
                 },
                 {
                     "name": "Ewing-like small round cell sarcoma",
@@ -440,28 +608,56 @@ angular.module('oncokbApp')
                     "oncotree": "Ovarian Cancer"
                 },
                 {
+                    "name": "Familial Pancreatic Cancer",
+                    "oncotree": "Pancreatic Cancer"
+                },
+                {
+                    "name": "Familial Platelet Disorder",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Familial Platelet Disorder with predisposition to AML (FPD/AML)",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "Follicular Lymphoma",
                     "oncotree": "Non-Hodgkin Lymphoma"
                 },
                 {
+                    "name": "Gallbladder Adenocarcinomas",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
                     "name": "Gastric Adenocarcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "gastric cancer",
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Gastric Carcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Gastric Tumors",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Gastroesophageal junction carcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
                 },
                 {
                     "name": "Gastrointestinal Neuroendocrine Tumor",
                     "oncotree": "Gastrointestinal Neuroendocrine Tumor"
+                },
+                {
+                    "name": "gastrointestinal stromal tumor",
+                    "oncotree": "Gastrointestinal Stromal Tumor"
+                },
+                {
+                    "name": "Gastrointestinal Stromal Tumor (Thymic Cancer?)",
+                    "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
                     "name": "Gastrointestinal Tumor",
@@ -476,6 +672,10 @@ angular.module('oncokbApp')
                     "oncotree": "Bone Cancer"
                 },
                 {
+                    "name": "glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
                     "name": "Glioblastoma Multiforme",
                     "oncotree": "Glioma"
                 },
@@ -484,7 +684,23 @@ angular.module('oncokbApp')
                     "oncotree": "Glioma"
                 },
                 {
+                    "name": "glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioma (Glioblastoma)",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioma, Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
                     "name": "Glioma/Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "GLIOMAS",
                     "oncotree": "Glioma"
                 },
                 {
@@ -493,39 +709,99 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Haematological malignancies",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "hairy cell leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "head and neck cancer",
+                    "oncotree": "Head and Neck Cancer"
                 },
                 {
                     "name": "Head and Neck Cancers",
-                    "oncotree": "Head and Neck Carcinoma"
+                    "oncotree": "Head and Neck Cancer"
                 },
                 {
                     "name": "Head and Neck Carcinoma",
-                    "oncotree": "Head and Neck Carcinoma"
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "head and neck squamous cell carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Head and Neck Squamous Cells Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
                 },
                 {
                     "name": "Hematologic Malignancies",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
                 },
                 {
                     "name": "Hematological Malignancies",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hematological Tumors",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hematopoietic Malignancies",
+                    "oncotree": "All Liquid Tumors"
                 },
                 {
                     "name": "Hepatocellular Adenoma",
                     "oncotree": "Hepatobiliary Cancer"
                 },
                 {
+                    "name": "Hepatocellular Cancer",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "hepatocellular carcinoma",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "Hereditary Non-polyposis Colorectal Cancer",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
                     "name": "High Grade Glioma",
                     "oncotree": "Glioma"
                 },
                 {
+                    "name": "Histiocytic Neoplasm",
+                    "oncotree": "Histiocytic Disorder"
+                },
+                {
+                    "name": "Hodgkin Lymphoma",
+                    "oncotree": "Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Hodgkin's Lymphoma",
+                    "oncotree": "Hodgkin Lymphoma"
+                },
+                {
+                    "name": "HodgkinŠ—Ès Lymphoma",
+                    "oncotree": "Hodgkin Lymphoma"
+                },
+                {
                     "name": "Hypereosinophilic Syndrome",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
                 },
                 {
                     "name": "Hypereosinophilic syndrome, Chronic Eosinophilic Leukemia",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hypopharyngeal Squamous Cell Cancer",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "inflammatory myofibroblastic tumor",
+                    "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
                     "name": "Inflammatory Myofibroblastic Tumors",
@@ -536,6 +812,10 @@ angular.module('oncokbApp')
                     "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
+                    "name": "Invasive Endometroid Cancer",
+                    "oncotree": "Cervical Cancer"
+                },
+                {
                     "name": "Invasive Mucinous Lung Adenocarcinoma",
                     "oncotree": "Non-Small Cell Lung Cancer"
                 },
@@ -544,8 +824,12 @@ angular.module('oncokbApp')
                     "oncotree": "Leukemia"
                 },
                 {
+                    "name": "Kaposi Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
                     "name": "Keratocystic Odontogenic Tumor",
-                    "oncotree": "Head and Neck Carcinoma"
+                    "oncotree": "Head and Neck Cancer"
                 },
                 {
                     "name": "Kidney Cancer",
@@ -554,6 +838,14 @@ angular.module('oncokbApp')
                 {
                     "name": "Langerhans cell histiocytosis",
                     "oncotree": "Histiocytosis"
+                },
+                {
+                    "name": "Large granular lymphocityc leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Laryngeal Squamous Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
                 },
                 {
                     "name": "Leiomyosarcoma",
@@ -565,11 +857,19 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Leukemia/Lymphoma",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
                 },
                 {
                     "name": "Liposarcoma",
                     "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "liver cancer",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "low grade glioma",
+                    "oncotree": "Glioma"
                 },
                 {
                     "name": "Low Grade Gliomas",
@@ -584,8 +884,32 @@ angular.module('oncokbApp')
                     "oncotree": "Non-Small Cell Lung Cancer"
                 },
                 {
+                    "name": "lung cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer, Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Lung Kancer",
+                    "oncotree": "Non-Small Cell Lung Cancer, Small Cell Lung Cancer"
+                },
+                {
+                    "name": "lung squamous cell carcinoma",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
                     "name": "Lymphoblastic Leukemia",
                     "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Lymphoma, Leukemia",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Lymphomas",
+                    "oncotree": "All Liquid Tumors"
                 },
                 {
                     "name": "Malignant gliomas",
@@ -604,6 +928,22 @@ angular.module('oncokbApp')
                     "oncotree": "Non-Hodgkin Lymphoma"
                 },
                 {
+                    "name": "Mast cell disorders",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Mast cell neoplasm",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Mast cell neoplasms",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Mastocytosis",
+                    "oncotree": "Mastocytosis"
+                },
+                {
                     "name": "Medullary Thyroid Cancer",
                     "oncotree": "Thyroid Cancer"
                 },
@@ -614,6 +954,26 @@ angular.module('oncokbApp')
                 {
                     "name": "Medulloablastoma",
                     "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "medulloblastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Meduloblastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "melanoma",
+                    "oncotree": "Melanoma"
+                },
+                {
+                    "name": "meningioma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Meningiomas",
+                    "oncotree": "CNS Cancer"
                 },
                 {
                     "name": "Meningothelial Tumor",
@@ -628,8 +988,16 @@ angular.module('oncokbApp')
                     "oncotree": "Mesothelioma"
                 },
                 {
+                    "name": "MSI high tumors",
+                    "oncotree": "Colorectal cancer, gastric cancer, Endometrial Cancer, ovarian cancer, Hepatobiliary Cancer, Bladder Cancerr, Glioma"
+                },
+                {
                     "name": "Multiple endocrine neoplasia",
                     "oncotree": "Germline disposition"
+                },
+                {
+                    "name": "multiple myeloma",
+                    "oncotree": "Multiple Myeloma"
                 },
                 {
                     "name": "Myelodysplasia",
@@ -644,8 +1012,16 @@ angular.module('oncokbApp')
                     "oncotree": "Myelodysplasia"
                 },
                 {
+                    "name": "Myelodysplastic Syndrome/Myeloproliferative Disease (MDS/MPD)",
+                    "oncotree": "Myelodysplasia, Myeloproliferative Neoplasm"
+                },
+                {
                     "name": "Myelodysplastic Syndromes",
                     "oncotree": "Myelodysplasia"
+                },
+                {
+                    "name": "Myelodysplatic Syndrome/Myeloproliferative Disease (MDS/MPD)",
+                    "oncotree": "Myelodysplasia, Myeloproliferative Neoplasm"
                 },
                 {
                     "name": "Myelofibrosis",
@@ -653,10 +1029,22 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Myeloid Malignancies",
-                    "oncotree": "All liquid tumors"
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Myeloproliferative Hypereosinophilic Syndrome",
+                    "oncotree": "Myeloproliferative Neoplasm"
                 },
                 {
                     "name": "Myeloproliferative Neoplasm",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myeloproliferative Neoplasm (PV, MF, ET)",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "myeloproliferative neoplasms",
                     "oncotree": "Myeloproliferative Neoplasm"
                 },
                 {
@@ -664,12 +1052,40 @@ angular.module('oncokbApp')
                     "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
+                    "name": "Nasopharyngeal Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "neuroblastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Neuroblastoma (small round blue cell tumors)",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Non Small Cel lung Cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
                     "name": "Non Small Cell Lung Cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Non Small Cell Lung Carcinoma",
                     "oncotree": "Non-Small Cell Lung Cancer"
                 },
                 {
                     "name": "Non-Hodgkin's Lymphoma",
                     "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Non-HodgkinŠ—Ès Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "non-small cell lung cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
                 },
                 {
                     "name": "Non-small cell lung cancer (NSCLC)",
@@ -689,7 +1105,15 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Oral cancer",
-                    "oncotree": "Head and Neck Carcinoma"
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Oral Squamous Cell Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Oropharyngeal Squamous Cell Carcinoma (OSCC)",
+                    "oncotree": "Head and Neck Cancer"
                 },
                 {
                     "name": "Ossifying fibromyxoid tumors (OFMT)",
@@ -700,8 +1124,24 @@ angular.module('oncokbApp')
                     "oncotree": "Bone Cancer"
                 },
                 {
+                    "name": "ovarian cancer",
+                    "oncotree": "Ovarian Cancer"
+                },
+                {
                     "name": "Ovarian Granulosa Cell Tumor",
                     "oncotree": "Sex Cord Stromal Tumor"
+                },
+                {
+                    "name": "ovarian granulosa cell tumors",
+                    "oncotree": "Sex Cord Stromal Tumor"
+                },
+                {
+                    "name": "pancreatic cancer",
+                    "oncotree": "Pancreatic Cancer"
+                },
+                {
+                    "name": "Pancreatic Ductal Carcinoma",
+                    "oncotree": "Pancreatic Cancer"
                 },
                 {
                     "name": "Pancreatic Neuroendocrine Tumor",
@@ -712,8 +1152,24 @@ angular.module('oncokbApp')
                     "oncotree": "Thyroid Cancer"
                 },
                 {
+                    "name": "Paraganglioma",
+                    "oncotree": "Miscellaneous Neuroepithelial Tumor"
+                },
+                {
                     "name": "Paragangliomas",
                     "oncotree": "Miscellaneous Neuroepithelial Tumor"
+                },
+                {
+                    "name": "Parathyroid Adenoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Parathyroid adenomas",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Parotid Cancer",
+                    "oncotree": "Salivary Gland Cancer"
                 },
                 {
                     "name": "Pediatric adrenocortical tumor",
@@ -721,6 +1177,10 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Pediatric Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pediatric Gliomas",
                     "oncotree": "Glioma"
                 },
                 {
@@ -732,8 +1192,24 @@ angular.module('oncokbApp')
                     "oncotree": "Glioma"
                 },
                 {
+                    "name": "Phaeochromacytoma",
+                    "oncotree": "Pheochromocytoma"
+                },
+                {
+                    "name": "pheochromocytoma",
+                    "oncotree": "Pheochromocytoma"
+                },
+                {
+                    "name": "Pheochromocytomas/Paragangliomas",
+                    "oncotree": "Pheochromocytoma,Miscellaneous Neuroepithelial Tumor"
+                },
+                {
                     "name": "Phyllodes Tumor of Breast",
-                    "oncotree": "Breast Carcinoma"
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Pilocytic Astrocytoma",
+                    "oncotree": "Glioma"
                 },
                 {
                     "name": "Pituitary Ademona",
@@ -744,12 +1220,48 @@ angular.module('oncokbApp')
                     "oncotree": "Sellar Tumor"
                 },
                 {
+                    "name": "pituitary adenomas",
+                    "oncotree": "Sellar Tumor"
+                },
+                {
+                    "name": "pituitary tumors",
+                    "oncotree": "Sellar Tumor"
+                },
+                {
+                    "name": "Polycythemia Vera",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
                     "name": "Pontine Glioma",
                     "oncotree": "Glioma"
                 },
                 {
+                    "name": "Primary Mediastinal Large B-cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Primary Plasma Cell Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
                     "name": "Primitive Neuroectodermal Tumor",
                     "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Prolymphocytic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "prostate cancer",
+                    "oncotree": "Prostate Cancer"
+                },
+                {
+                    "name": "Pulmonary Carcinoid",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "renal cell carcinoma",
+                    "oncotree": "Renal Cell Carcinoma"
                 },
                 {
                     "name": "Renal Cell Carcinomas",
@@ -764,8 +1276,20 @@ angular.module('oncokbApp')
                     "oncotree": "Wilms Tumor"
                 },
                 {
+                    "name": "rhabdomyosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
                     "name": "Salivary Gland Cancer",
-                    "oncotree": "Salivary Carcinoma"
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Salivary-Duct Cancer",
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Sarcoma Histocytosis",
+                    "oncotree": "Histiocytosis"
                 },
                 {
                     "name": "Sclerosing Rhabdomyosarcoma",
@@ -773,11 +1297,19 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Secretory Breast Carcinoma",
-                    "oncotree": "Breast Carcinoma"
+                    "oncotree": "Breast Cancer"
                 },
                 {
                     "name": "Serous Ovarian Cancer",
                     "oncotree": "Ovarian Cancer"
+                },
+                {
+                    "name": "skin basal cell carcinoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Skin Cancer (Non-Melanoma)",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
                 },
                 {
                     "name": "Skin Cancer, Non-Melanoma",
@@ -804,20 +1336,64 @@ angular.module('oncokbApp')
                     "oncotree": "Gastrointestinal Neuroendocrine Tumor"
                 },
                 {
+                    "name": "Small Round Cell Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Small-Cell Lung Cancer (SCLC)",
+                    "oncotree": "Small Cell Lung Cancer"
+                },
+                {
                     "name": "Soft Tissue Sarcoma",
                     "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
+                    "name": "Soft-Tissue Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
                     "name": "Solid Tumors",
-                    "oncotree": "All solid tumors"
+                    "oncotree": "All Solid Tumors"
+                },
+                {
+                    "name": "Solid Tumors (Epithelial Cancers)",
+                    "oncotree": "All Solid Tumors"
                 },
                 {
                     "name": "Spindle Cell Neoplasms",
                     "oncotree": "Soft Tissue Sarcoma"
                 },
                 {
+                    "name": "Stem cell leukemia, Lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "stem cell leukemia/lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
                     "name": "Stomach Adenocarcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "stomach cancer",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Subependymal Giant Cell Astrocytoma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Subependymal Giant Cell Astrocytoma (Ependymomal Tumor)",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "t cell acute lymphoblastic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T cell acute lymphoblastic leukemia (T-ALL)",
+                    "oncotree": "Leukemia"
                 },
                 {
                     "name": "T Cell Lymphoma",
@@ -828,7 +1404,19 @@ angular.module('oncokbApp')
                     "oncotree": "Leukemia"
                 },
                 {
+                    "name": "T-cell acute lymphoblastic leukemia , T-cell lymphoma",
+                    "oncotree": "Leukemia,Non-Hodgkin Lymphoma"
+                },
+                {
                     "name": "T-Cell Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T-cell precursor acute lymphoblastic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T-Cell Prolymphocytic Leukemia",
                     "oncotree": "Leukemia"
                 },
                 {
@@ -836,7 +1424,15 @@ angular.module('oncokbApp')
                     "oncotree": "Germ Cell Tumor"
                 },
                 {
+                    "name": "Therapy related Acute Myeloid Leukemia/Myelodysplastic Syndrome",
+                    "oncotree": "Leukemia, Myelodysplasia"
+                },
+                {
                     "name": "Thymic Cancer",
+                    "oncotree": "Thymic Tumor"
+                },
+                {
+                    "name": "thymic carcinoma",
                     "oncotree": "Thymic Tumor"
                 },
                 {
@@ -848,6 +1444,10 @@ angular.module('oncokbApp')
                     "oncotree": "Thymic Tumor"
                 },
                 {
+                    "name": "thyroid cancer",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
                     "name": "Thyroid carcinoma",
                     "oncotree": "Thyroid Cancer"
                 },
@@ -857,6 +1457,10 @@ angular.module('oncokbApp')
                 },
                 {
                     "name": "Urinary tract cancer",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "Urothelial Bladder Cancer",
                     "oncotree": "Bladder Cancer"
                 },
                 {
@@ -872,6 +1476,14 @@ angular.module('oncokbApp')
                     "oncotree": "Bladder Cancer"
                 },
                 {
+                    "name": "uterine cancer",
+                    "oncotree": "Uterine Sarcoma"
+                },
+                {
+                    "name": "Uterine Carcinoma",
+                    "oncotree": "Endometrial Cancer"
+                },
+                {
                     "name": "Uterine Carcinosarcoma",
                     "oncotree": "Endometrial Cancer"
                 },
@@ -884,484 +1496,20 @@ angular.module('oncokbApp')
                     "oncotree": "Uterine Sarcoma"
                 },
                 {
-                    "name": "Wilms Tumor",
-                    "oncotree": "Wilms Tumor"
-                },
-                {
-                    "name": "Acute Lymphoblastic Leukemia (ALL)",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "adenoid cystic carcinoma",
-                    "oncotree": "Salivary Carcinoma"
-                },
-                {
-                    "name": "Adrenal Carcinoma",
-                    "oncotree": "Adrenocortical Carcinoma"
-                },
-                {
-                    "name": "angioimmunoblastic t cell lymphoma",
-                    "oncotree": "Non-Hodgkin Lymphoma"
-                },
-                {
-                    "name": "anaplastic large cell lymphoma",
-                    "oncotree": "Non-Hodgkin Lymphoma"
-                },
-                {
-                    "name": "acute myeloid leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "b cell acute lymphoblastic leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "B-ALL (B-cell acute lymphoblastic leukemia)",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "bladder cancer",
-                    "oncotree": "Bladder Cancer"
-                },
-                {
-                    "name": "bladder urothelial carcinoma",
-                    "oncotree": "Bladder Cancer"
-                },
-                {
-                    "name": "breast cancer",
-                    "oncotree": "Breast Carcinoma"
-                },
-                {
-                    "name": "Breast Carcinoma, Prostate",
-                    "oncotree": "Breast Carcinoma"
-                },
-                {
-                    "name": "Cardio-facio-cutaneous syndrome",
-                    "oncotree": "Germline disposition"
-                },
-                {
-                    "name": "cervical cancer",
-                    "oncotree": "Cervical Cancer"
-                },
-                {
-                    "name": "Chronic Myeloid Leukemia (CML)",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "chondrosarcoma",
-                    "oncotree": "Bone Cancer"
-                },
-                {
-                    "name": "chronic lymphocytic leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "chronic myelomonocytic leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "Colon Adenocarcinoma",
-                    "oncotree": "Colorectal Cancer"
-                },
-                {
-                    "name": "colorectal adenocarcinoma",
-                    "oncotree": "Colorectal Cancer"
-                },
-                {
-                    "name": "Colorectal Carcinoma",
-                    "oncotree": "Colorectal Cancer"
-                },
-                {
-                    "name": "colorectal cancer",
-                    "oncotree": "Colorectal Cancer"
-                },
-                {
-                    "name": "cutaneous squamous cell carcinoma",
-                    "oncotree": "Skin Cancer, Non-Melanoma"
-                },
-                {
-                    "name": "Dermatofibrosarcoma Protuberans",
-                    "oncotree": "Skin Cancer, Non-Melanoma"
-                },
-                {
-                    "name": "desmoid tumors",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "Diffuse Large Cell B Cell Lymphoma",
-                    "oncotree": "Non-Hodgkin Lymphoma"
-                },
-                {
-                    "name": "Duodenal Adenocarcinoma",
-                    "oncotree": "Small Bowel Cancer"
-                },
-                {
-                    "name": "Epedymoma",
-                    "oncotree": "CNS Cancer"
-                },
-                {
-                    "name": "Ependymoma",
-                    "oncotree": "CNS Cancer"
-                },
-                {
-                    "name": "Epitheloid haemangioendothelioma",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "Erdheim Chester Disease",
-                    "oncotree": "Histiocytosis"
-                },
-                {
-                    "name": "esophageal squamous cell carcinoma",
-                    "oncotree": "Esophagogastric Carcinoma"
-                },
-                {
-                    "name": "Essential Thrombocythemia",
-                    "oncotree": "Myeloproliferative Neoplasm"
-                },
-                {
-                    "name": "Gallbladder Adenocarcinomas",
-                    "oncotree": "Hepatobiliary Cancer"
-                },
-                {
-                    "name": "gastric cancer",
-                    "oncotree": "Esophagogastric Carcinoma"
-                },
-                {
-                    "name": "Gastrointestinal Stromal Tumor (Thymic Cancer?)",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "glioblastoma",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "ovarian granulosa cell tumors",
-                    "oncotree": "Sex Cord Stromal Tumor"
-                },
-                {
-                    "name": "gastrointestinal stromal tumor",
-                    "oncotree": "Gastrointestinal Stromal Tumor"
-                },
-                {
-                    "name": "glioma",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "Glioma (Glioblastoma)",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "Glioma, Glioblastoma",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "GLIOMAS",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "hepatocellular carcinoma",
-                    "oncotree": "Hepatobiliary Cancer"
-                },
-                {
-                    "name": "hairy cell leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "head and neck cancer",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "Head and Neck Squamous Cells Carcinoma",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "Hematological Tumors",
-                    "oncotree": "All liquid tumors"
-                },
-                {
-                    "name": "Hematopoietic Malignancies",
-                    "oncotree": "All liquid tumors"
-                },
-                {
-                    "name": "Hepatocellular Cancer",
-                    "oncotree": "Hepatobiliary Cancer"
-                },
-                {
-                    "name": "Histiocytic Neoplasm",
-                    "oncotree": "Histiocytic Disorder"
-                },
-                {
-                    "name": "head and neck squamous cell carcinoma",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "Hodgkin Lymphoma",
-                    "oncotree": "Hodgkin Lymphoma"
-                },
-                {
-                    "name": "Hodgkin's Lymphoma",
-                    "oncotree": "Hodgkin Lymphoma"
-                },
-                {
-                    "name": "HodgkinŠ—Ès Lymphoma",
-                    "oncotree": "Hodgkin Lymphoma"
-                },
-                {
-                    "name": "Hypopharyngeal Squamous Cell Cancer",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "inflammatory myofibroblastic tumor",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "Kaposi Sarcoma",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "Large granular lymphocityc leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "Laryngeal Squamous Carcinoma",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "low grade glioma",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "liver cancer",
-                    "oncotree": "Hepatobiliary Cancer"
-                },
-                {
-                    "name": "lung squamous cell carcinoma",
-                    "oncotree": "Non-Small Cell Lung Cancer"
-                },
-                {
-                    "name": "Lymphoma, Leukemia",
-                    "oncotree": "All liquid tumors"
-                },
-                {
-                    "name": "Mast cell disorders",
-                    "oncotree": "Mastocytosis"
-                },
-                {
-                    "name": "Mast cell neoplasm",
-                    "oncotree": "Mastocytosis"
-                },
-                {
-                    "name": "Mast cell neoplasms",
-                    "oncotree": "Mastocytosis"
-                },
-                {
-                    "name": "Mastocytosis",
-                    "oncotree": "Mastocytosis"
-                },
-                {
-                    "name": "medulloblastoma",
-                    "oncotree": "Embryonal Tumor"
-                },
-                {
-                    "name": "Meduloblastoma",
-                    "oncotree": "Embryonal Tumor"
-                },
-                {
-                    "name": "meningioma",
-                    "oncotree": "CNS Cancer"
-                },
-                {
-                    "name": "Meningiomas",
-                    "oncotree": "CNS Cancer"
-                },
-                {
-                    "name": "multiple myeloma",
-                    "oncotree": "Multiple Myeloma"
-                },
-                {
-                    "name": "myeloproliferative neoplasms",
-                    "oncotree": "Myeloproliferative Neoplasm"
-                },
-                {
-                    "name": "Myeloproliferative Hypereosinophilic Syndrome",
-                    "oncotree": "Myeloproliferative Neoplasm"
-                },
-                {
-                    "name": "Myeloproliferative Neoplasm (PV, MF, ET)",
-                    "oncotree": "Myeloproliferative Neoplasm"
-                },
-                {
-                    "name": "Nasopharyngeal Carcinoma",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "neuroblastoma",
-                    "oncotree": "Embryonal Tumor"
-                },
-                {
-                    "name": "Neuroblastoma (small round blue cell tumors)",
-                    "oncotree": "Embryonal Tumor"
-                },
-                {
-                    "name": "Non Small Cel lung Cancer",
-                    "oncotree": "Non-Small Cell Lung Cancer"
-                },
-                {
-                    "name": "Non Small Cell Lung Carcinoma",
-                    "oncotree": "Non-Small Cell Lung Cancer"
-                },
-                {
-                    "name": "Non-HodgkinŠ—Ès Lymphoma",
-                    "oncotree": "Non-Hodgkin Lymphoma"
-                },
-                {
-                    "name": "non-small cell lung cancer",
-                    "oncotree": "Non-Small Cell Lung Cancer"
-                },
-                {
-                    "name": "Oral Squamous Cell Carcinoma",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "Oropharyngeal Squamous Cell Carcinoma (OSCC)",
-                    "oncotree": "Head and Neck Carcinoma"
-                },
-                {
-                    "name": "ovarian cancer",
-                    "oncotree": "Ovarian Cancer"
-                },
-                {
-                    "name": "pancreatic cancer",
-                    "oncotree": "Pancreatic Cancer"
-                },
-                {
-                    "name": "Pancreatic Ductal Carcinoma",
-                    "oncotree": "Pancreatic Cancer"
-                },
-                {
-                    "name": "Paraganglioma",
-                    "oncotree": "Miscellaneous Neuroepithelial Tumor"
-                },
-                {
-                    "name": "Phaeochromacytoma",
-                    "oncotree": "Pheochromocytoma"
-                },
-                {
-                    "name": "pheochromocytoma",
-                    "oncotree": "Pheochromocytoma"
-                },
-                {
-                    "name": "Pilocytic Astrocytoma",
-                    "oncotree": "Glioma"
-                },
-                {
-                    "name": "pituitary tumors",
-                    "oncotree": "Sellar Tumor"
-                },
-                {
-                    "name": "pituitary adenomas",
-                    "oncotree": "Sellar Tumor"
-                },
-                {
-                    "name": "Polycythemia Vera",
-                    "oncotree": "Myeloproliferative Neoplasm"
-                },
-                {
-                    "name": "Primary Mediastinal Large B-cell Lymphoma",
-                    "oncotree": "Non-Hodgkin Lymphoma"
-                },
-                {
-                    "name": "prostate cancer",
-                    "oncotree": "Prostate Cancer"
-                },
-                {
-                    "name": "renal cell carcinoma",
-                    "oncotree": "Renal Cell Carcinoma"
-                },
-                {
-                    "name": "rhabdomyosarcoma",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "Salivary-Duct Cancer",
-                    "oncotree": "Salivary Carcinoma"
-                },
-                {
-                    "name": "skin basal cell carcinoma",
-                    "oncotree": "Skin Cancer, Non-Melanoma"
-                },
-                {
-                    "name": "melanoma",
-                    "oncotree": "Melanoma"
-                },
-                {
-                    "name": "Skin Cancer (Non-Melanoma)",
-                    "oncotree": "Skin Cancer, Non-Melanoma"
-                },
-                {
-                    "name": "Small-Cell Lung Cancer (SCLC)",
-                    "oncotree": "Small Cell Lung Cancer"
-                },
-                {
-                    "name": "Soft-Tissue Sarcoma",
-                    "oncotree": "Soft Tissue Sarcoma"
-                },
-                {
-                    "name": "Solid Tumors (Epithelial Cancers)",
-                    "oncotree": "All solid tumors"
-                },
-                {
-                    "name": "stomach cancer",
-                    "oncotree": "Esophagogastric Carcinoma"
-                },
-                {
-                    "name": "Stem cell leukemia, Lymphoma",
-                    "oncotree": "All liquid tumors"
-                },
-                {
-                    "name": "stem cell leukemia/lymphoma",
-                    "oncotree": "All liquid tumors"
-                },
-                {
-                    "name": "Subependymal Giant Cell Astrocytoma",
-                    "oncotree": "CNS Cancer"
-                },
-                {
-                    "name": "Subependymal Giant Cell Astrocytoma (Ependymomal Tumor)",
-                    "oncotree": "CNS Cancer"
-                },
-                {
-                    "name": "T cell acute lymphoblastic leukemia (T-ALL)",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "t cell acute lymphoblastic leukemia",
-                    "oncotree": "Leukemia"
-                },
-                {
-                    "name": "thyroid cancer",
-                    "oncotree": "Thyroid Cancer"
-                },
-                {
-                    "name": "thymic carcinoma",
-                    "oncotree": "Thymic Tumor"
-                },
-                {
-                    "name": "endometrial carcinoma",
-                    "oncotree": "Endometrial Cancer"
-                },
-                {
                     "name": "uveal melanoma",
                     "oncotree": "Melanoma"
                 },
                 {
-                    "name": "Urothelial Bladder Cancer",
-                    "oncotree": "Bladder Cancer"
+                    "name": "Vestibular Schwannoma and Meningioma",
+                    "oncotree": "Nerve Sheath Tumor, CNS Cancer"
                 },
                 {
-                    "name": "uterine cancer",
-                    "oncotree": "Uterine Sarcoma"
+                    "name": "Waldenstrom's Macroglobulinemia, Lymphoplasmayctic Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Wilms Tumor",
+                    "oncotree": "Wilms Tumor"
                 }
             ];
             $scope.mappedTumorTypes = {};
@@ -1688,16 +1836,44 @@ angular.module('oncokbApp')
                             if (gene) {
                                 // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function(mutation, index) {
+                                    // var tumors = {};
                                     mutation.tumors.asArray().forEach(function(tumor) {
                                         //Convert to desired OncoTree tumor types
+                                        // if(tumors.hasOwnProperty(tumor.name.getText())) {
+                                        //     var message = '\tGene: ' + gene.name.getText() +
+                                        //         '\tMutation: ' + mutation.name.getText() +
+                                        //         '\tTumor type: ' + tumor.name.getText();
+                                        //     console.log(message);
+                                        // }else {
+                                        //     tumors[tumor.name.getText()] = 1;
+                                        // }
                                         var tt = tumor.name.getText().toString().trim().toLowerCase().replace('’',"'");
                                         var message = '\tGene: ' + gene.name.getText() +
                                             '\tMutation: ' + mutation.name.getText() +
                                             '\tTumor type: ' + tumor.name.getText();
                                         var mapped = $scope.mappedTumorTypes[tt];
-                                        if (mapped) {
-                                            message += '\tMapped: ' + mapped.name;
-                                            // tumor.name.setText(mapped.name);
+                                        if (_.isArray(mapped) && mapped.length > 0) {
+                                            var mappedName = [];
+                                            _.each(mapped, function(map, index) {
+                                                var exist = false;
+                                                _.each(tumor.cancerTypes.asArray(), function(ct) {
+                                                    if (ct.cancerType.getText() === map.name) {
+                                                        exist = true;
+                                                    }
+                                                });
+                                                if (!exist) {
+                                                    var cancerType = model.create(OncoKB.CancerType);
+                                                    cancerType.cancerType.setText(map.name);
+                                                    cancerType.cancerType_eStatus.set('obsolete', 'false');
+                                                    cancerType.subtype_eStatus.set('obsolete', 'false');
+                                                    cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
+                                                    tumor.cancerTypes.push(cancerType);
+                                                }
+                                                mappedName.push(map.name);
+                                                message += '\t' + (index + 1) + ': ' + map.name;
+                                            });
+                                            message += '\tMapped name:' + mappedName.join(', ');
+                                            tumor.name.setText(mappedName.join(', '));
                                         } else {
                                             message += '\tNo map.';
                                         }
@@ -1709,12 +1885,12 @@ angular.module('oncokbApp')
                                 //Google has limitation for numbere of requests within one second
                                 $timeout(function() {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                }, 200, false);
+                                }, 100, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                }, 200, false);
+                                }, 100, false);
                             }
                         }
                     });
@@ -1754,6 +1930,9 @@ angular.module('oncokbApp')
                     var mainType = findMainType(_oncotree);
                     if (mainType) {
                         $scope.mappedTumorTypes[_tumorType] = mainType;
+                        if (_.isArray(mainType) && mainType.length === 0) {
+                            console.error('NO MAPPING');
+                        }
                         // console.log('\t\tFound main type: ', mainType);
                     } else {
                         console.error('\t\tCannot find main type in OncoTree database.')
@@ -1770,13 +1949,25 @@ angular.module('oncokbApp')
             }
             
             function findMainType(mainType) {
-                for(var i = 0 ; i < $scope.oncoTree.mainTypes.length ; i ++) {
-                    if($scope.oncoTree.mainTypes[i].name.toString().trim().toLowerCase() === mainType.toString().trim().toLowerCase()) {
-                        return $scope.oncoTree.mainTypes[i];
-                        break;
-                    }
+                var mainTypes = [];
+                if (mainType !== 'Skin Cancer, Non-Melanoma') {
+                    mainTypes = mainType.split(',').map(function(item) {
+                        return item.toString().trim();
+                    });
+                } else {
+                    mainTypes = ['Skin Cancer, Non-Melanoma'];
                 }
-                return null;
+                var map = [];
+                _.each(mainTypes, function(mt) {
+                    for (var i = 0; i < $scope.oncoTree.mainTypes.length; i++) {
+                        if ($scope.oncoTree.mainTypes[i].name.toString().trim().toLowerCase() === mt.toLowerCase()) {
+                            map.push($scope.oncoTree.mainTypes[i]);
+                            break;
+                        }
+                    }
+                });
+
+                return map;
             }
             
             function getAllMainTypes() {
@@ -1785,19 +1976,19 @@ angular.module('oncokbApp')
                         if(result && _.isArray(result.data)) {
                             $scope.oncoTree.mainTypes = result.data;
                             $scope.oncoTree.mainTypes.push({
-                                name: "All liquid tumors"
+                                name: "All Liquid Tumors"
                             });
                             $scope.oncoTree.mainTypes.push({
-                                name: "All solid tumors"
+                                name: "All Solid Tumors"
                             });
                             $scope.oncoTree.mainTypes.push({
-                                name: "All tumors"
+                                name: "All Tumors"
                             });
                             $scope.oncoTree.mainTypes.push({
-                                name: "Germline disposition"
+                                name: "Germline Disposition"
                             });
                             $scope.oncoTree.mainTypes.push({
-                                name: "All pediatric tumors"
+                                name: "All Pediatric tumors"
                             });
                         }else {
                             console.log('No data available.');
@@ -2558,17 +2749,34 @@ angular.module('oncokbApp')
 
                 $scope.gene.mutations.asArray().forEach(function (e) {
                     console.log('------------------');
-                    console.log(e);
-                    console.log(e.shortSummary);
-                    console.log(e.shortSummary_eStatus);
-                    console.log(e.shortSummary_eStatus.get('curated'));
-                    console.log(e.effect);
-                    console.log(e.oncogenic);
-                    console.log(e.description);
+                    // console.log(e);
+                    // console.log(e.shortSummary);
+                    // console.log(e.shortSummary_eStatus);
+                    // console.log(e.shortSummary_eStatus.get('curated'));
+                    // console.log(e.effect);
+                    // console.log(e.oncogenic);
+                    // console.log(e.description);]
+                    e.tumors.asArray().forEach(function(tumortype) {
+                        tumortype.cancerTypes.asArray().forEach(function(cancerType) {
+                            console.log(cancerType);
+                        })
+                    });
                     console.log('------------------');
                 });
             };
 
+            $scope.getCancerTypeName = function(cancerTypes) {
+                var list = [];
+                cancerTypes.asArray().forEach(function(cancerType) {
+                    if (cancerType.subtype.length > 0) {
+                        list.push(cancerType.subtype.getText());
+                    } else if (cancerType.cancerType.length > 0) {
+                        list.push(cancerType.cancerType.getText());
+                    }
+                });
+                return list.join(', ');
+            };
+            
             $scope.updateGeneColor = function () {
                 if ($scope.gene) {
                     if (Number($scope.gene.status_timeStamp.get('lastEdit').value.text) > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
@@ -3174,23 +3382,23 @@ angular.module('oncokbApp')
                             $scope.oncoTree.mainTypes = result.data;
                             $scope.oncoTree.mainTypes.push({
                                 id: -1,
-                                name: "All liquid tumors"
+                                name: "All Liquid Tumors"
                             });
                             $scope.oncoTree.mainTypes.push({
                                 id: -2,
-                                name: "All solid tumors"
+                                name: "All Solid Tumors"
                             });
                             $scope.oncoTree.mainTypes.push({
                                 id: -3,
-                                name: "All tumors"
+                                name: "All Tumors"
                             });
                             $scope.oncoTree.mainTypes.push({
                                 id: -4,
-                                name: "Germline disposition"
+                                name: "Germline Disposition"
                             });
                             $scope.oncoTree.mainTypes.push({
                                 id: -5,
-                                name: "All pediatric tumors"
+                                name: "All Pediatric Tumors"
                             });
                         }
                     }, function(error) {
