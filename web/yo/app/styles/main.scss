@@ -1,4 +1,7 @@
 $icon-font-path: "../components/bootstrap-sass-official/assets/fonts/bootstrap/";
+$fa-font-path: "../components/fontawesome/fonts";
+$chosen-sprite-path: "../components/bootstrap-chosen/chosen-sprite.png";
+$chosen-sprite-retina-path: "../components/bootstrap-chosen/chosen-sprite@2x.png";
 // bower:scss
 @import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
@@ -672,8 +675,8 @@ h5 {
 .floatLeft {
   float: left;
 }
-.add-button {
-    margin-left: 10px;
+.panel-title *:focus {
+    outline: none;
 }
 /*** custom checkboxes ***/
 input[type=radio], input[type=checkbox] { display:none; } /* to hide the checkbox itself */
