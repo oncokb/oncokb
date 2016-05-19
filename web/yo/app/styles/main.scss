@@ -530,6 +530,9 @@ h5 {
   line-height: 30px;
   width: 100%;
 }
+.modify-tumor-type .chosen-container-single {
+    width: 100% !important;
+}
 
 //Change bootstrap default color
 .animate-show.ng-hide-add, .animate-show.ng-hide-remove {

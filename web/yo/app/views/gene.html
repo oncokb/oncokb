@@ -65,7 +65,7 @@
         <tbody>
         <tr>
           <td>cBioPortal link: </td>
-          <td><a href="http://www.cbioportal.org/ln?q={{::gene.name.text}}" target="_blank">http://www.cbioportal.org/ln?q={{::gene.name.text}}</a></td>
+          <td><a href="https://cbioportal.mskcc.org/ln?q={{::gene.name.text}}" target="_blank">https://cbioportal.mskcc.org/ln?q={{::gene.name.text}}</a></td>
         </tr>
         <tr>
           <td>COSMIC link: </td>
@@ -177,7 +177,9 @@
                 <uib-accordion-heading >
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen}"></i>
                   <span ng-click="stopCollopse($event)">Tumor type: </span>
-                  <span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false">{{getCancerTypesName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                  <span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false">{{getCancerTypesName(tumor.cancerTypes)}}</span>
+                    <i class="fa fa-edit" ng-click="stopCollopse($event); modifyTumorType(tumor)"></i>
+                    <comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="fileEditable">
                     <span style="margin-right: 20px">
@@ -394,14 +396,13 @@
                     Main Type: <select chosen
                                        allow-single-deselect="true"
                                        data-placeholder="Choose a main tumor type"
-                                       no-results-text="'Could not find any'"
+                                       no-results-text="'Could not find any'"t
                                        ng-model="cancerType.mainType"
                                        ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name' track by tt.id">
                     <option value=""></option>
                 </select>
                     Tumor Types:
                     <select style="width: 400px" chosen
-                            allow-single-deselec="true"
                             data-placeholder="Choose a tumor type"
                             no-results-text="'Could not find any'"
                             allow-single-deselect="true"

@@ -2636,6 +2636,21 @@ angular.module('oncokbApp')
                 }
             };
 
+            $scope.modifyTumorType = function(tumorType) {
+                var dlg = dialogs.create('views/modifyTumorTypes.html', 'ModifyTumorTypeCtrl', {
+                    model: $scope.realtimeDocument.getModel(),
+                    cancerTypes: tumorType.cancerTypes,
+                    oncoTree: $scope.oncoTree
+                }, {
+                    size: 'lg'
+                });
+                dlg.result.then(function(name) {
+                    $scope.name = name;
+                }, function() {
+                    $scope.name = 'You decided not to enter in your name, that makes me sad.';
+                });
+            };
+            
             //Add new therapeutic implication
             $scope.addTI = function (ti, index, newTIName, mutationIndex, tumorIndex, tiIndex) {
                 if (ti && newTIName) {
@@ -3802,4 +3817,150 @@ angular.module('oncokbApp')
                 documentClosed();
             });
         }]
-);
+)
+    .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, DatabaseConnector) {
+        $scope.meta = {
+            model: data.model,
+            oncoTree: data.oncoTree,
+            cancerTypes: data.cancerTypes,
+            newCancerTypes: []
+        }
+
+        $scope.cancel = function() {
+            $modalInstance.dismiss('canceled');
+        }; // end cancel
+
+        $scope.save = function() {
+            $scope.meta.model.beginCompoundOperation();
+
+            $scope.meta.cancerTypes.clear();
+            _.each($scope.meta.newCancerTypes, function(ct) {
+                if (ct.mainType.name) {
+                    var cancerType = $scope.meta.model.create(OncoKB.CancerType);
+                    cancerType.cancerType.setText(ct.mainType.name);
+                    if(ct.subtype) {
+                        if (ct.subtype.code) {
+                            cancerType.oncoTreeCode.setText(ct.subtype.code);
+                        }
+                        if (ct.subtype.name) {
+                            cancerType.subtype.setText(ct.subtype.name);
+                        }
+                    }
+                    cancerType.cancerType_eStatus.set('obsolete', 'false');
+                    cancerType.subtype_eStatus.set('obsolete', 'false');
+                    cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
+                    console.log(cancerType);
+                    $scope.meta.cancerTypes.push(cancerType);
+                }
+            });
+
+            $scope.meta.model.endCompoundOperation();
+            
+            $modalInstance.close();
+        }; // end save
+
+        $scope.hitEnter = function(evt) {
+            if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.name, null) || angular.equals($scope.name, ''))) {
+                $scope.save();
+            }
+        };
+
+        $scope.$watch('meta.newCancerTypes', function(n, o) {
+            // console.log('meta.newcancertypes watch has been called.',n, o);
+            if (n.length > 0 && n[n.length - 1].mainType) {
+                $scope.meta.newCancerTypes.push({
+                    mainType: '',
+                    subtype: '',
+                    oncoTreeTumorTypes: []
+                });
+            }
+            for (var i = n.length - 2; i >= 0; i--) {
+                if (!n[i].mainType) {
+                    n.splice(i, 1);
+                    i--;
+                }
+            }
+            function callback(index, result) {
+                if (_.isArray(result)) {
+                    n[index].oncoTreeTumorTypes = result;
+                    if(!n[index].subtype) {
+                        n[index].subtype = findSubtype(result, n[index].oncoTreeCode);
+                    }
+                }
+                if (index < n.length - 1) {
+                    findTumorTypeByMainType(++index, n[index].mainType, callback);
+                }
+            }
+
+            if (n.length > 1) {
+                findTumorTypeByMainType(0, n[0].mainType, callback);
+            }
+        }, true);
+
+        initNewCancerTypes();
+
+        function findTumorTypeByMainType(index, mainType, callback) {
+            if (mainType.name) {
+                if ($scope.meta.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
+                    if (_.isFunction(callback)) {
+                        callback(index, $scope.meta.oncoTree.tumorTypes[mainType.name]);
+                    }
+                } else {
+                    DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
+                        .then(function(result) {
+                            if (result.data) {
+                                $scope.meta.oncoTree.tumorTypes[mainType.name] = result.data;
+                                if (_.isFunction(callback)) {
+                                    callback(index, result.data);
+                                }
+                            }
+                        }, function() {
+                            if (_.isFunction(callback)) {
+                                callback(index, '');
+                            }
+                        });
+                }
+            } else {
+                if (_.isFunction(callback)) {
+                    callback(index, '');
+                }
+            }
+        }
+
+        function initNewCancerTypes() {
+            var newCancerTypes = [];
+            _.each($scope.meta.cancerTypes.asArray(), function(cancerType) {
+                newCancerTypes.push({
+                    mainType: findMainType(cancerType.cancerType.getText()),
+                    oncoTreeCode: cancerType.oncoTreeCode.getText(),
+                    subtype: '',
+                    oncoTreeTumorTypes: []
+                });
+            });
+
+            newCancerTypes.push({
+                mainType: '',
+                subtype: '',
+                oncoTreeTumorTypes: []
+            });
+            $scope.meta.newCancerTypes = newCancerTypes;
+        }
+
+        function findSubtype(list, code) {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].code === code) {
+                    return list[i];
+                }
+            }
+            return '';
+        }
+
+        function findMainType(name) {
+            for (var i = 0; i < $scope.meta.oncoTree.mainTypes.length; i++) {
+                if ($scope.meta.oncoTree.mainTypes[i].name === name) {
+                    return $scope.meta.oncoTree.mainTypes[i];
+                }
+            }
+            return '';
+        }
+    });
