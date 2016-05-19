@@ -4,7 +4,7 @@
       <!-- Gene: <span>{{gene.name.text}}</span> -->
       Gene: <span contenteditable="false" ng-model="gene.name.text"></span><comments-dict gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
       <span ng-repeat="collaborator in collaborators">
-        <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" tooltip-placement="top" tooltip="{{::collaborator.displayName}}">
+        <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.displayName}}">
       </span>
       <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
       <span ng-if="document && userRole === 8" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
@@ -110,7 +110,7 @@
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
             <span ng-click="stopCollopse($event)">Mutation: </span><span ng-click="stopCollopse($event)" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="mutation.name.text"/></span>
             <comments-dict mutation="{{mutation.name.text}}" gene-name="{{::gene.name.text}}" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-            <i class="fa fa-hand-o-left" tooltip-placement="top" tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===false || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===false}"></i>
+            <i class="fa fa-hand-o-left" uib-tooltip-placement="top" uib-tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===false || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===false}"></i>
             <span class="pull-right" ng-show="fileEditable">
               <span style="margin-right: 20px">
                 <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(gene.mutations, $index, $index, $event)"></i>
@@ -177,7 +177,7 @@
                 <uib-accordion-heading >
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen}"></i>
                   <span ng-click="stopCollopse($event)">Tumor type: </span>
-                  <span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false" ng-model="tumor.name.text"/></span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                  <span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false">{{getCancerTypesName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="fileEditable">
                     <span style="margin-right: 20px">
@@ -386,27 +386,36 @@
               </uib-accordion-group>
             </div>
           </uib-accordion>
-          <!--<div style="width: 100%" class="input-group input-group-sm accordionMarginTop" ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" >-->
-            <!--&lt;!&ndash;<input type="text" ng-model="newTumorTypeName" uib-typeahead="tumorType for tumorType in tumorTypes | typeaheadFilter:$viewValue | limitTo: 10" class="form-control" placeholder="Free text or choose from the dropdown list">&ndash;&gt;-->
-              <!--Main Type: <select chosen-->
-                                 <!--multiple-->
-                                 <!--data-placeholder="Choose a main tumor type"-->
-                      <!--no-results-text="'Could not find any'"-->
-                      <!--ng-model="meta.newMainType"-->
-                      <!--ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name' track by tt.id">-->
-              <!--</select>-->
-              <!--Tumor Types:-->
-              <!--<select style="width: 400px" chosen-->
-                      <!--multiple-->
-                      <!--data-placeholder="Choose a tumor type"-->
-                      <!--no-results-text="'Could not find any'"-->
-                      <!--ng-model="meta.newTumorType"-->
-                      <!--ng-options="(tt.name + ' in ' + tt.mainType.name) for tt in meta.currentOncoTreeTumorTypes | orderBy: 'name' track by tt.code">-->
-              <!--</select>-->
-              <!--<button type="button" class="btn btn-default btn-sm add-button" ng-disabled="meta.newMainType.length === 0" ng-click="addTumorType(mutation, meta.newMainType, meta.newTumorType, $index); meta.newTumorType=''">-->
-                <!--Add Tumor Type-->
-              <!--</button>-->
-          <!--</div>-->
+            <div style="width: 100%; margin: 0 5px" class="input-group input-group-sm accordionMarginTop"
+                 ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
+                <h4>Add tumor type or combination</h4>
+                <hr/>
+                <div ng-repeat="cancerType in meta.newCancerTypes" style="width: 100%;">
+                    Main Type: <select chosen
+                                       allow-single-deselect="true"
+                                       data-placeholder="Choose a main tumor type"
+                                       no-results-text="'Could not find any'"
+                                       ng-model="cancerType.mainType"
+                                       ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name' track by tt.id">
+                    <option value=""></option>
+                </select>
+                    Tumor Types:
+                    <select style="width: 400px" chosen
+                            allow-single-deselec="true"
+                            data-placeholder="Choose a tumor type"
+                            no-results-text="'Could not find any'"
+                            allow-single-deselect="true"
+                            ng-model="cancerType.subtype"
+                            ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
+                        <option value=""></option>
+                    </select>
+                </div><br/>
+                <button type="button" class="btn btn-default btn-sm"
+                        ng-disabled="meta.newMainType.length === 0"
+                        ng-click="addTumorType(mutation, $index); meta.newTumorType=''">
+                    Add Tumor Type
+                </button>
+            </div>
         </uib-accordion-group>
       </div>
     </uib-accordion>
