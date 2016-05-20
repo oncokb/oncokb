@@ -11,10 +11,7 @@ import org.mskcc.cbio.oncokb.response.ApiNumbersGene;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGenes;
 import org.mskcc.cbio.oncokb.response.ApiNumbersLeves;
 import org.mskcc.cbio.oncokb.response.ApiNumbersMain;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.NumberUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -51,7 +48,7 @@ public class NumbersApi {
         RespMeta meta = new RespMeta();
         HttpStatus status = HttpStatus.OK;
 
-        Set<GeneNumber> geneNumbers = NumberUtils.getGeneNumberList(Collections.singleton(GeneUtils.getGeneByHugoSymbol(hugoSymbol)));
+        Set<GeneNumber> geneNumbers = NumberUtils.getGeneNumberListWithLevels(Collections.singleton(GeneUtils.getGeneByHugoSymbol(hugoSymbol)), LevelUtils.getPublicLevels());
         if (geneNumbers.size() == 1) {
             apiNumbersGene.setData(geneNumbers.iterator().next());
         } else {
@@ -81,7 +78,7 @@ public class NumbersApi {
 
         ApiNumbersGenes apiNumbersGenes = new ApiNumbersGenes();
 
-        Set<GeneNumber> genes = NumberUtils.getGeneNumberList();
+        Set<GeneNumber> genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
         oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
         apiNumbersGenes.setData(genes);
 
@@ -108,7 +105,7 @@ public class NumbersApi {
         mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
         mainNumber.setAlteration(ApplicationContextSingleton.getAlterationBo().countAll());
         mainNumber.setTumorType(ApplicationContextSingleton.getTumorTypeBo().countAll());
-        mainNumber.setDrug(NumberUtils.getDrugsCount());
+        mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
         apiNumbersMain.setData(mainNumber);
 
         RespMeta meta = new RespMeta();
@@ -129,7 +126,7 @@ public class NumbersApi {
         
         ApiNumbersLeves apiNumbersGenes = new ApiNumbersLeves();
 
-        Set<LevelNumber> genes = NumberUtils.getLevelNumberList();
+        Set<LevelNumber> genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
         apiNumbersGenes.setData(genes);
 
         RespMeta meta = new RespMeta();

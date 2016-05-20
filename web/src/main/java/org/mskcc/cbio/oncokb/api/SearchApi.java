@@ -8,10 +8,7 @@ import org.mskcc.cbio.oncokb.response.ApiGenes;
 import org.mskcc.cbio.oncokb.response.ApiSearchEvidences;
 import org.mskcc.cbio.oncokb.response.ApiSearchVariantsBiological;
 import org.mskcc.cbio.oncokb.response.ApiSearchVariantsClinical;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.EvidenceUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -98,11 +95,11 @@ public class SearchApi {
         RespMeta meta = new RespMeta();
         HttpStatus status = HttpStatus.OK;
         Set<ShortGene> genes = GeneUtils.searchShortGene(query);
-        
-        if(genes.size() == 0) {
+
+        if (genes.size() == 0) {
             status = HttpStatus.NO_CONTENT;
         }
-        
+
         meta.setCode(status.value());
         instance.setRespMeta(meta);
         instance.setData(genes);
@@ -200,6 +197,7 @@ public class SearchApi {
                     add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
                 }};
                 Map<Alteration, Map<TumorType, Set<Evidence>>> evidences = new HashMap<>();
+                Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
                 for (Alteration alteration : alterations) {
                     evidences.put(alteration, new HashMap<TumorType, Set<Evidence>>());
@@ -214,7 +212,9 @@ public class SearchApi {
                         if (!evidences.get(alteration).containsKey(tumorType)) {
                             evidences.get(alteration).put(tumorType, new HashSet<Evidence>());
                         }
-                        evidences.get(alteration).get(tumorType).add(evidence);
+                        if (publicLevels.contains(evidence.getLevelOfEvidence())) {
+                            evidences.get(alteration).get(tumorType).add(evidence);
+                        }
                     }
                 }
 
@@ -231,7 +231,7 @@ public class SearchApi {
                             variant.setVariant(alteration.getAlteration());
                             variant.setCancerType(tumorType.getName());
                             LevelOfEvidence levelOfEvidence = _evidence.getLevelOfEvidence();
-                            variant.setHighestLevel(levelOfEvidence != null ? levelOfEvidence.getLevel() : "");
+                            variant.setLevel(levelOfEvidence != null ? levelOfEvidence.getLevel() : "");
                             variant.setDrug(EvidenceUtils.getDrugs(_evidences));
                             variant.setDrugPmids(EvidenceUtils.getPmids(_evidences));
                             variants.add(variant);

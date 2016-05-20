@@ -16,7 +16,7 @@ public class ClinicalVariant {
 
     private String variant = null;
     private String cancerType = null;
-    private String highestLevel = null;
+    private String level = null;
     private Set<String> drug = new HashSet<String>();
     private Set<String> drugPmids = new HashSet<String>();
 
@@ -50,13 +50,13 @@ public class ClinicalVariant {
     /**
      **/
     @ApiModelProperty(value = "")
-    @JsonProperty("highestLevel")
-    public String getHighestLevel() {
-        return highestLevel;
+    @JsonProperty("level")
+    public String getLevel() {
+        return level;
     }
 
-    public void setHighestLevel(String highestLevel) {
-        this.highestLevel = highestLevel;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
 
@@ -97,14 +97,14 @@ public class ClinicalVariant {
         ClinicalVariant clinicalVariant = (ClinicalVariant) o;
         return Objects.equals(variant, clinicalVariant.variant) &&
             Objects.equals(cancerType, clinicalVariant.cancerType) &&
-            Objects.equals(highestLevel, clinicalVariant.highestLevel) &&
+            Objects.equals(level, clinicalVariant.level) &&
             Objects.equals(drug, clinicalVariant.drug) &&
             Objects.equals(drugPmids, clinicalVariant.drugPmids);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(variant, cancerType, highestLevel, drug, drugPmids);
+        return Objects.hash(variant, cancerType, level, drug, drugPmids);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class ClinicalVariant {
 
         sb.append("  variant: ").append(variant).append("\n");
         sb.append("  cancerType: ").append(cancerType).append("\n");
-        sb.append("  highestLevel: ").append(highestLevel).append("\n");
+        sb.append("  level: ").append(level).append("\n");
         sb.append("  drug: ").append(drug).append("\n");
         sb.append("  drugPmids: ").append(drugPmids).append("\n");
         sb.append("}\n");

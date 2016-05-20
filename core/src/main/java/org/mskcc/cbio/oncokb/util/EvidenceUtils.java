@@ -368,4 +368,10 @@ public class EvidenceUtils {
         }
         return result;
     }
+    
+    public static Map<Gene, Set<Evidence>> getAllGeneBasedEvidences() {
+        Set<Gene> genes = GeneUtils.getAllGenes();
+        Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
+        return evidences;
+    }
 }

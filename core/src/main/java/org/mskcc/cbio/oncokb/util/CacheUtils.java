@@ -131,20 +131,24 @@ public class CacheUtils {
     };
 
     static {
-        GeneObservable.getInstance().addObserver(variantSummaryObserver);
-        GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
-        GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
-        GeneObservable.getInstance().addObserver(alterationsObserver);
-        GeneObservable.getInstance().addObserver(geneObserver);
-        GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
-        GeneObservable.getInstance().addObserver(genesObserver);
-        GeneObservable.getInstance().addObserver(evidencesObserver);
+        try {
+            GeneObservable.getInstance().addObserver(variantSummaryObserver);
+            GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
+            GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
+            GeneObservable.getInstance().addObserver(alterationsObserver);
+            GeneObservable.getInstance().addObserver(geneObserver);
+            GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
+            GeneObservable.getInstance().addObserver(genesObserver);
+            GeneObservable.getInstance().addObserver(evidencesObserver);
 
-        Long oldTime = new Date().getTime();
-        genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
-        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
-        evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
-        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
+            Long oldTime = new Date().getTime();
+            genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
+            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
+            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
+        }catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
