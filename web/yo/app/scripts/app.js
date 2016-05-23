@@ -30,14 +30,13 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0BzBfo69g8fP6ZHJqZ1ZRd3hHbU0', //testing folder
+    // folderId: '0BzBfo69g8fP6RHFUVVhmMlRyME0', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
     // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //curation folder 05/17/2016
-    folderId: '0BzBfo69g8fP6SjFhTWJzVTN2eUE', //curation folder 05/18/2016
+    folderId: '0BzBfo69g8fP6eERxcnpmMjRtYVU', //curation folder 05/19/2016
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010

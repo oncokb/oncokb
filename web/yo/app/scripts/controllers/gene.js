@@ -1510,6 +1510,58 @@ angular.module('oncokbApp')
                 {
                     "name": "Wilms Tumor",
                     "oncotree": "Wilms Tumor"
+                },
+                {
+                    "name": "Primary Pulmonary Myxoid Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Malignant Gastrointestinal Neuroectodermal Tumor",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Breast, lung, ovarian, prostate, pancreatic",
+                    "oncotree": "Breast Cancer, Small Cell Lung Cancer, Non-Small Cell Lung Cancer, Ovarian Cancer, Prostate Cancer,Pancreatic Cancer"
+                },
+                {
+                    "name": "Skin Cancer",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "T-ALL",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Peritoneal Cancer",
+                    "oncotree": "Mesothelioma"
+                },
+                {
+                    "name": "All Pediatric Tumors",
+                    "oncotree": "All Pediatric Tumors"
+                },
+                {
+                    "name": "Pediatric tumors",
+                    "oncotree": "All Pediatric Tumors"
+                },
+                {
+                    "name": "SARCOMA",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Pediatric Malignancies",
+                    "oncotree": "All Pediatric Tumors"
+                },
+                {
+                    "name": "Brain Cancer",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pilomatricoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
                 }
             ];
             $scope.mappedTumorTypes = {};
@@ -1834,7 +1886,7 @@ angular.module('oncokbApp')
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
-                                // model.beginCompoundOperation();
+                                model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function(mutation, index) {
                                     // var tumors = {};
                                     mutation.tumors.asArray().forEach(function(tumor) {
@@ -1873,24 +1925,23 @@ angular.module('oncokbApp')
                                                 message += '\t' + (index + 1) + ': ' + map.name;
                                             });
                                             message += '\tMapped name:' + mappedName.join(', ');
-                                            tumor.name.setText(mappedName.join(', '));
                                         } else {
                                             message += '\tNo map.';
                                         }
                                         console.log(message);
                                     });
                                 });
-                                // model.endCompoundOperation();
+                                model.endCompoundOperation();
                                 
                                 //Google has limitation for numbere of requests within one second
                                 $timeout(function() {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                }, 100, false);
+                                },500, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                }, 100, false);
+                                }, 500, false);
                             }
                         }
                     });
@@ -1988,7 +2039,7 @@ angular.module('oncokbApp')
                                 name: "Germline Disposition"
                             });
                             $scope.oncoTree.mainTypes.push({
-                                name: "All Pediatric tumors"
+                                name: "All Pediatric Tumors"
                             });
                         }else {
                             console.log('No data available.');

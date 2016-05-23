@@ -681,6 +681,11 @@ h5 {
 .panel-title *:focus {
     outline: none;
 }
+.original-tumor-type {
+    font-size: 12px;
+    color: grey;
+    font-style: italic;
+}
 /*** custom checkboxes ***/
 input[type=radio], input[type=checkbox] { display:none; } /* to hide the checkbox itself */
 input[type=radio] + label:before, input[type=checkbox] + label:before {
