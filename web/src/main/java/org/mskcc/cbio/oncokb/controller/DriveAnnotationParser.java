@@ -7,6 +7,7 @@ package org.mskcc.cbio.oncokb.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mortbay.util.ajax.JSON;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
@@ -336,7 +337,10 @@ public class DriveAnnotationParser {
             if (mutationObj.has("tumors")) {
                 JSONArray cancers = mutationObj.getJSONArray("tumors");
                 for (int i = 0; i < cancers.length(); i++) {
-                    parseCancer(gene, alterations, cancers.getJSONObject(i));
+                    JSONArray subTumorTypes = cancers.getJSONObject(i).getJSONArray("cancerTypes");
+                    for (int j = 0; j < subTumorTypes.length(); j++) {
+                        parseCancer(gene, alterations, cancers.getJSONObject(i), subTumorTypes.getJSONObject(j).getString("cancerType"));
+                    }
                 }
             } else {
                 System.out.println("    No tumor available.");
@@ -401,14 +405,20 @@ public class DriveAnnotationParser {
         return ret;
     }
 
-    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj) {
+    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String cancerName) {
         String cancer = "";
 
-        if (cancerObj.has("name")) {
-            cancer = cancerObj.getString("name").trim();
-        } else {
+        if(cancerName == null) {
             return;
+        }else {
+            cancer = cancerName;
         }
+//        if (cancerObj.has("name")) {
+////            Use cancerTypes array instead of cancer name for now.
+////            cancer = cancerObj.getString("name").trim();
+//        } else {
+//            return;
+//        }
 
         if (cancer.isEmpty() || cancer.endsWith(DO_NOT_IMPORT)) {
             System.out.println("##    Cancer type: " + cancer + " -- skip");
