@@ -314,6 +314,14 @@ angular.module('oncokbApp')
                         __tumor.TI.push(ti);
                     });
 
+
+                    e1.cancerTypes.asArray().forEach(function (e2) {
+                        var ct = {};
+
+                        ct = combineData(ti, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation']);
+                        __tumor.cancerTypes.push(ct);
+                    });
+
                     if (!(excludeObsolete !== undefined && excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
                         __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short']);
                     }
