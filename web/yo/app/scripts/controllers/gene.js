@@ -2594,15 +2594,16 @@ angular.module('oncokbApp')
                 if(vus) {
                     params.vus = JSON.stringify(vus);
                 }
-                DatabaseConnector.updateGene(params, function (result) {
-                    $scope.docStatus.savedGene = true;
-                    console.log('success', result);
-                    changeLastUpdate();
-                }, function (result) {
-                    $scope.docStatus.savedGene = true;
-                    console.log('failed', result);
-                    changeLastUpdate();
-                });
+                console.log(gene);
+                // DatabaseConnector.updateGene(params, function (result) {
+                //     $scope.docStatus.savedGene = true;
+                //     console.log('success', result);
+                //     changeLastUpdate();
+                // }, function (result) {
+                //     $scope.docStatus.savedGene = true;
+                //     console.log('failed', result);
+                //     changeLastUpdate();
+                // });
                 // }, 1000);
             };
 
@@ -2846,9 +2847,10 @@ angular.module('oncokbApp')
                     // console.log(e.oncogenic);
                     // console.log(e.description);]
                     e.tumors.asArray().forEach(function(tumortype) {
-                        tumortype.cancerTypes.asArray().forEach(function(cancerType) {
-                            console.log(cancerType);
-                        })
+                        console.log(tumortype);
+                        // tumortype.cancerTypes.asArray().forEach(function(cancerType) {
+                        //     console.log(cancerType);
+                        // })
                     });
                     console.log('------------------');
                 });
@@ -2859,9 +2861,9 @@ angular.module('oncokbApp')
                 cancerTypes.asArray().forEach(function(cancerType) {
                     if (cancerType.subtype.length > 0) {
                         var str = cancerType.subtype.getText();
-                        if (cancerType.oncoTreeCode.length > 0) {
-                            str += '(' + cancerType.oncoTreeCode + ')';
-                        }
+                        // if (cancerType.oncoTreeCode.length > 0) {
+                        //     str += '(' + cancerType.oncoTreeCode + ')';
+                        // }
                         list.push(str);
                     } else if (cancerType.cancerType.length > 0) {
                         list.push(cancerType.cancerType.getText());
