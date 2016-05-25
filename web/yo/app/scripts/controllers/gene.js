@@ -1566,7 +1566,7 @@ angular.module('oncokbApp')
             ];
             $scope.mappedTumorTypes = {};
             getCacheStatus();
-            getAllMainTypes();
+            // getAllMainTypes();
 
             var newGenes = [];
 
@@ -2056,7 +2056,6 @@ angular.module('oncokbApp')
                                         });
                                         $scope.oncoTree.tumorTypes = tumorTypes;
                                         $scope.oncoTree.allTumorTypes = allTumorTypes;
-                                        console.log($scope.oncoTree.tumorTypes)
                                     }
                                 }
                             }, function(error) {
