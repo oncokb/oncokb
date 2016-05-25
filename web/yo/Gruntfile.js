@@ -382,6 +382,16 @@ module.exports = function (grunt) {
           src: 'components/bootstrap-sass-official/assets/fonts/bootstrap/*',
           dest: '<%= oncokb.dist %>'
         }, {
+            expand: true,
+            cwd: '<%= oncokb.app %>/',
+            src: 'components/fontawesome/fonts/*',
+            dest: '<%= oncokb.dist %>'
+        }, {
+            expand: true,
+            cwd: '<%= oncokb.app %>/',
+            src: 'components/bootstrap-chosen/*',
+            dest: '<%= oncokb.dist %>'
+        }, {
           expand: true,
           cwd: '<%= oncokb.app %>/components/datatables/media/images',
           src: '*',
@@ -391,11 +401,6 @@ module.exports = function (grunt) {
           cwd: '<%= oncokb.app %>/components/bootstrap-chosen/',
           src: ['chosen-sprite.png','chosen-sprite@2x.png'],
           dest: '<%= oncokb.dist %>/styles'
-        },{
-          expand: true,
-          cwd: '.',
-          src: ['app/components/bootstrap-chosen/chosen-sprite.png','app/components/bootstrap-chosen/chosen-sprite@2x.png'],
-          dest: '<%= oncokb.dist %>'
         }]
       },
       styles: {
