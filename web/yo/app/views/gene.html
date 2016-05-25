@@ -24,10 +24,12 @@
         <button ng-if="userRole === 8" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=false">
           <i class="fa fa-eye-slash"></i>Show all obsolete
         </button>
-        <button type="button" class="btn btn-default"  ng-click="status.expandAll=true">
+        <button type="button" class="btn btn-default"  ng-click="status.expandAll=true"
+                ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
           <i class="fa fa-expand"></i>Expand all
         </button>
-        <button type="button" class="btn btn-default"  ng-click="status.expandAll=false">
+        <button type="button" class="btn btn-default"  ng-click="status.expandAll=false"
+                ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
           <i class="fa fa-compress"></i>Collapse all
         </button>
         <!--<button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">-->
@@ -185,7 +187,8 @@
                   <span ng-click="stopCollopse($event)">Tumor type: </span>
                   <span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false">{{getCancerTypesName(tumor.cancerTypes)}}</span>
                     <i class="fa fa-edit" ng-click="stopCollopse($event); modifyTumorType(tumor)"></i>
-                    <span class="original-tumor-type" ng-if="getCancerTypesName(tumor.cancerTypes).toLowerCase() !== tumor.name.text.toLowerCase()">Original Tumor Type: {{tumor.name.text}}</span>
+                    <span class="original-tumor-type"
+                          ng-if="getCancerTypesName(tumor.cancerTypes).toLowerCase() !== tumor.name.text.toLowerCase() && tumor.name.text">Original Tumor Type: {{tumor.name.text}}</span>
                     <comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="fileEditable">
@@ -404,10 +407,10 @@
           </uib-accordion>
             <div style="width: 100%; margin: 0 5px" class="input-group input-group-sm accordionMarginTop"
                  ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
-                <h4>Add tumor type or combination</h4>
+                <h4>Add tumor type(s) or combination</h4>
                 <hr/>
-                <div ng-repeat="cancerType in meta.newCancerTypes" style="width: 100%;">
-                    Main Type: <select chosen
+                <div class="add-tumor-type-item" ng-repeat="cancerType in meta.newCancerTypes">
+                    Cancer Type: <select chosen
                                        allow-single-deselect="true"
                                        data-placeholder="Choose a main tumor type"
                                        no-results-text="'Could not find any'"t
@@ -415,7 +418,7 @@
                                        ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name' track by tt.id">
                     <option value=""></option>
                 </select>
-                    Tumor Types:
+                    Subtype:
                     <select style="width: 400px" chosen
                             data-placeholder="Choose a tumor type"
                             no-results-text="'Could not find any'"
@@ -424,11 +427,11 @@
                             ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
                         <option value=""></option>
                     </select>
-                </div><br/>
+                </div>
                 <button type="button" class="btn btn-default btn-sm"
                         ng-disabled="meta.newMainType.length === 0"
                         ng-click="addTumorType(mutation, $index); meta.newTumorType=''">
-                    Add Tumor Type
+                    Add Tumor Type(s)
                 </button>
             </div>
         </uib-accordion-group>
@@ -480,10 +483,12 @@
   <button ng-if="userRole === 8" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=false">
     <i class="fa fa-eye-slash"></i>Show all obsolete
   </button>
-  <button type="button" class="btn btn-default"  ng-click="status.expandAll=true">
+    <button type="button" class="btn btn-default" ng-click="status.expandAll=true"
+            ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
     <i class="fa fa-expand"></i>Expand all
   </button>
-  <button type="button" class="btn btn-default"  ng-click="status.expandAll=false">
+  <button type="button" class="btn btn-default"  ng-click="status.expandAll=false"
+          ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
     <i class="fa fa-compress"></i>Collapse all
   </button>
   <!--<button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">-->
@@ -497,7 +502,7 @@
   <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>-->
   <!--<button ng-style="{color: updateGeneColor()}" type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>-->
   <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>-->
-  <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>
+    <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>-->
   <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>
 </div>
 
