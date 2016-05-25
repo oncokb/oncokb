@@ -4012,33 +4012,42 @@ angular.module('oncokbApp')
                 });
             }
             for (var i = n.length - 2; i >= 0; i--) {
-                if (!n[i].mainType && !n[i].subtype) {
-                    n.splice(i, 1);
-                    i--;
+                if (!n[i].mainType) {
+                    if(n[i].mainType != '') {
+                        n.splice(i, 1);
+                        i--;
+                    }
                 }
             }
-            function callback(index, oncoTreeTumorTypes) {
+            function callback(index, mainType, subType, oncoTreeTumorTypes) {
                 n[index].oncoTreeTumorTypes = oncoTreeTumorTypes ? oncoTreeTumorTypes : $scope.meta.oncoTree.allTumorTypes;
 
+                if(mainType) {
+                    n[index].mainType = mainType;
+                }
+                
                 var next = index + 1;
                 if (next < n.length - 1) {
-                    findCancerType(next, n[next].mainType, callback);
+                    findCancerType(next, n[next].mainType, n[next].subtype, callback);
                 }
             }
 
             if (n.length > 1) {
-                findCancerType(0, n[0].mainType, callback)
+                findCancerType(0, n[0].mainType, n[0].subtype, callback)
             }
         }, true);
 
         initNewCancerTypes();
 
-        function findCancerType(index, mainType, callback) {
-            var list;
+        function findCancerType(index, mainType, subtype, callback) {
+            var list, _mainType;
             if (mainType && mainType.name) {
                 list = $scope.meta.oncoTree.tumorTypes[mainType.name];
             }
-            callback(index, list);
+            if (!mainType && subtype) {
+                _mainType = findMainType(subtype.mainType.name);
+            }
+            callback(index, _mainType, subtype, list);
         }
 
         function initNewCancerTypes() {
