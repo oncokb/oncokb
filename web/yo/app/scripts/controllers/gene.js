@@ -2682,7 +2682,6 @@ angular.module('oncokbApp')
                                 _tumorType.cancerTypes.push(cancerType);
                             }
                         });
-                        _tumorType.name.setText(newTumorTypesName);
                         _tumorType.nccn.category.setText('2A');
                         for (var i = 0; i < 4; i++) {
                             var __ti = model.create(OncoKB.TI);
@@ -2695,10 +2694,8 @@ angular.module('oncokbApp')
                             __ti.name.setText(__name);
                             _tumorType.TI.push(__ti);
                         }
-                        console.log(_tumorType);
                         mutation.tumors.push(_tumorType);
                         model.endCompoundOperation();
-                        console.log(mutation.tumors);
                         $scope.meta.newCancerTypes = [{
                             mainType: '',
                             subtype: '',

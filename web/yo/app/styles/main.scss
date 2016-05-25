@@ -686,6 +686,10 @@ h5 {
     color: grey;
     font-style: italic;
 }
+.add-tumor-type-item {
+    width: 100%;
+    margin: 10px 0;
+}
 /*** custom checkboxes ***/
 input[type=radio], input[type=checkbox] { display:none; } /* to hide the checkbox itself */
 input[type=radio] + label:before, input[type=checkbox] + label:before {
