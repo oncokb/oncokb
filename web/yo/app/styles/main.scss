@@ -533,6 +533,9 @@ h5 {
 .modify-tumor-type .chosen-container-single {
     width: 100% !important;
 }
+.add-tumor-type-item .chosen-container-single {
+    width: 30% !important;
+}
 
 //Change bootstrap default color
 .animate-show.ng-hide-add, .animate-show.ng-hide-remove {
