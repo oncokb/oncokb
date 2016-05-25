@@ -512,6 +512,18 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
+            function getOncoTreeTumorTypesByMainTypes(mainTypes) {
+                var deferred = $q.defer();
+                OncoTree.getTumorTypesByMainTypes(mainTypes)
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+
             function getOncoTreeTumorTypeByName(name, exactMatch) {
                 var deferred = $q.defer();
                 OncoTree.getTumorType('name', name, exactMatch)
@@ -585,6 +597,7 @@ angular.module('oncokbApp')
                 },
                 'getOncoTreeMainTypes': getOncoTreeMainTypes,
                 'getOncoTreeTumorTypesByMainType': getOncoTreeTumorTypesByMainType,
+                'getOncoTreeTumorTypesByMainTypes': getOncoTreeTumorTypesByMainTypes,
                 'getOncoTreeTumorTypeByName': getOncoTreeTumorTypeByName,
                 'testAccess': testAccess
             };

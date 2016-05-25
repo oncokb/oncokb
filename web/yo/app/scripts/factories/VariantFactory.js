@@ -326,28 +326,46 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
 
 angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
     'use strict';
-    
+
     function getMainType(status) {
-        return $http.get(OncoKB.config.oncoTreeLink + 'mainTypes');
+        return $http.get(OncoKB.config.oncoTreeLink + 'mainTypes?version=oncokb');
     }
 
     function getTumorTypeByMainType(mainType) {
         return $http.get(OncoKB.config.oncoTreeLink +
-            'tumorTypes/search/maintype/' + mainType + '?exactMatch=true');
+            'tumorTypes/search/maintype/' + mainType + '?exactMatch=true&version=oncokb');
     }
 
     function getTumorType(type, query, exactMatch) {
-        if(!type || !query) {
+        if (!type || !query) {
             return null;
         }
         exactMatch = _.isBoolean(exactMatch) ? true : exactMatch;
         return $http.get(OncoKB.config.oncoTreeLink +
-            'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch);
+            'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch + '&version=oncokb');
+    }
+
+    function getTumorTypesByMainTypes(mainTypes) {
+        var queries = _.map(mainTypes, function(mainType) {
+            return {
+                'type': 'maintype',
+                'query': mainType,
+                'exactMatch': true
+            }
+        });
+        return $http.post(OncoKB.config.oncoTreeLink + 'tumorTypes/search',
+            {
+                'queries': queries,
+                'version': 'oncokb'
+            }, {
+                headers: {'Content-Type': 'application/json'}
+            });
     }
 
     return {
         getMainType: getMainType,
         getTumorTypeByMainType: getTumorTypeByMainType,
-        getTumorType: getTumorType
+        getTumorType: getTumorType,
+        getTumorTypesByMainTypes: getTumorTypesByMainTypes
     };
 }]);
