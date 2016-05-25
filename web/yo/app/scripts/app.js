@@ -48,7 +48,7 @@ OncoKB.config = {
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/api/',
     // apiLink: 'http://localhost:8080/oncokb/api/',
-    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree//api/',
+    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {}
 };
 
