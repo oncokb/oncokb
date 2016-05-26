@@ -407,7 +407,7 @@
           </uib-accordion>
             <div style="width: 100%; margin: 0 5px" class="input-group input-group-sm accordionMarginTop"
                  ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
-                <h4>Add tumor type(s) or combination</h4>
+                <h4>Add tumor type(s)</h4>
                 <hr/>
                 <div class="add-tumor-type-item" ng-repeat="cancerType in meta.newCancerTypes">
                     Cancer Type: <select chosen
