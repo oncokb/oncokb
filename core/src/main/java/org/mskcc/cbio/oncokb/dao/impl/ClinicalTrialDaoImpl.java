@@ -17,19 +17,4 @@ public class ClinicalTrialDaoImpl
         List<ClinicalTrial> list = findByNamedQuery("findClinicalTrialByNctId", nciId);
         return list.isEmpty() ? null : list.get(0);
     }
-
-    @Override
-    public List<ClinicalTrial> findClinicalTrialByTumorTypeAndDrug(TumorType tumorType, Drug drug) {
-        return findByNamedQuery("findClinicalTrialByTumorTypeAndDrug", tumorType.getTumorTypeId(), drug.getDrugId());
-    }
-
-    @Override
-    public List<ClinicalTrial> findClinicalTrialByTumorType(TumorType tumorType) {
-        return findByNamedQuery("findClinicalTrialByTumorType", tumorType.getTumorTypeId());
-    }
-
-    @Override
-    public List<ClinicalTrial> findClinicalTrialByTumorTypeAndAlteration(TumorType tumorType, Alteration alteration) {
-        return findByNamedQuery("findClinicalTrialByTumorTypeAndAlteration", tumorType.getTumorTypeId(), alteration.getAlterationId());
-    }
 }

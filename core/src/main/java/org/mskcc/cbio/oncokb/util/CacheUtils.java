@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.OncoTreeType;
 
 import java.util.*;
 
@@ -28,9 +28,10 @@ public class CacheUtils {
     private static Map<String, Map<String, String>> variantCustomizedSummary = new HashMap<>();
     private static Map<String, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
     private static Map<String, List<Alteration>> alterations = new HashMap<>();
-    private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
+    private static Map<String, List<OncoTreeType>> mappedTumorTypes = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Gene> genesByHugoSymbol = new HashMap<>();
+    private static Map<String, List<OncoTreeType>> allOncoTreeItems = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Map<String, List<Evidence>>> relevantEvidences = new HashMap<>();
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
@@ -109,6 +110,14 @@ public class CacheUtils {
         }
     };
 
+    private static Observer allCancerTypesObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            allOncoTreeItems.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+            allOncoTreeItems.put("subtype", TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+        }
+    };
+
     static {
         GeneObservable.getInstance().addObserver(variantSummaryObserver);
         GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
@@ -116,6 +125,9 @@ public class CacheUtils {
         GeneObservable.getInstance().addObserver(alterationsObserver);
         GeneObservable.getInstance().addObserver(geneObserver);
         GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
+        GeneObservable.getInstance().addObserver(allCancerTypesObserver);
+        allOncoTreeItems.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+        allOncoTreeItems.put("subtype", TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
@@ -160,7 +172,7 @@ public class CacheUtils {
 
     public static Boolean containRelevantEvidences(String gene, String variant) {
         return (relevantEvidences.containsKey(gene) &&
-                relevantEvidences.get(gene).containsKey(variant)) ? true : false;
+            relevantEvidences.get(gene).containsKey(variant)) ? true : false;
     }
 
     public static void setRelevantEvidences(String gene, String variant, List<Evidence> evidences) {
@@ -180,7 +192,7 @@ public class CacheUtils {
 
     public static Boolean containVariantSummary(String gene, String variant) {
         return (variantSummary.containsKey(gene) &&
-                variantSummary.get(gene).containsKey(variant)) ? true : false;
+            variantSummary.get(gene).containsKey(variant)) ? true : false;
     }
 
     public static void setVariantSummary(String gene, String variant, String summary) {
@@ -200,7 +212,7 @@ public class CacheUtils {
 
     public static Boolean containVariantCustomizedSummary(String gene, String variant) {
         return (variantCustomizedSummary.containsKey(gene) &&
-                variantCustomizedSummary.get(gene).containsKey(variant)) ? true : false;
+            variantCustomizedSummary.get(gene).containsKey(variant)) ? true : false;
     }
 
     public static void setVariantCustomizedSummary(String gene, String variant, String summary) {
@@ -220,7 +232,7 @@ public class CacheUtils {
 
     public static Boolean containRelevantAlterations(String gene, String variant) {
         return (relevantAlterations.containsKey(gene) &&
-                relevantAlterations.get(gene).containsKey(variant)) ? true : false;
+            relevantAlterations.get(gene).containsKey(variant)) ? true : false;
     }
 
     public static void setRelevantAlterations(String gene, String variant, List<Alteration> alts) {
@@ -242,7 +254,7 @@ public class CacheUtils {
         alterations.put(gene, alts);
     }
 
-    public static List<TumorType> getMappedTumorTypes(String queryTumorType, String source) {
+    public static List<OncoTreeType> getMappedTumorTypes(String queryTumorType, String source) {
         return mappedTumorTypes.get(queryTumorType + "&" + source);
     }
 
@@ -250,8 +262,24 @@ public class CacheUtils {
         return mappedTumorTypes.containsKey(queryTumorType + "&" + source) ? true : false;
     }
 
-    public static void setMappedTumorTypes(String queryTumorType, String source, List<TumorType> tumorTypes) {
+    public static void setMappedTumorTypes(String queryTumorType, String source, List<OncoTreeType> tumorTypes) {
         mappedTumorTypes.put(queryTumorType + "&" + source, tumorTypes);
+    }
+
+    public static List<OncoTreeType> getAllCancerTypes() {
+        if (isEnabled()) {
+            return allOncoTreeItems.get("main");
+        } else {
+            return TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
+        }
+    }
+
+    public static List<OncoTreeType> getAllSubtypes() {
+        if (isEnabled()) {
+            return allOncoTreeItems.get("subtype");
+        } else {
+            return TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
+        }
     }
 
     public static void updateGene(String gene) {

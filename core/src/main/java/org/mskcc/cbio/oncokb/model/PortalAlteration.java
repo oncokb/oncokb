@@ -21,12 +21,13 @@ public class PortalAlteration {
     private String proteinChange;
     private Integer proteinStartPosition;
     private Integer proteinEndPosition;
+    private Set<Alteration> oncoKBAlterations;
     private String alterationType;
 
     public PortalAlteration() {
     }
 
-    public PortalAlteration(String cancerType, String cancerStudy, String sampleId, Gene gene, String proteinChange, Integer proteinStartPosition, Integer proteinEndPosition, String alterationType) {
+    public PortalAlteration(String cancerType, String cancerStudy, String sampleId, Gene gene, String proteinChange, Integer proteinStartPosition, Integer proteinEndPosition, Set<Alteration> oncoKBAlterations, String alterationType) {
         this.cancerType = cancerType;
         this.cancerStudy = cancerStudy;
         this.sampleId = sampleId;
@@ -34,6 +35,7 @@ public class PortalAlteration {
         this.proteinChange = proteinChange;
         this.proteinStartPosition = proteinStartPosition;
         this.proteinEndPosition = proteinEndPosition;
+        this.oncoKBAlterations = oncoKBAlterations;
         this.alterationType = alterationType;
     }
     public PortalAlteration(PortalAlteration pa) {
@@ -44,6 +46,7 @@ public class PortalAlteration {
         proteinChange = pa.proteinChange;
         proteinStartPosition = pa.proteinStartPosition;
         proteinEndPosition = pa.proteinEndPosition;
+        oncoKBAlterations = pa.oncoKBAlterations;
         alterationType = pa.alterationType;
     }
     public Integer getPortalAlterationID() {
@@ -108,6 +111,14 @@ public class PortalAlteration {
 
     public void setProteinEndPosition(Integer proteinEndPosition) {
         this.proteinEndPosition = proteinEndPosition;
+    }
+
+    public Set<Alteration> getOncoKBAlterations() {
+        return oncoKBAlterations;
+    }
+
+    public void setOncoKBAlterations(Set<Alteration> oncoKBAlterations) {
+        this.oncoKBAlterations = oncoKBAlterations;
     }
 
     public String getAlterationType() {

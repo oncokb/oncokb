@@ -15,10 +15,22 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
+        Set<String> relevantTumorTypeNames = new HashSet<>();
+        
+        for(OncoTreeType oncoTreeType : relevantTumorTypes) {
+            if(oncoTreeType.getSubtype() == null) {
+                if(oncoTreeType.getCancerType() != null) {
+                    relevantTumorTypeNames.add(oncoTreeType.getCancerType());
+                }
+            }else {
+                relevantTumorTypeNames.add(oncoTreeType.getSubtype());
+            }
+        }
+        
         if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(geneId, key)) {
             return CacheUtils.getVariantSummary(geneId, key);
         }
@@ -87,7 +99,7 @@ public class SummaryUtils {
                 }
             } else {
                 //Tumor type summary
-                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
+                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypeNames, "tumorType");
                 if (!tumorTypeSummaryEvs.isEmpty()) {
                     Evidence ev = tumorTypeSummaryEvs.get(0);
                     String tumorTypeSummary = ev.getShortDescription();
@@ -106,7 +118,7 @@ public class SummaryUtils {
                             EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
                                     EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
-                            evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypes)
+                            evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypeNames, "tumorType")
                     );
                     List<Evidence> evidences = new ArrayList<>();
                     //                if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -214,7 +226,7 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
@@ -354,7 +366,7 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
 
         queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
@@ -400,7 +412,17 @@ public class SummaryUtils {
         List<String> list = new ArrayList<String>();
 
         for (Evidence ev : evidences) {
-            String tt = ev.getTumorType().getName().toLowerCase();
+            String tt = null;
+            if(ev.getSubtype() != null) {
+                tt = ev.getSubtype().toLowerCase();
+            }else if (ev.getCancerType() != null) {
+                tt = ev.getCancerType().toLowerCase();
+            }
+            
+            if(tt == null) {
+                continue;
+            }
+            
             Map<String, Map<String, Object>> ttMap = map.get(tt);
             if (ttMap == null && !ev.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_0)) {
                 ttMap = new TreeMap<String, Map<String, Object>>();

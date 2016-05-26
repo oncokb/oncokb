@@ -13,7 +13,8 @@ import java.util.Set;
 public class Evidence implements java.io.Serializable {
     private Integer evidenceId;
     private EvidenceType evidenceType;
-    private TumorType tumorType;
+    private String cancerType;
+    private String subtype;
     private Gene gene;
     private Set<Alteration> alterations;
     private String shortDescription;
@@ -54,12 +55,20 @@ public class Evidence implements java.io.Serializable {
         this.evidenceType = evidenceType;
     }
 
-    public TumorType getTumorType() {
-        return tumorType;
+    public String getCancerType() {
+        return cancerType;
     }
 
-    public void setTumorType(TumorType tumorType) {
-        this.tumorType = tumorType;
+    public void setCancerType(String cancerType) {
+        this.cancerType = cancerType;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 
     public Gene getGene() {
@@ -199,7 +208,8 @@ public class Evidence implements java.io.Serializable {
     public Evidence(Evidence e){
             evidenceId = e.evidenceId;
             evidenceType = e.evidenceType;
-            tumorType = e.tumorType;
+            cancerType = e.cancerType;
+            subtype = e.subtype;
             gene = e.gene;
             alterations = e.alterations;
             shortDescription = e.shortDescription;

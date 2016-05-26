@@ -1,126 +1,184 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence">
-    <cache usage="nonstrict-read-write"/>
-    <id name="EvidenceId" type="java.lang.Integer">
-      <column name="evidence_id"/>
-      <generator class="identity"/>
-    </id>
-    <property column="evidence_type" name="evidenceType">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
-        <param name="type">12</param>
-        <param name="useNamed">true</param>
-      </type>
-    </property>
-    <many-to-one class="org.mskcc.cbio.oncokb.model.TumorType" fetch="join" lazy="false" name="tumorType">
-      <column length="50" name="tumor_type_id"/>
-    </many-to-one>
-    <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
-      <column name="entrez_gene_id"/>
-    </many-to-one>
-    <set lazy="false" name="alterations" table="evidence_alteration">
-      <key>
-        <column name="evidence_id" not-null="true"/>
-      </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
-        <column name="alteration_id" not-null="true"/>
-      </many-to-many>
-    </set>
-    <set lazy="false" name="treatments" table="evidence_treatment">
-      <key>
-        <column name="evidence_id" not-null="true"/>
-      </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.Treatment">
-        <column name="treatment_id" not-null="true"/>
-      </many-to-many>
-    </set>
-    <property name="knownEffect" type="string">
-      <column length="255" name="known_effect"/>
-    </property>
-    <property column="level_of_evidence" name="levelOfEvidence">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">org.mskcc.cbio.oncokb.model.LevelOfEvidence</param>
-        <param name="type">12</param>
-        <param name="useNamed">true</param>
-      </type>
-    </property>
-    <property name="shortDescription" type="string">
-      <column length="65535" name="short_description"/>
-    </property>
-    <property name="description" type="string">
-      <column length="65535" name="description"/>
-    </property>
-    <property name="status" type="string">
-      <column length="50" name="status"/>
-    </property>
-    <property name="lastEdit" type="date">
-      <column name="last_edit"/>
-    </property>
-    <set lazy="false" name="articles" table="evidence_article">
-      <key>
-        <column name="evidence_id" not-null="true"/>
-      </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.Article">
-        <column name="article_id" not-null="true"/>
-      </many-to-many>
-    </set>
-    <set lazy="false" name="nccnGuidelines" table="evidence_nccn_guideline">
-      <key>
-        <column name="evidence_id" not-null="true"/>
-      </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.NccnGuideline">
-        <column name="nccn_guideline_id" not-null="true"/>
-      </many-to-many>
-    </set>
-    <set lazy="false" name="clinicalTrials" table="evidence_clinical_trial">
-      <key>
-        <column name="evidence_id" not-null="true"/>
-      </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.ClinicalTrial">
-        <column name="trial_id" not-null="true"/>
-      </many-to-many>
-    </set>
-  </class>
-  <query name="findEvidencesByAlteration">
+    <class catalog="oncokb" name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence">
+        <cache usage="nonstrict-read-write"/>
+        <id name="EvidenceId" type="java.lang.Integer">
+            <column name="evidence_id"/>
+            <generator class="identity"/>
+        </id>
+        <property column="evidence_type" name="evidenceType">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
+                <param name="type">12</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="subtype" type="string">
+            <column length="255" name="subtype"/>
+        </property>
+        <property name="cancerType" type="string">
+            <column length="255" name="cancer_type"/>
+        </property>
+        <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
+            <column name="entrez_gene_id"/>
+        </many-to-one>
+        <set lazy="false" name="alterations" table="evidence_alteration">
+            <key>
+                <column name="evidence_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
+                <column name="alteration_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <set lazy="false" name="treatments" table="evidence_treatment">
+            <key>
+                <column name="evidence_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Treatment">
+                <column name="treatment_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <property name="knownEffect" type="string">
+            <column length="255" name="known_effect"/>
+        </property>
+        <property column="level_of_evidence" name="levelOfEvidence">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.mskcc.cbio.oncokb.model.LevelOfEvidence</param>
+                <param name="type">12</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="shortDescription" type="string">
+            <column length="65535" name="short_description"/>
+        </property>
+        <property name="description" type="string">
+            <column length="65535" name="description"/>
+        </property>
+        <property name="status" type="string">
+            <column length="50" name="status"/>
+        </property>
+        <property name="lastEdit" type="date">
+            <column name="last_edit"/>
+        </property>
+        <set lazy="false" name="articles" table="evidence_article">
+            <key>
+                <column name="evidence_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Article">
+                <column name="article_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <set lazy="false" name="nccnGuidelines" table="evidence_nccn_guideline">
+            <key>
+                <column name="evidence_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.NccnGuideline">
+                <column name="nccn_guideline_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <set lazy="false" name="clinicalTrials" table="evidence_clinical_trial">
+            <key>
+                <column name="evidence_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.ClinicalTrial">
+                <column name="trial_id" not-null="true"/>
+            </many-to-many>
+        </set>
+    </class>
+    <query name="findEvidencesByAlteration">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=?]]>
-  </query>
-  <query name="findEvidencesByAlterationAndTumorType">
-    <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.tumorType=?]]>
-  </query>
-  <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes">
-    <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.tumorType in (:tts) and  e.evidenceType in (:ets)]]>
-  </query>
-  <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence">
-    <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.tumorType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
-  </query>
-  <query name="findEvidencesByAlterationAndEvidenceType">
+    </query>
+    <query name="findEvidencesByAlterationAndTumorType">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=:alt and (e.cancerType=:tt or e.subtype=:tt)]]>
+    </query>
+    <query name="findEvidencesByAlterationAndCancerType">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.cancerType=?]]>
+    </query>
+    <query name="findEvidencesByAlterationAndSubtype">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.subtype=?]]>
+    </query>
+    <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tt)) and  e.evidenceType in (:ets)]]>
+    </query>
+    <query name="findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets)]]>
+    </query>
+    <query name="findEvidencesByAlterationsAndSubtypesAndEvidenceTypes">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets)]]>
+    </query>
+    <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tts)) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+    </query>
+    <query name="findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+    </query>
+    <query name="findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+    </query>
+    <query name="findEvidencesByAlterationAndEvidenceType">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?]]>
-  </query>
+    </query>
     <query name="findEvidencesByAlterationAndEvidenceTypeAndLevels">
         <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.levelOfEvidence=?]]>
     </query>
-  <query name="findEvidencesByAlterationAndEvidenceTypeAndTumorType">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.tumorType=?]]>
-  </query>
-  <query name="findEvidencesByGene">
+    <query name="findEvidencesByAlterationAndEvidenceTypeAndTumorType">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=:alt and e.evidenceType=:et and (e.cancerType=:tt or e.subtype=:tt)]]>
+    </query>
+    <query name="findEvidencesByAlterationAndEvidenceTypeAndCancerType">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.cancerType=?]]>
+    </query>
+    <query name="findEvidencesByAlterationAndEvidenceTypeAndSubtype">
+        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.subtype=?]]>
+    </query>
+    <query name="findEvidencesByGene">
         <![CDATA[select e from Evidence e where e.gene=?]]>
-  </query>
-  <query name="findEvidencesByGeneAndEvidenceType">
+    </query>
+    <query name="findEvidencesByGeneAndEvidenceType">
         <![CDATA[select e from Evidence e where e.gene=? and e.evidenceType=?]]>
-  </query>
-  <query name="findEvidencesByGeneAndEvidenceTypeAndTumorType">
-        <![CDATA[select e from Evidence e where e.gene=? and e.evidenceType=? and e.tumorType=?]]>
-  </query>
-  <query name="findEvidencesByTumorType">
-        <![CDATA[select e from Evidence e where e.tumorType=?]]>
-  </query>
-  <query name="findEvidencesByGeneAndTumorType">
-        <![CDATA[select e from Evidence e join e.alterations a where e.gene=? and e.tumorType=?]]>
-  </query>
-  <query name="findTumorTypesWithEvidencesForAlteration">
-        <![CDATA[select distinct e.tumorType from Evidence e join e.alterations a where a.alterationId=?]]>
-  </query>
+    </query>
+    <query name="findEvidencesByGeneAndEvidenceTypeAndTumorType">
+        <![CDATA[select e from Evidence e where e.gene=:g and e.evidenceType=:et and (e.cancerType=:tt or e.subtype=:tt)]]>
+    </query>
+    <query name="findEvidencesByGeneAndEvidenceTypeAndCancerType">
+        <![CDATA[select e from Evidence e where e.gene=? and e.evidenceType=? and e.cancerType=?]]>
+    </query>
+    <query name="findEvidencesByGeneAndEvidenceTypeAndSubtype">
+        <![CDATA[select e from Evidence e where e.gene=? and e.evidenceType=? and e.subtype=?]]>
+    </query>
+    <query name="findEvidencesByTumorType">
+        <![CDATA[select e from Evidence e where (e.cancerType=:tt or e.subtype=:tt)]]>
+    </query>
+    <query name="findEvidencesByCancerType">
+        <![CDATA[select e from Evidence e where e.cancerType=?]]>
+    </query>
+    <query name="findEvidencesBySubtype">
+        <![CDATA[select e from Evidence e where e.subtype=?]]>
+    </query>
+    <query name="findEvidencesByGeneAndTumorType">
+        <![CDATA[select e from Evidence e join e.alterations a where e.gene=:g and (e.cancerType=:tt or e.subtype=:tt)]]>
+    </query>
+    <query name="findEvidencesByGeneAndCancerType">
+        <![CDATA[select e from Evidence e join e.alterations a where e.gene=? and e.cancerType=?]]>
+    </query>
+    <query name="findEvidencesByGeneAndSubtype">
+        <![CDATA[select e from Evidence e join e.alterations a where e.gene=? and e.subtype=?]]>
+    </query>
+    <query name="findTumorTypesWithEvidencesForAlteration">
+        <![CDATA[select distinct (e.cancerType, e.subtype)from Evidence e join e.alterations a where a.alterationId=?]]>
+    </query>
+    <query name="findCancerTypesWithEvidencesForAlteration">
+        <![CDATA[select distinct e.cancerType from Evidence e join e.alterations a where a.alterationId=?]]>
+    </query>
+    <query name="findSubtypesWithEvidencesForAlteration">
+        <![CDATA[select distinct e.subtype from Evidence e join e.alterations a where a.alterationId=?]]>
+    </query>
+    <query name="findAllCancerTypes">
+        <![CDATA[select distinct e.cancerType from Evidence e]]>
+    </query>
+    <query name="findAllSubtypes">
+        <![CDATA[select distinct e.subtype from Evidence e]]>
+    </query>
 </hibernate-mapping>

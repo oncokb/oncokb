@@ -43,7 +43,7 @@ public final class VariantAnnotationXML {
             }
         }
 
-        Set<TumorType> relevantTumorTypes = TumorTypeUtils.fromQuestTumorType(tumorType);
+        Set<OncoTreeType> relevantTumorTypes = new HashSet<OncoTreeType>(TumorTypeUtils.getTumorTypes(tumorType, "quest"));
 
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         
@@ -56,9 +56,16 @@ public final class VariantAnnotationXML {
         //List<Drug> drugs = evidenceBo.findDrugsByAlterations(alterations);
 
         // find tumor types
-        TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
-        List<TumorType> tumorTypes = new LinkedList<TumorType>(tumorTypeBo.findTumorTypesWithEvidencesForAlterations(alterations));
-        sortTumorType(tumorTypes, tumorType);
+        List<Evidence> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlteration(alterations);
+        List<String> tumorTypes = new ArrayList<>();
+        
+        for(Evidence evidence : tumorTypesEvidence) {
+            if(evidence.getCancerType() != null) {
+                tumorTypes.add(evidence.getCancerType());
+            }
+        }
+
+//        sortTumorType(tumorTypes, tumorType);
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
 
         // summary
@@ -109,15 +116,15 @@ public final class VariantAnnotationXML {
             sb.append("</variant_effect>\n");
         }
 
-        for (TumorType tt : tumorTypes) {
+        for (String tt : tumorTypes) {
             boolean isRelevant = relevantTumorTypes.contains(tt);
 
             StringBuilder sbTumorType = new StringBuilder();
-            sbTumorType.append("<cancer_type type=\"").append(tt.getName()).append("\" relevant_to_patient_disease=\"").append(isRelevant?"Yes":"No").append("\">\n");
+            sbTumorType.append("<cancer_type type=\"").append(tt).append("\" relevant_to_patient_disease=\"").append(isRelevant?"Yes":"No").append("\">\n");
             int nEmp = sbTumorType.length();
 
             // find prevalence evidence blob
-            Set<Evidence> prevalanceEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(tt)));
+            Set<Evidence> prevalanceEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(tt), "mainType"));
             if (!prevalanceEbs.isEmpty()) {
                 sbTumorType.append("    <prevalence>\n");
                 sbTumorType.append("        <description>\n");
@@ -140,7 +147,7 @@ public final class VariantAnnotationXML {
 
 
             // find prognostic implication evidence blob
-            Set<Evidence> prognosticEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(tt)));
+            Set<Evidence> prognosticEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(tt), "mainType"));
             if (!prognosticEbs.isEmpty()) {
                 sbTumorType.append("    <prognostic_implications>\n");
                 sbTumorType.append("        <description>\n");
@@ -162,8 +169,8 @@ public final class VariantAnnotationXML {
             }
 
             // STANDARD_THERAPEUTIC_IMPLICATIONS
-            List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt));
-            List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt));
+            List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt), "mainType");
+            List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt), "mainType");
 
             //Remove level_0
             stdImpEbsSensitivity = filterLevelZeroEvidence(stdImpEbsSensitivity);
@@ -174,7 +181,7 @@ public final class VariantAnnotationXML {
             exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ");
 
             // NCCN_GUIDELINES
-            List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.NCCN_GUIDELINES), Collections.singleton(tt));
+            List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.NCCN_GUIDELINES), Collections.singleton(tt), "mainType");
             Set<NccnGuideline> nccnGuidelines = new LinkedHashSet<NccnGuideline>();
             for (Evidence ev : nccnEvs) {
                 nccnGuidelines.addAll(ev.getNccnGuidelines());
@@ -211,8 +218,8 @@ public final class VariantAnnotationXML {
             }
 
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
-            List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(tt));
-            List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(tt));
+            List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(tt), "mainType");
+            List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(tt), "mainType");
 
             //Remove level_R3
             invImpEbsResisitance = filterResistanceEvidence(invImpEbsResisitance);
@@ -233,7 +240,7 @@ public final class VariantAnnotationXML {
 //                    }
 //                }
 
-                List<TumorType> tumorTypesForTrials;
+                List<String> tumorTypesForTrials;
                 if (isRelevant) { // if relevant to pateint disease, find trials that match the tumor type
                     tumorTypesForTrials = Collections.singletonList(tt);
                 } else if (relevantTumorTypes.size()==1) { // if no relevant disease, find trials that match the tumor type
@@ -243,7 +250,7 @@ public final class VariantAnnotationXML {
                 }
 
                 if (tumorTypesForTrials!=null) {
-                    List<Evidence> clinicalTrialEvidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tt));
+                    List<Evidence> clinicalTrialEvidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tt), "mainType");
                     List<ClinicalTrial> clinicalTrials = new LinkedList<ClinicalTrial>();
                     for (Evidence ev : clinicalTrialEvidences) {
                         clinicalTrials.addAll(ev.getClinicalTrials());
@@ -287,7 +294,7 @@ public final class VariantAnnotationXML {
         return resistanceEvidences;
     }
 
-    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -441,17 +448,12 @@ public final class VariantAnnotationXML {
             sb.append("</intervention>\n");
         }
 
-        for (TumorType tumorType : trial.getTumorTypes()) {
-            sb.append(indent).append("    <condition>");
-            sb.append(StringEscapeUtils.escapeXml(tumorType.getName()));
-            sb.append("</condition>\n");
-        }
-
         sb.append(indent).append("</clinical_trial>");
     }
 
-    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
+        List<OncoTreeType> evidenceOncoTreeTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(evidence.getCancerType()));
 
         for (Treatment treatment : evidence.getTreatments()) {
             sb.append(indent).append("<treatment>\n");
@@ -461,7 +463,7 @@ public final class VariantAnnotationXML {
 
         if (levelOfEvidence!=null) {
             if (levelOfEvidence==LevelOfEvidence.LEVEL_1 &&
-                    !relevantTumorTypes.contains(evidence.getTumorType())) {
+                    !relevantTumorTypes.contains(evidenceOncoTreeTypes)) {
                 levelOfEvidence = LevelOfEvidence.LEVEL_2B;
             }
             sb.append(indent).append("<level_of_evidence_for_patient_indication>\n");
@@ -605,12 +607,12 @@ public final class VariantAnnotationXML {
      * @param patientTumorType
      * @return the number of relevant tumor types
      */
-    private static void sortTumorType(List<TumorType> tumorTypes, String patientTumorType) {
-        Set<TumorType> relevantTumorTypes = TumorTypeUtils.fromQuestTumorType(patientTumorType);
-//        relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
-        tumorTypes.removeAll(relevantTumorTypes); // other tumor types
-        tumorTypes.addAll(0, relevantTumorTypes);
-    }
+//    private static void sortTumorType(List<String> tumorTypes, String patientTumorType) {
+//        List<OncoTreeType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(patientTumorType, "quest");
+////        relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
+//        tumorTypes.removeAll(relevantTumorTypes); // other tumor types
+//        tumorTypes.addAll(0, relevantTumorTypes);
+//    }
 
 //    private static Set<Drug> allTargetedDrugs = new HashSet<Drug>();
 //    static {

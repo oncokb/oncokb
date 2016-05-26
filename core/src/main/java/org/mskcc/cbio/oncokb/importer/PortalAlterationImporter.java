@@ -116,21 +116,8 @@ public class PortalAlterationImporter {
                     Integer entrez_gene_id = jObject.getInt("entrez_gene_id");
                     String sampleId = jObject.getString("sample_id");
                     Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
-                    
-                    portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);
-                    portalAlterationBo.save(portalAlteration);
-                    
-                    Set<PortalAlteration> portalAlterations = new HashSet<>();
-                                         
                     Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
-                    for(Alteration oncoKBAlteration : oncoKBAlterations){
-                        portalAlterations = oncoKBAlteration.getPortalAlterations();
-                        portalAlterations.add(portalAlteration);
-                        
-                        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-                        oncoKBAlteration.setPortalAlterations(portalAlterations);
-                        alterationBo.update(oncoKBAlteration);
-                    }
+                    portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, oncoKBAlterations, mutation_type);
                     
                     //remove saved sample from sequenced sample list 
                     for (int n = 0; n < sequencedSamples.length(); n++) {
@@ -144,7 +131,7 @@ public class PortalAlterationImporter {
                 if(sequencedSamples.length() > 0)
                 {
                     for (int p = 0; p < sequencedSamples.length(); p++) {
-                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null);
+                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null, null);
                         portalAlterationBo.save(portalAlteration);
                     }
                 }

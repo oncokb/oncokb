@@ -99,7 +99,8 @@ public class AlterationActivityEvidenceImporter {
             evidence.setEvidenceType(evidenceType);
             evidence.setGene(gene);
             evidence.setAlterations(Collections.singleton(alteration));
-            evidence.setTumorType(null);
+            evidence.setCancerType(null);
+            evidence.setSubtype(null);
             evidence.setKnownEffect(effect);
             evidence.setArticles(docs);
             
