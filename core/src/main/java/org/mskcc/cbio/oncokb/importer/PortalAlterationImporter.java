@@ -81,8 +81,7 @@ public class PortalAlterationImporter {
             genes[i] = jObject.get("hugoSymbol").toString();
         }
         String joinedGenes = StringUtils.join(genes, ",");
-        String studies[] = {"skcm_tcga", "lusc_tcga", "luad_tcga", "coadread_tcga", "brca_tcga", "gbm_tcga", "hnsc_tcga", "kirc_tcga", "ov_tcga", "blca_tcga", "lgg_tcga", "cesc_tcga", "stad_tcga", "kirp_tcga", "kich_tcga", "lihc_tcga", "prad_tcga", "sarc_tcga", "ucec_tcga", "thca_tcga", "tgct_tcga"};
-
+        String studies[] = {"blca_tcga_pub", "brca_tcga_pub2015", "cesc_tcga", "coadread_tcga_pub", "hnsc_tcga_pub", "kich_tcga_pub", "kirc_tcga_pub", "kirp_tcga", "lihc_tcga", "luad_tcga_pub", "lusc_tcga_pub", "lgggbm_tcga_pub", "ov_tcga_pub", "thca_tcga_pub", "prad_tcga_pub", "sarc_tcga", "skcm_tcga", "stad_tcga_pub", "tgct_tcga", "ucec_tcga_pub"};
         String joinedStudies = StringUtils.join(studies, ",");
         String studyUrl = "http://www.cbioportal.org/api/studies?study_ids=" + joinedStudies;
         String studyResult = FileUtils.readRemote(studyUrl);
