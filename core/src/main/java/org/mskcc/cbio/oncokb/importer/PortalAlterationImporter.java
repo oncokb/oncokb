@@ -59,10 +59,23 @@ public class PortalAlterationImporter {
         mapper.put("splicing", new String[]{"splice_region_variant"});
         mapper.put("Translation_Start_Site", new String[]{"start_lost"});
         mapper.put("vIII deletion", new String[]{"any"});
+        mapper.put("exon14skip", new String[]{"inframe_deletion"});
+        mapper.put("frameshift", new String[]{"frameshift_variant"});
+        mapper.put("nonframeshift insertion", new String[]{"frameshift_variant", "inframe_deletion", "inframe_insertion"});
+        mapper.put("nonframeshift_deletion", new String[]{"frameshift_variant", "inframe_deletion", "inframe_insertion"});
+        mapper.put("nonframeshift_insertion", new String[]{"frameshift_variant", "inframe_deletion", "inframe_insertion"});
+        mapper.put("Nonsense", new String[]{"stop_gained"});
+        mapper.put("splice", new String[]{"splice_region_variant"});
+        mapper.put("Splice_Site_Indel", new String[]{"splice_region_variant"});
 
         String[] consequences = mapper.get(mutation_type);
-        for (String consequence : consequences) {
-            alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
+        
+        if(consequences == null) {
+            System.out.println("No mapping for " + mutation_type);
+        }else {
+            for (String consequence : consequences) {
+                alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
+            }
         }
 
         return alterations;
@@ -81,7 +94,7 @@ public class PortalAlterationImporter {
             genes[i] = jObject.get("hugoSymbol").toString();
         }
         String joinedGenes = StringUtils.join(genes, ",");
-        String studies[] = {"blca_tcga_pub", "brca_tcga_pub2015", "cesc_tcga", "coadread_tcga_pub", "hnsc_tcga_pub", "kich_tcga_pub", "kirc_tcga_pub", "kirp_tcga", "lihc_tcga", "luad_tcga_pub", "lusc_tcga_pub", "lgggbm_tcga_pub", "ov_tcga_pub", "thca_tcga_pub", "prad_tcga_pub", "sarc_tcga", "skcm_tcga", "stad_tcga_pub", "tgct_tcga", "ucec_tcga_pub"};
+        String studies[] = {"lgggbm_tcga_pub"};
         String joinedStudies = StringUtils.join(studies, ",");
         String studyUrl = "http://www.cbioportal.org/api/studies?study_ids=" + joinedStudies;
         String studyResult = FileUtils.readRemote(studyUrl);
@@ -98,57 +111,60 @@ public class PortalAlterationImporter {
                 String sequencedSamplesUrl = "http://www.cbioportal.org/api/samplelists?sample_list_ids=" + cancerStudy + "_sequenced";
                 String sequencedSamplesResult = FileUtils.readRemote(sequencedSamplesUrl);
                 JSONArray sequencedSamplesJSONResult = new JSONArray(sequencedSamplesResult);
-                JSONArray sequencedSamples = (JSONArray) sequencedSamplesJSONResult.getJSONObject(0).get("sample_ids");
+                
+                if(sequencedSamplesJSONResult != null && sequencedSamplesJSONResult.length() > 0) {
+                    JSONArray sequencedSamples = (JSONArray) sequencedSamplesJSONResult.getJSONObject(0).get("sample_ids");
 
-                String genetic_profile_id = cancerStudy + "_mutations";
-                String sample_list_id = cancerStudy + "_sequenced";
-                String profileDataUrl = "http://www.cbioportal.org/api/geneticprofiledata?genetic_profile_ids=" + genetic_profile_id + "&genes=" + joinedGenes + "&sample_list_id=" + sample_list_id;
-                String alterationResult = FileUtils.readRemote(profileDataUrl);
-                JSONArray alterationJSONResult = new JSONArray(alterationResult);
+                    String genetic_profile_id = cancerStudy + "_mutations";
+                    String sample_list_id = cancerStudy + "_sequenced";
+                    String profileDataUrl = "http://www.cbioportal.org/api/geneticprofiledata?genetic_profile_ids=" + genetic_profile_id + "&genes=" + joinedGenes + "&sample_list_id=" + sample_list_id;
+                    String alterationResult = FileUtils.readRemote(profileDataUrl);
+                    JSONArray alterationJSONResult = new JSONArray(alterationResult);
 
-                for (int m = 0; m < alterationJSONResult.length(); m++) {
-                    jObject = alterationJSONResult.getJSONObject(m);
-                    String proteinChange = jObject.getString("amino_acid_change");
-                    Integer proteinStartPosition = jObject.getInt("protein_start_position");
-                    Integer proteinEndPosition = jObject.getInt("protein_end_position");
-                    String mutation_type = jObject.getString("mutation_type");
-                    String hugo_gene_symbol = jObject.getString("hugo_gene_symbol");
-                    Integer entrez_gene_id = jObject.getInt("entrez_gene_id");
-                    String sampleId = jObject.getString("sample_id");
-                    Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
-                    
-                    portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);
-                    portalAlterationBo.save(portalAlteration);
-                    
-                    Set<PortalAlteration> portalAlterations = new HashSet<>();
-                                         
-                    Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
-                    for(Alteration oncoKBAlteration : oncoKBAlterations){
-                        portalAlterations = oncoKBAlteration.getPortalAlterations();
-                        portalAlterations.add(portalAlteration);
-                        
-                        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-                        oncoKBAlteration.setPortalAlterations(portalAlterations);
-                        alterationBo.update(oncoKBAlteration);
-                    }
-                    
-                    //remove saved sample from sequenced sample list 
-                    for (int n = 0; n < sequencedSamples.length(); n++) {
-                        if (sequencedSamples.get(n).equals(sampleId)) {
-                            sequencedSamples.remove(n);
-                            break;
+                    for (int m = 0; m < alterationJSONResult.length(); m++) {
+                        jObject = alterationJSONResult.getJSONObject(m);
+                        String proteinChange = jObject.getString("amino_acid_change");
+                        Integer proteinStartPosition = jObject.getInt("protein_start_position");
+                        Integer proteinEndPosition = jObject.getInt("protein_end_position");
+                        String mutation_type = jObject.getString("mutation_type");
+                        String hugo_gene_symbol = jObject.getString("hugo_gene_symbol");
+                        Integer entrez_gene_id = jObject.getInt("entrez_gene_id");
+                        String sampleId = jObject.getString("sample_id");
+                        Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
+
+                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);
+                        portalAlterationBo.save(portalAlteration);
+
+                        Set<PortalAlteration> portalAlterations = new HashSet<>();
+
+                        Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
+                        for (Alteration oncoKBAlteration : oncoKBAlterations) {
+                            portalAlterations = oncoKBAlteration.getPortalAlterations();
+                            portalAlterations.add(portalAlteration);
+
+                            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+                            oncoKBAlteration.setPortalAlterations(portalAlterations);
+                            alterationBo.update(oncoKBAlteration);
+                        }
+
+                        //remove saved sample from sequenced sample list 
+                        for (int n = 0; n < sequencedSamples.length(); n++) {
+                            if (sequencedSamples.get(n).equals(sampleId)) {
+                                sequencedSamples.remove(n);
+                                break;
+                            }
                         }
                     }
-                }
-                //save samples that don't have mutations
-                if(sequencedSamples.length() > 0)
-                {
-                    for (int p = 0; p < sequencedSamples.length(); p++) {
-                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null);
-                        portalAlterationBo.save(portalAlteration);
+                    //save samples that don't have mutations
+                    if (sequencedSamples.length() > 0) {
+                        for (int p = 0; p < sequencedSamples.length(); p++) {
+                            portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null);
+                            portalAlterationBo.save(portalAlteration);
+                        }
                     }
+                }else {
+                    System.out.println("\tThe study doesnot have any sequenced samples.");
                 }
-                
                 
                 DecimalFormat myFormatter = new DecimalFormat("##.##");
                 String output = myFormatter.format(100 * (j + 1) / studyJSONResult.length());
