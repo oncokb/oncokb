@@ -89,12 +89,14 @@ public class NumberUtils {
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
         Map<LevelOfEvidence, Set<Gene>> genes = new HashMap<>();
         for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
-            LevelOfEvidence levelOfEvidence = LevelUtils.getHighestLevelFromEvidence(entry.getValue());
+            Set<LevelOfEvidence> levelsOfEvidence = LevelUtils.getLevelsFromEvidence(entry.getValue());
 
-            if (!genes.containsKey(levelOfEvidence)) {
-                genes.put(levelOfEvidence, new HashSet<Gene>());
+            for(LevelOfEvidence levelOfEvidence : levelsOfEvidence) {
+                if (!genes.containsKey(levelOfEvidence)) {
+                    genes.put(levelOfEvidence, new HashSet<Gene>());
+                }
+                genes.get(levelOfEvidence).add(entry.getKey());
             }
-            genes.get(levelOfEvidence).add(entry.getKey());
         }
         return genes;
     }
@@ -106,9 +108,9 @@ public class NumberUtils {
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
         Map<LevelOfEvidence, Set<Gene>> genes = new HashMap<>();
         for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
-            LevelOfEvidence levelOfEvidence = LevelUtils.getHighestLevelFromEvidence(entry.getValue());
+            Set<LevelOfEvidence> levelsOfEvidence = LevelUtils.getLevelsFromEvidenceByLevels(entry.getValue(), levels);
 
-            if (levels.contains(levelOfEvidence)) {
+            for(LevelOfEvidence levelOfEvidence : levelsOfEvidence) {
                 if (!genes.containsKey(levelOfEvidence)) {
                     genes.put(levelOfEvidence, new HashSet<Gene>());
                 }

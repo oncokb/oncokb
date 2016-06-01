@@ -60,13 +60,39 @@ public class LevelUtils {
         return null;
     }
 
+    public static Set<LevelOfEvidence> getLevelsFromEvidence(Set<Evidence> evidences) {
+        Set<LevelOfEvidence> levels = new HashSet<>();
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                LevelOfEvidence level = evidence.getLevelOfEvidence();
+                if (!levels.contains(level)) {
+                    levels.add(level);
+                }
+            }
+
+        }
+        return levels;
+    }
+
+    public static Set<LevelOfEvidence> getLevelsFromEvidenceByLevels(Set<Evidence> evidences, Set<LevelOfEvidence> levels) {
+        Set<LevelOfEvidence> result = new HashSet<>();
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                LevelOfEvidence level = evidence.getLevelOfEvidence();
+                if (levels.contains(level) && !result.contains(level)) {
+                    result.add(level);
+                }
+            }
+
+        }
+        return result;
+    }
+    
     public static Set<LevelOfEvidence> getPublicLevels() {
         return new HashSet<LevelOfEvidence>() {{
             add(LevelOfEvidence.LEVEL_1);
             add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_2B);
             add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_3B);
         }};
     }
 }
