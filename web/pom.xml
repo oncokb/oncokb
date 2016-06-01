@@ -220,52 +220,52 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.github.trecloux</groupId>
-                <artifactId>yeoman-maven-plugin</artifactId>
-                <version>0.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>yo/dist</directory>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>yo/dist</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>yo/.tmp</directory>
-                        </fileset>
+            <!--<plugin>-->
+                <!--<groupId>com.github.trecloux</groupId>-->
+                <!--<artifactId>yeoman-maven-plugin</artifactId>-->
+                <!--<version>0.4</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<goals>-->
+                            <!--<goal>build</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<skipTests>true</skipTests>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+                <!--<artifactId>maven-war-plugin</artifactId>-->
+                <!--<version>2.3</version>-->
+                <!--<configuration>-->
+                    <!--<webResources>-->
+                        <!--<resource>-->
+                            <!--<directory>yo/dist</directory>-->
+                        <!--</resource>-->
+                    <!--</webResources>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+                <!--<artifactId>maven-clean-plugin</artifactId>-->
+                <!--<version>2.5</version>-->
+                <!--<configuration>-->
+                    <!--<filesets>-->
                         <!--<fileset>-->
-                        <!--<directory>yo/app/components</directory>-->
+                            <!--<directory>yo/dist</directory>-->
                         <!--</fileset>-->
                         <!--<fileset>-->
-                        <!--<directory>yo/node_modules</directory>-->
+                            <!--<directory>yo/.tmp</directory>-->
                         <!--</fileset>-->
-                    </filesets>
-                </configuration>
-            </plugin>
+                        <!--&lt;!&ndash;<fileset>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<directory>yo/app/components</directory>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</fileset>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<fileset>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<directory>yo/node_modules</directory>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</fileset>&ndash;&gt;-->
+                    <!--</filesets>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
     <reporting>

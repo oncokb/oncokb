@@ -3,10 +3,7 @@ package org.mskcc.cbio.oncokb.api;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.model.GeneNumber;
-import org.mskcc.cbio.oncokb.model.LevelNumber;
-import org.mskcc.cbio.oncokb.model.MainNumber;
-import org.mskcc.cbio.oncokb.model.RespMeta;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGene;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGenes;
 import org.mskcc.cbio.oncokb.response.ApiNumbersLeves;
@@ -19,9 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -78,7 +73,15 @@ public class NumbersApi {
 
         ApiNumbersGenes apiNumbersGenes = new ApiNumbersGenes();
 
-        Set<GeneNumber> genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
+        Set<GeneNumber> genes = new HashSet<>();
+
+        if (CacheUtils.getNumbers("genes") == null) {
+            genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
+            CacheUtils.setNumbers("genes", genes);
+        } else {
+            genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
+        }
+        
         oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
         apiNumbersGenes.setData(genes);
 
@@ -100,12 +103,21 @@ public class NumbersApi {
         throws NotFoundException {
 
         ApiNumbersMain apiNumbersMain = new ApiNumbersMain();
-
         MainNumber mainNumber = new MainNumber();
-        mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
-        mainNumber.setAlteration(ApplicationContextSingleton.getAlterationBo().countAll());
-        mainNumber.setTumorType(ApplicationContextSingleton.getTumorTypeBo().countAll());
-        mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
+
+        if (CacheUtils.getNumbers("main") == null) {
+            mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
+
+            List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
+            Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
+
+            mainNumber.setAlteration(excludeVUS.size());
+            mainNumber.setTumorType(ApplicationContextSingleton.getTumorTypeBo().countAll());
+            mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
+            CacheUtils.setNumbers("main", mainNumber);
+        } else {
+            mainNumber = (MainNumber) CacheUtils.getNumbers("main");
+        }
         apiNumbersMain.setData(mainNumber);
 
         RespMeta meta = new RespMeta();
@@ -125,8 +137,15 @@ public class NumbersApi {
         throws NotFoundException {
         
         ApiNumbersLeves apiNumbersGenes = new ApiNumbersLeves();
+        Set<LevelNumber> genes = new HashSet<>();
 
-        Set<LevelNumber> genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
+        if (CacheUtils.getNumbers("levels") == null) {
+            genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
+            CacheUtils.setNumbers("levels", genes);
+        } else {
+            genes = (Set<LevelNumber>) CacheUtils.getNumbers("levels");
+        }
+        
         apiNumbersGenes.setData(genes);
 
         RespMeta meta = new RespMeta();

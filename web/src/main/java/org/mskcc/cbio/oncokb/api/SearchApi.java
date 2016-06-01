@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 
+import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
@@ -124,6 +125,7 @@ public class SearchApi {
             if (gene != null) {
                 Long oldTime = new Date().getTime();
                 Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
+                alterations = AlterationUtils.excludeVUS(gene, alterations);
                 oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
 
                 Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
@@ -146,7 +148,9 @@ public class SearchApi {
 
                 for (Evidence evidence : geneEvidences.get(gene)) {
                     for (Alteration alteration : evidence.getAlterations()) {
-                        evidences.get(alteration).get(evidence.getEvidenceType()).add(evidence);
+                        if(evidences.containsKey(alteration)) {
+                            evidences.get(alteration).get(evidence.getEvidenceType()).add(evidence);
+                        }
                     }
                 }
                 oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Seperate evidences.");
@@ -192,6 +196,7 @@ public class SearchApi {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
             if (gene != null) {
                 Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
+                alterations = AlterationUtils.excludeVUS(gene, alterations);
                 Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                     add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
                     add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
@@ -209,11 +214,13 @@ public class SearchApi {
                 for (Evidence evidence : geneEvidences.get(gene)) {
                     TumorType tumorType = evidence.getTumorType();
                     for (Alteration alteration : evidence.getAlterations()) {
-                        if (!evidences.get(alteration).containsKey(tumorType)) {
-                            evidences.get(alteration).put(tumorType, new HashSet<Evidence>());
-                        }
-                        if (publicLevels.contains(evidence.getLevelOfEvidence())) {
-                            evidences.get(alteration).get(tumorType).add(evidence);
+                        if(evidences.containsKey(alteration)) {
+                            if (!evidences.get(alteration).containsKey(tumorType)) {
+                                evidences.get(alteration).put(tumorType, new HashSet<Evidence>());
+                            }
+                            if (publicLevels.contains(evidence.getLevelOfEvidence())) {
+                                evidences.get(alteration).get(tumorType).add(evidence);
+                            }
                         }
                     }
                 }

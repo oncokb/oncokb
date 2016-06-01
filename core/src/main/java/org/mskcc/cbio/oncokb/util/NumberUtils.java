@@ -24,7 +24,9 @@ public class NumberUtils {
             LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(pair.getValue());
             geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
 
-            geneNumber.setAlteration(AlterationUtils.getAllAlterations(pair.getKey()).size());
+            List<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
+            Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new HashSet<Alteration>(alterations));
+            geneNumber.setAlteration(excludeVUS.size());
             geneNumbers.add(geneNumber);
         }
         return geneNumbers;
@@ -48,7 +50,9 @@ public class NumberUtils {
             LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), levels);
             geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
 
-            geneNumber.setAlteration(AlterationUtils.getAllAlterations(pair.getKey()).size());
+            List<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
+            Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new HashSet<Alteration>(alterations));
+            geneNumber.setAlteration(excludeVUS.size());
             geneNumbers.add(geneNumber);
         }
         return geneNumbers;

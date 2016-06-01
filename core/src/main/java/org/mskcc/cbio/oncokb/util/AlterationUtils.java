@@ -11,10 +11,7 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -251,6 +248,48 @@ public final class AlterationUtils {
         } else {
             return alterationBo.findAlterationsByGene(Collections.singleton(gene));
         }
+    }
+    
+    public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
+        Set<Alteration> alterations = new HashSet<>();
+        
+        for(Evidence evidence : evidences) {
+            if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
+                alterations.addAll(evidence.getAlterations());
+            }
+        }
+        
+        return alterations;
+    }
+
+    public static Set<Alteration> excludeVUS(Set<Alteration> alterations) {
+        Set<Alteration> result = new HashSet<>();
+        Set<Alteration> VUS = new HashSet<>();
+        Set<Gene> allGenes = CacheUtils.getAllGenes();
+        for(Gene gene : allGenes) {
+            VUS.addAll(CacheUtils.getVUS(gene));
+        }
+        
+        for(Alteration alteration : alterations) {
+            if(!VUS.contains(alteration)) {
+                result.add(alteration);
+            }
+        }
+
+        return result;
+    }
+    
+    public static Set<Alteration> excludeVUS(Gene gene, Set<Alteration> alterations) {
+        Set<Alteration> result = new HashSet<>();
+        Set<Alteration> VUS = CacheUtils.getVUS(gene);
+        
+        for(Alteration alteration : alterations) {
+            if(!VUS.contains(alteration)) {
+                result.add(alteration);
+            }
+        }
+        
+        return result;
     }
 
     public static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, List<Alteration> fullAlterations) {

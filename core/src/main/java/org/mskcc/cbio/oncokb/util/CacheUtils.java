@@ -31,6 +31,8 @@ public class CacheUtils {
     private static Map<String, Gene> genesByHugoSymbol = new HashMap<>();
     private static Map<String, Map<String, List<Evidence>>> relevantEvidences = new HashMap<>();
     private static Set<Gene> genes = new HashSet<>();
+    private static Map<Gene, Set<Alteration>> VUS = new HashMap<>();
+    private static Map<String, Object> numbers = new HashMap<>();
     private static Map<Gene, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
@@ -66,6 +68,28 @@ public class CacheUtils {
                 relevantAlterations.remove(operation.get("val"));
             } else if (operation.get("cmd") == "reset") {
                 relevantAlterations.clear();
+            }
+        }
+    };
+
+    private static Observer numbersObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            Map<String, String> operation = (Map<String, String>) arg;
+            numbers.clear();
+        }
+    };
+
+    private static Observer VUSObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            Map<String, String> operation = (Map<String, String>) arg;
+            Gene gene = GeneUtils.getGeneByHugoSymbol(operation.get("val"));
+            if (operation.get("cmd") == "update" && gene != null) {
+                VUS.remove(gene);
+                VUS.put(gene, AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene)));
+            } else if (operation.get("cmd") == "reset") {
+                VUS.clear();
             }
         }
     };
@@ -122,7 +146,11 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                evidences.remove(GeneUtils.getGeneByHugoSymbol(operation.get("val")));
+                Gene gene = GeneUtils.getGeneByHugoSymbol(operation.get("val"));
+                if(gene != null) {
+                    evidences.remove(gene);
+                    evidences.put(gene, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGene(Collections.singleton(gene))));
+                }
             } else if (operation.get("cmd") == "reset") {
                 evidences.clear();
                 evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
@@ -140,12 +168,19 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
             GeneObservable.getInstance().addObserver(genesObserver);
             GeneObservable.getInstance().addObserver(evidencesObserver);
+            GeneObservable.getInstance().addObserver(VUSObserver);
+            GeneObservable.getInstance().addObserver(numbersObserver);
 
             Long oldTime = new Date().getTime();
             genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
             oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
             evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
             oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
+            for(Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+                setVUS(entry.getKey(), entry.getValue());
+            }
+            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all VUS");
+
         }catch (Exception e) {
             System.out.println(e);
         }
@@ -196,6 +231,29 @@ public class CacheUtils {
             relevantEvidences.get(gene).containsKey(variant)) ? true : false;
     }
 
+    public static void setVUS(Gene gene, Set<Evidence> evidences) {
+        if (!VUS.containsKey(gene)) {
+            VUS.put(gene, new HashSet<Alteration>());
+        }
+        VUS.put(gene, AlterationUtils.findVUSFromEvidences(evidences));
+    }
+
+    public static Set<Alteration> getVUS(Gene gene) {
+        if (VUS.containsKey(gene)) {
+            return VUS.get(gene);
+        } else {
+            return null;
+        }
+    }
+    
+    public static void setNumbers(String type, Object number) {
+        numbers.put(type, number);
+    }
+
+    public static Object getNumbers(String type) {
+        return numbers.get(type);
+    }
+    
     public static void setRelevantEvidences(String gene, String variant, List<Evidence> evidences) {
         if (!relevantEvidences.containsKey(gene)) {
             relevantEvidences.put(gene, new HashMap<String, List<Evidence>>());
