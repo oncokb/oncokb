@@ -21,9 +21,7 @@ import java.util.regex.Pattern;
 public final class AlterationUtils {
     private static List<String> oncogenicList = Arrays.asList(new String[]{"", "-1", "0", "2", "1"});
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-    private final static String[] generalAlts = {"activating mutations", "inactivating mutation", "all mutations", "wildtype"};
-    private final static Set<String> generalAlterations = new HashSet<>(Arrays.asList(generalAlts));
-    
+
     private AlterationUtils() {
         throw new AssertionError();
     }
@@ -291,17 +289,6 @@ public final class AlterationUtils {
             }
         }
         
-        return result;
-    }
-    
-    public static Set<Alteration> excludeGeneralAlterations(Set<Alteration> alterations) {
-        Set<Alteration> result = new HashSet<>();
-        for(Alteration alteration : alterations) {
-            String name = alteration.getAlteration().toLowerCase();
-            if(name != null && !generalAlterations.contains(name)) {
-                result.add(alteration);   
-            }
-        }
         return result;
     }
 
