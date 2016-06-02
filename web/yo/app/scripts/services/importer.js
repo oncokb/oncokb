@@ -248,14 +248,17 @@ angular.module('oncokbApp')
                     _mutation.tumors = [];
                     _mutation.effect = {};
                     _mutation = combineData(_mutation, e, ['name', 'summary'], excludeObsolete);
+                    //This is a weird way to do, but due to time constraint, this has to be implemented in this way.
+                    //I assigned shortSummary estatus for oncogenic and oncogenic estatus to mutation effect, 
+                    // so there is no need to check excludeObsolete since I did outside of combinedata.
                     if (!(excludeObsolete !== undefined && excludeObsolete && e.shortSummary_eStatus && e.shortSummary_eStatus.has('obsolete') && e.shortSummary_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], excludeObsolete);
+                        _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false);
                     }
                     if (!(excludeObsolete !== undefined && excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
                         _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete);
-                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], excludeObsolete);
+                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false);
     
-                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], excludeObsolete);
+                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false);
     
                         if (e.effect_comments) {
                             _mutation.effect_comments = getComments(e.effect_comments);
