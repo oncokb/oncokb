@@ -359,10 +359,12 @@ public class DriveAnnotationParser {
                 evidence.setKnownEffect(oncogenic);
                 evidence.setDescription(oncogenicSummary);
                 evidenceBo.save(evidence);
+                setDocuments(oncogenicSummary, evidence);
             } else if (oncogenic.equals("1") || oncogenic.equals("2")) {
                 evidences.get(0).setKnownEffect(oncogenic);
                 evidences.get(0).setDescription(oncogenicSummary);
                 evidenceBo.update(evidences.get(0));
+                setDocuments(oncogenicSummary, evidences.get(0));
             }
         }
     }
