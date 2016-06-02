@@ -75,9 +75,8 @@ public class PortalAlterationImporter {
         }else{
             for (String consequence : consequences) {
                alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
-               
            }
-           alterationsSet = new HashSet<>(alterations);
+           alterationsSet = AlterationUtils.excludeVUS(new HashSet<>(alterations));
         }
         
         return alterationsSet;
