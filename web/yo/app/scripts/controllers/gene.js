@@ -1787,7 +1787,7 @@ angular.module('oncokbApp')
             $scope.convertTumorTypes = function () {
                 console.info('Converting tumor types to OncoTree tumor types...');
 
-                convertTumorTypeToOncoTree(0, function () {
+                convertLung(0, function () {
                     console.info('Finished.');
                 });
             };
@@ -1875,6 +1875,73 @@ angular.module('oncokbApp')
                 }
             }
 
+            function convertLung(index, callback) {
+                if (index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('Did not get realtime document.');
+                        } else {
+                            console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function(mutation) {
+                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                        var tumorName = tumor.name.getText();
+                                        var message = '\tGene: ' + gene.name.getText() +
+                                            '\tMutation: ' + mutation.name.getText() +
+                                            '\tTumor type: ' + tumorName;
+                                        
+                                        var hasNLung = false;
+                                        var hasSLung = false;
+                                        var sLungIndices = [];
+                                        
+                                        _.each(tumor.cancerTypes.asArray(), function(ct, ctIndex) {
+                                            if (ct.cancerType.getText().trim() === 'Small Cell Lung Cancer') {
+                                                sLungIndices.push(ctIndex);
+                                                hasSLung = true;
+                                            }
+                                            if (ct.cancerType.getText().trim() === 'Non-Small Cell Lung Cancer') {
+                                                hasNLung = true;
+                                            }
+                                        });
+
+                                        if (hasNLung && hasSLung) {
+                                            message += '\t' + JSON.stringify(sLungIndices);
+                                            console.log(message);
+                                            
+                                            if (sLungIndices.length > 1) {
+                                                console.error("\t\t\t\tHas multiple small cell");
+                                            }else if(sLungIndices.length === 1){
+                                                console.log('\t\t\t\tRemoving...');
+                                                tumor.cancerTypes.remove(sLungIndices[0]);
+                                            }
+                                        }
+                                    });
+                                });
+                                model.endCompoundOperation();
+
+                                //Google has limitation for numbere of requests within one second
+                                $timeout(function() {
+                                    convertLung(++index, callback);
+                                },300, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function() {
+                                    convertLung(++index, callback);
+                                }, 300, false);
+                            }
+                        }
+                    });
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
             function convertTumorTypeToOncoTree(index, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
