@@ -123,7 +123,10 @@ public class SearchApi {
             if (gene != null) {
                 Long oldTime = new Date().getTime();
                 Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
+                
                 alterations = AlterationUtils.excludeVUS(gene, alterations);
+                alterations = AlterationUtils.excludeGeneralAlterations(alterations);
+                
                 oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
 
                 Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
