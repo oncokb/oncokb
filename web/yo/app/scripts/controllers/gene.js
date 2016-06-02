@@ -1792,6 +1792,15 @@ angular.module('oncokbApp')
                 });
             };
 
+            $scope.findRelevantVariants = function () {
+                console.info('Finding relevant variants...');
+                var list = [];
+
+                findRelevantVariants(list, 0, function () {
+                    console.info('Finished.');
+                });
+            };
+
             $scope.changeCacheStatus = function() {
                 if ($scope.status.cache === 'enabled') {
                     DatabaseConnector.disableCache()
@@ -1875,7 +1884,65 @@ angular.module('oncokbApp')
                 }
             }
 
-            function convertLung(index, callback) {
+            function findRelevantVariants(list, index, callback) {
+                if (index < list.length) {
+                    var result = Documents.get({title: list[index].gene});
+                    var document = _.isArray(result) ? result[0] : '';
+                    var message = (index+1) + '\t' + list[index].gene + ' ' + list[index].alt;
+                    
+                    if (document) {
+                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                console.log('Did not get realtime document.');
+                            } else {
+                                var model = realtime.getModel();
+                                var gene = model.getRoot().get('gene');
+                                if (gene) {
+                                    // model.beginCompoundOperation();
+                                    var found = [];
+                                    gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
+                                        if (mutation.name.getText().trim().toLowerCase() === list[index].alt.trim().toLowerCase()) {
+                                            found.push(mutationIndex);
+                                        }
+                                    });
+
+                                    if (found.length > 0) {
+                                        message += '\t\tFound mapping';
+                                        if (found.length > 1) {
+                                            message += '\t\tFound duplicates.\t' +  JSON.stringify(found);
+                                        }
+                                    } else {
+                                        message += '\t\tNo mapping';
+                                    }
+                                    console.log(message);
+                                    // model.endCompoundOperation();
+
+                                    //Google has limitation for numbere of requests within one second
+                                    $timeout(function() {
+                                        findRelevantVariants(list, ++index, callback);
+                                    }, 300, false);
+                                } else {
+                                    console.log('\t\tNo gene model.');
+                                    $timeout(function() {
+                                        findRelevantVariants(list, ++index, callback);
+                                    }, 300, false);
+                                }
+                            }
+                        });
+                    } else {
+                        console.log('\t\tNo gene found.');
+                        $timeout(function() {
+                            findRelevantVariants(list, ++index, callback);
+                        }, 300, false);
+                    }
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+             function convertLung(index, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
                     storage.getRealtimeDocument(document.id).then(function(realtime) {
@@ -1886,7 +1953,7 @@ angular.module('oncokbApp')
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
-                                model.beginCompoundOperation();
+                                // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function(mutation) {
                                     mutation.tumors.asArray().forEach(function(tumor) {
                                         var tumorName = tumor.name.getText();
@@ -1916,12 +1983,12 @@ angular.module('oncokbApp')
                                                 console.error("\t\t\t\tHas multiple small cell");
                                             }else if(sLungIndices.length === 1){
                                                 console.log('\t\t\t\tRemoving...');
-                                                tumor.cancerTypes.remove(sLungIndices[0]);
+                                                // tumor.cancerTypes.remove(sLungIndices[0]);
                                             }
                                         }
                                     });
                                 });
-                                model.endCompoundOperation();
+                                // model.endCompoundOperation();
 
                                 //Google has limitation for numbere of requests within one second
                                 $timeout(function() {
