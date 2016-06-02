@@ -12,14 +12,12 @@ import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 
-import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
@@ -201,11 +199,11 @@ public class SearchApi {
                     add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
                     add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
                 }};
-                Map<Alteration, Map<TumorType, Set<Evidence>>> evidences = new HashMap<>();
+                Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
                 Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
                 for (Alteration alteration : alterations) {
-                    evidences.put(alteration, new HashMap<TumorType, Set<Evidence>>());
+                    evidences.put(alteration, new HashMap<TumorType, Map<LevelOfEvidence, Set<Evidence>>>());
                 }
 
                 Map<Gene, Set<Evidence>> geneEvidences =
@@ -216,31 +214,33 @@ public class SearchApi {
                     for (Alteration alteration : evidence.getAlterations()) {
                         if(evidences.containsKey(alteration)) {
                             if (!evidences.get(alteration).containsKey(tumorType)) {
-                                evidences.get(alteration).put(tumorType, new HashSet<Evidence>());
+                                evidences.get(alteration).put(tumorType, new HashMap<LevelOfEvidence, Set<Evidence>>());
                             }
                             if (publicLevels.contains(evidence.getLevelOfEvidence())) {
-                                evidences.get(alteration).get(tumorType).add(evidence);
+                                LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
+                                if(!evidences.get(alteration).get(tumorType).containsKey(levelOfEvidence)) {
+                                    evidences.get(alteration).get(tumorType).put(levelOfEvidence, new HashSet<Evidence>());
+                                }
+                                evidences.get(alteration).get(tumorType).get(levelOfEvidence).add(evidence);
                             }
                         }
                     }
                 }
 
-                for (Map.Entry<Alteration, Map<TumorType, Set<Evidence>>> entry : evidences.entrySet()) {
+                for (Map.Entry<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
                     Alteration alteration = entry.getKey();
-                    Map<TumorType, Set<Evidence>> map = entry.getValue();
+                    Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
 
-                    for (Map.Entry<TumorType, Set<Evidence>> _entry : map.entrySet()) {
+                    for (Map.Entry<TumorType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
                         TumorType tumorType = _entry.getKey();
-                        Set<Evidence> _evidences = _entry.getValue();
 
-                        for (Evidence _evidence : _evidences) {
+                        for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : _entry.getValue().entrySet()) {
                             ClinicalVariant variant = new ClinicalVariant();
                             variant.setVariant(alteration.getAlteration());
                             variant.setCancerType(tumorType.getName());
-                            LevelOfEvidence levelOfEvidence = _evidence.getLevelOfEvidence();
-                            variant.setLevel(levelOfEvidence != null ? levelOfEvidence.getLevel() : "");
-                            variant.setDrug(EvidenceUtils.getDrugs(_evidences));
-                            variant.setDrugPmids(EvidenceUtils.getPmids(_evidences));
+                            variant.setLevel(__entry.getKey().getLevel());
+                            variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
+                            variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
                             variants.add(variant);
                         }
                     }
