@@ -20,7 +20,7 @@ import java.util.*;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/api/indicator.json")
+@RequestMapping(value = "/legacy-api/indicator.json")
 public class IndicatorController {
     @RequestMapping(method = RequestMethod.POST)
     public

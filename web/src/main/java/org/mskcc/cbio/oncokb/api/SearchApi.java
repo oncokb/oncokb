@@ -21,7 +21,7 @@ import java.util.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
-@RequestMapping(value = "/api/public/v1/search", produces = {APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/public-api/v1/search", produces = {APPLICATION_JSON_VALUE})
 @Api(value = "/search", description = "the search API")
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class SearchApi {

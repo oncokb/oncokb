@@ -23,7 +23,7 @@ import java.util.Set;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
-@RequestMapping(value = "/api/public/v1/genes", produces = {APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/public-api/v1/genes", produces = {APPLICATION_JSON_VALUE})
 @Api(value = "/genes", description = "the genes API")
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class GenesApi {
