@@ -4,9 +4,10 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
-import java.util.List;
 import org.mskcc.cbio.oncokb.bo.GenericBo;
 import org.mskcc.cbio.oncokb.dao.GenericDao;
+
+import java.util.List;
 
 /**
  *
@@ -40,7 +41,10 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
     public List<T> findAll() {
         return dao.findAll();
     }
-    
+
+    public Integer countAll() {
+        return dao.countAll();
+    }
     @Override
     public void delete(T t) {
         dao.delete(t);

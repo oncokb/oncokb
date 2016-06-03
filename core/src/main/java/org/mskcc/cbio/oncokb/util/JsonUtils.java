@@ -4,26 +4,27 @@
  */
 package org.mskcc.cbio.oncokb.util;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 /**
- *
  * @author jgao
  */
 public final class JsonUtils {
     private JsonUtils() {
         throw new AssertionError();
     }
-    
+
     private static ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
-    private static TypeReference<HashMap<String,Object>> typeRefMap
-                = new TypeReference<HashMap<String,Object>>() {}; 
-    
+    private static TypeReference<HashMap<String, Object>> typeRefMap
+        = new TypeReference<HashMap<String, Object>>() {
+    };
+
     public static Map<String, Object> jsonToMap(String json) throws IOException {
         return objectMapper.readValue(json, typeRefMap);
     }

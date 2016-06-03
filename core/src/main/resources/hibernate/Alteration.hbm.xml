@@ -3,7 +3,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncokb.model.Alteration" table="alteration" catalog="oncokb">
+    <class name="org.mskcc.cbio.oncokb.model.Alteration" table="alteration">
         <cache usage="nonstrict-read-write"/>
         <id name="alterationId" type="java.lang.Integer">
             <column name="alteration_id" />

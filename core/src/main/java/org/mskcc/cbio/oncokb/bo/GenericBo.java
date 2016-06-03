@@ -22,4 +22,6 @@ public interface GenericBo<T> {
     void delete(T t);
     
     List<T> findAll();
+    
+    Integer countAll();
 }
