@@ -21,7 +21,7 @@ angular.module('oncokbApp').factory('Gene', ['$http', function($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('gene.json');
+        return $http.get(OncoKB.config.apiLink + 'gene.json');
     }
 
     function getFromFile() {
@@ -115,7 +115,7 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', function($http)
     'use strict';
 
     function getFromServer() {
-        return $http.get('oncokbInfo.json');
+        return $http.get(OncoKB.config.apiLink + 'oncokbInfo.json');
     }
 
     function getFromFile() {

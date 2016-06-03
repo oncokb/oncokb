@@ -353,6 +353,10 @@ public class CacheUtils {
     }
 
     public static Set<Evidence> getEvidences(Gene gene) {
+        if(evidences == null || evidences.size() == 0) {
+            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+        }
+        
         if (evidences.containsKey(gene)) {
             Set<Evidence> result = evidences.get(gene);
             return result;

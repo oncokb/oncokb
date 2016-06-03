@@ -15,6 +15,24 @@
     <name>OncoKB Web</name>
     <url>http://maven.apache.org</url>
 
+    <profiles>
+        <profile>
+            <id>public</id>
+            <properties>
+                <web.folder>public</web.folder>
+            </properties>
+        </profile>
+        <profile>
+            <id>curate</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <web.folder>yo</web.folder>
+            </properties>
+        </profile>
+    </profiles>
+    
     <properties>
         <java.version>1.7</java.version>
         <spring.version>3.2.10.RELEASE</spring.version>
@@ -233,6 +251,7 @@
                     </executions>
                     <configuration>
                         <skipTests>true</skipTests>
+                        <yeomanProjectDirectory>${web.folder}</yeomanProjectDirectory>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -241,7 +260,8 @@
                             <configuration>
                         <webResources>
                             <resource>
-                                <directory>yo/dist</directory>
+                                <directory>${web.folder}/dist</directory>
+                                <targetPath></targetPath>
                             </resource>
                         </webResources>
                     </configuration>
@@ -252,10 +272,10 @@
                     <configuration>
                         <filesets>
                             <fileset>
-                                <directory>yo/dist</directory>
+                                <directory>${web.folder}/dist</directory>
                             </fileset>
                             <fileset>
-                                <directory>yo/.tmp</directory>
+                                <directory>${web.folder}/.tmp</directory>
                             </fileset>
                             <!--<fileset>-->
                                 <!--<directory>yo/app/components</directory>-->

@@ -2,7 +2,7 @@ angular.module('oncokbApp').factory('Evidence', ['$http', function ($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('api/evidence.json');
+        return $http.get(OncoKB.config.apiLink + 'evidence.json');
     }
 
     function getFromFile() {

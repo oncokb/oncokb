@@ -170,9 +170,6 @@ public class PortalAlterationImporter {
                 }else {
                     System.out.println("\tThe study doesnot have any sequenced samples.");
                 }
-                else{
-                    System.out.println("No info for this study " + cancerStudy);
-                }
                 
                 
                 DecimalFormat myFormatter = new DecimalFormat("##.##");
