@@ -97,9 +97,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             String effect = evidence.getKnownEffect();
             if (effect != null) {
                 effect = effect.toLowerCase();
-                if (effect.contains("inactivating")) {
+                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
                     inactivating = true;
-                } else if (effect.contains("activating")) {
+                } else if (effect.contains("activating") || effect.contains("gain-of-function")) {
                     activating = true;
                 }
             }
@@ -176,10 +176,20 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             if (alt != null) {
                 alterations.add(alt);
             }
+            
+            alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "loss-of-function mutations");
+            if (alt != null) {
+                alterations.add(alt);
+            }
         }
 
         if (activating) {
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "activating mutations");
+            if (alt != null) {
+                alterations.add(alt);
+            }
+            
+            alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "gain-of-function mutations");
             if (alt != null) {
                 alterations.add(alt);
             }
