@@ -69,7 +69,7 @@ public class NumbersApi {
     public ResponseEntity<ApiNumbersGenes> numbersGenesGet()
         throws NotFoundException {
         Long oldTime = new Date().getTime();
-        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Start the servlet");
+//        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Start the servlet");
 
         ApiNumbersGenes apiNumbersGenes = new ApiNumbersGenes();
 
@@ -82,14 +82,14 @@ public class NumbersApi {
             genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
         }
         
-        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
+//        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
         apiNumbersGenes.setData(genes);
 
         RespMeta meta = new RespMeta();
         meta.setCode(HttpStatus.OK.value());
         apiNumbersGenes.setRespMeta(meta);
 
-        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "End the servlet");
+//        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "End the servlet");
         return new ResponseEntity<ApiNumbersGenes>(apiNumbersGenes, HttpStatus.OK);
     }
 

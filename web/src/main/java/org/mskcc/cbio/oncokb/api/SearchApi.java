@@ -127,7 +127,7 @@ public class SearchApi {
                 alterations = AlterationUtils.excludeVUS(gene, alterations);
                 alterations = AlterationUtils.excludeGeneralAlterations(alterations);
                 
-                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
+//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
 
                 Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                     add(EvidenceType.MUTATION_EFFECT);
@@ -141,11 +141,11 @@ public class SearchApi {
                     map.put(EvidenceType.MUTATION_EFFECT, new HashSet<Evidence>());
                     evidences.put(alteration, map);
                 }
-                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Initialize evidences.");
+//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Initialize evidences.");
 
                 Map<Gene, Set<Evidence>> geneEvidences =
                     EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
-                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene evidences.");
+//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene evidences.");
 
                 for (Evidence evidence : geneEvidences.get(gene)) {
                     for (Alteration alteration : evidence.getAlterations()) {
@@ -154,7 +154,7 @@ public class SearchApi {
                         }
                     }
                 }
-                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Seperate evidences.");
+//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Seperate evidences.");
 
                 for (Map.Entry<Alteration, Map<EvidenceType, Set<Evidence>>> entry : evidences.entrySet()) {
                     Alteration alteration = entry.getKey();

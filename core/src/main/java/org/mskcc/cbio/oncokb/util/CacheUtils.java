@@ -173,13 +173,13 @@ public class CacheUtils {
 
             Long oldTime = new Date().getTime();
             genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
-            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
+//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
             evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
-            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
+//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
             for(Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
                 setVUS(entry.getKey(), entry.getValue());
             }
-            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all VUS");
+//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all VUS");
 
         }catch (Exception e) {
             System.out.println(e);

@@ -340,6 +340,22 @@ public class EvidenceUtils {
                 result.add(evidence.getKnownEffect());
             }
         }
+        
+        if(evidenceType.equals(EvidenceType.MUTATION_EFFECT) && result.size() > 1) {
+            String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Unknown", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
+            List<String> list = Arrays.asList(effects);
+            Integer index  = 100;
+            for(String effect : result) {
+                if(list.indexOf(effect) < index) {
+                    index = list.indexOf(effect);
+                }
+            }
+            if(index == -1) {
+                return "Unknown";
+            }else {
+                return list.get(index);
+            }
+        }
         return StringUtils.join(result, ", ");
     }
 
