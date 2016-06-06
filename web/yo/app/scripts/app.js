@@ -30,12 +30,13 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    //folderId: '0BzBfo69g8fP6c1lDZXl2OWxwdDA', //testing folder
+    // folderId: '0BzBfo69g8fP6ckZpM1ZkZW5XOVE', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
-    //folderId: '0BzBfo69g8fP6bnJzRVFYRWoycHc', //one of backup folder under knowledgebase
-    folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02
+    // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
+    // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
+    folderId: '0BzBfo69g8fP6eERxcnpmMjRtYVU', //curation folder 05/19/2016
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -46,7 +47,8 @@ OncoKB.config = {
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/api/',
-    //apiLink: 'http://localhost:8080/oncokb/api/',
+    // apiLink: 'http://localhost:8080/oncokb/api/',
+    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {}
 };
 
@@ -170,9 +172,26 @@ OncoKB.curateInfo = {
             display: 'Description'
         }
     },
+    'CancerType': {
+        'cancerType': {
+            type: 'string'
+        },
+        'subtype': {
+            type: 'string'
+        },
+        'oncoTreeCode': {
+            type: 'string'
+        },
+        'operation': {
+            type: 'string' //TODO: May be used for exclude or other operation.
+        }
+    },
     'Tumor': {
         'name': {
             type: 'string'
+        },
+        'cancerTypes': {
+            type: 'list'
         },
         'summary': {
             type: 'string'
@@ -433,6 +452,7 @@ angular.module('oncokbApp', [
     'contenteditable',
     'datatables',
     'datatables.bootstrap',
+    'localytics.directives',
     'ui.sortable'
 ])
     .value('user', {
@@ -546,7 +566,7 @@ angular.module('oncokbApp', [
                 var $rootScope = $injector.get('$rootScope');
                 $rootScope.addError({message: 'Exception', reason: exception, case: cause});
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                //$delegate(exception, cause);
+                // $delegate(exception, cause);
             };
         });
 

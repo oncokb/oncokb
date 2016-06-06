@@ -108,7 +108,7 @@ public final class QuestDocAnnotationParser {
     
     public static void main(String[] args) throws Exception {
         VariantConsequenceImporter.main(args);
-        TumorTypeImporter.main(args);
+//        TumorTypeImporter.main(args);
         PiHelperDrugImporter.main(args);
 //        List<String> files = FileUtils.getFilesInFolder(QUEST_CURATION_FOLDER, "docx");
 //        for (String file : files) {
