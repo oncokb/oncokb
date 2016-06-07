@@ -57,10 +57,12 @@ angular.module('oncokbApp')
                 };
                 $scope.getClass = function (dt) {
                     if (dt instanceof Date) {
-                        var _date = new Date().getMonth();
-                        if (_date - dt.getMonth() > 3) {
+                        var _month = new Date().getMonth();
+                        var _year = new Date().getYear();
+                        var _monthDiff = (_year - dt.getYear()) * 12 + _month - dt.getMonth();
+                        if (_monthDiff > 3) {
                             return 'danger'
-                        } else if (_date - dt.getMonth() > 1) {
+                        } else if (_monthDiff > 1) {
                             return 'warning'
                         }
                     }

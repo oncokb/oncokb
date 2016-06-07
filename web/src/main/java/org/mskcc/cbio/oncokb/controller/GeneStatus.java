@@ -24,7 +24,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @Controller
 public class GeneStatus {
 
-    @RequestMapping(value="/api/geneStatus.json", method = {POST, GET})
+    @RequestMapping(value="/legacy-api/geneStatus.json", method = {POST, GET})
     public @ResponseBody
     Object geneStatus(
             @RequestParam(value="geneId", required=true) String geneId,

@@ -3,7 +3,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class name="org.mskcc.cbio.oncokb.model.VariantConsequence" table="variant_consequence" catalog="oncokb">
+    <class name="org.mskcc.cbio.oncokb.model.VariantConsequence" table="variant_consequence">
         <cache usage="nonstrict-read-write"/>
         <id name="term" type="string">
             <column name="term" length="100" />

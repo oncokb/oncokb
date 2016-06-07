@@ -23,7 +23,7 @@ import java.util.List;
  * Created by Hongxin on 8/10/15.
  */
 @Controller
-@RequestMapping(value = "/api/summary.json")
+@RequestMapping(value = "/legacy-api/summary.json")
 public class SummaryController {
     @RequestMapping(method = RequestMethod.GET)
     public

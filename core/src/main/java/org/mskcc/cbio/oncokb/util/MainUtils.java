@@ -85,4 +85,9 @@ public class MainUtils {
         requestQueries.put("levels", levelOfEvidences);
         return requestQueries;
     }
+    
+    public static Long printTimeDiff(Long oldDate, Long newDate, String message) {
+        System.out.println(message + ": " +  (newDate - oldDate));
+        return newDate;
+    }
 }

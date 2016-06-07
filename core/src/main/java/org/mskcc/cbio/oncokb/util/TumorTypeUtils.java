@@ -97,7 +97,7 @@ public class TumorTypeUtils {
                 }
 
                 String[] parts = line.split("\t");
-                if(parts.length > 2) {
+                if(parts.length > 1) {
                     String cbioType = parts[0].toLowerCase();
                     List<TumorType> types = cbioTumorTypeMap.get(cbioType);
                     if (types==null) {

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class GeneController {
     
-    @RequestMapping(value="/gene.json")
+    @RequestMapping(value="/legacy-api/gene.json")
     public @ResponseBody List<Gene> getGene(
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {

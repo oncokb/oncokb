@@ -155,7 +155,1418 @@ angular.module('oncokbApp')
             };
             $scope.adminEmails = [];
             $scope.getDocs();
+            $scope.oncoTree = {
+                mainTypes: {}
+            };
+            $scope.tumorTypes = [
+                {
+                    "name": "Activated -B-cell-like Diffuse Large B-cell Lymphoma (ABC-DLBCL)",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Actue Lymphoblastic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Lymphoblastic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Lymphoblastic Leukemia (ALL)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Lymphocytic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Lymphoid Leukemia, Acute Myeloid Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Myelogenous Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "acute myeloid leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Myeloid Leukemia (AML)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Myeloid Leukemia, Acute Lymphoblastic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Acute Myeloid Leukemia, Myelodysplastic Syndromes, Myeloproliferative Neoplasms",
+                    "oncotree": "Leukemia, Myelodysplasia, Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Acute promyelocytic leukemia (APL)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "adenoid cystic carcinoma",
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Adrenal Carcinoma",
+                    "oncotree": "Adrenocortical Carcinoma"
+                },
+                {
+                    "name": "Adrenocortical Carcinoma",
+                    "oncotree": "Adrenocortical Carcinoma"
+                },
+                {
+                    "name": "Advanced Solid Tumors",
+                    "oncotree": "All Solid Tumors"
+                },
+                {
+                    "name": "All Solid Tumors",
+                    "oncotree": "All Solid Tumors"
+                },
+                {
+                    "name": "All Tumor Types",
+                    "oncotree": "All Tumors"
+                },
+                {
+                    "name": "All Tumors",
+                    "oncotree": "All Tumors"
+                },
+                {
+                    "name": "All Types",
+                    "oncotree": "All Tumors"
+                },
+                {
+                    "name": "Anaplastic Glioma, Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "anaplastic large cell lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Anaplastic Thyroid Cancer",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "angioimmunoblastic t cell lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Angiomatoid Fibrous Histiocytoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Angiosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Angiosarcomas",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Astrocytomas",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Atypical Teratoid/Rhabdoid Tumors (AT/RT)",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "b cell acute lymphoblastic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "B-ALL (B-cell acute lymphoblastic leukemia)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "B-cell lymphocytosis",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Basal Cell Carcinoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Biliary Cancer",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "bladder cancer",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "bladder urothelial carcinoma",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "Brain Tumors",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "breast cancer",
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Breast Carcinoma",
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Breast Carcinoma, Ovarian Cancer",
+                    "oncotree": "Breast Cancer, Ovarian Cancer"
+                },
+                {
+                    "name": "Breast Carcinoma, Prostate",
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Breast Fibroadenoma",
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Burkitt Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Burkitt's Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Cancer of Unknown Primary (See Occult Primary)-Midline Carcinomas",
+                    "oncotree": "Cancer of Unknown Primary"
+                },
+                {
+                    "name": "Cardio-facio-cutaneous syndrome",
+                    "oncotree": "Germline disposition"
+                },
+                {
+                    "name": "cervical cancer",
+                    "oncotree": "Cervical Cancer"
+                },
+                {
+                    "name": "Cervical Carcinoma",
+                    "oncotree": "Cervical Cancer"
+                },
+                {
+                    "name": "Childhood B cell lineage ALL",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Childhood Brain Tumor (Astrocytoma)",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Childhood Leukemias",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Childhood Myelodysplastic Syndrome",
+                    "oncotree": "Myelodysplasia"
+                },
+                {
+                    "name": "Childhood Precursor B Cell Acute Lymphoid Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Chilhood Brain Tumor (Astrocytoma)",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "cholangiocarcinoma",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "chondrosarcoma",
+                    "oncotree": "Bone Cancer"
+                },
+                {
+                    "name": "Chronic Eosinophilic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "chronic lymphocytic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Chronic Lymphocytic Leukemia (CLL)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Chronic Myelogenous Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Chronic Myeloid Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Chronic Myeloid Leukemia (CML)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "chronic myelomonocytic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Clear Cell Renal Cell Carcinoma",
+                    "oncotree": "Renal Cell Carcinoma"
+                },
+                {
+                    "name": "Clear Cell Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Colon Adenocarcinoma",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "Colon Cancer",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "colorectal adenocarcinoma",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "colorectal cancer",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "Colorectal Carcinoma",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "Congenital Fibrosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Congenital Mesoblastic Nephroma",
+                    "oncotree": "Renal Cell Carcinoma"
+                },
+                {
+                    "name": "cutaneous squamous cell carcinoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Cutaneous Squamous Cell Carcinoma and Keratoacanthomas",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Dermatofibrosarcoma Protuberans",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "desmoid tumors",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Desmoplastic Small Round Cell Tumor",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Differentiated Thyroid Cancer",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "Diffuse Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Diffuse Intrinsic Pontine Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Diffuse Large B Cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Diffuse Large B Cell Lymphoma (DLBCL)",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "DIFFUSE LARGE B-CELL LYMPHOMA",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Diffuse Large Cell B Cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Duodenal Adenocarcinoma",
+                    "oncotree": "Small Bowel Cancer"
+                },
+                {
+                    "name": "Embryonal Rhabdomyosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Encapsulated Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Endometrial Cancer",
+                    "oncotree": "Endometrial Cancer"
+                },
+                {
+                    "name": "endometrial carcinoma",
+                    "oncotree": "Endometrial Cancer"
+                },
+                {
+                    "name": "Endometrial stromal sarcoma",
+                    "oncotree": "Uterine Sarcoma"
+                },
+                {
+                    "name": "Epedymoma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Ependymoma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Epithelioid Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Epitheloid haemangioendothelioma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Erdheim Chester Disease",
+                    "oncotree": "Histiocytosis"
+                },
+                {
+                    "name": "Erdheim-Chester Disease",
+                    "oncotree": "Histiocytosis"
+                },
+                {
+                    "name": "Esophageal Adenocarcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Esophageal and Gastric adenocarcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Esophageal Cancer",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Esophageal Carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Esophageal Squamous Carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "esophageal squamous cell carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Esophagogastric Cancer",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Esophagogastric Carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Essential Thrombocythemia",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Ewing Sarcoma",
+                    "oncotree": "Bone Cancer"
+                },
+                {
+                    "name": "Ewing Sarcoma, Acute Myelogenous Leukemia",
+                    "oncotree": "Bone Cancer, Leukemia"
+                },
+                {
+                    "name": "Ewing-like small round cell sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Extraskeletal Myxoid Chondrosarcoma",
+                    "oncotree": "Bone Cancer"
+                },
+                {
+                    "name": "Fallopian Tube Carcinoma",
+                    "oncotree": "Ovarian Cancer"
+                },
+                {
+                    "name": "Familial Pancreatic Cancer",
+                    "oncotree": "Pancreatic Cancer"
+                },
+                {
+                    "name": "Familial Platelet Disorder",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Familial Platelet Disorder with predisposition to AML (FPD/AML)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Follicular Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Gallbladder Adenocarcinomas",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "Gastric Adenocarcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "gastric cancer",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Gastric Carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Gastric Tumors",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Gastroesophageal junction carcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Gastrointestinal Neuroendocrine Tumor",
+                    "oncotree": "Gastrointestinal Neuroendocrine Tumor"
+                },
+                {
+                    "name": "gastrointestinal stromal tumor",
+                    "oncotree": "Gastrointestinal Stromal Tumor"
+                },
+                {
+                    "name": "Gastrointestinal Stromal Tumor (Thymic Cancer?)",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Gastrointestinal Tumor",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Germ Cell Tumor",
+                    "oncotree": "Germ Cell Tumor"
+                },
+                {
+                    "name": "Giant Cell Tumor of the Bone",
+                    "oncotree": "Bone Cancer"
+                },
+                {
+                    "name": "glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioblastoma Multiforme",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioblastomas",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioma (Glioblastoma)",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioma, Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Glioma/Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "GLIOMAS",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Granulosa Cell Tumor (Male)",
+                    "oncotree": "Sex Cord Stromal Tumor"
+                },
+                {
+                    "name": "Haematological malignancies",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "hairy cell leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "head and neck cancer",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Head and Neck Cancers",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Head and Neck Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "head and neck squamous cell carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Head and Neck Squamous Cells Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Hematologic Malignancies",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hematological Malignancies",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hematological Tumors",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hematopoietic Malignancies",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hepatocellular Adenoma",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "Hepatocellular Cancer",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "hepatocellular carcinoma",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "Hereditary Non-polyposis Colorectal Cancer",
+                    "oncotree": "Colorectal Cancer"
+                },
+                {
+                    "name": "High Grade Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Histiocytic Neoplasm",
+                    "oncotree": "Histiocytic Disorder"
+                },
+                {
+                    "name": "Hodgkin Lymphoma",
+                    "oncotree": "Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Hodgkin's Lymphoma",
+                    "oncotree": "Hodgkin Lymphoma"
+                },
+                {
+                    "name": "HodgkinŠ—Ès Lymphoma",
+                    "oncotree": "Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Hypereosinophilic Syndrome",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hypereosinophilic syndrome, Chronic Eosinophilic Leukemia",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Hypopharyngeal Squamous Cell Cancer",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "inflammatory myofibroblastic tumor",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Inflammatory Myofibroblastic Tumors",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Intimal sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Invasive Endometroid Cancer",
+                    "oncotree": "Cervical Cancer"
+                },
+                {
+                    "name": "Invasive Mucinous Lung Adenocarcinoma",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Juvenile Myelomonocytic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Kaposi Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Keratocystic Odontogenic Tumor",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Kidney Cancer",
+                    "oncotree": "Renal Cell Carcinoma"
+                },
+                {
+                    "name": "Langerhans cell histiocytosis",
+                    "oncotree": "Histiocytosis"
+                },
+                {
+                    "name": "Large granular lymphocityc leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Laryngeal Squamous Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Leiomyosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Leukemia/Lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Liposarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "liver cancer",
+                    "oncotree": "Hepatobiliary Cancer"
+                },
+                {
+                    "name": "low grade glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Low Grade Gliomas",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Low-Grade Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Lung Adenocarcinoma",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "lung cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer, Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Lung Kancer",
+                    "oncotree": "Non-Small Cell Lung Cancer, Small Cell Lung Cancer"
+                },
+                {
+                    "name": "lung squamous cell carcinoma",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Lymphoblastic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Lymphoma, Leukemia",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Lymphomas",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Malignant gliomas",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Malignant Melanoma",
+                    "oncotree": "Melanoma"
+                },
+                {
+                    "name": "Malignant peripheral nerve sheath tumors",
+                    "oncotree": "Nerve Sheath Tumor"
+                },
+                {
+                    "name": "Mantle Cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Mast cell disorders",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Mast cell neoplasm",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Mast cell neoplasms",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Mastocytosis",
+                    "oncotree": "Mastocytosis"
+                },
+                {
+                    "name": "Medullary Thyroid Cancer",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "Medullary Thyroid Carcinoma",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "Medulloablastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "medulloblastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Meduloblastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "melanoma",
+                    "oncotree": "Melanoma"
+                },
+                {
+                    "name": "meningioma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Meningiomas",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Meningothelial Tumor",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Merkel cell carcinoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Mesothelioma",
+                    "oncotree": "Mesothelioma"
+                },
+                {
+                    "name": "MSI high tumors",
+                    "oncotree": "Colorectal cancer, gastric cancer, Endometrial Cancer, ovarian cancer, Hepatobiliary Cancer, Bladder Cancerr, Glioma"
+                },
+                {
+                    "name": "Multiple endocrine neoplasia",
+                    "oncotree": "Germline disposition"
+                },
+                {
+                    "name": "multiple myeloma",
+                    "oncotree": "Multiple Myeloma"
+                },
+                {
+                    "name": "Myelodysplasia",
+                    "oncotree": "Myelodysplasia"
+                },
+                {
+                    "name": "Myelodysplastic Syndrome",
+                    "oncotree": "Myelodysplasia"
+                },
+                {
+                    "name": "Myelodysplastic Syndrome (MDS)",
+                    "oncotree": "Myelodysplasia"
+                },
+                {
+                    "name": "Myelodysplastic Syndrome/Myeloproliferative Disease (MDS/MPD)",
+                    "oncotree": "Myelodysplasia, Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myelodysplastic Syndromes",
+                    "oncotree": "Myelodysplasia"
+                },
+                {
+                    "name": "Myelodysplatic Syndrome/Myeloproliferative Disease (MDS/MPD)",
+                    "oncotree": "Myelodysplasia, Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myelofibrosis",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myeloid Malignancies",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Myeloproliferative Hypereosinophilic Syndrome",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myeloproliferative Neoplasm",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myeloproliferative Neoplasm (PV, MF, ET)",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "myeloproliferative neoplasms",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Myxoid Liposarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Nasopharyngeal Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "neuroblastoma",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Neuroblastoma (small round blue cell tumors)",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Non Small Cel lung Cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Non Small Cell Lung Cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Non Small Cell Lung Carcinoma",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Non-Hodgkin's Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Non-HodgkinŠ—Ès Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "non-small cell lung cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Non-small cell lung cancer (NSCLC)",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Non-Small Cell Lung Carcinoma",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "non-small lung cancer",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Oligodendroglioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Oral cancer",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Oral Squamous Cell Carcinoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Oropharyngeal Squamous Cell Carcinoma (OSCC)",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Ossifying fibromyxoid tumors (OFMT)",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Osteosarcoma",
+                    "oncotree": "Bone Cancer"
+                },
+                {
+                    "name": "ovarian cancer",
+                    "oncotree": "Ovarian Cancer"
+                },
+                {
+                    "name": "Ovarian Granulosa Cell Tumor",
+                    "oncotree": "Sex Cord Stromal Tumor"
+                },
+                {
+                    "name": "ovarian granulosa cell tumors",
+                    "oncotree": "Sex Cord Stromal Tumor"
+                },
+                {
+                    "name": "pancreatic cancer",
+                    "oncotree": "Pancreatic Cancer"
+                },
+                {
+                    "name": "Pancreatic Ductal Carcinoma",
+                    "oncotree": "Pancreatic Cancer"
+                },
+                {
+                    "name": "Pancreatic Neuroendocrine Tumor",
+                    "oncotree": "Pancreatic Cancer"
+                },
+                {
+                    "name": "Papillary Thyroid Cancer",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "Paraganglioma",
+                    "oncotree": "Miscellaneous Neuroepithelial Tumor"
+                },
+                {
+                    "name": "Paragangliomas",
+                    "oncotree": "Miscellaneous Neuroepithelial Tumor"
+                },
+                {
+                    "name": "Parathyroid Adenoma",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Parathyroid adenomas",
+                    "oncotree": "Head and Neck Cancer"
+                },
+                {
+                    "name": "Parotid Cancer",
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Pediatric adrenocortical tumor",
+                    "oncotree": "Adrenocortical Carcinoma"
+                },
+                {
+                    "name": "Pediatric Glioblastoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pediatric Gliomas",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pediatric High Grade Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pediatric high-grade gliomas",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Phaeochromacytoma",
+                    "oncotree": "Pheochromocytoma"
+                },
+                {
+                    "name": "pheochromocytoma",
+                    "oncotree": "Pheochromocytoma"
+                },
+                {
+                    "name": "Pheochromocytomas/Paragangliomas",
+                    "oncotree": "Pheochromocytoma,Miscellaneous Neuroepithelial Tumor"
+                },
+                {
+                    "name": "Phyllodes Tumor of Breast",
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Pilocytic Astrocytoma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pituitary Ademona",
+                    "oncotree": "Sellar Tumor"
+                },
+                {
+                    "name": "Pituitary Adenoma",
+                    "oncotree": "Sellar Tumor"
+                },
+                {
+                    "name": "pituitary adenomas",
+                    "oncotree": "Sellar Tumor"
+                },
+                {
+                    "name": "pituitary tumors",
+                    "oncotree": "Sellar Tumor"
+                },
+                {
+                    "name": "Polycythemia Vera",
+                    "oncotree": "Myeloproliferative Neoplasm"
+                },
+                {
+                    "name": "Pontine Glioma",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Primary Mediastinal Large B-cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Primary Plasma Cell Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Primitive Neuroectodermal Tumor",
+                    "oncotree": "Embryonal Tumor"
+                },
+                {
+                    "name": "Prolymphocytic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "prostate cancer",
+                    "oncotree": "Prostate Cancer"
+                },
+                {
+                    "name": "Pulmonary Carcinoid",
+                    "oncotree": "Non-Small Cell Lung Cancer"
+                },
+                {
+                    "name": "renal cell carcinoma",
+                    "oncotree": "Renal Cell Carcinoma"
+                },
+                {
+                    "name": "Renal Cell Carcinomas",
+                    "oncotree": "Renal Cell Carcinoma"
+                },
+                {
+                    "name": "Retinoblastoma",
+                    "oncotree": "Retinoblastoma"
+                },
+                {
+                    "name": "Rhabdoid Tumors",
+                    "oncotree": "Wilms Tumor"
+                },
+                {
+                    "name": "rhabdomyosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Salivary Gland Cancer",
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Salivary-Duct Cancer",
+                    "oncotree": "Salivary Gland Cancer"
+                },
+                {
+                    "name": "Sarcoma Histocytosis",
+                    "oncotree": "Histiocytosis"
+                },
+                {
+                    "name": "Sclerosing Rhabdomyosarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Secretory Breast Carcinoma",
+                    "oncotree": "Breast Cancer"
+                },
+                {
+                    "name": "Serous Ovarian Cancer",
+                    "oncotree": "Ovarian Cancer"
+                },
+                {
+                    "name": "skin basal cell carcinoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Skin Cancer (Non-Melanoma)",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Skin Cancer, Non-Melanoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "Small Cell Carcinoma of the Ovaries, Hyeprcalcemic Type",
+                    "oncotree": "Ovarian Cancer"
+                },
+                {
+                    "name": "Small Cell Carcinoma of the Ovaries, Hypercalcemic Type",
+                    "oncotree": "Ovarian Cancer"
+                },
+                {
+                    "name": "Small Cell Lung Cancer",
+                    "oncotree": "Small Cell Lung Cancer"
+                },
+                {
+                    "name": "SMALL CELL LUNG CARCINOMA",
+                    "oncotree": "Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Small intestine neuroendocrine tumors",
+                    "oncotree": "Gastrointestinal Neuroendocrine Tumor"
+                },
+                {
+                    "name": "Small Round Cell Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Small-Cell Lung Cancer (SCLC)",
+                    "oncotree": "Small Cell Lung Cancer"
+                },
+                {
+                    "name": "Soft Tissue Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Soft-Tissue Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Solid Tumors",
+                    "oncotree": "All Solid Tumors"
+                },
+                {
+                    "name": "Solid Tumors (Epithelial Cancers)",
+                    "oncotree": "All Solid Tumors"
+                },
+                {
+                    "name": "Spindle Cell Neoplasms",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Stem cell leukemia, Lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "stem cell leukemia/lymphoma",
+                    "oncotree": "All Liquid Tumors"
+                },
+                {
+                    "name": "Stomach Adenocarcinoma",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "stomach cancer",
+                    "oncotree": "Esophagogastric Cancer"
+                },
+                {
+                    "name": "Subependymal Giant Cell Astrocytoma",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "Subependymal Giant Cell Astrocytoma (Ependymomal Tumor)",
+                    "oncotree": "CNS Cancer"
+                },
+                {
+                    "name": "t cell acute lymphoblastic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T cell acute lymphoblastic leukemia (T-ALL)",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T Cell Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "T-cell Acute Lymphoblastic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T-cell acute lymphoblastic leukemia , T-cell lymphoma",
+                    "oncotree": "Leukemia,Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "T-Cell Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T-cell precursor acute lymphoblastic leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "T-Cell Prolymphocytic Leukemia",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Teratoma",
+                    "oncotree": "Germ Cell Tumor"
+                },
+                {
+                    "name": "Therapy related Acute Myeloid Leukemia/Myelodysplastic Syndrome",
+                    "oncotree": "Leukemia, Myelodysplasia"
+                },
+                {
+                    "name": "Thymic Cancer",
+                    "oncotree": "Thymic Tumor"
+                },
+                {
+                    "name": "thymic carcinoma",
+                    "oncotree": "Thymic Tumor"
+                },
+                {
+                    "name": "Thymic Epithelial Tumors",
+                    "oncotree": "Thymic Tumor"
+                },
+                {
+                    "name": "Thymic Tumor",
+                    "oncotree": "Thymic Tumor"
+                },
+                {
+                    "name": "thyroid cancer",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "Thyroid carcinoma",
+                    "oncotree": "Thyroid Cancer"
+                },
+                {
+                    "name": "Undifferentiated spindle-cell sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Urinary tract cancer",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "Urothelial Bladder Cancer",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "Urothelial Cancer",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "Urothelial Carcinoma of the Bladder",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "Urothelial/Bladder Carcinoma",
+                    "oncotree": "Bladder Cancer"
+                },
+                {
+                    "name": "uterine cancer",
+                    "oncotree": "Uterine Sarcoma"
+                },
+                {
+                    "name": "Uterine Carcinoma",
+                    "oncotree": "Endometrial Cancer"
+                },
+                {
+                    "name": "Uterine Carcinosarcoma",
+                    "oncotree": "Endometrial Cancer"
+                },
+                {
+                    "name": "Uterine Leiomyoma",
+                    "oncotree": "Uterine Sarcoma"
+                },
+                {
+                    "name": "Uterine Leiomyosarcoma",
+                    "oncotree": "Uterine Sarcoma"
+                },
+                {
+                    "name": "uveal melanoma",
+                    "oncotree": "Melanoma"
+                },
+                {
+                    "name": "Vestibular Schwannoma and Meningioma",
+                    "oncotree": "Nerve Sheath Tumor, CNS Cancer"
+                },
+                {
+                    "name": "Waldenstrom's Macroglobulinemia, Lymphoplasmayctic Lymphoma",
+                    "oncotree": "Non-Hodgkin Lymphoma"
+                },
+                {
+                    "name": "Wilms Tumor",
+                    "oncotree": "Wilms Tumor"
+                },
+                {
+                    "name": "Primary Pulmonary Myxoid Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Malignant Gastrointestinal Neuroectodermal Tumor",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Sarcoma",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Breast, lung, ovarian, prostate, pancreatic",
+                    "oncotree": "Breast Cancer, Small Cell Lung Cancer, Non-Small Cell Lung Cancer, Ovarian Cancer, Prostate Cancer,Pancreatic Cancer"
+                },
+                {
+                    "name": "Skin Cancer",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                },
+                {
+                    "name": "T-ALL",
+                    "oncotree": "Leukemia"
+                },
+                {
+                    "name": "Peritoneal Cancer",
+                    "oncotree": "Mesothelioma"
+                },
+                {
+                    "name": "All Pediatric Tumors",
+                    "oncotree": "All Pediatric Tumors"
+                },
+                {
+                    "name": "Pediatric tumors",
+                    "oncotree": "All Pediatric Tumors"
+                },
+                {
+                    "name": "SARCOMA",
+                    "oncotree": "Soft Tissue Sarcoma"
+                },
+                {
+                    "name": "Pediatric Malignancies",
+                    "oncotree": "All Pediatric Tumors"
+                },
+                {
+                    "name": "Brain Cancer",
+                    "oncotree": "Glioma"
+                },
+                {
+                    "name": "Pilomatricoma",
+                    "oncotree": "Skin Cancer, Non-Melanoma"
+                }
+            ];
+            $scope.mappedTumorTypes = {};
             getCacheStatus();
+            // getAllMainTypes();
 
             var newGenes = [];
 
@@ -373,6 +1784,23 @@ angular.module('oncokbApp')
                 });
             };
 
+            $scope.convertTumorTypes = function () {
+                console.info('Converting tumor types to OncoTree tumor types...');
+
+                convertLung(0, function () {
+                    console.info('Finished.');
+                });
+            };
+
+            $scope.findRelevantVariants = function () {
+                console.info('Finding relevant variants...');
+                var list = [];
+
+                findRelevantVariants(list, 0, function () {
+                    console.info('Finished.');
+                });
+            };
+
             $scope.changeCacheStatus = function() {
                 if ($scope.status.cache === 'enabled') {
                     DatabaseConnector.disableCache()
@@ -456,6 +1884,323 @@ angular.module('oncokbApp')
                 }
             }
 
+            function findRelevantVariants(list, index, callback) {
+                if (index < list.length) {
+                    var result = Documents.get({title: list[index].gene});
+                    var document = _.isArray(result) ? result[0] : '';
+                    var message = (index+1) + '\t' + list[index].gene + ' ' + list[index].alt;
+                    
+                    if (document) {
+                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                console.log('Did not get realtime document.');
+                            } else {
+                                var model = realtime.getModel();
+                                var gene = model.getRoot().get('gene');
+                                if (gene) {
+                                    // model.beginCompoundOperation();
+                                    var found = [];
+                                    gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
+                                        if (mutation.name.getText().trim().toLowerCase() === list[index].alt.trim().toLowerCase()) {
+                                            found.push(mutationIndex);
+                                        }
+                                    });
+
+                                    if (found.length > 0) {
+                                        message += '\t\tFound mapping';
+                                        if (found.length > 1) {
+                                            message += '\t\tFound duplicates.\t' +  JSON.stringify(found);
+                                        }
+                                    } else {
+                                        message += '\t\tNo mapping';
+                                    }
+                                    console.log(message);
+                                    // model.endCompoundOperation();
+
+                                    //Google has limitation for numbere of requests within one second
+                                    $timeout(function() {
+                                        findRelevantVariants(list, ++index, callback);
+                                    }, 300, false);
+                                } else {
+                                    console.log('\t\tNo gene model.');
+                                    $timeout(function() {
+                                        findRelevantVariants(list, ++index, callback);
+                                    }, 300, false);
+                                }
+                            }
+                        });
+                    } else {
+                        console.log('\t\tNo gene found.');
+                        $timeout(function() {
+                            findRelevantVariants(list, ++index, callback);
+                        }, 300, false);
+                    }
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+             function convertLung(index, callback) {
+                if (index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('Did not get realtime document.');
+                        } else {
+                            console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                // model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function(mutation) {
+                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                        var tumorName = tumor.name.getText();
+                                        var message = '\tGene: ' + gene.name.getText() +
+                                            '\tMutation: ' + mutation.name.getText() +
+                                            '\tTumor type: ' + tumorName;
+                                        
+                                        var hasNLung = false;
+                                        var hasSLung = false;
+                                        var sLungIndices = [];
+                                        
+                                        _.each(tumor.cancerTypes.asArray(), function(ct, ctIndex) {
+                                            if (ct.cancerType.getText().trim() === 'Small Cell Lung Cancer') {
+                                                sLungIndices.push(ctIndex);
+                                                hasSLung = true;
+                                            }
+                                            if (ct.cancerType.getText().trim() === 'Non-Small Cell Lung Cancer') {
+                                                hasNLung = true;
+                                            }
+                                        });
+
+                                        if (hasNLung && hasSLung) {
+                                            message += '\t' + JSON.stringify(sLungIndices);
+                                            console.log(message);
+                                            
+                                            if (sLungIndices.length > 1) {
+                                                console.error("\t\t\t\tHas multiple small cell");
+                                            }else if(sLungIndices.length === 1){
+                                                console.log('\t\t\t\tRemoving...');
+                                                // tumor.cancerTypes.remove(sLungIndices[0]);
+                                            }
+                                        }
+                                    });
+                                });
+                                // model.endCompoundOperation();
+
+                                //Google has limitation for numbere of requests within one second
+                                $timeout(function() {
+                                    convertLung(++index, callback);
+                                },300, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function() {
+                                    convertLung(++index, callback);
+                                }, 300, false);
+                            }
+                        }
+                    });
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function convertTumorTypeToOncoTree(index, callback) {
+                if (index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('Did not get realtime document.');
+                        } else {
+                            console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function(mutation, index) {
+                                    // var tumors = {};
+                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                        //Convert to desired OncoTree tumor types
+                                        // if(tumors.hasOwnProperty(tumor.name.getText())) {
+                                        //     var message = '\tGene: ' + gene.name.getText() +
+                                        //         '\tMutation: ' + mutation.name.getText() +
+                                        //         '\tTumor type: ' + tumor.name.getText();
+                                        //     console.log(message);
+                                        // }else {
+                                        //     tumors[tumor.name.getText()] = 1;
+                                        // }
+                                        var tt = tumor.name.getText().toString().trim().toLowerCase().replace('’',"'");
+                                        var message = '\tGene: ' + gene.name.getText() +
+                                            '\tMutation: ' + mutation.name.getText() +
+                                            '\tTumor type: ' + tumor.name.getText();
+                                        var mapped = $scope.mappedTumorTypes[tt];
+                                        if (_.isArray(mapped) && mapped.length > 0) {
+                                            var mappedName = [];
+                                            _.each(mapped, function(map, index) {
+                                                var exist = false;
+                                                _.each(tumor.cancerTypes.asArray(), function(ct) {
+                                                    if (ct.cancerType.getText() === map.name) {
+                                                        exist = true;
+                                                    }
+                                                });
+                                                if (!exist) {
+                                                    var cancerType = model.create(OncoKB.CancerType);
+                                                    cancerType.cancerType.setText(map.name);
+                                                    cancerType.cancerType_eStatus.set('obsolete', 'false');
+                                                    cancerType.subtype_eStatus.set('obsolete', 'false');
+                                                    cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
+                                                    tumor.cancerTypes.push(cancerType);
+                                                }
+                                                mappedName.push(map.name);
+                                                message += '\t' + (index + 1) + ': ' + map.name;
+                                            });
+                                            message += '\tMapped name:' + mappedName.join(', ');
+                                        } else {
+                                            message += '\tNo map.';
+                                        }
+                                        console.log(message);
+                                    });
+                                });
+                                model.endCompoundOperation();
+                                
+                                //Google has limitation for numbere of requests within one second
+                                $timeout(function() {
+                                    convertTumorTypeToOncoTree(++index, callback);
+                                },500, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function() {
+                                    convertTumorTypeToOncoTree(++index, callback);
+                                }, 500, false);
+                            }
+                        }
+                    });
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+
+            $scope.loopTumorTypes = function() {
+                getAllOncoTreeTumorTypes(0, function() {
+                    console.log($scope.mappedTumorTypes);
+                });
+            }
+            
+            function getOncoTreeTumorType(tumorType) {
+                if(tumorType) {
+                    tumorType = tumorType.toString().trim();
+                    if($scope.mappedTumorTypes.hasOwnProperty(tumorType)) {
+                        return $scope.mappedTumorTypes[tumorType];
+                    }else {
+                        console.log('\t\tNot found.');
+                        return null;
+                    }
+                }else {
+                    console.log('\t\tThere is no tumor type provided.');
+                    return null;
+                }
+            }
+            
+            function getAllOncoTreeTumorTypes(index, callback) {
+                if (index < $scope.tumorTypes.length) {
+                    var _tumorType = $scope.tumorTypes[index].name.toString().trim().toLowerCase().replace('’',"'");
+                    var _oncotree = $scope.tumorTypes[index].oncotree;
+                    console.log((index + 1) + '\t' + _tumorType);
+                    var mainType = findMainType(_oncotree);
+                    if (mainType) {
+                        $scope.mappedTumorTypes[_tumorType] = mainType;
+                        if (_.isArray(mainType) && mainType.length === 0) {
+                            console.error('NO MAPPING');
+                        }
+                        // console.log('\t\tFound main type: ', mainType);
+                    } else {
+                        console.error('\t\tCannot find main type in OncoTree database.')
+                    }
+                    $timeout(function() {
+                        getAllOncoTreeTumorTypes(++index, callback);
+                    }, 10, false);
+                } else {
+                    console.log('All tumor types have been mapped with OncoTree main tumors.')
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function findMainType(mainType) {
+                var mainTypes = [];
+                if (mainType !== 'Skin Cancer, Non-Melanoma') {
+                    mainTypes = mainType.split(',').map(function(item) {
+                        return item.toString().trim();
+                    });
+                } else {
+                    mainTypes = ['Skin Cancer, Non-Melanoma'];
+                }
+                var map = [];
+                _.each(mainTypes, function(mt) {
+                    for (var i = 0; i < $scope.oncoTree.mainTypes.length; i++) {
+                        if ($scope.oncoTree.mainTypes[i].name.toString().trim().toLowerCase() === mt.toLowerCase()) {
+                            map.push($scope.oncoTree.mainTypes[i]);
+                            break;
+                        }
+                    }
+                });
+
+                return map;
+            }
+            
+            function getAllMainTypes() {
+                DatabaseConnector.getOncoTreeMainTypes()
+                    .then(function(result) {
+                        if(result && _.isArray(result.data)) {
+                            $scope.oncoTree.mainTypes = result.data;
+                            $scope.oncoTree.mainTypes.push({
+                                name: "All Liquid Tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                name: "All Solid Tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                name: "All Tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                name: "Germline Disposition"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                name: "All Pediatric Tumors"
+                            });
+                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function(mainType) {
+                                return mainType.name;
+                            })).then(function(data) {
+                                if (_.isObject(data) && _.isArray(data.data)) {
+                                    if (data.data.length !== result.data.length) {
+                                        console.error('The number of returned tumor types is not matched with number of main types.')
+                                    } else {
+                                        var tumorTypes = {};
+                                        var allTumorTypes = [];
+                                        _.each(result.data, function(mainType, i) {
+                                            tumorTypes[mainType.name] = data.data[i];
+                                            allTumorTypes.push(data.data[i]);
+                                        });
+                                        $scope.oncoTree.tumorTypes = tumorTypes;
+                                        $scope.oncoTree.allTumorTypes = allTumorTypes;
+                                    }
+                                }
+                            }, function(error) {
+                                //TODO: if OncoTree server returns error.
+                            });
+                        } else {
+                            console.log('No data available.');
+                        }
+                    });
+            }
+            
             function getAlteration(codon, aa) {
                 var alteration = [];
                 if (codon) {
@@ -1003,6 +2748,7 @@ angular.module('oncokbApp')
                 if(vus) {
                     params.vus = JSON.stringify(vus);
                 }
+                // console.log(gene);
                 DatabaseConnector.updateGene(params, function (result) {
                     $scope.docStatus.savedGene = true;
                     console.log('success', result);
@@ -1012,7 +2758,6 @@ angular.module('oncokbApp')
                     console.log('failed', result);
                     changeLastUpdate();
                 });
-                // }, 1000);
             };
 
             function changeLastUpdate() {
@@ -1032,14 +2777,16 @@ angular.module('oncokbApp')
                 $scope.docStatus.updateGene = true;
             }
 
-            $scope.addTumorType = function (mutation, newTumorTypeName, mutationIndex) {
-                if (mutation && newTumorTypeName) {
+            $scope.addTumorType = function (mutation, mutationIndex) {
+                var newTumorTypesName = getNewCancerTypesName($scope.meta.newCancerTypes);
+                
+                if (mutation && newTumorTypesName) {
                     var _tumorType = '';
                     var exists = false;
-                    newTumorTypeName = newTumorTypeName.toString().trim();
+                    var model = $scope.realtimeDocument.getModel();
 
                     mutation.tumors.asArray().forEach(function (e) {
-                        if (e.name.getText().toLowerCase() === newTumorTypeName.toLowerCase()) {
+                        if ($scope.getCancerTypesName(e.cancerTypes).toLowerCase() === newTumorTypesName.toLowerCase()) {
                             exists = true;
                         }
                     });
@@ -1047,12 +2794,30 @@ angular.module('oncokbApp')
                     if (exists) {
                         dialogs.notify('Warning', 'Tumor type exists.');
                     } else {
-                        $scope.realtimeDocument.getModel().beginCompoundOperation();
-                        _tumorType = $scope.realtimeDocument.getModel().create(OncoKB.Tumor);
-                        _tumorType.name.setText(newTumorTypeName);
+                        model.beginCompoundOperation();
+                        _tumorType = model.create(OncoKB.Tumor);
+                        
+                        _.each($scope.meta.newCancerTypes, function(ct) {
+                            if(ct.mainType && ct.mainType.name) {
+                                var cancerType = model.create(OncoKB.CancerType);
+                                cancerType.cancerType.setText(ct.mainType.name);
+                                if(ct.subtype) {
+                                    if(ct.subtype.code) {
+                                        cancerType.oncoTreeCode.setText(ct.subtype.code);
+                                    }
+                                    if(ct.subtype.name) {
+                                        cancerType.subtype.setText(ct.subtype.name);
+                                    }
+                                }
+                                cancerType.cancerType_eStatus.set('obsolete', 'false');
+                                cancerType.subtype_eStatus.set('obsolete', 'false');
+                                cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
+                                _tumorType.cancerTypes.push(cancerType);
+                            }
+                        });
                         _tumorType.nccn.category.setText('2A');
                         for (var i = 0; i < 4; i++) {
-                            var __ti = $scope.realtimeDocument.getModel().create(OncoKB.TI);
+                            var __ti = model.create(OncoKB.TI);
                             var __status = i < 2 ? 1 : 0; // 1: Standard, 0: Investigational
                             var __type = i % 2 === 0 ? 1 : 0; //1: sensitivity, 0: resistance
                             var __name = (__status ? 'Standard' : 'Investigational') + ' implications for ' + (__type ? 'sensitivity' : 'resistance') + ' to therapy';
@@ -1063,13 +2828,32 @@ angular.module('oncokbApp')
                             _tumorType.TI.push(__ti);
                         }
                         mutation.tumors.push(_tumorType);
-                        $scope.realtimeDocument.getModel().endCompoundOperation();
+                        model.endCompoundOperation();
+                        $scope.meta.newCancerTypes = [{
+                            mainType: '',
+                            subtype: '',
+                            oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
+                        }];
                         $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new GeneStatusSingleton();
-                        sendEmail(this.gene.name.text + ',' + mutation.name.text + ' new TUMOR TYPE added -> ' + newTumorTypeName, ' ');
                     }
                 }
             };
 
+            $scope.modifyTumorType = function(tumorType) {
+                var dlg = dialogs.create('views/modifyTumorTypes.html', 'ModifyTumorTypeCtrl', {
+                    model: $scope.realtimeDocument.getModel(),
+                    cancerTypes: tumorType.cancerTypes,
+                    oncoTree: $scope.oncoTree
+                }, {
+                    size: 'lg'
+                });
+                dlg.result.then(function(name) {
+                    $scope.name = name;
+                }, function() {
+                    $scope.name = 'You decided not to enter in your name, that makes me sad.';
+                });
+            };
+            
             //Add new therapeutic implication
             $scope.addTI = function (ti, index, newTIName, mutationIndex, tumorIndex, tiIndex) {
                 if (ti && newTIName) {
@@ -1206,17 +2990,55 @@ angular.module('oncokbApp')
 
                 $scope.gene.mutations.asArray().forEach(function (e) {
                     console.log('------------------');
-                    console.log(e);
-                    console.log(e.shortSummary);
-                    console.log(e.shortSummary_eStatus);
-                    console.log(e.shortSummary_eStatus.get('curated'));
-                    console.log(e.effect);
-                    console.log(e.oncogenic);
-                    console.log(e.description);
+                    // console.log(e);
+                    // console.log(e.shortSummary);
+                    // console.log(e.shortSummary_eStatus);
+                    // console.log(e.shortSummary_eStatus.get('curated'));
+                    // console.log(e.effect);
+                    // console.log(e.oncogenic);
+                    // console.log(e.description);]
+                    e.tumors.asArray().forEach(function(tumortype) {
+                        console.log(tumortype);
+                        // tumortype.cancerTypes.asArray().forEach(function(cancerType) {
+                        //     console.log(cancerType);
+                        // })
+                    });
                     console.log('------------------');
                 });
             };
 
+            $scope.getCancerTypesName = function(cancerTypes) {
+                var list = [];
+                cancerTypes.asArray().forEach(function(cancerType) {
+                    if (cancerType.subtype.length > 0) {
+                        var str = cancerType.subtype.getText();
+                        // if (cancerType.oncoTreeCode.length > 0) {
+                        //     str += '(' + cancerType.oncoTreeCode + ')';
+                        // }
+                        list.push(str);
+                    } else if (cancerType.cancerType.length > 0) {
+                        list.push(cancerType.cancerType.getText());
+                    }
+                });
+                return list.join(', ');
+            };
+
+            function getNewCancerTypesName(cancerTypes) {
+                var list = [];
+                _.each(cancerTypes, function(cancerType) {
+                    if (cancerType.subtype && cancerType.subtype.name && cancerType.subtype.name.length > 0) {
+                        var str = cancerType.subtype.name;
+                        if (cancerType.subtype.code.length > 0) {
+                            str += '(' + cancerType.subtype.code + ')';
+                        }
+                        list.push(str);
+                    } else if (cancerType.mainType && cancerType.mainType.name && cancerType.mainType.name.length > 0) {
+                        list.push(cancerType.mainType.name);
+                    }
+                });
+                return list.join(', ');
+            }
+            
             $scope.updateGeneColor = function () {
                 if ($scope.gene) {
                     if (Number($scope.gene.status_timeStamp.get('lastEdit').value.text) > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
@@ -1814,70 +3636,62 @@ angular.module('oncokbApp')
                 $scope.fileEditable = false;
             }
 
-            function getOncoTreeTumortypes() {
-                $scope.tumorTypes = ['Adrenocortical Carcinoma',
-                    'Pheochromocytoma',
-                    'Ampullary Carcinoma',
-                    'Biliary Cancer',
-                    'Bladder Cancer',
-                    'Blastic Plasmacytoid Dendritic Cell Neoplasm',
-                    'Histiocytosis',
-                    'Leukemia',
-                    'Multiple Myeloma',
-                    'Myelodysplasia',
-                    'Myeloproliferative Neoplasm',
-                    'Chondroblastoma',
-                    'Chondrosarcoma',
-                    'Chordoma',
-                    'Ewing Sarcoma',
-                    'Giant Cell Tumor',
-                    'Osteosarcoma',
-                    'Anal Cancer',
-                    'Melanoma',
-                    'Appendiceal Cancer',
-                    'Colorectal Cancer',
-                    'Gastrointestinal Neuroendocrine Tumor',
-                    'Small Bowel Cancer',
-                    'Diffuse Glioma',
-                    'Encapsulated Glioma',
-                    'Ependymomal Tumor',
-                    'Miscellaneous Neuroepithelial Tumor',
-                    'Meningothelial Tumor',
-                    'Embryonal Tumor',
-                    'Sellar Tumor',
-                    'Nerve Sheath Tumor',
-                    'Choroid Plexus Tumor',
-                    'Pineal Tumor',
-                    'Germ Cell Tumor',
-                    'Miscellaneous Brain Tumor',
-                    'Breast Carcinoma',
-                    'Cervical Cancer',
-                    'Esophagogastric Carcinoma',
-                    'Retinoblastoma',
-                    'Head and Neck Carcinoma',
-                    'Renal Cell Carcinoma',
-                    'Wilms Tumor',
-                    'Hepatocellular Carcinoma',
-                    'Hodgkin\'s Lymphoma',
-                    'Non-Hodgkin’s Lymphoma',
-                    'Lung cancer',
-                    'Mesothelioma',
-                    'Ovarian Cancer',
-                    'Pancreatic Cancer',
-                    'Penile Cancer',
-                    'Prostate Cancer',
-                    'Skin Cancer, Non-Melanoma',
-                    'Soft Tissue Sarcoma',
-                    'Gastrointestinal Stromal Tumor',
-                    'Thymic Tumor',
-                    'Thyroid Cancer',
-                    'Gestational Trophoblastic Disease',
-                    'Endometrial Cancer',
-                    'Uterine Sarcoma',
-                    'Vulvar Carcinoma',
-                    'Cancer of Unknown Primary',
-                    'Mixed Cancer Types',
-                    'Unknown Cancer Type'];
+            function getOncoTreeMainTypes() {
+                DatabaseConnector.getOncoTreeMainTypes()
+                    .then(function(result) {
+                        if(result.data) {
+                            $scope.oncoTree.mainTypes = result.data;
+                            $scope.oncoTree.mainTypes.push({
+                                id: -1,
+                                name: "All Liquid Tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -2,
+                                name: "All Solid Tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -3,
+                                name: "All Tumors"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -4,
+                                name: "Germline Disposition"
+                            });
+                            $scope.oncoTree.mainTypes.push({
+                                id: -5,
+                                name: "All Pediatric Tumors"
+                            });
+                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function(mainType) {
+                                return mainType.name;
+                            })).then(function(data) {
+                                if (_.isObject(data) && _.isArray(data.data)) {
+                                    if (data.data.length !== result.data.length) {
+                                        console.error('The number of returned tumor types is not matched with number of main types.')
+                                    } else {
+                                        var tumorTypes = {};
+                                        var allTumorTypes = [];
+                                        _.each(result.data, function(mainType, i) {
+                                            tumorTypes[mainType.name] = data.data[i];
+                                            allTumorTypes = _.union(allTumorTypes, data.data[i]);
+                                        });
+                                        $scope.oncoTree.tumorTypes = tumorTypes;
+                                        $scope.oncoTree.allTumorTypes = allTumorTypes;
+                                        $scope.meta = {
+                                            newCancerTypes: [{
+                                                mainType: '',
+                                                subtype: '',
+                                                oncoTreeTumorTypes: allTumorTypes
+                                            }]
+                                        };
+                                    }
+                                }
+                            }, function(error) {
+                                //TODO: if OncoTree server returns error.
+                            });
+                        }
+                    }, function(error) {
+                        console.log(error);
+                    });
             }
 
             function getLevels() {
@@ -2027,7 +3841,103 @@ angular.module('oncokbApp')
             };
             $scope.selfParams = {};
             $scope.geneStatus = {};
+            $scope.oncoTree = {
+                mainTypes: [],
+                tumorTypes: {}
+            };
+            $scope.meta = {
+                newCancerTypes: [{
+                    mainType: '',
+                    subtype: '',
+                    oncoTreeTumorTypes: []
+                }]
+            };
 
+            $scope.$watch('meta.newCancerTypes', function(n, o) {
+                if(n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
+                    $scope.meta.newCancerTypes.push({
+                        mainType: '',
+                        subtype: '',
+                        oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
+                    });
+                }
+                for(var i = n.length-2 ; i >= 0 ; i--) {
+                    if(!n[i].mainType && !n[i].subtype) {
+                        n.splice(i, 1);
+                        i--;
+                    }
+                }
+                function callback(index, result, type){
+                    if(type === 'mainType') {
+                        n[index].oncoTreeTumorTypes = result;
+                    }else {
+                        n[index].mainType = result;
+                    }
+                    var next = index + 1;
+                    if(next < n.length - 1) {
+                        if(n[next].subtype) {
+                            findMainTypeBySubtype(next, n[next].subtype, callback);
+                        }else {
+                            findTumorTypeByMainType(next, n[next].mainType, callback);
+                        }
+                    }
+                }
+                if(n.length > 1) {
+                    if(n[0].subtype) {
+                        findMainTypeBySubtype(0, n[0].subtype, callback)
+                    }else {
+                        findTumorTypeByMainType(0, n[0].mainType, callback);
+                    }
+                }
+            }, true);
+
+            function findTumorTypeByMainType(index, mainType, callback) {
+                if(mainType && mainType.name) {
+                    if($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
+                        if(_.isFunction(callback)) {
+                            callback(index, $scope.oncoTree.tumorTypes[mainType.name], 'mainType');
+                        }
+                    }else {
+                        DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
+                            .then(function(result) {
+                                if(result.data) {
+                                    $scope.oncoTree.tumorTypes[mainType.name] = result.data;
+                                    if(_.isFunction(callback)) {
+                                        callback(index, result.data, 'mainType');
+                                    }
+                                }
+                            }, function() {
+                                if(_.isFunction(callback)) {
+                                    callback(index, '', 'mainType');
+                                }
+                            });
+                    }
+                }else {
+                    if(_.isFunction(callback)) {
+                        callback(index, '', 'mainType');
+                    }
+                }
+            }
+
+            function findMainTypeBySubtype(index, subtype, callback) {
+                if(subtype && subtype.mainType && subtype.mainType.name) {
+                    var match = -1;
+                    for(var i = 0 ; i < $scope.oncoTree.mainTypes.length ; i ++) {
+                        if($scope.oncoTree.mainTypes[i].name === subtype.mainType.name) {
+                            match = i;
+                            break;
+                        }
+                    }
+                    if(_.isFunction(callback)) {
+                        callback(index, match > -1 ? $scope.oncoTree.mainTypes[match]: '', 'subtype');
+                    }
+                }else {
+                    if(_.isFunction(callback)) {
+                        callback(index, '', 'subtype');
+                    }
+                }
+            }
+            
             $scope.status = {
                 expandAll: false,
                 hideAllEmpty: false,
@@ -2061,8 +3971,37 @@ angular.module('oncokbApp')
                 }
             });
 
+            $scope.$watch('meta.newMainType',function(n, o) {
+               if(_.isArray(n) && n.length > 0) {
+                   var _tumorTypes = [];
+                   var locks = 0;
+                   _.each(n, function(mainType) {
+                       if($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
+                           _tumorTypes = _.union(_tumorTypes, $scope.oncoTree.tumorTypes[mainType.name]);
+                       }else {
+                           locks++;
+                           DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
+                               .then(function(result) {
+                                   if(result.data) {
+                                       $scope.oncoTree.tumorTypes[mainType.name] = result.data;
+                                       _tumorTypes = _.union(_tumorTypes, result.data);
+                                   }
+                                   locks--;
+                               }, function() {
+                                   locks--;
+                               });
+                       }
+                   });
+                   var interval = $interval(function() {
+                       if(locks === 0) {
+                           $scope.meta.currentOncoTreeTumorTypes = _tumorTypes;
+                           $interval.cancel(interval);
+                       }
+                   }, 100);
+               }
+            });
             getDriveOncokbInfo();
-            getOncoTreeTumortypes();
+            getOncoTreeMainTypes();
             var clock;
             clock = $interval(function () {
                 storage.requireAuth(true).then(function (result) {
@@ -2144,42 +4083,139 @@ angular.module('oncokbApp')
                 storage.closeDocument();
                 documentClosed();
             });
-
-            // Get OncoTree primary/secondary/tertiary/quaternary types
-            // DatabaseConnector.getAllOncoTreeTumorTypes(function(data){
-            //   var tumorTypes = {};
-
-            //   data.forEach(function(e, i){
-            //     var key = e.primary;
-
-            //     if(!_.endsWith(key, 'cancer')) {
-            //       key += ' cancer';
-            //     }
-
-            //     if(tumorTypes.hasOwnProperty(key)) {
-            //       var loop=['secondary', 'tertiary', 'quaternary'];
-            //       loop.forEach(function(e1, i1){
-            //         if(e[e1] && tumorTypes[key].indexOf(e[e1]) === -1) {
-            //           tumorTypes[key].push(e[e1]);
-            //         }
-            //       });
-            //     }else {
-            //       tumorTypes[key] = [];
-            //     }
-            //   });
-
-            //   var newTumorTypes = []
-            //   for(var key in tumorTypes) {
-            //     for(var i = 0; i < tumorTypes[key].length; i++) {
-            //       var __datum = {
-            //         'name': tumorTypes[key][i],
-            //         'tissue': key
-            //       }
-            //       newTumorTypes.push(__datum);
-            //     }
-            //   }
-            //   $scope.tumorTypes = newTumorTypes;
-            // });
-
         }]
-);
+)
+    .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, DatabaseConnector) {
+        $scope.meta = {
+            model: data.model,
+            oncoTree: data.oncoTree,
+            cancerTypes: data.cancerTypes,
+            newCancerTypes: []
+        }
+
+        $scope.cancel = function() {
+            $modalInstance.dismiss('canceled');
+        }; // end cancel
+
+        $scope.save = function() {
+            $scope.meta.model.beginCompoundOperation();
+
+            $scope.meta.cancerTypes.clear();
+            _.each($scope.meta.newCancerTypes, function(ct) {
+                if (ct.mainType.name) {
+                    var cancerType = $scope.meta.model.create(OncoKB.CancerType);
+                    cancerType.cancerType.setText(ct.mainType.name);
+                    if (ct.subtype) {
+                        if (ct.subtype.code) {
+                            cancerType.oncoTreeCode.setText(ct.subtype.code);
+                        }
+                        if (ct.subtype.name) {
+                            cancerType.subtype.setText(ct.subtype.name);
+                        }
+                    }
+                    cancerType.cancerType_eStatus.set('obsolete', 'false');
+                    cancerType.subtype_eStatus.set('obsolete', 'false');
+                    cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
+                    console.log(cancerType);
+                    $scope.meta.cancerTypes.push(cancerType);
+                }
+            });
+
+            $scope.meta.model.endCompoundOperation();
+
+            $modalInstance.close();
+        }; // end save
+
+        $scope.hitEnter = function(evt) {
+            if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.name, null) || angular.equals($scope.name, ''))) {
+                $scope.save();
+            }
+        };
+
+        $scope.$watch('meta.newCancerTypes', function(n, o) {
+            // console.log('meta.newcancertypes watch has been called.',n, o);
+            if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
+                $scope.meta.newCancerTypes.push({
+                    mainType: '',
+                    subtype: '',
+                    oncoTreeTumorTypes: angular.copy($scope.meta.oncoTree.allTumorTypes)
+                });
+            }
+            for (var i = n.length - 2; i >= 0; i--) {
+                if (!n[i].mainType) {
+                    if(n[i].mainType != '') {
+                        n.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+            function callback(index, mainType, subType, oncoTreeTumorTypes) {
+                n[index].oncoTreeTumorTypes = oncoTreeTumorTypes ? oncoTreeTumorTypes : $scope.meta.oncoTree.allTumorTypes;
+
+                if(mainType) {
+                    n[index].mainType = mainType;
+                }
+                
+                var next = index + 1;
+                if (next < n.length - 1) {
+                    findCancerType(next, n[next].mainType, n[next].subtype, callback);
+                }
+            }
+
+            if (n.length > 1) {
+                findCancerType(0, n[0].mainType, n[0].subtype, callback)
+            }
+        }, true);
+
+        initNewCancerTypes();
+
+        function findCancerType(index, mainType, subtype, callback) {
+            var list, _mainType;
+            if (mainType && mainType.name) {
+                list = $scope.meta.oncoTree.tumorTypes[mainType.name];
+            }
+            if (!mainType && subtype) {
+                _mainType = findMainType(subtype.mainType.name);
+            }
+            callback(index, _mainType, subtype, list);
+        }
+
+        function initNewCancerTypes() {
+            var newCancerTypes = [];
+            _.each($scope.meta.cancerTypes.asArray(), function(cancerType) {
+                var mainType = findMainType(cancerType.cancerType.getText());
+                var subtype = findSubtype(cancerType.subtype.getText());
+                newCancerTypes.push({
+                    mainType: mainType,
+                    oncoTreeCode: cancerType.oncoTreeCode.getText(),
+                    subtype: subtype,
+                    oncoTreeTumorTypes: []
+                });
+            });
+
+            newCancerTypes.push({
+                mainType: '',
+                subtype: '',
+                oncoTreeTumorTypes: angular.copy($scope.meta.oncoTree.allTumorTypes)
+            });
+            $scope.meta.newCancerTypes = newCancerTypes;
+        }
+
+        function findMainType(name) {
+            for (var i = 0; i < $scope.meta.oncoTree.mainTypes.length; i++) {
+                if ($scope.meta.oncoTree.mainTypes[i].name === name) {
+                    return $scope.meta.oncoTree.mainTypes[i];
+                }
+            }
+            return '';
+        }
+
+        function findSubtype(name) {
+            for (var i = 0; i < $scope.meta.oncoTree.allTumorTypes.length; i++) {
+                if ($scope.meta.oncoTree.allTumorTypes[i].name === name) {
+                    return $scope.meta.oncoTree.allTumorTypes[i];
+                }
+            }
+            return '';
+        }
+    });

@@ -20,7 +20,7 @@ import java.util.Map;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/api/evidence.json")
+@RequestMapping(value = "/legacy-api/evidence.json")
 public class EvidenceController {
     @RequestMapping(method = RequestMethod.GET)
     public

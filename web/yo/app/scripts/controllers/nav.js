@@ -22,7 +22,7 @@ angular.module('oncokbApp')
     var accessLevels = config.accessLevels;
 
     function loginCallback() {
-         console.log('In login callback.');
+         // console.log('In login callback.');
 
         testInternal(function () {
             if(!$scope.$$phase) {
@@ -32,20 +32,20 @@ angular.module('oncokbApp')
             }
             //$rootScope.$apply(function() {
                 var url = access.getURL();
-                console.log('Current URL:', url);
+                // console.log('Current URL:', url);
                 if(url) {
-                    console.log('is logged in? ', access.isLoggedIn());
+                    // console.log('is logged in? ', access.isLoggedIn());
                     if(access.isLoggedIn()){
                         access.setURL('');
                         $location.path(url);
                     }
                 }else {
                     if (access.isLoggedIn() && access.authorize(config.accessLevels.curator)) {
-                        console.log('logged in and has authorize.');
+                        // console.log('logged in and has authorize.');
                         $location.path('/genes');
                     }else {
-                        console.log('is logged in? ', access.isLoggedIn());
-                        console.log('does not have access? ', access.authorize(config.accessLevels.curator));
+                        // console.log('is logged in? ', access.isLoggedIn());
+                        // console.log('does not have access? ', access.authorize(config.accessLevels.curator));
                         $location.path('/');
                     }
                 }
@@ -72,7 +72,7 @@ angular.module('oncokbApp')
     }
     function testInternal(callback) {
         DatabaseConnector.testAccess(function (data, status, headers, config) {
-            console.log(data, status, headers, config);
+            // console.log(data, status, headers, config);
             $rootScope.internal = true;
             if(angular.isFunction(callback)) {
                 callback();
@@ -124,7 +124,7 @@ angular.module('oncokbApp')
         if(authResult.access_token) {
             // Successful sign in.
             // $scope.signedIn = true;
-             console.log('access success', authResult);
+            //  console.log('access success', authResult);
             access.login(loginCallback);
         } else if(authResult.error) {
             // Error while signing in.
