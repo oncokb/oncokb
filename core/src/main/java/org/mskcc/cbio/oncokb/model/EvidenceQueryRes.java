@@ -12,7 +12,7 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private Query query;
     private Gene gene;
     private List<Alteration> alterations;
-    private List<TumorType> tumorTypes;
+    private List<OncoTreeType> tumorTypes;
     private List<Evidence> evidences;
 
     public EvidenceQueryRes() {
@@ -50,12 +50,12 @@ public class EvidenceQueryRes implements java.io.Serializable {
         this.alterations = alterations;
     }
 
-    public List<TumorType> getTumorTypes() {
+    public List<OncoTreeType> getOncoTreeTypes() {
         return tumorTypes;
     }
 
-    public void setTumorTypes(List<TumorType> tumorTypes) {
-        this.tumorTypes = tumorTypes;
+    public void setOncoTreeTypes(List<OncoTreeType> cancerTypes) {
+        this.tumorTypes = cancerTypes;
     }
 
     public List<Evidence> getEvidences() {

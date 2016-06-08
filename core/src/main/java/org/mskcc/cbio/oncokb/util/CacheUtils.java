@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
@@ -26,9 +25,10 @@ public class CacheUtils {
     private static Map<String, Map<String, String>> variantCustomizedSummary = new HashMap<>();
     private static Map<String, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
     private static Map<String, List<Alteration>> alterations = new HashMap<>();
-    private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
+    private static Map<String, List<OncoTreeType>> mappedTumorTypes = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Gene> genesByHugoSymbol = new HashMap<>();
+    private static Map<String, List<OncoTreeType>> allOncoTreeItems = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Map<String, List<Evidence>>> relevantEvidences = new HashMap<>();
     private static Set<Gene> genes = new HashSet<>();
     private static Map<Gene, Set<Alteration>> VUS = new HashMap<>();
@@ -124,8 +124,7 @@ public class CacheUtils {
     private static Observer genesObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-            genes = new HashSet<Gene>(geneBo.findAll());
+            genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
         }
     };
 
@@ -158,32 +157,38 @@ public class CacheUtils {
         }
     };
 
-    static {
-        try {
-            GeneObservable.getInstance().addObserver(variantSummaryObserver);
-            GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
-            GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
-            GeneObservable.getInstance().addObserver(alterationsObserver);
-            GeneObservable.getInstance().addObserver(geneObserver);
-            GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
-            GeneObservable.getInstance().addObserver(genesObserver);
-            GeneObservable.getInstance().addObserver(evidencesObserver);
-            GeneObservable.getInstance().addObserver(VUSObserver);
-            GeneObservable.getInstance().addObserver(numbersObserver);
-
-            Long oldTime = new Date().getTime();
-            genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
-//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
-            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
-//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
-            for(Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
-                setVUS(entry.getKey(), entry.getValue());
-            }
-//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all VUS");
-
-        }catch (Exception e) {
-            System.out.println(e);
+    private static Observer allCancerTypesObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            allOncoTreeItems.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+            allOncoTreeItems.put("subtype", TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
         }
+    };
+
+    static {
+        GeneObservable.getInstance().addObserver(variantSummaryObserver);
+        GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
+        GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
+        GeneObservable.getInstance().addObserver(alterationsObserver);
+        GeneObservable.getInstance().addObserver(geneObserver);
+        GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
+        GeneObservable.getInstance().addObserver(allCancerTypesObserver);
+        allOncoTreeItems.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+        allOncoTreeItems.put("subtype", TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+        GeneObservable.getInstance().addObserver(genesObserver);
+        GeneObservable.getInstance().addObserver(evidencesObserver);
+        GeneObservable.getInstance().addObserver(VUSObserver);
+        GeneObservable.getInstance().addObserver(numbersObserver);
+
+        Long oldTime = new Date().getTime();
+        genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
+//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
+        evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
+        for(Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+            setVUS(entry.getKey(), entry.getValue());
+        }
+//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all VUS");
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
@@ -333,7 +338,7 @@ public class CacheUtils {
         alterations.put(gene, alts);
     }
 
-    public static List<TumorType> getMappedTumorTypes(String queryTumorType, String source) {
+    public static List<OncoTreeType> getMappedTumorTypes(String queryTumorType, String source) {
         return mappedTumorTypes.get(queryTumorType + "&" + source);
     }
 
@@ -341,8 +346,24 @@ public class CacheUtils {
         return mappedTumorTypes.containsKey(queryTumorType + "&" + source) ? true : false;
     }
 
-    public static void setMappedTumorTypes(String queryTumorType, String source, List<TumorType> tumorTypes) {
+    public static void setMappedTumorTypes(String queryTumorType, String source, List<OncoTreeType> tumorTypes) {
         mappedTumorTypes.put(queryTumorType + "&" + source, tumorTypes);
+    }
+
+    public static List<OncoTreeType> getAllCancerTypes() {
+        if (isEnabled()) {
+            return allOncoTreeItems.get("main");
+        } else {
+            return TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
+        }
+    }
+
+    public static List<OncoTreeType> getAllSubtypes() {
+        if (isEnabled()) {
+            return allOncoTreeItems.get("subtype");
+        } else {
+            return TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
+        }
     }
 
     public static Set<Gene> getAllGenes() {

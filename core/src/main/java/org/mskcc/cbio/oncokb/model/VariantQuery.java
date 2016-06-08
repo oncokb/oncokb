@@ -17,7 +17,7 @@ public class VariantQuery implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private List<Alteration> alterations;
-    private List<TumorType> tumorTypes;
+    private List<OncoTreeType> tumorTypes;
 
     public VariantQuery() {
     }
@@ -70,11 +70,11 @@ public class VariantQuery implements java.io.Serializable {
         this.queryTumorType = queryTumorType;
     }
 
-    public List<TumorType> getTumorTypes() {
+    public List<OncoTreeType> getTumorTypes() {
         return tumorTypes;
     }
 
-    public void setTumorTypes(List<TumorType> tumorTypes) {
+    public void setTumorTypes(List<OncoTreeType> tumorTypes) {
         this.tumorTypes = tumorTypes;
     }
 

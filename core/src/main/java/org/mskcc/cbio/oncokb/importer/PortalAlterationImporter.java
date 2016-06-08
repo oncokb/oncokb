@@ -112,8 +112,7 @@ public class PortalAlterationImporter {
                 String sequencedSamplesUrl = "http://www.cbioportal.org/api/samplelists?sample_list_ids=" + cancerStudy + "_sequenced";
                 String sequencedSamplesResult = FileUtils.readRemote(sequencedSamplesUrl);
                 JSONArray sequencedSamplesJSONResult = new JSONArray(sequencedSamplesResult);
-                if(sequencedSamplesJSONResult != null && sequencedSamplesJSONResult.length() > 0)
-                {
+                if (sequencedSamplesJSONResult != null && sequencedSamplesJSONResult.length() > 0) {
                     JSONArray sequencedSamples = (JSONArray) sequencedSamplesJSONResult.getJSONObject(0).get("sample_ids");
 
                     String genetic_profile_id = cancerStudy + "_mutations";
@@ -131,25 +130,9 @@ public class PortalAlterationImporter {
                         String hugo_gene_symbol = jObject.getString("hugo_gene_symbol");
                         Integer entrez_gene_id = jObject.getInt("entrez_gene_id");
                         String sampleId = jObject.getString("sample_id");
-                        
-                        
                         Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
-
-                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);
-                        portalAlterationBo.save(portalAlteration);
-
-                        Set<PortalAlteration> portalAlterations = new HashSet<>();
-
-                        Set<Alteration> oncoKBAlterations = findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition);
-                        
-                        for(Alteration oncoKBAlteration : oncoKBAlterations){
-                            portalAlterations = oncoKBAlteration.getPortalAlterations();
-                            portalAlterations.add(portalAlteration);
-
-                            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-                            oncoKBAlteration.setPortalAlterations(portalAlterations);
-                            alterationBo.update(oncoKBAlteration);
-                        }
+                        Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
+                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, oncoKBAlterations, mutation_type);
 
                         //remove saved sample from sequenced sample list 
                         for (int n = 0; n < sequencedSamples.length(); n++) {
@@ -160,24 +143,23 @@ public class PortalAlterationImporter {
                         }
                     }
                     //save samples that don't have mutations
-                    if(sequencedSamples.length() > 0)
-                    {
+                    if (sequencedSamples.length() > 0) {
                         for (int p = 0; p < sequencedSamples.length(); p++) {
-                            portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null);
+                            portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null, null);
                             portalAlterationBo.save(portalAlteration);
                         }
+                    } else {
+                        System.out.println("\tThe study doesnot have any sequenced samples.");
                     }
-                }else {
-                    System.out.println("\tThe study doesnot have any sequenced samples.");
+
+
+                    DecimalFormat myFormatter = new DecimalFormat("##.##");
+                    String output = myFormatter.format(100 * (j + 1) / studyJSONResult.length());
+                    System.out.println("Importing " + output + "% done.");
                 }
-                
-                
-                DecimalFormat myFormatter = new DecimalFormat("##.##");
-                String output = myFormatter.format(100 * (j + 1) / studyJSONResult.length());
-                System.out.println("Importing " + output + "% done.");
+
             }
 
         }
-
     }
 }

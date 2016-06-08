@@ -41,14 +41,6 @@
                 <column name="alteration_id" not-null="true"/>
             </many-to-many>
         </set>
-        <set lazy="false" name="tumorTypes" table="status_tumor_type">
-            <key>
-                <column name="status_id" not-null="true"/>
-            </key>
-            <many-to-many class="org.mskcc.cbio.oncokb.model.TumorType">
-                <column name="tumor_type_id" not-null="true"/>
-            </many-to-many>
-        </set>
         <set lazy="false" name="evidences" table="status_evidence">
             <key>
                 <column name="status_id" not-null="true"/>
