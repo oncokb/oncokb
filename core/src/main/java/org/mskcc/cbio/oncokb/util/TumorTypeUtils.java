@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Created by Hongxin on 8/10/15.
- * 
+ * <p>
  * In OncoTree, there are two categories: cancerType and subtype. In order to distinguish
  * the difference, tumorType will be used to include both.
  */
@@ -194,44 +194,67 @@ public class TumorTypeUtils {
     private static List<OncoTreeType> findTumorTypes(String tumorType, String source) {
         List<OncoTreeType> tumorTypes = getOncoTreeSubtypes(Collections.singletonList(tumorType));
 
-        if(tumorTypes == null || tumorTypes.size() == 0){
+        if (tumorTypes == null || tumorTypes.size() == 0) {
             tumorTypes = getOncoTreeCancerTypes(Collections.singletonList(tumorType));
         }
-        
+
         return tumorTypes;
     }
 
-    public static List<OncoTreeType> getOncoTreeCancerTypes() {
+    public static List<OncoTreeType> getAllTumorTypes() {
+        List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
+        oncoTreeTypes.addAll(getAllOncoTreeCancerTypes());
+        oncoTreeTypes.addAll(getAllOncoTreeSubtypes());
+        return oncoTreeTypes;
+    }
+
+    public static List<OncoTreeType> getAllOncoTreeCancerTypes() {
         return CacheUtils.getAllCancerTypes();
     }
 
-    public static List<OncoTreeType> getOncoTreeSubtypes() {
+    public static List<OncoTreeType> getAllOncoTreeSubtypes() {
         return CacheUtils.getAllSubtypes();
     }
-    
-    public static List<OncoTreeType> getOncoTreeCancerTypes(List<String> cancerTypes) {
+
+    public static List<OncoTreeType> findOncoTreeTypesByCancerTypes(List<String> cancerTypes) {
         List<OncoTreeType> oncoTreeTypes = CacheUtils.getAllCancerTypes();
         List<OncoTreeType> mapped = new ArrayList<>();
 
         for (String cancerType : cancerTypes) {
-            for(OncoTreeType oncoTreeType : oncoTreeTypes) {
-                if(cancerType.equalsIgnoreCase(oncoTreeType.getCancerType())) {
+            for (OncoTreeType oncoTreeType : oncoTreeTypes) {
+                if (cancerType.equalsIgnoreCase(oncoTreeType.getCancerType())) {
                     mapped.add(oncoTreeType);
                     break;
                 }
             }
         }
-        
+
         return mapped;
     }
 
-    public static List<OncoTreeType> getOncoTreeSubtypes(List<String> subtypes) {
+    public static List<OncoTreeType> findOncoTreeTypesBySubtypeNames(List<String> subtypes) {
         List<OncoTreeType> oncoTreeTypes = CacheUtils.getAllSubtypes();
         List<OncoTreeType> mapped = new ArrayList<>();
 
         for (String subtype : subtypes) {
-            for(OncoTreeType oncoTreeType : oncoTreeTypes) {
-                if(subtype.equalsIgnoreCase(oncoTreeType.getSubtype())) {
+            for (OncoTreeType oncoTreeType : oncoTreeTypes) {
+                if (subtype.equalsIgnoreCase(oncoTreeType.getSubtype())) {
+                    mapped.add(oncoTreeType);
+                    break;
+                }
+            }
+        }
+
+        return mapped;
+    }
+    
+    public static List<OncoTreeType> findOncoTreeTypesBySubtypeCodes(List<String> codes) {
+        List<OncoTreeType> oncoTreeTypes = CacheUtils.getAllSubtypes();
+        List<OncoTreeType> mapped = new ArrayList<>();
+
+        for (String code : codes) {
+            for (OncoTreeType oncoTreeType : oncoTreeTypes) {
+                if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
                     mapped.add(oncoTreeType);
                     break;
                 }
@@ -249,6 +272,20 @@ public class TumorTypeUtils {
                 return cancerType;
             }
         }
+        return null;
+    }
+    
+    public static OncoTreeType findSingleOncoTreeTypeByCode(String code) {
+        List<OncoTreeType> matchedSubtypes = getOncoTreeSubtypes(Collections.singletonList(code));
+        if (matchedSubtypes != null) {
+            return matchedSubtypes.get(0);
+        }
+
+        List<OncoTreeType> matchedCancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(code));
+        if (matchedCancerTypes != null) {
+            return matchedCancerTypes.get(0);
+        }
+        
         return null;
     }
 

@@ -112,7 +112,7 @@ public class NumbersApi {
             Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
 
             mainNumber.setAlteration(excludeVUS.size());
-            mainNumber.setTumorType(ApplicationContextSingleton.getTumorTypeBo().countAll());
+            mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
             mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
             CacheUtils.setNumbers("main", mainNumber);
         } else {

@@ -5,7 +5,7 @@ package org.mskcc.cbio.oncokb.model;
  */
 public class OncoTreeType {
     private String code;
-    private String subtype;
+    private String name;
     private String cancerType;
     private String level;
     private String tissue;
@@ -14,7 +14,7 @@ public class OncoTreeType {
 
     public OncoTreeType(String code, String subtype, String cancerType, String level, String tissue) {
         this.code = code;
-        this.subtype = subtype;
+        this.name = subtype;
         this.cancerType = cancerType;
         this.level = level;
         this.tissue = tissue;
@@ -29,11 +29,11 @@ public class OncoTreeType {
     }
 
     public String getSubtype() {
-        return subtype;
+        return name;
     }
 
     public void setSubtype(String subtype) {
-        this.subtype = subtype;
+        this.name = subtype;
     }
 
     public String getCancerType() {

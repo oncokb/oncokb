@@ -119,7 +119,7 @@ public class EvidenceUtils {
             return getEvidence(alterations, evidenceTypes, levelOfEvidences);
         }
         if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
-            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes, type);
+            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, TumorTypeUtils.find, type);
         } else {
             return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes, type, levelOfEvidences);
         }
@@ -288,8 +288,8 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(tempEvidence);
                             } else {
-                                List<OncoTreeType> cancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
-                                List<OncoTreeType> subtypes = TumorTypeUtils.getOncoTreeSubtypes(Collections.singletonList(tempEvidence.getSubtype()));
+                                List<OncoTreeType> cancerTypes = TumorTypeUtils.findOncoTreeTypesByCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
+                                List<OncoTreeType> subtypes = TumorTypeUtils.findOncoTreeTypesBySubtypes(Collections.singletonList(tempEvidence.getSubtype()));
 
                                 if (evidenceQuery.getOncoTreeTypes().contains(cancerTypes) || evidenceQuery.getOncoTreeTypes().contains(subtypes)) {
                                     filtered.add(tempEvidence);

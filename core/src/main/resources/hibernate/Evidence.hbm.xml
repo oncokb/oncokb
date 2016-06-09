@@ -17,10 +17,10 @@
             </type>
         </property>
         <property name="subtype" type="string">
-            <column length="255" name="subtype"/>
+            <column length="10" name="subtype"/>
         </property>
         <property name="cancerType" type="string">
-            <column length="255" name="cancer_type"/>
+            <column length="50" name="cancer_type"/>
         </property>
         <many-to-one class="org.mskcc.cbio.oncokb.model.Gene" fetch="join" lazy="false" name="gene">
             <column name="entrez_gene_id"/>

@@ -115,7 +115,7 @@ public class EvidenceController {
                     query.setAlterations(AlterationUtils.getRelevantAlterations(query.getGene(), requestQuery.getAlteration(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd()));
                 }
 
-                query.setTumorTypes(TumorTypeUtils.getTumorTypes(requestQuery.getTumorType(), source));
+                query.setOncoTreeTypes(TumorTypeUtils.getTumorTypes(requestQuery.getTumorType(), source));
 
                 evidenceQueries.add(query);
             }

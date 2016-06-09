@@ -160,8 +160,8 @@ public class CacheUtils {
     private static Observer allCancerTypesObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            allOncoTreeItems.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-            allOncoTreeItems.put("subtype", TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+            allOncoTreeItems.put("main", TumorTypeUtils.findOncoTreeTypesByCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+            allOncoTreeItems.put("subtype", TumorTypeUtils.findOncoTreeTypesBySubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
         }
     };
 
@@ -173,8 +173,8 @@ public class CacheUtils {
         GeneObservable.getInstance().addObserver(geneObserver);
         GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
         GeneObservable.getInstance().addObserver(allCancerTypesObserver);
-        allOncoTreeItems.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-        allOncoTreeItems.put("subtype", TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+        allOncoTreeItems.put("main", TumorTypeUtils.findOncoTreeTypesByCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+        allOncoTreeItems.put("subtype", TumorTypeUtils.findOncoTreeTypesBySubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
         GeneObservable.getInstance().addObserver(genesObserver);
         GeneObservable.getInstance().addObserver(evidencesObserver);
         GeneObservable.getInstance().addObserver(VUSObserver);
@@ -354,7 +354,7 @@ public class CacheUtils {
         if (isEnabled()) {
             return allOncoTreeItems.get("main");
         } else {
-            return TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
+            return TumorTypeUtils.findOncoTreeTypesByCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
         }
     }
 
@@ -362,7 +362,7 @@ public class CacheUtils {
         if (isEnabled()) {
             return allOncoTreeItems.get("subtype");
         } else {
-            return TumorTypeUtils.getOncoTreeSubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
+            return TumorTypeUtils.findOncoTreeTypesBySubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
         }
     }
 

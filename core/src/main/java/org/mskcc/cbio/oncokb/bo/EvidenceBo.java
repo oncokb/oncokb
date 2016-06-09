@@ -43,23 +43,21 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * 
      * @param alterations
      * @param evidenceTypes
-     * @param cancerTypes
-     * @param type cancer types category: main or subtype
+     * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<String> cancerTypes, String type);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
 
 
     /**
      * 
      * @param alterations
      * @param evidenceTypes
-     * @param cancerTypes
-     * @param type cancer types category: main or subtype
+     * @param tumorTypes
      * @param levelOfEvidences
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<String> cancerTypes, String type, Collection<LevelOfEvidence> levelOfEvidences);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
 
     /**
      * Find Evidences by Entrez Gene ID
@@ -80,11 +78,10 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * 
      * @param genes
      * @param evidenceTypes
-     * @param cancerTypes
-     * @param type cancer types category: main or subtype
+     * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<String> cancerTypes, String type);
+    List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
     
     /**
      * 
