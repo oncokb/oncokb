@@ -27,10 +27,6 @@ public class TumorTypeController {
     @ResponseBody
     List<OncoTreeType> getTumorType(
         @RequestParam(value = "tumorTypeId", required = false) List<String> tumorTypeIds) {
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<String> allEvidenceTumorTypes = evidenceBo.findAllCancerTypes();
-        List<OncoTreeType> tumorTypes = TumorTypeUtils.getOncoTreeCancerTypes(allEvidenceTumorTypes);
-
-        return tumorTypes;
+        return TumorTypeUtils.getAllOncoTreeTypes();
     }
 }

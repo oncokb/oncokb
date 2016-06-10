@@ -19,18 +19,6 @@ public class SummaryUtils {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
-        Set<String> relevantTumorTypeNames = new HashSet<>();
-        
-        for(OncoTreeType oncoTreeType : relevantTumorTypes) {
-            if(oncoTreeType.getSubtype() == null) {
-                if(oncoTreeType.getCancerType() != null) {
-                    relevantTumorTypeNames.add(oncoTreeType.getCancerType());
-                }
-            }else {
-                relevantTumorTypeNames.add(oncoTreeType.getSubtype());
-            }
-        }
-        
         if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(geneId, key)) {
             return CacheUtils.getVariantSummary(geneId, key);
         }
@@ -99,7 +87,7 @@ public class SummaryUtils {
                 }
             } else {
                 //Tumor type summary
-                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypeNames, "tumorType");
+                List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
                 if (!tumorTypeSummaryEvs.isEmpty()) {
                     Evidence ev = tumorTypeSummaryEvs.get(0);
                     String tumorTypeSummary = ev.getShortDescription();
@@ -118,7 +106,7 @@ public class SummaryUtils {
                             EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
                                     EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
                     Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
-                            evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypeNames, "tumorType")
+                            evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypes)
                     );
                     List<Evidence> evidences = new ArrayList<>();
                     //                if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_0).isEmpty()) {

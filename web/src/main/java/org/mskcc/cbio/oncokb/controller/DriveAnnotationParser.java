@@ -339,7 +339,7 @@ public class DriveAnnotationParser {
                 for (int i = 0; i < cancers.length(); i++) {
                     JSONArray subTumorTypes = cancers.getJSONObject(i).getJSONArray("cancerTypes");
                     for (int j = 0; j < subTumorTypes.length(); j++) {
-                        parseCancer(gene, alterations, cancers.getJSONObject(i), subTumorTypes.getJSONObject(j).getString("cancerType"), subTumorTypes.getJSONObject(j).getString("subtype"));
+                        parseCancer(gene, alterations, cancers.getJSONObject(i), subTumorTypes.getJSONObject(j).getString("cancerType"), subTumorTypes.getJSONObject(j).getString("oncoTreeCode") != "" ? subTumorTypes.getJSONObject(j).getString("oncoTreeCode") : null);
                     }
                 }
             } else {
@@ -407,29 +407,23 @@ public class DriveAnnotationParser {
         return ret;
     }
 
-    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String cancerType, String subtype) {
-        if(cancerType == null) {
+    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String cancerType, String code) {
+        if(cancerType == null || cancerType.equals("")) {
             return;
         }
 
         System.out.println("##    Cancer type: " + cancerType);
-        System.out.println("##    Subtype: " + subtype);
+        System.out.println("##    Subtype code: " + code);
 
-        List<OncoTreeType> oncoTreeTypes;
         OncoTreeType oncoTreeType;
         
-        if(subtype != null) {
-            oncoTreeTypes = TumorTypeUtils.getOncoTreeSubtypes(Collections.singletonList(subtype));
+        if(code != null && !code.equals("")) {
+            oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(code);
         } else {
-            oncoTreeTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(cancerType));
+            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(cancerType);
         }
         
-        if(oncoTreeTypes != null && oncoTreeTypes.size() > 0) {
-            oncoTreeType = oncoTreeTypes.get(0);
-            if(oncoTreeTypes.size() > 1) {
-                System.out.println("##      There are multiple mapped OncoTree types.");
-            }
-        }else {
+        if(oncoTreeType == null) {
             System.out.println("##      No mapped OncoTreeType.");
             return;
         }

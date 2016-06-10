@@ -215,23 +215,11 @@ public class SearchApi {
                 for (Evidence evidence : geneEvidences.get(gene)) {
                     OncoTreeType oncoTreeType = null;
                     if (evidence.getSubtype() != null) {
-                        List<OncoTreeType> matchedSubtypes = TumorTypeUtils.getOncoTreeSubtypes(Collections.singletonList(evidence.getSubtype()));
-                        if (matchedSubtypes != null) {
-                            oncoTreeType = matchedSubtypes.get(0);
-                            if (matchedSubtypes.size() > 1) {
-                                System.out.println("Searched subtype " + evidence.getSubtype() + " has multiple matched OncoTreeType.");
-                            }
-                        }
+                        oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(evidence.getSubtype());
                     }
 
                     if (oncoTreeType == null && evidence.getCancerType() != null) {
-                        List<OncoTreeType> matchedCancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(evidence.getCancerType()));
-                        if (matchedCancerTypes != null) {
-                            oncoTreeType = matchedCancerTypes.get(0);
-                            if (matchedCancerTypes.size() > 1) {
-                                System.out.println("Searched cancer type " + evidence.getSubtype() + " has multiple matched OncoTreeType.");
-                            }
-                        }
+                        oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(evidence.getCancerType());
                     }
 
                     if (oncoTreeType != null) {

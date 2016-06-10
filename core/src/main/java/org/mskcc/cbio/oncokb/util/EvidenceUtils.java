@@ -67,7 +67,7 @@ public class EvidenceUtils {
             List<Evidence> relevantEvidences;
             List<OncoTreeType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
-                relevantTumorTypes = TumorTypeUtils.getTumorTypes(query.getTumorType(), source);
+                relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
             EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
             evidenceQueryRes.setGene(gene);
@@ -108,7 +108,7 @@ public class EvidenceUtils {
         }
     }
 
-    private static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<String> tumorTypes, String type, List<LevelOfEvidence> levelOfEvidences) {
+    private static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<OncoTreeType> tumorTypes, List<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
@@ -119,9 +119,9 @@ public class EvidenceUtils {
             return getEvidence(alterations, evidenceTypes, levelOfEvidences);
         }
         if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
-            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, TumorTypeUtils.find, type);
+            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes);
         } else {
-            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes, type, levelOfEvidences);
+            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes, levelOfEvidences);
         }
     }
 
@@ -201,23 +201,9 @@ public class EvidenceUtils {
             evidenceTypes.remove(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
             evidenceTypes.remove(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
 
-            List<String> cancerTypes = new ArrayList<>();
-            List<String> subtypes = new ArrayList<>();
+            List<Evidence> tumorTypesEvidences = getEvidence(new ArrayList<>(alterations.values()), evidenceTypes, tumorTypes.isEmpty() ? null : new ArrayList<>(tumorTypes), levelOfEvidences);
 
-            for (OncoTreeType oncoTreeType : tumorTypes) {
-                if (oncoTreeType.getCancerType() != null) {
-                    cancerTypes.add(oncoTreeType.getCancerType());
-                }
-                if (oncoTreeType.getSubtype() != null) {
-                    subtypes.add(oncoTreeType.getSubtype());
-                }
-            }
-
-            List<Evidence> subtypeEvidences = getEvidence(new ArrayList<>(alterations.values()), evidenceTypes, tumorTypes.isEmpty() ? null : new ArrayList<>(subtypes), "subtype", levelOfEvidences);
-            List<Evidence> cancerTypesEvidences = getEvidence(new ArrayList<>(alterations.values()), evidenceTypes, tumorTypes.isEmpty() ? null : new ArrayList<>(subtypes), "cancerType", levelOfEvidences);
-
-            evidences.addAll(subtypeEvidences);
-            evidences.addAll(cancerTypesEvidences);
+            evidences.addAll(tumorTypesEvidences);
         }
         return evidences;
     }
@@ -288,8 +274,8 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(tempEvidence);
                             } else {
-                                List<OncoTreeType> cancerTypes = TumorTypeUtils.findOncoTreeTypesByCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
-                                List<OncoTreeType> subtypes = TumorTypeUtils.findOncoTreeTypesBySubtypes(Collections.singletonList(tempEvidence.getSubtype()));
+                                List<OncoTreeType> cancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
+                                List<OncoTreeType> subtypes = TumorTypeUtils.getOncoTreeSubtypesByCode(Collections.singletonList(tempEvidence.getSubtype()));
 
                                 if (evidenceQuery.getOncoTreeTypes().contains(cancerTypes) || evidenceQuery.getOncoTreeTypes().contains(subtypes)) {
                                     filtered.add(tempEvidence);
@@ -351,19 +337,19 @@ public class EvidenceUtils {
                 result.add(evidence.getKnownEffect());
             }
         }
-        
-        if(evidenceType.equals(EvidenceType.MUTATION_EFFECT) && result.size() > 1) {
+
+        if (evidenceType.equals(EvidenceType.MUTATION_EFFECT) && result.size() > 1) {
             String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Unknown", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
             List<String> list = Arrays.asList(effects);
-            Integer index  = 100;
-            for(String effect : result) {
-                if(list.indexOf(effect) < index) {
+            Integer index = 100;
+            for (String effect : result) {
+                if (list.indexOf(effect) < index) {
                     index = list.indexOf(effect);
                 }
             }
-            if(index == -1) {
+            if (index == -1) {
                 return "Unknown";
-            }else {
+            } else {
                 return list.get(index);
             }
         }
@@ -395,7 +381,7 @@ public class EvidenceUtils {
         }
         return result;
     }
-    
+
     public static Map<Gene, Set<Evidence>> getAllGeneBasedEvidences() {
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);

@@ -39,6 +39,14 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
     List<Evidence> findEvidencesByAlterationAndCancerType(Alteration alteration, String cancerType);
 
     /**
+     * 
+     * @param alteration
+     * @param cancerType
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, String cancerType);
+
+    /**
      *
      * @param alteration
      * @param subtype
@@ -64,6 +72,15 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return
      */
     List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes);
+
+    /**
+     * 
+     * @param alterations
+     * @param cancerTypes
+     * @param evidenceTypes
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes);
     
     /**
      *
@@ -94,6 +111,15 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      */
     List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences);
 
+    /**
+     * 
+     * @param alterations
+     * @param cancerTypes
+     * @param evidenceTypes
+     * @param levelOfEvidences
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences);
 
     /**
      * 
@@ -142,6 +168,15 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * 
      * @param alteration
      * @param evidenceType
+     * @param cancerType
+     * @return
+     */
+    List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, EvidenceType evidenceType, String cancerType);
+
+    /**
+     * 
+     * @param alteration
+     * @param evidenceType
      * @param subtype
      * @return
      */
@@ -179,6 +214,15 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
      * @return 
      */
     List<Evidence> findEvidencesByGeneAndCancerType(Gene gene, EvidenceType evidenceType, String cancerType);
+
+    /**
+     * 
+     * @param gene
+     * @param evidenceType
+     * @param cancerType
+     * @return
+     */
+    List<Evidence> findEvidencesByGeneAndCancerTypeNoSubtype(Gene gene, EvidenceType evidenceType, String cancerType);
 
     /**
      *

@@ -39,6 +39,11 @@ public class EvidenceDaoImpl
     }
 
     @Override
+    public List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, String cancerType) {
+        return findByNamedQuery("findEvidencesByAlterationAndCancerTypeNoSubtype", alteration.getAlterationId(), cancerType);
+    }
+
+    @Override
     public List<Evidence> findEvidencesByAlterationAndSubtype(Alteration alteration, String subtype) {
         return findByNamedQuery("findEvidencesByAlterationAndSubtype", alteration.getAlterationId(), subtype);
     }
@@ -67,6 +72,19 @@ public class EvidenceDaoImpl
         List[] values = {alterationIds, cancerTypes, evidenceTypes};
 
         return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes", params, values);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes) {
+        List<Integer> alterationIds = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alterationIds.add(alteration.getAlterationId());
+        }
+
+        String[] params = {"alts", "tts", "ets"};
+        List[] values = {alterationIds, cancerTypes, evidenceTypes};
+
+        return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype", params, values);
     }
 
     @Override
@@ -107,6 +125,19 @@ public class EvidenceDaoImpl
 
         return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence", params, values);
 
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
+        List<Integer> alterationIds = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alterationIds.add(alteration.getAlterationId());
+        }
+
+        String[] params = {"alts", "tts", "ets", "les"};
+        List[] values = {alterationIds, cancerTypes, evidenceTypes, levelOfEvidences};
+
+        return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype", params, values);
     }
 
     @Override
@@ -151,6 +182,12 @@ public class EvidenceDaoImpl
     }
 
     @Override
+    public List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, EvidenceType evidenceType, String cancerType) {
+        if (cancerType==null) return findEvidencesByAlteration(alteration, evidenceType);
+        return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndCancerTypeNoSubtype", alteration.getAlterationId(), evidenceType, cancerType);
+    }
+
+    @Override
     public List<Evidence> findEvidencesByAlterationAndSubtype(Alteration alteration, EvidenceType evidenceType, String subtype) {
         if (subtype==null) return findEvidencesByAlteration(alteration, evidenceType);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndSubtype", alteration.getAlterationId(), evidenceType, subtype);
@@ -179,6 +216,12 @@ public class EvidenceDaoImpl
     public List<Evidence> findEvidencesByGeneAndCancerType(Gene gene, EvidenceType evidenceType, String cancerType) {
         if (cancerType==null) return findEvidencesByGene(gene, evidenceType);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndCancerType", gene, evidenceType, cancerType);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByGeneAndCancerTypeNoSubtype(Gene gene, EvidenceType evidenceType, String cancerType) {
+        if (cancerType==null) return findEvidencesByGene(gene, evidenceType);
+        return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndCancerTypeNoSubtype", gene, evidenceType, cancerType);
     }
 
     @Override

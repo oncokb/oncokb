@@ -43,7 +43,7 @@ public final class VariantAnnotationXML {
             }
         }
 
-        Set<OncoTreeType> relevantTumorTypes = new HashSet<OncoTreeType>(TumorTypeUtils.getTumorTypes(tumorType, "quest"));
+        Set<OncoTreeType> relevantTumorTypes = new HashSet<OncoTreeType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
 
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         
@@ -117,6 +117,7 @@ public final class VariantAnnotationXML {
         }
 
         for (String tt : tumorTypes) {
+            OncoTreeType oncoTreeType = TumorTypeUtils.getMappedOncoTreeTypesBySource(tt, "quest").get(0);
             boolean isRelevant = relevantTumorTypes.contains(tt);
 
             StringBuilder sbTumorType = new StringBuilder();
@@ -124,7 +125,7 @@ public final class VariantAnnotationXML {
             int nEmp = sbTumorType.length();
 
             // find prevalence evidence blob
-            Set<Evidence> prevalanceEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(tt), "mainType"));
+            Set<Evidence> prevalanceEbs = new HashSet<>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PREVALENCE), Collections.singleton(oncoTreeType)));
             if (!prevalanceEbs.isEmpty()) {
                 sbTumorType.append("    <prevalence>\n");
                 sbTumorType.append("        <description>\n");
@@ -147,7 +148,7 @@ public final class VariantAnnotationXML {
 
 
             // find prognostic implication evidence blob
-            Set<Evidence> prognosticEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(tt), "mainType"));
+            Set<Evidence> prognosticEbs = new HashSet<Evidence>(evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.PROGNOSTIC_IMPLICATION), Collections.singleton(oncoTreeType)));
             if (!prognosticEbs.isEmpty()) {
                 sbTumorType.append("    <prognostic_implications>\n");
                 sbTumorType.append("        <description>\n");
@@ -169,8 +170,8 @@ public final class VariantAnnotationXML {
             }
 
             // STANDARD_THERAPEUTIC_IMPLICATIONS
-            List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(tt), "mainType");
-            List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(tt), "mainType");
+            List<Evidence> stdImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY), Collections.singleton(oncoTreeType));
+            List<Evidence> stdImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE), Collections.singleton(oncoTreeType));
 
             //Remove level_0
             stdImpEbsSensitivity = filterLevelZeroEvidence(stdImpEbsSensitivity);
@@ -181,7 +182,7 @@ public final class VariantAnnotationXML {
             exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ");
 
             // NCCN_GUIDELINES
-            List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.NCCN_GUIDELINES), Collections.singleton(tt), "mainType");
+            List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.NCCN_GUIDELINES), Collections.singleton(oncoTreeType));
             Set<NccnGuideline> nccnGuidelines = new LinkedHashSet<NccnGuideline>();
             for (Evidence ev : nccnEvs) {
                 nccnGuidelines.addAll(ev.getNccnGuidelines());
@@ -218,8 +219,8 @@ public final class VariantAnnotationXML {
             }
 
             // INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS
-            List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(tt), "mainType");
-            List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(tt), "mainType");
+            List<Evidence> invImpEbsSensitivity = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY), Collections.singleton(oncoTreeType));
+            List<Evidence> invImpEbsResisitance = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE), Collections.singleton(oncoTreeType));
 
             //Remove level_R3
             invImpEbsResisitance = filterResistanceEvidence(invImpEbsResisitance);
@@ -250,7 +251,7 @@ public final class VariantAnnotationXML {
                 }
 
                 if (tumorTypesForTrials!=null) {
-                    List<Evidence> clinicalTrialEvidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(tt), "mainType");
+                    List<Evidence> clinicalTrialEvidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(oncoTreeType));
                     List<ClinicalTrial> clinicalTrials = new LinkedList<ClinicalTrial>();
                     for (Evidence ev : clinicalTrialEvidences) {
                         clinicalTrials.addAll(ev.getClinicalTrials());

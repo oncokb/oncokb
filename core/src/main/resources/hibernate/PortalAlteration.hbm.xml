@@ -45,7 +45,7 @@
             </column>
         </property>
 
-        <set lazy="false" name="portalAlterations" table="portalAlt_oncoKBAlt">
+        <set lazy="false" name="oncoKBAlterations" table="portalAlt_oncoKBAlt">
             <key>
                 <column name="alteration_id" not-null="true"/>
             </key>

@@ -70,16 +70,22 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         List<Alteration> alts = new ArrayList<>();
         List<String> cancerTypes = new ArrayList<>();
         List<String> subTypes = new ArrayList<>();
+        List<String> cancerTypesOfSubtypes = new ArrayList<>();
         List<EvidenceType> ets = new ArrayList<>();
         alts.addAll(alterations);
         ets.addAll(evidenceTypes);
         
         for(OncoTreeType oncoTreeType : tumorTypes) {
-            cancerTypes.add(oncoTreeType.getCancerType());
-            subTypes.add(oncoTreeType.getCode());
+            if(oncoTreeType.getSubtype() == null) {
+                cancerTypes.add(oncoTreeType.getCancerType());
+            }else {
+                subTypes.add(oncoTreeType.getCode());
+                cancerTypesOfSubtypes.add(oncoTreeType.getCancerType());
+            }
         }
         
         set.addAll(getDao().findEvidencesByAlterationsAndSubtypesAndEvidenceTypes(alts, subTypes, ets));
+        set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(alts, cancerTypesOfSubtypes, ets));
         set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes(alts, cancerTypes, ets));
         return new ArrayList<Evidence>(set);
     }
@@ -96,6 +102,7 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         List<Alteration> alts = new ArrayList<>();
         List<String> cancerTypes = new ArrayList<>();
         List<String> subTypes = new ArrayList<>();
+        List<String> cancerTypesOfSubtypes = new ArrayList<>();
         List<EvidenceType> ets = new ArrayList<>();
         List<LevelOfEvidence> les = new ArrayList<>();
         alts.addAll(alterations);
@@ -103,8 +110,12 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         les.addAll(levelOfEvidences);
 
         for(OncoTreeType oncoTreeType : tumorTypes) {
-            cancerTypes.add(oncoTreeType.getCancerType());
-            subTypes.add(oncoTreeType.getCode());
+            if(oncoTreeType.getSubtype() == null) {
+                cancerTypes.add(oncoTreeType.getCancerType());
+            }else {
+                subTypes.add(oncoTreeType.getCode());
+                cancerTypesOfSubtypes.add(oncoTreeType.getCancerType());
+            }
         }
         
         set.addAll(getDao().findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence(alts, subTypes, ets, les));
@@ -138,8 +149,12 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         for (Gene gene : genes) {
             for (EvidenceType evidenceType : evidenceTypes) {
                 for(OncoTreeType oncoTreeType : tumorTypes) {
-                    set.addAll(getDao().findEvidencesByGeneAndSubtype(gene, evidenceType, oncoTreeType.getCode()));
-                    set.addAll(getDao().findEvidencesByGeneAndCancerType(gene, evidenceType, oncoTreeType.getCancerType()));
+                    if(oncoTreeType.getSubtype() != null) {
+                        set.addAll(getDao().findEvidencesByGeneAndSubtype(gene, evidenceType, oncoTreeType.getCode()));
+                        set.addAll(getDao().findEvidencesByGeneAndCancerTypeNoSubtype(gene, evidenceType, oncoTreeType.getCancerType()));
+                    }else if(oncoTreeType.getCancerType() != null) {
+                        set.addAll(getDao().findEvidencesByGeneAndCancerType(gene, evidenceType, oncoTreeType.getCancerType()));
+                    }
                 }
             }
         }

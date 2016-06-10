@@ -28,7 +28,7 @@ public class CacheUtils {
     private static Map<String, List<OncoTreeType>> mappedTumorTypes = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Gene> genesByHugoSymbol = new HashMap<>();
-    private static Map<String, List<OncoTreeType>> allOncoTreeItems = new HashMap<>(); //Tag by different categories. main or subtype
+    private static Map<String, List<OncoTreeType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Map<String, List<Evidence>>> relevantEvidences = new HashMap<>();
     private static Set<Gene> genes = new HashSet<>();
     private static Map<Gene, Set<Alteration>> VUS = new HashMap<>();
@@ -160,35 +160,36 @@ public class CacheUtils {
     private static Observer allCancerTypesObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            allOncoTreeItems.put("main", TumorTypeUtils.findOncoTreeTypesByCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-            allOncoTreeItems.put("subtype", TumorTypeUtils.findOncoTreeTypesBySubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+            allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+            allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
         }
     };
 
     static {
-        GeneObservable.getInstance().addObserver(variantSummaryObserver);
-        GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
-        GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
-        GeneObservable.getInstance().addObserver(alterationsObserver);
-        GeneObservable.getInstance().addObserver(geneObserver);
-        GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
-        GeneObservable.getInstance().addObserver(allCancerTypesObserver);
-        allOncoTreeItems.put("main", TumorTypeUtils.findOncoTreeTypesByCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-        allOncoTreeItems.put("subtype", TumorTypeUtils.findOncoTreeTypesBySubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
-        GeneObservable.getInstance().addObserver(genesObserver);
-        GeneObservable.getInstance().addObserver(evidencesObserver);
-        GeneObservable.getInstance().addObserver(VUSObserver);
-        GeneObservable.getInstance().addObserver(numbersObserver);
+        try {
+            GeneObservable.getInstance().addObserver(variantSummaryObserver);
+            GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
+            GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
+            GeneObservable.getInstance().addObserver(alterationsObserver);
+            GeneObservable.getInstance().addObserver(geneObserver);
+            GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
+            GeneObservable.getInstance().addObserver(allCancerTypesObserver);
+            GeneObservable.getInstance().addObserver(genesObserver);
+            GeneObservable.getInstance().addObserver(evidencesObserver);
+            GeneObservable.getInstance().addObserver(VUSObserver);
+            GeneObservable.getInstance().addObserver(numbersObserver);
 
-        Long oldTime = new Date().getTime();
-        genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
-//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
-        evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
-//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene based evidences");
-        for(Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
-            setVUS(entry.getKey(), entry.getValue());
+            genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
+            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+            for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+                setVUS(entry.getKey(), entry.getValue());
+            }
+            allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+            allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+
+        } catch (Exception e) {
+            System.out.println(e);
         }
-//            oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all VUS");
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
@@ -352,17 +353,17 @@ public class CacheUtils {
 
     public static List<OncoTreeType> getAllCancerTypes() {
         if (isEnabled()) {
-            return allOncoTreeItems.get("main");
+            return allOncoTreeTypes.get("main");
         } else {
-            return TumorTypeUtils.findOncoTreeTypesByCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
+            return TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
         }
     }
 
     public static List<OncoTreeType> getAllSubtypes() {
         if (isEnabled()) {
-            return allOncoTreeItems.get("subtype");
+            return allOncoTreeTypes.get("subtype");
         } else {
-            return TumorTypeUtils.findOncoTreeTypesBySubtypes(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
+            return TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
         }
     }
 
