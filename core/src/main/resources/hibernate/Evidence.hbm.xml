@@ -194,9 +194,9 @@
         <![CDATA[select distinct e.subtype from Evidence e join e.alterations a where a.alterationId=?]]>
     </query>
     <query name="findAllCancerTypes">
-        <![CDATA[select distinct e.cancerType from Evidence e]]>
+        <![CDATA[select distinct e.cancerType from Evidence e where e.cancerType is not null]]>
     </query>
     <query name="findAllSubtypes">
-        <![CDATA[select distinct e.subtype from Evidence e]]>
+        <![CDATA[select distinct e.subtype from Evidence e where e.subtype is not null]]>
     </query>
 </hibernate-mapping>

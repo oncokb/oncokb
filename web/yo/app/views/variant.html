@@ -6,7 +6,7 @@
                 <option value=""></option>
                 </select>
             </div>
-            <div class="col-lg-4 col-md-3 col-sm-8 col-xs-8">
+            <div class="col-lg-3 col-md-3 col-sm-8 col-xs-8">
                 <div class="input-group input-group-sm">
                     <input type="text" ng-model="alteration" id="variantMutation" style='width:100%' class="form-control" placeholder="Type in mutation">
                     <div class="input-group-btn" >
@@ -19,12 +19,17 @@
                 <option value=""></option>
                 </select> -->
             </div>
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
-                <select chosen ng-model='selectedTumorType' id="tumorTypesDropDown" ng-options='tumorType for tumorType in tumorTypes' allow-single-deselect="true" data-placeholder="Choose a tumor type (eg. lung cancer)">
+            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6">
+                <select chosen ng-model='view.selectedCancerType' id="cancerTypesDropDown" ng-options='cancerType.cancerType for cancerType in view.filteredCancerTypes' allow-single-deselect="true" data-placeholder="Choose a cancer type">
                 <option value=""></option>
                 </select>
             </div>
             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                <select chosen ng-model='view.selectedSubtype' id="subtypesDropDown" ng-options='subtype.subtype for subtype in view.filteredSubtypes' allow-single-deselect="true" data-placeholder="Choose a subtype">
+                    <option value=""></option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6">
                 <div class="btn-group btn-group-sm" style='width:100%'>
                     <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="searchVariantBtn" type="button" ng-disabled="rendering || !isSearchable()" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
                     <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="useExampleBtn" type="button" ng-disabled="rendering" ng-click="useExample()" class="btn btn-default"><span ng-hide="rendering">Example</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>

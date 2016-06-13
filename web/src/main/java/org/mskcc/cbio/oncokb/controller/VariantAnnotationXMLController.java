@@ -48,7 +48,7 @@ public class VariantAnnotationXMLController {
             @RequestParam(value="consequence", required=false) String consequence,
             @RequestParam(value="proteinStart", required=false) Integer proteinStart,
             @RequestParam(value="proteinEnd", required=false) Integer proteinEnd,
-            @RequestParam(value="tumorType", required=false) String tumorType) {
+            @RequestParam(value="cancerType", required=false) String tumorType) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         sb.append("<xml>\n");

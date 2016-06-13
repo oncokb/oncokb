@@ -27,6 +27,6 @@ public class TumorTypeController {
     @ResponseBody
     List<OncoTreeType> getTumorType(
         @RequestParam(value = "tumorTypeId", required = false) List<String> tumorTypeIds) {
-        return TumorTypeUtils.getAllOncoTreeTypes();
+        return TumorTypeUtils.getAllTumorTypes();
     }
 }
