@@ -21,7 +21,15 @@ public class Alteration implements java.io.Serializable {
     private Integer proteinEnd;
     private String variantResidues;
     private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
-    
+    private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);;
+
+    public Set<PortalAlteration> getPortalAlterations() {
+        return portalAlterations;
+    }
+
+    public void setPortalAlterations(Set<PortalAlteration> portalAlterations) {
+        this.portalAlterations = portalAlterations;
+    }
     public Alteration() {
     }
 

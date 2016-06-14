@@ -5,13 +5,6 @@
  */
 package org.mskcc.cbio.oncokb.importer;
 
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,8 +18,11 @@ import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.*;
+
 /**
- *
  * @author jiaojiao April/14/2016 Import alteration data from portal database
  */
 public class PortalAlterationImporter {
@@ -68,17 +64,17 @@ public class PortalAlterationImporter {
         mapper.put("Nonsense", new String[]{"stop_gained"});
         mapper.put("splice", new String[]{"splice_region_variant"});
         mapper.put("Splice_Site_Indel", new String[]{"splice_region_variant"});
-        
+
         String[] consequences = mapper.get(mutation_type);
-        if(consequences == null){
+        if (consequences == null) {
             System.out.println("No mutation type mapping for " + mutation_type);
-        }else{
+        } else {
             for (String consequence : consequences) {
-               alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
-           }
-           alterationsSet = AlterationUtils.excludeVUS(new HashSet<>(alterations));
+                alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
+            }
+            alterationsSet = AlterationUtils.excludeVUS(new HashSet<>(alterations));
         }
-        
+
         return alterationsSet;
     }
 
@@ -130,11 +126,26 @@ public class PortalAlterationImporter {
                         String hugo_gene_symbol = jObject.getString("hugo_gene_symbol");
                         Integer entrez_gene_id = jObject.getInt("entrez_gene_id");
                         String sampleId = jObject.getString("sample_id");
+
+
                         Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
-                        Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
-                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, oncoKBAlterations, mutation_type);
+
+                        portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);
                         portalAlterationBo.save(portalAlteration);
-                        
+
+                        Set<PortalAlteration> portalAlterations = new HashSet<>();
+
+                        Set<Alteration> oncoKBAlterations = findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition);
+
+                        for (Alteration oncoKBAlteration : oncoKBAlterations) {
+                            portalAlterations = oncoKBAlteration.getPortalAlterations();
+                            portalAlterations.add(portalAlteration);
+
+                            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+                            oncoKBAlteration.setPortalAlterations(portalAlterations);
+                            alterationBo.update(oncoKBAlteration);
+                        }
+
                         //remove saved sample from sequenced sample list 
                         for (int n = 0; n < sequencedSamples.length(); n++) {
                             if (sequencedSamples.get(n).equals(sampleId)) {
@@ -146,21 +157,21 @@ public class PortalAlterationImporter {
                     //save samples that don't have mutations
                     if (sequencedSamples.length() > 0) {
                         for (int p = 0; p < sequencedSamples.length(); p++) {
-                            portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null, null);
+                            portalAlteration = new PortalAlteration(cancerType, cancerStudy, sequencedSamples.getString(p), null, null, null, null, null);
                             portalAlterationBo.save(portalAlteration);
                         }
-                    } else {
-                        System.out.println("\tThe study doesnot have any sequenced samples.");
                     }
-
-
-                    DecimalFormat myFormatter = new DecimalFormat("##.##");
-                    String output = myFormatter.format(100 * (j + 1) / studyJSONResult.length());
-                    System.out.println("Importing " + output + "% done.");
+                } else {
+                    System.out.println("\tThe study doesnot have any sequenced samples.");
                 }
 
+
+                DecimalFormat myFormatter = new DecimalFormat("##.##");
+                String output = myFormatter.format(100 * (j + 1) / studyJSONResult.length());
+                System.out.println("Importing " + output + "% done.");
             }
 
         }
+
     }
 }
