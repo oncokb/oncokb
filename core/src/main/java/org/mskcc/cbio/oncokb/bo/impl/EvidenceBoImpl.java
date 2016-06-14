@@ -202,18 +202,18 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findTumorTypesWithEvidencesForAlteration(List<Alteration> alterations) {
-        return getDao().findTumorTypesWithEvidencesForAlteration(alterations);
+    public List<Object> findTumorTypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        return getDao().findTumorTypesWithEvidencesForAlterations(alterations);
     }
 
     @Override
-    public List<Evidence> findCancerTypesWithEvidencesForAlteration(List<Alteration> alterations) {
-        return getDao().findCancerTypesWithEvidencesForAlteration(alterations);
+    public List<Object> findCancerTypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        return getDao().findCancerTypesWithEvidencesForAlterations(alterations);
     }
 
     @Override
-    public List<Evidence> findSubtypesWithEvidencesForAlteration(List<Alteration> alterations) {
-        return getDao().findSubtypesWithEvidencesForAlteration(alterations);
+    public List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        return getDao().findSubtypesWithEvidencesForAlterations(alterations);
     }
 
     @Override

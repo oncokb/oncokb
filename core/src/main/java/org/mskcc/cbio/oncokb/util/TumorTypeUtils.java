@@ -328,8 +328,32 @@ public class TumorTypeUtils {
         questTumorType = questTumorType == null ? null : questTumorType.toLowerCase();
 
         List<OncoTreeType> ret = questTumorTypeMap.get(questTumorType);
+        
+        if (ret == null || ret.size() == 0) {
+            Set<OncoTreeType> oncoTreeTypes = getOncoTreeTypesByTumorType(questTumorType);
+            if(oncoTreeTypes != null) {
+                ret = new ArrayList<>(oncoTreeTypes);
+            }
+        }
 
-        return new LinkedHashSet<>(ret);
+        return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
+    }
+
+    private static Set<OncoTreeType> getOncoTreeTypesByTumorType(String tumorType) {
+        Set<OncoTreeType> types = new HashSet<>();
+        OncoTreeType mapped;
+
+        mapped = getOncoTreeSubtypeByCode(tumorType);
+        if (mapped == null) {
+            mapped = getOncoTreeSubtypeByCode(tumorType);
+        }
+        if (mapped == null) {
+            mapped = getOncoTreeCancerType(tumorType);
+        }
+        if (mapped != null) {
+            types.add(mapped);
+        }
+        return types;
     }
 
     private static Set<OncoTreeType> fromCbioportalTumorType(String cbioTumorType) {
@@ -386,7 +410,14 @@ public class TumorTypeUtils {
 
         List<OncoTreeType> ret = cbioTumorTypeMap.get(cbioTumorType);
 
-        return new LinkedHashSet<>(ret);
+        if (ret == null || ret.size() == 0) {
+            Set<OncoTreeType> oncoTreeTypes = getOncoTreeTypesByTumorType(cbioTumorType);
+            if(oncoTreeTypes != null) {
+                ret = new ArrayList<>(oncoTreeTypes);
+            }
+        }
+
+        return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
     }
 
     private static List<OncoTreeType> getOncoTreeCancerTypesFromSource() {

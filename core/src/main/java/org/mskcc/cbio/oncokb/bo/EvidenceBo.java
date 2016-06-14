@@ -95,21 +95,21 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param alterations
      * @return
      */
-    List<Evidence> findTumorTypesWithEvidencesForAlteration(List<Alteration> alterations);
+    List<Object> findTumorTypesWithEvidencesForAlterations(List<Alteration> alterations);
 
     /**
      *
      * @param alterations
      * @return
      */
-    List<Evidence> findCancerTypesWithEvidencesForAlteration(List<Alteration> alterations);
+    List<Object> findCancerTypesWithEvidencesForAlterations(List<Alteration> alterations);
 
     /**
      *
      * @param alterations
      * @return
      */
-    List<Evidence> findSubtypesWithEvidencesForAlteration(List<Alteration> alterations);
+    List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations);
     
     List<String> findAllCancerTypes();
     

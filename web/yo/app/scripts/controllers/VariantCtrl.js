@@ -101,7 +101,7 @@ angular.module('oncokbApp')
 
                     params.geneName = $scope.gene;
                     params.alteration = $scope.alteration;
-                    params.cancerType = $scope.view.selectedCancerType.cancerType;
+                    params.tumorType = $scope.view.selectedCancerType.cancerType;//ReportDataService accepts tumorType for now
                     params.subtype = $scope.view.selectedSubtype.subtype;
                     params.annotation = annotation.annotation;
                     params.relevantCancerType = annotation.relevantCancerType;
@@ -369,7 +369,9 @@ angular.module('oncokbApp')
                 if(hasSelectedCancerType) {
                     params.cancerType = $scope.view.selectedCancerType.cancerType;
                     if($scope.view.selectedSubtype && $scope.view.selectedSubtype.subtype) {
-                        params.subtype = $scope.view.selectedSubtype.subtype;
+                        params.tumorType = $scope.view.selectedSubtype.subtype;
+                    }else {
+                        params.tumorType = $scope.view.selectedSubtype.subtype;
                     }
                 }else{
                     params.cancerType = '';

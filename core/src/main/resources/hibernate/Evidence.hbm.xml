@@ -184,14 +184,14 @@
     <query name="findEvidencesByGeneAndSubtype">
         <![CDATA[select e from Evidence e join e.alterations a where e.gene=? and e.subtype=?]]>
     </query>
-    <query name="findTumorTypesWithEvidencesForAlteration">
-        <![CDATA[select distinct e.cancerType, e.subtype from Evidence e join e.alterations a where a.alterationId=? ]]>
+    <query name="findTumorTypesWithEvidencesForAlterations">
+        <![CDATA[select distinct e.cancerType, e.subtype from Evidence e join e.alterations a where a.alterationId in (:alts) ]]>
     </query>
-    <query name="findCancerTypesWithEvidencesForAlteration">
-        <![CDATA[select distinct e.cancerType from Evidence e join e.alterations a where a.alterationId=?]]>
+    <query name="findCancerTypesWithEvidencesForAlterations">
+        <![CDATA[select distinct e.cancerType from Evidence e join e.alterations a where a.alterationId in (:alts)]]>
     </query>
-    <query name="findSubtypesWithEvidencesForAlteration">
-        <![CDATA[select distinct e.subtype from Evidence e join e.alterations a where a.alterationId=?]]>
+    <query name="findSubtypesWithEvidencesForAlterations">
+        <![CDATA[select distinct e.subtype from Evidence e join e.alterations a where a.alterationId in (:alts)]]>
     </query>
     <query name="findAllCancerTypes">
         <![CDATA[select distinct e.cancerType from Evidence e where e.cancerType is not null]]>

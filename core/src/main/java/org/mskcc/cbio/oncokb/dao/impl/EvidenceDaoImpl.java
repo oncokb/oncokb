@@ -231,18 +231,36 @@ public class EvidenceDaoImpl
     }
 
     @Override
-    public List<Evidence> findTumorTypesWithEvidencesForAlteration(List<Alteration> alterations) {
-        return findByNamedQuery("findTumorTypesWithEvidencesForAlteration", alterations);
+    public List<Object> findTumorTypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        List<Integer> alts = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alts.add(alteration.getAlterationId());
+        }
+        String[] params = {"alts"};
+        List[] values = {alts};
+        return getHibernateTemplate().findByNamedQueryAndNamedParam("findTumorTypesWithEvidencesForAlterations", params, values);
     }
 
     @Override
-    public List<Evidence> findCancerTypesWithEvidencesForAlteration(List<Alteration> alterations) {
-        return findByNamedQuery("findCancerTypesWithEvidencesForAlteration", alterations);
+    public List<Object> findCancerTypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        List<Integer> alts = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alts.add(alteration.getAlterationId());
+        }
+        String[] params = {"alts"};
+        List[] values = {alts};
+        return getHibernateTemplate().findByNamedQueryAndNamedParam("findCancerTypesWithEvidencesForAlterations", params, values);
     }
 
     @Override
-    public List<Evidence> findSubtypesWithEvidencesForAlteration(List<Alteration> alterations) {
-        return findByNamedQuery("findSubtypesWithEvidencesForAlteration", alterations);
+    public List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        List<Integer> alts = new ArrayList<>();
+        for(Alteration alteration : alterations) {
+            alts.add(alteration.getAlterationId());
+        }
+        String[] params = {"alts"};
+        List[] values = {alts};
+        return getHibernateTemplate().findByNamedQueryAndNamedParam("findSubtypesWithEvidencesForAlterations", params, values);
     }
 
     @Override
