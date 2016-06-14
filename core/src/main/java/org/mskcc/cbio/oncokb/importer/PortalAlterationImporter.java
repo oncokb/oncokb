@@ -86,7 +86,7 @@ public class PortalAlterationImporter {
 
         JSONObject jObject = null;
         PortalAlteration portalAlteration = null;
-        String geneUrl = "http://oncokb.org/gene.json";
+        String geneUrl = "http://oncokb.org/legacy-api/gene.json";
         String geneResult = FileUtils.readRemote(geneUrl);
         JSONArray geneJSONResult = new JSONArray(geneResult);
         String genes[] = new String[geneJSONResult.length()];
@@ -133,7 +133,8 @@ public class PortalAlterationImporter {
                         Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
                         Set<Alteration> oncoKBAlterations = new HashSet<>(findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition));
                         portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, oncoKBAlterations, mutation_type);
-
+                        portalAlterationBo.save(portalAlteration);
+                        
                         //remove saved sample from sequenced sample list 
                         for (int n = 0; n < sequencedSamples.length(); n++) {
                             if (sequencedSamples.get(n).equals(sampleId)) {

@@ -45,12 +45,12 @@
             </column>
         </property>
 
-        <set lazy="false" name="oncoKBAlterations" table="portalAlt_oncoKBAlt">
+        <set lazy="false" name="oncoKBAlterations" table="portalAlt_oncoKBAlt" cascade="delete-orphan">
             <key>
-                <column name="alteration_id" not-null="true"/>
-            </key>
-            <many-to-many class="org.mskcc.cbio.oncokb.model.PortalAlteration">
                 <column name="portalAlteration_id" not-null="true"/>
+            </key>
+            <many-to-many class="org.mskcc.cbio.oncokb.model.Alteration">
+                <column name="alteration_id" not-null="true"/>
             </many-to-many>
         </set>
     </class>
