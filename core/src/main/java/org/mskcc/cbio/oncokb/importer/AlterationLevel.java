@@ -4,22 +4,16 @@
  */
 package org.mskcc.cbio.oncokb.importer;
 
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.LevelUtils;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
- * @author zhangh2 
+ * @author zhangh2
  */
 
 public class AlterationLevel {
@@ -37,13 +31,49 @@ public class AlterationLevel {
             for (Alteration alteration : alterationsWithoutVUS) {
                 List<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
                 List<Evidence> relevantEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidencesByAlteration(relevantAlts);
-                LevelOfEvidence levelOfEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(relevantEvidences));
-                String level = "NA";
+//                LevelOfEvidence levelOfEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(relevantEvidences));
 
-                if (levelOfEvidence != null && levelOfEvidence.getLevel() != null) {
-                    level = levelOfEvidence.getLevel().toUpperCase();
+                for (Evidence evidence : relevantEvidences) {
+                    LevelOfEvidence level = evidence.getLevelOfEvidence();
+                    TumorType tumorType = evidence.getTumorType();
+                    String levelStr = "";
+
+                    if (level != null && level.getLevel() != null) {
+                        levelStr = level.getLevel().toUpperCase();
+                    }
+
+                    if (tumorType != null) {
+                        String tumorTypeStr = tumorType.getName();
+                        Set<Treatment> treatments = evidence.getTreatments();
+                        List<String> treatmentNames = new ArrayList<>();
+
+                        for (Treatment treatment : treatments) {
+                            Set<Drug> drugs = treatment.getDrugs();
+                            List<String> drugNames = new ArrayList<>();
+
+                            for (Drug drug : drugs) {
+                                if (drug.getDrugName() != null) {
+                                    drugNames.add(drug.getDrugName());
+                                }
+                            }
+                            String drugStr = StringUtils.join(drugNames, " + ");
+
+                            treatmentNames.add(drugStr);
+                        }
+
+                        String treatmentStr = StringUtils.join(treatmentNames, ", ");
+                        
+                        if (treatmentStr != null && !treatmentStr.equals("")) {
+                            System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + tumorTypeStr + "\t" + levelStr + "\t" + treatmentStr);
+                        }
+                    }
                 }
-                System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + level);
+
+//                String level = "NA";
+//
+//                if (levelOfEvidence != null && levelOfEvidence.getLevel() != null) {
+//                    level = levelOfEvidence.getLevel().toUpperCase();
+//                }
             }
         }
     }
