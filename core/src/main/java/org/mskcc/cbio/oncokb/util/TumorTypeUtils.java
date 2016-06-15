@@ -327,11 +327,15 @@ public class TumorTypeUtils {
 
         questTumorType = questTumorType == null ? null : questTumorType.toLowerCase();
 
+        if (questTumorType == null) {
+            return new LinkedHashSet<>();
+        }
+
         List<OncoTreeType> ret = questTumorTypeMap.get(questTumorType);
-        
+
         if (ret == null || ret.size() == 0) {
             Set<OncoTreeType> oncoTreeTypes = getOncoTreeTypesByTumorType(questTumorType);
-            if(oncoTreeTypes != null) {
+            if (oncoTreeTypes != null) {
                 ret = new ArrayList<>(oncoTreeTypes);
             }
         }
@@ -407,12 +411,16 @@ public class TumorTypeUtils {
         }
 
         cbioTumorType = cbioTumorType == null ? null : cbioTumorType.toLowerCase();
-
+        
+        if (cbioTumorType == null) {
+            return new LinkedHashSet<>();
+        }
+        
         List<OncoTreeType> ret = cbioTumorTypeMap.get(cbioTumorType);
 
         if (ret == null || ret.size() == 0) {
             Set<OncoTreeType> oncoTreeTypes = getOncoTreeTypesByTumorType(cbioTumorType);
-            if(oncoTreeTypes != null) {
+            if (oncoTreeTypes != null) {
                 ret = new ArrayList<>(oncoTreeTypes);
             }
         }

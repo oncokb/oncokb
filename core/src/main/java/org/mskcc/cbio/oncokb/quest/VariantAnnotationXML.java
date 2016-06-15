@@ -59,14 +59,16 @@ public final class VariantAnnotationXML {
         //List<Drug> drugs = evidenceBo.findDrugsByAlterations(alterations);
 
         // find tumor types
-        List<Object> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlterations(alterations);
-        List<String> tumorTypes = new ArrayList<>();
+        Set<String> tumorTypes = new HashSet<>();
 
-        for (Object evidence : tumorTypesEvidence) {
-            if (evidence != null) {
-                Object[] evidences = (Object[]) evidence;
-                if (evidences.length > 0 && evidences[0] != null) {
-                    tumorTypes.add((String)evidences[0]);
+        if(alterations != null && alterations.size() > 0) {
+            List<Object> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlterations(alterations);
+            for (Object evidence : tumorTypesEvidence) {
+                if (evidence != null) {
+                    Object[] evidences = (Object[]) evidence;
+                    if (evidences.length > 0 && evidences[0] != null) {
+                        tumorTypes.add((String) evidences[0]);
+                    }
                 }
             }
         }

@@ -203,8 +203,8 @@ angular.module('oncokbApp')
                         var _alteration = trimAlteration(e[key]);
                         datum.alteration = _alteration;
                       }else if(/tumor/i.test(key)) {
-                        var _tumorType = check(e[key], 'tumorTypes');
-                        datum.tumorType = _tumorType;
+                        // var _tumorType = check(e[key], 'tumorTypes');
+                        datum.tumorType = e[key];
                       }
                     }
                   }

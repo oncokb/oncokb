@@ -101,8 +101,8 @@ angular.module('oncokbApp')
 
                     params.geneName = $scope.gene;
                     params.alteration = $scope.alteration;
-                    params.tumorType = $scope.view.selectedCancerType.cancerType;//ReportDataService accepts tumorType for now
-                    params.subtype = $scope.view.selectedSubtype.subtype;
+                    params.tumorType = $scope.view.selectedCancerType ? $scope.view.selectedCancerType.cancerType : '';//ReportDataService accepts tumorType for now
+                    params.subtype = $scope.view.selectedSubtype ?$scope.view.selectedSubtype.subtype : '';
                     params.annotation = annotation.annotation;
                     params.relevantCancerType = annotation.relevantCancerType;
 
@@ -371,11 +371,12 @@ angular.module('oncokbApp')
                     if($scope.view.selectedSubtype && $scope.view.selectedSubtype.subtype) {
                         params.tumorType = $scope.view.selectedSubtype.subtype;
                     }else {
-                        params.tumorType = $scope.view.selectedSubtype.subtype;
+                        params.tumorType = params.cancerType;
                     }
                 }else{
                     params.cancerType = '';
                     params.subtype = '';
+                    params.tumorType = '';
                 }
                 if($scope.hasOwnProperty('selectedConsequence') && $scope.selectedConsequence) {
                     params.consequence = $scope.selectedConsequence;

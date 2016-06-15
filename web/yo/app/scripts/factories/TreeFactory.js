@@ -68,9 +68,8 @@ angular.module('oncokbApp').factory('AnalysisEvidence', function() {
     function initTreeAlteration(datum, treeInfo) {
         var _datumName = '';
 
-        if( datum.tumorType &&
-            datum.tumorType.name) {
-            treeInfo.tumorType = datum.tumorType.name;
+        if( datum.cancerType ) {
+            treeInfo.cancerType = datum.cancerType;
             
             if( datum.treatments &&
                 datum.treatments.length > 0) {
@@ -204,7 +203,7 @@ angular.module('oncokbApp').factory('AnalysisEvidence', function() {
         }
     }
     
-    function initDesTreatments(datum, attrDatum, _geneName, _altName, _tumorTypeName) {
+    function initDesTreatments(datum, attrDatum, _geneName, _altName, _cancerType) {
         var _treatmentsName = '';
 
         for(var j = 0, _treatmentsL = datum.treatments.length; j < _treatmentsL; j++){
@@ -212,32 +211,32 @@ angular.module('oncokbApp').factory('AnalysisEvidence', function() {
             for(var m = 1, _drugsL = datum.treatments[j].drugs.length; m < _drugsL; m++) {
                 _treatmentsName += ',' + datum.treatments[j].drugs[m].drugName;
             }
-            if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty(_treatmentsName)){
-                description[_geneName][_altName][_tumorTypeName][_treatmentsName] = {};
+            if(!description[_geneName][_altName][_cancerType].hasOwnProperty(_treatmentsName)){
+                description[_geneName][_altName][_cancerType][_treatmentsName] = {};
             }
-            if(!description[_geneName][_altName][_tumorTypeName][_treatmentsName].hasOwnProperty('description')) {
-                description[_geneName][_altName][_tumorTypeName][_treatmentsName].description = [];
+            if(!description[_geneName][_altName][_cancerType][_treatmentsName].hasOwnProperty('description')) {
+                description[_geneName][_altName][_cancerType][_treatmentsName].description = [];
             }
 
-            description[_geneName][_altName][_tumorTypeName][_treatmentsName].description.push(attrDatum);
+            description[_geneName][_altName][_cancerType][_treatmentsName].description.push(attrDatum);
         }
     }
     
     function initDesTumorType(datum, attrDatum, _geneName, _altName) {
-        var _tumorTypeName = datum.tumorType.name;
+        var _cancerType = datum.cancerType;
         
-        if(!description[_geneName][_altName].hasOwnProperty(_tumorTypeName)){
-            description[_geneName][_altName][_tumorTypeName] = {};
+        if(!description[_geneName][_altName].hasOwnProperty(_cancerType)){
+            description[_geneName][_altName][_cancerType] = {};
         }
 
         if(datum.treatments && datum.treatments.length > 0) {
-            initDesTreatments(datum, attrDatum, _geneName, _altName, _tumorTypeName);
+            initDesTreatments(datum, attrDatum, _geneName, _altName, _cancerType);
         }else {
 
-            if(!description[_geneName][_altName][_tumorTypeName].hasOwnProperty('description')) {
-                description[_geneName][_altName][_tumorTypeName].description = [];
+            if(!description[_geneName][_altName][_cancerType].hasOwnProperty('description')) {
+                description[_geneName][_altName][_cancerType].description = [];
             }
-            description[_geneName][_altName][_tumorTypeName].description.push(attrDatum);
+            description[_geneName][_altName][_cancerType].description.push(attrDatum);
         }
     }
     
@@ -246,7 +245,7 @@ angular.module('oncokbApp').factory('AnalysisEvidence', function() {
             description[_geneName][_altName] = {};
         }
 
-        if(_datum.tumorType) {
+        if(_datum.cancerType) {
            initDesTumorType(_datum, _attrDatum, _geneName, _altName);
         }else {
             if(!description[_geneName][_altName].hasOwnProperty('description')) {
