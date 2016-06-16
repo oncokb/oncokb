@@ -18,10 +18,15 @@ import java.util.*;
  */
 public class TumorTypeUtils {
 
-    private static final String TUMOR_TYPE_ALL_TUMORS = "all tumors";
+    private static final String TUMOR_TYPE_ALL_TUMORS = "All Tumors";
     private static final String ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
     private static List<OncoTreeType> allOncoTreeCancerTypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeCancerTypesFromSource());
+        add(new OncoTreeType(null, null, "All Tumors", null, null));
+        add(new OncoTreeType(null, null, "All Liquid Tumors", null, null));
+        add(new OncoTreeType(null, null, "All Solid Tumors", null, null));
+        add(new OncoTreeType(null, null, "All Pediatric Tumors", null, null));
+        add(new OncoTreeType(null, null, "Germline Disposition", null, null));
     }};
     private static List<OncoTreeType> allOncoTreeSubtypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeSubtypesByCancerTypesFromSource(allOncoTreeCancerTypes));
@@ -340,6 +345,10 @@ public class TumorTypeUtils {
             }
         }
 
+        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
+        if(allTumor != null) {
+            ret.add(allTumor);
+        }
         return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
     }
 
@@ -424,7 +433,12 @@ public class TumorTypeUtils {
                 ret = new ArrayList<>(oncoTreeTypes);
             }
         }
-
+        
+        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
+        if(allTumor != null) {
+            ret.add(allTumor);
+        }
+        
         return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
     }
 
