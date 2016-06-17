@@ -123,8 +123,21 @@ angular.module('oncokbApp')
       }
     }
 
+      function getCancerTypesName(cancerTypes) {
+          var list = [];
+          cancerTypes.forEach(function(cancerType) {
+              if (cancerType.subtype.length > 0) {
+                  var str = cancerType.subtype;
+                  list.push(str);
+              } else if (cancerType.cancerType.length > 0) {
+                  list.push(cancerType.cancerType);
+              }
+          });
+          return list.join(', ');
+      };
+      
     function drawFuncTumorType(tumorType) {
-      drawFunc('Tumor Type: ' + tumorType.name, '2', 'Bold');
+      drawFunc('Tumor Type: ' + getCancerTypesName(tumorType.cancerTypes), '2', 'Bold');
 
       for(var key in tumorTypeAttrs) {
         if(tumorType[key]) {
