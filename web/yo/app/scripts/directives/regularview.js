@@ -96,6 +96,22 @@ angular.module('oncokbApp')
 
             $scope.findRegex = FindRegex.get;
 
+            $scope.isNonArray = function(object) {
+                if(!angular.isArray(object)) {
+                    return true;
+                }else {
+                    return false;
+                }
+            }
+
+            $scope.isArray = function(object) {
+                if(angular.isArray(object)) {
+                    return true;
+                }else {
+                    return false;
+                }
+            }
+            
             function hasEvidenceLevel(data) {
                 if(typeof data === 'object' && 
                     data.hasOwnProperty('level_of_evidence_for_patient_indication') && 
