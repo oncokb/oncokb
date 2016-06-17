@@ -185,7 +185,12 @@ angular.module('oncokbApp')
                 return false;
             }
             $scope.init = function () {
-
+                $scope.view = {};
+                $scope.reportParams = {
+                    reportContent: {},
+                    requestInfo: {}
+                };
+                
                 $scope.rendering = false;
 
                 $scope.loadingPage = true;
@@ -255,6 +260,8 @@ angular.module('oncokbApp')
                     $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
                     $scope.cancerTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'cancerType');
                     $scope.subtypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'subtype');
+                    $scope.view.filteredCancerTypes = angular.copy($scope.cancerTypes);
+                    $scope.view.filteredSubtypes = angular.copy($scope.subtypes);
                     $scope.loadingPage = false;
                 }else {
                     DatabaseConnector.getGeneTumorType(function(data){
@@ -272,12 +279,6 @@ angular.module('oncokbApp')
                         checkUrl();
                     });
                 }
-
-                $scope.view = {};
-                $scope.reportParams = {
-                    reportContent: {},
-                    requestInfo: {}
-                };
             };
 
             $scope.isSearchable = function() {
@@ -425,7 +426,7 @@ angular.module('oncokbApp')
                 if (n) {
                     $scope.view.selectedCancerType = findCancerType(n.cancerType);
                 }else {
-                    console.log($scope.view.selectedSubtype);
+                    // console.log($scope.view.selectedSubtype);
                 }
             });
 
