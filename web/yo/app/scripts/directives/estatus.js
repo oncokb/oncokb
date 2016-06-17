@@ -7,7 +7,7 @@
  * # eStatus
  */
 angular.module('oncokbApp')
-  .directive('eStatus', function (gapi) {
+  .directive('eStatus', function (gapi, $timeout) {
     return {
       templateUrl: 'views/eStatus.html',
       restrict: 'AE',
@@ -17,6 +17,7 @@ angular.module('oncokbApp')
       },
       replace: true,
       link: function postLink(scope, element, attrs) {
+          scope.mouseLeaveTimeout = '';
         scope.checkboxes = [{
             display: 'Unvetted',
             value: 'uv',
@@ -58,10 +59,16 @@ angular.module('oncokbApp')
             });
 
         element.find('status').bind('mouseenter', function() {
-          element.find('statusBody').show();
+            if(scope.mouseLeaveTimeout) {
+                $timeout.cancel(scope.mouseLeaveTimeout);
+                scope.mouseLeaveTimeout = '';
+            }
+            element.find('statusBody').show();
         });
         element.find('status').bind('mouseleave', function() {
-          element.find('statusBody').hide();
+            scope.mouseLeaveTimeout = $timeout(function() {
+                element.find('statusBody').hide();
+            }, 500);
         });
       },
       controller: function($scope, $rootScope){
