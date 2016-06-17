@@ -14,22 +14,22 @@ import java.util.Set;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-10T02:49:36.208Z")
 public class ClinicalVariant {
 
-    private String variant = null;
+    private Alteration variant = null;
     private String cancerType = null;
     private String level = null;
     private Set<String> drug = new HashSet<String>();
     private Set<String> drugPmids = new HashSet<String>();
 
-
+    
     /**
      **/
     @ApiModelProperty(value = "")
     @JsonProperty("variant")
-    public String getVariant() {
+    public Alteration getVariant() {
         return variant;
     }
 
-    public void setVariant(String variant) {
+    public void setVariant(Alteration variant) {
         this.variant = variant;
     }
 
