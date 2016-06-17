@@ -8,8 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'OncoKB',
-        function ($scope, $rootScope, $location, $timeout, $routeParams, _, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, OncoKB) {
+    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'OncoKB', 'stringUtils',
+        function ($scope, $rootScope, $location, $timeout, $routeParams, _, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, OncoKB, stringUtils) {
             function saveGene(docs, docIndex, excludeObsolete, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -32,20 +32,20 @@ angular.module('oncokbApp')
                                 if(vusData) {
                                     params.vus = JSON.stringify(vusData);
                                 }
-                                DatabaseConnector.updateGene(params,
-                                    function (result) {
-                                        console.log('\t success', result);
+                                // DatabaseConnector.updateGene(params,
+                                //     function (result) {
+                                //         console.log('\t success', result);
+                                //         $timeout(function () {
+                                //             saveGene(docs, ++docIndex, excludeObsolete, callback);
+                                //         }, 200, false);
+                                //     },
+                                //     function (result) {
+                                //         console.log('\t failed', result);
                                         $timeout(function () {
                                             saveGene(docs, ++docIndex, excludeObsolete, callback);
                                         }, 200, false);
-                                    },
-                                    function (result) {
-                                        console.log('\t failed', result);
-                                        $timeout(function () {
-                                            saveGene(docs, ++docIndex, excludeObsolete, callback);
-                                        }, 200, false);
-                                    }
-                                );
+                                //     }
+                                // );
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
@@ -1827,7 +1827,105 @@ angular.module('oncokbApp')
                         console.log('failed.');
                     });
             };
+            
+            $scope.convertMutationEffect = function() {
+                convertMutationEffect(0, function() {
+                    console.log('Done converting mutation effect.');
+                });
+            };
 
+            function convertOncogenic(oncogenic) {
+                var result = 'Unknown';
+                if (oncogenic) {
+                    switch (oncogenic) {
+                        case 'YES':
+                            result = 'Yes';
+                            break;
+                        case 'LIKELY':
+                            result = 'Likely';
+                            break;
+                        case 'NO':
+                            result = 'Likely Neutral';
+                            break;
+                        case 'UNKNOWN':
+                            result = 'Unknown';
+                            break;
+                        case 'false':
+                            result = 'Likely Neutral';
+                            break;
+                        default:
+                            console.log('Couldn\'t find mapping for', oncogenic);
+                            break;
+                    }
+                }
+                return result;
+            }
+
+            function convertMutationEffect(index, callback) {
+                if (index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        } else {
+                            console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                model.beginCompoundOperation();
+                                gene.mutations.asArray().forEach(function(mutation, index) {
+                                    if (mutation.effect && mutation.effect.value.getText()) {
+                                        var effect = mutation.effect.value.getText();
+
+                                        if (mutation.effect.value.getText().toLowerCase() === 'other') {
+                                            if (mutation.effect.addOn.getText()) {
+                                                effect = mutation.effect.addOn.getText();
+                                            } else {
+                                                effect = 'Other';
+                                            }
+                                        } else {
+                                            if (mutation.effect.addOn.getText()) {
+                                                if (mutation.effect.addOn.getText().toLowerCase().indexOf(mutation.effect.value.getText().toLowerCase()) !== -1) {
+                                                    effect = mutation.effect.addOn.getText();
+                                                } else {
+                                                    effect += ' ' + mutation.effect.addOn.getText();
+                                                }
+                                            }
+                                        }
+
+                                        var message = '\t\t' + mutation.name + '\tThe original mutation effect is ' + effect;
+                                        mutation.effect.value.setText(stringUtils.findMutationEffect(effect));
+                                        // message += '\tconverting to: ' + stringUtils.findMutationEffect(effect);
+                                        // console.log(message);
+                                        mutation.effect.addOn.setText('');
+                                    }
+
+                                    if (mutation.oncogenic) {
+                                        var message = '\t\t' + mutation.name + '\tThe original oncogenic is ' + mutation.oncogenic.getText();
+                                        mutation.oncogenic.setText(convertOncogenic(mutation.oncogenic.getText()));
+                                        // message += '\tconverting to: ' + convertOncogenic(mutation.oncogenic.getText());
+                                        // console.log(message);
+                                    }
+                                });
+                                model.endCompoundOperation();
+                                $timeout(function() {
+                                    convertMutationEffect(++index, callback);
+                                }, 200, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function() {
+                                    convertMutationEffect(++index, callback);
+                                }, 200, false);
+                            }
+                        }
+                    });
+                } else {
+                    if (_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
             function getCacheStatus() {
                 DatabaseConnector.getCacheStatus().then(function(result) {
                     $scope.status.cache = result.hasOwnProperty('status') ? result.status : 'unknown';
@@ -3772,8 +3870,8 @@ angular.module('oncokbApp')
             $scope.newGene = {};
             $scope.collaborators = {};
             $scope.checkboxes = {
-                'oncogenic': ['YES', 'LIKELY', 'LIKELY NEUTRAL', 'UNKNOWN'],
-                'mutation_effect': ['Gain-of-function', 'Likely gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Unknown'],
+                'oncogenic': ['Yes', 'Likely', 'Likely Neutral', 'Unknown'],
+                'mutation_effect': ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Unknown'],
                 'geneStatus': ['Complete', 'Proceed with caution', 'Not ready'],
                 'hotspot': ['TRUE', 'FALSE']
             };

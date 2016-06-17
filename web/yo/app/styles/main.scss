@@ -213,7 +213,7 @@ p.editableBox.doubleH {
   width: 175px;
 }
 .mutationEffect .header {
-  width: 140px;
+  width: 110px;
 }
 .approvedIndication .content,.mutationEffect .content{
   float: left;
@@ -222,10 +222,10 @@ p.editableBox.doubleH {
   width: calc(100% - 175px);
 }
 .mutationEffect .content{
-  width: calc(100% - 140px);
+  width: calc(100% - 110px);
 }
 .mutationEffect .content span{
-  width: 100%;
+  width: 210px;
   float: left;
 }
 .mutationEffect .content span input[type="text"]{

@@ -231,7 +231,7 @@ public class DriveAnnotationParser {
                     case "likely":
                         oncogenic = "2";
                         break;
-                    case "no":
+                    case "likely neutral":
                         oncogenic = "0";
                         break;
                     case "unknown":
