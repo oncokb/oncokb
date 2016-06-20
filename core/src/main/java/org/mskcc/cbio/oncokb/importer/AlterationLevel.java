@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -35,15 +36,26 @@ public class AlterationLevel {
 
                 for (Evidence evidence : relevantEvidences) {
                     LevelOfEvidence level = evidence.getLevelOfEvidence();
-                    TumorType tumorType = evidence.getTumorType();
+                    String tumortype = evidence.getSubtype();
+                    OncoTreeType oncoTreeType = null;
+
+                    if (tumortype != null) {
+                        oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(tumortype);
+                    } else {
+                        tumortype = evidence.getCancerType();
+                        if (tumortype != null) {
+                            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(tumortype);
+                        }
+                    }
                     String levelStr = "";
 
                     if (level != null && level.getLevel() != null) {
                         levelStr = level.getLevel().toUpperCase();
                     }
 
-                    if (tumorType != null) {
-                        String tumorTypeStr = tumorType.getName();
+                    if (oncoTreeType != null) {
+                        String cancerTypeStr = oncoTreeType.getCancerType();
+                        String subtypeStr = oncoTreeType.getSubtype();
                         Set<Treatment> treatments = evidence.getTreatments();
                         List<String> treatmentNames = new ArrayList<>();
 
@@ -62,9 +74,9 @@ public class AlterationLevel {
                         }
 
                         String treatmentStr = StringUtils.join(treatmentNames, ", ");
-                        
+
                         if (treatmentStr != null && !treatmentStr.equals("")) {
-                            System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + tumorTypeStr + "\t" + levelStr + "\t" + treatmentStr);
+                            System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + cancerTypeStr + "\t" + subtypeStr + "\t" + levelStr + "\t" + treatmentStr);
                         }
                     }
                 }
