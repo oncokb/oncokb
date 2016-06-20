@@ -47,8 +47,9 @@ OncoKB.config = {
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     // apiLink: 'http://dashi.cbio.mskcc.org:38080/api/',
-    apiLink: 'http://localhost:8080/oncokb/legacy-api/',
-    // apiLink: 'legacy-api/',
+    // apiLink: 'http://172.21.75.67:8080/api/legacy-api/',
+    apiLink: 'legacy-api/',
+    curationLink: 'legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {}
 };
@@ -567,7 +568,7 @@ angular.module('oncokbApp', [
                 var $rootScope = $injector.get('$rootScope');
                 $rootScope.addError({message: 'Exception', reason: exception, case: cause});
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                $delegate(exception, cause);
+                // $delegate(exception, cause);
             };
         });
 
