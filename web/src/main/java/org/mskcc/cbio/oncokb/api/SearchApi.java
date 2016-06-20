@@ -161,7 +161,7 @@ public class SearchApi {
                     Map<EvidenceType, Set<Evidence>> map = entry.getValue();
 
                     BiologicalVariant variant = new BiologicalVariant();
-                    variant.setVariant(alteration.getAlteration());
+                    variant.setVariant(alteration);
                     Oncogenicity oncogenicity = Oncogenicity.getByLevel(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.ONCOGENIC, map.get(EvidenceType.ONCOGENIC)));
                     variant.setOncogenic(oncogenicity != null ? oncogenicity.getDescription() : "");
                     variant.setMutationEffect(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.MUTATION_EFFECT, map.get(EvidenceType.MUTATION_EFFECT)));
@@ -249,8 +249,8 @@ public class SearchApi {
 
                         for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : _entry.getValue().entrySet()) {
                             ClinicalVariant variant = new ClinicalVariant();
-                            variant.setVariant(alteration.getAlteration());
                             variant.setOncoTreeType(oncoTreeType);
+                            variant.setVariant(alteration);
                             variant.setLevel(__entry.getKey().getLevel());
                             variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
                             variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
