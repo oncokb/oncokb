@@ -351,6 +351,9 @@ public class SummaryUtils {
                 summary = StringEscapeUtils.escapeXml(summary).trim();
             }
         }
+
+        summary = summary.trim();
+        summary = summary.endsWith(".") ? summary : summary + ".";
         return summary;
     }
 
@@ -361,6 +364,8 @@ public class SummaryUtils {
 
         sb.append(geneSummary(genes.iterator().next()));
 
+        sb.append(" ");
+            
         sb.append(SummaryUtils.variantSummary(genes, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
 
         return sb.toString();

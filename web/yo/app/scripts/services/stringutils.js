@@ -11,14 +11,65 @@ angular.module('oncokbApp')
     .factory('stringUtils', function() {
         function findMutationEffect(query) {
             var mapping = {
+                "Loss-of-function, dominant negative, or gain-of-function": {
+                    "after": "Likely Loss-of-function"
+                },
+                "Activating Likely, mild effect": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Activating moderate": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Activating Probably mild effect": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Activating LIkely": {
+                    "after": "Likely Neutral"
+                },
+                "likely passenger mutation": {
+                    "after": "Likely Neutral"
+                },
+                "passenger mutation": {
+                    "after": "Neutral"
+                },
+                "possibly activating": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Activating Activation potential appears to be much weaker than E545K variant.": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Activating Weak activation": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Functional studies needed.": {
+                    "after": "Unknown"
+                },
+                "Likely to be activating": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Needs functional characterization.": {
+                    "after": "Unknown"
+                },
+                "Possibly activating, although the evidence is not quite conclusive.": {
+                    "after": "Unknown"
+                },
+                "Weak activity": {
+                    "after": "Likely Gain-of-function"
+                },
+                "Weakly activating": {
+                    "after": "Likely Gain-of-function"
+                },
                 "Gain-of-function": {
                     "after": "Gain-of-function"
                 },
                 "Likely Gain-of-function": {
                     "after": "Likely Gain-of-function"
                 },
+                "Loss-of-functionn": {
+                    "after": "Loss-of-function"
+                },
                 "Loss-of-function": {
-                    "after": "Loss-of-functionn"
+                    "after": "Loss-of-function"
                 },
                 "Likely Loss-of-function": {
                     "after": "Likely Loss-of-function"

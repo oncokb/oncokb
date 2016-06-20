@@ -1853,6 +1853,18 @@ angular.module('oncokbApp')
                         case 'false':
                             result = 'Likely Neutral';
                             break;
+                        case 'Yes':
+                            result = 'Yes';
+                            break;
+                        case 'Likely':
+                            result = 'Likely';
+                            break;
+                        case 'Likely Neutral':
+                            result = 'Likely Neutral';
+                            break;
+                        case 'Unknown':
+                            result = 'Unknown';
+                            break;
                         default:
                             console.log('Couldn\'t find mapping for', oncogenic);
                             break;
@@ -1868,54 +1880,64 @@ angular.module('oncokbApp')
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            console.log(document.title, '\t\t', index + 1);
+                            // console.log(document.title, '\t\t', index + 1);
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
-                                model.beginCompoundOperation();
+                                var geneIndex = index + 1;
+                                // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function(mutation, index) {
                                     if (mutation.effect && mutation.effect.value.getText()) {
                                         var effect = mutation.effect.value.getText();
-
-                                        if (mutation.effect.value.getText().toLowerCase() === 'other') {
-                                            if (mutation.effect.addOn.getText()) {
-                                                effect = mutation.effect.addOn.getText();
-                                            } else {
-                                                effect = 'Other';
-                                            }
-                                        } else {
-                                            if (mutation.effect.addOn.getText()) {
-                                                if (mutation.effect.addOn.getText().toLowerCase().indexOf(mutation.effect.value.getText().toLowerCase()) !== -1) {
+                                        var newEffects = ['Gain-of-function','Likely Gain-of-function','Loss-of-function','Likely Loss-of-function','Switch-of-function','Likely Switch-of-function','Neutral','Likely Neutral','Unknown'];
+                                        
+                                        if(newEffects.indexOf(effect) === -1) {
+                                            if (mutation.effect.value.getText().toLowerCase() === 'other') {
+                                                if (mutation.effect.addOn.getText()) {
                                                     effect = mutation.effect.addOn.getText();
                                                 } else {
-                                                    effect += ' ' + mutation.effect.addOn.getText();
+                                                    effect = 'Other';
+                                                }
+                                            } else {
+                                                if (mutation.effect.addOn.getText()) {
+                                                    if (mutation.effect.addOn.getText().toLowerCase().indexOf(mutation.effect.value.getText().toLowerCase()) !== -1) {
+                                                        effect = mutation.effect.addOn.getText();
+                                                    } else {
+                                                        effect += ' ' + mutation.effect.addOn.getText();
+                                                    }
                                                 }
                                             }
+    
+                                            var message = geneIndex + '\t' + document.title + '\t' + mutation.name + '\tmutation effect\t' + effect;
+                                            // mutation.effect.value.setText(stringUtils.findMutationEffect(effect));
+                                            message += '\t' + stringUtils.findMutationEffect(effect);
+                                            console.log(message);
+                                        }else {
+                                            var message = geneIndex + '\t' + document.title 
+                                                + '\t' + mutation.name + '\tmutation effect\t' 
+                                                + effect + ' ' + mutation.effect.addOn.getText()
+                                                + '\t' + effect + '\t1';
+                                            console.log(message);
                                         }
-
-                                        var message = '\t\t' + mutation.name + '\tThe original mutation effect is ' + effect;
-                                        mutation.effect.value.setText(stringUtils.findMutationEffect(effect));
-                                        // message += '\tconverting to: ' + stringUtils.findMutationEffect(effect);
-                                        // console.log(message);
-                                        mutation.effect.addOn.setText('');
+                                        // mutation.effect.addOn.setText('');
                                     }
 
                                     if (mutation.oncogenic) {
-                                        var message = '\t\t' + mutation.name + '\tThe original oncogenic is ' + mutation.oncogenic.getText();
-                                        mutation.oncogenic.setText(convertOncogenic(mutation.oncogenic.getText()));
-                                        // message += '\tconverting to: ' + convertOncogenic(mutation.oncogenic.getText());
-                                        // console.log(message);
+                                        var message = geneIndex + '\t' + document.title + '\t' + mutation.name + '\toncogenic\t' + mutation.oncogenic.getText();
+                                        // mutation.oncogenic.setText(convertOncogenic(mutation.oncogenic.getText()));
+                                        message += '\t' + convertOncogenic(mutation.oncogenic.getText());
+                                        console.log(message);
                                     }
                                 });
-                                model.endCompoundOperation();
+                                // model.endCompoundOperation();
                                 $timeout(function() {
                                     convertMutationEffect(++index, callback);
-                                }, 200, false);
+                                }, 500, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
                                     convertMutationEffect(++index, callback);
-                                }, 200, false);
+                                }, 500, false);
                             }
                         }
                     });
