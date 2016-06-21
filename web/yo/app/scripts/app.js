@@ -30,13 +30,13 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0BzBfo69g8fP6aXBMX3F3dmtFbE0', //testing folder
+    // folderId: '0BzBfo69g8fP6X0JNOGdLdkxlalk', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
     // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    folderId: '0BzBfo69g8fP6RU0wMkdiVl9yZDg', //curation folder 05/19/2016
+    folderId: '0BzBfo69g8fP6eERxcnpmMjRtYVU', //curation folder 05/19/2016
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -46,10 +46,11 @@ OncoKB.config = {
     backupFolderId: '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk',
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
-    // apiLink: 'http://dashi.cbio.mskcc.org:38080/api/',
-    // apiLink: 'http://172.21.75.67:8080/api/legacy-api/',
-    apiLink: 'legacy-api/',
+    apiLink: 'http://dashi.cbio.mskcc.org:38080/api/legacy-api/',
+    // apiLink: 'http://localhost:8080/api/legacy-api/',
+    // apiLink: 'legacy-api/',
     curationLink: 'legacy-api/',
+    // curationLink: 'http://localhost:8080/api/legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {}
 };
