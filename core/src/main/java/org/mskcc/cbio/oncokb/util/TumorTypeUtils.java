@@ -282,7 +282,7 @@ public class TumorTypeUtils {
 
     /*-- PRIVATE --*/
     private static List<OncoTreeType> findTumorTypes(String tumorType, String source) {
-        if (source == "cbioportal") {
+        if (source.equals("cbioportal")) {
             return new ArrayList<>(fromCbioportalTumorType(tumorType));
         } else {
             return new ArrayList<>(fromQuestTumorType(tumorType));
@@ -362,10 +362,14 @@ public class TumorTypeUtils {
 
         mapped = getOncoTreeSubtypeByCode(tumorType);
         if (mapped == null) {
-            mapped = getOncoTreeSubtypeByCode(tumorType);
+            mapped = getOncoTreeSubtypeByName(tumorType);
         }
+        
         if (mapped == null) {
             mapped = getOncoTreeCancerType(tumorType);
+        }else {
+            //Also include the cancer type into relevant types
+            types.add(getOncoTreeCancerType(mapped.getCancerType()));
         }
         if (mapped != null) {
             types.add(mapped);

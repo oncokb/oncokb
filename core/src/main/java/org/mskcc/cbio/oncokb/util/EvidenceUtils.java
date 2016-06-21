@@ -285,7 +285,7 @@ public class EvidenceUtils {
                                     subtypes = TumorTypeUtils.getOncoTreeSubtypesByCode(Collections.singletonList(tempEvidence.getSubtype()));
                                 }
 
-                                if (evidenceQuery.getOncoTreeTypes().contains(cancerTypes) || evidenceQuery.getOncoTreeTypes().contains(subtypes)) {
+                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), cancerTypes) || !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), subtypes)) {
                                     filtered.add(tempEvidence);
                                 } else {
                                     if (tempEvidence.getLevelOfEvidence() != null) {
