@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TumorTypeController {
 
-    @RequestMapping(value = "/legacy-api/tumorType.json")
+//    @RequestMapping(value = "/legacy-api/tumorType.json")
     public
     @ResponseBody
     List<OncoTreeType> getTumorType(

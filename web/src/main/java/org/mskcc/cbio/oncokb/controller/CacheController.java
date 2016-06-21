@@ -25,7 +25,7 @@ import java.util.*;
  */
 @Controller
 public class CacheController {
-    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.GET, produces = "application/json")
+//    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
     Map<String, String> getAlteration(
@@ -83,7 +83,7 @@ public class CacheController {
         return result;
     }
 
-    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.POST, produces = "application/json")
+//    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.POST, produces = "application/json")
     public
     @ResponseBody
     Map<String, String> postAlteration(
