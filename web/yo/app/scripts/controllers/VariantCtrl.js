@@ -257,9 +257,11 @@ angular.module('oncokbApp')
                 $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
                 if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
+                    var separatedTumorTypes = separateTumorTypes(OncoKB.global.tumorTypes);
+
                     $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
-                    $scope.cancerTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'cancerType');
-                    $scope.subtypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'subtype');
+                    $scope.cancerTypes = separatedTumorTypes.cancerTypes;
+                    $scope.subtypes = separatedTumorTypes.subtypes;
                     $scope.view.filteredCancerTypes = angular.copy($scope.cancerTypes);
                     $scope.view.filteredSubtypes = angular.copy($scope.subtypes);
                     $scope.loadingPage = false;
