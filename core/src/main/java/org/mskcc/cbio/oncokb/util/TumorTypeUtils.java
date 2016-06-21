@@ -116,11 +116,13 @@ public class TumorTypeUtils {
     public static List<OncoTreeType> getOncoTreeCancerTypes(List<String> cancerTypes) {
         List<OncoTreeType> mapped = new ArrayList<>();
 
-        for (String cancerType : cancerTypes) {
-            for (OncoTreeType oncoTreeType : allOncoTreeCancerTypes) {
-                if (cancerType.equalsIgnoreCase(oncoTreeType.getCancerType())) {
-                    mapped.add(oncoTreeType);
-                    break;
+        if(cancerTypes != null) {
+            for (String cancerType : cancerTypes) {
+                for (OncoTreeType oncoTreeType : allOncoTreeCancerTypes) {
+                    if (cancerType.equalsIgnoreCase(oncoTreeType.getCancerType())) {
+                        mapped.add(oncoTreeType);
+                        break;
+                    }
                 }
             }
         }
@@ -188,11 +190,13 @@ public class TumorTypeUtils {
     public static List<OncoTreeType> getOncoTreeSubtypesByCode(List<String> codes) {
         List<OncoTreeType> mapped = new ArrayList<>();
 
-        for (String code : codes) {
-            for (OncoTreeType oncoTreeType : allOncoTreeSubtypes) {
-                if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
-                    mapped.add(oncoTreeType);
-                    break;
+        if(codes != null) {
+            for (String code : codes) {
+                for (OncoTreeType oncoTreeType : allOncoTreeSubtypes) {
+                    if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
+                        mapped.add(oncoTreeType);
+                        break;
+                    }
                 }
             }
         }

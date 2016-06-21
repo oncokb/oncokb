@@ -274,8 +274,16 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(tempEvidence);
                             } else {
-                                List<OncoTreeType> cancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
-                                List<OncoTreeType> subtypes = TumorTypeUtils.getOncoTreeSubtypesByCode(Collections.singletonList(tempEvidence.getSubtype()));
+                                List<OncoTreeType> cancerTypes = new ArrayList<>();
+                                List<OncoTreeType> subtypes = new ArrayList<>();
+                                
+                                if(tempEvidence.getCancerType() != null) {
+                                    cancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
+                                }
+
+                                if(tempEvidence.getSubtype() != null) {
+                                    subtypes = TumorTypeUtils.getOncoTreeSubtypesByCode(Collections.singletonList(tempEvidence.getSubtype()));
+                                }
 
                                 if (evidenceQuery.getOncoTreeTypes().contains(cancerTypes) || evidenceQuery.getOncoTreeTypes().contains(subtypes)) {
                                     filtered.add(tempEvidence);
