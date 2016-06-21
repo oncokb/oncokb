@@ -22,10 +22,10 @@ import java.util.*;
 import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Controller
-@RequestMapping(value = "/public-api/v1/numbers", produces = {APPLICATION_JSON_VALUE})
-@Api(value = "/numbers", description = "the numbers API")
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
+//@Controller
+//@RequestMapping(value = "/public-api/v1/numbers", produces = {APPLICATION_JSON_VALUE})
+//@Api(value = "/numbers", description = "the numbers API")
+//@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class NumbersApi {
 
 
@@ -33,9 +33,9 @@ public class NumbersApi {
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK"),
         @io.swagger.annotations.ApiResponse(code = 204, message = "")})
-    @RequestMapping(value = "/gene/{hugoSymbol}",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/gene/{hugoSymbol}",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiNumbersGene> numbersGeneGet(
         @ApiParam(value = "The gene symbol used in Human Genome Organisation.", required = true) @PathVariable("hugoSymbol") String hugoSymbol
     )
@@ -65,9 +65,9 @@ public class NumbersApi {
     @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = ApiNumbersGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/genes/",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/genes/",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiNumbersGenes> numbersGenesGet()
         throws NotFoundException {
         Long oldTime = new Date().getTime();
@@ -102,9 +102,9 @@ public class NumbersApi {
     @ApiOperation(value = "", notes = "Get numbers served for the main page dashboard.", response = ApiNumbersMain.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/main/",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/main/",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiNumbersMain> numbersMainGet()
         throws NotFoundException {
 
@@ -147,9 +147,9 @@ public class NumbersApi {
     @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = ApiNumbersGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/levels/",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/levels/",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiNumbersLeves> numbersLevelsGet()
         throws NotFoundException {
 

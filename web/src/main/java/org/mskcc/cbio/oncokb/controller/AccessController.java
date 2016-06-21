@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class AccessController {
-    @RequestMapping(value="/legacy-api/access", method = RequestMethod.GET, produces = "application/json")
+//    @RequestMapping(value="/legacy-api/access", method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody
     StringResponse getAlteration() {
         Date date = new Date();

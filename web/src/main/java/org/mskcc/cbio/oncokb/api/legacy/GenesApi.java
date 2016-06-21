@@ -20,19 +20,19 @@ import java.util.Set;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Controller
-@RequestMapping(value = "/public-api/v1/genes", produces = {APPLICATION_JSON_VALUE})
-@Api(value = "/genes", description = "the genes API")
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
+//@Controller
+//@RequestMapping(value = "/public-api/v1/genes", produces = {APPLICATION_JSON_VALUE})
+//@Api(value = "/genes", description = "the genes API")
+//@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class GenesApi {
 
 
     @ApiOperation(value = "", notes = "Get list of current existed genes.", response = ApiGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiGenes> genesGet(@ApiParam(value = "The highest level of gene") @RequestParam(value = "level", required = false) String level
 
 
@@ -54,9 +54,9 @@ public class GenesApi {
     @ApiOperation(value = "", notes = "Get gene info.", response = ApiGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/{entrezGeneId}",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/{entrezGeneId}",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiGene> genesHugoSymbolGet(
         @ApiParam(value = "The gene symbol used in Human Genome Organisation.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
 

@@ -17,9 +17,9 @@ import java.util.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Controller
-@RequestMapping(value = "/public-api/v1/search", produces = {APPLICATION_JSON_VALUE})
-@Api(value = "/search", description = "the search API")
+//@Controller
+//@RequestMapping(value = "/public-api/v1/search", produces = {APPLICATION_JSON_VALUE})
+//@Api(value = "/search", description = "the search API")
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class SearchApi {
     final Set<EvidenceType> SUPPORTED_EVIDENCE_TYPES = new HashSet<EvidenceType>() {{
@@ -30,9 +30,9 @@ public class SearchApi {
     @ApiOperation(value = "", notes = "Get list of evidences.", response = ApiSearchEvidences.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/evidences",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/evidences",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiSearchEvidences> searchEvidencesGet(
         @ApiParam(value = "") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "") @RequestParam(value = "type", required = false) String type
@@ -80,9 +80,9 @@ public class SearchApi {
     @ApiOperation(value = "", notes = "Search to find gene. Code 204 will be returned in the META if no gene matched.", response = ApiGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/gene",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/gene",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiGenes> searchGeneHugoSymbolGet(
         @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.", required = true) @RequestParam(value = "query", required = false) String query,
         @ApiParam(value = "Find the exact match with query.", defaultValue = "false") @RequestParam(value = "exactMatch", required = false, defaultValue = "false") Boolean exactMatch
@@ -105,9 +105,9 @@ public class SearchApi {
     @ApiOperation(value = "", notes = "Get annotated variants information for specified gene.", response = ApiSearchVariantsBiological.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/variants/biological",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/variants/biological",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiSearchVariantsBiological> searchVariantsBiologicalGet(@ApiParam(value = "") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     ) throws NotFoundException {
         ApiSearchVariantsBiological instance = new ApiSearchVariantsBiological();
@@ -129,9 +129,9 @@ public class SearchApi {
     @ApiOperation(value = "", notes = "Get list of variant clinical information for specified gene.", response = ApiSearchVariantsClinical.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/variants/clinical",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/variants/clinical",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiSearchVariantsClinical> searchVariantsClinicalGet(@ApiParam(value = "") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
 
     ) throws NotFoundException {

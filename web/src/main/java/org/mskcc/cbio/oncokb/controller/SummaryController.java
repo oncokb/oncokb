@@ -24,9 +24,9 @@ import java.util.List;
  * Created by Hongxin on 8/10/15.
  */
 @Controller
-@RequestMapping(value = "/legacy-api/summary.json")
+//@RequestMapping(value = "/legacy-api/summary.json")
 public class SummaryController {
-    @RequestMapping(method = RequestMethod.GET)
+//    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     List<String> getSummary(
@@ -51,7 +51,7 @@ public class SummaryController {
         return summaryList;
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+//    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     List<SummaryQueryRes> getSummary(

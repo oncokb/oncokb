@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class VariantAnnotationXMLController {
-    @RequestMapping(value = "/legacy-api/var_annotation", produces = "application/xml;charset=UTF-8")//plain/text
+//    @RequestMapping(value = "/legacy-api/var_annotation", produces = "application/xml;charset=UTF-8")//plain/text
     public
     @ResponseBody
     String getVariantAnnotation(
