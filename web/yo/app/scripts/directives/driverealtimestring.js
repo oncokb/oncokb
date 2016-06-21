@@ -83,7 +83,7 @@ angular.module('oncokbApp')
             $scope.content.stringO = '';
           }
           $scope.content.preStringO = $scope.content.stringO;
-          console.log(event, $scope.content.stringO);
+          // console.log(event, $scope.content.stringO);
         }
       }
     };

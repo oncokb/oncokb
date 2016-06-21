@@ -32,20 +32,20 @@ angular.module('oncokbApp')
                                 if(vusData) {
                                     params.vus = JSON.stringify(vusData);
                                 }
-                                // DatabaseConnector.updateGene(params,
-                                //     function (result) {
-                                //         console.log('\t success', result);
-                                //         $timeout(function () {
-                                //             saveGene(docs, ++docIndex, excludeObsolete, callback);
-                                //         }, 200, false);
-                                //     },
-                                //     function (result) {
-                                //         console.log('\t failed', result);
+                                DatabaseConnector.updateGene(params,
+                                    function (result) {
+                                        console.log('\t success', result);
                                         $timeout(function () {
                                             saveGene(docs, ++docIndex, excludeObsolete, callback);
                                         }, 200, false);
-                                //     }
-                                // );
+                                    },
+                                    function (result) {
+                                        console.log('\t failed', result);
+                                        $timeout(function () {
+                                            saveGene(docs, ++docIndex, excludeObsolete, callback);
+                                        }, 200, false);
+                                    }
+                                );
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
@@ -1880,12 +1880,12 @@ angular.module('oncokbApp')
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            // console.log(document.title, '\t\t', index + 1);
+                            console.log(document.title, '\t\t', index + 1);
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
                                 var geneIndex = index + 1;
-                                // model.beginCompoundOperation();
+                                model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function(mutation, index) {
                                     if (mutation.effect && mutation.effect.value.getText()) {
                                         var effect = mutation.effect.value.getText();
@@ -1909,7 +1909,7 @@ angular.module('oncokbApp')
                                             }
     
                                             var message = geneIndex + '\t' + document.title + '\t' + mutation.name + '\tmutation effect\t' + effect;
-                                            // mutation.effect.value.setText(stringUtils.findMutationEffect(effect));
+                                            mutation.effect.value.setText(stringUtils.findMutationEffect(effect));
                                             message += '\t' + stringUtils.findMutationEffect(effect);
                                             console.log(message);
                                         }else {
@@ -1919,25 +1919,25 @@ angular.module('oncokbApp')
                                                 + '\t' + effect + '\t1';
                                             console.log(message);
                                         }
-                                        // mutation.effect.addOn.setText('');
+                                        mutation.effect.addOn.setText('');
                                     }
 
                                     if (mutation.oncogenic) {
                                         var message = geneIndex + '\t' + document.title + '\t' + mutation.name + '\toncogenic\t' + mutation.oncogenic.getText();
-                                        // mutation.oncogenic.setText(convertOncogenic(mutation.oncogenic.getText()));
+                                        mutation.oncogenic.setText(convertOncogenic(mutation.oncogenic.getText()));
                                         message += '\t' + convertOncogenic(mutation.oncogenic.getText());
                                         console.log(message);
                                     }
                                 });
-                                // model.endCompoundOperation();
+                                model.endCompoundOperation();
                                 $timeout(function() {
                                     convertMutationEffect(++index, callback);
-                                }, 500, false);
+                                }, 1000, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
                                     convertMutationEffect(++index, callback);
-                                }, 500, false);
+                                }, 1000, false);
                             }
                         }
                     });

@@ -258,31 +258,31 @@ angular.module('oncokbApp')
                         _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete);
                         _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false);
     
-                        if(_mutation.effect && _mutation.effect.value) {
-                            var effect = _mutation.effect.value;
-
-                            if(_mutation.effect.value.toLowerCase() === 'other') {
-                                if(_mutation.effect.addOn) {
-                                    effect = _mutation.effect.addOn;
-                                }else {
-                                    effect = 'Other';
-                                }
-                            }else {
-                                if(_mutation.effect.addOn) {
-                                    if(_mutation.effect.addOn.toLowerCase().indexOf(_mutation.effect.value.toLowerCase()) !== -1) {
-                                        effect = _mutation.effect.addOn;
-                                    }else {
-                                        effect += ' ' + _mutation.effect.addOn;
-                                    }
-                                }
-                            }
-
-                            var message = '\t\t' + _mutation.name + '\tThe original mutation effect is ' + effect;
-                            _mutation.effect.value = stringUtils.findMutationEffect(effect);
-                            message += '\tconverting to: ' + _mutation.effect.value;
-                            // console.log(message);
-                            _mutation.effect.addOn = '';
-                        }
+                        // if(_mutation.effect && _mutation.effect.value) {
+                        //     var effect = _mutation.effect.value;
+                        //
+                        //     if(_mutation.effect.value.toLowerCase() === 'other') {
+                        //         if(_mutation.effect.addOn) {
+                        //             effect = _mutation.effect.addOn;
+                        //         }else {
+                        //             effect = 'Other';
+                        //         }
+                        //     }else {
+                        //         if(_mutation.effect.addOn) {
+                        //             if(_mutation.effect.addOn.toLowerCase().indexOf(_mutation.effect.value.toLowerCase()) !== -1) {
+                        //                 effect = _mutation.effect.addOn;
+                        //             }else {
+                        //                 effect += ' ' + _mutation.effect.addOn;
+                        //             }
+                        //         }
+                        //     }
+                        //
+                        //     var message = '\t\t' + _mutation.name + '\tThe original mutation effect is ' + effect;
+                        //     _mutation.effect.value = stringUtils.findMutationEffect(effect);
+                        //     message += '\tconverting to: ' + _mutation.effect.value;
+                        //     // console.log(message);
+                        //     _mutation.effect.addOn = '';
+                        // }
                         
                         if (e.effect_comments) {
                             _mutation.effect_comments = getComments(e.effect_comments);
