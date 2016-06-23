@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.OncoTreeType;
 import org.mskcc.cbio.oncokb.model.VariantQuery;
 
 import java.util.ArrayList;
@@ -135,7 +135,7 @@ public class VariantPairUtils {
 
         for(int i = 0; i < pairwiseLength; i++) {
             String tumorType = tumorTypes == null? null : tumorTypes[i];
-            List<TumorType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(tumorType, tumorTypeSource);
+            List<OncoTreeType> relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, tumorTypeSource);
             pairs.get(i).setQueryTumorType(tumorType);
             pairs.get(i).setTumorTypes(relevantTumorTypes);
         }

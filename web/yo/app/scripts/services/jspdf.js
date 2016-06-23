@@ -24,7 +24,9 @@ angular.module('oncokbApp')
     var Y = MARGIN;
     var DOC = '';
     var tumorTypeAttrs = {
+        'shortPrevalence': 'Short Prevalence',
       'prevalence' : 'Prevalence',
+        'shortProgImp': 'Short Prognostic implications',
       'progImp' : 'Prognostic implications'
     };
     var nccnAttrs = {
@@ -103,16 +105,27 @@ angular.module('oncokbApp')
 
     function drawFuncMutation(mutation) {
       drawFunc('Mutation: ' + mutation.name, '2', 'Bold');
-      if(mutation.oncogenic) {
-        drawFunc('Oncogenic:' + mutation.oncogenic, '4', 'Bold');
-      }
-      if(mutation.effect.value || mutation.effect.addOn) {
-        drawFunc('Mutation effect:' + mutation.effect.value + mutation.effect.addOn, '4', 'Bold');
-      }
-      if(mutation.description) {
-        drawFunc('Description of mutation effect :', '4', 'Bold');
-        drawFunc(mutation.description);
-      }
+        if(mutation.summary) {
+            drawFunc('Summary:', '4', 'Bold');
+            drawFunc(mutation.summary);
+        }
+        if(mutation.oncogenic) {
+            drawFunc('Oncogenic: ' + mutation.oncogenic, '4', 'Bold');
+        }
+        if(mutation.shortSummary) {
+            drawFunc('Summary of oncogenic: ' + mutation.shortSummary, '4', 'Bold');
+        }
+        if(mutation.effect.value || mutation.effect.addOn) {
+        drawFunc('Mutation effect: ' + mutation.effect.value + mutation.effect.addOn, '4', 'Bold');
+        }
+        if(mutation.short) {
+            drawFunc('Short description of mutation effect:', '4', 'Bold');
+            drawFunc(mutation.short);
+        }
+        if(mutation.description) {
+            drawFunc('Description of mutation effect:', '4', 'Bold');
+            drawFunc(mutation.description);
+        }
     }
 
     function tumorType(tumorTypes) {
@@ -123,9 +136,25 @@ angular.module('oncokbApp')
       }
     }
 
+      function getCancerTypesName(cancerTypes) {
+          var list = [];
+          cancerTypes.forEach(function(cancerType) {
+              if (cancerType.subtype.length > 0) {
+                  var str = cancerType.subtype;
+                  list.push(str);
+              } else if (cancerType.cancerType.length > 0) {
+                  list.push(cancerType.cancerType);
+              }
+          });
+          return list.join(', ');
+      };
+      
     function drawFuncTumorType(tumorType) {
-      drawFunc('Tumor Type: ' + tumorType.name, '2', 'Bold');
-
+      drawFunc('Tumor Type: ' + getCancerTypesName(tumorType.cancerTypes), '2', 'Bold');
+        if(tumorType.summary) {
+            drawFunc('Summary:', '4', 'Bold');
+            drawFunc(tumorType.summary);
+        }
       for(var key in tumorTypeAttrs) {
         if(tumorType[key]) {
           drawFunc(tumorTypeAttrs[key] + ': ', '3', 'Bold');
@@ -167,9 +196,7 @@ angular.module('oncokbApp')
 
     function trialsFunc(trials){
       drawFunc('Ongoing clinical trials', '3', 'Bold');
-      trials.forEach(function(e){
-        drawFunc(e);
-      });
+        drawFunc(trials.join(', '));
     }
 
     function nccnFunc(nccn) {
@@ -184,8 +211,14 @@ angular.module('oncokbApp')
     function therapyFunc(therapy, title) {
       drawFunc(title + ': ' + therapy.name, '4', 'Bold');
       drawFunc('Highest level of evidence: ' + therapy.level, '4', 'Bold');
-      drawFunc('Description of evidence: ', '4', 'Bold');
-      drawFunc(therapy.description);
+        if(therapy.short) {
+            drawFunc('Short description of evidence: ', '4', 'Bold');
+            drawFunc(therapy.short);
+        }
+        if(therapy.description) {
+            drawFunc('Description of evidence: ', '4', 'Bold');
+            drawFunc(therapy.description);
+        }
     }
 
     this.create = create;

@@ -27,11 +27,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
-import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.ClinicalTrial;
 import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.w3c.dom.NodeList;
@@ -57,10 +55,6 @@ public class ClinicalTrialsImporter {
         
         Set<String> nctIds = getListOfCancerTrialsFromClinicalTrialsGov();//getListOfCancerTrialsFromCancerGov();
         List<ClinicalTrial> trials = importTrials(nctIds);
-        
-        TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
-        List<TumorType> tumorTypes = tumorTypeBo.findAll();
-        matchTumorTypes(trials, tumorTypes);
     }
     
     public static List<ClinicalTrial> importTrials(Collection<String> nctIds) throws ParserConfigurationException {
@@ -83,30 +77,14 @@ public class ClinicalTrialsImporter {
             }
             if (trial!=null) {
                 trials.add(trial);
+                ApplicationContextSingleton.getClinicalTrialBo().saveOrUpdate(trial);
             }
             System.out.println();
         }
         
         return trials;
     }
-    
-    static void matchTumorTypes(List<ClinicalTrial> trials, List<TumorType> tumorTypes) {
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        for (ClinicalTrial trial : trials) {
-            String condition = trial.getDiseaseCondition().toLowerCase();
-            Set<TumorType> matched = new HashSet<TumorType>();
-            for (TumorType tumorType : tumorTypes) {
-                for (String keyword : tumorType.getClinicalTrialKeywords()) {
-                    if (condition.contains(keyword.toLowerCase())) {
-                        matched.add(tumorType);
-                    }
-                }
-            }
-            trial.setTumorTypes(matched);
-            clinicalTrialBo.saveOrUpdate(trial);
-        }
-    }
-    
+     
     private static ClinicalTrial parseClinicalTrialsGov(String nctId, DocumentBuilder db) throws SAXException, IOException {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         

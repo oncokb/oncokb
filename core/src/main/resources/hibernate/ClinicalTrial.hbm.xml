@@ -41,14 +41,6 @@
         </key>
         <element column="country" type="string"></element>
     </set>
-    <set lazy="false" name="tumorTypes" table="clinical_trial_tumor_type">
-      <key>
-        <column name="trial_id" not-null="true"/>
-      </key>
-      <many-to-many class="org.mskcc.cbio.oncokb.model.TumorType">
-        <column name="tumor_type_id" not-null="true"/>
-      </many-to-many>
-    </set>
     <set lazy="false" name="drugs" table="clinical_trial_drug">
       <key>
         <column name="trial_id" not-null="true"/>
@@ -76,14 +68,5 @@
   </class>
   <query name="findClinicalTrialByNctId">
         <![CDATA[from ClinicalTrial c where c.nctId=?]]>
-  </query>
-  <query name="findClinicalTrialByTumorTypeAndDrug">
-        <![CDATA[select c from ClinicalTrial c join c.tumorTypes t join c.drugs d where t.tumorTypeId=? and d.drugId=?]]>
-  </query>
-  <query name="findClinicalTrialByTumorTypeAndAlteration">
-        <![CDATA[select c from ClinicalTrial c join c.tumorTypes t join c.alterations a where t.tumorTypeId=? and a.alterationId=?]]>
-  </query>
-  <query name="findClinicalTrialByTumorType">
-        <![CDATA[select c from ClinicalTrial c join c.tumorTypes t where t.tumorTypeId=?]]>
   </query>
 </hibernate-mapping>

@@ -7,7 +7,7 @@
  * # comments
  */
 angular.module('oncokbApp')
-  .directive('commentsDict', function (DatabaseConnector, S, users) {
+  .directive('commentsDict', function (DatabaseConnector, S, users, $timeout) {
     return {
       templateUrl: 'views/comments.html',
       restrict: 'AE',
@@ -20,6 +20,7 @@ angular.module('oncokbApp')
       },
       replace: true,
       link: function postLink(scope, element, attrs) {
+          scope.mouseLeaveTimeout = '';
         scope.key = attrs.key;
         scope.params = {};
         scope.status = {
@@ -57,11 +58,18 @@ angular.module('oncokbApp')
           if(scope.fileEditable || scope.comments.length > 0) {
             element.find('i').off('mouseenter');
             element.find('i').bind('mouseenter', function() {
-              element.find('commentsBody').show();
+                if(scope.mouseLeaveTimeout) {
+                    $timeout.cancel(scope.mouseLeaveTimeout);
+                    scope.mouseLeaveTimeout = '';
+                }
+                element.find('commentsBody').show();
             });
+              
             element.find('i').off('mouseleave');
             element.find('i').bind('mouseleave', function() {
-              element.find('commentsBody').hide();
+                scope.mouseLeaveTimeout = $timeout(function() {
+                    element.find('commentsBody').hide();
+                }, 500);
             });
           }else {
             element.find('i').off('mouseenter');

@@ -45,13 +45,13 @@
         <property name="proteinStart" type="int">
           <column name="protein_start"/>
         </property>
-        
+
         <property name="proteinEnd" type="int">
-          <column name="protein_end"/>
+            <column name="protein_end"/>
         </property>
-        
+
         <property name="variantResidues" type="string">
-          <column name="variant_residues"/>
+            <column name="variant_residues"/>
         </property>
 
         <set lazy="false" name="clinicalTrials" table="clinical_trial_alteration" cascade="delete-orphan">
@@ -62,7 +62,7 @@
                 <column name="alteration_id" not-null="true"/>
             </many-to-many>
         </set>
-        
+
         <set lazy="false" name="portalAlterations" table="portalAlt_oncoKBAlt">
             <key>
                 <column name="alteration_id" not-null="true"/>
@@ -72,7 +72,7 @@
             </many-to-many>
         </set>
     </class>
-    
+
     <query name="findAlterationsByGene">
         <![CDATA[from Alteration a where a.gene=?]]>
     </query>

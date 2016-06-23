@@ -14,8 +14,8 @@ import java.util.Set;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-10T02:49:36.208Z")
 public class ClinicalVariant {
 
+    private OncoTreeType oncoTreeType = null;
     private Alteration variant = null;
-    private String cancerType = null;
     private String level = null;
     private Set<String> drug = new HashSet<String>();
     private Set<String> drugPmids = new HashSet<String>();
@@ -38,12 +38,12 @@ public class ClinicalVariant {
      **/
     @ApiModelProperty(value = "")
     @JsonProperty("cancerType")
-    public String getCancerType() {
-        return cancerType;
+    public OncoTreeType getOncoTreeType() {
+        return oncoTreeType;
     }
 
-    public void setCancerType(String cancerType) {
-        this.cancerType = cancerType;
+    public void setOncoTreeType(OncoTreeType oncoTreeType) {
+        this.oncoTreeType = oncoTreeType;
     }
 
 
@@ -96,7 +96,7 @@ public class ClinicalVariant {
         }
         ClinicalVariant clinicalVariant = (ClinicalVariant) o;
         return Objects.equals(variant, clinicalVariant.variant) &&
-            Objects.equals(cancerType, clinicalVariant.cancerType) &&
+            Objects.equals(oncoTreeType, clinicalVariant.oncoTreeType) &&
             Objects.equals(level, clinicalVariant.level) &&
             Objects.equals(drug, clinicalVariant.drug) &&
             Objects.equals(drugPmids, clinicalVariant.drugPmids);
@@ -104,7 +104,7 @@ public class ClinicalVariant {
 
     @Override
     public int hashCode() {
-        return Objects.hash(variant, cancerType, level, drug, drugPmids);
+        return Objects.hash(variant, oncoTreeType, level, drug, drugPmids);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class ClinicalVariant {
         sb.append("class ClinicalVariant {\n");
 
         sb.append("  variant: ").append(variant).append("\n");
-        sb.append("  cancerType: ").append(cancerType).append("\n");
+        sb.append("  cancerType: ").append(oncoTreeType).append("\n");
         sb.append("  level: ").append(level).append("\n");
         sb.append("  drug: ").append(drug).append("\n");
         sb.append("  drugPmids: ").append(drugPmids).append("\n");

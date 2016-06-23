@@ -12,7 +12,6 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<import resource="../beans/VariantConsequence.xml"/>
 	<import resource="../beans/Drug.xml"/>
 	<import resource="../beans/Alteration.xml"/>
-	<import resource="../beans/TumorType.xml"/>
 	<import resource="../beans/Article.xml"/>
 	<import resource="../beans/ClinicalTrial.xml"/>
 	<import resource="../beans/NccnGuideline.xml"/>

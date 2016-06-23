@@ -15,7 +15,7 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
@@ -214,7 +214,7 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
 
@@ -351,16 +351,21 @@ public class SummaryUtils {
                 summary = StringEscapeUtils.escapeXml(summary).trim();
             }
         }
+
+        summary = summary.trim();
+        summary = summary.endsWith(".") ? summary : summary + ".";
         return summary;
     }
 
-    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
 
         queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
 
         sb.append(geneSummary(genes.iterator().next()));
 
+        sb.append(" ");
+            
         sb.append(SummaryUtils.variantSummary(genes, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
 
         return sb.toString();
@@ -400,7 +405,17 @@ public class SummaryUtils {
         List<String> list = new ArrayList<String>();
 
         for (Evidence ev : evidences) {
-            String tt = ev.getTumorType().getName().toLowerCase();
+            String tt = null;
+            if(ev.getSubtype() != null) {
+                tt = ev.getSubtype().toLowerCase();
+            }else if (ev.getCancerType() != null) {
+                tt = ev.getCancerType().toLowerCase();
+            }
+            
+            if(tt == null) {
+                continue;
+            }
+            
             Map<String, Map<String, Object>> ttMap = map.get(tt);
             if (ttMap == null && !ev.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_0)) {
                 ttMap = new TreeMap<String, Map<String, Object>>();

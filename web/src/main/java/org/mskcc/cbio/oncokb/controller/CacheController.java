@@ -6,7 +6,6 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.springframework.cache.Cache;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

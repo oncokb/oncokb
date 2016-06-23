@@ -17,7 +17,6 @@ public class Status implements java.io.Serializable {
 
     private Set<Gene> genes;
     private Set<Alteration> alterations;
-    private Set<TumorType> tumorTypes;
     private Set<Evidence> evidences;
 
     public Status() {
@@ -77,14 +76,6 @@ public class Status implements java.io.Serializable {
 
     public void setAlterations(Set<Alteration> alterations) {
         this.alterations = alterations;
-    }
-
-    public Set<TumorType> getTumorTypes() {
-        return tumorTypes;
-    }
-
-    public void setTumorTypes(Set<TumorType> tumorTypes) {
-        this.tumorTypes = tumorTypes;
     }
 
     public Set<Evidence> getEvidences() {

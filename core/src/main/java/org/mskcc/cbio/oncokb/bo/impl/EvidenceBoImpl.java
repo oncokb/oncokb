@@ -15,21 +15,22 @@ import java.util.logging.Level;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
 /**
- *
  * @author jgao
  */
-public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implements EvidenceBo {
-    
+public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> implements EvidenceBo {
+
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Alteration alteration : alterations) {
             set.addAll(getDao().findEvidencesByAlteration(alteration));
         }
-        return new ArrayList<Evidence>(set);    }
-    
+        return new ArrayList<Evidence>(set);
+    }
+
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
@@ -56,69 +57,96 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
         }
         return new ArrayList<Evidence>(set);
     }
-    
+
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
-        if(tumorTypes == null) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes) {
+        if (tumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
             }
             return findEvidencesByAlteration(alterations, evidenceTypes);
         }
         Set<Evidence> set = new LinkedHashSet<Evidence>();
-//        for (Alteration alteration : alterations) {
-//            for (TumorType tumorType : tumorTypes) {
-//                if(evidenceTypes == null) {
-//                    set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
-//                }else{
-//                    for (EvidenceType evidenceType : evidenceTypes) {
-//                        set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
-//                    }
-//                }
-//            }
-//        }
         List<Alteration> alts = new ArrayList<>();
-        List<TumorType> tts = new ArrayList<>();
+        List<String> cancerTypes = new ArrayList<>();
+        List<String> subTypes = new ArrayList<>();
+        List<String> cancerTypesOfSubtypes = new ArrayList<>();
         List<EvidenceType> ets = new ArrayList<>();
         alts.addAll(alterations);
-        tts.addAll(tumorTypes);
         ets.addAll(evidenceTypes);
-        set.addAll(getDao().findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes(alts, tts, ets));
+
+        for (OncoTreeType oncoTreeType : tumorTypes) {
+            if (oncoTreeType.getSubtype() == null) {
+                cancerTypes.add(oncoTreeType.getCancerType());
+            } else {
+                subTypes.add(oncoTreeType.getCode());
+                cancerTypesOfSubtypes.add(oncoTreeType.getCancerType());
+            }
+        }
+
+        if (subTypes.size() > 0) {
+            List<String> tts = subTypes;
+            set.addAll(getDao().findEvidencesByAlterationsAndSubtypesAndEvidenceTypes(alts, tts, ets));
+        }
+
+        if (cancerTypesOfSubtypes.size() > 0) {
+            List<String> tts = cancerTypesOfSubtypes;
+            set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(alts, tts, ets));
+        }
+
+        if (cancerTypes.size() > 0) {
+            List<String> tts = cancerTypes;
+            set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes(alts, tts, ets));
+        }
         return new ArrayList<Evidence>(set);
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
-        if(tumorTypes == null) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        if (tumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
             }
             return findEvidencesByAlteration(alterations, evidenceTypes);
         }
         Set<Evidence> set = new LinkedHashSet<Evidence>();
-//        for (Alteration alteration : alterations) {
-//            for (TumorType tumorType : tumorTypes) {
-//                if(evidenceTypes == null) {
-//                    set.addAll(getDao().findEvidencesByAlterationAndTumorType(alteration, tumorType));
-//                }else{
-//                    for (EvidenceType evidenceType : evidenceTypes) {
-//                        set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType, tumorType));
-//                    }
-//                }
-//            }
-//        }
         List<Alteration> alts = new ArrayList<>();
-        List<TumorType> tts = new ArrayList<>();
+        List<String> cancerTypes = new ArrayList<>();
+        List<String> subTypes = new ArrayList<>();
+        List<String> cancerTypesOfSubtypes = new ArrayList<>();
         List<EvidenceType> ets = new ArrayList<>();
         List<LevelOfEvidence> les = new ArrayList<>();
         alts.addAll(alterations);
-        tts.addAll(tumorTypes);
         ets.addAll(evidenceTypes);
         les.addAll(levelOfEvidences);
-        set.addAll(getDao().findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence(alts, tts, ets, les));
+
+        for (OncoTreeType oncoTreeType : tumorTypes) {
+            if (oncoTreeType.getSubtype() == null) {
+                cancerTypes.add(oncoTreeType.getCancerType());
+            } else {
+                subTypes.add(oncoTreeType.getCode());
+                cancerTypesOfSubtypes.add(oncoTreeType.getCancerType());
+            }
+        }
+
+        if (subTypes.size() > 0) {
+            List<String> tts = subTypes;
+            set.addAll(getDao().findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence(alts, tts, ets, les));
+        }
+
+        if (cancerTypesOfSubtypes.size() > 0) {
+            List<String> tts = cancerTypesOfSubtypes;
+            set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(alts, tts, ets, les));
+        }
+
+        if (cancerTypes.size() > 0) {
+            List<String> tts = cancerTypes;
+            set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence(alts, tts, ets, les));
+        }
+        
         return new ArrayList<Evidence>(set);
     }
-    
+
     @Override
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
@@ -140,12 +168,17 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
     }
 
     @Override
-    public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
+    public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
             for (EvidenceType evidenceType : evidenceTypes) {
-                for (TumorType tumorType : tumorTypes) {
-                    set.addAll(getDao().findEvidencesByGene(gene, evidenceType, tumorType));
+                for (OncoTreeType oncoTreeType : tumorTypes) {
+                    if (oncoTreeType.getSubtype() != null) {
+                        set.addAll(getDao().findEvidencesByGeneAndSubtype(gene, evidenceType, oncoTreeType.getCode()));
+                        set.addAll(getDao().findEvidencesByGeneAndCancerTypeNoSubtype(gene, evidenceType, oncoTreeType.getCancerType()));
+                    } else if (oncoTreeType.getCancerType() != null) {
+                        set.addAll(getDao().findEvidencesByGeneAndCancerType(gene, evidenceType, oncoTreeType.getCancerType()));
+                    }
                 }
             }
         }
@@ -166,5 +199,30 @@ public class EvidenceBoImpl  extends GenericBoImpl<Evidence, EvidenceDao> implem
             }
         }
         return new ArrayList<Drug>(set);
+    }
+
+    @Override
+    public List<Object> findTumorTypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        return getDao().findTumorTypesWithEvidencesForAlterations(alterations);
+    }
+
+    @Override
+    public List<Object> findCancerTypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        return getDao().findCancerTypesWithEvidencesForAlterations(alterations);
+    }
+
+    @Override
+    public List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations) {
+        return getDao().findSubtypesWithEvidencesForAlterations(alterations);
+    }
+
+    @Override
+    public List<String> findAllCancerTypes() {
+        return getDao().findAllCancerTypes();
+    }
+
+    @Override
+    public List<String> findAllSubtypes() {
+        return getDao().findAllSubtypes();
     }
 }

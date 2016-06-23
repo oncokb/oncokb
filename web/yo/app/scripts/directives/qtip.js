@@ -63,7 +63,7 @@ angular.module('oncokbApp')
                     hide: {
                         event: hideEvent,
                         fixed: true,
-                        delay: 100
+                        delay: 500
                     }
                 };
                 $(element).qtip(options);

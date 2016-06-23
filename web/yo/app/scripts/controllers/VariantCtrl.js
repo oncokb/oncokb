@@ -15,7 +15,8 @@ angular.module('oncokbApp')
         'FindRegex',
         'OncoKB',
         'stringUtils',
-        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, DeepMerge, x2js, FindRegex, OncoKB, stringUtils) {
+        '_',
+        function ($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, DeepMerge, x2js, FindRegex, OncoKB, stringUtils, _) {
 
             'use strict';
 
@@ -45,8 +46,11 @@ angular.module('oncokbApp')
                             // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, urlVars.alteration || '')];
                             $scope.alteration = stringUtils.trimMutationName(urlVars.alteration);
                         }
-                        if(urlVars.hasOwnProperty('tumorType')){
-                            $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, urlVars.tumorType || '')];
+                        if(urlVars.hasOwnProperty('cancerType')){
+                            $scope.view.selectedCancerType = $scope.view.filteredCancerTypes[$filter('getIndexByObjectNameInArray')($scope.view.filteredCancerTypes, urlVars.cancerType, 'cancerType')];
+                        }
+                        if(urlVars.hasOwnProperty('subtype')){
+                            $scope.view.selectedSubtype = $scope.view.filteredCancerTypes[$filter('getIndexByObjectNameInArray')($scope.view.filteredSubtypes, urlVars.subtype, 'subtype')];
                         }
                         $scope.search();
                     }
@@ -87,7 +91,8 @@ angular.module('oncokbApp')
                 var params = {
                     'geneName': '',
                     'alteration': '',
-                    'tumorType': '',
+                    'cancerType': '',
+                    'subtype': '',
                     'annotation': '',
                     'relevantCancerType': ''};
                 if(status === 'success') {
@@ -96,7 +101,8 @@ angular.module('oncokbApp')
 
                     params.geneName = $scope.gene;
                     params.alteration = $scope.alteration;
-                    params.tumorType = $scope.selectedTumorType;
+                    params.tumorType = $scope.view.selectedCancerType ? $scope.view.selectedCancerType.cancerType : '';//ReportDataService accepts tumorType for now
+                    params.subtype = $scope.view.selectedSubtype ?$scope.view.selectedSubtype.subtype : '';
                     params.annotation = annotation.annotation;
                     params.relevantCancerType = annotation.relevantCancerType;
 
@@ -104,7 +110,7 @@ angular.module('oncokbApp')
                     $scope.reportParams.requestInfo = {
                         email: $rootScope.user.email,
                         folderName: '',
-                        fileName: params.geneName + '_' + params.alteration + '_' + params.tumorType,
+                        fileName: params.geneName + '_' + params.alteration + '_' + params.cancerType + '_' + params.subtype,
                         userName: $rootScope.user.name
                     };
 
@@ -134,8 +140,57 @@ angular.module('oncokbApp')
                 },500);
             }
 
+            function separateTumorTypes(tumorTypes) {
+                var subtypes = {}, cancerTypes = {};
+                _.each(tumorTypes, function(tumorType) {
+                    if(tumorType) {
+                        if(tumorType.subtype && !subtypes.subtype) {
+                            subtypes[tumorType.subtype] = tumorType;
+                        }
+                        if(tumorType.cancerType && !cancerTypes.cancerType) {
+                            cancerTypes[tumorType.cancerType] = tumorType;
+                        }
+                    }
+                });
+                return {
+                    subtypes: _.values(subtypes),
+                    cancerTypes: _.values(cancerTypes)
+                }
+            }
+            
+            function findCancerType(cancerType) {
+                for(var i = 0; i < $scope.view.filteredCancerTypes.length; i++) {
+                    if($scope.view.filteredCancerTypes[i].cancerType === cancerType) {
+                        return $scope.view.filteredCancerTypes[i];
+                    }
+                }
+            }
+            
+            function findSubtypesByCancerType(cancerType) {
+                var subtypes = [];
+                for(var i = 0; i < $scope.subtypes.length; i++) {
+                    if($scope.subtypes[i].cancerType === cancerType) {
+                        subtypes.push($scope.subtypes[i]);
+                    }
+                }
+                return subtypes;
+            }
+            
+            function containSubtype(subtype, subtypes) {
+                for(var i = 0 ; i < subtypes.length ; i ++) {
+                    if(subtypes[i].subtype == subtype.subtype) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             $scope.init = function () {
-
+                $scope.view = {};
+                $scope.reportParams = {
+                    reportContent: {},
+                    requestInfo: {}
+                };
+                
                 $scope.rendering = false;
 
                 $scope.loadingPage = true;
@@ -202,25 +257,30 @@ angular.module('oncokbApp')
                 $scope.specialAttr = ['investigational_therapeutic_implications', 'standard_therapeutic_implications'];
 
                 if(OncoKB.global.genes && OncoKB.global.genes && OncoKB.global.tumorTypes) {
+                    var separatedTumorTypes = separateTumorTypes(OncoKB.global.tumorTypes);
+
                     $scope.genes = getUnique(angular.copy(OncoKB.global.genes), 'hugoSymbol');
-                    $scope.tumorTypes = getUnique(angular.copy(OncoKB.global.tumorTypes), 'name');
+                    $scope.cancerTypes = separatedTumorTypes.cancerTypes;
+                    $scope.subtypes = separatedTumorTypes.subtypes;
+                    $scope.view.filteredCancerTypes = angular.copy($scope.cancerTypes);
+                    $scope.view.filteredSubtypes = angular.copy($scope.subtypes);
                     $scope.loadingPage = false;
                 }else {
                     DatabaseConnector.getGeneTumorType(function(data){
                         OncoKB.global.genes = angular.copy(data.genes);
                         OncoKB.global.tumorTypes = angular.copy(data.tumorTypes);
 
+                        var separatedTumorTypes = separateTumorTypes(OncoKB.global.tumorTypes);
+                        
                         $scope.genes = getUnique(data.genes, 'hugoSymbol');
-                        $scope.tumorTypes = getUnique(data.tumorTypes, 'name');
+                        $scope.cancerTypes = separatedTumorTypes.cancerTypes;
+                        $scope.subtypes = separatedTumorTypes.subtypes;
+                        $scope.view.filteredCancerTypes = angular.copy($scope.cancerTypes);
+                        $scope.view.filteredSubtypes = angular.copy($scope.subtypes);
                         $scope.loadingPage = false;
                         checkUrl();
                     });
                 }
-
-                $scope.reportParams = {
-                    reportContent: {},
-                    requestInfo: {}
-                };
             };
 
             $scope.isSearchable = function() {
@@ -239,14 +299,14 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.hasSelectedTumorType = function() {
-                if($scope.hasOwnProperty('selectedTumorType') && $scope.selectedTumorType) {
+            $scope.hasSelectedCancerType = function() {
+                if($scope.view.hasOwnProperty('selectedCancerType') && $scope.view.selectedCancerType) {
                     return true;
                 }else {
                     return false;
                 }
             };
-
+            
             $scope.setCollapsed = function(trial, attr) {
                 $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
             };
@@ -293,10 +353,10 @@ angular.module('oncokbApp')
             };
 
             $scope.search = function() {
-                var hasSelectedTumorType = $scope.hasSelectedTumorType();
+                var hasSelectedCancerType = $scope.hasSelectedCancerType();
                 $scope.rendering = true;
-                $scope.reportViewActive = hasSelectedTumorType;
-                $scope.regularViewActive = !hasSelectedTumorType;
+                $scope.reportViewActive = hasSelectedCancerType;
+                $scope.regularViewActive = !hasSelectedCancerType;
                 $scope.alteration = stringUtils.trimMutationName($scope.alteration);
                 var params = {'alterationType': 'MUTATION'};
                 var paramsContent = {
@@ -309,9 +369,16 @@ angular.module('oncokbApp')
                         params[key] = paramsContent[key];
                     }
                 }
-                if(hasSelectedTumorType) {
-                    params.tumorType = $scope.selectedTumorType;
+                if(hasSelectedCancerType) {
+                    params.cancerType = $scope.view.selectedCancerType.cancerType;
+                    if($scope.view.selectedSubtype && $scope.view.selectedSubtype.subtype) {
+                        params.tumorType = $scope.view.selectedSubtype.subtype;
+                    }else {
+                        params.tumorType = params.cancerType;
+                    }
                 }else{
+                    params.cancerType = '';
+                    params.subtype = '';
                     params.tumorType = '';
                 }
                 if($scope.hasOwnProperty('selectedConsequence') && $scope.selectedConsequence) {
@@ -351,8 +418,34 @@ angular.module('oncokbApp')
                 $scope.gene= $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'BRAF')];
                 // $scope.alteration = $scope.alterations[$filter('getIndexByObjectNameInArray')($scope.alterations, 'V600E')];
                 $scope.alteration = 'V600E';
-                $scope.selectedTumorType = $scope.tumorTypes[$filter('getIndexByObjectNameInArray')($scope.tumorTypes, 'melanoma')];
+                $scope.view.selectedCancerType = $scope.view.filteredCancerTypes[$filter('getIndexByObjectNameInArray')($scope.view.filteredCancerTypes, 'Melanoma', 'cancerType')];
+                $scope.view.selectedSubtype = '';
                 $scope.selectedConsequence = '';
                 $scope.search();
             };
+
+            $scope.$watch('view.selectedSubtype', function(n, o) {
+                if (n) {
+                    $scope.view.selectedCancerType = findCancerType(n.cancerType);
+                }else {
+                    // console.log($scope.view.selectedSubtype);
+                }
+            });
+
+            $scope.$watch('view.selectedCancerType', function(n, o) {
+                if (n) {
+                    if ($scope.view.selectedSubtype) {
+                        var mappedSubtypes = findSubtypesByCancerType(n.cancerType);
+                        if(!containSubtype($scope.view.selectedSubtype, mappedSubtypes)) {
+                            $scope.view.filteredSubtypes = mappedSubtypes;
+                            $scope.view.selectedSubtype = '';
+                        }
+                    }else{
+                        $scope.view.filteredSubtypes = findSubtypesByCancerType(n.cancerType);
+                    }
+                } else {
+                    $scope.view.filteredSubtypes = angular.copy($scope.subtypes);
+                    $scope.view.selectedSubtype = '';
+                }
+            });
         }]);
