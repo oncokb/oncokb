@@ -238,54 +238,54 @@
 		   <encoding>${project.build.sourceEncoding}</encoding>
 		  </configuration>
 		 </plugin>
-                 <plugin>
-                    <groupId>com.github.trecloux</groupId>
-                    <artifactId>yeoman-maven-plugin</artifactId>
-                    <version>0.5</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>build</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <skipTests>true</skipTests>
-                        <yeomanProjectDirectory>${web.folder}</yeomanProjectDirectory>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>2.3</version>
-                            <configuration>
-                        <webResources>
-                            <resource>
-                                <directory>${web.folder}/dist</directory>
-                                <targetPath></targetPath>
-                            </resource>
-                        </webResources>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.5</version>
-                    <configuration>
-                        <filesets>
-                            <fileset>
-                                <directory>${web.folder}/dist</directory>
-                            </fileset>
-                            <fileset>
-                                <directory>${web.folder}/.tmp</directory>
-                            </fileset>
+                 <!--<plugin>-->
+                    <!--<groupId>com.github.trecloux</groupId>-->
+                    <!--<artifactId>yeoman-maven-plugin</artifactId>-->
+                    <!--<version>0.5</version>-->
+                    <!--<executions>-->
+                        <!--<execution>-->
+                            <!--<goals>-->
+                                <!--<goal>build</goal>-->
+                            <!--</goals>-->
+                        <!--</execution>-->
+                    <!--</executions>-->
+                    <!--<configuration>-->
+                        <!--<skipTests>true</skipTests>-->
+                        <!--<yeomanProjectDirectory>${web.folder}</yeomanProjectDirectory>-->
+                    <!--</configuration>-->
+                <!--</plugin>-->
+                <!--<plugin>-->
+                    <!--<artifactId>maven-war-plugin</artifactId>-->
+                    <!--<version>2.3</version>-->
+                            <!--<configuration>-->
+                        <!--<webResources>-->
+                            <!--<resource>-->
+                                <!--<directory>${web.folder}/dist</directory>-->
+                                <!--<targetPath></targetPath>-->
+                            <!--</resource>-->
+                        <!--</webResources>-->
+                    <!--</configuration>-->
+                <!--</plugin>-->
+                <!--<plugin>-->
+                    <!--<artifactId>maven-clean-plugin</artifactId>-->
+                    <!--<version>2.5</version>-->
+                    <!--<configuration>-->
+                        <!--<filesets>-->
                             <!--<fileset>-->
-                                <!--<directory>yo/app/components</directory>-->
+                                <!--<directory>${web.folder}/dist</directory>-->
                             <!--</fileset>-->
                             <!--<fileset>-->
-                              <!--<directory>yo/node_modules</directory>-->
+                                <!--<directory>${web.folder}/.tmp</directory>-->
                             <!--</fileset>-->
-                        </filesets>
-                    </configuration>
-                </plugin>
+                            <!--&lt;!&ndash;<fileset>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<directory>yo/app/components</directory>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</fileset>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<fileset>&ndash;&gt;-->
+                              <!--&lt;!&ndash;<directory>yo/node_modules</directory>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</fileset>&ndash;&gt;-->
+                        <!--</filesets>-->
+                    <!--</configuration>-->
+                <!--</plugin>-->
 		</plugins>
 	</build>
  <reporting>

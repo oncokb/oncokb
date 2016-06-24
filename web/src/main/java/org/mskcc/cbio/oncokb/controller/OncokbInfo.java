@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mskcc.cbio.oncokb.config.GoogleAuth;
+import org.mskcc.cbio.oncokb.util.GoogleAuth;
 import org.mskcc.cbio.oncokb.model.CurationSuggestion;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
