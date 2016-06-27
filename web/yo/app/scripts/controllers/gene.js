@@ -2876,6 +2876,7 @@ angular.module('oncokbApp')
                 }, function (result) {
                     $scope.docStatus.savedGene = true;
                     console.log('failed', result);
+                    dialogs.error('Error', 'An error has occurred when saving data, please contact the developer. Error code: 1');
                     changeLastUpdate();
                 });
             };
@@ -3105,7 +3106,6 @@ angular.module('oncokbApp')
                 console.log($scope.geneStatus);
 
                 console.log('Num of watchers: ' + checkNumWatchers());
-                console.log($scope.gene.status_timeStamp.get('lastEdit').value);
                 console.log($scope.gene.status_timeStamp.get('lastUpdate').value);
 
                 $scope.gene.mutations.asArray().forEach(function (e) {
@@ -3160,12 +3160,14 @@ angular.module('oncokbApp')
             }
             
             $scope.updateGeneColor = function () {
-                if ($scope.gene) {
-                    if (Number($scope.gene.status_timeStamp.get('lastEdit').value.text) > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
+                if ($scope.gene && $scope.document && $scope.document.hasOwnProperty('modifiedDate')) {
+                    if (new Date($scope.document.modifiedDate).getTime() > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
                         return 'red';
                     } else {
                         return 'black';
                     }
+                }else {
+                    return 'black';
                 }
             };
 
@@ -3612,14 +3614,14 @@ angular.module('oncokbApp')
                 var file = Documents.get({title: $scope.fileTitle});
                 var timeStamp;
                 file = file[0];
-                if (!$scope.gene.status_timeStamp.has('lastEdit')) {
-                    $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                    timeStamp.value.setText(new Date().getTime().toString());
-                    timeStamp.by.setText(Users.getMe().name);
-                    $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
-                    $scope.realtimeDocument.getModel().endCompoundOperation();
-                }
+                // if (!$scope.gene.status_timeStamp.has('lastEdit')) {
+                //     $scope.realtimeDocument.getModel().beginCompoundOperation();
+                //     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                //     timeStamp.value.setText(new Date().getTime().toString());
+                //     timeStamp.by.setText(Users.getMe().name);
+                //     $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
+                //     $scope.realtimeDocument.getModel().endCompoundOperation();
+                // }
                 if (!$scope.gene.status_timeStamp.has('lastUpdate')) {
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
@@ -3739,10 +3741,10 @@ angular.module('oncokbApp')
             }
 
             function documentSaved() {
-                if (!$scope.docStatus.updateGene) {
-                    $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
-                    $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
-                }
+                // if (!$scope.docStatus.updateGene) {
+                //     $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
+                //     $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
+                // }
                 $scope.docStatus.saving = false;
                 $scope.docStatus.saved = true;
                 $scope.docStatus.closed = false;
@@ -4137,7 +4139,11 @@ angular.module('oncokbApp')
 
             loadFile().then(function (file) {
                 $scope.realtimeDocument = file;
-
+                var _documents = Documents.get({'title': $scope.fileTitle});
+                if(_.isArray(_documents) && _documents.length > 0) {
+                    $scope.document = _documents[0];
+                }
+                
                 if ($scope.fileTitle) {
                     var model = $scope.realtimeDocument.getModel();
                     if (!model.getRoot().get('gene')) {
