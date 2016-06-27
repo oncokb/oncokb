@@ -3460,28 +3460,63 @@ angular.module('oncokbApp')
                 status.set('curated', !status.get('curated'));
             };
 
+            // Calculate number of 'number' elements within the object
+            function getNoNKeys(object) {
+                var count = 0;
+                for(var key in object) {
+                    if(!isNaN(key)) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+            
+            // Only do the simple check wheter the numebr of array has been changed.
+            // It's a little triky to monitor all content. 
             function regenerateGeneStatus() {
                 var geneStatus = {};
                 var mutationKeys = ['oncogenic'];
                 var tumorKeys = ['prevalence', 'progImp', 'nccn', 'trials'];
 
-                $scope.gene.mutations.asArray().forEach(function (mutation, mutationIndex) {
-                    geneStatus[mutationIndex] = new GeneStatusSingleton();
-                    mutationKeys.forEach(function (key) {
-                        if (mutation[key]) {
-                            geneStatus[mutationIndex][key] = new GeneStatusSingleton();
-                        }
-                    });
+                var changeMutation = false;
+
+                if ($scope.gene.mutations.length !== getNoNKeys($scope.geneStatus)) {
+                    changeMutation = true;
+                }
+                $scope.gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
+                    if (changeMutation) {
+                        geneStatus[mutationIndex] = new GeneStatusSingleton();
+                        mutationKeys.forEach(function(key) {
+                            if (mutation[key]) {
+                                geneStatus[mutationIndex][key] = new GeneStatusSingleton();
+                            }
+                        });
+                    } else {
+                        geneStatus[mutationIndex] = $scope.geneStatus[mutationIndex];
+                    }
 
                     if (mutation.tumors.length > 0) {
-                        mutation.tumors.asArray().forEach(function (tumor, tumorIndex) {
-                            geneStatus[mutationIndex][tumorIndex] = new GeneStatusSingleton();
-                            tumorKeys.forEach(function (key) {
+                        var changeTT = false;
+
+                        if (mutation.tumors.length !== getNoNKeys($scope.geneStatus[mutationIndex])) {
+                            changeTT = true;
+                        }
+                        mutation.tumors.asArray().forEach(function(tumor, tumorIndex) {
+                            geneStatus[mutationIndex][tumorIndex] = changeTT ? new GeneStatusSingleton() : $scope.geneStatus[mutationIndex][tumorIndex];
+                            tumorKeys.forEach(function(key) {
                                 if (tumor[key]) {
                                     geneStatus[mutationIndex][tumorIndex][key] = new GeneStatusSingleton();
                                 }
-                                tumor.TI.asArray(function (therapyType, therapyTypeIndex) {
-                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new GeneStatusSingleton();
+                                tumor.TI.asArray(function(therapyType, therapyTypeIndex) {
+                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = $scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex];
+                                    var changeT = false;
+
+                                    if (therapyType.treatment.length !== getNoNKeys($scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex])) {
+                                        changeT = true;
+                                    }
+                                    therapyType.treatments.asArray(function(treatment, treatmentIndex) {
+                                        geneStatus[mutationIndex][tumorIndex][therapyTypeIndex][treatmentIndex] = changeT ? new GeneStatusSingleton() : $scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex][treatmentIndex];
+                                    });
                                 });
                             });
                         });
