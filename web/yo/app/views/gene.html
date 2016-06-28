@@ -309,7 +309,7 @@
                                   <i ng-if="$parent.$index < ti.treatments.length-2" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
                                 </span>
                                  <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text"></e-status>
-                                <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $index)" class="fa fa-trash-o"></i>
+                                <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$index, $index)" class="fa fa-trash-o"></i>
                               </span>
                             </uib-accordion-heading>
                             <p>
