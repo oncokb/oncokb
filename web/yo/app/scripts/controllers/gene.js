@@ -3485,7 +3485,7 @@ angular.module('oncokbApp')
                 }
                 $scope.gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
                     if (changeMutation) {
-                        geneStatus[mutationIndex] = new GeneStatusSingleton();
+                        geneStatus[mutationIndex] = $.extend($scope.geneStatus[mutationIndex], new GeneStatusSingleton());
                         mutationKeys.forEach(function(key) {
                             if (mutation[key]) {
                                 geneStatus[mutationIndex][key] = new GeneStatusSingleton();
@@ -3502,9 +3502,11 @@ angular.module('oncokbApp')
                             changeTT = true;
                         }
                         mutation.tumors.asArray().forEach(function(tumor, tumorIndex) {
-                            geneStatus[mutationIndex][tumorIndex] = changeTT ? new GeneStatusSingleton() : $scope.geneStatus[mutationIndex][tumorIndex];
+                            if(changeTT) {
+                                geneStatus[mutationIndex][tumorIndex] = $.extend($scope.geneStatus[mutationIndex][tumorIndex], new GeneStatusSingleton());
+                            }
                             tumorKeys.forEach(function(key) {
-                                if (tumor[key]) {
+                                if (tumor[key] && changeTT) {
                                     geneStatus[mutationIndex][tumorIndex][key] = new GeneStatusSingleton();
                                 }
                                 tumor.TI.asArray(function(therapyType, therapyTypeIndex) {
