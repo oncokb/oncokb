@@ -3225,8 +3225,7 @@ angular.module('oncokbApp')
                     }    
                 });
                 PMIDs.sort();
-                $scope.PMIDs = PMIDs.join(', ');
-                $scope.PMIDLength = PMIDs.length;
+                dialogs.notify('All annotated PMIDs (' + PMIDs.length + ')', PMIDs.join(', '));
             }
             
             $scope.curatorsName = function () {
