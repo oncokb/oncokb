@@ -2769,8 +2769,8 @@ angular.module('oncokbApp')
             }
         }]
 )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf','FindRegex',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex) {
             $scope.test = function (event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
@@ -3216,7 +3216,19 @@ angular.module('oncokbApp')
                 $scope.model.undo();
                 regenerateGeneStatus();
             };
-
+            $scope.getAllPMIDs = function(){
+                var geneTextInfo = JSON.stringify(importer.getGeneData(this.gene, true));
+                var results = FindRegex.result(geneTextInfo), PMIDs = [];
+                _.each(results, function(item){ 
+                    if(item.type === 'pmid'){
+                        PMIDs.push(item.id); 
+                    }    
+                });
+                PMIDs.sort();
+                $scope.PMIDs = PMIDs.join(', ');
+                $scope.PMIDLength = PMIDs.length;
+            }
+            
             $scope.curatorsName = function () {
                 return this.gene.curators.asArray().map(function (d) {
                     return d.name;
