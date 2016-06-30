@@ -30,7 +30,7 @@ public class AllTreatmentsWithPMIDs {
         List<Gene> genes = ApplicationContextSingleton.getGeneBo().findAll();
         List<Map<String, String>> allLevels = getRecords();
 
-        System.out.println("Gene\tAlteration\tLevel\tCancer Type\tSubtype\tTreatment\tPMIDs\tExist");
+        System.out.println("Gene\tAlteration\tLevel\tCancer Type\tSubtype\tTreatment\tPMIDs\t Treatment updated from v1.1\tAlteration newly added");
         for (Gene gene : genes) {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
             Set<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(new HashSet<>(alterations));
@@ -112,7 +112,8 @@ public class AllTreatmentsWithPMIDs {
                             query.put("treatment", treatmentStr);
                             query.put("pmids", StringUtils.join(PMIDsStr, ", "));
 //                            System.out.println(query.get("gene") + "\t" + query.get("alteration") + "\t" + levelStr + "\t" + cancerTypeStr + "\t" + subtypeStr + "\t" + treatmentStr + "\t" + query.get("pmids"));
-                            System.out.println(query.get("gene") + "\t" + query.get("alteration") + "\t" + levelStr + "\t" + cancerTypeStr + "\t" + subtypeStr + "\t" + treatmentStr + "\t" + query.get("pmids") + "\t" + hasMatch(allLevels, query));
+                            Map<String, Boolean> match = hasMatch(allLevels, query);
+                            System.out.println(query.get("gene") + "\t" + query.get("alteration") + "\t" + levelStr + "\t" + cancerTypeStr + "\t" + subtypeStr + "\t" + treatmentStr + "\t" + query.get("pmids") + "\t" + !match.get("treatment") + "\t" + !match.get("alt"));
                         }
                     }
                 }
@@ -126,27 +127,26 @@ public class AllTreatmentsWithPMIDs {
         }
     }
 
-    public static Boolean hasMatch(List<Map<String, String>> records, Map<String, String> query) {
-        Boolean hasMatch = false;
+    
+    public static Map<String, Boolean> hasMatch(List<Map<String, String>> records, Map<String, String> query) {
+        Boolean hasSameTreatment = false;
+        Boolean hasAlt = false;
 
         if (records.contains(query)) {
-            hasMatch = true;
+            hasSameTreatment = true;
         }
-//        for(Map<String, String> record : records) {
-//            if(mapsAreEqual(query, record)) {
-//                hasMatch = true;
-//            }
-//        }
+        
+        for(Map<String, String> record : records) {
+            if(query.get("gene").equals(record.get("gene")) && query.get("alteration").equals(record.get("alteration"))) {
+                hasAlt = true;
+                break;
+            }
+        }
 
-//        for(Map<String, String> record : records) {
-//            for (Map.Entry<String, String> entry: query.entrySet()) {
-//                // Check if the current value is a key in the 2nd map
-//                if (record.containsKey(entry.getKey()) && record.get(entry.getKey()).equals(entry.getValue())) {
-//
-//                }
-//            }
-//        }
-        return hasMatch;
+        Map<String, Boolean> match = new HashMap<>();
+        match.put("treatment", hasSameTreatment);
+        match.put("alt", hasAlt);
+        return match;
     }
 
     public static boolean mapsAreEqual(Map<String, String> mapA, Map<String, String> mapB) {
