@@ -15,6 +15,7 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_3A);
             add(LevelOfEvidence.LEVEL_2B);
             add(LevelOfEvidence.LEVEL_2A);
+            add(LevelOfEvidence.LEVEL_R1);
             add(LevelOfEvidence.LEVEL_1);
         }}
     );
@@ -91,6 +92,7 @@ public class LevelUtils {
     public static Set<LevelOfEvidence> getPublicLevels() {
         return new HashSet<LevelOfEvidence>() {{
             add(LevelOfEvidence.LEVEL_1);
+            add(LevelOfEvidence.LEVEL_R1);
             add(LevelOfEvidence.LEVEL_2A);
             add(LevelOfEvidence.LEVEL_3A);
         }};

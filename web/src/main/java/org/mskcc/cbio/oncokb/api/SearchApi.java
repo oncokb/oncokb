@@ -200,6 +200,7 @@ public class SearchApi {
                 alterations = AlterationUtils.excludeVUS(gene, alterations);
                 Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                     add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+                    add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
                     add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
                 }};
                 Map<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
