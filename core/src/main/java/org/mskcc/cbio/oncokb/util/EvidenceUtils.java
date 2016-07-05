@@ -94,7 +94,7 @@ public class EvidenceUtils {
         return evidenceBo.findEvidencesByAlteration(alterations);
     }
 
-    private static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
+    public static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }

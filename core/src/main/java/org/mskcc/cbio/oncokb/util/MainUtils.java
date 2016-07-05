@@ -4,10 +4,7 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -89,5 +86,33 @@ public class MainUtils {
     public static Long printTimeDiff(Long oldDate, Long newDate, String message) {
         System.out.println(message + ": " +  (newDate - oldDate));
         return newDate;
+    }
+    
+    public static String findHighestMutationEffect(Set<String> mutationEffect) {
+        String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Unknown", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
+        List<String> list = Arrays.asList(effects);
+        Integer index = 100;
+        for (String effect : mutationEffect) {
+            if (list.indexOf(effect) < index) {
+                index = list.indexOf(effect);
+            }
+        }
+        return index == 100 ? "" : list.get(index);
+    }
+    
+    public static String findHighestOncogenic(Set<Oncogenicity> oncogenic) {
+        String level = "";
+        Integer index = -2;
+        
+        for(Oncogenicity datum : oncogenic) {
+            if(datum != null) {
+                Integer oncogenicIndex = Integer.parseInt(datum.getOncogenic());
+                if(index < oncogenicIndex) {
+                    index = oncogenicIndex;
+                }
+            }
+        }
+        
+        return index == -2 ? "" : Oncogenicity.getByLevel(index.toString()).getDescription();
     }
 }
