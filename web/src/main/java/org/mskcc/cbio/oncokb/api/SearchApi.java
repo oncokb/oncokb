@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.api;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.log4j.chainsaw.Main;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.response.ApiGenes;
 import org.mskcc.cbio.oncokb.response.ApiSearchEvidences;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.sql.Struct;
 import java.util.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -163,13 +165,15 @@ public class SearchApi {
                     BiologicalVariant variant = new BiologicalVariant();
                     variant.setVariant(alteration);
                     Oncogenicity oncogenicity = Oncogenicity.getByLevel(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.ONCOGENIC, map.get(EvidenceType.ONCOGENIC)));
-                    variant.setOncogenic(oncogenicity != null ? oncogenicity.getDescription() : "");
-                    variant.setMutationEffect(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.MUTATION_EFFECT, map.get(EvidenceType.MUTATION_EFFECT)));
+                    
+                    Map<String, String> properMapping = MainUtils.matchOncogenicMutation(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.MUTATION_EFFECT, map.get(EvidenceType.MUTATION_EFFECT)), oncogenicity == null ? null : oncogenicity.getDescription());
+                    variant.setOncogenic(properMapping.get("oncogenic"));
+                    variant.setMutationEffect(properMapping.get("mutationEffect"));
                     variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
                     variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
                     variants.add(variant);
                 }
-                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Created biological annotations.");
+//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Created biological annotations.");
             }
         }
         instance.setData(variants);
@@ -200,6 +204,7 @@ public class SearchApi {
                 alterations = AlterationUtils.excludeVUS(gene, alterations);
                 Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                     add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+                    add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
                     add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
                 }};
                 Map<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();

@@ -17,7 +17,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import org.mskcc.cbio.oncokb.config.GoogleAuth;
+
+import org.mskcc.cbio.oncokb.util.GoogleAuth;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;

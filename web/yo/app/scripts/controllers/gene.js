@@ -2876,6 +2876,7 @@ angular.module('oncokbApp')
                 }, function (result) {
                     $scope.docStatus.savedGene = true;
                     console.log('failed', result);
+                    dialogs.error('Error', 'An error has occurred when saving data, please contact the developer. Error code: 1');
                     changeLastUpdate();
                 });
             };
@@ -3105,7 +3106,6 @@ angular.module('oncokbApp')
                 console.log($scope.geneStatus);
 
                 console.log('Num of watchers: ' + checkNumWatchers());
-                console.log($scope.gene.status_timeStamp.get('lastEdit').value);
                 console.log($scope.gene.status_timeStamp.get('lastUpdate').value);
 
                 $scope.gene.mutations.asArray().forEach(function (e) {
@@ -3160,12 +3160,14 @@ angular.module('oncokbApp')
             }
             
             $scope.updateGeneColor = function () {
-                if ($scope.gene) {
-                    if (Number($scope.gene.status_timeStamp.get('lastEdit').value.text) > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
+                if ($scope.gene && $scope.document && $scope.document.hasOwnProperty('modifiedDate')) {
+                    if (new Date($scope.document.modifiedDate).getTime() > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
                         return 'red';
                     } else {
                         return 'black';
                     }
+                }else {
+                    return 'black';
                 }
             };
 
@@ -3458,28 +3460,65 @@ angular.module('oncokbApp')
                 status.set('curated', !status.get('curated'));
             };
 
+            // Calculate number of 'number' elements within the object
+            function getNoNKeys(object) {
+                var count = 0;
+                for(var key in object) {
+                    if(!isNaN(key)) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+            
+            // Only do the simple check wheter the numebr of array has been changed.
+            // It's a little triky to monitor all content. 
             function regenerateGeneStatus() {
                 var geneStatus = {};
                 var mutationKeys = ['oncogenic'];
                 var tumorKeys = ['prevalence', 'progImp', 'nccn', 'trials'];
 
-                $scope.gene.mutations.asArray().forEach(function (mutation, mutationIndex) {
-                    geneStatus[mutationIndex] = new GeneStatusSingleton();
-                    mutationKeys.forEach(function (key) {
-                        if (mutation[key]) {
-                            geneStatus[mutationIndex][key] = new GeneStatusSingleton();
-                        }
-                    });
+                var changeMutation = false;
+
+                if ($scope.gene.mutations.length !== getNoNKeys($scope.geneStatus)) {
+                    changeMutation = true;
+                }
+                $scope.gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
+                    if (changeMutation) {
+                        geneStatus[mutationIndex] = $.extend($scope.geneStatus[mutationIndex], new GeneStatusSingleton());
+                        mutationKeys.forEach(function(key) {
+                            if (mutation[key]) {
+                                geneStatus[mutationIndex][key] = new GeneStatusSingleton();
+                            }
+                        });
+                    } else {
+                        geneStatus[mutationIndex] = $scope.geneStatus[mutationIndex];
+                    }
 
                     if (mutation.tumors.length > 0) {
-                        mutation.tumors.asArray().forEach(function (tumor, tumorIndex) {
-                            geneStatus[mutationIndex][tumorIndex] = new GeneStatusSingleton();
-                            tumorKeys.forEach(function (key) {
-                                if (tumor[key]) {
+                        var changeTT = false;
+
+                        if (mutation.tumors.length !== getNoNKeys($scope.geneStatus[mutationIndex])) {
+                            changeTT = true;
+                        }
+                        mutation.tumors.asArray().forEach(function(tumor, tumorIndex) {
+                            if(changeTT) {
+                                geneStatus[mutationIndex][tumorIndex] = $.extend($scope.geneStatus[mutationIndex][tumorIndex], new GeneStatusSingleton());
+                            }
+                            tumorKeys.forEach(function(key) {
+                                if (tumor[key] && changeTT) {
                                     geneStatus[mutationIndex][tumorIndex][key] = new GeneStatusSingleton();
                                 }
-                                tumor.TI.asArray(function (therapyType, therapyTypeIndex) {
-                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = new GeneStatusSingleton();
+                                tumor.TI.asArray(function(therapyType, therapyTypeIndex) {
+                                    geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = $scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex];
+                                    var changeT = false;
+
+                                    if (therapyType.treatment.length !== getNoNKeys($scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex])) {
+                                        changeT = true;
+                                    }
+                                    therapyType.treatments.asArray(function(treatment, treatmentIndex) {
+                                        geneStatus[mutationIndex][tumorIndex][therapyTypeIndex][treatmentIndex] = changeT ? new GeneStatusSingleton() : $scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex][treatmentIndex];
+                                    });
                                 });
                             });
                         });
@@ -3612,14 +3651,14 @@ angular.module('oncokbApp')
                 var file = Documents.get({title: $scope.fileTitle});
                 var timeStamp;
                 file = file[0];
-                if (!$scope.gene.status_timeStamp.has('lastEdit')) {
-                    $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                    timeStamp.value.setText(new Date().getTime().toString());
-                    timeStamp.by.setText(Users.getMe().name);
-                    $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
-                    $scope.realtimeDocument.getModel().endCompoundOperation();
-                }
+                // if (!$scope.gene.status_timeStamp.has('lastEdit')) {
+                //     $scope.realtimeDocument.getModel().beginCompoundOperation();
+                //     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                //     timeStamp.value.setText(new Date().getTime().toString());
+                //     timeStamp.by.setText(Users.getMe().name);
+                //     $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
+                //     $scope.realtimeDocument.getModel().endCompoundOperation();
+                // }
                 if (!$scope.gene.status_timeStamp.has('lastUpdate')) {
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
@@ -3739,10 +3778,10 @@ angular.module('oncokbApp')
             }
 
             function documentSaved() {
-                if (!$scope.docStatus.updateGene) {
-                    $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
-                    $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
-                }
+                // if (!$scope.docStatus.updateGene) {
+                //     $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
+                //     $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
+                // }
                 $scope.docStatus.saving = false;
                 $scope.docStatus.saved = true;
                 $scope.docStatus.closed = false;
@@ -3817,21 +3856,20 @@ angular.module('oncokbApp')
             function getLevels() {
                 var desS = {
                     '': '',
-                    '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker.',
-                    '1': 'FDA-approved biomarker and drug in this indication.',
-                    '2A': 'Standard-of-care biomarker and drug in this indication but not FDA-approved.',
-                    '2B': 'FDA-approved biomarker and drug in another indication, but not FDA or NCCN compendium-listed for this indication.',
-                    '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
-                    '3A': 'Clinical evidence links biomarker to drug response in this indication but neither biomarker or drug are FDA-approved or NCCN compendium-listed.',
-                    '3B': 'Clinical evidence links biomarker to drug response in another indication but neither biomarker or drug are FDA-approved or NCCN compendium-listed.',
-                    '4': 'Preclinical evidence associates this biomarker to drug response, where the biomarker and drug are NOT FDA-approved or NCCN compendium-listed.'
+                    '0': $rootScope.meta.levelsDesc['0'],
+                    '1': $rootScope.meta.levelsDesc['1'],
+                    '2A': $rootScope.meta.levelsDesc['2A'],
+                    '2B': $rootScope.meta.levelsDesc['2B'],
+                    '3A': $rootScope.meta.levelsDesc['3A'],
+                    '3B': $rootScope.meta.levelsDesc['3B'],
+                    '4': $rootScope.meta.levelsDesc['4']
                 };
 
                 var desR = {
                     '': '',
-                    'R1': 'NCCN-compendium listed biomarker for resistance to a FDA-approved drug.',
-                    'R2': 'Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.',
-                    'R3': 'Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.'
+                    'R1': $rootScope.meta.levelsDesc['R1'],
+                    'R2': $rootScope.meta.levelsDesc['R2'],
+                    'R3': $rootScope.meta.levelsDesc['R3'],
                 };
 
                 var levels = {};
@@ -3932,8 +3970,8 @@ angular.module('oncokbApp')
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = Users.getMe().role;
             $scope.levelExps = {
-                SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
-                IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
+                SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> ' + $rootScope.meta.levelsDescHtml['R1'] + '.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
+                IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> ' + $rootScope.meta.levelsDescHtml['R2'] + '.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> ' + $rootScope.meta.levelsDescHtml['R3'] + '.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
             };
             $scope.showHideButtons = [
                 {'key': 'prevelenceShow', 'display': 'Prevalence'},
@@ -4137,7 +4175,11 @@ angular.module('oncokbApp')
 
             loadFile().then(function (file) {
                 $scope.realtimeDocument = file;
-
+                var _documents = Documents.get({'title': $scope.fileTitle});
+                if(_.isArray(_documents) && _documents.length > 0) {
+                    $scope.document = _documents[0];
+                }
+                
                 if ($scope.fileTitle) {
                     var model = $scope.realtimeDocument.getModel();
                     if (!model.getRoot().get('gene')) {

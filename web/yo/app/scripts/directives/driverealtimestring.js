@@ -54,7 +54,12 @@ angular.module('oncokbApp')
           });
         }
         scope.content.preStringO = scope.content.stringO;
-
+      
+          scope.$watch("object.text" ,function(n, o){
+              if(n !== o) {
+                  scope.content.stringO = scope.object.text;
+              }
+          });
         scope.$watch("content.stringO", function (n, o) {
           $timeout.cancel(scope.stringTimeoutPromise);  //does nothing, if timeout already done
           scope.stringTimeoutPromise = $timeout(function(){   //Set timeout
