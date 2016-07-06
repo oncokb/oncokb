@@ -181,7 +181,7 @@ public class MainUtils {
             return false;
         }
 
-        if (effect.equalsIgnoreCase("known") || effect.isEmpty()) {
+        if (effect.equalsIgnoreCase("unknown") || effect.isEmpty()) {
             return false;
         } else {
             return true;
