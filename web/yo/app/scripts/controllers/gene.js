@@ -3856,21 +3856,20 @@ angular.module('oncokbApp')
             function getLevels() {
                 var desS = {
                     '': '',
-                    '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker.',
-                    '1': 'FDA-approved biomarker and drug in this indication.',
-                    '2A': 'Standard-of-care biomarker and drug in this indication but not FDA-approved.',
-                    '2B': 'FDA-approved biomarker and drug in another indication, but not FDA or NCCN compendium-listed for this indication.',
-                    '3': 'Clinical evidence links this biomarker to drug response but no FDA-approved or NCCN compendium-listed biomarker and drug association.',
-                    '3A': 'Clinical evidence links biomarker to drug response in this indication but neither biomarker or drug are FDA-approved or NCCN compendium-listed.',
-                    '3B': 'Clinical evidence links biomarker to drug response in another indication but neither biomarker or drug are FDA-approved or NCCN compendium-listed.',
-                    '4': 'Preclinical evidence associates this biomarker to drug response, where the biomarker and drug are NOT FDA-approved or NCCN compendium-listed.'
+                    '0': $rootScope.meta.levelsDesc['0'],
+                    '1': $rootScope.meta.levelsDesc['1'],
+                    '2A': $rootScope.meta.levelsDesc['2A'],
+                    '2B': $rootScope.meta.levelsDesc['2B'],
+                    '3A': $rootScope.meta.levelsDesc['3A'],
+                    '3B': $rootScope.meta.levelsDesc['3B'],
+                    '4': $rootScope.meta.levelsDesc['4']
                 };
 
                 var desR = {
                     '': '',
-                    'R1': 'NCCN-compendium listed biomarker for resistance to a FDA-approved drug.',
-                    'R2': 'Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.',
-                    'R3': 'Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.'
+                    'R1': $rootScope.meta.levelsDesc['R1'],
+                    'R2': $rootScope.meta.levelsDesc['R2'],
+                    'R3': $rootScope.meta.levelsDesc['R3'],
                 };
 
                 var levels = {};
@@ -3971,8 +3970,8 @@ angular.module('oncokbApp')
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = Users.getMe().role;
             $scope.levelExps = {
-                SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> NCCN-compendium listed biomarker for resistance to a FDA-approved drug.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
-                IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
+                SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> ' + $rootScope.meta.levelsDescHtml['R1'] + '.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
+                IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> ' + $rootScope.meta.levelsDescHtml['R2'] + '.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> ' + $rootScope.meta.levelsDescHtml['R3'] + '.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
             };
             $scope.showHideButtons = [
                 {'key': 'prevelenceShow', 'display': 'Prevalence'},
