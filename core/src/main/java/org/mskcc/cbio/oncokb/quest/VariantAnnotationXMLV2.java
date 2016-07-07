@@ -261,8 +261,7 @@ public final class VariantAnnotationXMLV2 {
                 }
                 parts = line.split("\t");
                 if(!hugoSymboles.contains(parts[0]) && diagnosis.equals(parts[1])){
-                    i = hugoSymboles.indexOf(parts[0]);
-                    tempAlteration.setGene(GeneUtils.getGene(Integer.parseInt(entrezGeneIDs.get(i)), hugoSymboles.get(i)));
+                    tempAlteration.setGene(GeneUtils.getGene(null, parts[0]));
                     tempAlteration.setAlteration("Wildtype");
                     tempAlteration.setAlterationType(AlterationType.MUTATION); 
                     StringBuilder sb = new StringBuilder();
