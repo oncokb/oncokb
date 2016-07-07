@@ -215,7 +215,7 @@ public final class VariantAnnotationXMLV2 {
         Alteration alteration = new Alteration();
         alteration.setGene(gene);
         alteration.setAlteration(type);
-        alteration.setAlterationType(AlterationType.COPY_NUMBER_ALTERATION); 
+        alteration.setAlterationType(AlterationType.MUTATION); // TODO: this needs to be fixed
         
         StringBuilder sb = new StringBuilder();
         sb.append("<variant_type>copy_number_alteration</variant_type>\n");
@@ -240,7 +240,7 @@ public final class VariantAnnotationXMLV2 {
         Alteration alteration = new Alteration();
         alteration.setGene(gene2);
         alteration.setAlteration(fusion);
-        alteration.setAlterationType(AlterationType.FUSION); 
+        alteration.setAlterationType(AlterationType.MUTATION); // TODO: this needs to be fixed
         
         sb.append(VariantAnnotationXML.annotate(alteration, diagnosis));
         
@@ -260,7 +260,7 @@ public final class VariantAnnotationXMLV2 {
                    continue;
                 }
                 parts = line.split("\t");
-                if(hugoSymboles.contains(parts[0]) && diagnosis.equals(parts[1])){
+                if(!hugoSymboles.contains(parts[0]) && diagnosis.equals(parts[1])){
                     i = hugoSymboles.indexOf(parts[0]);
                     tempAlteration.setGene(GeneUtils.getGene(Integer.parseInt(entrezGeneIDs.get(i)), hugoSymboles.get(i)));
                     tempAlteration.setAlteration("Wildtype");
