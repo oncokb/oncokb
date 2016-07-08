@@ -290,6 +290,7 @@ public final class VariantAnnotationXMLV2 {
     }
     
     private static List<Alteration> getAlterationOrderByLevelOfEvidence(Map<Alteration, String> mapAlterationXml) {
+        //sort the variant based on the highest level in the order of: 0 > 1 > R1 > 2A > 2B > R2 > 3A > 3B > R3 > 4
         ArrayList<Alteration> alterations = new ArrayList<Alteration>(mapAlterationXml.keySet());
         final Map<Alteration, String> mapAlterationLevel = new LinkedHashMap<Alteration, String>();
         String relevant = "", level = "9", tempLevel = "";
@@ -309,11 +310,18 @@ public final class VariantAnnotationXMLV2 {
                     relevant = currentNode.getAttributes().getNamedItem("relevant_to_patient_disease").getNodeValue();
                     if(relevant.equals("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
                         tempLevel = currentNode.getElementsByTagName("level").item(0).getTextContent();
-                        if(tempLevel.equalsIgnoreCase("1R")){
-                        //when the level is 1R, which is the highest, there is no need to compare other levels 
+                        if(tempLevel.equals("0")){
+                        //when the level is 0, which is the highest, there is no need to compare other levels 
                             level = "0";
                             break;
-                        }else if(tempLevel.compareTo(level) < 0){
+                        }else if(tempLevel.equalsIgnoreCase("R1")){
+                            tempLevel = "1A";
+                        }else if(tempLevel.equalsIgnoreCase("R2")){
+                            tempLevel = "2C";
+                        }else if(tempLevel.equalsIgnoreCase("R3")){
+                            tempLevel = "3C";
+                        }
+                        if(tempLevel.compareTo(level) < 0){
                         //assign level value only if higher level appears    
                             level = tempLevel;
                         }
