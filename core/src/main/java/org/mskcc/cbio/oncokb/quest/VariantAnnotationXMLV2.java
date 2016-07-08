@@ -30,6 +30,9 @@ import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.FileUtils;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -68,9 +71,6 @@ public final class VariantAnnotationXMLV2 {
 
             // test id
             String testId = document.selectSingleNode("//xml/test_id").getText();
-            
-            // project id / test name
-            String testName = document.selectSingleNode("//xml/project_id").getText();
 
             // diagnosis
             String diagnosis = document.selectSingleNode("//xml/diagnosis").getText();
@@ -95,10 +95,16 @@ public final class VariantAnnotationXMLV2 {
             for (Node fusionNode : fusionNodes) {
                 handleFusion(fusionNode, mapAlterationXml, diagnosis);
             }
-            
-            // identify other related variants such as TP53 wildtype
-            identifyAdditionalVariants(mapAlterationXml, diagnosis, getSequencedGenes(testName));
-            
+
+            List<Node> entrezNodes = document.selectNodes("//xml/sequencing_panel/genes/gene/entrez_gene_id");
+            ArrayList<Gene> sequencedGenes = new ArrayList<Gene>();
+            //use entrezGeneID, which is more stable than hugoSymbol, to fetch Gene instance
+            for(int i = 0;i < entrezNodes.size();i++){
+                  sequencedGenes.add(GeneUtils.getGene(Integer.parseInt(entrezNodes.get(i).getText()), null));
+            }
+            // identify other related variants such as KRAS wildtype
+            identifyAdditionalVariants(mapAlterationXml, diagnosis, sequencedGenes);
+
             List<Alteration> alterations = getAlterationOrderByLevelOfEvidence(mapAlterationXml);
 
             // exporting
@@ -239,13 +245,41 @@ public final class VariantAnnotationXMLV2 {
         mapAlterationXml.put(alteration, sb.toString());
 
     }
-    
-    private static List<Gene> getSequencedGenes(String testName) {
-        return Collections.emptyList();
-    }
-    
-    private static void identifyAdditionalVariants(Map<Alteration, String> mapAlterationXml, String diagnosis, List<Gene> sequencedGenes) {
-        
+
+    private static void identifyAdditionalVariants(Map<Alteration, String> mapAlterationXml, String diagnosis, ArrayList<Gene> sequencedGenes) {
+        List<String> lines;
+        try {
+            ArrayList<Alteration> alterations = new ArrayList<Alteration>(mapAlterationXml.keySet());
+            ArrayList<Gene> genesWithMutation = new ArrayList<Gene>();
+            for(int i = 0;i < alterations.size();i++){
+                genesWithMutation.add(alterations.get(i).getGene());
+            }
+            lines = FileUtils.readTrimedLinesStream(TumorTypeUtils.class.getResourceAsStream("/data/wildtype-alterations.txt"));
+            String[] parts = new String[2];
+            Alteration tempAlteration = new Alteration();
+            Gene tempGene = new Gene();
+            for (String line : lines) {
+                if (line.startsWith("#")) {
+                   continue;
+                }
+                parts = line.split("\t");
+                tempGene = GeneUtils.getGene(null, parts[0]);
+                if(sequencedGenes.contains(tempGene) && diagnosis.equals(parts[1]) && !genesWithMutation.contains(tempGene)){
+                    tempAlteration.setGene(tempGene);
+                    tempAlteration.setAlteration("Wildtype");
+                    tempAlteration.setAlterationType(AlterationType.MUTATION); 
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<variant_type>wildtype</variant_type>\n");
+                    sb.append(VariantAnnotationXML.annotate(tempAlteration, diagnosis));
+
+                    mapAlterationXml.put(tempAlteration, sb.toString());
+                }
+         
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+       
     }
     
     private static List<Alteration> getAlterationOrderByLevelOfEvidence(Map<Alteration, String> mapAlterationXml) {
