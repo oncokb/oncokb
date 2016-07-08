@@ -15,11 +15,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -34,6 +38,9 @@ import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.stereotype.Controller;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /**
  *
@@ -283,7 +290,49 @@ public final class VariantAnnotationXMLV2 {
     }
     
     private static List<Alteration> getAlterationOrderByLevelOfEvidence(Map<Alteration, String> mapAlterationXml) {
-        return new ArrayList<Alteration>(mapAlterationXml.keySet());
+        ArrayList<Alteration> alterations = new ArrayList<Alteration>(mapAlterationXml.keySet());
+        final Map<Alteration, String> mapAlterationLevel = new LinkedHashMap<Alteration, String>();
+        String relevant = "", level = "9", tempLevel = "";
+        for(int i = 0;i < alterations.size();i++){
+            //For some variants, there is no canncertype relevant to patient disease. And we assign the level to 9, which will put them in the end of variant list.
+            level = "9"; 
+            String tempXMLString = "<xml>" + mapAlterationXml.get(alterations.get(i)) + "</xml>";
+            try  
+            {  
+                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                InputSource src = new InputSource();
+                src.setCharacterStream(new StringReader(tempXMLString));
+                org.w3c.dom.Document doc = builder.parse(src);
+                NodeList cancerTypeNodes = doc.getElementsByTagName("cancer_type");
+                for(int j = 0;j < cancerTypeNodes.getLength();j++){
+                    Element currentNode = (Element)cancerTypeNodes.item(j);
+                    relevant = currentNode.getAttributes().getNamedItem("relevant_to_patient_disease").getNodeValue();
+                    if(relevant.equals("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
+                        tempLevel = currentNode.getElementsByTagName("level").item(0).getTextContent();
+                        if(tempLevel.equalsIgnoreCase("1R")){
+                        //when the level is 1R, which is the highest, there is no need to compare other levels 
+                            level = "0";
+                            break;
+                        }else if(tempLevel.compareTo(level) < 0){
+                        //assign level value only if higher level appears    
+                            level = tempLevel;
+                        }
+                         
+                    }
+                }
+                mapAlterationLevel.put(alterations.get(i), level);
+            } catch (Exception e) {  
+                e.printStackTrace();  
+            } 
+           
+        }
+        Collections.sort(alterations, new Comparator<Alteration>() {
+            public int compare(Alteration a1, Alteration a2) {
+                return mapAlterationLevel.get(a1).compareTo(mapAlterationLevel.get(a2));
+            }
+        });
+
+        return alterations;
     }
     
     private static Gene parseGene(Node node, String genePath) {
