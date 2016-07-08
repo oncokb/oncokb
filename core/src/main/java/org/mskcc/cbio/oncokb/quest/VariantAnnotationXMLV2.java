@@ -96,16 +96,14 @@ public final class VariantAnnotationXMLV2 {
                 handleFusion(fusionNode, mapAlterationXml, diagnosis);
             }
 
-            List<Node> hugoNodes = document.selectNodes("//xml/sequencing_panel/genes/gene/hgnc_symbol");
             List<Node> entrezNodes = document.selectNodes("//xml/sequencing_panel/genes/gene/entrez_gene_id");
-            ArrayList<String> hugoSymboles = new ArrayList<String>();
-            ArrayList<String> entrezGeneIDs = new ArrayList<String>();
-            for(int i = 0;i < hugoNodes.size();i++){
-                hugoSymboles.add(hugoNodes.get(i).getText());
-                entrezGeneIDs.add(entrezNodes.get(i).getText());
+            ArrayList<Gene> sequencedGenes = new ArrayList<Gene>();
+            //use entrezGeneID, which is more stable than hugoSymbol, to fetch Gene instance
+            for(int i = 0;i < entrezNodes.size();i++){
+                  sequencedGenes.add(GeneUtils.getGene(Integer.parseInt(entrezNodes.get(i).getText()), null));
             }
-            // identify other related variants such as TP53 wildtype
-            identifyAdditionalVariants(mapAlterationXml, diagnosis, hugoSymboles, entrezGeneIDs);
+            // identify other related variants such as KRAS wildtype
+            identifyAdditionalVariants(mapAlterationXml, diagnosis, sequencedGenes);
 
             List<Alteration> alterations = getAlterationOrderByLevelOfEvidence(mapAlterationXml);
 
@@ -248,24 +246,30 @@ public final class VariantAnnotationXMLV2 {
 
     }
 
-    private static void identifyAdditionalVariants(Map<Alteration, String> mapAlterationXml, String diagnosis, ArrayList<String> hugoSymboles, ArrayList<String> entrezGeneIDs) {
+    private static void identifyAdditionalVariants(Map<Alteration, String> mapAlterationXml, String diagnosis, ArrayList<Gene> sequencedGenes) {
         List<String> lines;
         try {
+            ArrayList<Alteration> alterations = new ArrayList<Alteration>(mapAlterationXml.keySet());
+            ArrayList<Gene> genesWithMutation = new ArrayList<Gene>();
+            for(int i = 0;i < alterations.size();i++){
+                genesWithMutation.add(alterations.get(i).getGene());
+            }
             lines = FileUtils.readTrimedLinesStream(TumorTypeUtils.class.getResourceAsStream("/data/wildtype-alterations.txt"));
             String[] parts = new String[2];
             Alteration tempAlteration = new Alteration();
-            Integer i = 0;
+            Gene tempGene = new Gene();
             for (String line : lines) {
                 if (line.startsWith("#")) {
                    continue;
                 }
                 parts = line.split("\t");
-                if(!hugoSymboles.contains(parts[0]) && diagnosis.equals(parts[1])){
-                    tempAlteration.setGene(GeneUtils.getGene(null, parts[0]));
+                tempGene = GeneUtils.getGene(null, parts[0]);
+                if(sequencedGenes.contains(tempGene) && diagnosis.equals(parts[1]) && !genesWithMutation.contains(tempGene)){
+                    tempAlteration.setGene(tempGene);
                     tempAlteration.setAlteration("Wildtype");
                     tempAlteration.setAlterationType(AlterationType.MUTATION); 
                     StringBuilder sb = new StringBuilder();
-                    sb.append("<variant_type>Wildtype</variant_type>\n");
+                    sb.append("<variant_type>wildtype</variant_type>\n");
                     sb.append(VariantAnnotationXML.annotate(tempAlteration, diagnosis));
 
                     mapAlterationXml.put(tempAlteration, sb.toString());
