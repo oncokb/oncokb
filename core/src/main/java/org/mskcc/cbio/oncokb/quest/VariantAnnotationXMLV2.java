@@ -315,7 +315,7 @@ public final class VariantAnnotationXMLV2 {
                     if(relevant.equals("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
                         levelIndex = 100;
                         for(int k = 0; k < levelNodes.getLength();k++){
-                            tempLevel = levelNodes.item(k).getTextContent();
+                            tempLevel = levelNodes.item(k).getTextContent().toUpperCase();
                             lowestLevelIndex = ArrayUtils.indexOf(levels, tempLevel);
                             if(lowestLevelIndex < levelIndex)levelIndex = lowestLevelIndex;
                         }
