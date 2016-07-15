@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.commons.lang3.ArrayUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -291,12 +292,14 @@ public final class VariantAnnotationXMLV2 {
     
     private static List<Alteration> getAlterationOrderByLevelOfEvidence(Map<Alteration, String> mapAlterationXml) {
         //sort the variant based on the highest level in the order of: 0 > 1 > R1 > 2A > 2B > R2 > 3A > 3B > R3 > 4
+        String[] levels = {"0", "1", "R1", "2A", "2B", "R2", "3A", "3B", "R3", "4"};
         ArrayList<Alteration> alterations = new ArrayList<Alteration>(mapAlterationXml.keySet());
-        final Map<Alteration, String> mapAlterationLevel = new LinkedHashMap<Alteration, String>();
-        String relevant = "", level = "9", tempLevel = "";
+        final Map<Alteration, Integer> mapAlterationLevel = new LinkedHashMap<Alteration, Integer>();
+        String relevant = "", tempLevel = "";
+        Integer levelIndex, lowestLevelIndex;
         for(int i = 0;i < alterations.size();i++){
-            //For some variants, there is no canncertype relevant to patient disease. And we assign the level to 9, which will put them in the end of variant list.
-            level = "9"; 
+            levelIndex = -1;
+            lowestLevelIndex = -1;
             String tempXMLString = "<xml>" + mapAlterationXml.get(alterations.get(i)) + "</xml>";
             try  
             {  
@@ -308,27 +311,17 @@ public final class VariantAnnotationXMLV2 {
                 for(int j = 0;j < cancerTypeNodes.getLength();j++){
                     Element currentNode = (Element)cancerTypeNodes.item(j);
                     relevant = currentNode.getAttributes().getNamedItem("relevant_to_patient_disease").getNodeValue();
+                    NodeList levelNodes = currentNode.getElementsByTagName("level");
                     if(relevant.equals("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
-                        tempLevel = currentNode.getElementsByTagName("level").item(0).getTextContent();
-                        if(tempLevel.equals("0")){
-                        //when the level is 0, which is the highest, there is no need to compare other levels 
-                            level = "0";
-                            break;
-                        }else if(tempLevel.equalsIgnoreCase("R1")){
-                            tempLevel = "1A";
-                        }else if(tempLevel.equalsIgnoreCase("R2")){
-                            tempLevel = "2C";
-                        }else if(tempLevel.equalsIgnoreCase("R3")){
-                            tempLevel = "3C";
+                        levelIndex = 100;
+                        for(int k = 0; k < levelNodes.getLength();k++){
+                            tempLevel = levelNodes.item(k).getTextContent();
+                            lowestLevelIndex = ArrayUtils.indexOf(levels, tempLevel);
+                            if(lowestLevelIndex < levelIndex)levelIndex = lowestLevelIndex;
                         }
-                        if(tempLevel.compareTo(level) < 0){
-                        //assign level value only if higher level appears    
-                            level = tempLevel;
-                        }
-                         
                     }
                 }
-                mapAlterationLevel.put(alterations.get(i), level);
+                mapAlterationLevel.put(alterations.get(i), levelIndex);
             } catch (Exception e) {  
                 e.printStackTrace();  
             } 
@@ -336,7 +329,10 @@ public final class VariantAnnotationXMLV2 {
         }
         Collections.sort(alterations, new Comparator<Alteration>() {
             public int compare(Alteration a1, Alteration a2) {
-                return mapAlterationLevel.get(a1).compareTo(mapAlterationLevel.get(a2));
+                Integer aLevel = mapAlterationLevel.get(a1), bLevel = mapAlterationLevel.get(a2);
+                if(aLevel == -1)return 1;
+                if(bLevel == -1)return -1;
+                return aLevel - bLevel; 
             }
         });
 
