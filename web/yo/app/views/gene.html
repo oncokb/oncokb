@@ -454,7 +454,7 @@
     <h3>Variants of Unknown Significance (Investigated and data not found)</h3>
     <div>
       <div ng-repeat="variant in vus.asArray()">
-        <vus-item vus="vus" index="$index" file-editable="fileEditable" d-model="model"></vus-item>
+        <vus-item vus="vus" index="$index" file-editable="fileEditable" d-model="model" comments="variant.name_comments"  object="variant" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></vus-item>
       </div>
 
       <div class="input-group input-group-sm vusGroup">

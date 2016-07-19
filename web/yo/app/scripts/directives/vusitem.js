@@ -15,7 +15,8 @@ angular.module('oncokbApp')
                 vus: '=',
                 index: '=',
                 fileEditable: '=',
-                dModel: '=' //drive realtime document model
+                dModel: '=', //drive realtime document model
+                addCommentInGene: '&addComment' //reference to the external function "addComment" in the gene controller
             },
             link: function postLink(scope, element, attrs) {
                 scope.variant = scope.vus.get(scope.index);
@@ -68,7 +69,12 @@ angular.module('oncokbApp')
                     }
 
                     return '';
-                }
+                };
+                $scope.addComment = function(arg1, arg2, arg3){
+                    //pass parameters in value pair mapping format
+                    $scope.addCommentInGene({arg1: arg1, arg2: arg2, arg3: arg3});
+                };
+                
             }
         }
     });
