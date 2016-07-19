@@ -1,6 +1,9 @@
 <div class="input-group  input-group-sm vusGroup">
     <span class="input-group-addon" ng-class="getClass(dt)" qtip type="vusItem" time="dt" by="dtBy">{{::variant.name.getText()}}</span>
     <span class="input-group-btn" ng-show="fileEditable">
+        <button class="btn btn-default" type="button" style="text-align:left">
+             <comments-dict file-editable="fileEditable" comments="variant.name_comments" object="variant" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+        </button>
         <button class="btn btn-default"
                 type="button" ng-click="update()" qtip content="Recheck: set the date to today">
             <i class="fa fa-refresh"></i>
