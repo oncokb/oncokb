@@ -67,8 +67,6 @@ public class VariantAnnotationXMLController {
             tumorType = subtype;
         } else if (cancerType != null) {
             tumorType = cancerType;
-        } else if (tumorType != null) {
-            tumorType = tumorType.toLowerCase();
         }
 
         Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, alterationType, consequence, proteinStart, proteinEnd);
