@@ -30,7 +30,7 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0BzBfo69g8fP6X0JNOGdLdkxlalk', //testing folder
+    //folderId: '0By19QWSOYlS_WDl3M3VYZ2E3Sjg', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
@@ -90,6 +90,12 @@ OncoKB.curateInfo = {
         },
         'curators': {
             type: 'list'
+        },
+        'transcripts': {
+            type: 'list'
+        },
+        'type': {
+            type: 'map'
         }
     },
     'Mutation': {
@@ -130,7 +136,7 @@ OncoKB.curateInfo = {
         'email': {
             type: 'string'
         }
-    },
+    },  
     'NCCN': {
         'therapy': {
             type: 'string',
@@ -231,7 +237,7 @@ OncoKB.curateInfo = {
         'interactAlts': {
             type: 'InteractAlts'
         }
-    },
+    },  
     'TI': {
         'name': {
             type: 'string'
@@ -339,9 +345,23 @@ OncoKB.curateInfo = {
         time: {
             type: 'list'
         }
+    },
+    'ISOForm': {
+        isoform_override: {
+            type: 'string'
+        },
+        gene_name: {
+            type: 'string'
+        },
+        dmp_refseq_id: {
+            type: 'string'
+        },
+        ccds_id: {
+            type: 'string'
+        }
     }
 };
-
+		
 OncoKB.setUp = function(object) {
     if(OncoKB.curateInfo.hasOwnProperty(object.attr)){
         for(var key1 in OncoKB.curateInfo[object.attr]){
@@ -402,6 +422,9 @@ OncoKB.initialize = function() {
                                 break;
                             case 'list':
                                 this[__key] = model.createList();
+                                break;
+                            case 'map':
+                                this[__key] = model.createMap({'TSG': '', 'OCG': ''});
                                 break;
                             default:
                                 this[__key] = model.create(OncoKB.curateInfo[id][__key].type);

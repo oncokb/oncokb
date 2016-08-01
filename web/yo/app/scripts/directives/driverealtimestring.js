@@ -69,7 +69,9 @@ angular.module('oncokbApp')
               }else{
                 scope.object.text = n;
               }
-              scope.valueChanged();
+              if(typeof scope.es !== 'undefined'){
+                  scope.valueChanged();
+              }
             }
           }, 1000);
         });
