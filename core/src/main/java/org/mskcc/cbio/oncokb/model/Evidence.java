@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -205,6 +207,19 @@ public class Evidence implements java.io.Serializable {
         }
         return true;
     }
+    
+    public OncoTreeType getOncoTreeType() {
+        OncoTreeType oncoTreeType = new OncoTreeType();
+        
+        if(this.subtype != null) {
+            oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);
+        }else if (this.cancerType != null) {
+            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(this.cancerType);
+        }
+        
+        return oncoTreeType;
+    }
+    
     public Evidence(Evidence e){
             evidenceId = e.evidenceId;
             evidenceType = e.evidenceType;

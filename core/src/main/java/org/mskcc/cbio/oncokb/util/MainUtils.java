@@ -100,7 +100,7 @@ public class MainUtils {
         return index == 100 ? "" : list.get(index);
     }
 
-    public static String findHighestOncogenic(Set<Oncogenicity> oncogenic) {
+    public static Oncogenicity findHighestOncogenic(Set<Oncogenicity> oncogenic) {
         String level = "";
         Integer index = -2;
 
@@ -113,7 +113,7 @@ public class MainUtils {
             }
         }
 
-        return index == -2 ? "" : Oncogenicity.getByLevel(index.toString()).getDescription();
+        return index == -2 ? null : Oncogenicity.getByLevel(index.toString());
     }
 
     public static String idealOncogenicityByMutationEffect(String mutationEffect) {
@@ -176,6 +176,15 @@ public class MainUtils {
         return match;
     }
 
+    public static Set<EvidenceType> getTreatmentEvidenceTypes() {
+        Set<EvidenceType> types = new HashSet<>();
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        
+        return types;
+    }
     private static Boolean hasInfoForEffect(String effect) {
         if (effect == null) {
             return false;

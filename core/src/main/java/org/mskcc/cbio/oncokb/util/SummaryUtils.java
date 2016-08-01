@@ -1,7 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.google.gdata.data.maps.MapEntry;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mortbay.jetty.Main;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -371,6 +373,98 @@ public class SummaryUtils {
         return sb.toString();
     }
 
+    public static String alleleSummary(Alteration alteration) {
+        StringBuilder sb = new StringBuilder();
+        
+        String geneStr = alteration.getGene().getHugoSymbol();
+        String altStr = alteration.getAlteration();
+        
+        sb.append(geneStr + " " + altStr);
+        sb.append(" has not been functionally or clinically validated.");
+        
+        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+
+        // Detemin whether allele alterations have treatments
+        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<Alteration>(alleles), new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()), null);
+        
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
+        Set<Alteration> highestAlterations = new HashSet<>();
+        Map<OncoTreeType, Set<Alteration>> mappedAlts = new HashMap<>();
+        Oncogenicity highestOncogenicity;
+        
+        // If there are no treatments for the alleles, try to find whether there are alleles are oncogenic or likely oncogenic
+        if(treatmentsEvis != null && treatmentsEvis.size() == 0) {
+            for(Alteration alt : alleles) {
+                List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alt), new ArrayList<EvidenceType>(MainUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevel));
+                if(evidences != null && evidences.size() > 0) {
+                    highestAlterations.add(alt);
+                }
+                
+                for(Evidence evidence : evidences) {
+                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
+                    
+                    if(oncoTreeType == null ) 
+                        continue;
+                    
+                    if(!mappedAlts.containsKey(oncoTreeType)) 
+                        mappedAlts.put(oncoTreeType, new HashSet<Alteration>());
+                    
+                    mappedAlts.get(oncoTreeType).add(alt);
+                }
+            }
+        }else {
+            highestAlterations = alleles;
+        }
+
+        Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(highestAlterations));
+        highestOncogenicity = (Oncogenicity)map.get("oncogenicity");
+        
+        if(highestOncogenicity != null && (highestOncogenicity.getOncogenic() == "1" || highestOncogenicity.getOncogenic() == "2")) {
+            sb.append(" is known to be " + highestOncogenicity.getDescription().toLowerCase());
+            sb.append(", and therefore " + geneStr + " " + altStr + " is considered likely oncogenic.");
+        }
+        
+        if(mappedAlts.keySet().size() > 0) {
+            sb.append(" While");
+            for (Map.Entry<OncoTreeType, Set<Alteration>> entry : mappedAlts.entrySet()) {
+                sb.append( entry.getKey().getCancerType());
+            }
+        }
+        return sb.toString();
+    }
+    
+    private static String alterationsToStr(Set<Alteration>) {
+        
+    }
+    private static Map<String, Object> geAlterationsWithHighestOncogenicity (Set<Alteration> alleles) {
+        Map<Oncogenicity, Set<Alteration>> oncoCate = new HashMap<>();
+
+        // Get oncogenicity info in alleles
+        for(Alteration alt : alleles) {
+            List<EvidenceType> evidenceTypes = new ArrayList<>();
+            evidenceTypes.add(EvidenceType.ONCOGENIC);
+            List<Evidence> allelesOnco = EvidenceUtils.getEvidence(Collections.singletonList(alt), evidenceTypes, null);
+
+            for(Evidence evidence : allelesOnco) {
+                String oncoStr = evidence.getKnownEffect();
+                if(oncoStr == null)
+                    continue;
+
+                Oncogenicity oncogenicity = Oncogenicity.getByLevel(oncoStr);
+                if(!oncoCate.containsKey(oncogenicity))
+                    oncoCate.put(oncogenicity, new HashSet<Alteration>());
+
+                oncoCate.get(oncogenicity).add(alt);
+            }
+        }
+        
+        Oncogenicity oncogenicity = MainUtils.findHighestOncogenic(oncoCate.keySet());
+        Map<String, Object> result = new HashMap<>();
+        result.put("oncogenicity", oncogenicity);
+        result.put("alterations", oncoCate != null ? oncoCate.get(oncogenicity.getOncogenic()) : new HashSet<>());
+        return result;
+    }
+    
     private static Map<LevelOfEvidence, List<Evidence>> groupEvidencesByLevel(List<Evidence> evidences) {
         Map<LevelOfEvidence, List<Evidence>> map = new EnumMap<LevelOfEvidence, List<Evidence>>(LevelOfEvidence.class);
         for (LevelOfEvidence level : LevelOfEvidence.values()) {

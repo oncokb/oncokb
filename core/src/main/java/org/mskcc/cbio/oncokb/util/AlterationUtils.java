@@ -349,6 +349,14 @@ public final class AlterationUtils {
         return alterations;
     }
 
+    public static List<Alteration> getRelevantAlterations(Alteration alteration) {
+        return alterationBo.findRelevantAlterations(alteration, null);
+    }
+
+    public static List<Alteration> getAlleleAlterations(Alteration alteration) {
+        return alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+    }
+    
     public static List<Alteration> getRelevantAlterations(
             Gene gene, String alteration, String consequence,
             Integer proteinStart, Integer proteinEnd) {
