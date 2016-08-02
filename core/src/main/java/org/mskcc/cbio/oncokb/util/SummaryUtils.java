@@ -449,14 +449,11 @@ public class SummaryUtils {
             Alteration tmp = alterations.iterator().next();
             String residue = tmp.getRefResidues();
             String location = Integer.toString(tmp.getProteinStart());
-            Set<String> variantResidue = new HashSet<>();
+            Set<String> variantResidue = new TreeSet<>();
             
             for(Alteration alteration : alterations) {
                 variantResidue.add(alteration.getVariantResidues());
             }
-            
-            
-            Collections.sort(new ArrayList<>(variantResidue));
             
             return residue + location + StringUtils.join(variantResidue, "/");
         }else {
