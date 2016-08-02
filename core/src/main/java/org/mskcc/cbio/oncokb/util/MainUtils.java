@@ -101,19 +101,21 @@ public class MainUtils {
     }
 
     public static Oncogenicity findHighestOncogenic(Set<Oncogenicity> oncogenic) {
+        String[] effects = {"-1", "0", "2", "1"};
+        List<String> list = Arrays.asList(effects);
         String level = "";
         Integer index = -2;
 
         for (Oncogenicity datum : oncogenic) {
             if (datum != null) {
-                Integer oncogenicIndex = Integer.parseInt(datum.getOncogenic());
+                Integer oncogenicIndex = list.indexOf(datum.getOncogenic());
                 if (index < oncogenicIndex) {
                     index = oncogenicIndex;
                 }
             }
         }
 
-        return index == -2 ? null : Oncogenicity.getByLevel(index.toString());
+        return index == -2 ? null : Oncogenicity.getByLevel(list.get(index));
     }
 
     public static String idealOncogenicityByMutationEffect(String mutationEffect) {

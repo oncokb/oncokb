@@ -251,16 +251,16 @@ public final class AlterationUtils {
             return alterationBo.findAlterationsByGene(Collections.singleton(gene));
         }
     }
-    
+
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
         Set<Alteration> alterations = new HashSet<>();
-        
-        for(Evidence evidence : evidences) {
+
+        for (Evidence evidence : evidences) {
             if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
                 alterations.addAll(evidence.getAlterations());
             }
         }
-        
+
         return alterations;
     }
 
@@ -268,37 +268,37 @@ public final class AlterationUtils {
         Set<Alteration> result = new HashSet<>();
         Set<Alteration> VUS = new HashSet<>();
         Set<Gene> allGenes = CacheUtils.getAllGenes();
-        for(Gene gene : allGenes) {
+        for (Gene gene : allGenes) {
             VUS.addAll(CacheUtils.getVUS(gene));
         }
-        
-        for(Alteration alteration : alterations) {
-            if(!VUS.contains(alteration)) {
+
+        for (Alteration alteration : alterations) {
+            if (!VUS.contains(alteration)) {
                 result.add(alteration);
             }
         }
 
         return result;
     }
-    
+
     public static Set<Alteration> excludeVUS(Gene gene, Set<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
         Set<Alteration> VUS = CacheUtils.getVUS(gene);
-        
-        for(Alteration alteration : alterations) {
-            if(!VUS.contains(alteration)) {
+
+        for (Alteration alteration : alterations) {
+            if (!VUS.contains(alteration)) {
                 result.add(alteration);
             }
         }
-        
+
         return result;
     }
 
     public static Set<Alteration> excludeGeneralAlterations(Set<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             String name = alteration.getAlteration().toLowerCase();
-            if(name != null && !generalAlterations.contains(name)) {
+            if (name != null && !generalAlterations.contains(name)) {
                 result.add(alteration);
             }
         }
@@ -356,10 +356,10 @@ public final class AlterationUtils {
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
         return alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
     }
-    
+
     public static List<Alteration> getRelevantAlterations(
-            Gene gene, String alteration, String consequence,
-            Integer proteinStart, Integer proteinEnd) {
+        Gene gene, String alteration, String consequence,
+        Integer proteinStart, Integer proteinEnd) {
         if (gene == null) {
             return new ArrayList<>();
         }
@@ -369,19 +369,28 @@ public final class AlterationUtils {
         if (CacheUtils.isEnabled()) {
             if (!CacheUtils.containRelevantAlterations(geneId, id)) {
                 CacheUtils.setRelevantAlterations(
-                        geneId, id,
-                        getAlterations(
-                                gene, alteration, consequence,
-                                proteinStart, proteinEnd,
-                                getAllAlterations(gene)));
+                    geneId, id,
+                    getAlterations(
+                        gene, alteration, consequence,
+                        proteinStart, proteinEnd,
+                        getAllAlterations(gene)));
             }
 
             return CacheUtils.getRelevantAlterations(geneId, id);
-        }else {
+        } else {
             return getAlterations(
-                    gene, alteration, consequence,
-                    proteinStart, proteinEnd,
-                    getAllAlterations(gene));
+                gene, alteration, consequence,
+                proteinStart, proteinEnd,
+                getAllAlterations(gene));
+        }
+    }
+
+    public static Boolean hasAlleleAlterations(Alteration alteration) {
+        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+        if (alleles == null || alleles.size() == 0) {
+            return false;
+        } else {
+            return true;
         }
     }
 }

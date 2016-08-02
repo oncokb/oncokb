@@ -45,7 +45,7 @@ public class GeneUtils {
                 }
                 return CacheUtils.getGeneByEntrezId(entrezId);
             } else {
-                geneBo.findGeneByEntrezGeneId(entrezId);
+                return geneBo.findGeneByEntrezGeneId(entrezId);
             }
         }
         return null;

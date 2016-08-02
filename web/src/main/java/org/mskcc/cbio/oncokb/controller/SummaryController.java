@@ -85,16 +85,16 @@ public class SummaryController {
         if (query != null && query.getGene() != null) {
             switch (summaryType) {
                 case "variant":
-                    summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "full":
                     summary = SummaryUtils.fullSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "variantCustomized":
-                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 default:
-                    summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), AlterationUtils.getVariantName(query.getGene() == null ? query.getQueryGene() : query.getGene().getHugoSymbol(), query.getQueryAlteration()), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
             }
         }
