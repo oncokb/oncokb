@@ -34,8 +34,8 @@ public class validation {
         Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Integer count = 0;
-        String result1 = "", result2 = "", result3 = "";
-        Integer length1 = 0, length2 = 0, length3 = 0;
+        String result0 = "", result1 = "", result2 = "", result3 = "", result4 = "";
+        Integer length0 = 0, length1 = 0, length2 = 0, length3 = 0, length4 = 0;
         ArrayList<String> specialAlterations = new ArrayList<>(Arrays.asList("Inactivating Mutations", "Activating Mutations", "Fusions", "Inactivating", "Wildtype", "Amplification", "Fusions"));
         for (Gene gene : genes) {
             Set<Evidence> evidences = allGeneBasedEvidences.get(gene);
@@ -43,6 +43,8 @@ public class validation {
             Map<Alteration, ArrayList<Alteration>> relevantAlterationsMapping = new HashMap<Alteration, ArrayList<Alteration>>();
             Map<Alteration, String> oncogenicityMapping = new HashMap<Alteration, String>();
             Map<Alteration, String> mutationEffectMapping = new HashMap<Alteration, String>();
+            Map<Alteration, Set<String>> referencesMapping = new HashMap<Alteration, Set<String>>();
+            ArrayList<Alteration> altsWithDescriptions = new ArrayList<Alteration>();
             Set<Alteration> allVariants = new HashSet<Alteration>();
             Set<Alteration> allAlts = new HashSet<Alteration>();
             for (Evidence evidenceItem : evidences) {
@@ -56,14 +58,33 @@ public class validation {
                     if (evidenceItem.getEvidenceType().toString().equals("MUTATION_EFFECT")) {
                         mutationEffectMapping.put(alterationItem, evidenceItem.getKnownEffect());
                     }
+                    if(referencesMapping.containsKey(alterationItem)){
+                        Set<String> oldPMIDs = referencesMapping.get(alterationItem);
+                        Set<String> newPMIDs = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
+                        newPMIDs.addAll(oldPMIDs);
+                        referencesMapping.put(alterationItem, newPMIDs);
+                    }else{
+                        referencesMapping.put(alterationItem, EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem))));
+                    }
+                    if(!altsWithDescriptions.contains(alterationItem)){    
+                        if(evidenceItem.getDescription() != null && !evidenceItem.getDescription().isEmpty() || evidenceItem.getShortDescription() != null && !evidenceItem.getShortDescription().isEmpty()){
+                            altsWithDescriptions.add(alterationItem);
+                        }
+                    }
                 }
             }
             for (Alteration alt : allAlts) {
                 ArrayList<Alteration> relevantAlts = relevantAlterationsMapping.get(alt);
                 for (Alteration relevantAlt : relevantAlts) {
-                    if (oncogenicityMapping.containsKey(alt) && oncogenicityMapping.containsKey(relevantAlt) && !oncogenicityMapping.get(alt).equals(oncogenicityMapping.get(relevantAlt)) 
-                            || mutationEffectMapping.containsKey(alt) && mutationEffectMapping.containsKey(relevantAlt) && !mutationEffectMapping.get(alt).equals(mutationEffectMapping.get(relevantAlt))) {
-                        result1 += alt.toString() + "\n";
+                    if (oncogenicityMapping.containsKey(alt) && oncogenicityMapping.containsKey(relevantAlt) && !oncogenicityMapping.get(alt).equals(oncogenicityMapping.get(relevantAlt))) {
+                        result0 += alt.toString() + ": " + Oncogenicity.getByLevel(oncogenicityMapping.get(alt)).getDescription() + ". Relevant alteration: " +  relevantAlt.toString() + ": " + Oncogenicity.getByLevel(oncogenicityMapping.get(relevantAlt)).getDescription() + "\n";
+                        length0++;
+                        break;
+                    }
+                }
+                for (Alteration relevantAlt : relevantAlts) {
+                    if (mutationEffectMapping.containsKey(alt) && mutationEffectMapping.containsKey(relevantAlt) && !mutationEffectMapping.get(alt).equals(mutationEffectMapping.get(relevantAlt))) {
+                        result1 += alt.toString() + ": " + mutationEffectMapping.get(alt) + ". Relevant alteration: " + relevantAlt.toString() + ": " + mutationEffectMapping.get(relevantAlt) +  "\n";
                         length1++;
                         break;
                     }
@@ -81,25 +102,37 @@ public class validation {
                         }
                     }
                 }
-                if (!oncogenicityMapping.containsKey(alt) && !mutationEffectMapping.containsKey(alt) && !VUSAlterations.contains(alt) && !specialAlterations.contains(alt.getAlteration())) {
+                if (!oncogenicityMapping.containsKey(alt) && !mutationEffectMapping.containsKey(alt) && !VUSAlterations.contains(alt) && !specialAlterations.contains(alt.getAlteration()) && !altsWithDescriptions.contains(alt)) {
                     result3 += alt.toString() + "\n";
                     length3++;
+                }
+                if (oncogenicityMapping.containsKey(alt) && mutationEffectMapping.containsKey(alt) && referencesMapping.get(alt).size() == 0) {
+                    result4 += alt.toString() + "\n";
+                    length4++;
                 }
 
             }
             count++;
             System.out.println("Processing " + gene.getHugoSymbol() + "  " + 100 * count / genes.size() + "% finished");
         }
-        String output = "Rule 1 check result: There are " + Integer.toString(length1) + " variants whose oncogenicty or mutation effect is different with its relevant variants.\n";
+        String output = "Rule 1 check result: There are " + Integer.toString(length0) + " variants whose oncogenicty is different with its relevant variants.\n";
+        output += result0;
+        
+        output += "******************************************************************************************\n";
+        output += "Rule 2 check result: There are " + Integer.toString(length1) + " variants whose mutation effect is different with its relevant variants.\n";
         output += result1;
 
         output += "******************************************************************************************\n";
-        output += "Rule 2 check result: There are " + Integer.toString(length2) + " variants that has unknown oncogenic and unknown mutation effect, and same for all its relevant variants.\n";
+        output += "Rule 3 check result: There are " + Integer.toString(length2) + " variants that has unknown oncogenic and unknown mutation effect, and same for all its relevant variants.\n";
         output += result2;
 
         output += "******************************************************************************************\n";
-        output += "Rule 3 check result: There are " + Integer.toString(length3) + " variants that don't have oncogenic and mutation effect, and not in the VUS list.\n";
+        output += "Rule 4 check result: There are " + Integer.toString(length3) + " variants that don't have oncogenic, mutation effect and descriptions, and not in the VUS list.\n";
         output += result3;
+        
+        output += "******************************************************************************************\n";
+        output += "Rule 5 check result: There are " + Integer.toString(length4) + " variants that have oncogenic and mutation effect, but don't have any PMIDs.\n";
+        output += result4;
 
         try {
             File file = new File("validation-result.txt");
