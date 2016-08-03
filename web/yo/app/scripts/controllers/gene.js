@@ -1776,10 +1776,10 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.convertLevels = function () {
-                console.info('Converting levels...');
+            $scope.changeData = function () {
+                console.info('Change data');
 
-                convertLevels(0, function () {
+                changeData(0, function () {
                     console.info('Finished.');
                 });
             };
@@ -1956,7 +1956,7 @@ angular.module('oncokbApp')
                 })
             }
 
-            function convertLevels(index, callback) {
+            function changeData(index, callback) {
                 if(index < $scope.documents.length) {
                     var document = $scope.documents[index];
                     storage.getRealtimeDocument(document.id).then(function (realtime) {
@@ -1967,33 +1967,52 @@ angular.module('oncokbApp')
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
-                                model.beginCompoundOperation();
+                                // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function (mutation, index) {
-                                    mutation.tumors.asArray().forEach(function (tumor) {
-                                        tumor.TI.asArray().forEach(function (ti) {
-                                            ti.treatments.asArray().forEach(function (treatment) {
-                                                if(treatment.level.getText() === '3') {
-                                                    console.log('\t', mutation.name.getText());
-                                                    console.log('\t\t', tumor.name.getText());
-                                                    console.log('\t\t\t', ti.name.getText());
-                                                    console.log('\t\t\t\t', 'Drug:', treatment.name.getText(), 'Level:', treatment.level.getText(), '\t converting to ', '3B');
-                                                    treatment.level.setText('3B');
-                                                }else {
-                                                    //console.log('\t\t\t\t', 'Drug:', treatment.name.getText(), 'Level:', treatment.level.getText());
-                                                }
-                                            })
-                                        });
-                                    });
+                                    var oncogenic = mutation.oncogenic.getText();
+                                    var mutationEffect = mutation.effect.value.getText();
+                                    var oncogenicSummary = mutation.shortSummary.getText();
+                                    var mutationDesp = mutation.description.getText();
+                                    var mutationShortDesp = mutation.short.getText();
+                                    var tumorTypes = mutation.tumors;
+                                    var mutationName = mutation.name.getText();
+                                    
+                                    // if(isUndefinedOrEmpty(mutationEffect) &&
+                                    //     (_.isString(oncogenic) && oncogenic.toLowerCase() === 'unknown') &&
+                                    //     isUndefinedOrEmpty(oncogenicSummary) &&
+                                    //     isUndefinedOrEmpty(mutationDesp) &&
+                                    //     isUndefinedOrEmpty(mutationShortDesp)) {
+                                    //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + (tumorTypes.length === 0 ? "\tNo cancer type" : "\tHas cancer type"));
+                                    //     // mutation.oncogenic.setText('');
+                                    // }
+                                    if(mutation.oncogenic_eStatus.get('curated')===false) {
+                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tRed hand");
+                                    }
+                                    if(mutation.name_eStatus.get('obsolete') === 'true') {
+                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tObsoleted");
+                                    }
+                                    if(mutationName.indexOf(',') !== -1 &&
+                                        isUndefinedOrEmpty(mutationEffect) &&
+                                        isUndefinedOrEmpty(mutationDesp) &&
+                                        isUndefinedOrEmpty(mutationShortDesp)) {
+                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tString mutation and without mutation effect.");
+                                    }
+                                    if(tumorTypes.length > 0 &&
+                                    isUndefinedOrEmpty(mutationEffect) &&
+                                    isUndefinedOrEmpty(mutationDesp) &&
+                                    isUndefinedOrEmpty(mutationShortDesp)) {
+                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tNo mutation effect but has treatments.");
+                                    }
                                 });
-                                model.endCompoundOperation();
+                                // model.endCompoundOperation();
                                 $timeout(function () {
-                                    convertLevels(++index, callback);
-                                }, 200, false);
+                                    changeData(++index, callback);
+                                }, 500, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
-                                    convertLevels(++index, callback);
-                                }, 200, false);
+                                    changeData(++index, callback);
+                                }, 500, false);
                             }
                         }
                     });
@@ -2004,6 +2023,14 @@ angular.module('oncokbApp')
                 }
             }
 
+            function isUndefinedOrEmpty(str) {
+                if(_.isUndefined(str)) {
+                    return true;
+                }else {
+                    return str.toString().trim() === '' ? true : false; 
+                }
+            }
+            
             function findRelevantVariants(list, index, callback) {
                 if (index < list.length) {
                     var result = Documents.get({title: list[index].gene});
