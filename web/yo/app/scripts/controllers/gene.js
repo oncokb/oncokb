@@ -68,7 +68,43 @@ angular.module('oncokbApp')
                 })
                 //console.log($scope.documents);
             };
-
+            
+            $scope.importISOForm = function() {
+                $.getJSON("data/ISOForm.json", function(response){
+                   $scope.documents.forEach(function (document) {
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                console.log('Did not get realtime document.');
+                            } else {
+                                var model = realtime.getModel();
+                                var gene = model.getRoot().get('gene');
+                                if (gene) {
+                                    //remove old transcripts values
+                                    for(var i = 0;i < gene.transcripts.length;i++){
+                                        gene.transcripts.remove(i);
+                                    }
+                                    //loop throught the ISOform data, find the corresponding transcirpt and save to gene transcripts attribute
+                                    for(var i = 0; i< response.length;i++){
+                                        if(response[i].gene_name === gene.name.getText()){
+                                            var ISOForm = model.create(OncoKB.ISOForm);
+                                            ISOForm.isoform_override.setText(response[i].isoform_override);
+                                            ISOForm.gene_name.setText(response[i].gene_name);
+                                            ISOForm.dmp_refseq_id.setText(response[i].dmp_refseq_id);
+                                            ISOForm.ccds_id.setText(response[i].ccds_id);
+                                            gene.transcripts.push(ISOForm);
+                                            break;
+                                        }
+                                    }
+                                    console.log('importing transcript data for ', gene.name.getText());
+                                } else {
+                                    console.log('\t\tNo gene model.');
+                                }
+                            }
+                        });
+                })
+               })
+            }
+           
             $scope.getDocs = function () {
                 var docs = Documents.get();
                 if (docs.length > 0) {
@@ -3944,7 +3980,9 @@ angular.module('oncokbApp')
                 'oncogenic': ['Yes', 'Likely', 'Likely Neutral', 'Unknown'],
                 'mutation_effect': ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Unknown'],
                 'geneStatus': ['Complete', 'Proceed with caution', 'Not ready'],
-                'hotspot': ['TRUE', 'FALSE']
+                'hotspot': ['TRUE', 'FALSE'],
+                'TSG': ['Tumor Suppressor'],
+                'OCG': ['Oncogenic']
             };
             $scope.nccnDiseaseTypes = ['', 'Acute Lymphoblastic Leukemia', 'Acute Myeloid Leukemia      20th Annual Edition!', 'Anal Carcinoma', 'Bladder Cancer', 'Bone Cancer', 'Breast Cancer', 'Cancer of Unknown Primary (See Occult Primary)', 'Central Nervous System Cancers', 'Cervical Cancer', 'Chronic Myelogenous Leukemia', 'Colon/Rectal Cancer', 'Colon Cancer      20th Annual Edition!', 'Rectal Cancer      20th Annual Edition!', 'Cutaneous Melanoma (See Melanoma)', 'Endometrial Cancer (See Uterine Neoplasms)', 'Esophageal and Esophagogastric Junction Cancers', 'Fallopian Tube Cancer (See Ovarian Cancer)', 'Gastric Cancer', 'Head and Neck Cancers', 'Hepatobiliary Cancers', 'Hodgkin Lymphoma', 'Kidney Cancer', 'Malignant Pleural Mesothelioma', 'Melanoma', 'Multiple Myeloma/Other Plasma Cell Neoplasms', 'Multiple Myeloma', 'Systemic Light Chain Amyloidosis', 'Waldenström\'s Macroglobulinemia / Lymphoplasmacytic Lymphoma', 'Myelodysplastic Syndromes', 'Neuroendocrine Tumors', 'Non-Hodgkin\'s Lymphomas', 'Non-Melanoma Skin Cancers', 'Basal Cell Skin Cancer', 'Dermatofibrosarcoma Protuberans', 'Merkel Cell Carcinoma', 'Squamous Cell Skin Cancer', 'Non-Small Cell Lung Cancer      20th Annual Edition!', 'Occult Primary', 'Ovarian Cancer', 'Pancreatic Adenocarcinoma', 'Penile Cancer', 'Primary Peritoneal Cancer (See Ovarian Cancer)', 'Prostate Cancer      20th Annual Edition!', 'Small Cell Lung Cancer      20th Annual Edition!', 'Soft Tissue Sarcoma', 'Testicular Cancer', 'Thymomas and Thymic Carcinomas', 'Thyroid Carcinoma', 'Uterine Neoplasms'];
             $scope.nccnCategories = [
@@ -4182,7 +4220,6 @@ angular.module('oncokbApp')
                     }
                 });
             }, 600000);
-
 
             loadFile().then(function (file) {
                 $scope.realtimeDocument = file;
