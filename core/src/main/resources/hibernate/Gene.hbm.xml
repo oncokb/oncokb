@@ -15,9 +15,6 @@
         <property name="name" type="string">
             <column name="name" length="500" not-null="true" />
         </property>
-        <property name="summary" type="string">
-            <column name="summary" length="65535" />
-        </property>
         <property name="status" type="string">
             <column name="status" length="100" not-null="false"/>
         </property>
