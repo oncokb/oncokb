@@ -264,7 +264,7 @@ public class EvidenceUtils {
                         filtered.add(tempEvidence);
                     } else {
                         if (!CollectionUtils.intersection(tempEvidence.getAlterations(), evidenceQuery.getAlterations()).isEmpty()) {
-                            if (tempEvidence.getCancerType() == null && tempEvidence.getSubtype() == null) {
+                            if (tempEvidence.getOncoTreeType() == null) {
                                 if (tempEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                                     if (tempEvidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
@@ -274,18 +274,13 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(tempEvidence);
                             } else {
-                                List<OncoTreeType> cancerTypes = new ArrayList<>();
-                                List<OncoTreeType> subtypes = new ArrayList<>();
+                                List<OncoTreeType> tumorType = new ArrayList<>();
                                 
-                                if(tempEvidence.getCancerType() != null) {
-                                    cancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
+                                if(tempEvidence.getOncoTreeType() != null) {
+                                    tumorType.add(tempEvidence.getOncoTreeType());
                                 }
 
-                                if(tempEvidence.getSubtype() != null) {
-                                    subtypes = TumorTypeUtils.getOncoTreeSubtypesByCode(Collections.singletonList(tempEvidence.getSubtype()));
-                                }
-
-                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), cancerTypes) || !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), subtypes)) {
+                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType)) {
                                     filtered.add(tempEvidence);
                                 } else {
                                     if (tempEvidence.getLevelOfEvidence() != null) {

@@ -42,17 +42,7 @@ public class AlterationLevel {
 
                 for (Evidence evidence : relevantEvidences) {
                     LevelOfEvidence level = evidence.getLevelOfEvidence();
-                    String tumortype = evidence.getSubtype();
-                    OncoTreeType oncoTreeType = null;
-
-                    if (tumortype != null) {
-                        oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(tumortype);
-                    } else {
-                        tumortype = evidence.getCancerType();
-                        if (tumortype != null) {
-                            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(tumortype);
-                        }
-                    }
+                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
                     String levelStr = "";
 
                     if (level != null && level.getLevel() != null) {

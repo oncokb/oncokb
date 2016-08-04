@@ -218,14 +218,7 @@ public class SearchApi {
                     EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
                 for (Evidence evidence : geneEvidences.get(gene)) {
-                    OncoTreeType oncoTreeType = null;
-                    if (evidence.getSubtype() != null) {
-                        oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(evidence.getSubtype());
-                    }
-
-                    if (oncoTreeType == null && evidence.getCancerType() != null) {
-                        oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(evidence.getCancerType());
-                    }
+                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
 
                     if (oncoTreeType != null) {
                         for (Alteration alteration : evidence.getAlterations()) {

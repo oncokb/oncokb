@@ -40,17 +40,8 @@ public class AllTreatmentsWithPMIDs {
 
                 for (Evidence evidence : relevantEvidences) {
                     LevelOfEvidence level = evidence.getLevelOfEvidence();
-                    String tumortype = evidence.getSubtype();
-                    OncoTreeType oncoTreeType = null;
+                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
 
-                    if (tumortype != null) {
-                        oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(tumortype);
-                    } else {
-                        tumortype = evidence.getCancerType();
-                        if (tumortype != null) {
-                            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(tumortype);
-                        }
-                    }
                     String levelStr = "";
 
                     if (level != null && level.getLevel() != null) {

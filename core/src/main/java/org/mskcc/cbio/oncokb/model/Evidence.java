@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import java.util.Date;
@@ -15,8 +16,10 @@ import java.util.Set;
 public class Evidence implements java.io.Serializable {
     private Integer evidenceId;
     private EvidenceType evidenceType;
+    
     private String cancerType;
     private String subtype;
+    private OncoTreeType oncoTreeType;
     private Gene gene;
     private Set<Alteration> alterations;
     private String shortDescription;
@@ -71,6 +74,25 @@ public class Evidence implements java.io.Serializable {
 
     public void setSubtype(String subtype) {
         this.subtype = subtype;
+    }
+    
+    public void setOncoTreeType(OncoTreeType oncoTreeType) {
+        this.oncoTreeType = oncoTreeType;
+    }
+
+    public OncoTreeType getOncoTreeType() {
+        if(this.oncoTreeType != null)
+            return this.oncoTreeType;
+
+        OncoTreeType oncoTreeType = new OncoTreeType();
+
+        if(this.subtype != null) {
+            oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);
+        }else if (this.cancerType != null) {
+            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(this.cancerType);
+        }
+
+        return oncoTreeType;
     }
 
     public Gene getGene() {
@@ -206,18 +228,6 @@ public class Evidence implements java.io.Serializable {
             return false;
         }
         return true;
-    }
-    
-    public OncoTreeType getOncoTreeType() {
-        OncoTreeType oncoTreeType = new OncoTreeType();
-        
-        if(this.subtype != null) {
-            oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);
-        }else if (this.cancerType != null) {
-            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(this.cancerType);
-        }
-        
-        return oncoTreeType;
     }
     
     public Evidence(Evidence e){
