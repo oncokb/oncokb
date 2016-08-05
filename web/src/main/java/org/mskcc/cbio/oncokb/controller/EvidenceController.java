@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -183,12 +184,12 @@ public class EvidenceController {
                 }
 
                 // Get treatment evidences
-                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), null);
+                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), new ArrayList<LevelOfEvidence>(LevelUtils.getPublicLevels()));
                 if (alleleEvidences != null) {
                     LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<Evidence>(alleleEvidences));
                     alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevelFromEvidence));
                     for (Evidence evidence : alleleEvidences) {
-                        evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence()));
+                        evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0));
                     }
                     query.getEvidences().addAll(alleleEvidences);
                 }

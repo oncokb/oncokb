@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.controller;
 
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,7 +73,9 @@ public class IndicatorController {
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.VUS), null)
                     ));
                     highestLevels = findHighestLevel(
-                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), body.getLevels()
+                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), 
+                            new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), 
+                            new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels()))
                         )
                     );
                 }else if(indicatorQuery.getAlleleExist()) {
@@ -81,11 +84,11 @@ public class IndicatorController {
                     
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                    highestLevels = findHighestLevel(EvidenceUtils.getEvidence(alleles, new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), body.getLevels()));
+                    highestLevels = findHighestLevel(EvidenceUtils.getEvidence(alleles, new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels()))));
                     
                     LevelOfEvidence sensitive = highestLevels.get("sensitive");
                     if(sensitive != null) 
-                        highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive));
+                        highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, true));
                     highestLevels.put("resistant", null);
                 }
                 indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());

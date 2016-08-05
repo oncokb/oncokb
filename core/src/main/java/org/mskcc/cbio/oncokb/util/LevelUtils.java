@@ -98,32 +98,30 @@ public class LevelUtils {
         }};
     }
 
-    public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level) {
-        Set<LevelOfEvidence> sameIndication = new HashSet<>();
-        sameIndication.add(LevelOfEvidence.LEVEL_0);
-        sameIndication.add(LevelOfEvidence.LEVEL_1);
-        sameIndication.add(LevelOfEvidence.LEVEL_2A);
-
-        Set<LevelOfEvidence> otherIndication = new HashSet<>();
-        otherIndication.add(LevelOfEvidence.LEVEL_2B);
-
+    public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level, Boolean sameIndication) {
+        Set<LevelOfEvidence> convertLevels = new HashSet<>();
+        convertLevels.add(LevelOfEvidence.LEVEL_0);
+        convertLevels.add(LevelOfEvidence.LEVEL_1);
+        convertLevels.add(LevelOfEvidence.LEVEL_2A);
+        convertLevels.add(LevelOfEvidence.LEVEL_2B);
+        convertLevels.add(LevelOfEvidence.LEVEL_3A);
 
         Set<LevelOfEvidence> ignoreIndication = new HashSet<>();
         ignoreIndication.add(LevelOfEvidence.LEVEL_R1);
         ignoreIndication.add(LevelOfEvidence.LEVEL_R2);
         ignoreIndication.add(LevelOfEvidence.LEVEL_R3);
 
-        if(level == null)
+        if(level == null || ignoreIndication.contains(level))
             return null;
-
-        if(sameIndication.contains(level)) {
-            return LevelOfEvidence.LEVEL_3A;
-        }else if(otherIndication.contains(level)) {
-            return LevelOfEvidence.LEVEL_3B;
-        }else if(ignoreIndication.contains(level)) {
-            return null;
-        }else {
-            return level;
+        
+        if(convertLevels.contains(level)) {
+            if(sameIndication) {
+                return LevelOfEvidence.LEVEL_3A;
+            }else {
+                return LevelOfEvidence.LEVEL_3B;
+            }
         }
+        
+        return level;
     }
 }
