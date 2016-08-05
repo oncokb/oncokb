@@ -5,10 +5,7 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.EvidenceUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.LevelUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,7 +62,7 @@ public class IndicatorController {
                     indicatorQuery.setAlleleExist(true);  
                 }
                 if(indicatorQuery.getVariantExist()) {
-                    Oncogenicity oncogenicity = findHighestOncogenic(
+                    Oncogenicity oncogenicity = MainUtils.findHighestOncogenic(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.ONCOGENIC), null)
                     );
                     
@@ -79,7 +76,7 @@ public class IndicatorController {
                         )
                     );
                 }else if(indicatorQuery.getAlleleExist()) {
-                    Oncogenicity oncogenicity = setToAlleleOncogenicity(findHighestOncogenic(
+                    Oncogenicity oncogenicity = setToAlleleOncogenicity(MainUtils.findHighestOncogenic(
                         EvidenceUtils.getEvidence(alleles, Arrays.asList(EvidenceType.ONCOGENIC), null)));
                     
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
@@ -106,26 +103,6 @@ public class IndicatorController {
             }
         }
         return false;
-    }
-    private Oncogenicity findHighestOncogenic(List<Evidence> evidences) {
-        List<String> levels = Arrays.asList("-1", "0", "2", "1");
-        List<String> levelsExplanation = Arrays.asList("Unknown", "Likely Neutral", "Likely Oncogenic", "Oncogenic");
-
-        int index = -1;
-
-        if (evidences != null) {
-            for (Evidence evidence : evidences) {
-                if (evidence.getKnownEffect() != null) {
-                    int _index = -1;
-                    _index = levels.indexOf(evidence.getKnownEffect());
-                    if (_index > index) {
-                        index = _index;
-                    }
-                }
-            }
-        }
-
-        return index > -1 ? Oncogenicity.getByLevel(levels.get(index)) : null;
     }
 
     private Map<String, LevelOfEvidence> findHighestLevel(List<Evidence> evidences) {

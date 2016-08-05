@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * @author jgao
@@ -25,18 +24,18 @@ public class EvidenceController {
     public
     @ResponseBody
     List<List<Evidence>> getEvidence(
-            HttpMethod method,
-            @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
-            @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
-            @RequestParam(value = "alteration", required = false) String alteration,
-            @RequestParam(value = "tumorType", required = false) String tumorType,
-            @RequestParam(value = "evidenceType", required = false) String evidenceType,
-            @RequestParam(value = "consequence", required = false) String consequence,
-            @RequestParam(value = "proteinStart", required = false) String proteinStart,
-            @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
-            @RequestParam(value = "geneStatus", required = false) String geneStatus,
-            @RequestParam(value = "source", required = false) String source,
-            @RequestParam(value = "levels", required = false) String levels) {
+        HttpMethod method,
+        @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
+        @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
+        @RequestParam(value = "alteration", required = false) String alteration,
+        @RequestParam(value = "tumorType", required = false) String tumorType,
+        @RequestParam(value = "evidenceType", required = false) String evidenceType,
+        @RequestParam(value = "consequence", required = false) String consequence,
+        @RequestParam(value = "proteinStart", required = false) String proteinStart,
+        @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
+        @RequestParam(value = "geneStatus", required = false) String geneStatus,
+        @RequestParam(value = "source", required = false) String source,
+        @RequestParam(value = "levels", required = false) String levels) {
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<List<Evidence>> evidences = new ArrayList<>();
@@ -47,7 +46,7 @@ public class EvidenceController {
         }
 
         Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId, hugoSymbol, alteration,
-                tumorType, evidenceType, consequence, proteinStart, proteinEnd, geneStatus, source, levels);
+            tumorType, evidenceType, consequence, proteinStart, proteinEnd, geneStatus, source, levels);
 
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
@@ -58,9 +57,9 @@ public class EvidenceController {
         }
 
         evidenceQueries = processRequest(
-                (List<Query>) requestQueries.get("queries"),
-                (List<EvidenceType>) requestQueries.get("evidenceTypes"),
-                geneStatus, source, (List<LevelOfEvidence>) requestQueries.get("levels"));
+            (List<Query>) requestQueries.get("queries"),
+            (List<EvidenceType>) requestQueries.get("evidenceTypes"),
+            geneStatus, source, (List<LevelOfEvidence>) requestQueries.get("levels"));
 
         for (EvidenceQueryRes query : evidenceQueries) {
             evidences.add(query.getEvidences());
@@ -73,7 +72,7 @@ public class EvidenceController {
     public
     @ResponseBody
     List<EvidenceQueryRes> getEvidence(
-            @RequestBody EvidenceQueries body) {
+        @RequestBody EvidenceQueries body) {
 
         List<EvidenceQueryRes> result = new ArrayList<>();
         if (body.getQueries().size() > 0) {
@@ -113,7 +112,7 @@ public class EvidenceController {
                 if (requestQuery.getAlteration() != null) {
                     List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(query.getGene(), requestQuery.getAlteration(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                     query.setAlterations(relevantAlts);
-                    
+
                     Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                     List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                     query.setAlleles(allelesAlts);
@@ -145,14 +144,50 @@ public class EvidenceController {
     private List<EvidenceQueryRes> assignEvidence(List<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries) {
         for (EvidenceQueryRes query : evidenceQueries) {
             query.setEvidences(EvidenceUtils.filterEvidence(evidences, query));
-            
+
             // Attach evidence if query doesn't contain any alteration and has alleles.
-            if((query.getAlterations() == null || query.getAlterations().isEmpty()) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
-                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(query.getAlleles(), new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), null);
-                if(alleleEvidences != null) {
+            if ((query.getAlterations() == null || query.getAlterations().isEmpty()) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
+                // Get oncogenic and mutation effect evidences
+                List<Alteration> alleles = query.getAlleles();
+                List<Evidence> oncogenics = EvidenceUtils.getEvidence(alleles, Collections.singletonList(EvidenceType.ONCOGENIC), null);
+                Oncogenicity highestOncogenic = MainUtils.findHighestOncogenic(oncogenics);
+                if (highestOncogenic != null) {
+                    Evidence evidence = new Evidence();
+                    evidence.setEvidenceType(EvidenceType.ONCOGENIC);
+                    evidence.setKnownEffect(highestOncogenic.getDescription());
+                    query.getEvidences().add(evidence);
+                }
+
+                Set<Alteration> altsWithHighestOncogenicity = new HashSet<>();
+
+                for (Evidence evidence : EvidenceUtils.getEvidenceBasedOnHighestOncogenicity(new HashSet<Evidence>(oncogenics))) {
+                    for (Alteration alt : evidence.getAlterations()) {
+                        if (alleles.contains(alt)) {
+                            altsWithHighestOncogenicity.add(alt);
+                        }
+                    }
+                }
+
+                List<Evidence> mutationEffectsEvis = EvidenceUtils.getEvidence(new ArrayList<Alteration>(altsWithHighestOncogenicity), Collections.singletonList(EvidenceType.MUTATION_EFFECT), null);
+                if(mutationEffectsEvis != null && mutationEffectsEvis.size() > 0) {
+                    Set<String> effects = new HashSet<>();
+                    
+                    for(Evidence mutationEffectEvi : mutationEffectsEvis) {
+                        effects.add(mutationEffectEvi.getKnownEffect());
+                    }
+                    
+                    Evidence mutationEffect = new Evidence();
+                    mutationEffect.setEvidenceType(EvidenceType.MUTATION_EFFECT);
+                    mutationEffect.setKnownEffect(MainUtils.getAlleleConflictsMutationEffect(effects));
+                    query.getEvidences().add(mutationEffect);
+                }
+
+                // Get treatment evidences
+                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), null);
+                if (alleleEvidences != null) {
                     LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<Evidence>(alleleEvidences));
-                    alleleEvidences = EvidenceUtils.getEvidence(query.getAlleles(), new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevelFromEvidence));
-                    for(Evidence evidence : alleleEvidences) {
+                    alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevelFromEvidence));
+                    for (Evidence evidence : alleleEvidences) {
                         evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence()));
                     }
                     query.getEvidences().addAll(alleleEvidences);

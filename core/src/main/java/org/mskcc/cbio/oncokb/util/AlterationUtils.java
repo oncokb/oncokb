@@ -354,7 +354,10 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
-        return alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+        List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+        // Remove alteration itself
+        alterations.remove(alteration);
+        return alterations;
     }
 
     public static List<Alteration> getRelevantAlterations(

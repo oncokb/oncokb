@@ -1,9 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Oncogenicity;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
 
@@ -187,6 +184,47 @@ public class MainUtils {
         
         return types;
     }
+
+    public static Oncogenicity findHighestOncogenic(List<Evidence> evidences) {
+        List<String> levels = Arrays.asList("-1", "0", "2", "1");
+
+        int index = -1;
+
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getKnownEffect() != null) {
+                    int _index = -1;
+                    _index = levels.indexOf(evidence.getKnownEffect());
+                    if (_index > index) {
+                        index = _index;
+                    }
+                }
+            }
+        }
+
+        return index > -1 ? Oncogenicity.getByLevel(levels.get(index)) : null;
+    }
+    
+    public static String getAlleleConflictsMutationEffect(Set<String> mutationEffects) {
+        Set<String> clean = new HashSet<>();
+        
+        for(String mutationEffect : mutationEffects) {
+            if(mutationEffect != null) {
+                mutationEffect = mutationEffect.replaceAll("(?i)likely", "");
+                mutationEffect = mutationEffect.replaceAll("\\s", "");
+                clean.add(mutationEffect);
+            }
+        }
+        
+        if(clean.size() > 1) {
+            return "Unknown";
+        }else if(clean.size() == 1){
+            return "Likely " + clean.iterator().next();
+        }else {
+            return "";   
+        }
+    }
+    
     private static Boolean hasInfoForEffect(String effect) {
         if (effect == null) {
             return false;

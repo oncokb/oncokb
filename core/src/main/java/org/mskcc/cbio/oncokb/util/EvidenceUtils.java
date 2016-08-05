@@ -400,4 +400,26 @@ public class EvidenceUtils {
         
         return types;
     }
+    
+    public static Set<Evidence> getEvidenceBasedOnHighestOncogenicity(Set<Evidence> evidences) {
+        Set<Evidence> filtered = new HashSet<>();
+        Map<Oncogenicity, Set<Evidence>> map = new HashMap<>();
+        
+        for(Evidence evidence : evidences) {
+            if(evidence.getEvidenceType()!= null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+                Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                
+                if(oncogenicity != null) {
+                    if(!map.containsKey(oncogenicity))
+                        map.put(oncogenicity, new HashSet<Evidence>());
+                    
+                    map.get(oncogenicity).add(evidence);
+                }
+            }
+        }
+        
+        Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenic(new ArrayList<Evidence>(evidences));
+        
+        return map.get(highestOncogenicity);
+    }
 }
