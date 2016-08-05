@@ -97,4 +97,33 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_3A);
         }};
     }
+
+    public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level) {
+        Set<LevelOfEvidence> sameIndication = new HashSet<>();
+        sameIndication.add(LevelOfEvidence.LEVEL_0);
+        sameIndication.add(LevelOfEvidence.LEVEL_1);
+        sameIndication.add(LevelOfEvidence.LEVEL_2A);
+
+        Set<LevelOfEvidence> otherIndication = new HashSet<>();
+        otherIndication.add(LevelOfEvidence.LEVEL_2B);
+
+
+        Set<LevelOfEvidence> ignoreIndication = new HashSet<>();
+        ignoreIndication.add(LevelOfEvidence.LEVEL_R1);
+        ignoreIndication.add(LevelOfEvidence.LEVEL_R2);
+        ignoreIndication.add(LevelOfEvidence.LEVEL_R3);
+
+        if(level == null)
+            return null;
+
+        if(sameIndication.contains(level)) {
+            return LevelOfEvidence.LEVEL_3A;
+        }else if(otherIndication.contains(level)) {
+            return LevelOfEvidence.LEVEL_3B;
+        }else if(ignoreIndication.contains(level)) {
+            return null;
+        }else {
+            return level;
+        }
+    }
 }

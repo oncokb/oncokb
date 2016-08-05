@@ -84,7 +84,7 @@ public class Evidence implements java.io.Serializable {
         if(this.oncoTreeType != null)
             return this.oncoTreeType;
 
-        OncoTreeType oncoTreeType = new OncoTreeType();
+        OncoTreeType oncoTreeType = null;
 
         if(this.subtype != null) {
             oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);

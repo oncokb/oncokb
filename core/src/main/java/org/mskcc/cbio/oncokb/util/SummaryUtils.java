@@ -52,7 +52,7 @@ public class SummaryUtils {
                 AlterationUtils.annotateAlteration(alteration, queryAlteration);
                 
                 if(AlterationUtils.hasAlleleAlterations(alteration)) {
-                    sb.append(alleleSummary(alteration));
+                    sb.append(" " + alleleSummary(alteration));
                 }else {
                     sb.append("The oncogenic activity of this variant is unknown. ");
                 }

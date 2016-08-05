@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,12 +65,6 @@ public class IndicatorController {
                     indicatorQuery.setAlleleExist(true);  
                 }
                 if(indicatorQuery.getVariantExist()) {
-                    List<EvidenceType> treatmentEvidenceTypes = new ArrayList<>();
-                    treatmentEvidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
-                    treatmentEvidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-                    treatmentEvidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
-                    treatmentEvidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-
                     Oncogenicity oncogenicity = findHighestOncogenic(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.ONCOGENIC), null)
                     );
@@ -80,26 +75,20 @@ public class IndicatorController {
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.VUS), null)
                     ));
                     highestLevels = findHighestLevel(
-                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), treatmentEvidenceTypes, body.getLevels()
+                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), body.getLevels()
                         )
                     );
                 }else if(indicatorQuery.getAlleleExist()) {
-                    List<EvidenceType> treatmentEvidenceTypes = new ArrayList<>();
-                    treatmentEvidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
-                    treatmentEvidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-                    treatmentEvidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
-                    treatmentEvidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-                    
                     Oncogenicity oncogenicity = setToAlleleOncogenicity(findHighestOncogenic(
                         EvidenceUtils.getEvidence(alleles, Arrays.asList(EvidenceType.ONCOGENIC), null)));
                     
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                    highestLevels = findHighestLevel(EvidenceUtils.getEvidence(alleles, treatmentEvidenceTypes, body.getLevels()));
+                    highestLevels = findHighestLevel(EvidenceUtils.getEvidence(alleles, new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), body.getLevels()));
                     
                     LevelOfEvidence sensitive = highestLevels.get("sensitive");
                     if(sensitive != null) 
-                        highestLevels.put("sensitive", setToAlleleLevel(sensitive));
+                        highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive));
                     highestLevels.put("resistant", null);
                 }
                 indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
@@ -195,34 +184,5 @@ public class IndicatorController {
         }
         
         return null;
-    }
-    
-    private LevelOfEvidence setToAlleleLevel(LevelOfEvidence level) {
-        Set<LevelOfEvidence> sameIndication = new HashSet<>();
-        sameIndication.add(LevelOfEvidence.LEVEL_0);
-        sameIndication.add(LevelOfEvidence.LEVEL_1);
-        sameIndication.add(LevelOfEvidence.LEVEL_2A);
-        
-        Set<LevelOfEvidence> otherIndication = new HashSet<>();
-        sameIndication.add(LevelOfEvidence.LEVEL_2B);
-
-
-        Set<LevelOfEvidence> ignoreIndication = new HashSet<>();
-        sameIndication.add(LevelOfEvidence.LEVEL_R1);
-        sameIndication.add(LevelOfEvidence.LEVEL_R2);
-        sameIndication.add(LevelOfEvidence.LEVEL_R3);
-        
-        if(level == null) 
-            return null;
-        
-        if(sameIndication.contains(level)) {
-            return LevelOfEvidence.LEVEL_3A;
-        }else if(otherIndication.contains(level)) {
-            return LevelOfEvidence.LEVEL_3B;
-        }else if(ignoreIndication.contains(level)) {
-            return null;
-        }else {
-            return level;
-        }
     }
 }

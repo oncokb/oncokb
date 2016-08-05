@@ -12,6 +12,7 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private Query query;
     private Gene gene;
     private List<Alteration> alterations;
+    private List<Alteration> alleles;
     private List<OncoTreeType> tumorTypes;
     private List<Evidence> evidences;
 
@@ -48,6 +49,14 @@ public class EvidenceQueryRes implements java.io.Serializable {
 
     public void setAlterations(List<Alteration> alterations) {
         this.alterations = alterations;
+    }
+
+    public List<Alteration> getAlleles() {
+        return alleles;
+    }
+
+    public void setAlleles(List<Alteration> alleles) {
+        this.alleles = alleles;
     }
 
     public List<OncoTreeType> getOncoTreeTypes() {

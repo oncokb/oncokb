@@ -12,9 +12,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  * @author jgao
@@ -112,7 +111,12 @@ public class EvidenceController {
 
             if (query.getGene() != null) {
                 if (requestQuery.getAlteration() != null) {
-                    query.setAlterations(AlterationUtils.getRelevantAlterations(query.getGene(), requestQuery.getAlteration(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd()));
+                    List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(query.getGene(), requestQuery.getAlteration(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                    query.setAlterations(relevantAlts);
+                    
+                    Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                    List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
+                    query.setAlleles(allelesAlts);
                 }
 
                 query.setOncoTreeTypes(TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
@@ -141,6 +145,19 @@ public class EvidenceController {
     private List<EvidenceQueryRes> assignEvidence(List<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries) {
         for (EvidenceQueryRes query : evidenceQueries) {
             query.setEvidences(EvidenceUtils.filterEvidence(evidences, query));
+            
+            // Attach evidence if query doesn't contain any alteration and has alleles.
+            if((query.getAlterations() == null || query.getAlterations().isEmpty()) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
+                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(query.getAlleles(), new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), null);
+                if(alleleEvidences != null) {
+                    LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<Evidence>(alleleEvidences));
+                    alleleEvidences = EvidenceUtils.getEvidence(query.getAlleles(), new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevelFromEvidence));
+                    for(Evidence evidence : alleleEvidences) {
+                        evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence()));
+                    }
+                    query.getEvidences().addAll(alleleEvidences);
+                }
+            }
         }
         return evidenceQueries;
     }
