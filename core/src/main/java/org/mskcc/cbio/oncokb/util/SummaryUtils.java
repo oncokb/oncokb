@@ -445,7 +445,7 @@ public class SummaryUtils {
     }
 
     private static String alleleNamesStr(Set<Alteration> alterations) {
-        if(alterations != null && alterations.size() > 1) {
+        if(alterations != null && alterations.size() > 0) {
             Alteration tmp = alterations.iterator().next();
             String residue = tmp.getRefResidues();
             String location = Integer.toString(tmp.getProteinStart());
