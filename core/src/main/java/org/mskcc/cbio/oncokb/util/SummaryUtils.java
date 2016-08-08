@@ -41,7 +41,7 @@ public class SummaryUtils {
             isPlural = true;
         }
 
-        if (genes.isEmpty() || alterations == null || alterations.isEmpty()) {
+        if (genes.isEmpty() || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(gene, new HashSet<>(alterations)).size() == 0) {
             Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
             if (alteration == null) {
                 alteration = new Alteration();
@@ -50,12 +50,10 @@ public class SummaryUtils {
                 alteration.setAlteration(queryAlteration);
                 alteration.setName(queryAlteration);
                 AlterationUtils.annotateAlteration(alteration, queryAlteration);
-                
-                if(AlterationUtils.hasAlleleAlterations(alteration)) {
-                    sb.append(" " + alleleSummary(alteration));
-                }else {
-                    sb.append("The oncogenic activity of this variant is unknown. ");
-                }
+            }
+
+            if(AlterationUtils.hasAlleleAlterations(alteration)) {
+                sb.append(" " + alleleSummary(alteration));
             }else {
                 sb.append("The oncogenic activity of this variant is unknown. ");
             }
@@ -258,7 +256,7 @@ public class SummaryUtils {
             isPlural = true;
         }
 
-        if (genes.isEmpty() || alterations == null || alterations.isEmpty()) {
+        if (genes.isEmpty() || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(gene, new HashSet<>(alterations)).size() == 0) {
             Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
             if (alteration == null) {
                 alteration = new Alteration();
@@ -267,12 +265,9 @@ public class SummaryUtils {
                 alteration.setAlteration(queryAlteration);
                 alteration.setName(queryAlteration);
                 AlterationUtils.annotateAlteration(alteration, queryAlteration);
-
-                if(AlterationUtils.hasAlleleAlterations(alteration)) {
-                    sb.append(" " + alleleSummary(alteration));
-                }else {
-                    sb.append("The oncogenic activity of this variant is unknown. ");
-                }
+            }
+            if(AlterationUtils.hasAlleleAlterations(alteration)) {
+                sb.append(" " + alleleSummary(alteration));
             }else {
                 sb.append("The oncogenic activity of this variant is unknown. ");
             }

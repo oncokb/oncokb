@@ -391,16 +391,6 @@ public class EvidenceUtils {
         return evidences;
     }
     
-    public static Set<EvidenceType> getTreatmentEvidenceTypes() {
-        Set<EvidenceType> types = new HashSet<>();
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
-        
-        return types;
-    }
-    
     public static Set<Evidence> getEvidenceBasedOnHighestOncogenicity(Set<Evidence> evidences) {
         Set<Evidence> filtered = new HashSet<>();
         Map<Oncogenicity, Set<Evidence>> map = new HashMap<>();

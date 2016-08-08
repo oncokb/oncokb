@@ -57,28 +57,28 @@ public class IndicatorController {
 
                 Set<Alteration> alleles = AlterationUtils.getAlleleAlterations(AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd()));
                 
+                indicatorQuery.setVUS(isVUS(
+                    EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.VUS), null)
+                ));
+
                 if(alleles == null || alleles.size() == 0) {
                     indicatorQuery.setAlleleExist(false);
                 }else {
                     indicatorQuery.setAlleleExist(true);  
                 }
-                if(indicatorQuery.getVariantExist()) {
+                if(indicatorQuery.getVariantExist() && !indicatorQuery.getVUS()) {
                     Oncogenicity oncogenicity = MainUtils.findHighestOncogenic(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.ONCOGENIC), null)
                     );
-                    
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                    indicatorQuery.setVUS(isVUS(
-                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.VUS), null)
-                    ));
                     highestLevels = findHighestLevel(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), 
-                            new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()),
+                            new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()),
                             (body.getLevels() != null ? new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<>(LevelUtils.getPublicLevels()))
                         )
                     );
-                }else if(indicatorQuery.getAlleleExist()) {
+                }else if(indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
                     Oncogenicity oncogenicity = setToAlleleOncogenicity(MainUtils.findHighestOncogenic(
                         EvidenceUtils.getEvidence(new ArrayList<>(alleles), Arrays.asList(EvidenceType.ONCOGENIC), null)));
                     
@@ -87,7 +87,7 @@ public class IndicatorController {
                     highestLevels = findHighestLevel(
                         EvidenceUtils.getEvidence(
                             new ArrayList<>(alleles), 
-                            new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), 
+                            new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()), 
                             (body.getLevels() != null ? new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<>(LevelUtils.getPublicLevels()))
                         )
                     );

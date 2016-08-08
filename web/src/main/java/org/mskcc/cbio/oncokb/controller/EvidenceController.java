@@ -147,7 +147,7 @@ public class EvidenceController {
             query.setEvidences(EvidenceUtils.filterEvidence(evidences, query));
 
             // Attach evidence if query doesn't contain any alteration and has alleles.
-            if ((query.getAlterations() == null || query.getAlterations().isEmpty()) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
+            if ((query.getAlterations() == null || query.getAlterations().isEmpty() || AlterationUtils.excludeVUS(query.getGene(), new HashSet<>(query.getAlterations())).size() == 0) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
                 // Get oncogenic and mutation effect evidences
                 List<Alteration> alleles = query.getAlleles();
                 List<Evidence> oncogenics = EvidenceUtils.getEvidence(alleles, Collections.singletonList(EvidenceType.ONCOGENIC), null);
@@ -184,14 +184,16 @@ public class EvidenceController {
                 }
 
                 // Get treatment evidences
-                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), new ArrayList<LevelOfEvidence>(LevelUtils.getPublicLevels()));
+                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<>(MainUtils.getSensitiveTreatmentEvidenceTypes()), new ArrayList<LevelOfEvidence>(LevelUtils.getPublicLevels()));
                 if (alleleEvidences != null) {
-                    LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<Evidence>(alleleEvidences));
-                    alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<EvidenceType>(EvidenceUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevelFromEvidence));
-                    for (Evidence evidence : alleleEvidences) {
-                        evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0));
+                    LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(alleleEvidences));
+                    if(highestLevelFromEvidence != null && LevelUtils.getPublicLevels().contains(highestLevelFromEvidence)) {
+                        alleleEvidences = EvidenceUtils.getEvidence(alleles, new ArrayList<>(MainUtils.getSensitiveTreatmentEvidenceTypes()), Collections.singletonList(highestLevelFromEvidence));
+                        for (Evidence evidence : alleleEvidences) {
+                            evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0));
+                        }
+                        query.getEvidences().addAll(alleleEvidences);
                     }
-                    query.getEvidences().addAll(alleleEvidences);
                 }
             }
         }
