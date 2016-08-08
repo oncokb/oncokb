@@ -3468,7 +3468,7 @@ angular.module('oncokbApp')
 
             $scope.checkEmpty = function (mutation, type) {
                 if(type === 'mutationEffect') {
-                    if (mutation.effect.value.text === '' && mutation.description.text === '') {
+                    if (mutation.effect.value.text === '' && mutation.description.text === '' && mutation.short.text === '') {
                         return true;
                     } else {
                         return false;

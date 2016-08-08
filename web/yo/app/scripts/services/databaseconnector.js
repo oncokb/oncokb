@@ -11,6 +11,7 @@ angular.module('oncokbApp')
     .factory('DatabaseConnector', [
         '$timeout',
         '$q',
+        'config',
         'Gene',
         'Alteration',
         'TumorType',
@@ -28,6 +29,7 @@ angular.module('oncokbApp')
         'InternalAccess',
         function ($timeout,
                   $q,
+                  config,
                   Gene,
                   Alteration,
                   TumorType,
@@ -48,7 +50,7 @@ angular.module('oncokbApp')
                 data = {};
 
             //When running locally, set this to true, all servlet will read data from relative files.
-            var dataFromFile = false;
+            var dataFromFile = config.testing || false;
 
             function getAllGene(callback, timestamp) {
                 if (dataFromFile) {
