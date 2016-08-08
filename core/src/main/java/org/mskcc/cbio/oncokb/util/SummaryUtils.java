@@ -385,60 +385,56 @@ public class SummaryUtils {
         sb.append(" has not been functionally or clinically validated.");
 
         Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
-
-        // Detemin whether allele alterations have treatments
-        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<Alteration>(alleles), new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()), null);
-
-        LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
         
-        Map<OncoTreeType, Set<Alteration>> mappedAlts = new HashMap<>();
-        Oncogenicity highestOncogenicity;
-
-        // If there are no treatments for the alleles, try to find whether there are alleles are oncogenic or likely oncogenic
-        if (treatmentsEvis != null && treatmentsEvis.size() > 0) {
-            for (Alteration alt : alleles) {
-                List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alt), new ArrayList<EvidenceType>(MainUtils.getTreatmentEvidenceTypes()), Collections.singletonList(highestLevel));
-                for (Evidence evidence : evidences) {
-                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
-
-                    if (oncoTreeType == null)
-                        continue;
-
-                    if (!mappedAlts.containsKey(oncoTreeType))
-                        mappedAlts.put(oncoTreeType, new HashSet<Alteration>());
-
-                    mappedAlts.get(oncoTreeType).add(alt);
-                }
-            }
-        }
-
         Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
-        highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
+        Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
         Set<Alteration> highestAlts = (Set<Alteration>)map.get("alterations");
 
         if (highestOncogenicity != null && (highestOncogenicity.getOncogenic() == "1" || highestOncogenicity.getOncogenic() == "2")) {
 
             sb.append(" However, ");
-            sb.append(alterationsToStr(highestAlts));
+            sb.append(allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is") + " known to be " + highestOncogenicity.getDescription().toLowerCase());
             sb.append(", and therefore " + geneStr + " " + altStr + " is considered likely oncogenic.");
         }
 
-        if (mappedAlts.keySet().size() > 0) {
-            sb.append(" While ");
-            List<String> treatmentStr = new ArrayList<>();
-            Boolean multiAlts = false;
+        // Detemin whether allele alterations have treatments
+        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<>(alleles), new ArrayList<>(MainUtils.getSensitiveTreatmentEvidenceTypes()), null);
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
+        Set<Treatment> treatments = new HashSet<>();
+        Set<Alteration> highestLevelTreatmentRelatedAlts = new HashSet<>();
 
-            for (Map.Entry<OncoTreeType, Set<Alteration>> entry : mappedAlts.entrySet()) {
-                if(entry.getValue().size() > 1)
-                    multiAlts = true;
-                treatmentStr.add(geneStr + " " + alterationsToStr(entry.getValue()) + " in "
-                    + (entry.getKey().getSubtype() != null ? entry.getKey().getSubtype() : entry.getKey().getCancerType()));
+        // If there are no treatments for the alleles, try to find whether there are alleles are oncogenic or likely oncogenic
+        if (treatmentsEvis != null && treatmentsEvis.size() > 0) {
+            for(Evidence evidence : treatmentsEvis) {
+                if(evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(highestLevel)) {
+                    treatments.addAll(evidence.getTreatments());
+                    for(Alteration alt : evidence.getAlterations()) {
+                        if(alleles.contains(alt)) {
+                            highestLevelTreatmentRelatedAlts.add(alt);
+                        }
+                    }
+                }
             }
-
-            sb.append(listToString(treatmentStr, " and ") + ((treatmentStr.size() > 1 || multiAlts) ? " are" : " is") + " considered"
-                + " level " + highestLevel.getLevel().toUpperCase() + ", the therapeutic implications for "
-                + geneStr + " " + altStr + " should be considered investigational.");
+        }
+        
+        if (treatments.size() > 0) {
+            String treatmentStr = "";
+            if(treatments.size() > 1) {
+                treatmentStr = "multiple therapies";
+            }else {
+                Set<String> drugs = new HashSet<>();
+                for(Drug drug : treatments.iterator().next().getDrugs()){
+                    drugs.add(drug.getDrugName());
+                }
+                treatmentStr = StringUtils.join(drugs, " + ");
+            }
+            
+            sb.append(" While ");
+            sb.append(geneStr + " " + allelesToStr(highestLevelTreatmentRelatedAlts) + " mutant tumors have demonstrated sensitivity to " 
+                + treatmentStr + ", therefore "
+                + geneStr + " " + altStr + " is considered likely sensitive to"
+                + (treatments.size() > 1 ? " these therapies." : " this therapy."));
         }
         
         return sb.toString();
@@ -461,7 +457,7 @@ public class SummaryUtils {
         }
     }
     
-    private static String alterationsToStr(Set<Alteration> alterations) {
+    private static String allelesToStr(Set<Alteration> alterations) {
         List<String> alterationNames = new ArrayList<>();
         Map<Integer, Set<Alteration>> locationBasedAlts= new HashMap<>();
         

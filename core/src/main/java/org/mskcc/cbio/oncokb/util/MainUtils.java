@@ -184,6 +184,13 @@ public class MainUtils {
         
         return types;
     }
+    
+    public static Set<EvidenceType> getSensitiveTreatmentEvidenceTypes() {
+        Set<EvidenceType> types = new HashSet<>();
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        return types;
+    }
 
     public static Oncogenicity findHighestOncogenic(List<Evidence> evidences) {
         List<String> levels = Arrays.asList("-1", "0", "2", "1");

@@ -115,8 +115,8 @@ public class EvidenceController {
                     query.setAlterations(relevantAlts);
 
                     Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
-                    List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
-                    query.setAlleles(allelesAlts);
+                    Set<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
+                    query.setAlleles(new ArrayList<>(allelesAlts));
                 }
 
                 query.setOncoTreeTypes(TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));

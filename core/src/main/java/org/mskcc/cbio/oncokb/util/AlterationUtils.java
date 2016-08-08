@@ -353,11 +353,11 @@ public final class AlterationUtils {
         return alterationBo.findRelevantAlterations(alteration, null);
     }
 
-    public static List<Alteration> getAlleleAlterations(Alteration alteration) {
+    public static Set<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         // Remove alteration itself
         alterations.remove(alteration);
-        return alterations;
+        return filterAllelesBasedOnLocation(new HashSet<>(alterations), alteration.getProteinStart());
     }
 
     public static List<Alteration> getRelevantAlterations(
@@ -395,5 +395,21 @@ public final class AlterationUtils {
         } else {
             return true;
         }
+    }
+    
+    public static Set<Alteration> filterAllelesBasedOnLocation(Set<Alteration> alterations, Integer location) {
+        Set<Alteration> result = new HashSet<>();
+        
+        for(Alteration alteration : alterations) {
+            if(alteration.getProteinStart() != null 
+                && alteration.getProteinEnd() != null
+                && alteration.getProteinStart().equals(alteration.getProteinEnd())
+                && alteration.getProteinStart().equals(location)) {
+                
+                result.add(alteration);
+            }
+        }
+        
+        return result;
     }
 }
