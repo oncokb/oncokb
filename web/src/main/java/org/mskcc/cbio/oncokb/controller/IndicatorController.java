@@ -74,8 +74,8 @@ public class IndicatorController {
                     ));
                     highestLevels = findHighestLevel(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), 
-                            new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), 
-                            new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels()))
+                            new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()),
+                            (body.getLevels() != null ? new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<>(LevelUtils.getPublicLevels()))
                         )
                     );
                 }else if(indicatorQuery.getAlleleExist()) {
@@ -84,7 +84,13 @@ public class IndicatorController {
                     
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                    highestLevels = findHighestLevel(EvidenceUtils.getEvidence(new ArrayList<>(alleles), new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels()))));
+                    highestLevels = findHighestLevel(
+                        EvidenceUtils.getEvidence(
+                            new ArrayList<>(alleles), 
+                            new ArrayList<>(EvidenceUtils.getTreatmentEvidenceTypes()), 
+                            (body.getLevels() != null ? new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<>(LevelUtils.getPublicLevels()))
+                        )
+                    );
                     
                     LevelOfEvidence sensitive = highestLevels.get("sensitive");
                     if(sensitive != null) 

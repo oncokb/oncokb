@@ -421,7 +421,7 @@ public class SummaryUtils {
         if (treatments.size() > 0) {
             String treatmentStr = "";
             if(treatments.size() > 1) {
-                treatmentStr = "multiple therapies";
+                treatmentStr = "multiple targeted therapies";
             }else {
                 Set<String> drugs = new HashSet<>();
                 for(Drug drug : treatments.iterator().next().getDrugs()){
@@ -430,8 +430,7 @@ public class SummaryUtils {
                 treatmentStr = StringUtils.join(drugs, " + ");
             }
             
-            sb.append(" While ");
-            sb.append(geneStr + " " + allelesToStr(highestLevelTreatmentRelatedAlts) + " mutant tumors have demonstrated sensitivity to " 
+            sb.append(" " + geneStr + " " + allelesToStr(highestLevelTreatmentRelatedAlts) + " mutant tumors have demonstrated sensitivity to " 
                 + treatmentStr + ", therefore "
                 + geneStr + " " + altStr + " is considered likely sensitive to"
                 + (treatments.size() > 1 ? " these therapies." : " this therapy."));
