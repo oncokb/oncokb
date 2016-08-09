@@ -1777,7 +1777,7 @@ angular.module('oncokbApp')
             };
 
             $scope.changeData = function () {
-                console.info('Change data');
+                console.info('Gene\tMutation\tCancer Type\tTreatment');
 
                 changeData(0, function () {
                     console.info('Finished.');
@@ -1963,7 +1963,7 @@ angular.module('oncokbApp')
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            console.log(document.title, '\t\t', index + 1);
+                            // console.log(document.title, '\t\t', index + 1);
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
@@ -1976,6 +1976,8 @@ angular.module('oncokbApp')
                                     var mutationShortDesp = mutation.short.getText();
                                     var tumorTypes = mutation.tumors;
                                     var mutationName = mutation.name.getText();
+                                    var containPMID = mutationShortDesp.indexOf('PMID') !==-1 || mutationDesp.indexOf('PMID') !==-1;
+                                    var category = [];
                                     
                                     // if(isUndefinedOrEmpty(mutationEffect) &&
                                     //     (_.isString(oncogenic) && oncogenic.toLowerCase() === 'unknown') &&
@@ -1985,24 +1987,56 @@ angular.module('oncokbApp')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + (tumorTypes.length === 0 ? "\tNo cancer type" : "\tHas cancer type"));
                                     //     // mutation.oncogenic.setText('');
                                     // }
-                                    if(mutation.oncogenic_eStatus.get('curated')===false) {
-                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tRed hand");
+                                    // if(mutation.oncogenic_eStatus.get('curated')===false) {
+                                    //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tRed hand");
+                                    // }
+                                    // if(mutation.name_eStatus.get('obsolete') === 'true') {
+                                    //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tObsoleted");
+                                    // }
+                                    // if(mutationName.indexOf(',') !== -1 &&
+                                    //     isUndefinedOrEmpty(mutationEffect) &&
+                                    //     isUndefinedOrEmpty(mutationDesp) &&
+                                    //     isUndefinedOrEmpty(mutationShortDesp)) {
+                                    //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tString mutation and without mutation effect.");
+                                    // }
+                                    // if(tumorTypes.length > 0 &&
+                                    // isUndefinedOrEmpty(mutationEffect) &&
+                                    // isUndefinedOrEmpty(mutationDesp) &&
+                                    // isUndefinedOrEmpty(mutationShortDesp)) {
+                                    //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tNo mutation effect but has treatments.");
+                                    // }
+                                    if(isUndefinedOrEmpty(mutationEffect)) {
+                                        category[0] = '0';
+                                    }else {
+                                        category[0] = '1';
                                     }
-                                    if(mutation.name_eStatus.get('obsolete') === 'true') {
-                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tObsoleted");
+
+                                    if(isUndefinedOrEmpty(oncogenic)) {
+                                        category[1] = '0';
+                                    }else {
+                                        category[1] = '1';
                                     }
-                                    if(mutationName.indexOf(',') !== -1 &&
-                                        isUndefinedOrEmpty(mutationEffect) &&
-                                        isUndefinedOrEmpty(mutationDesp) &&
-                                        isUndefinedOrEmpty(mutationShortDesp)) {
-                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tString mutation and without mutation effect.");
+                                    
+                                    if(containPMID) {
+                                        category[2] = '1';
+                                    }else {
+                                        category[2] = '0';
                                     }
-                                    if(tumorTypes.length > 0 &&
-                                    isUndefinedOrEmpty(mutationEffect) &&
-                                    isUndefinedOrEmpty(mutationDesp) &&
-                                    isUndefinedOrEmpty(mutationShortDesp)) {
-                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tNo mutation effect but has treatments.");
-                                    }
+                                    if( category.join('') !== '111' && 
+                                        mutation.oncogenic_eStatus.get('curated')===true &&
+                                        mutation.name_eStatus.get('obsolete') === 'false')
+                                        console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\t" + category.join(''));
+
+                                    // mutation.tumors.asArray().forEach(function(tumor) {
+                                    //     tumor.TI.asArray().forEach(function(ti) {
+                                    //         ti.treatments.asArray().forEach(function(treatment) {
+                                    //             if (treatment.level.getText() === 'R1') {
+                                    //                 var result = [gene.name.getText(), mutation.name.getText(), tumor.name.getText(), treatment.name.getText()];
+                                    //                 console.log(result.join('\t'));
+                                    //             }
+                                    //         })
+                                    //     });
+                                    // });
                                 });
                                 // model.endCompoundOperation();
                                 $timeout(function () {
