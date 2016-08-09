@@ -15,11 +15,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.commons.lang3.ArrayUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -34,6 +39,9 @@ import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.stereotype.Controller;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /**
  *
@@ -283,7 +291,52 @@ public final class VariantAnnotationXMLV2 {
     }
     
     private static List<Alteration> getAlterationOrderByLevelOfEvidence(Map<Alteration, String> mapAlterationXml) {
-        return new ArrayList<Alteration>(mapAlterationXml.keySet());
+        //sort the variant based on the highest level in the order of: 0 > 1 > R1 > 2A > 2B > R2 > 3A > 3B > R3 > 4
+        String[] levels = {"0", "1", "R1", "2A", "2B", "R2", "3A", "3B", "R3", "4"};
+        ArrayList<Alteration> alterations = new ArrayList<Alteration>(mapAlterationXml.keySet());
+        final Map<Alteration, Integer> mapAlterationLevel = new LinkedHashMap<Alteration, Integer>();
+        String relevant = "", tempLevel = "";
+        Integer levelIndex, lowestLevelIndex;
+        for(int i = 0;i < alterations.size();i++){
+            levelIndex = -1;
+            lowestLevelIndex = -1;
+            String tempXMLString = "<xml>" + mapAlterationXml.get(alterations.get(i)) + "</xml>";
+            try  
+            {  
+                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                InputSource src = new InputSource();
+                src.setCharacterStream(new StringReader(tempXMLString));
+                org.w3c.dom.Document doc = builder.parse(src);
+                NodeList cancerTypeNodes = doc.getElementsByTagName("cancer_type");
+                for(int j = 0;j < cancerTypeNodes.getLength();j++){
+                    Element currentNode = (Element)cancerTypeNodes.item(j);
+                    relevant = currentNode.getAttributes().getNamedItem("relevant_to_patient_disease").getNodeValue();
+                    NodeList levelNodes = currentNode.getElementsByTagName("level");
+                    if(relevant.equals("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
+                        levelIndex = 100;
+                        for(int k = 0; k < levelNodes.getLength();k++){
+                            tempLevel = levelNodes.item(k).getTextContent().toUpperCase();
+                            lowestLevelIndex = ArrayUtils.indexOf(levels, tempLevel);
+                            if(lowestLevelIndex < levelIndex)levelIndex = lowestLevelIndex;
+                        }
+                    }
+                }
+                mapAlterationLevel.put(alterations.get(i), levelIndex);
+            } catch (Exception e) {  
+                e.printStackTrace();  
+            } 
+           
+        }
+        Collections.sort(alterations, new Comparator<Alteration>() {
+            public int compare(Alteration a1, Alteration a2) {
+                Integer aLevel = mapAlterationLevel.get(a1), bLevel = mapAlterationLevel.get(a2);
+                if(aLevel == -1)return 1;
+                if(bLevel == -1)return -1;
+                return aLevel - bLevel; 
+            }
+        });
+
+        return alterations;
     }
     
     private static Gene parseGene(Node node, String genePath) {
