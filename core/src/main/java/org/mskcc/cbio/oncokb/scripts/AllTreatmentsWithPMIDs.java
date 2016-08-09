@@ -40,17 +40,8 @@ public class AllTreatmentsWithPMIDs {
 
                 for (Evidence evidence : relevantEvidences) {
                     LevelOfEvidence level = evidence.getLevelOfEvidence();
-                    String tumortype = evidence.getSubtype();
-                    OncoTreeType oncoTreeType = null;
+                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
 
-                    if (tumortype != null) {
-                        oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(tumortype);
-                    } else {
-                        tumortype = evidence.getCancerType();
-                        if (tumortype != null) {
-                            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(tumortype);
-                        }
-                    }
                     String levelStr = "";
 
                     if (level != null && level.getLevel() != null) {
@@ -80,7 +71,7 @@ public class AllTreatmentsWithPMIDs {
                         String treatmentStr = StringUtils.join(treatmentNames, ", ");
 
                         if (treatmentStr != null && !treatmentStr.equals("")) {
-                            Set<Integer> PMIDs = new HashSet<>();
+                            Set<Integer> PMIDs = new TreeSet<>();
 
                             for (Article article : evidence.getArticles()) {
                                 Integer articleRep;
@@ -94,12 +85,9 @@ public class AllTreatmentsWithPMIDs {
                                 PMIDs.add(articleRep);
                             }
 
-                            List<Integer> PMIDsInt = new ArrayList<>(PMIDs);
                             List<String> PMIDsStr = new ArrayList<>();
 
-                            Collections.sort(PMIDsInt);
-
-                            for (Integer pmid : PMIDsInt) {
+                            for (Integer pmid : PMIDs) {
                                 PMIDsStr.add(pmid.toString());
                             }
 

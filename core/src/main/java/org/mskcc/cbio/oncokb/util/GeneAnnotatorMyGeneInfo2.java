@@ -101,11 +101,6 @@ public final class GeneAnnotatorMyGeneInfo2 {
         String json = FileUtils.readRemote(url);
         
         Map<String,Object> map = JsonUtils.jsonToMap(json);
-        Object objSummary = map.get("summary");
-        if (objSummary!=null) {
-            gene.setSummary(String.class.cast(objSummary));
-        }
-        
         Object objAlias = map.get("alias");
         if (objAlias!=null) {
             if (objAlias instanceof String) {

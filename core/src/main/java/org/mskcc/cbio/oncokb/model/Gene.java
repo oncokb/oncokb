@@ -15,7 +15,6 @@ public class Gene implements Serializable {
     private int entrezGeneId;
     private String hugoSymbol;
     private String name;
-    private String summary;
     private String status;
 
     private Set<String> geneLabels = new HashSet<String>(0);
@@ -35,7 +34,6 @@ public class Gene implements Serializable {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
         this.name = name;
-        this.summary = summary;
         this.status = "not ready";
         this.geneLabels = geneLabels;
         this.geneAliases = geneAliases;
@@ -67,15 +65,6 @@ public class Gene implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getSummary() {
-        return this.summary;
-    }
-
-
-    public void setSummary(String summary) {
-        this.summary = summary;
     }
 
     public Set<String> getGeneLabels() {

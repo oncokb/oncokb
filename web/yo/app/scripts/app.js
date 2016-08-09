@@ -52,7 +52,8 @@ OncoKB.config = {
     curationLink: 'legacy-api/',
     // curationLink: 'http://localhost:8080/api/legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
-    accessLevels: {}
+    accessLevels: {},
+    testing: true
 };
 
 OncoKB.config.accessLevels.public = OncoKB.config.userRoles.public | OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
@@ -569,7 +570,8 @@ angular.module('oncokbApp', [
                 var $rootScope = $injector.get('$rootScope');
                 $rootScope.addError({message: 'Exception', reason: exception, case: cause});
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                // $delegate(exception, cause);
+                if(config.testing)
+                    $delegate(exception, cause);
             };
         });
 

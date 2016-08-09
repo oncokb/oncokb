@@ -1,9 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.model.EvidenceType;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Oncogenicity;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
 
@@ -100,20 +97,22 @@ public class MainUtils {
         return index == 100 ? "" : list.get(index);
     }
 
-    public static String findHighestOncogenic(Set<Oncogenicity> oncogenic) {
+    public static Oncogenicity findHighestOncogenic(Set<Oncogenicity> oncogenic) {
+        String[] effects = {"-1", "0", "2", "1"};
+        List<String> list = Arrays.asList(effects);
         String level = "";
         Integer index = -2;
 
         for (Oncogenicity datum : oncogenic) {
             if (datum != null) {
-                Integer oncogenicIndex = Integer.parseInt(datum.getOncogenic());
+                Integer oncogenicIndex = list.indexOf(datum.getOncogenic());
                 if (index < oncogenicIndex) {
                     index = oncogenicIndex;
                 }
             }
         }
 
-        return index == -2 ? "" : Oncogenicity.getByLevel(index.toString()).getDescription();
+        return index == -2 ? null : Oncogenicity.getByLevel(list.get(index));
     }
 
     public static String idealOncogenicityByMutationEffect(String mutationEffect) {
@@ -176,6 +175,63 @@ public class MainUtils {
         return match;
     }
 
+    public static Set<EvidenceType> getTreatmentEvidenceTypes() {
+        Set<EvidenceType> types = new HashSet<>();
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        
+        return types;
+    }
+    
+    public static Set<EvidenceType> getSensitiveTreatmentEvidenceTypes() {
+        Set<EvidenceType> types = new HashSet<>();
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        return types;
+    }
+
+    public static Oncogenicity findHighestOncogenic(List<Evidence> evidences) {
+        List<String> levels = Arrays.asList("-1", "0", "2", "1");
+
+        int index = -1;
+
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getKnownEffect() != null) {
+                    int _index = -1;
+                    _index = levels.indexOf(evidence.getKnownEffect());
+                    if (_index > index) {
+                        index = _index;
+                    }
+                }
+            }
+        }
+
+        return index > -1 ? Oncogenicity.getByLevel(levels.get(index)) : null;
+    }
+    
+    public static String getAlleleConflictsMutationEffect(Set<String> mutationEffects) {
+        Set<String> clean = new HashSet<>();
+        
+        for(String mutationEffect : mutationEffects) {
+            if(mutationEffect != null) {
+                mutationEffect = mutationEffect.replaceAll("(?i)likely", "");
+                mutationEffect = mutationEffect.replaceAll("\\s", "");
+                clean.add(mutationEffect);
+            }
+        }
+        
+        if(clean.size() > 1) {
+            return "Unknown";
+        }else if(clean.size() == 1){
+            return "Likely " + clean.iterator().next();
+        }else {
+            return "";   
+        }
+    }
+    
     private static Boolean hasInfoForEffect(String effect) {
         if (effect == null) {
             return false;

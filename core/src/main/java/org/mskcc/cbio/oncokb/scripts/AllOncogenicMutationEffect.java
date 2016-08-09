@@ -67,7 +67,7 @@ public class AllOncogenicMutationEffect {
         return MainUtils.findHighestMutationEffect(mutationEffect);
     }
 
-    private static String getOncogenic(List<Evidence> evidences) {
+    private static Oncogenicity getOncogenic(List<Evidence> evidences) {
         Set<Oncogenicity> oncogenic = new HashSet<>();
         for (Evidence evidence : evidences) {
             if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {

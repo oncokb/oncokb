@@ -264,7 +264,7 @@ public class EvidenceUtils {
                         filtered.add(tempEvidence);
                     } else {
                         if (!CollectionUtils.intersection(tempEvidence.getAlterations(), evidenceQuery.getAlterations()).isEmpty()) {
-                            if (tempEvidence.getCancerType() == null && tempEvidence.getSubtype() == null) {
+                            if (tempEvidence.getOncoTreeType() == null) {
                                 if (tempEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                                     if (tempEvidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
@@ -274,18 +274,13 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(tempEvidence);
                             } else {
-                                List<OncoTreeType> cancerTypes = new ArrayList<>();
-                                List<OncoTreeType> subtypes = new ArrayList<>();
+                                List<OncoTreeType> tumorType = new ArrayList<>();
                                 
-                                if(tempEvidence.getCancerType() != null) {
-                                    cancerTypes = TumorTypeUtils.getOncoTreeCancerTypes(Collections.singletonList(tempEvidence.getCancerType()));
+                                if(tempEvidence.getOncoTreeType() != null) {
+                                    tumorType.add(tempEvidence.getOncoTreeType());
                                 }
 
-                                if(tempEvidence.getSubtype() != null) {
-                                    subtypes = TumorTypeUtils.getOncoTreeSubtypesByCode(Collections.singletonList(tempEvidence.getSubtype()));
-                                }
-
-                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), cancerTypes) || !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), subtypes)) {
+                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType)) {
                                     filtered.add(tempEvidence);
                                 } else {
                                     if (tempEvidence.getLevelOfEvidence() != null) {
@@ -394,5 +389,27 @@ public class EvidenceUtils {
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
         return evidences;
+    }
+    
+    public static Set<Evidence> getEvidenceBasedOnHighestOncogenicity(Set<Evidence> evidences) {
+        Set<Evidence> filtered = new HashSet<>();
+        Map<Oncogenicity, Set<Evidence>> map = new HashMap<>();
+        
+        for(Evidence evidence : evidences) {
+            if(evidence.getEvidenceType()!= null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+                Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                
+                if(oncogenicity != null) {
+                    if(!map.containsKey(oncogenicity))
+                        map.put(oncogenicity, new HashSet<Evidence>());
+                    
+                    map.get(oncogenicity).add(evidence);
+                }
+            }
+        }
+        
+        Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenic(new ArrayList<Evidence>(evidences));
+        
+        return map.get(highestOncogenicity);
     }
 }
