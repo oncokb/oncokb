@@ -53,7 +53,7 @@ OncoKB.config = {
     // curationLink: 'http://localhost:8080/api/legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {},
-    testing: true
+    testing: false
 };
 
 OncoKB.config.accessLevels.public = OncoKB.config.userRoles.public | OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
