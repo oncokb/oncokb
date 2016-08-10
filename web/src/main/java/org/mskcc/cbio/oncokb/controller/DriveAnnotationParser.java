@@ -600,8 +600,8 @@ public class DriveAnnotationParser {
                 evidence.setCancerType(oncoTreeType.getCancerType());
                 evidence.setSubtype(oncoTreeType.getCode());
                 evidence.setKnownEffect(knownEffectOfEvidence);
-                if (implicationObj.has("shortProgImp") && !implicationObj.getString("shortProgImp").trim().isEmpty()) {
-                    String shortDesc = implicationObj.getString("shortProgImp").trim();
+                if (implicationObj.has("short") && !implicationObj.getString("short").trim().isEmpty()) {
+                    String shortDesc = implicationObj.getString("short").trim();
                     evidence.setShortDescription(shortDesc);
                     setDocuments(shortDesc, evidence);
                 }
