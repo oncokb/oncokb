@@ -243,7 +243,7 @@ angular.module('oncokbApp')
             });
 
             geneData.mutations.asArray().forEach(function (e) {
-                if (!(excludeObsolete !== undefined && excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true' && e.oncogenic_eStatus.get('curated')===false)){
+                if (!(excludeObsolete !== undefined && excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && e.oncogenic_eStatus.get('curated')!==false){
                     var _mutation = {};
                     _mutation.tumors = [];
                     _mutation.effect = {};
