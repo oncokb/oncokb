@@ -589,26 +589,27 @@ public class DriveAnnotationParser {
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
+        if ((implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) || (implicationObj.has("short") && !implicationObj.getString("short").trim().isEmpty())) {
             // general description
-            String desc = implicationObj.getString("description");
-            if (!desc.isEmpty()) {
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(evidenceType);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setCancerType(oncoTreeType.getCancerType());
-                evidence.setSubtype(oncoTreeType.getCode());
-                evidence.setKnownEffect(knownEffectOfEvidence);
-                if (implicationObj.has("short") && !implicationObj.getString("short").trim().isEmpty()) {
-                    String shortDesc = implicationObj.getString("short").trim();
-                    evidence.setShortDescription(shortDesc);
-                    setDocuments(shortDesc, evidence);
-                }
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(evidenceType);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            evidence.setCancerType(oncoTreeType.getCancerType());
+            evidence.setSubtype(oncoTreeType.getCode());
+            evidence.setKnownEffect(knownEffectOfEvidence);
+            
+            if (implicationObj.has("short") && !implicationObj.getString("short").trim().isEmpty()) {
+                String shortDesc = implicationObj.getString("short").trim();
+                evidence.setShortDescription(shortDesc);
+                setDocuments(shortDesc, evidence);
+            }
+            if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
+                String desc = implicationObj.getString("description");
                 evidence.setDescription(desc);
                 setDocuments(desc, evidence);
-                evidenceBo.save(evidence);
             }
+            evidenceBo.save(evidence);
         }
 
         // specific evidence
@@ -694,13 +695,13 @@ public class DriveAnnotationParser {
             }
 
             // description
+            if (drugObj.has("short") && !drugObj.getString("short").trim().isEmpty()) {
+                String shortDesc = drugObj.getString("short").trim();
+                evidence.setShortDescription(shortDesc);
+                setDocuments(shortDesc, evidence);
+            }
             if (drugObj.has("description") && !drugObj.getString("description").trim().isEmpty()) {
                 String desc = drugObj.getString("description").trim();
-                if (drugObj.has("short") && !drugObj.getString("short").trim().isEmpty()) {
-                    String shortDesc = drugObj.getString("short").trim();
-                    evidence.setShortDescription(shortDesc);
-                    setDocuments(shortDesc, evidence);
-                }
                 evidence.setDescription(desc);
                 setDocuments(desc, evidence);
             }
