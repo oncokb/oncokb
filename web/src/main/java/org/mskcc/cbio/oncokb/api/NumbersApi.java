@@ -75,11 +75,15 @@ public class NumbersApi {
 
         Set<GeneNumber> genes = new HashSet<>();
 
-        if (CacheUtils.getNumbers("genes") == null) {
+        if(CacheUtils.isEnabled()) {
+            if (CacheUtils.getNumbers("genes") == null) {
+                genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
+                CacheUtils.setNumbers("genes", genes);
+            } else {
+                genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
+            }
+        }else {
             genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
-            CacheUtils.setNumbers("genes", genes);
-        } else {
-            genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
         }
         
 //        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
@@ -105,19 +109,29 @@ public class NumbersApi {
         ApiNumbersMain apiNumbersMain = new ApiNumbersMain();
         MainNumber mainNumber = new MainNumber();
 
-        if (CacheUtils.getNumbers("main") == null) {
-            mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
+        if (CacheUtils.isEnabled()) {
+            if (CacheUtils.getNumbers("main") == null) {
+                mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
 
+                List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
+                Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
+
+                mainNumber.setAlteration(excludeVUS.size());
+                mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
+                mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
+                CacheUtils.setNumbers("main", mainNumber);
+            } else {
+                mainNumber = (MainNumber) CacheUtils.getNumbers("main");
+            }
+        }else {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
             Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
 
             mainNumber.setAlteration(excludeVUS.size());
             mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
             mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
-            CacheUtils.setNumbers("main", mainNumber);
-        } else {
-            mainNumber = (MainNumber) CacheUtils.getNumbers("main");
         }
+        
         apiNumbersMain.setData(mainNumber);
 
         RespMeta meta = new RespMeta();
@@ -139,11 +153,15 @@ public class NumbersApi {
         ApiNumbersLeves apiNumbersGenes = new ApiNumbersLeves();
         Set<LevelNumber> genes = new HashSet<>();
 
-        if (CacheUtils.getNumbers("levels") == null) {
+        if(CacheUtils.isEnabled()) {
+            if (CacheUtils.getNumbers("levels") == null) {
+                genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
+                CacheUtils.setNumbers("levels", genes);
+            } else {
+                genes = (Set<LevelNumber>) CacheUtils.getNumbers("levels");
+            }
+        }else {
             genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
-            CacheUtils.setNumbers("levels", genes);
-        } else {
-            genes = (Set<LevelNumber>) CacheUtils.getNumbers("levels");
         }
         
         apiNumbersGenes.setData(genes);
