@@ -2954,7 +2954,7 @@ angular.module('oncokbApp')
                     var errorMessage = 'An error has occurred when saving data, please contact the developer.';
 
                     if ($scope.userRole === 8) {
-                        errorMessage += ' <br/> Error : ' + result;
+                        errorMessage += ' <br/> Error : ' + JSON.stringify(error);
                     }
                     dialogs.error('Error', errorMessage);
                     changeLastUpdate();
@@ -4313,7 +4313,7 @@ angular.module('oncokbApp')
                         size: 'lg'
                     };
                     if(!_.isUndefined(error)) {
-                        errorMessage +=  '<br/>' + error;
+                        errorMessage +=  '<br/>' + JSON.stringify(error);
                     }
                 }
                 dialogs.error('Error', errorMessage, opts);
@@ -4331,7 +4331,7 @@ angular.module('oncokbApp')
                         size: 'lg'
                     };
                     if(!_.isUndefined(error)) {
-                        errorMessage +=  '<br/>' + error;
+                        errorMessage +=  '<br/>' + JSON.stringify(error);
                     }
                 }
                 
@@ -4341,15 +4341,39 @@ angular.module('oncokbApp')
             });
 
             // Realtime documet not found
-            $rootScope.$on('realtimeDoc.client_error', function () {
-                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
+            $rootScope.$on('realtimeDoc.client_error', function (error) {
+                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
+                var opts = {};
+                if ($scope.userRole === 8) {
+                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>' + error;
+                    opts = {
+                        size: 'lg'
+                    };
+                    if(!_.isUndefined(error)) {
+                        errorMessage +=  '<br/>' + JSON.stringify(error);
+                    }
+                }
+
+                dialogs.error('Error', errorMessage, opts);
                 documentClosed();
                 $location.path('/genes');
             });
 
             // Realtime documet not found
-            $rootScope.$on('realtimeDoc.not_found', function () {
-                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
+            $rootScope.$on('realtimeDoc.not_found', function (error) {
+                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
+                var opts = {};
+                if ($scope.userRole === 8) {
+                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>' + error;
+                    opts = {
+                        size: 'lg'
+                    };
+                    if(!_.isUndefined(error)) {
+                        errorMessage +=  '<br/>' + JSON.stringify(error);
+                    }
+                }
+
+                dialogs.error('Error', errorMessage, opts);
                 documentClosed();
                 $location.path('/genes');
             });

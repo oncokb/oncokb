@@ -561,12 +561,12 @@ public class DriveAnnotationParser {
                 nctIds.add(nctId);
             }
         }
-
-        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(oncoTreeType));
-
-        for (Evidence eve : evidences) {
-            evidenceBo.delete(eve);
-        }
+        // Couldnot find out the reason why designed to remove all previous trials. 
+//        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(oncoTreeType));
+//
+//        for (Evidence eve : evidences) {
+//            evidenceBo.delete(eve);
+//        }
 
         try {
             List<ClinicalTrial> trials = ClinicalTrialsImporter.importTrials(nctIds);
