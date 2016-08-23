@@ -130,7 +130,7 @@ public class SummaryUtils {
                     if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_1).isEmpty()) {
                         // if there are FDA approved drugs in the patient tumor type with the variant
                         evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_1));
-                        sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, true, false, false))
+                        sb.append(treatmentsToStringByTumorType(evidences, queriedAltName, queryTumorType, true, true, false, false))
                             .append(". ");
                     } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN guidelines in the patient tumor type with the variant
@@ -144,7 +144,7 @@ public class SummaryUtils {
                         //                        .append(". ");
                         //                }
                         evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_2A));
-                        sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, false, true, false))
+                        sb.append(treatmentsToStringByTumorType(evidences, queriedAltName, queryTumorType, true, false, true, false))
                             .append(". ");
                     } else {
                         // no FDA or NCCN in the patient tumor type with the variant
@@ -160,18 +160,18 @@ public class SummaryUtils {
                             // if there are FDA approved drugs in other tumor types with the variant
                             evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_1));
                             sb.append("While ")
-                                .append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, false, true, false, true))
+                                .append(treatmentsToStringByTumorType(evidences, queriedAltName, queryTumorType, false, true, false, true))
                                 .append(", the clinical utility for patients with ")
                                 .append(queryTumorType == null ? "tumors" : queryTumorType)
-                                .append(" harboring the " + queryAlteration)
+                                .append(" harboring the " + queriedAltName)
                                 .append(" is unknown. ");
                         } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                             // if there are NCCN drugs in other tumor types with the variant
                             evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A));
-                            sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, false, true, true))
+                            sb.append(treatmentsToStringByTumorType(evidences, queriedAltName, queryTumorType, true, false, true, true))
                                 .append(", the clinical utility for patients with ")
                                 .append(queryTumorType == null ? "tumors" : queryTumorType)
-                                .append(" harboring the " + queryAlteration)
+                                .append(" harboring the " + queriedAltName)
                                 .append(" is unknown. ");
                         } else {
                             // no FDA or NCCN drugs for the variant in any tumor type -- remove wild type evidence
@@ -193,7 +193,7 @@ public class SummaryUtils {
                                     .append(treatmentsToStringByTumorType(evidences, null, queryTumorType, false, true, false, true))
                                     .append(", the clinical utility for patients with ")
                                     .append(queryTumorType == null ? "tumors" : queryTumorType)
-                                    .append(" harboring the " + queryAlteration)
+                                    .append(" harboring the " + queriedAltName)
                                     .append(" is unknown. ");
                             } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                                 // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E
@@ -201,7 +201,7 @@ public class SummaryUtils {
                                 sb.append(treatmentsToStringByTumorType(evidences, null, queryTumorType, true, false, true, true))
                                     .append(", the clinical utility for patients with ")
                                     .append(queryTumorType == null ? "tumors" : queryTumorType)
-                                    .append(" harboring the " + queryAlteration)
+                                    .append(" harboring the " + queriedAltName)
                                     .append(" is unknown. ");
                             } else {
                                 // if there is no FDA or NCCN drugs for the gene at all
@@ -211,7 +211,7 @@ public class SummaryUtils {
                                 if (appendThe) {
                                     sb.append("the ");
                                 }
-                                sb.append(queryAlteration)
+                                sb.append(queriedAltName)
                                     .append(". ");
                             }
                         }
