@@ -2950,7 +2950,7 @@ angular.module('oncokbApp')
                     console.log('success', result);
                     changeLastUpdate();
                 }, function (result) {
-                    $scope.c.savedGene = true;
+                    $scope.docStatus.savedGene = true;
                     var errorMessage = 'An error has occurred when saving data, please contact the developer.';
 
                     if ($scope.userRole === 8) {
@@ -4305,8 +4305,6 @@ angular.module('oncokbApp')
 
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function (error) {
-
-                var error = undefined;
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page';
                 var opts = {};
                 if ($scope.userRole === 8) {
