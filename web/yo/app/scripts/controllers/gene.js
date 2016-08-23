@@ -2950,9 +2950,13 @@ angular.module('oncokbApp')
                     console.log('success', result);
                     changeLastUpdate();
                 }, function (result) {
-                    $scope.docStatus.savedGene = true;
-                    console.log('failed', result);
-                    dialogs.error('Error', 'An error has occurred when saving data, please contact the developer. Error code: 1');
+                    $scope.c.savedGene = true;
+                    var errorMessage = 'An error has occurred when saving data, please contact the developer.';
+
+                    if ($scope.userRole === 8) {
+                        errorMessage += ' <br/> Error : ' + result;
+                    }
+                    dialogs.error('Error', errorMessage);
                     changeLastUpdate();
                 });
             };
@@ -4300,16 +4304,40 @@ angular.module('oncokbApp')
 
 
             // Token expired, refresh
-            $rootScope.$on('realtimeDoc.token_refresh_required', function () {
-                console.log('--token_refresh_required-- going to refresh page.');
-                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
+            $rootScope.$on('realtimeDoc.token_refresh_required', function (error) {
+
+                var error = undefined;
+                var errorMessage = 'An error has occurred. This page will be redirected to Genes page';
+                var opts = {};
+                if ($scope.userRole === 8) {
+                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>Error code: 2';
+                    opts = {
+                        size: 'lg'
+                    };
+                    if(!_.isUndefined(error)) {
+                        errorMessage +=  '<br/>' + error;
+                    }
+                }
+                dialogs.error('Error', errorMessage, opts);
                 documentClosed();
                 $location.path('/genes');
             });
 
             // Other unidentify error
-            $rootScope.$on('realtimeDoc.other_error', function () {
-                dialogs.error('Error', 'An error has occurred. This page will be redirected to genes page.');
+            $rootScope.$on('realtimeDoc.other_error', function (error) {
+                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
+                var opts = {};
+                if ($scope.userRole === 8) {
+                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>' + error;
+                    opts = {
+                        size: 'lg'
+                    };
+                    if(!_.isUndefined(error)) {
+                        errorMessage +=  '<br/>' + error;
+                    }
+                }
+                
+                dialogs.error('Error', errorMessage, opts);
                 documentClosed();
                 $location.path('/genes');
             });
