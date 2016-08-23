@@ -19,6 +19,7 @@ angular.module('oncokbApp')
         dialogs,
         S,
         $q,
+        _,
         Levenshtein) {
       return {
         templateUrl: 'views/toolxlsx.html',
@@ -36,7 +37,10 @@ angular.module('oncokbApp')
           });
         },
         controller: function($scope){
-
+            $scope.status = {};
+            $scope.progress = {};
+            $scope.sheets = {};
+            
           function initParams(callback) {
             $scope.sheets = {
               length: 0,
@@ -90,68 +94,7 @@ angular.module('oncokbApp')
               fileSelected: false,
               mergePatient: true
             };
-
-            $scope.$watch('$scope.workers.length', function(n){
-              $scope.progress.max = n;
-            });
-
-            $scope.$watch('status.initializingIndex', function(n){
-              if(n === 0) {
-                $scope.groupKeys = [];
-                $scope.groups = {};
-                $scope.status.groupIndex = -1;
-                $scope.status.generateIndex = -1;
-                $scope.progress.dynamic = 0;
-                $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
-              }
-
-              if(n >= 0) {
-                if(n === $scope.workers.length) {
-                  $scope.status.initializing = false;
-                  $scope.status.initializingIndex = -1;
-                  groupWorkers();
-                  $scope.status.groupIndex = 0;
-                  $scope.status.generateIndex = 0;
-                }
-
-                if(n < $scope.workers.length){
-                  initializeWorkersData();
-                }
-              }
-            });
-
-            $scope.$watch('status.groupIndex', function(n){
-              if(n >= 0) {
-                if(n >= $scope.groupKeys.length) {
-                  $scope.status.generating = false;
-                  $scope.status.groupIndex = -1;
-                }
-
-                if(n < $scope.groupKeys.length){
-                  generateGoogleDocs();
-                }
-              }
-            });
-
-            $scope.$watch('status.generateIndex', function(n, o){
-              if(n === 0){
-                $scope.progress.dynamic = 0;
-                $scope.progress.value = 0;
-                $scope.progress.max = $scope.workers.length;
-              }
-              if(n >= 0) {
-                if(n > 0){
-                  $scope.progress.dynamic += n - o;
-                  $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
-                }
-                if(n >= $scope.workers.length) {
-                  $scope.status.generating = false;
-                  $scope.status.generateIndex = -1;
-                  $scope.status.working = false;
-                }
-              }
-            });
-
+            
             getGMT(callback);
           }
 
@@ -379,6 +322,76 @@ angular.module('oncokbApp')
               readXLSXfile($scope.file);
             });
           };
+
+            $scope.$watch('workers.length', function(n){
+                if(_.isNumber(n)) {
+                    $scope.progress.max = n;
+                }
+            });
+
+            $scope.$watch('status.initializingIndex', function(n){
+                if(_.isNumber(n)) {
+                    if(n === 0) {
+                        $scope.groupKeys = [];
+                        $scope.groups = {};
+                        $scope.status.groupIndex = -1;
+                        $scope.status.generateIndex = -1;
+                        $scope.progress.dynamic = 0;
+                        $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+                    }
+    
+                    if(n >= 0) {
+                        if(n === $scope.workers.length) {
+                            $scope.status.initializing = false;
+                            $scope.status.initializingIndex = -1;
+                            groupWorkers();
+                            $scope.status.groupIndex = 0;
+                            $scope.status.generateIndex = 0;
+                        }
+    
+                        if(n < $scope.workers.length){
+                            initializeWorkersData();
+                        }
+                    }
+                }
+            });
+
+            $scope.$watch('status.groupIndex', function(n){
+                if(_.isNumber(n)) {
+                    if(n >= 0) {
+                        if(n >= $scope.groupKeys.length) {
+                            $scope.status.generating = false;
+                            $scope.status.groupIndex = -1;
+                        }
+    
+                        if(n < $scope.groupKeys.length){
+                            generateGoogleDocs();
+                        }
+                    }
+                }
+            });
+
+            $scope.$watch('status.generateIndex', function(n, o){
+                if(_.isNumber(n)) {
+                    if (n === 0) {
+                        $scope.progress.dynamic = 0;
+                        $scope.progress.value = 0;
+                        $scope.progress.max = $scope.workers.length;
+                    }
+                    if (n >= 0) {
+                        if (n > 0) {
+                            $scope.progress.dynamic += n - o;
+                            $scope.progress.value = $scope.progress.dynamic / $scope.progress.max * 100;
+                        }
+                        if (n >= $scope.workers.length) {
+                            $scope.status.generating = false;
+                            $scope.status.generateIndex = -1;
+                            $scope.status.working = false;
+                        }
+                    }
+                }
+            });
+
         }
       };
     });
