@@ -395,6 +395,9 @@ public class EvidenceUtils {
         Set<Evidence> filtered = new HashSet<>();
         Map<Oncogenicity, Set<Evidence>> map = new HashMap<>();
         
+        if(evidences == null || evidences.size() == 0)
+            return filtered;
+        
         for(Evidence evidence : evidences) {
             if(evidence.getEvidenceType()!= null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                 Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
@@ -409,7 +412,8 @@ public class EvidenceUtils {
         }
         
         Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenic(new ArrayList<Evidence>(evidences));
-        
-        return map.get(highestOncogenicity);
+        if(map.get(highestOncogenicity) != null)
+            filtered = map.get(highestOncogenicity);
+        return filtered;
     }
 }
