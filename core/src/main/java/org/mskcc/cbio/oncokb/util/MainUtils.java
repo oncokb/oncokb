@@ -211,6 +211,22 @@ public class MainUtils {
 
         return index > -1 ? Oncogenicity.getByLevel(levels.get(index)) : null;
     }
+
+    public static Oncogenicity setToAlleleOncogenicity(Oncogenicity oncogenicity) {
+        Set<Oncogenicity> eligibleList = new HashSet<>();
+        eligibleList.add(Oncogenicity.getByLevel("1"));
+        eligibleList.add(Oncogenicity.getByLevel("2"));
+
+        if(oncogenicity == null) {
+            return null;
+        }
+
+        if(eligibleList.contains(oncogenicity)) {
+            return Oncogenicity.getByLevel("2");
+        }
+
+        return null;
+    }
     
     public static String getAlleleConflictsMutationEffect(Set<String> mutationEffects) {
         Set<String> clean = new HashSet<>();
