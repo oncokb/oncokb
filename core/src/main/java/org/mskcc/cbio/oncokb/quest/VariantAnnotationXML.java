@@ -462,7 +462,6 @@ public final class VariantAnnotationXML {
 
     private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
-        List<OncoTreeType> evidenceOncoTreeTypes = Collections.singletonList(evidence.getOncoTreeType());
 
         for (Treatment treatment : evidence.getTreatments()) {
             sb.append(indent).append("<treatment>\n");
@@ -472,7 +471,7 @@ public final class VariantAnnotationXML {
 
         if (levelOfEvidence != null) {
             if (levelOfEvidence == LevelOfEvidence.LEVEL_1 &&
-                !relevantTumorTypes.contains(evidenceOncoTreeTypes)) {
+                !relevantTumorTypes.contains(evidence.getOncoTreeType())) {
                 levelOfEvidence = LevelOfEvidence.LEVEL_2B;
             }
             sb.append(indent).append("<level_of_evidence_for_patient_indication>\n");
