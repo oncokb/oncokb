@@ -79,7 +79,7 @@ public class IndicatorController {
                         )
                     );
                 }else if(indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
-                    Oncogenicity oncogenicity = setToAlleleOncogenicity(MainUtils.findHighestOncogenic(
+                    Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenic(
                         EvidenceUtils.getEvidence(new ArrayList<>(alleles), Arrays.asList(EvidenceType.ONCOGENIC), null)));
                     
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
@@ -154,21 +154,5 @@ public class IndicatorController {
         levels.put("sensitive", levelSIndex > -1 ? sensitiveLevels.get(levelSIndex) : null);
         levels.put("resistant", levelRIndex > -1 ? resistanceLevels.get(levelRIndex) : null);
         return levels;
-    }
-    
-    private Oncogenicity setToAlleleOncogenicity(Oncogenicity oncogenicity) {
-        Set<Oncogenicity> eligibleList = new HashSet<>();
-        eligibleList.add(Oncogenicity.getByLevel("1"));
-        eligibleList.add(Oncogenicity.getByLevel("2"));
-        
-        if(oncogenicity == null) {
-            return null;
-        }
-        
-        if(eligibleList.contains(oncogenicity)) {
-            return Oncogenicity.getByLevel("2");
-        }
-        
-        return null;
     }
 }

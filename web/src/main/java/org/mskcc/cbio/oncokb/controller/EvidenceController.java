@@ -153,10 +153,28 @@ public class EvidenceController {
                 List<Evidence> oncogenics = EvidenceUtils.getEvidence(alleles, Collections.singletonList(EvidenceType.ONCOGENIC), null);
                 Oncogenicity highestOncogenic = MainUtils.findHighestOncogenic(oncogenics);
                 if (highestOncogenic != null) {
-                    Evidence evidence = new Evidence();
-                    evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                    evidence.setKnownEffect(highestOncogenic.getDescription());
-                    query.getEvidences().add(evidence);
+                    Evidence recordMatchHighestOncogenicity = null;
+                    
+                    for(int i = 0 ; i < oncogenics.size();i++) {
+                        Evidence evidence = oncogenics.get(i);
+                        if (evidence.getKnownEffect() != null) {
+                            Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                            if(oncogenicity != null && oncogenicity.equals(highestOncogenic)) {
+                                recordMatchHighestOncogenicity = evidence;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if(recordMatchHighestOncogenicity != null) {
+                        Oncogenicity alleleOncogenicity = MainUtils.setToAlleleOncogenicity(highestOncogenic);
+                        Evidence evidence = new Evidence();
+                        evidence.setEvidenceId(recordMatchHighestOncogenicity.getEvidenceId());
+                        evidence.setGene(recordMatchHighestOncogenicity.getGene());
+                        evidence.setEvidenceType(EvidenceType.ONCOGENIC);
+                        evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getDescription());
+                        query.getEvidences().add(evidence);
+                    }
                 }
 
                 Set<Alteration> altsWithHighestOncogenicity = new HashSet<>();
@@ -172,12 +190,14 @@ public class EvidenceController {
                 List<Evidence> mutationEffectsEvis = EvidenceUtils.getEvidence(new ArrayList<Alteration>(altsWithHighestOncogenicity), Collections.singletonList(EvidenceType.MUTATION_EFFECT), null);
                 if(mutationEffectsEvis != null && mutationEffectsEvis.size() > 0) {
                     Set<String> effects = new HashSet<>();
-                    
+
                     for(Evidence mutationEffectEvi : mutationEffectsEvis) {
                         effects.add(mutationEffectEvi.getKnownEffect());
                     }
-                    
+
                     Evidence mutationEffect = new Evidence();
+                    mutationEffect.setEvidenceId(mutationEffectsEvis.get(0).getEvidenceId());
+                    mutationEffect.setGene(mutationEffectsEvis.get(0).getGene());
                     mutationEffect.setEvidenceType(EvidenceType.MUTATION_EFFECT);
                     mutationEffect.setKnownEffect(MainUtils.getAlleleConflictsMutationEffect(effects));
                     query.getEvidences().add(mutationEffect);
