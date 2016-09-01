@@ -8,8 +8,14 @@
  * Controller of the oncokb
  */
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'OncoKB', 'stringUtils',
-        function ($scope, $rootScope, $location, $timeout, $routeParams, _, config, importer, storage, Documents, users, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, OncoKB, stringUtils) {
+    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', 
+        '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 
+        'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 
+        'OncoKB', 'stringUtils', 'S',
+        function ($scope, $rootScope, $location, $timeout, $routeParams, _, 
+                  config, importer, storage, Documents, users, 
+                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, 
+                  OncoKB, stringUtils, S) {
             function saveGene(docs, docIndex, excludeObsolete, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -1777,7 +1783,9 @@ angular.module('oncokbApp')
             };
 
             $scope.changeData = function () {
-                console.info('Category\tGene\tMutation');
+                console.info('Gene\tVariant\tTumorType\tTreatment' +
+                    '\tFDA approved indication\tLevel\tShortDescription\t' +
+                    'Description\tObsolete');
 
                 changeData(0, function () {
                     console.info('Finished.');
@@ -1833,7 +1841,23 @@ angular.module('oncokbApp')
                     console.log('Done converting mutation effect.');
                 });
             };
-
+            
+            function getCancerTypesName(cancerTypes) {
+                var list = [];
+                cancerTypes.asArray().forEach(function(cancerType) {
+                    if (cancerType.subtype.length > 0) {
+                        var str = cancerType.subtype.getText();
+                        // if (cancerType.oncoTreeCode.length > 0) {
+                        //     str += '(' + cancerType.oncoTreeCode + ')';
+                        // }
+                        list.push(str);
+                    } else if (cancerType.cancerType.length > 0) {
+                        list.push(cancerType.cancerType.getText());
+                    }
+                });
+                return list.join(', ');
+            };
+            
             function convertOncogenic(oncogenic) {
                 var result = 'Unknown';
                 if (oncogenic) {
@@ -1956,6 +1980,14 @@ angular.module('oncokbApp')
                 })
             }
 
+            function getString(string) {
+                var tmp = window.document.createElement('DIV');
+                tmp.innerHTML = string;
+                var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
+                string = S(_string).collapseWhitespace().s;
+                return string;
+            }
+            
             function changeData(index, callback) {
                 if(index < $scope.documents.length) {
                     var document = $scope.documents[index];
@@ -1987,32 +2019,32 @@ angular.module('oncokbApp')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + (tumorTypes.length === 0 ? "\tNo cancer type" : "\tHas cancer type"));
                                     //     // mutation.oncogenic.setText('');
                                     // }
-                                    if(mutation.oncogenic_eStatus.get('curated')===false) {
-                                        console.log("Red hand\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
-                                    if(mutation.name_eStatus.get('obsolete') === 'true') {
-                                        console.log("Obsoleted\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
+                                    // if(mutation.oncogenic_eStatus.get('curated')===false && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                    //     console.log("Red hand\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
+                                    // if(mutation.name_eStatus.get('obsolete') === 'true') {
+                                    //     console.log("Obsoleted\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
                                     
-                                    if(mutationName.indexOf(',') !== -1 || mutationName.indexOf('/') !== -1 ) {
-                                        console.log("String mutation\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
-
-                                    if(mutationName.indexOf('Fusions') !== -1 ) {
-                                        console.log("Fusions\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
-
-                                    if(mutationName.indexOf('Truncat') !== -1 ) {
-                                        console.log("Truncating mutations\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
-
-                                    if(mutationName.indexOf('Delet') !== -1 ) {
-                                        console.log("Deletions\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
-
-                                    if(mutationName.indexOf('Amplif') !== -1 ) {
-                                        console.log("Amplification\t" + gene.name.getText() + '\t' + mutation.name.getText());
-                                    }
+                                    // if(mutationName.indexOf(',') !== -1 || mutationName.indexOf('/') !== -1 ) {
+                                    //     console.log("String mutation\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
+                                    //
+                                    // if(mutationName.indexOf('Fusions') !== -1 ) {
+                                    //     console.log("Fusions\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
+                                    //
+                                    // if(mutationName.indexOf('Truncat') !== -1 ) {
+                                    //     console.log("Truncating mutations\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
+                                    //
+                                    // if(mutationName.indexOf('Delet') !== -1 ) {
+                                    //     console.log("Deletions\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
+                                    //
+                                    // if(mutationName.indexOf('Amplif') !== -1 ) {
+                                    //     console.log("Amplification\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // }
                                     // if(tumorTypes.length > 0 &&
                                     // isUndefinedOrEmpty(mutationEffect) &&
                                     // isUndefinedOrEmpty(mutationDesp) &&
@@ -2042,16 +2074,25 @@ angular.module('oncokbApp')
                                     //     mutation.name_eStatus.get('obsolete') === 'false')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\t" + category.join(''));
 
-                                    // mutation.tumors.asArray().forEach(function(tumor) {
-                                    //     tumor.TI.asArray().forEach(function(ti) {
-                                    //         ti.treatments.asArray().forEach(function(treatment) {
-                                    //             if (treatment.level.getText() === 'R1') {
-                                    //                 var result = [gene.name.getText(), mutation.name.getText(), tumor.name.getText(), treatment.name.getText()];
-                                    //                 console.log(result.join('\t'));
-                                    //             }
-                                    //         })
-                                    //     });
-                                    // });
+                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                        tumor.TI.asArray().forEach(function(ti) {
+                                            ti.treatments.asArray().forEach(function(treatment) {
+                                                // if (treatment.level.getText() === 'R1') {
+                                            var result = [gene.name.getText(), 
+                                                mutation.name.getText(), 
+                                                getCancerTypesName(tumor.cancerTypes), 
+                                                treatment.name.getText(),
+                                                treatment.indication.getText(),
+                                                treatment.level.getText(),
+                                                getString(treatment.short.getText()),
+                                                getString(treatment.description.getText()),
+                                                treatment.name_eStatus.get('obsolete')
+                                            ];
+                                            console.log(result.join('\t'));
+                                                // }
+                                            })
+                                        });
+                                    });
                                 });
                                 // model.endCompoundOperation();
                                 $timeout(function () {
