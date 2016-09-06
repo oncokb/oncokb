@@ -39,7 +39,8 @@ public class IndicatorController {
             IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
             indicatorQuery.setQuery(query);
 
-            Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
+            Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
+                GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
             indicatorQuery.setGeneExist(gene == null ? false : true);
 
             if (gene != null) {

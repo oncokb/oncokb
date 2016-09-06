@@ -12,13 +12,12 @@ import java.util.Set;
  * Created by hongxinzhang on 4/5/16.
  */
 public class GeneUtils {
-    public static Gene getGene(Integer entrezId, String hugoSymbol) {
-        if (entrezId != null) {
-            return getGeneByEntrezId(entrezId);
-        } else if (hugoSymbol != null) {
-            return getGeneByHugoSymbol(hugoSymbol);
+    public static Gene getGene(String gene) {
+        if (StringUtils.isNumeric(gene)) {
+            return getGeneByEntrezId(Integer.parseInt(gene));
+        } else {
+            return getGeneByHugoSymbol(gene);
         }
-        return null;
     }
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {

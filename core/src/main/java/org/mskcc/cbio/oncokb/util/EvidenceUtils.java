@@ -48,7 +48,8 @@ public class EvidenceUtils {
     public static List<Evidence> getRelevantEvidences(
         Query query, String source, String geneStatus,
         List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
-        Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
+        Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol())
+            : GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         if (gene != null) {
             String variantId = query.getQueryId() +
                 (source != null ? ("&" + source) : "") +

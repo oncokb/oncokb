@@ -128,7 +128,8 @@ public class PortalAlterationImporter {
                         String sampleId = jObject.getString("sample_id");
 
 
-                        Gene gene = GeneUtils.getGene(entrez_gene_id, hugo_gene_symbol);
+                        Gene gene = entrez_gene_id == null ? GeneUtils.getGeneByHugoSymbol(hugo_gene_symbol) : 
+                            GeneUtils.getGeneByEntrezId(entrez_gene_id);
 
                         portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);
                         portalAlterationBo.save(portalAlteration);

@@ -3,12 +3,8 @@ package org.mskcc.cbio.oncokb.api;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.log4j.chainsaw.Main;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.response.ApiGenes;
-import org.mskcc.cbio.oncokb.response.ApiSearchEvidences;
-import org.mskcc.cbio.oncokb.response.ApiSearchVariantsBiological;
-import org.mskcc.cbio.oncokb.response.ApiSearchVariantsClinical;
+import org.mskcc.cbio.oncokb.response.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.sql.Struct;
 import java.util.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -165,7 +160,7 @@ public class SearchApi {
                     BiologicalVariant variant = new BiologicalVariant();
                     variant.setVariant(alteration);
                     Oncogenicity oncogenicity = Oncogenicity.getByLevel(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.ONCOGENIC, map.get(EvidenceType.ONCOGENIC)));
-                    
+
                     Map<String, String> properMapping = MainUtils.matchOncogenicMutation(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.MUTATION_EFFECT, map.get(EvidenceType.MUTATION_EFFECT)), oncogenicity == null ? null : oncogenicity.getDescription());
                     variant.setOncogenic(properMapping.get("oncogenic"));
                     variant.setMutationEffect(properMapping.get("mutationEffect"));
@@ -264,4 +259,47 @@ public class SearchApi {
         instance.setMeta(meta);
         return new ResponseEntity<ApiSearchVariantsClinical>(instance, status);
     }
+
+    @ApiOperation(value = "", notes = "Search to find treatments.", response = ApiGenes.class)
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/treatments",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    public ResponseEntity<ApiTreatments> searchTreatmentsGet(
+        @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.", required = true) @RequestParam(value = "gene", required = false) String queryGene,
+        @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel
+    ) throws NotFoundException {
+        ApiTreatments instance = new ApiTreatments();
+        RespMeta meta = new RespMeta();
+        HttpStatus status = HttpStatus.OK;
+        Gene gene = GeneUtils.getGene(queryGene);
+
+        if (gene == null) {
+            status = HttpStatus.BAD_REQUEST;
+        } else {
+            if (queryLevel != null) {
+                LevelOfEvidence level = LevelOfEvidence.getByLevel(queryLevel);
+                if (level == null) {
+                    status = HttpStatus.BAD_REQUEST;
+                } else {
+                    List<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
+                    List<Evidence> evidences = EvidenceUtils.getEvidence(alterations,
+                        new ArrayList<EvidenceType>(MainUtils.getTreatmentEvidenceTypes()),
+                        Collections.singletonList(level));
+                    Set<Treatment> treatments = new HashSet<>();
+                    
+                    for(Evidence evidence : evidences) {
+                        treatments.addAll(evidence.getTreatments());
+                    }
+                    instance.setData(treatments);
+                }
+            }
+        }
+
+        meta.setCode(status.value());
+        instance.setRespMeta(meta);
+        return new ResponseEntity<ApiTreatments>(instance, status);
+    }
+
 }

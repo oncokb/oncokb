@@ -108,7 +108,7 @@ public final class VariantAnnotationXMLV2 {
             ArrayList<Gene> sequencedGenes = new ArrayList<Gene>();
             //use entrezGeneID, which is more stable than hugoSymbol, to fetch Gene instance
             for(int i = 0;i < entrezNodes.size();i++){
-                  sequencedGenes.add(GeneUtils.getGene(Integer.parseInt(entrezNodes.get(i).getText()), null));
+                  sequencedGenes.add(GeneUtils.getGeneByEntrezId(Integer.parseInt(entrezNodes.get(i).getText())));
             }
             // identify other related variants such as KRAS wildtype
             identifyAdditionalVariants(mapAlterationXml, diagnosis, sequencedGenes);
@@ -271,7 +271,7 @@ public final class VariantAnnotationXMLV2 {
                    continue;
                 }
                 parts = line.split("\t");
-                tempGene = GeneUtils.getGene(null, parts[0]);
+                tempGene = GeneUtils.getGeneByHugoSymbol(parts[0]);
                 if(sequencedGenes.contains(tempGene) && diagnosis.equals(parts[1]) && !genesWithMutation.contains(tempGene)){
                     tempAlteration.setGene(tempGene);
                     tempAlteration.setAlteration("Wildtype");
