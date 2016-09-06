@@ -4,10 +4,8 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.mortbay.util.ajax.JSON;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
@@ -35,8 +33,8 @@ public class DriveAnnotationParser {
     public
     @ResponseBody
     void getEvidence(
-            @RequestParam(value = "gene", required = true) String gene,
-            @RequestParam(value = "vus", required = false) String vus
+        @RequestParam(value = "gene", required = true) String gene,
+        @RequestParam(value = "vus", required = false) String vus
     ) throws IOException {
 
         if (gene == null) {
@@ -282,55 +280,41 @@ public class DriveAnnotationParser {
             }
 
             // mutation effect
-            JSONObject effectObject = mutationObj.has("effect") ? mutationObj.getJSONObject("effect") : null;
-            if (effectObject != null) {
-                String effect = effectObject.has("value") ? effectObject.getString("value") : null;
+            String effect = mutationObj.has("effect") ?
+                (mutationObj.getJSONObject("effect").has("value") ?
+                    (mutationObj.getJSONObject("effect").getString("value").trim().isEmpty() ? null :
+                        mutationObj.getJSONObject("effect").getString("value").trim())
+                    : null)
+                : null;
+            String effectDesc = mutationObj.has("description") ?
+                (mutationObj.getString("description").trim().isEmpty() ? null :
+                    mutationObj.getString("description").trim())
+                : null;
+            String effectShortDesc = mutationObj.has("short") ?
+                (mutationObj.getString("short").trim().isEmpty() ? null : mutationObj.getString("short").trim())
+                : null;
 
-                if (effect != null && !effect.isEmpty()) {
-                    String effectAddon = effectObject.has("addOn") ? effectObject.getString("addOn") : null;
-                    if (effect.equalsIgnoreCase("other")) {
-                        if (effectAddon != null && !effectAddon.isEmpty()) {
-                            effect = effectAddon;
-                        } else {
-                            effect = "Other";
-                        }
-                    } else {
-                        if (effectAddon != null && !effectAddon.isEmpty()) {
-                            if (StringUtils.containsIgnoreCase(effectAddon, effect)) {
-                                effect = effectAddon;
-                            } else {
-                                effect = effect + " " + effectAddon;
-                            }
-                        }
-                    }
-                } else {
-                    effect = null;
-                }
-
+            if (effect != null || effectDesc != null || effectShortDesc != null) {
                 // save
-                if (effect != null) {
-                    Evidence evidence = new Evidence();
-                    evidence.setEvidenceType(EvidenceType.MUTATION_EFFECT);
-                    evidence.setAlterations(alterations);
-                    evidence.setGene(gene);
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.MUTATION_EFFECT);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
 
-                    if ((mutationObj.has("description") && !mutationObj.getString("description").trim().isEmpty())) {
-                        String desc = mutationObj.getString("description").trim();
-                        evidence.setDescription(desc);
-                        setDocuments(desc, evidence);
-                    }
-
-                    if ((mutationObj.has("short") && !mutationObj.getString("short").trim().isEmpty())) {
-                        String desc = mutationObj.getString("short").trim();
-                        evidence.setShortDescription(desc);
-                        setDocuments(desc, evidence);
-                    }
-
-                    evidence.setKnownEffect(effect);
-
-                    EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-                    evidenceBo.save(evidence);
+                if ((effectDesc != null && !effectDesc.trim().isEmpty())) {
+                    evidence.setDescription(effectDesc);
+                    setDocuments(effectDesc, evidence);
                 }
+
+                if ((effectShortDesc != null && !effectShortDesc.trim().isEmpty())) {
+                    evidence.setShortDescription(effectShortDesc);
+                    setDocuments(effectShortDesc, evidence);
+                }
+
+                evidence.setKnownEffect(effect);
+
+                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                evidenceBo.save(evidence);
             }
 
             // cancers
@@ -408,7 +392,7 @@ public class DriveAnnotationParser {
     }
 
     private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String cancerType, String code) {
-        if(cancerType == null || cancerType.equals("")) {
+        if (cancerType == null || cancerType.equals("")) {
             return;
         }
 
@@ -416,14 +400,14 @@ public class DriveAnnotationParser {
         System.out.println("##    Subtype code: " + code);
 
         OncoTreeType oncoTreeType;
-        
-        if(code != null && !code.equals("")) {
+
+        if (code != null && !code.equals("")) {
             oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(code);
         } else {
             oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(cancerType);
         }
-        
-        if(oncoTreeType == null) {
+
+        if (oncoTreeType == null) {
             System.out.println("##      No mapped OncoTreeType.");
             return;
         }
@@ -598,7 +582,7 @@ public class DriveAnnotationParser {
             evidence.setCancerType(oncoTreeType.getCancerType());
             evidence.setSubtype(oncoTreeType.getCode());
             evidence.setKnownEffect(knownEffectOfEvidence);
-            
+
             if (implicationObj.has("short") && !implicationObj.getString("short").trim().isEmpty()) {
                 String shortDesc = implicationObj.getString("short").trim();
                 evidence.setShortDescription(shortDesc);
@@ -678,7 +662,7 @@ public class DriveAnnotationParser {
                 if (level.equals("2")) {
 
                     if (evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE
-                            || evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY) {
+                        || evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY) {
                         level = "2a";
                     } else {
                         level = "2b";
