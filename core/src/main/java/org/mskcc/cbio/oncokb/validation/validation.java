@@ -34,8 +34,8 @@ public class validation {
         Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Integer count = 0;
-        String result0 = "", result1 = "", result2 = "", result3 = "", result4 = "";
-        Integer length0 = 0, length1 = 0, length2 = 0, length3 = 0, length4 = 0;
+        String result0 = "", result1 = "", result2 = "", result3 = "", result4 = "", result5 = "";
+        Integer length0 = 0, length1 = 0, length2 = 0, length3 = 0, length4 = 0, length5 = 0;
         ArrayList<String> specialAlterations = new ArrayList<>(Arrays.asList("Inactivating Mutations", "Activating Mutations", "Fusions", "Inactivating", "Wildtype", "Amplification", "Fusions"));
         for (Gene gene : genes) {
             Set<Evidence> evidences = allGeneBasedEvidences.get(gene);
@@ -43,6 +43,7 @@ public class validation {
             Map<Alteration, ArrayList<Alteration>> relevantAlterationsMapping = new HashMap<Alteration, ArrayList<Alteration>>();
             Map<Alteration, String> oncogenicityMapping = new HashMap<Alteration, String>();
             Map<Alteration, String> mutationEffectMapping = new HashMap<Alteration, String>();
+            Map<Alteration, Set<Evidence>> multipleMutationEffects = new HashMap<>();
             Map<Alteration, Set<String>> referencesMapping = new HashMap<Alteration, Set<String>>();
             ArrayList<Alteration> altsWithDescriptions = new ArrayList<Alteration>();
             Set<Alteration> allVariants = new HashSet<Alteration>();
@@ -58,6 +59,10 @@ public class validation {
                     if (evidenceItem.getEvidenceType().toString().equals("MUTATION_EFFECT")) {
                         mutationEffectMapping.put(alterationItem, evidenceItem.getKnownEffect());
                     }
+                    if(!multipleMutationEffects.containsKey(alterationItem)) {
+                        multipleMutationEffects.put(alterationItem, new HashSet<Evidence>());
+                    }
+                    multipleMutationEffects.get(alterationItem).add(evidenceItem);
                     if(referencesMapping.containsKey(alterationItem)){
                         Set<String> oldPMIDs = referencesMapping.get(alterationItem);
                         Set<String> newPMIDs = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
@@ -110,6 +115,10 @@ public class validation {
                     result4 += alt.toString() + "\n";
                     length4++;
                 }
+                if (multipleMutationEffects.containsKey(alt) && multipleMutationEffects.size() > 1) {
+                    result5 += alt.toString() + "\n";
+                    length5++;
+                }
 
             }
             count++;
@@ -133,6 +142,10 @@ public class validation {
         output += "******************************************************************************************\n";
         output += "Rule 5 check result: There are " + Integer.toString(length4) + " variants that have oncogenic and mutation effect, but don't have any PMIDs.\n";
         output += result4;
+
+        output += "******************************************************************************************\n";
+        output += "Rule 6 check result: There are " + Integer.toString(length5) + " variants that have multiple mutation effects (does not count relevant mutation effects)\n";
+        output += result5;
 
         try {
             File file = new File("validation-result.txt");
