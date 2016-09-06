@@ -5,24 +5,16 @@
  */
 package org.mskcc.cbio.oncokb.validation;
 
+import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.EvidenceUtils;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.MutationEffect;
-import org.mskcc.cbio.oncokb.model.Oncogenicity;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.EvidenceUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
+import java.util.*;
 
 /**
  *
@@ -59,10 +51,12 @@ public class validation {
                     if (evidenceItem.getEvidenceType().toString().equals("MUTATION_EFFECT")) {
                         mutationEffectMapping.put(alterationItem, evidenceItem.getKnownEffect());
                     }
-                    if(!multipleMutationEffects.containsKey(alterationItem)) {
-                        multipleMutationEffects.put(alterationItem, new HashSet<Evidence>());
+                    if (evidenceItem.getEvidenceType().toString().equals("MUTATION_EFFECT")) {
+                        if (!multipleMutationEffects.containsKey(alterationItem)) {
+                            multipleMutationEffects.put(alterationItem, new HashSet<Evidence>());
+                        }
+                        multipleMutationEffects.get(alterationItem).add(evidenceItem);
                     }
-                    multipleMutationEffects.get(alterationItem).add(evidenceItem);
                     if(referencesMapping.containsKey(alterationItem)){
                         Set<String> oldPMIDs = referencesMapping.get(alterationItem);
                         Set<String> newPMIDs = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
@@ -88,8 +82,12 @@ public class validation {
                     }
                 }
                 for (Alteration relevantAlt : relevantAlts) {
-                    if (mutationEffectMapping.containsKey(alt) && mutationEffectMapping.containsKey(relevantAlt) && !mutationEffectMapping.get(alt).equals(mutationEffectMapping.get(relevantAlt))) {
-                        result1 += alt.toString() + ": " + mutationEffectMapping.get(alt) + ". Relevant alteration: " + relevantAlt.toString() + ": " + mutationEffectMapping.get(relevantAlt) +  "\n";
+                    if (mutationEffectMapping.containsKey(alt) && mutationEffectMapping.containsKey(relevantAlt) &&
+                        mutationEffectMapping.get(alt) != null && mutationEffectMapping.get(relevantAlt) != null &&
+                        !mutationEffectMapping.get(alt).equals(mutationEffectMapping.get(relevantAlt))) {
+                        result1 += alt.toString() + ": " + mutationEffectMapping.get(alt) +
+                            ". Relevant alteration: " + relevantAlt.toString() + ": " +
+                            mutationEffectMapping.get(relevantAlt) +  "\n";
                         length1++;
                         break;
                     }
@@ -115,7 +113,7 @@ public class validation {
                     result4 += alt.toString() + "\n";
                     length4++;
                 }
-                if (multipleMutationEffects.containsKey(alt) && multipleMutationEffects.size() > 1) {
+                if (multipleMutationEffects.containsKey(alt) && multipleMutationEffects.get(alt).size() > 1) {
                     result5 += alt.toString() + "\n";
                     length5++;
                 }
