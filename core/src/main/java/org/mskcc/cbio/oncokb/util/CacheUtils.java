@@ -23,9 +23,8 @@ import java.util.*;
 public class CacheUtils {
     private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
     private static Map<Integer, Map<String, String>> variantCustomizedSummary = new HashMap<>();
-    private static Map<Integer, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
+    private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
-
     // The key would be entrezGeneId, variant name and evidence ID
     private static Map<Integer, Map<String, Set<Integer>>> relevantEvidences = new HashMap<>();
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>();
@@ -37,7 +36,7 @@ public class CacheUtils {
 
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
-    // Cache meta data from database
+    // Cache metadata from database
     private static Set<Gene> genes = new HashSet<>();
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
     private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based evidences 
@@ -236,7 +235,7 @@ public class CacheUtils {
     }
 
     public static void setGeneByEntrezId(Gene gene) {
-        if(gene != null) {
+        if (gene != null) {
             genesByEntrezId.put(gene.getEntrezGeneId(), gene);
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
@@ -263,7 +262,7 @@ public class CacheUtils {
     }
 
     public static void setGeneByHugoSymbol(Gene gene) {
-        if(gene != null) {
+        if (gene != null) {
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
             genesByEntrezId.put(gene.getEntrezGeneId(), gene);
         }
@@ -367,7 +366,15 @@ public class CacheUtils {
 
     public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
         if (relevantAlterations.containsKey(entrezGeneId) && relevantAlterations.get(entrezGeneId).containsKey(variant)) {
-            return relevantAlterations.get(entrezGeneId).get(variant);
+            List<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
+            List<Alteration> mappedAlts = new ArrayList<>();
+            Set<Alteration> geneAlts = alterations.get(entrezGeneId);
+            for (Alteration alteration : geneAlts) {
+                if (mappedAltsIds.contains(alteration.getAlterationId())) {
+                    mappedAlts.add(alteration);
+                }
+            }
+            return mappedAlts;
         } else {
             return null;
         }
@@ -380,9 +387,13 @@ public class CacheUtils {
 
     public static void setRelevantAlterations(Integer entrezGeneId, String variant, List<Alteration> alts) {
         if (!relevantAlterations.containsKey(entrezGeneId)) {
-            relevantAlterations.put(entrezGeneId, new HashMap<String, List<Alteration>>());
+            relevantAlterations.put(entrezGeneId, new HashMap<String, List<Integer>>());
         }
-        relevantAlterations.get(entrezGeneId).put(variant, alts);
+        List<Integer> mappedAltsIds = new ArrayList<>();
+        for (Alteration alteration : alts) {
+            mappedAltsIds.add(alteration.getAlterationId());
+        }
+        relevantAlterations.get(entrezGeneId).put(variant, mappedAltsIds);
     }
 
     public static Set<Alteration> getAlterations(Integer entrezGeneId) {
@@ -434,7 +445,7 @@ public class CacheUtils {
 
     public static Set<Evidence> getEvidences(Gene gene) {
         if (evidences == null || evidences.size() == 0) {
-            Map<Gene, Set<Evidence>> mappedEvidence = 
+            Map<Gene, Set<Evidence>> mappedEvidence =
                 EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
                     ApplicationContextSingleton.getEvidenceBo().findAll()));
             Iterator it = mappedEvidence.entrySet().iterator();

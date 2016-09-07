@@ -247,6 +247,15 @@ public class MainUtils {
             return "";   
         }
     }
+
+
+    public static Long getCurrentTimestamp() {
+        return new Date().getTime();
+    }
+
+    public static Long getTimestampDiff(Long old) {
+        return new Date().getTime() - old;
+    }
     
     private static Boolean hasInfoForEffect(String effect) {
         if (effect == null) {

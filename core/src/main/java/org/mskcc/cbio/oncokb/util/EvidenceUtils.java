@@ -71,16 +71,16 @@ public class EvidenceUtils {
             evidenceQueryRes.setOncoTreeTypes(relevantTumorTypes);
             List<EvidenceQueryRes> evidenceQueryResList = new ArrayList<>();
             evidenceQueryResList.add(evidenceQueryRes);
-            
+
             if (CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(gene.getEntrezGeneId(), variantId)) {
                 relevantEvidences = CacheUtils.getRelevantEvidences(gene.getEntrezGeneId(), variantId);
-            }else {
+            } else {
                 relevantEvidences = getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences);
                 if (CacheUtils.isEnabled()) {
                     CacheUtils.setRelevantEvidences(gene.getEntrezGeneId(), variantId, relevantEvidences);
                 }
             }
-            
+
             return filterEvidence(relevantEvidences, evidenceQueryRes);
         } else {
             return new ArrayList<>();
@@ -91,7 +91,11 @@ public class EvidenceUtils {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
-        return evidenceBo.findEvidencesByAlteration(alterations);
+        if (CacheUtils.isEnabled()) {
+            return new ArrayList<>(getAlterationEvidences(new HashSet<>(alterations)));
+        } else {
+            return evidenceBo.findEvidencesByAlteration(alterations);
+        }
     }
 
     public static List<Evidence> getEvidence(List<Alteration> alterations, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
@@ -101,10 +105,26 @@ public class EvidenceUtils {
         if (evidenceTypes == null || evidenceTypes.size() == 0) {
             return getEvidence(alterations);
         }
-        if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
-            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes);
-        } else {
-            return evidenceBo.findEvidencesByAlterationWithLevels(alterations, evidenceTypes, levelOfEvidences);
+        if(CacheUtils.isEnabled()) {
+            Set<Evidence> alterationEvidences = getAlterationEvidences(new HashSet<>(alterations));
+            List<Evidence> result = new ArrayList<>();
+
+            for (Evidence evidence : alterationEvidences) {
+                if(!evidenceTypes.contains(evidence.getEvidenceType())) {
+                    continue;
+                }
+                if (levelOfEvidences != null && levelOfEvidences.size() > 0 && !levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
+                    continue;
+                }
+                result.add(evidence);
+            }
+            return result;
+        }else{
+            if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
+                return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes);
+            } else {
+                return evidenceBo.findEvidencesByAlterationWithLevels(alterations, evidenceTypes, levelOfEvidences);
+            }
         }
     }
 
@@ -208,6 +228,25 @@ public class EvidenceUtils {
         return evidences;
     }
 
+    public static Set<Evidence> getAlterationEvidences(Set<Alteration> alterations) {
+        Set<Evidence> evidences = new HashSet<>();
+
+        if (CacheUtils.isEnabled()) {
+            Set<Evidence> geneEvidences = new HashSet<>();
+            for (Alteration alteration : alterations) {
+                geneEvidences.addAll(CacheUtils.getEvidences(alteration.getGene()));
+            }
+            for (Evidence evidence : geneEvidences) {
+                if (!Collections.disjoint(evidence.getAlterations(), alterations)) {
+                    evidences.add(evidence);
+                }
+            }
+        } else {
+            evidences = new HashSet<>(evidenceBo.findEvidencesByAlteration(alterations));
+        }
+        return evidences;
+    }
+
     public static Map<Gene, Set<Evidence>> getEvidenceByGenes(Set<Gene> genes) {
         Map<Gene, Set<Evidence>> evidences = new HashMap<>();
         if (CacheUtils.isEnabled()) {
@@ -275,8 +314,8 @@ public class EvidenceUtils {
                                 filtered.add(tempEvidence);
                             } else {
                                 List<OncoTreeType> tumorType = new ArrayList<>();
-                                
-                                if(tempEvidence.getOncoTreeType() != null) {
+
+                                if (tempEvidence.getOncoTreeType() != null) {
                                     tumorType.add(tempEvidence.getOncoTreeType());
                                 }
 
@@ -390,29 +429,29 @@ public class EvidenceUtils {
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
         return evidences;
     }
-    
+
     public static Set<Evidence> getEvidenceBasedOnHighestOncogenicity(Set<Evidence> evidences) {
         Set<Evidence> filtered = new HashSet<>();
         Map<Oncogenicity, Set<Evidence>> map = new HashMap<>();
-        
-        if(evidences == null || evidences.size() == 0)
+
+        if (evidences == null || evidences.size() == 0)
             return filtered;
-        
-        for(Evidence evidence : evidences) {
-            if(evidence.getEvidenceType()!= null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getEvidenceType() != null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                 Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
-                
-                if(oncogenicity != null) {
-                    if(!map.containsKey(oncogenicity))
+
+                if (oncogenicity != null) {
+                    if (!map.containsKey(oncogenicity))
                         map.put(oncogenicity, new HashSet<Evidence>());
-                    
+
                     map.get(oncogenicity).add(evidence);
                 }
             }
         }
-        
+
         Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenic(new ArrayList<Evidence>(evidences));
-        if(map.get(highestOncogenicity) != null)
+        if (map.get(highestOncogenicity) != null)
             filtered = map.get(highestOncogenicity);
         return filtered;
     }
