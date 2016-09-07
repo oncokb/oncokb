@@ -26,7 +26,7 @@ public class GeneUtils {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
                 if (CacheUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
-                    CacheUtils.setGeneByHugoSymbol(hugoSymbol, geneBo.findGeneByHugoSymbol(hugoSymbol));
+                    CacheUtils.setGeneByHugoSymbol(geneBo.findGeneByHugoSymbol(hugoSymbol));
                 }
                 return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
             } else {
@@ -41,7 +41,7 @@ public class GeneUtils {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
                 if (CacheUtils.getGeneByEntrezId(entrezId) == null) {
-                    CacheUtils.setGeneByEntrezId(entrezId, geneBo.findGeneByEntrezGeneId(entrezId));
+                    CacheUtils.setGeneByEntrezId(geneBo.findGeneByEntrezGeneId(entrezId));
                 }
                 return CacheUtils.getGeneByEntrezId(entrezId);
             } else {

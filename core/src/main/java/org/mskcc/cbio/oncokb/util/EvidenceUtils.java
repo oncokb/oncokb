@@ -50,15 +50,10 @@ public class EvidenceUtils {
         List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
         if (gene != null) {
-            String strEntrezId = Integer.toString(gene.getEntrezGeneId());
             String variantId = query.getQueryId() +
                 (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
-
-            if (CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(strEntrezId, variantId)) {
-                return CacheUtils.getRelevantEvidences(strEntrezId, variantId);
-            }
 
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
                 gene, query.getAlteration(), query.getConsequence(),
@@ -76,12 +71,17 @@ public class EvidenceUtils {
             evidenceQueryRes.setOncoTreeTypes(relevantTumorTypes);
             List<EvidenceQueryRes> evidenceQueryResList = new ArrayList<>();
             evidenceQueryResList.add(evidenceQueryRes);
-            relevantEvidences = filterEvidence(getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences), evidenceQueryRes);
-
-            if (CacheUtils.isEnabled()) {
-                CacheUtils.setRelevantEvidences(strEntrezId, variantId, relevantEvidences);
+            
+            if (CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(gene.getEntrezGeneId(), variantId)) {
+                relevantEvidences = CacheUtils.getRelevantEvidences(gene.getEntrezGeneId(), variantId);
+            }else {
+                relevantEvidences = getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences);
+                if (CacheUtils.isEnabled()) {
+                    CacheUtils.setRelevantEvidences(gene.getEntrezGeneId(), variantId, relevantEvidences);
+                }
             }
-            return relevantEvidences;
+            
+            return filterEvidence(relevantEvidences, evidenceQueryRes);
         } else {
             return new ArrayList<>();
         }

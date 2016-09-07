@@ -21,27 +21,34 @@ import java.util.*;
 
 
 public class CacheUtils {
-    private static Map<String, Map<String, String>> variantSummary = new HashMap<>();
-    private static Map<String, Map<String, String>> variantCustomizedSummary = new HashMap<>();
-    private static Map<String, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
-    private static Map<String, List<Alteration>> alterations = new HashMap<>();
-    private static Map<String, List<OncoTreeType>> mappedTumorTypes = new HashMap<>();
+    private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
+    private static Map<Integer, Map<String, String>> variantCustomizedSummary = new HashMap<>();
+    private static Map<Integer, Map<String, List<Alteration>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
-    private static Map<String, Gene> genesByHugoSymbol = new HashMap<>();
+
+    // The key would be entrezGeneId, variant name and evidence ID
+    private static Map<Integer, Map<String, Set<Integer>>> relevantEvidences = new HashMap<>();
+    private static Map<Integer, Set<Alteration>> VUS = new HashMap<>();
+
+    private static Map<String, List<OncoTreeType>> mappedTumorTypes = new HashMap<>();
+    private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
     private static Map<String, List<OncoTreeType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
-    private static Map<String, Map<String, List<Evidence>>> relevantEvidences = new HashMap<>();
-    private static Set<Gene> genes = new HashSet<>();
-    private static Map<Gene, Set<Alteration>> VUS = new HashMap<>();
     private static Map<String, Object> numbers = new HashMap<>();
-    private static Map<Gene, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
+
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
+
+    // Cache meta data from database
+    private static Set<Gene> genes = new HashSet<>();
+    private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
+    private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based evidences 
 
     private static Observer variantSummaryObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                variantSummary.remove(operation.get("val"));
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                variantSummary.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
                 variantSummary.clear();
             }
@@ -53,7 +60,8 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                variantCustomizedSummary.remove(operation.get("val"));
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                variantCustomizedSummary.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
                 variantCustomizedSummary.clear();
             }
@@ -65,7 +73,8 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                relevantAlterations.remove(operation.get("val"));
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                relevantAlterations.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
                 relevantAlterations.clear();
             }
@@ -75,7 +84,6 @@ public class CacheUtils {
     private static Observer numbersObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
             numbers.clear();
         }
     };
@@ -84,10 +92,11 @@ public class CacheUtils {
         @Override
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
-            Gene gene = GeneUtils.getGeneByHugoSymbol(operation.get("val"));
-            if (operation.get("cmd") == "update" && gene != null) {
-                VUS.remove(gene);
-                VUS.put(gene, AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene)));
+            if (operation.get("cmd") == "update") {
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+                VUS.remove(entrezGeneId);
+                VUS.put(entrezGeneId, AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene)));
             } else if (operation.get("cmd") == "reset") {
                 VUS.clear();
             }
@@ -99,7 +108,8 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                alterations.remove(operation.get("val"));
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                alterations.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
                 alterations.clear();
             }
@@ -111,12 +121,18 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                String gene = operation.get("val");
-                genesByEntrezId.remove(gene);
-                genesByHugoSymbol.remove(gene);
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                genesByEntrezId.remove(entrezGeneId);
+                Iterator it = hugoSymbolToEntrez.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    if ((pair.getValue()).equals(entrezGeneId)) {
+                        it.remove();
+                    }
+                }
             } else if (operation.get("cmd") == "reset") {
                 genesByEntrezId.clear();
-                genesByHugoSymbol.clear();
+                hugoSymbolToEntrez.clear();
             }
         }
     };
@@ -124,7 +140,7 @@ public class CacheUtils {
     private static Observer genesObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
-            genes = new HashSet<Gene>(ApplicationContextSingleton.getGeneBo().findAll());
+            genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         }
     };
 
@@ -133,7 +149,8 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                relevantEvidences.remove(operation.get("val"));
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                relevantEvidences.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
                 relevantEvidences.clear();
             }
@@ -145,14 +162,22 @@ public class CacheUtils {
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
-                Gene gene = GeneUtils.getGeneByHugoSymbol(operation.get("val"));
-                if(gene != null) {
-                    evidences.remove(gene);
-                    evidences.put(gene, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGene(Collections.singleton(gene))));
-                }
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+                evidences.remove(entrezGeneId);
+                evidences.put(entrezGeneId, new HashSet<>(
+                    ApplicationContextSingleton.getEvidenceBo().findEvidencesByGene(Collections.singleton(gene))));
+
             } else if (operation.get("cmd") == "reset") {
                 evidences.clear();
-                evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+                Map<Gene, Set<Evidence>> mappedEvidence =
+                    EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
+                        ApplicationContextSingleton.getEvidenceBo().findAll()));
+                Iterator it = mappedEvidence.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
+                    evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
+                }
             }
         }
     };
@@ -180,8 +205,14 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(numbersObserver);
 
             genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
-            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
-            for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+
+            Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+            Iterator it = mappedEvidence.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
+                evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
+            }
+            for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
                 setVUS(entry.getKey(), entry.getValue());
             }
             allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
@@ -204,54 +235,77 @@ public class CacheUtils {
         return genesByEntrezId.containsKey(entrezId) ? true : false;
     }
 
-    public static void setGeneByEntrezId(Integer entrezId, Gene gene) {
-        genesByEntrezId.put(entrezId, gene);
+    public static void setGeneByEntrezId(Gene gene) {
+        if(gene != null) {
+            genesByEntrezId.put(gene.getEntrezGeneId(), gene);
+            hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
+        }
     }
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
-        if (genesByHugoSymbol.containsKey(hugoSymbol)) {
-            return genesByHugoSymbol.get(hugoSymbol);
-        } else {
+        Integer entrezGeneId = hugoSymbolToEntrez.get(hugoSymbol);
+        if (entrezGeneId == null)
             return null;
-        }
+
+        return genesByEntrezId.get(entrezGeneId);
     }
 
     public static Boolean containGeneByHugoSymbol(String hugoSymbol) {
-        return genesByHugoSymbol.containsKey(hugoSymbol) ? true : false;
+        Integer entrezGeneId = hugoSymbolToEntrez.get(hugoSymbol);
+        if (entrezGeneId == null)
+            return false;
+
+        if (genesByEntrezId.get(entrezGeneId) == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
-    public static void setGeneByHugoSymbol(String hugoSymbol, Gene gene) {
-        genesByHugoSymbol.put(hugoSymbol, gene);
+    public static void setGeneByHugoSymbol(Gene gene) {
+        if(gene != null) {
+            hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
+            genesByEntrezId.put(gene.getEntrezGeneId(), gene);
+        }
     }
 
-    public static List<Evidence> getRelevantEvidences(String gene, String variant) {
-        if (relevantEvidences.containsKey(gene) && relevantEvidences.get(gene).containsKey(variant)) {
-            return relevantEvidences.get(gene).get(variant);
+    public static List<Evidence> getRelevantEvidences(Integer entrezGeneId, String variant) {
+        if (relevantEvidences.containsKey(entrezGeneId) && relevantEvidences.get(entrezGeneId).containsKey(variant)) {
+            Set<Integer> mappedEntrez = relevantEvidences.get(entrezGeneId).get(variant);
+            Set<Evidence> geneEvidences = evidences.get(entrezGeneId);
+            List<Evidence> mappedEvidences = new ArrayList<>();
+
+            for (Evidence evidence : geneEvidences) {
+                if (mappedEntrez.contains(evidence.getEvidenceId())) {
+                    mappedEvidences.add(evidence);
+                }
+            }
+            return mappedEvidences;
         } else {
             return null;
         }
     }
 
-    public static Boolean containRelevantEvidences(String gene, String variant) {
-        return (relevantEvidences.containsKey(gene) &&
-            relevantEvidences.get(gene).containsKey(variant)) ? true : false;
+    public static Boolean containRelevantEvidences(Integer entrezGeneId, String variant) {
+        return (relevantEvidences.containsKey(entrezGeneId) &&
+            relevantEvidences.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setVUS(Gene gene, Set<Evidence> evidences) {
-        if (!VUS.containsKey(gene)) {
-            VUS.put(gene, new HashSet<Alteration>());
+    public static void setVUS(Integer entrezGeneId, Set<Evidence> evidences) {
+        if (!VUS.containsKey(entrezGeneId)) {
+            VUS.put(entrezGeneId, new HashSet<Alteration>());
         }
-        VUS.put(gene, AlterationUtils.findVUSFromEvidences(evidences));
+        VUS.put(entrezGeneId, AlterationUtils.findVUSFromEvidences(evidences));
     }
 
-    public static Set<Alteration> getVUS(Gene gene) {
-        if (VUS.containsKey(gene)) {
-            return VUS.get(gene);
+    public static Set<Alteration> getVUS(Integer entrezGeneId) {
+        if (VUS.containsKey(entrezGeneId)) {
+            return VUS.get(entrezGeneId);
         } else {
             return null;
         }
     }
-    
+
     public static void setNumbers(String type, Object number) {
         numbers.put(type, number);
     }
@@ -259,84 +313,88 @@ public class CacheUtils {
     public static Object getNumbers(String type) {
         return numbers.get(type);
     }
-    
-    public static void setRelevantEvidences(String gene, String variant, List<Evidence> evidences) {
-        if (!relevantEvidences.containsKey(gene)) {
-            relevantEvidences.put(gene, new HashMap<String, List<Evidence>>());
+
+    public static void setRelevantEvidences(Integer entrezGeneId, String variant, List<Evidence> evidences) {
+        if (!relevantEvidences.containsKey(entrezGeneId)) {
+            relevantEvidences.put(entrezGeneId, new HashMap<String, Set<Integer>>());
         }
-        relevantEvidences.get(gene).put(variant, evidences);
+        Set<Integer> mappedEvidenceIds = new HashSet<>();
+        for (Evidence evidence : evidences) {
+            mappedEvidenceIds.add(evidence.getEvidenceId());
+        }
+        relevantEvidences.get(entrezGeneId).put(variant, mappedEvidenceIds);
     }
 
-    public static String getVariantSummary(String gene, String variant) {
-        if (variantSummary.containsKey(gene) && variantSummary.get(gene).containsKey(variant)) {
-            return variantSummary.get(gene).get(variant);
+    public static String getVariantSummary(Integer entrezGeneId, String variant) {
+        if (variantSummary.containsKey(entrezGeneId) && variantSummary.get(entrezGeneId).containsKey(variant)) {
+            return variantSummary.get(entrezGeneId).get(variant);
         } else {
             return null;
         }
     }
 
-    public static Boolean containVariantSummary(String gene, String variant) {
-        return (variantSummary.containsKey(gene) &&
-            variantSummary.get(gene).containsKey(variant)) ? true : false;
+    public static Boolean containVariantSummary(Integer entrezGeneId, String variant) {
+        return (variantSummary.containsKey(entrezGeneId) &&
+            variantSummary.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setVariantSummary(String gene, String variant, String summary) {
-        if (!variantSummary.containsKey(gene)) {
-            variantSummary.put(gene, new HashMap<String, String>());
+    public static void setVariantSummary(Integer entrezGeneId, String variant, String summary) {
+        if (!variantSummary.containsKey(entrezGeneId)) {
+            variantSummary.put(entrezGeneId, new HashMap<String, String>());
         }
-        variantSummary.get(gene).put(variant, summary);
+        variantSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static String getVariantCustomizedSummary(String gene, String variant) {
-        if (variantCustomizedSummary.containsKey(gene) && variantCustomizedSummary.get(gene).containsKey(variant)) {
-            return variantCustomizedSummary.get(gene).get(variant);
+    public static String getVariantCustomizedSummary(Integer entrezGeneId, String variant) {
+        if (variantCustomizedSummary.containsKey(entrezGeneId) && variantCustomizedSummary.get(entrezGeneId).containsKey(variant)) {
+            return variantCustomizedSummary.get(entrezGeneId).get(variant);
         } else {
             return null;
         }
     }
 
-    public static Boolean containVariantCustomizedSummary(String gene, String variant) {
-        return (variantCustomizedSummary.containsKey(gene) &&
-            variantCustomizedSummary.get(gene).containsKey(variant)) ? true : false;
+    public static Boolean containVariantCustomizedSummary(Integer entrezGeneId, String variant) {
+        return (variantCustomizedSummary.containsKey(entrezGeneId) &&
+            variantCustomizedSummary.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setVariantCustomizedSummary(String gene, String variant, String summary) {
-        if (!variantCustomizedSummary.containsKey(gene)) {
-            variantCustomizedSummary.put(gene, new HashMap<String, String>());
+    public static void setVariantCustomizedSummary(Integer entrezGeneId, String variant, String summary) {
+        if (!variantCustomizedSummary.containsKey(entrezGeneId)) {
+            variantCustomizedSummary.put(entrezGeneId, new HashMap<String, String>());
         }
-        variantCustomizedSummary.get(gene).put(variant, summary);
+        variantCustomizedSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static List<Alteration> getRelevantAlterations(String gene, String variant) {
-        if (relevantAlterations.containsKey(gene) && relevantAlterations.get(gene).containsKey(variant)) {
-            return relevantAlterations.get(gene).get(variant);
+    public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
+        if (relevantAlterations.containsKey(entrezGeneId) && relevantAlterations.get(entrezGeneId).containsKey(variant)) {
+            return relevantAlterations.get(entrezGeneId).get(variant);
         } else {
             return null;
         }
     }
 
-    public static Boolean containRelevantAlterations(String gene, String variant) {
-        return (relevantAlterations.containsKey(gene) &&
-            relevantAlterations.get(gene).containsKey(variant)) ? true : false;
+    public static Boolean containRelevantAlterations(Integer entrezGeneId, String variant) {
+        return (relevantAlterations.containsKey(entrezGeneId) &&
+            relevantAlterations.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setRelevantAlterations(String gene, String variant, List<Alteration> alts) {
-        if (!relevantAlterations.containsKey(gene)) {
-            relevantAlterations.put(gene, new HashMap<String, List<Alteration>>());
+    public static void setRelevantAlterations(Integer entrezGeneId, String variant, List<Alteration> alts) {
+        if (!relevantAlterations.containsKey(entrezGeneId)) {
+            relevantAlterations.put(entrezGeneId, new HashMap<String, List<Alteration>>());
         }
-        relevantAlterations.get(gene).put(variant, alts);
+        relevantAlterations.get(entrezGeneId).put(variant, alts);
     }
 
-    public static List<Alteration> getAlterations(String gene) {
-        return alterations.get(gene);
+    public static Set<Alteration> getAlterations(Integer entrezGeneId) {
+        return alterations.get(entrezGeneId);
     }
 
-    public static Boolean containAlterations(String gene) {
-        return alterations.containsKey(gene) ? true : false;
+    public static Boolean containAlterations(Integer entrezGeneId) {
+        return alterations.containsKey(entrezGeneId) ? true : false;
     }
 
-    public static void setAlterations(String gene, List<Alteration> alts) {
-        alterations.put(gene, alts);
+    public static void setAlterations(Integer entrezGeneId, Set<Alteration> alts) {
+        alterations.put(entrezGeneId, alts);
     }
 
     public static List<OncoTreeType> getMappedTumorTypes(String queryTumorType, String source) {
@@ -375,12 +433,19 @@ public class CacheUtils {
     }
 
     public static Set<Evidence> getEvidences(Gene gene) {
-        if(evidences == null || evidences.size() == 0) {
-            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+        if (evidences == null || evidences.size() == 0) {
+            Map<Gene, Set<Evidence>> mappedEvidence = 
+                EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
+                    ApplicationContextSingleton.getEvidenceBo().findAll()));
+            Iterator it = mappedEvidence.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
+                evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
+            }
         }
-        
-        if (evidences.containsKey(gene)) {
-            Set<Evidence> result = evidences.get(gene);
+
+        if (evidences.containsKey(gene.getEntrezGeneId())) {
+            Set<Evidence> result = evidences.get(gene.getEntrezGeneId());
             return result;
         } else {
             return null;
@@ -392,15 +457,15 @@ public class CacheUtils {
     }
 
     public static void setEvidences(Gene gene, Set<Evidence> newEvidences) {
-        evidences.put(gene, newEvidences);
+        evidences.put(gene.getEntrezGeneId(), newEvidences);
     }
 
     public static Set<ShortGene> getAllShortGenes() {
         return ShortGeneUtils.getShortGenesFromGenes(genes);
     }
 
-    public static void updateGene(String gene) {
-        GeneObservable.getInstance().update("update", gene);
+    public static void updateGene(Integer entrezGeneId) {
+        GeneObservable.getInstance().update("update", entrezGeneId.toString());
     }
 
     public static void resetAll() {
