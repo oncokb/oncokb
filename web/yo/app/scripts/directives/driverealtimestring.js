@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-  .directive('driveRealtimeString', function (gapi, $timeout) {
+  .directive('driveRealtimeString', function (gapi, $timeout, _) {
     return {
       templateUrl: 'views/driveRealtimeString.html',
       restrict: 'AE',
@@ -76,7 +76,9 @@ angular.module('oncokbApp')
       },
       controller: function($scope, $rootScope){
         $scope.valueChanged = function(newVal) {
-          $scope.es.set('vetted', 'uv');
+            if(!_.isUndefined($scope.es)){
+                $scope.es.set('vetted', 'uv');
+            }
         };
 
         $scope.sCheckboxChange = function() {
