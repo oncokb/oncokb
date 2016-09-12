@@ -36,7 +36,7 @@ OncoKB.config = {
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
     // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    folderId: '0BzBfo69g8fP6eERxcnpmMjRtYVU', //curation folder 05/19/2016
+    folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -91,6 +91,12 @@ OncoKB.curateInfo = {
         },
         'curators': {
             type: 'list'
+        },
+        'transcripts': {
+            type: 'list'
+        },
+        'type': {
+            type: 'map'
         }
     },
     'Mutation': {
@@ -340,6 +346,20 @@ OncoKB.curateInfo = {
         time: {
             type: 'list'
         }
+    },
+    'ISOForm': {
+        isoform_override: {
+            type: 'string'
+        },
+        gene_name: {
+            type: 'string'
+        },
+        dmp_refseq_id: {
+            type: 'string'
+        },
+        ccds_id: {
+            type: 'string'
+        }
     }
 };
 
@@ -359,6 +379,7 @@ OncoKB.setUp = function(object) {
         }
     }
 };
+OncoKB.keyMappings = {type: {'TSG': '', 'OCG': ''}};
 
 OncoKB.initialize = function() {
     var nonSetUp = ['TI'];
@@ -404,6 +425,9 @@ OncoKB.initialize = function() {
                             case 'list':
                                 this[__key] = model.createList();
                                 break;
+                            case 'map':
+                                this[__key] = model.createMap(OncoKB.keyMappings[__key]);
+                                break;    
                             default:
                                 this[__key] = model.create(OncoKB.curateInfo[id][__key].type);
                                 break;

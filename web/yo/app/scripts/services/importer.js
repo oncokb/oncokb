@@ -66,7 +66,14 @@ angular.module('oncokbApp')
             if (index < self.docs.length) {
                 var doc = self.docs[index];
                 copyFileData(self.newFolder, doc.id, doc.title, index).then(function () {
-                    copyData(++index, callback);
+                    if((index+1)%50 === 0){
+                        console.log("copied another 50 genes, waiting 5s...");
+                        $timeout(function () {
+                                    copyData(++index, callback);
+                                }, 5000, false);
+                    }else{
+                         copyData(++index, callback);
+                    }
                 });
             } else {
                 if (callback) {
@@ -232,16 +239,20 @@ angular.module('oncokbApp')
             var gene = {};
             var geneData = realtime;
 
-            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background'], excludeObsolete);
+            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete);
             gene.mutations = [];
             gene.curators = [];
-
+            gene.transcripts = [];
             geneData.curators.asArray().forEach(function (e) {
                 var _curator = {};
                 _curator = combineData(_curator, e, ['name', 'email']);
                 gene.curators.push(_curator);
             });
-
+            geneData.transcripts.asArray().forEach(function (e) {
+                var _transcript = {};
+                _transcript = combineData(_transcript, e, ['isoform_override', 'gene_name', 'dmp_refseq_id', 'ccds_id']);
+                gene.transcripts.push(_transcript);
+            });
             geneData.mutations.asArray().forEach(function (e) {
                 if (!(excludeObsolete !== undefined && excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && e.oncogenic_eStatus.get('curated')!==false){
                     var _mutation = {};
@@ -440,6 +451,8 @@ angular.module('oncokbApp')
             if (angular.isString(value)) {
                 if (model[key] && model[key].type) {
                     model[key].setText(value);
+                }else if(model.type === 'Map'){
+                    model.set(key, value);
                 } else {
                     console.log('Unknown key', key);
                 }
@@ -452,6 +465,9 @@ angular.module('oncokbApp')
                             break;
                         case 'mutations':
                             _datum = rootModel.create('Mutation');
+                            break;
+                        case 'transcripts':
+                            _datum = rootModel.create('ISOForm');
                             break;
                         case 'tumors':
                             _datum = rootModel.create('Tumor');
@@ -501,6 +517,9 @@ angular.module('oncokbApp')
                     case 'interactAlts':
                         _datum = rootModel.create('InteractAlts');
                         break;
+                    case 'type':
+                        _datum = rootModel.createMap(OncoKB.keyMappings['type']);
+                        break;    
                 }
 
                 if (key.indexOf('_eStatus') !== -1) {
@@ -551,7 +570,13 @@ angular.module('oncokbApp')
         function combineData(object, model, keys, excludeObsolete) {
             keys.forEach(function(e) {
                 if (!(excludeObsolete !== undefined && excludeObsolete && model[e + '_eStatus'] && model[e + '_eStatus'].has('obsolete') && model[e + '_eStatus'].get('obsolete') === 'true')) {
-                    if (model[e]) {
+                    if (model[e].type === "Map"){
+                        object[e] = {};
+                        _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping){
+                            object[e][keyMapping] = model[e].get(keyMapping);
+                        }) 
+                    }else
+                    {
                         object[e] = getString(model[e].getText());
                         if (model[e + '_comments']) {
                             object[e + '_comments'] = getComments(model[e + '_comments']);

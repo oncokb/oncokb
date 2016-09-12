@@ -47,6 +47,7 @@
       </span>
       
     </h2>
+    <p>Transcript: {{gene.transcripts.asArray()[0].isoform_override.text}}</p>
     <p ng-if="userRole === 8">
       <strong>Status:</strong>
       <span ng-repeat="checkbox in checkboxes['geneStatus']">
@@ -64,6 +65,13 @@
         <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{::gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'"></e-status></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.summary.text"></p>
+    <span style="float:left">                
+        <drive-realtime-string fe="fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
+    </span>
+    <span style="float:left">
+        <drive-realtime-string fe="fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
+    </span>
+    <br/>
     <h3>{{::gene.background.display}}:
         <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'"></e-status>
