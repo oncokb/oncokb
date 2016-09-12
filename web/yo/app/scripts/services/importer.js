@@ -518,7 +518,7 @@ angular.module('oncokbApp')
                         _datum = rootModel.create('InteractAlts');
                         break;
                     case 'type':
-                        _datum = rootModel.createMap({'TSG': '', 'OCG': ''});
+                        _datum = rootModel.createMap(OncoKB.keyMappings['type']);
                         break;    
                 }
 
