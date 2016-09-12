@@ -155,7 +155,7 @@ public class DriveAnnotationParser {
                 // Variants of unknown significance
                 parseVUS(gene, vus);
 
-                CacheUtils.updateGene(Integer.toString(gene.getEntrezGeneId()));
+                CacheUtils.updateGene(gene.getEntrezGeneId());
             } else {
                 System.out.print("No gene name available");
             }

@@ -20,8 +20,8 @@ public class SummaryUtils {
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
         Gene gene = GeneUtils.getGene(Integer.parseInt(geneId), null);
         String queriedAltName = AlterationUtils.getVariantName(gene.getHugoSymbol(), queryAlteration);
-        if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(geneId, key)) {
-            return CacheUtils.getVariantSummary(geneId, key);
+        if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
+            return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
         }
 
         StringBuilder sb = new StringBuilder();
@@ -30,34 +30,38 @@ public class SummaryUtils {
 
         queryTumorType = queryTumorType == null ? null : (StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase());
 
-        Boolean appendThe = true;
-        Boolean isPlural = false;
-
-        if (queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion")) {
-            appendThe = false;
-        }
-
-        if (queryAlteration.toLowerCase().contains("fusions")) {
-            isPlural = true;
-        }
-
         if (genes.isEmpty() || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(gene, new HashSet<>(alterations)).size() == 0) {
-            Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
-            if (alteration == null) {
-                alteration = new Alteration();
-                alteration.setGene(gene);
-                alteration.setAlterationType(AlterationType.MUTATION);
-                alteration.setAlteration(queryAlteration);
-                alteration.setName(queryAlteration);
-                AlterationUtils.annotateAlteration(alteration, queryAlteration);
-            }
+            if (queryAlteration != null) {
+                Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
+                if (alteration == null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(AlterationType.MUTATION);
+                    alteration.setAlteration(queryAlteration);
+                    alteration.setName(queryAlteration);
+                    AlterationUtils.annotateAlteration(alteration, queryAlteration);
+                }
 
-            if(AlterationUtils.hasAlleleAlterations(alteration)) {
-                sb.append(" " + alleleSummary(alteration));
+                if (AlterationUtils.hasAlleleAlterations(alteration)) {
+                    sb.append(" " + alleleSummary(alteration));
+                } else {
+                    sb.append("The oncogenic activity of this variant is unknown. ");
+                }
             }else {
                 sb.append("The oncogenic activity of this variant is unknown. ");
             }
         } else {
+            Boolean appendThe = true;
+            Boolean isPlural = false;
+
+            if (queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion")) {
+                appendThe = false;
+            }
+
+            if (queryAlteration.toLowerCase().contains("fusions")) {
+                isPlural = true;
+            }
+
             int oncogenic = -1;
             for (Alteration a : alterations) {
                 List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
@@ -224,7 +228,7 @@ public class SummaryUtils {
         }
 
         if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantSummary(geneId, key, sb.toString().trim());
+            CacheUtils.setVariantSummary(genes.iterator().next().getEntrezGeneId(), key, sb.toString().trim());
         }
         return sb.toString().trim();
     }
@@ -236,42 +240,46 @@ public class SummaryUtils {
         String queriedAltName = AlterationUtils.getVariantName(gene.getHugoSymbol(), queryAlteration);
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-        if (CacheUtils.isEnabled() && CacheUtils.containVariantCustomizedSummary(geneId, key)) {
-            return CacheUtils.getVariantCustomizedSummary(geneId, key);
+        if (CacheUtils.isEnabled() && CacheUtils.containVariantCustomizedSummary(genes.iterator().next().getEntrezGeneId(), key)) {
+            return CacheUtils.getVariantCustomizedSummary(genes.iterator().next().getEntrezGeneId(), key);
         }
 
         StringBuilder sb = new StringBuilder();
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        Boolean appendThe = true;
-        Boolean isPlural = false;
-
         sb.append(geneSummary(genes.iterator().next()));
 
-        if (queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion")) {
-            appendThe = false;
-        }
-
-        if (queryAlteration.toLowerCase().contains("fusions")) {
-            isPlural = true;
-        }
-
         if (genes.isEmpty() || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(gene, new HashSet<>(alterations)).size() == 0) {
-            Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
-            if (alteration == null) {
-                alteration = new Alteration();
-                alteration.setGene(gene);
-                alteration.setAlterationType(AlterationType.MUTATION);
-                alteration.setAlteration(queryAlteration);
-                alteration.setName(queryAlteration);
-                AlterationUtils.annotateAlteration(alteration, queryAlteration);
-            }
-            if(AlterationUtils.hasAlleleAlterations(alteration)) {
-                sb.append(" " + alleleSummary(alteration));
+            if(queryAlteration != null) {
+                Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
+                if (alteration == null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(AlterationType.MUTATION);
+                    alteration.setAlteration(queryAlteration);
+                    alteration.setName(queryAlteration);
+                    AlterationUtils.annotateAlteration(alteration, queryAlteration);
+                }
+                if(AlterationUtils.hasAlleleAlterations(alteration)) {
+                    sb.append(" " + alleleSummary(alteration));
+                }else {
+                    sb.append("The oncogenic activity of this variant is unknown. ");
+                }
             }else {
                 sb.append("The oncogenic activity of this variant is unknown. ");
             }
         } else {
+            Boolean appendThe = true;
+            Boolean isPlural = false;
+
+            if (queryAlteration.toLowerCase().contains("deletion") || queryAlteration.toLowerCase().contains("amplification") || queryAlteration.toLowerCase().contains("fusion")) {
+                appendThe = false;
+            }
+
+            if (queryAlteration.toLowerCase().contains("fusions")) {
+                isPlural = true;
+            }
+
             int oncogenic = -1;
             for (Alteration a : alterations) {
                 List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
@@ -285,7 +293,7 @@ public class SummaryUtils {
         }
 
         if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantCustomizedSummary(geneId, key, sb.toString().trim());
+            CacheUtils.setVariantCustomizedSummary(genes.iterator().next().getEntrezGeneId(), key, sb.toString().trim());
         }
         return sb.toString().trim();
     }

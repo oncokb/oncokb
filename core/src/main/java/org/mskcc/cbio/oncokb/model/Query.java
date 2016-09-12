@@ -4,9 +4,7 @@ package org.mskcc.cbio.oncokb.model;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -91,25 +89,26 @@ public class Query implements java.io.Serializable {
 
     public String getQueryId() {
         List<String> content = new ArrayList<>();
-        if(entrezGeneId != null) {
+        if (entrezGeneId != null) {
             content.add(Integer.toString(entrezGeneId));
+        } else {
+            if (hugoSymbol != null) {
+                content.add(hugoSymbol);
+            }
         }
-        if(hugoSymbol != null) {
-            content.add(hugoSymbol);
-        }
-        if(alteration != null) {
+        if (alteration != null) {
             content.add(alteration);
         }
-        if(tumorType != null) {
+        if (tumorType != null) {
             content.add(tumorType);
         }
-        if(consequence != null) {
+        if (consequence != null) {
             content.add(consequence);
         }
-        if(proteinStart != null) {
+        if (proteinStart != null) {
             content.add(Integer.toString(proteinStart));
         }
-        if(proteinEnd != null) {
+        if (proteinEnd != null) {
             content.add(Integer.toString(proteinEnd));
         }
 

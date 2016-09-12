@@ -4,9 +4,9 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * @author jgao
@@ -26,7 +25,7 @@ public class IndicatorController {
     public
     @ResponseBody
     List<IndicatorQueryResp> getResult(
-            @RequestBody EvidenceQueries body) {
+        @RequestBody EvidenceQueries body) {
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -45,40 +44,40 @@ public class IndicatorController {
 
             if (gene != null) {
                 List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
-                        gene, query.getAlteration(), query.getConsequence(),
-                        query.getProteinStart(), query.getProteinEnd());
+                    gene, query.getAlteration(), query.getConsequence(),
+                    query.getProteinStart(), query.getProteinEnd());
                 Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
 
-                if(relevantAlterations == null || relevantAlterations.size() == 0) {
+                if (relevantAlterations == null || relevantAlterations.size() == 0) {
                     indicatorQuery.setVariantExist(false);
-                }else {
+                } else {
                     indicatorQuery.setVariantExist(true);
                 }
 
                 Set<Alteration> alleles = AlterationUtils.getAlleleAlterations(AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd()));
-                
+
                 indicatorQuery.setVUS(isVUS(
                     EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.VUS), null)
                 ));
 
-                if(alleles == null || alleles.size() == 0) {
+                if (alleles == null || alleles.size() == 0) {
                     indicatorQuery.setAlleleExist(false);
-                }else {
-                    indicatorQuery.setAlleleExist(true);  
+                } else {
+                    indicatorQuery.setAlleleExist(true);
                 }
-                if(indicatorQuery.getVariantExist() && !indicatorQuery.getVUS()) {
+                if (indicatorQuery.getVariantExist() && !indicatorQuery.getVUS()) {
                     Oncogenicity oncogenicity = MainUtils.findHighestOncogenic(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Arrays.asList(EvidenceType.ONCOGENIC), null)
                     );
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
                     highestLevels = findHighestLevel(
-                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), 
+                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(),
                             new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()),
-                            (body.getLevels() != null ? new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<>(LevelUtils.getPublicLevels()))
+                            (body.getLevels() != null ? new ArrayList<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<LevelOfEvidence>(LevelUtils.getPublicLevels()))
                         )
                     );
-                }else if(indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
+                } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
                     Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenic(
                         EvidenceUtils.getEvidence(new ArrayList<>(alleles), Arrays.asList(EvidenceType.ONCOGENIC), null)));
                     
@@ -86,14 +85,14 @@ public class IndicatorController {
 
                     highestLevels = findHighestLevel(
                         EvidenceUtils.getEvidence(
-                            new ArrayList<>(alleles), 
-                            new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()), 
-                            (body.getLevels() != null ? new ArrayList<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<>(LevelUtils.getPublicLevels()))
+                            new ArrayList<>(alleles),
+                            new ArrayList<>(MainUtils.getTreatmentEvidenceTypes()),
+                            (body.getLevels() != null ? new ArrayList<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : new ArrayList<LevelOfEvidence>(LevelUtils.getPublicLevels()))
                         )
                     );
-                    
+
                     LevelOfEvidence sensitive = highestLevels.get("sensitive");
-                    if(sensitive != null) 
+                    if (sensitive != null)
                         highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, true));
                     highestLevels.put("resistant", null);
                 }
@@ -106,8 +105,8 @@ public class IndicatorController {
     }
 
     private Boolean isVUS(List<Evidence> evidenceList) {
-        for(Evidence evidence : evidenceList) {
-            if(evidence.getEvidenceType().equals(EvidenceType.VUS)) {
+        for (Evidence evidence : evidenceList) {
+            if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
                 return true;
             }
         }
