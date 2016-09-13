@@ -238,16 +238,25 @@ public final class AlterationUtils {
         return oncogenic;
     }
 
-    public static List<Alteration> getAllAlterations(Gene gene) {
+    public static Set<Alteration> getAllAlterations(Gene gene) {
         if (CacheUtils.isEnabled()) {
             if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
                 CacheUtils.setAlterations(gene.getEntrezGeneId(),
                     new HashSet<>(alterationBo.findAlterationsByGene(Collections.singleton(gene))));
             }
-            return new ArrayList<>(CacheUtils.getAlterations(gene.getEntrezGeneId()));
+            return CacheUtils.getAlterations(gene.getEntrezGeneId());
         } else {
-            return alterationBo.findAlterationsByGene(Collections.singleton(gene));
+            return new HashSet<>(alterationBo.findAlterationsByGene(Collections.singleton(gene)));
         }
+    }
+
+    public static Set<Alteration> getAllAlterations() {
+        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Alteration> alterations = new HashSet<>();
+        for (Gene gene : genes) {
+            alterations.addAll(getAllAlterations(gene));
+        }
+        return alterations;
     }
 
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
@@ -267,7 +276,10 @@ public final class AlterationUtils {
         Set<Alteration> VUS = new HashSet<>();
         Set<Gene> allGenes = CacheUtils.getAllGenes();
         for (Gene gene : allGenes) {
-            VUS.addAll(CacheUtils.getVUS(gene.getEntrezGeneId()));
+            Set<Alteration> alts = CacheUtils.getVUS(gene.getEntrezGeneId());
+            if (alts != null) {
+                VUS.addAll(alts);
+            }
         }
 
         for (Alteration alteration : alterations) {
@@ -283,6 +295,10 @@ public final class AlterationUtils {
         Set<Alteration> result = new HashSet<>();
         Set<Alteration> VUS = CacheUtils.getVUS(gene.getEntrezGeneId());
 
+        if (VUS == null) {
+            VUS = new HashSet<>();
+        }
+        
         for (Alteration alteration : alterations) {
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
@@ -303,8 +319,8 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, List<Alteration> fullAlterations) {
-        List<Alteration> alterations = new ArrayList<>();
+    public static Set<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
+        Set<Alteration> alterations = new HashSet<>();
         VariantConsequence variantConsequence = null;
 
         if (gene != null && alteration != null) {
@@ -322,7 +338,7 @@ public final class AlterationUtils {
 
                     AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                    List<Alteration> alts = alterationBo.findRelevantAlterations(alt, fullAlterations);
+                    List<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
                     if (!alts.isEmpty()) {
                         alterations.addAll(alts);
                     }
@@ -337,7 +353,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                List<Alteration> alts = alterationBo.findRelevantAlterations(alt, fullAlterations);
+                List<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -362,11 +378,11 @@ public final class AlterationUtils {
         return filterAllelesBasedOnLocation(new HashSet<>(alterations), alteration.getProteinStart());
     }
 
-    public static List<Alteration> getRelevantAlterations(
+    public static Set<Alteration> getRelevantAlterations(
         Gene gene, String alteration, String consequence,
         Integer proteinStart, Integer proteinEnd) {
         if (gene == null) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
         String id = gene.getHugoSymbol() + alteration + (consequence == null ? "" : consequence);
 

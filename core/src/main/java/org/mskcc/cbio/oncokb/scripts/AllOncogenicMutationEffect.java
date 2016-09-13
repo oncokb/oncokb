@@ -37,7 +37,7 @@ public class AllOncogenicMutationEffect {
                 evidenceTypes.add(EvidenceType.MUTATION_EFFECT);
                 evidenceTypes.add(EvidenceType.ONCOGENIC);
 
-                List<Evidence> relevantEvidences = EvidenceUtils.getEvidence(relevantAlts, new ArrayList<>(evidenceTypes), null);
+                Set<Evidence> relevantEvidences = EvidenceUtils.getEvidence(new HashSet<>(relevantAlts), evidenceTypes, null);
 
 //                System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + getMutationEffect(relevantEvidences) + "\t" + getOncogenic(relevantEvidences));
                 

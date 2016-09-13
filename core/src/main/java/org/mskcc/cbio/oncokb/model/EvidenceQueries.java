@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 
@@ -12,7 +13,7 @@ public class EvidenceQueries implements java.io.Serializable {
     private List<Query> queries; //Optional, This id is passed from request. The identifier used to distinguish the query
     private String geneStatus;
     private String evidenceTypes;
-    private List<LevelOfEvidence> levels;
+    private Set<LevelOfEvidence> levels;
     private String source;
 
     public EvidenceQueries() {
@@ -42,11 +43,11 @@ public class EvidenceQueries implements java.io.Serializable {
         this.evidenceTypes = evidenceTypes;
     }
 
-    public List<LevelOfEvidence> getLevels() {
+    public Set<LevelOfEvidence> getLevels() {
         return levels;
     }
 
-    public void setLevels(List<LevelOfEvidence> levels) {
+    public void setLevels(Set<LevelOfEvidence> levels) {
         this.levels = levels;
     }
 

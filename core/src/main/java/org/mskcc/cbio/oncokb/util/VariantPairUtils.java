@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.OncoTreeType;
 import org.mskcc.cbio.oncokb.model.VariantQuery;
@@ -127,8 +128,9 @@ public class VariantPairUtils {
                 VariantQuery query = pairs.get(i);
                 pairs.get(i).setQueryAlteration(alterations[i]);
                 pairs.get(i).setAlterations(
-                        AlterationUtils.getRelevantAlterations(query.getGene(), query.getQueryAlteration(),
-                                query.getConsequence(), query.getProteinStart(), query.getProteinEnd())
+                    new ArrayList<>(AlterationUtils.getRelevantAlterations(query.getGene(), query.getQueryAlteration(),
+                        query.getConsequence(), query.getProteinStart(), query.getProteinEnd())
+                        )
                 );
             }
         }
