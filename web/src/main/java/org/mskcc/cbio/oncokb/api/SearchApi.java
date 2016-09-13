@@ -273,30 +273,32 @@ public class SearchApi {
         ApiTreatments instance = new ApiTreatments();
         RespMeta meta = new RespMeta();
         HttpStatus status = HttpStatus.OK;
+        String errorMessage = null;
         Gene gene = GeneUtils.getGene(queryGene);
 
-        if (gene == null) {
+        if (gene == null && queryLevel == null) {
             status = HttpStatus.BAD_REQUEST;
+            errorMessage = "Getting all treatments is not supported at this moment.";
         } else {
-            if (queryLevel != null) {
+            if (queryLevel == null) {
+                instance.setData(TreatmentUtils.getTreatmentsByGene(gene));
+            }else {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(queryLevel);
                 if (level == null) {
                     status = HttpStatus.BAD_REQUEST;
-                } else {
-                    List<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
-                    List<Evidence> evidences = EvidenceUtils.getEvidence(alterations,
-                        new ArrayList<EvidenceType>(MainUtils.getTreatmentEvidenceTypes()),
-                        Collections.singletonList(level));
-                    Set<Treatment> treatments = new HashSet<>();
-                    
-                    for(Evidence evidence : evidences) {
-                        treatments.addAll(evidence.getTreatments());
-                    }
-                    instance.setData(treatments);
+                    errorMessage = "The level is invalid.";
+                } else if (!LevelUtils.getPublicLevels().contains(level)) {
+                    status = HttpStatus.BAD_REQUEST;
+                    errorMessage = "The level is not supported at this moment.";
+                } else if (gene == null){
+                    instance.setData(TreatmentUtils.getTreatmentsByLevels(Collections.singleton(level)));
+                }else {
+                    instance.setData(TreatmentUtils.getTreatmentsByGeneAndLevels(gene, Collections.singleton(level)));
                 }
             }
         }
 
+        meta.setError_message(errorMessage);
         meta.setCode(status.value());
         instance.setRespMeta(meta);
         return new ResponseEntity<ApiTreatments>(instance, status);
