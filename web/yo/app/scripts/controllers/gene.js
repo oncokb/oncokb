@@ -3339,24 +3339,22 @@ angular.module('oncokbApp')
                 $scope.model.undo();
                 regenerateGeneStatus();
             };
+            function fetchPMIDs(data){
+                var PMIDs = [];
+                _.each(data, function(item){ 
+                    if(item.type === 'pmid'){
+                        PMIDs.push(item.id); 
+                    }    
+                });
+                PMIDs.sort();
+                return PMIDs;
+            }
             $scope.getAllPMIDs = function(){
                 var geneData = JSON.stringify(importer.getGeneData(this.gene, true));
-                var annotationResults = FindRegex.result(geneData), annotationPMIDs = [];
-                _.each(annotationResults, function(item){ 
-                    if(item.type === 'pmid'){
-                        annotationPMIDs.push(item.id); 
-                    }    
-                });
-                annotationPMIDs.sort();
+                var annotationPMIDs = fetchPMIDs(FindRegex.result(geneData));
                 
                 var vusData = JSON.stringify(importer.getVUSFullData(this.vus));
-                var vusResults = FindRegex.result(vusData), vusPMIDs = [];
-                _.each(vusResults, function(item){ 
-                    if(item.type === 'pmid'){
-                        vusPMIDs.push(item.id); 
-                    }    
-                });
-                vusPMIDs.sort();
+                var vusPMIDs = fetchPMIDs(FindRegex.result(vusData));
                 
                 var messageContent = "<h4>Annotation ("+annotationPMIDs.length+")</h4>" + annotationPMIDs.join(', ');
                 if(vusPMIDs.length > 0){

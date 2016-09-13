@@ -212,14 +212,14 @@ angular.module('oncokbApp')
                         _time.by.email = time.by.email.getText();
                         datum.time.push(_time);
                     });
-                    datum.name_comments = [];
-                    vusItem.name_comments.asArray().forEach(function (name_comment) {
-                        var name_comment_item = {};
-                        name_comment_item.value = name_comment.content.getText();
-                        name_comment_item.by = {};
-                        name_comment_item.by.userName = name_comment.userName.getText();
-                        name_comment_item.by.email = name_comment.email.getText();
-                        datum.name_comments.push(name_comment_item);
+                    datum.nameComments = [];
+                    vusItem.name_comments.asArray().forEach(function (nameComment) {
+                        var nameCommentItem = {};
+                        nameCommentItem.value = nameComment.content.getText();
+                        nameCommentItem.by = {};
+                        nameCommentItem.by.userName = nameComment.userName.getText();
+                        nameCommentItem.by.email = nameComment.email.getText();
+                        datum.nameComments.push(nameCommentItem);
                     });
                     vusData.push(datum);
                 });
