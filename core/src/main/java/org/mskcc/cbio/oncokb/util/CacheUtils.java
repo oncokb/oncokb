@@ -290,7 +290,7 @@ public class CacheUtils {
             }
             return mappedEvidences;
         } else {
-            return null;
+            return new HashSet<>();
         }
     }
 
@@ -310,7 +310,7 @@ public class CacheUtils {
         if (VUS.containsKey(entrezGeneId)) {
             return VUS.get(entrezGeneId);
         } else {
-            return null;
+            return new HashSet<>();
         }
     }
 
@@ -385,7 +385,7 @@ public class CacheUtils {
             }
             return mappedAlts;
         } else {
-            return null;
+            return new HashSet<>();
         }
     }
 
@@ -468,7 +468,7 @@ public class CacheUtils {
             Set<Evidence> result = evidences.get(gene.getEntrezGeneId());
             return result;
         } else {
-            return null;
+            return new HashSet<>();
         }
     }
 
