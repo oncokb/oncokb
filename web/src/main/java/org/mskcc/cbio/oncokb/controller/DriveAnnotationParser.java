@@ -216,29 +216,16 @@ public class DriveAnnotationParser {
 
             Set<Alteration> alterations = new HashSet<Alteration>();
 
-            String oncogenic = null;
+            String oncogenic = getOncogenicity(mutationObj);
             String oncogenicSummaryStr = null;
+            String effect = getMutationEffect(mutationObj);
 
-            if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
-                String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
-
-                switch (oncogenicStr) {
-                    case "yes":
-                        oncogenic = "1";
-                        break;
-                    case "likely":
-                        oncogenic = "2";
-                        break;
-                    case "likely neutral":
-                        oncogenic = "0";
-                        break;
-                    case "unknown":
-                        oncogenic = "-1";
-                        break;
-                    default:
-                        break;
-                }
+            // If both mutation effect and oncogenicity both unknown, ignore variant.
+            if (oncogenic != null && oncogenic.equals("-1") 
+                && effect != null && effect.toLowerCase().equals("unknown")) {
+                return;
             }
+
             if (mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
                 oncogenicSummaryStr = mutationObj.getString("shortSummary");
             }
@@ -280,12 +267,7 @@ public class DriveAnnotationParser {
             }
 
             // mutation effect
-            String effect = mutationObj.has("effect") ?
-                (mutationObj.getJSONObject("effect").has("value") ?
-                    (mutationObj.getJSONObject("effect").getString("value").trim().isEmpty() ? null :
-                        mutationObj.getJSONObject("effect").getString("value").trim())
-                    : null)
-                : null;
+
             String effectDesc = mutationObj.has("description") ?
                 (mutationObj.getString("description").trim().isEmpty() ? null :
                     mutationObj.getString("description").trim())
@@ -332,6 +314,40 @@ public class DriveAnnotationParser {
         } else {
             System.out.println("##  Mutation does not have name skip...");
         }
+    }
+
+    private static String getMutationEffect(JSONObject mutationObj) {
+        return mutationObj.has("effect") ?
+            (mutationObj.getJSONObject("effect").has("value") ?
+                (mutationObj.getJSONObject("effect").getString("value").trim().isEmpty() ? null :
+                    mutationObj.getJSONObject("effect").getString("value").trim())
+                : null)
+            : null;
+    }
+
+    private static String getOncogenicity(JSONObject mutationObj) {
+        String oncogenic = null;
+        if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
+            String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
+
+            switch (oncogenicStr) {
+                case "yes":
+                    oncogenic = "1";
+                    break;
+                case "likely":
+                    oncogenic = "2";
+                    break;
+                case "likely neutral":
+                    oncogenic = "0";
+                    break;
+                case "unknown":
+                    oncogenic = "-1";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return oncogenic;
     }
 
     private static void setOncogenic(Gene gene, Alteration alteration, String oncogenic, String oncogenicSummary) {
