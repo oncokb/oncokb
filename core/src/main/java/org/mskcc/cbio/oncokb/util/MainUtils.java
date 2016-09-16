@@ -32,8 +32,6 @@ public class MainUtils {
                 requestQuery.setHugoSymbol(symbol);
                 queries.add(requestQuery);
             }
-        } else {
-            return null;
         }
 
         if (evidenceType != null) {
@@ -181,10 +179,10 @@ public class MainUtils {
         types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
         types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
         types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-        
+
         return types;
     }
-    
+
     public static Set<EvidenceType> getSensitiveTreatmentEvidenceTypes() {
         Set<EvidenceType> types = new HashSet<>();
         types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
@@ -192,7 +190,7 @@ public class MainUtils {
         return types;
     }
 
-    public static Oncogenicity findHighestOncogenic(List<Evidence> evidences) {
+    public static Oncogenicity findHighestOncogenicByEvidences(Set<Evidence> evidences) {
         List<String> levels = Arrays.asList("-1", "0", "2", "1");
 
         int index = -1;
@@ -217,34 +215,34 @@ public class MainUtils {
         eligibleList.add(Oncogenicity.getByLevel("1"));
         eligibleList.add(Oncogenicity.getByLevel("2"));
 
-        if(oncogenicity == null) {
+        if (oncogenicity == null) {
             return null;
         }
 
-        if(eligibleList.contains(oncogenicity)) {
+        if (eligibleList.contains(oncogenicity)) {
             return Oncogenicity.getByLevel("2");
         }
 
         return null;
     }
-    
+
     public static String getAlleleConflictsMutationEffect(Set<String> mutationEffects) {
         Set<String> clean = new HashSet<>();
-        
-        for(String mutationEffect : mutationEffects) {
-            if(mutationEffect != null) {
+
+        for (String mutationEffect : mutationEffects) {
+            if (mutationEffect != null) {
                 mutationEffect = mutationEffect.replaceAll("(?i)likely", "");
                 mutationEffect = mutationEffect.replaceAll("\\s", "");
                 clean.add(mutationEffect);
             }
         }
-        
-        if(clean.size() > 1) {
+
+        if (clean.size() > 1) {
             return "Unknown";
-        }else if(clean.size() == 1){
+        } else if (clean.size() == 1) {
             return "Likely " + clean.iterator().next();
-        }else {
-            return "";   
+        } else {
+            return "";
         }
     }
 
@@ -256,7 +254,7 @@ public class MainUtils {
     public static Long getTimestampDiff(Long old) {
         return new Date().getTime() - old;
     }
-    
+
     private static Boolean hasInfoForEffect(String effect) {
         if (effect == null) {
             return false;

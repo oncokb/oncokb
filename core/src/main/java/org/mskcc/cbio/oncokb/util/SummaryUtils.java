@@ -18,7 +18,7 @@ public class SummaryUtils {
     public static String variantSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
-        Gene gene = GeneUtils.getGene(Integer.parseInt(geneId), null);
+        Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
         String queriedAltName = AlterationUtils.getVariantName(gene.getHugoSymbol(), queryAlteration);
         if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
             return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
@@ -236,7 +236,7 @@ public class SummaryUtils {
     public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
-        Gene gene = GeneUtils.getGene(Integer.parseInt(geneId), null);
+        Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
         String queriedAltName = AlterationUtils.getVariantName(gene.getHugoSymbol(), queryAlteration);
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
@@ -402,7 +402,7 @@ public class SummaryUtils {
         }
 
         // Detemin whether allele alterations have treatments
-        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<>(alleles), new ArrayList<>(MainUtils.getSensitiveTreatmentEvidenceTypes()), null);
+        Set<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(alleles, MainUtils.getSensitiveTreatmentEvidenceTypes(), null);
         LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
         Set<Treatment> treatments = new HashSet<>();
         Set<Alteration> highestLevelTreatmentRelatedAlts = new HashSet<>();
@@ -482,9 +482,9 @@ public class SummaryUtils {
 
         // Get oncogenicity info in alleles
         for (Alteration alt : alleles) {
-            List<EvidenceType> evidenceTypes = new ArrayList<>();
+            Set<EvidenceType> evidenceTypes = new HashSet<>();
             evidenceTypes.add(EvidenceType.ONCOGENIC);
-            List<Evidence> allelesOnco = EvidenceUtils.getEvidence(Collections.singletonList(alt), evidenceTypes, null);
+            Set<Evidence> allelesOnco = EvidenceUtils.getEvidence(Collections.singleton(alt), evidenceTypes, null);
 
             for (Evidence evidence : allelesOnco) {
                 String oncoStr = evidence.getKnownEffect();

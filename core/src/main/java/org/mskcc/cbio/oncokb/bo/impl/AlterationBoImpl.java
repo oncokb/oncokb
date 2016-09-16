@@ -99,7 +99,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 effect = effect.toLowerCase();
                 if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
                     inactivating = true;
-                } else if (effect.contains("activating") || effect.contains("gain-of-function")) {
+                } else if (effect.contains("activating") || effect.contains("gain-of-function")
+                    || effect.contains("switch-of-function")) {
                     activating = true;
                 }
             }

@@ -23,9 +23,9 @@ import java.util.*;
 public class CacheUtils {
     private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
     private static Map<Integer, Map<String, String>> variantCustomizedSummary = new HashMap<>();
-    private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
+    private static Map<Integer, Map<String, Set<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
-    // The key would be entrezGeneId, variant name and evidence ID
+    // The key would be entrezGeneId, variant name and evidence ID. -1 will be used to store gene irrelevant evidences.
     private static Map<Integer, Map<String, Set<Integer>>> relevantEvidences = new HashMap<>();
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>();
 
@@ -150,6 +150,8 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 relevantEvidences.remove(entrezGeneId);
+                //Remove gene irrelevant evidences 
+                relevantEvidences.remove(-1);
             } else if (operation.get("cmd") == "reset") {
                 relevantEvidences.clear();
             }
@@ -268,12 +270,19 @@ public class CacheUtils {
         }
     }
 
-    public static List<Evidence> getRelevantEvidences(Integer entrezGeneId, String variant) {
+    public static Set<Evidence> getRelevantEvidences(Integer entrezGeneId, String variant) {
         if (relevantEvidences.containsKey(entrezGeneId) && relevantEvidences.get(entrezGeneId).containsKey(variant)) {
             Set<Integer> mappedEntrez = relevantEvidences.get(entrezGeneId).get(variant);
-            Set<Evidence> geneEvidences = evidences.get(entrezGeneId);
-            List<Evidence> mappedEvidences = new ArrayList<>();
+            Set<Evidence> geneEvidences = new HashSet<>();
+            Set<Evidence> mappedEvidences = new HashSet<>();
 
+            if(entrezGeneId == -1) {
+                for(Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()){
+                    geneEvidences.addAll(map.getValue());
+                }
+            }else {
+                geneEvidences = evidences.get(entrezGeneId);
+            }
             for (Evidence evidence : geneEvidences) {
                 if (mappedEntrez.contains(evidence.getEvidenceId())) {
                     mappedEvidences.add(evidence);
@@ -313,7 +322,7 @@ public class CacheUtils {
         return numbers.get(type);
     }
 
-    public static void setRelevantEvidences(Integer entrezGeneId, String variant, List<Evidence> evidences) {
+    public static void setRelevantEvidences(Integer entrezGeneId, String variant, Set<Evidence> evidences) {
         if (!relevantEvidences.containsKey(entrezGeneId)) {
             relevantEvidences.put(entrezGeneId, new HashMap<String, Set<Integer>>());
         }
@@ -364,10 +373,10 @@ public class CacheUtils {
         variantCustomizedSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
+    public static Set<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
         if (relevantAlterations.containsKey(entrezGeneId) && relevantAlterations.get(entrezGeneId).containsKey(variant)) {
-            List<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
-            List<Alteration> mappedAlts = new ArrayList<>();
+            Set<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
+            Set<Alteration> mappedAlts = new HashSet<>();
             Set<Alteration> geneAlts = alterations.get(entrezGeneId);
             for (Alteration alteration : geneAlts) {
                 if (mappedAltsIds.contains(alteration.getAlterationId())) {
@@ -385,11 +394,11 @@ public class CacheUtils {
             relevantAlterations.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setRelevantAlterations(Integer entrezGeneId, String variant, List<Alteration> alts) {
+    public static void setRelevantAlterations(Integer entrezGeneId, String variant, Set<Alteration> alts) {
         if (!relevantAlterations.containsKey(entrezGeneId)) {
-            relevantAlterations.put(entrezGeneId, new HashMap<String, List<Integer>>());
+            relevantAlterations.put(entrezGeneId, new HashMap<String, Set<Integer>>());
         }
-        List<Integer> mappedAltsIds = new ArrayList<>();
+        Set<Integer> mappedAltsIds = new HashSet<>();
         for (Alteration alteration : alts) {
             mappedAltsIds.add(alteration.getAlterationId());
         }
