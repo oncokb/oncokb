@@ -3339,16 +3339,28 @@ angular.module('oncokbApp')
                 $scope.model.undo();
                 regenerateGeneStatus();
             };
-            $scope.getAllPMIDs = function(){
-                var geneTextInfo = JSON.stringify(importer.getGeneData(this.gene, true));
-                var results = FindRegex.result(geneTextInfo), PMIDs = [];
-                _.each(results, function(item){ 
+            function fetchPMIDs(data){
+                var PMIDs = [];
+                _.each(data, function(item){ 
                     if(item.type === 'pmid'){
                         PMIDs.push(item.id); 
                     }    
                 });
                 PMIDs.sort();
-                dialogs.notify('All annotated PMIDs (' + PMIDs.length + ')', PMIDs.join(', '));
+                return PMIDs;
+            }
+            $scope.getAllPMIDs = function(){
+                var geneData = JSON.stringify(importer.getGeneData(this.gene, true));
+                var annotationPMIDs = fetchPMIDs(FindRegex.result(geneData));
+                
+                var vusData = JSON.stringify(importer.getVUSFullData(this.vus));
+                var vusPMIDs = fetchPMIDs(FindRegex.result(vusData));
+                
+                var messageContent = "<h4>Annotation ("+annotationPMIDs.length+")</h4>" + annotationPMIDs.join(', ');
+                if(vusPMIDs.length > 0){
+                    messageContent += "<hr><h4>VUS ("+vusPMIDs.length+")</h4>" + vusPMIDs.join(', ');
+                }
+                dialogs.notify('All PMIDs', messageContent, {size: 'lg'});
             }
             
             $scope.curatorsName = function () {
