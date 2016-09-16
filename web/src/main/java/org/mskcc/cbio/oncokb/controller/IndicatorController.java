@@ -75,7 +75,9 @@ public class IndicatorController {
                     highestLevels = findHighestLevel(
                         EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(),
                             MainUtils.getTreatmentEvidenceTypes(),
-                            (body.getLevels() != null ? new HashSet<>(CollectionUtils.intersection(body.getLevels(), LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels())
+                            (body.getLevels() != null ?
+                                new HashSet<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(),
+                                    LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels())
                         )
                     );
                 } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
@@ -88,7 +90,7 @@ public class IndicatorController {
                         EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
                             (
                                 body.getLevels() != null ?
-                                    new HashSet<>(CollectionUtils.intersection(body.getLevels(),
+                                    new HashSet<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(),
                                         LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels())
                         )
                     );
