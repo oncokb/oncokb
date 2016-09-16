@@ -44,7 +44,7 @@ public class validation {
                 allVariants = evidenceItem.getAlterations();
                 allAlts.addAll(allVariants);
                 for (Alteration alterationItem : allVariants) {
-                    relevantAlterationsMapping.put(alterationItem, (ArrayList<Alteration>) AlterationUtils.getRelevantAlterations(gene, alterationItem.getAlteration(), null, null, null));
+                    relevantAlterationsMapping.put(alterationItem, new ArrayList<Alteration>(AlterationUtils.getRelevantAlterations(gene, alterationItem.getAlteration(), null, null, null)) );
                     if (evidenceItem.getEvidenceType().toString().equals("ONCOGENIC")) {
                         oncogenicityMapping.put(alterationItem, evidenceItem.getKnownEffect());
                     }
