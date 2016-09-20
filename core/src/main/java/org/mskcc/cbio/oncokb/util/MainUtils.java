@@ -21,13 +21,13 @@ public class MainUtils {
         String[] genes = {};
 
         if (entrezGeneId != null) {
-            for (String id : entrezGeneId.split(",")) {
+            for (String id : entrezGeneId.trim().split("\\s*,\\s*")) {
                 Query requestQuery = new Query();
                 requestQuery.setEntrezGeneId(Integer.parseInt(id));
                 queries.add(requestQuery);
             }
         } else if (hugoSymbol != null) {
-            for (String symbol : hugoSymbol.split(",")) {
+            for (String symbol : hugoSymbol.trim().split("\\s*,\\s*")) {
                 Query requestQuery = new Query();
                 requestQuery.setHugoSymbol(symbol);
                 queries.add(requestQuery);
@@ -35,21 +35,20 @@ public class MainUtils {
         }
 
         if (evidenceType != null) {
-            for (String type : evidenceType.split(",")) {
+            for (String type : evidenceType.trim().split("\\s*,\\s*")) {
                 EvidenceType et = EvidenceType.valueOf(type);
                 evidenceTypes.add(et);
             }
         }
 
         if (alteration != null) {
-            String[] alts = alteration.split(",");
+            String[] alts = alteration.trim().split("\\s*,\\s*");;
             if (queries.size() == alts.length) {
-                String[] consequences = consequence == null ? new String[0] : consequence.split(",");
-                String[] proteinStarts = proteinStart == null ? new String[0] : proteinStart.split(",");
-                String[] proteinEnds = proteinEnd == null ? new String[0] : proteinEnd.split(",");
+                String[] consequences = consequence == null ? new String[0] : consequence.trim().split("\\s*,\\s*");;
+                String[] proteinStarts = proteinStart == null ? new String[0] : proteinStart.trim().split("\\s*,\\s*");;
+                String[] proteinEnds = proteinEnd == null ? new String[0] : proteinEnd.trim().split("\\s*,\\s*");;
 
                 for (int i = 0; i < queries.size(); i++) {
-                    queries.get(i).setTumorType(tumorType);
                     queries.get(i).setAlteration(alts[i]);
                     queries.get(i).setConsequence(consequences.length == alts.length ? consequences[i] : null);
                     queries.get(i).setProteinStart(proteinStarts.length == alts.length ? Integer.valueOf(proteinStarts[i]) : null);
@@ -59,9 +58,22 @@ public class MainUtils {
                 return null;
             }
         }
+        
+        String[] tumorTypes = tumorType == null ? new String[0] : tumorType.trim().split("\\s*,\\s*");
+        if(tumorTypes.length > 0) {
+           if(tumorTypes.length == 1) {
+               for (int i = 0; i < queries.size(); i++) {
+                   queries.get(i).setTumorType(tumorTypes[0]);
+               }
+           }else if(queries.size() == tumorTypes.length) {
+               for (int i = 0; i < queries.size(); i++) {
+                   queries.get(i).setTumorType(tumorTypes[i]);
+               }
+           }
+        }
 
         if (levels != null) {
-            String[] levelStrs = levels.split(",");
+            String[] levelStrs = levels.trim().split("\\s*,\\s*");
             for (int i = 0; i < levelStrs.length; i++) {
                 LevelOfEvidence level = LevelOfEvidence.getByName(levelStrs[i]);
                 if (level != null) {

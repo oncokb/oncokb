@@ -70,6 +70,7 @@ public class EvidenceUtils {
             evidenceQueryRes.setQuery(query);
             evidenceQueryRes.setAlterations(new ArrayList<>(relevantAlterations));
             evidenceQueryRes.setOncoTreeTypes(relevantTumorTypes);
+            evidenceQueryRes.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
             List<EvidenceQueryRes> evidenceQueryResList = new ArrayList<>();
             evidenceQueryResList.add(evidenceQueryRes);
 
@@ -198,26 +199,30 @@ public class EvidenceUtils {
                     genes.put(entrezGeneId, query.getGene());
                 }
 
-                for (Alteration alt : query.getAlterations()) {
-                    int altId = alt.getAlterationId();
+                if (query.getAlterations() != null) {
+                    for (Alteration alt : query.getAlterations()) {
+                        int altId = alt.getAlterationId();
 
 //                    if (geneStatus == null || geneStatus == "") {
-                    geneStatus = "all";
+                        geneStatus = "all";
 //                    }
-                    geneStatus = geneStatus.toLowerCase();
-                    if (geneStatus.equals("all") || query.getGene().getStatus().toLowerCase().equals(geneStatus)) {
-                        if (!alterations.containsKey(altId)) {
-                            alterations.put(altId, alt);
-                        }
-
-                        for (OncoTreeType tumorType : query.getOncoTreeTypes()) {
-                            if (!tumorTypes.contains(tumorType)) {
-                                tumorTypes.add(tumorType);
+                        geneStatus = geneStatus.toLowerCase();
+                        if (geneStatus.equals("all") || query.getGene().getStatus().toLowerCase().equals(geneStatus)) {
+                            if (!alterations.containsKey(altId)) {
+                                alterations.put(altId, alt);
+                            }
+                        } else {
+                            if (!alterationsME.containsKey(altId)) {
+                                alterationsME.put(altId, alt);
                             }
                         }
-                    } else {
-                        if (!alterationsME.containsKey(altId)) {
-                            alterationsME.put(altId, alt);
+                    }
+                }
+
+                if (query.getOncoTreeTypes() != null) {
+                    for (OncoTreeType tumorType : query.getOncoTreeTypes()) {
+                        if (!tumorTypes.contains(tumorType)) {
+                            tumorTypes.add(tumorType);
                         }
                     }
                 }
@@ -376,6 +381,25 @@ public class EvidenceUtils {
                                             filtered.add(tempEvidence);
                                         }
                                     }
+//                                    Disable for now, unless cbioportal integration issue fixed
+//                                    if (tempEvidence.getLevelOfEvidence() != null) {
+//                                        if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
+//                                            tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+//                                            if (evidenceQuery.getLevelOfEvidences() == null
+//                                                || evidenceQuery.getLevelOfEvidences().size() == 0
+//                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_2B)) {
+//                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+//                                                filtered.add(tempEvidence);
+//                                            }
+//                                        } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
+//                                            if (evidenceQuery.getLevelOfEvidences() == null
+//                                                || evidenceQuery.getLevelOfEvidences().size() == 0
+//                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_3B)) {
+//                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+//                                                filtered.add(tempEvidence);
+//                                            }
+//                                        }
+//                                    }
                                 }
                             }
                         }

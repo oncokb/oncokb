@@ -111,6 +111,8 @@ public class EvidenceController {
                 query.setGene(getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
                 if (query.getGene() != null) {
+                    query.setOncoTreeTypes(TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
+                    
                     if (requestQuery.getAlteration() != null) {
                         Set<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(query.getGene(), requestQuery.getAlteration(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         query.setAlterations(relevantAlts == null ? null : new ArrayList<>(relevantAlts));
@@ -118,12 +120,15 @@ public class EvidenceController {
                         Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         Set<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                         query.setAlleles(new ArrayList<>(allelesAlts));
+                    } else if(query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
+                        // if no alteration assigned, but has tumor type
+                        query.setAlterations(new ArrayList<Alteration>(AlterationUtils.getAllAlterations(query.getGene())));
                     }
-
-                    query.setOncoTreeTypes(TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
-
-                    evidenceQueries.add(query);
                 }
+                if(levelOfEvidences != null) {
+                    query.setLevelOfEvidences(new ArrayList<LevelOfEvidence>(levelOfEvidences));
+                }
+                evidenceQueries.add(query);
             }
         }
 
