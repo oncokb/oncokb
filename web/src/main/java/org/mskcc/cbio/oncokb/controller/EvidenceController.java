@@ -212,14 +212,17 @@ public class EvidenceController {
 
                 // Get treatment evidences
                 Set<Evidence> alleleEvidences = EvidenceUtils.getEvidence(alleles, MainUtils.getSensitiveTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+                Set<Evidence> alleleEvidencesCopy = new HashSet<>();
                 if (alleleEvidences != null) {
                     LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(alleleEvidences));
                     if (highestLevelFromEvidence != null && LevelUtils.getPublicLevels().contains(highestLevelFromEvidence)) {
                         alleleEvidences = EvidenceUtils.getEvidence(alleles, MainUtils.getSensitiveTreatmentEvidenceTypes(), Collections.singleton(highestLevelFromEvidence));
                         for (Evidence evidence : alleleEvidences) {
-                            evidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0));
+                            Evidence tmpEvidence = new Evidence(evidence);
+                            tmpEvidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0));
+                            alleleEvidencesCopy.add(tmpEvidence);
                         }
-                        query.getEvidences().addAll(alleleEvidences);
+                        query.getEvidences().addAll(alleleEvidencesCopy);
                     }
                 }
             }
