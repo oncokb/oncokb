@@ -15,6 +15,7 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private List<Alteration> alleles;
     private List<OncoTreeType> tumorTypes;
     private List<Evidence> evidences;
+    private List<LevelOfEvidence> levelOfEvidences;
 
     public EvidenceQueryRes() {
     }
@@ -73,6 +74,14 @@ public class EvidenceQueryRes implements java.io.Serializable {
 
     public void setEvidences(List<Evidence> evidences) {
         this.evidences = evidences;
+    }
+
+    public List<LevelOfEvidence> getLevelOfEvidences() {
+        return levelOfEvidences;
+    }
+
+    public void setLevelOfEvidences(List<LevelOfEvidence> levelOfEvidences) {
+        this.levelOfEvidences = levelOfEvidences;
     }
 }
 
