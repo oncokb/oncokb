@@ -1,7 +1,10 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -17,7 +20,13 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
     private Boolean VUS;
-
+    private String geneSummary;
+    private String variantSummary;
+    private String tumorTypeSummary;
+    private Set<IndicatorQueryTreatment> treatments = new HashSet<>();
+    private String dataVersion;
+    private Date lastUpdate;
+    
     public IndicatorQueryResp() {
     }
 
@@ -83,6 +92,54 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setAlleleExist(Boolean alleleExist) {
         this.alleleExist = alleleExist;
+    }
+
+    public String getGeneSummary() {
+        return geneSummary;
+    }
+
+    public void setGeneSummary(String geneSummary) {
+        this.geneSummary = geneSummary;
+    }
+
+    public String getVariantSummary() {
+        return variantSummary;
+    }
+
+    public void setVariantSummary(String variantSummary) {
+        this.variantSummary = variantSummary;
+    }
+
+    public String getTumorTypeSummary() {
+        return tumorTypeSummary;
+    }
+
+    public void setTumorTypeSummary(String tumorTypeSummary) {
+        this.tumorTypeSummary = tumorTypeSummary;
+    }
+
+    public Set<IndicatorQueryTreatment> getTreatments() {
+        return treatments;
+    }
+
+    public void setTreatments(Set<IndicatorQueryTreatment> treatments) {
+        this.treatments = treatments;
+    }
+
+    public String getDataVersion() {
+        return dataVersion;
+    }
+
+    public void setDataVersion(String dataVersion) {
+        this.dataVersion = dataVersion;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 }
 

@@ -17,7 +17,7 @@ public class Drug implements java.io.Serializable {
      private Set<String> synonyms = new HashSet<String>(0);
      private Boolean fdaApproved;
      private Set<String> atcCodes;
-     private String description;
+//     private String description;
 
     public Drug() {
     }
@@ -79,13 +79,13 @@ public class Drug implements java.io.Serializable {
         this.atcCodes = atcCodes;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+//    public String getDescription() {
+//        return description;
+//    }
+//
+//    public void setDescription(String description) {
+//        this.description = description;
+//    }
 
     
      @Override
