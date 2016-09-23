@@ -93,6 +93,14 @@ public class EvidenceController {
         if (source == null) {
             source = "quest";
         }
+        
+        if (evidenceTypes == null) {
+            evidenceTypes = new HashSet<>(MainUtils.getAllEvidenceTypes());    
+        }
+        
+        if (levelOfEvidences == null) {
+            levelOfEvidences = LevelUtils.getPublicLevels();
+        }
 
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();

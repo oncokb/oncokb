@@ -39,6 +39,8 @@ public class MainUtils {
                 EvidenceType et = EvidenceType.valueOf(type);
                 evidenceTypes.add(et);
             }
+        } else {
+            evidenceTypes = getAllEvidenceTypes();
         }
 
         if (alteration != null) {
@@ -80,6 +82,8 @@ public class MainUtils {
                     levelOfEvidences.add(level);
                 }
             }
+        }else {
+            levelOfEvidences = new ArrayList<>(LevelUtils.getPublicLevels());
         }
 
         requestQueries.put("queries", queries);
@@ -193,6 +197,10 @@ public class MainUtils {
         types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
 
         return types;
+    }
+
+    public static List<EvidenceType> getAllEvidenceTypes() {
+        return Arrays.asList(EvidenceType.values());
     }
 
     public static Set<EvidenceType> getSensitiveTreatmentEvidenceTypes() {
