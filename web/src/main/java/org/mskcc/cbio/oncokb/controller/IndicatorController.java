@@ -44,6 +44,9 @@ public class IndicatorController {
             indicatorQuery.setGeneExist(gene == null ? false : true);
 
             if (gene != null) {
+                // Gene summary
+                indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
+
                 Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
                     gene, query.getAlteration(), query.getConsequence(),
                     query.getProteinStart(), query.getProteinEnd());
@@ -55,8 +58,32 @@ public class IndicatorController {
                     indicatorQuery.setVariantExist(true);
                 }
 
-                Set<Alteration> alleles = AlterationUtils.getAlleleAlterations(AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd()));
+                Alteration alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
 
+                Set<Alteration> alleles = new HashSet<>();
+                List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
+                
+                if (query.getTumorType() != null) {
+                    oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
+                    // Tumor type summary
+                    Set<Evidence> tumorTypeSummary = EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), new HashSet<>(oncoTreeTypes), null);
+                    if (tumorTypeSummary != null && tumorTypeSummary.size() > 0) {
+                        indicatorQuery.setTumorTypeSummary(tumorTypeSummary.iterator().next().getDescription());
+                    }
+                }
+                
+                if (alteration != null) {
+                    alleles = AlterationUtils.getAlleleAlterations(alteration);
+
+                    // Mutation summary
+                    Set<Evidence> mutationSummary = EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.MUTATION_SUMMARY), null);
+                    if (mutationSummary != null && mutationSummary.size() > 0) {
+                        indicatorQuery.setVariantSummary(mutationSummary.iterator().next().getDescription());
+                    }else {
+                        indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(Collections.singleton(gene), new ArrayList<Alteration>(relevantAlterations), query.getAlteration(), new HashSet<OncoTreeType>(oncoTreeTypes), query.getTumorType()));
+                    }
+                }
+                
                 indicatorQuery.setVUS(isVUS(
                     EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Collections.singleton(EvidenceType.VUS), null)
                 ));
@@ -72,28 +99,30 @@ public class IndicatorController {
                     );
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                    highestLevels = findHighestLevel(
-                        EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(),
-                            MainUtils.getTreatmentEvidenceTypes(),
-                            (body.getLevels() != null ?
-                                new HashSet<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(),
-                                    LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels())
-                        )
-                    );
+                    Set<Evidence> treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(),
+                        MainUtils.getTreatmentEvidenceTypes(),
+                        (body.getLevels() != null ?
+                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(),
+                                LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels()));
+
+                    if (treatmentEvidences != null) {
+                        indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
+                        highestLevels = findHighestLevel(treatmentEvidences);
+                    }
                 } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
                     Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
                         EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
 
                     indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
-
-                    highestLevels = findHighestLevel(
-                        EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
-                            (
-                                body.getLevels() != null ?
-                                    new HashSet<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(),
-                                        LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels())
-                        )
+                    Set<Evidence> treatmentEvidences = EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
+                        (
+                            body.getLevels() != null ?
+                                new HashSet<LevelOfEvidence>(CollectionUtils.intersection(body.getLevels(),
+                                    LevelUtils.getPublicLevels())) : LevelUtils.getPublicLevels())
                     );
+                    
+                    indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
+                    highestLevels = findHighestLevel(treatmentEvidences);
 
                     LevelOfEvidence sensitive = highestLevels.get("sensitive");
                     if (sensitive != null)
@@ -106,6 +135,27 @@ public class IndicatorController {
             result.add(indicatorQuery);
         }
         return result;
+    }
+
+    private Set<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
+        Set<IndicatorQueryTreatment> treatments = new HashSet<>();
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                Set<String> pmids = new HashSet<>();
+                for (Article article : evidence.getArticles()) {
+                    pmids.add(article.getPmid());
+                }
+                for (Treatment treatment : evidence.getTreatments()) {
+                    IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
+                    indicatorQueryTreatment.setDrugs(treatment.getDrugs());
+                    indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                    indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
+                    indicatorQueryTreatment.setPmids(pmids);
+                    treatments.add(indicatorQueryTreatment);
+                }
+            }
+        }
+        return treatments;
     }
 
     private Boolean isVUS(Set<Evidence> evidenceList) {

@@ -166,7 +166,7 @@ public class EvidenceUtils {
         }
     }
 
-    private static Set<Evidence> getEvidence(Set<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<OncoTreeType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
+    public static Set<Evidence> getEvidence(Set<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<OncoTreeType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new HashSet<>();
         }
@@ -340,6 +340,26 @@ public class EvidenceUtils {
         return result;
     }
 
+    public static Set<Evidence> getEvidenceByGeneAndEvidenceTypes(Gene gene, Set<EvidenceType> evidenceTypes) {
+        Set<Evidence> result = new HashSet<>();
+        if (gene != null) {
+            if (CacheUtils.isEnabled()) {
+                Set<Evidence> evidences = CacheUtils.getEvidences(gene);
+                for (Evidence evidence : evidences) {
+                    if (evidenceTypes.contains(evidence.getEvidenceType())) {
+                        result.add(evidence);
+                    }
+                }
+            } else {
+                List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene), evidenceTypes);
+                if (evidences != null) {
+                    result = new HashSet<>(evidences);
+                }
+            }
+        }
+        return result;
+    }
+    
     public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
