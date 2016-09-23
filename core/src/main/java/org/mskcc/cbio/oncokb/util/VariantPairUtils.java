@@ -44,21 +44,21 @@ public class VariantPairUtils {
 
         //Number of variants should be exactly matched with each other.
         if(entrezGeneIdStr != null) {
-            genes = entrezGeneIdStr.split(",");
+            genes = entrezGeneIdStr.split("\\s*,\\s*");
         }else if(hugoSymbolStr != null){
-            genes = hugoSymbolStr.split(",");
+            genes = hugoSymbolStr.split("\\s*,\\s*");
         }else {
             return pairs;
         }
 
         if(alterationStr != null) {
-            alterations = alterationStr.split(",");
+            alterations = alterationStr.split("\\s*,\\s*");
             if(alterations.length != genes.length) {
                 return null;
             }
         }
         if(tumorTypeStr != null) {
-            tumorTypes = tumorTypeStr.split(",");
+            tumorTypes = tumorTypeStr.split("\\s*,\\s*");
             if(tumorTypes.length == 1) {
                 String tumorType = tumorTypes[0];
                 tumorTypes = new String[genes.length];
@@ -68,13 +68,13 @@ public class VariantPairUtils {
             }
         }
         if(consequenceStr != null) {
-            consequences = consequenceStr.split(",");
+            consequences = consequenceStr.split("\\s*,\\s*");
             if(consequences.length != genes.length) {
                 return null;
             }
         }
         if(proteinStartStr != null) {
-            for(String item : proteinStartStr.split(",")) {
+            for(String item : proteinStartStr.split("\\s*,\\s*")) {
                 proteinStarts.add(Integer.parseInt(item));
             }
             if(proteinStarts.size() != genes.length) {
@@ -82,7 +82,7 @@ public class VariantPairUtils {
             }
         }
         if(proteinEndStr != null) {
-            for(String item : proteinEndStr.split(",")) {
+            for(String item : proteinEndStr.split("\\s*,\\s*")) {
                 proteinEnds.add(Integer.parseInt(item));
             }
             if(proteinEnds.size() != genes.length) {

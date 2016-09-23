@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
@@ -22,7 +23,7 @@ import java.util.*;
 
 public class CacheUtils {
     private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
-    private static Map<Integer, Map<String, String>> variantCustomizedSummary = new HashMap<>();
+    private static Map<Integer, Map<String, Map<String, String>>> variantTumorTypeSummary = new HashMap<>();
     private static Map<Integer, Map<String, Set<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     // The key would be entrezGeneId, variant name and evidence ID. -1 will be used to store gene irrelevant evidences.
@@ -54,15 +55,15 @@ public class CacheUtils {
         }
     };
 
-    private static Observer variantCustomizedSummaryObserver = new Observer() {
+    private static Observer variantTumorTypeSummaryObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
             Map<String, String> operation = (Map<String, String>) arg;
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                variantCustomizedSummary.remove(entrezGeneId);
+                variantTumorTypeSummary.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
-                variantCustomizedSummary.clear();
+                variantTumorTypeSummary.clear();
             }
         }
     };
@@ -194,7 +195,7 @@ public class CacheUtils {
     static {
         try {
             GeneObservable.getInstance().addObserver(variantSummaryObserver);
-            GeneObservable.getInstance().addObserver(variantCustomizedSummaryObserver);
+            GeneObservable.getInstance().addObserver(variantTumorTypeSummaryObserver);
             GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
             GeneObservable.getInstance().addObserver(alterationsObserver);
             GeneObservable.getInstance().addObserver(geneObserver);
@@ -276,11 +277,11 @@ public class CacheUtils {
             Set<Evidence> geneEvidences = new HashSet<>();
             Set<Evidence> mappedEvidences = new HashSet<>();
 
-            if(entrezGeneId == -1) {
-                for(Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()){
+            if (entrezGeneId == -1) {
+                for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
                     geneEvidences.addAll(map.getValue());
                 }
-            }else {
+            } else {
                 geneEvidences = evidences.get(entrezGeneId);
             }
             for (Evidence evidence : geneEvidences) {
@@ -353,24 +354,30 @@ public class CacheUtils {
         variantSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static String getVariantCustomizedSummary(Integer entrezGeneId, String variant) {
-        if (variantCustomizedSummary.containsKey(entrezGeneId) && variantCustomizedSummary.get(entrezGeneId).containsKey(variant)) {
-            return variantCustomizedSummary.get(entrezGeneId).get(variant);
+    public static String getVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType) {
+        if (variantTumorTypeSummary.containsKey(entrezGeneId)
+            && variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)
+            && variantTumorTypeSummary.get(entrezGeneId).get(variant).containsKey(tumorType)) {
+            return variantTumorTypeSummary.get(entrezGeneId).get(variant).get(tumorType);
         } else {
             return null;
         }
     }
 
-    public static Boolean containVariantCustomizedSummary(Integer entrezGeneId, String variant) {
-        return (variantCustomizedSummary.containsKey(entrezGeneId) &&
-            variantCustomizedSummary.get(entrezGeneId).containsKey(variant)) ? true : false;
+    public static Boolean containVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType) {
+        return (variantTumorTypeSummary.containsKey(entrezGeneId)
+            && variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)
+        && variantTumorTypeSummary.get(entrezGeneId).get(variant).containsKey(tumorType)) ? true : false;
     }
 
-    public static void setVariantCustomizedSummary(Integer entrezGeneId, String variant, String summary) {
-        if (!variantCustomizedSummary.containsKey(entrezGeneId)) {
-            variantCustomizedSummary.put(entrezGeneId, new HashMap<String, String>());
+    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType, String summary) {
+        if (!variantTumorTypeSummary.containsKey(entrezGeneId)) {
+            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, Map<String, String>>());
         }
-        variantCustomizedSummary.get(entrezGeneId).put(variant, summary);
+        if (!variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)) {
+            variantTumorTypeSummary.get(entrezGeneId).put(variant, new HashMap<String, String>());
+        }
+        variantTumorTypeSummary.get(entrezGeneId).get(variant).put(tumorType, summary);
     }
 
     public static Set<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
