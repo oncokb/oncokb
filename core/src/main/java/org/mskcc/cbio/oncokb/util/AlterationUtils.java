@@ -407,6 +407,7 @@ public final class AlterationUtils {
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {
         Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+        alleles = AlterationUtils.excludeVUS(alleles);
         if (alleles == null || alleles.size() == 0) {
             return false;
         } else {
