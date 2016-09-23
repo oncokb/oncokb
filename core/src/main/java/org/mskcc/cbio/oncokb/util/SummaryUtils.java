@@ -45,10 +45,10 @@ public class SummaryUtils {
                 if (AlterationUtils.hasAlleleAlterations(alteration)) {
                     sb.append(" " + alleleSummary(alteration));
                 } else {
-                    sb.append("The oncogenic activity of this variant is unknown. ");
+                    sb.append(" The oncogenic activity of this variant is unknown. ");
                 }
             }else {
-                sb.append("The oncogenic activity of this variant is unknown. ");
+                sb.append(" The oncogenic activity of this variant is unknown. ");
             }
         } else {
             Boolean appendThe = true;
@@ -263,10 +263,10 @@ public class SummaryUtils {
                 if(AlterationUtils.hasAlleleAlterations(alteration)) {
                     sb.append(" " + alleleSummary(alteration));
                 }else {
-                    sb.append("The oncogenic activity of this variant is unknown. ");
+                    sb.append(" The oncogenic activity of this variant is unknown. ");
                 }
             }else {
-                sb.append("The oncogenic activity of this variant is unknown. ");
+                sb.append(" The oncogenic activity of this variant is unknown. ");
             }
         } else {
             Boolean appendThe = true;
