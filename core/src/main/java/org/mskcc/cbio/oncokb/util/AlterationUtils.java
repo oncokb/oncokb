@@ -368,14 +368,20 @@ public final class AlterationUtils {
     }
 
     public static Set<Alteration> getAlleleAlterations(Alteration alteration) {
-        List<Alteration> alterations =
+        List<Alteration> alterations = new ArrayList<>();
+        
+        if(CacheUtils.isEnabled()) {
+            alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
+        }else {
+            alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
+        }
+        List<Alteration> alleles =
             alterationBo.findMutationsByConsequenceAndPosition(
                 alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
-                alteration.getProteinEnd(),
-                new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId())));
+                alteration.getProteinEnd(), alterations);
         // Remove alteration itself
-        alterations.remove(alteration);
-        return filterAllelesBasedOnLocation(new HashSet<>(alterations), alteration.getProteinStart());
+        alleles.remove(alteration);
+        return filterAllelesBasedOnLocation(new HashSet<>(alleles), alteration.getProteinStart());
     }
 
     public static Set<Alteration> getRelevantAlterations(

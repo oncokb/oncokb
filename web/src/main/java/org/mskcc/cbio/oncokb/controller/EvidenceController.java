@@ -72,7 +72,7 @@ public class EvidenceController {
             Set<EvidenceType> evidenceTypes = new HashSet<>();
 
             if (body.getEvidenceTypes() != null) {
-                for (String type : body.getEvidenceTypes().split(",")) {
+                for (String type : body.getEvidenceTypes().split("\\s*,\\s*")) {
                     EvidenceType et = EvidenceType.valueOf(type);
                     evidenceTypes.add(et);
                 }
