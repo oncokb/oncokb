@@ -26,25 +26,25 @@ import java.util.*;
 public final class VariantAnnotationXML {
 
     public static String annotate(Alteration alt, String tumorType) {
-        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+//        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
 
         StringBuilder sb = new StringBuilder();
 
         Gene gene = alt.getGene();
 
-        Set<Gene> genes = new HashSet<Gene>();
-        if (gene.getEntrezGeneId() > 0) {
-            genes.add(gene);
-        } else {
+//        Set<Gene> genes = new HashSet<Gene>();
+//        if (gene.getEntrezGeneId() > 0) {
+//            genes.add(gene);
+//        } else {
             // fake gene... could be a fusion gene
-            Set<String> aliases = gene.getGeneAliases();
-            for (String alias : aliases) {
-                Gene g = geneBo.findGeneByHugoSymbol(alias);
-                if (g != null) {
-                    genes.add(g);
-                }
-            }
-        }
+//            Set<String> aliases = gene.getGeneAliases();
+//            for (String alias : aliases) {
+//                Gene g = geneBo.findGeneByHugoSymbol(alias);
+//                if (g != null) {
+//                    genes.add(g);
+//                }
+//            }
+//        }
 
         Set<OncoTreeType> relevantTumorTypes = new HashSet<OncoTreeType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
 
@@ -78,11 +78,11 @@ public final class VariantAnnotationXML {
 
         // summary
         sb.append("<annotation_summary>");
-        sb.append(SummaryUtils.fullSummary(genes, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, alt.getAlteration(), relevantTumorTypes, tumorType));
+        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, alt.getAlteration(), relevantTumorTypes, tumorType));
         sb.append("</annotation_summary>\n");
 
         // gene background
-        List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(genes, Collections.singleton(EvidenceType.GENE_BACKGROUND));
+        List<Evidence> geneBgEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_BACKGROUND));
         if (!geneBgEvs.isEmpty()) {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");

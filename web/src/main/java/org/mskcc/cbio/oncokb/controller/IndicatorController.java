@@ -50,39 +50,33 @@ public class IndicatorController {
                 Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
                     gene, query.getAlteration(), query.getConsequence(),
                     query.getProteinStart(), query.getProteinEnd());
+                Set<Alteration> nonVUSAlts = AlterationUtils.excludeVUS(relevantAlterations);
                 Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-
-                if (relevantAlterations == null || relevantAlterations.size() == 0) {
-                    indicatorQuery.setVariantExist(false);
-                } else {
-                    indicatorQuery.setVariantExist(true);
-                }
-
-                Alteration alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-
                 Set<Alteration> alleles = new HashSet<>();
                 List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
+                
+                if (relevantAlterations == null || relevantAlterations.size() == 0) {
+                    indicatorQuery.setVariantExist(false);
+
+                    Alteration alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                    if (alteration != null) {
+                        alleles = AlterationUtils.getAlleleAlterations(alteration);
+                    }
+                } else {
+                    indicatorQuery.setVariantExist(true);
+                    if (!relevantAlterations.isEmpty() && nonVUSAlts.isEmpty()) {
+                        alleles = AlterationUtils.getAlleleAlterations(relevantAlterations.iterator().next());
+                    }
+                }
 
                 if (query.getTumorType() != null) {
                     oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
                     // Tumor type summary
-                    Set<Evidence> tumorTypeSummary = EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), new HashSet<>(oncoTreeTypes), null);
-                    if (tumorTypeSummary != null && tumorTypeSummary.size() > 0) {
-                        indicatorQuery.setTumorTypeSummary(tumorTypeSummary.iterator().next().getDescription());
-                    }
+                    indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query.getAlteration(), new ArrayList<Alteration>(relevantAlterations), query.getTumorType(), new HashSet<OncoTreeType>(oncoTreeTypes)));
                 }
 
-                if (alteration != null) {
-                    alleles = AlterationUtils.getAlleleAlterations(alteration);
-
-                    // Mutation summary
-                    Set<Evidence> mutationSummary = EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.MUTATION_SUMMARY), null);
-                    if (mutationSummary != null && mutationSummary.size() > 0) {
-                        indicatorQuery.setVariantSummary(mutationSummary.iterator().next().getDescription());
-                    } else {
-                        indicatorQuery.setVariantSummary(SummaryUtils.variantTumorTypeSummary(Collections.singleton(gene), new ArrayList<Alteration>(relevantAlterations), query.getAlteration(), new HashSet<OncoTreeType>(oncoTreeTypes), query.getTumorType()));
-                    }
-                }
+                // Mutation summary
+                indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene, new ArrayList<Alteration>(relevantAlterations), query.getAlteration(), false));
 
                 indicatorQuery.setVUS(isVUS(
                     EvidenceUtils.getRelevantEvidences(query, source, body.getGeneStatus(), Collections.singleton(EvidenceType.VUS), null)

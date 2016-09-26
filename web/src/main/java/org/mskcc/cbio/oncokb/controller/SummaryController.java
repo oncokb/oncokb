@@ -85,16 +85,16 @@ public class SummaryController {
         if (query != null && query.getGene() != null) {
             switch (summaryType) {
                 case "variant":
-                    summary = SummaryUtils.variantTumorTypeSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "full":
-                    summary = SummaryUtils.fullSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.fullSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "variantCustomized":
                     summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 default:
-                    summary = SummaryUtils.variantTumorTypeSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
             }
         }
