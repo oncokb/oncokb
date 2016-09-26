@@ -2,8 +2,6 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.text.SimpleDateFormat;
@@ -16,10 +14,12 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    public static String variantTumorTypeSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
-        String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
+    public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
+        if (gene == null) {
+            return "";
+        }
+        String geneId = Integer.toString(gene.getEntrezGeneId());
         String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
-        Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
         String queriedAltName = AlterationUtils.getVariantName(gene.getHugoSymbol(), queryAlteration);
         if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
             return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
@@ -47,18 +47,18 @@ public class SummaryUtils {
 //            } else {
 //            }
 
-        String os = oncogenicSummary(gene, alterations, queriedAltName, false);
+        String os = oncogenicSummary(gene, alterations, queryAlteration, false);
         if (os != null && !os.equals("")) {
             sb.append(" " + os);
         }
 
-        String ts = tumorTypeSummary(genes, queryAlteration, alterations, queryTumorType, relevantTumorTypes);
+        String ts = tumorTypeSummary(gene, queriedAltName, alterations, queryTumorType, relevantTumorTypes);
         if (ts != null && !ts.equals("")) {
             sb.append(" " + ts);
         }
 
         if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantSummary(genes.iterator().next().getEntrezGeneId(), key, sb.toString().trim());
+            CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, sb.toString().trim());
         }
         return sb.toString().trim();
     }
@@ -73,7 +73,7 @@ public class SummaryUtils {
 
         sb.append(geneSummary(genes.iterator().next()));
 
-        String os = oncogenicSummary(gene, alterations, queriedAltName, false);
+        String os = oncogenicSummary(gene, alterations, queryAlteration, false);
         if (os != null && !os.equals("")) {
             sb.append(" " + os);
         }
@@ -81,25 +81,24 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String tumorTypeSummary(Set<Gene> genes, String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<OncoTreeType> relevantTumorTypes) {
+    public static String tumorTypeSummary(Gene gene, String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<OncoTreeType> relevantTumorTypes) {
         //Tumor type summary
         StringBuilder sb = new StringBuilder();
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+
         Boolean appendThe = appendThe(queryAlteration);
 
-        if (genes == null || alterations == null || alterations.isEmpty()
+        if (gene == null || alterations == null || alterations.isEmpty()
             || relevantTumorTypes == null || relevantTumorTypes.isEmpty()) {
             return "";
         }
 
-        if (CacheUtils.isEnabled() && CacheUtils.containVariantTumorTypeSummary(genes.iterator().next().getEntrezGeneId(), queryAlteration, queryTumorType)) {
-            return CacheUtils.getVariantTumorTypeSummary(genes.iterator().next().getEntrezGeneId(), queryAlteration, queryTumorType);
+        if (CacheUtils.isEnabled() && CacheUtils.containVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType)) {
+            return CacheUtils.getVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType);
         }
 
-        List<Evidence> tumorTypeSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes);
+        Set<Evidence> tumorTypeSummaryEvs = EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
         if (!tumorTypeSummaryEvs.isEmpty()) {
-            Evidence ev = tumorTypeSummaryEvs.get(0);
+            Evidence ev = tumorTypeSummaryEvs.iterator().next();
             String tumorTypeSummary = ev.getShortDescription();
 
             if (tumorTypeSummary == null) {
@@ -115,9 +114,10 @@ public class SummaryUtils {
             Set<EvidenceType> sensitivityEvidenceTypes =
                 EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
                     EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-            Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(
-                evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes, relevantTumorTypes)
-            );
+            Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(new ArrayList<Evidence>(
+                EvidenceUtils.getEvidence(
+                    new HashSet<Alteration>(alterations),
+                    sensitivityEvidenceTypes, relevantTumorTypes, null)));
             List<Evidence> evidences = new ArrayList<>();
             //                if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
             //                    evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_0));
@@ -126,7 +126,7 @@ public class SummaryUtils {
                 // if there are FDA approved drugs in the patient tumor type with the variant
                 evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_1));
                 sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, true, false, false))
-                    .append(". ");
+                    .append(".");
             } else if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                 // if there are NCCN guidelines in the patient tumor type with the variant
                 //                Map<LevelOfEvidence, List<Evidence>> otherEvidencesByLevel = groupEvidencesByLevel(
@@ -140,11 +140,11 @@ public class SummaryUtils {
                 //                }
                 evidences.addAll(evidencesByLevel.get(LevelOfEvidence.LEVEL_2A));
                 sb.append(treatmentsToStringByTumorType(evidences, queryAlteration, queryTumorType, true, false, true, false))
-                    .append(". ");
+                    .append(".");
             } else {
                 // no FDA or NCCN in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> evidencesByLevelOtherTumorType = groupEvidencesByLevel(
-                    evidenceBo.findEvidencesByAlteration(alterations, sensitivityEvidenceTypes)
+                    new ArrayList<Evidence>(EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), sensitivityEvidenceTypes, null))
                 );
                 evidences.clear();
                 //                    if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -159,7 +159,7 @@ public class SummaryUtils {
                         .append(", the clinical utility for patients with ")
                         .append(queryTumorType == null ? "tumors" : queryTumorType)
                         .append(" harboring the " + queryAlteration)
-                        .append(" is unknown. ");
+                        .append(" is unknown.");
                 } else if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                     // if there are NCCN drugs in other tumor types with the variant
                     evidences.addAll(evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_2A));
@@ -167,15 +167,13 @@ public class SummaryUtils {
                         .append(", the clinical utility for patients with ")
                         .append(queryTumorType == null ? "tumors" : queryTumorType)
                         .append(" harboring the " + queryAlteration)
-                        .append(" is unknown. ");
+                        .append(" is unknown.");
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type -- remove wild type evidence
-                    List<Evidence> evs = evidenceBo.findEvidencesByGene(genes, sensitivityEvidenceTypes);
-                    for (Gene g : genes) {
-                        Alteration alt = alterationBo.findAlteration(g, AlterationType.MUTATION, "wildtype");
-                        EvidenceUtils.removeByAlterations(evs, Collections.singleton(alt));
-                    }
-                    Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(evs);
+                    Set<Evidence> evs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, sensitivityEvidenceTypes);
+                    Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), "wildtype", AlterationType.MUTATION.label(), null, null, null);
+                    EvidenceUtils.removeByAlterations(new ArrayList<Evidence>(evs), Collections.singleton(alt));
+                    Map<LevelOfEvidence, List<Evidence>> evidencesByLevelGene = groupEvidencesByLevel(new ArrayList<Evidence>(evs));
 
                     evidences.clear();
                     //                        if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -189,7 +187,7 @@ public class SummaryUtils {
                             .append(", the clinical utility for patients with ")
                             .append(queryTumorType == null ? "tumors" : queryTumorType)
                             .append(" harboring the " + queryAlteration)
-                            .append(" is unknown. ");
+                            .append(" is unknown.");
                     } else if (!evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A).isEmpty()) {
                         // if there are NCCN drugs for different variants in the same gene (either same tumor type or different ones) .. e.g. BRAF K601E
                         evidences.addAll(evidencesByLevelGene.get(LevelOfEvidence.LEVEL_2A));
@@ -197,7 +195,7 @@ public class SummaryUtils {
                             .append(", the clinical utility for patients with ")
                             .append(queryTumorType == null ? "tumors" : queryTumorType)
                             .append(" harboring the " + queryAlteration)
-                            .append(" is unknown. ");
+                            .append(" is unknown.");
                     } else {
                         // if there is no FDA or NCCN drugs for the gene at all
                         sb.append("There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with ")
@@ -207,7 +205,7 @@ public class SummaryUtils {
                             sb.append("the ");
                         }
                         sb.append(queryAlteration)
-                            .append(". ");
+                            .append(".");
                     }
                 }
 
@@ -216,20 +214,18 @@ public class SummaryUtils {
         }
 
         if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantTumorTypeSummary(genes.iterator().next().getEntrezGeneId(), queryAlteration, queryTumorType, sb.toString());
+            CacheUtils.setVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType, sb.toString());
         }
 
         return sb.toString();
     }
 
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
-        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         StringBuilder sb = new StringBuilder();
 
         if (gene == null || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations)).size() == 0) {
             if (gene != null && queryAlteration != null) {
-                Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, queryAlteration);
+                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), null, null, null);
                 if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
@@ -255,16 +251,16 @@ public class SummaryUtils {
                         }
                     }
                     if (lastEdit == null) {
-                        sb.append(" The oncogenic activity of this variant is unknown. ");
+                        sb.append("The oncogenic activity of this variant is unknown.");
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-                        sb.append(" No functional data about this variant was found (last update: " + sdf.format(lastEdit) + ")");
+                        sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this variant was available.");
                     }
                 } else {
-                    sb.append(" The oncogenic activity of this variant is unknown. ");
+                    sb.append("The oncogenic activity of this variant is unknown.");
                 }
             } else {
-                sb.append(" The oncogenic activity of this variant is unknown. ");
+                sb.append("The oncogenic activity of this variant is unknown.");
             }
         } else {
             if (gene == null || alterations == null) {
@@ -285,10 +281,13 @@ public class SummaryUtils {
 
             int oncogenic = -1;
             for (Alteration a : alterations) {
-                List<Evidence> oncogenicEvidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC));
-                if (oncogenicEvidences.size() > 0 && oncogenicEvidences.get(0) != null && oncogenicEvidences.get(0).getKnownEffect() != null && Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect()) >= 0) {
-                    oncogenic = Integer.parseInt(oncogenicEvidences.get(0).getKnownEffect());
-                    break;
+                Set<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
+                if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
+                    Evidence evidence = oncogenicEvidences.iterator().next();
+                    if (evidence != null && evidence.getKnownEffect() != null && Integer.parseInt(evidence.getKnownEffect()) >= 0) {
+                        oncogenic = Integer.parseInt(evidence.getKnownEffect());
+                        break;
+                    }
                 }
             }
             if (oncogenic >= 0) {
@@ -312,7 +311,7 @@ public class SummaryUtils {
                         sb.append(" known to be");
                     }
 
-                    sb.append(" oncogenic. ");
+                    sb.append(" oncogenic.");
                 }
             } else {
                 sb.append("It is unknown whether ");
@@ -327,11 +326,11 @@ public class SummaryUtils {
                 } else {
                     sb.append(" is");
                 }
-                sb.append(" oncogenic. ");
+                sb.append(" oncogenic.");
             }
 
             if (addition) {
-                List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.ONCOGENIC));
+                Set<Evidence> oncogenicEvs = EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), Collections.singleton(EvidenceType.ONCOGENIC), null);
                 List<String> clinicalSummaries = new ArrayList<>();
 
                 for (Evidence evidence : oncogenicEvs) {
@@ -356,19 +355,20 @@ public class SummaryUtils {
     }
 
     public static String geneSummary(Gene gene) {
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> geneSummaryEvs = evidenceBo.findEvidencesByGene(Collections.singleton(gene), Collections.singleton(EvidenceType.GENE_SUMMARY));
+        Set<Evidence> geneSummaryEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
         String summary = "";
         if (!geneSummaryEvs.isEmpty()) {
-            Evidence ev = geneSummaryEvs.get(0);
-            summary = ev.getShortDescription();
+            Evidence ev = geneSummaryEvs.iterator().next();
+            if (ev != null) {
+                summary = ev.getShortDescription();
 
-            if (summary == null) {
-                summary = ev.getDescription();
-            }
+                if (summary == null) {
+                    summary = ev.getDescription();
+                }
 
-            if (summary != null) {
-                summary = StringEscapeUtils.escapeXml(summary).trim();
+                if (summary != null) {
+                    summary = StringEscapeUtils.escapeXml(summary).trim();
+                }
             }
         }
 
@@ -377,16 +377,17 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String fullSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
+    public static String fullSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
 
         queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
 
-        sb.append(geneSummary(genes.iterator().next()));
+        sb.append(geneSummary(gene));
 
-        sb.append(" ");
-
-        sb.append(SummaryUtils.variantTumorTypeSummary(genes, alterations, queryAlteration, relevantTumorTypes, queryTumorType));
+        String vts = SummaryUtils.variantTumorTypeSummary(gene, alterations, queryAlteration, relevantTumorTypes, queryTumorType);
+        if (vts != null && !vts.equals("")) {
+            sb.append(" " + vts);
+        }
 
         return sb.toString();
     }
