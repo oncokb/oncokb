@@ -2923,7 +2923,14 @@ angular.module('oncokbApp')
                         var _mutation = '';
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
                         _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
-                        _mutation.name.setText(newMutationName);
+                        var filteredContent = [];
+                        _.each(newMutationName.split(','), function(item){
+                            item = item.trim();
+                            if(item.length > 0){
+                                filteredContent.push(item);
+                            }
+                        });
+                        _mutation.name.setText(filteredContent.join(','));
                         _mutation.oncogenic_eStatus.set('obsolete', 'false');
                         _mutation.shortSummary_eStatus.set('obsolete', 'false');
 
