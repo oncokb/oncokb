@@ -17,6 +17,9 @@ angular.module('oncokbApp')
             nct: {
                 regex: /NCT:?[0-9]+/ig,
                 link: 'http://clinicaltrials.gov/show/'
+            },
+            abstract: {
+                regex: /\(\s*Abstract\s*:[^\)]*;\s*\)/ig
             }
         };
         function find(str, type) {
@@ -71,11 +74,10 @@ angular.module('oncokbApp')
             }
             return str;
         }
-
         function result(str) {
             var uniqueResultA = [];
             if(typeof str === 'string' && str !== '') {
-                var regex = [allRegex.pmid.regex, allRegex.nct.regex];
+                var regex = [allRegex.pmid.regex, allRegex.nct.regex, allRegex.abstract.regex];
                 for (var j = 0, regexL = regex.length; j < regexL; j++) {
                     var resultMatch = str.match(regex[j]);
 
@@ -117,6 +119,16 @@ angular.module('oncokbApp')
                                         _datum = S(_datum).strip(':').s;
                                     }
                                     uniqueResultA.push({type: 'nct', id: _datum});
+                                    break;
+                                case 2:
+                                    _datum = _datum.replace(/\(\s*Abstract\s*:\s*/ig, "");
+                                    var abstracts = _datum.match(/[^;]*;/gi), text = '', link = '', tempIndex = 0;
+                                    _.each(abstracts, function(item){
+                                        tempIndex = item.indexOf('.');
+                                        text = item.substring(0, tempIndex).trim();
+                                        link = item.substring(tempIndex+1, item.length-1).trim();
+                                        uniqueResultA.push({type: 'abstract', id: text, link: link});
+                                    });
                                     break;
                                 default:
                                     break;

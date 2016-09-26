@@ -9,7 +9,7 @@
       <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
       <span ng-if="document && userRole === 8" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
       <span class="btn-group btn-group-sm pull-right" role="group">
-        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal" ng-click="getAllPMIDs()">PMIDs</button>
+        <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
         <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
         <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
@@ -45,7 +45,7 @@
         <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
         
       </span>
-      
+        
     </h2>
     <p>Transcript: {{gene.transcripts.asArray()[0].isoform_override.text}}, {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</p>
     <p ng-if="userRole === 8">

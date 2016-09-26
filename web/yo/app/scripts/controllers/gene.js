@@ -115,7 +115,7 @@ angular.module('oncokbApp')
                     $scope.status.backup = true;
                 });
             };
-
+            
             $scope.redirect = function (path) {
                 $location.path(path);
             };
@@ -3343,30 +3343,83 @@ angular.module('oncokbApp')
                 $scope.model.undo();
                 regenerateGeneStatus();
             };
-            function fetchPMIDs(data){
-                var PMIDs = [];
+            function fetchResults(data){
+                var PMIDs = [], abstracts = [];
                 _.each(data, function(item){ 
                     if(item.type === 'pmid'){
                         PMIDs.push(item.id); 
-                    }    
+                    }else if(item.type === 'abstract'){
+                        abstracts.push(item.id);
+                    }
                 });
                 PMIDs.sort();
-                return PMIDs;
+                abstracts.sort();
+                return {PMIDs: PMIDs, abstracts: abstracts};
             }
-            $scope.getAllPMIDs = function(){
+            $scope.getAllCitations = function(){
+                var results = [];
                 var geneData = JSON.stringify(stringUtils.getGeneData(this.gene, true));
-                var annotationPMIDs = fetchPMIDs(FindRegex.result(geneData));
+                results = fetchResults(FindRegex.result(geneData));
+                var annotationPMIDs = results.PMIDs, annotationAbstracts = results.abstracts;
                 
                 var vusData = JSON.stringify(stringUtils.getVUSFullData(this.vus));
-                var vusPMIDs = fetchPMIDs(FindRegex.result(vusData));
+                results  = fetchResults(FindRegex.result(vusData));
+                var vusPMIDs = results.PMIDs, vusAbstracts = results.abstracts;
+                var hasAnnotation = (annotationPMIDs.length + annotationAbstracts.length > 0) ? true : false;
+                var hasVUS = (vusPMIDs.length + vusAbstracts.length > 0) ? true : false;
                 
-                var messageContent = "<h4>Annotation ("+annotationPMIDs.length+")</h4>" + annotationPMIDs.join(', ');
-                if(vusPMIDs.length > 0){
-                    messageContent += "<hr><h4>VUS ("+vusPMIDs.length+")</h4>" + vusPMIDs.join(', ');
-                }
-                dialogs.notify('All PMIDs', messageContent, {size: 'lg'});
+                //we only seperate citations information to tabs when both annotation and vus citations exist and there are too much info to fit in one tab
+                var tabFlag = hasAnnotation && hasVUS && (annotationPMIDs.length > 80 || annotationAbstracts.length > 10 || vusPMIDs.length > 80 || vusAbstracts.length > 10);
+                var messageContent = [];
+                if(!hasAnnotation && !hasVUS){
+                    messageContent.push('No information available!');
+                }else if(tabFlag){
+                    messageContent.push('<ul class="nav nav-tabs">');
+                    if(hasAnnotation){
+                        messageContent.push('<li class="active"><a data-toggle="tab" href="#home"><h4>Annotation</h4></a></li>');
+                    }
+                    if(hasVUS){
+                        messageContent.push('<li><a data-toggle="tab" href="#menu1"><h4>VUS</h4></a></li>');
+                    }
+                    messageContent.push('</ul><div class="tab-content">');
+                    if(hasAnnotation){
+                        messageContent.push('<div id="home" class="tab-pane fade in active"><h4>PMIDs (' + annotationPMIDs.length + ')</h4><p>' + annotationPMIDs.join(', ') + '</p>');
+                        if(annotationAbstracts.length > 0){
+                            messageContent.push('<h4>Abstracts (' + annotationAbstracts.length + ')</h4><p>' + annotationAbstracts.join(', ') + '</p>');
+                        }
+                        messageContent.push('</div>');
+                    }
+                    if(hasVUS){
+                        messageContent.push('<div id="menu1" class="tab-pane fade"><h4>PMIDs (' + vusPMIDs.length + ')</h4><p>' + vusPMIDs.join(', ') + '</p>');
+                        if(vusAbstracts.length > 0){
+                            messageContent.push('<h4>Abstracts (' + vusAbstracts.length + ')</h4><p>' + vusAbstracts.join(', ') + '</p>');
+                        }
+                        messageContent.push('</div>');
+                    }
+                    messageContent.push('</div>');
+                }else{
+                    if(hasAnnotation){
+                        messageContent.push('<h3 style="color:black">Annotation</h3>');
+                        if(annotationPMIDs.length > 0){
+                            messageContent.push('<h4>PMIDs (' + annotationPMIDs.length + ')</h4><p>' + annotationPMIDs.join(', ') + '</p>');
+                        }
+                        if(annotationAbstracts.length > 0){
+                            messageContent.push('<h4>Abstracts (' + annotationAbstracts.length + ')</h4><p>' + annotationAbstracts.join(', ') + '</p>');
+                        }
+                    }
+                    
+                    if(hasVUS){
+                        messageContent.push('<hr/><h3 style="color:black">VUS</h3>');
+                        if(vusPMIDs.length > 0){
+                            messageContent.push('<h4>PMIDs (' + vusPMIDs.length + ')</h4><p>' + vusPMIDs.join(', ') + '</p>');
+                        }
+                        if(vusAbstracts.length > 0){
+                            messageContent.push('<h4>Abstracts (' + vusAbstracts.length + ')</h4><p>' + vusAbstracts.join(', ') + '</p>');
+                        }
+                    }
+                }               
+                dialogs.notify('All Citations', messageContent.join(''), {size: 'lg'});
             }
-            
             $scope.curatorsName = function () {
                 return this.gene.curators.asArray().map(function (d) {
                     return d.name;

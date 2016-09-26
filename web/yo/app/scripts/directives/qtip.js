@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                 var my = attrs.hasOwnProperty('my') ? attrs.my : 'bottom center';
                 var at = attrs.hasOwnProperty('at') ? attrs.at : 'top center';
 
-                if (attrs.type && ['pmid', 'nct'].indexOf(attrs.type) !== -1) {
+                if (attrs.type && ['pmid', 'nct', 'abstract'].indexOf(attrs.type) !== -1) {
                     src = '<iframe width="600px" height="400px" src=\'';
                     if (attrs.type && attrs.number) {
                         switch (attrs.type) {
@@ -30,6 +30,9 @@ angular.module('oncokbApp')
                                 break;
                             case 'nct':
                                 src += 'https://clinicaltrials.gov/show/' + attrs.number;
+                                break;
+                            case 'abstract':
+                                src += attrs.number;
                                 break;
                             default:
                                 break;
@@ -66,9 +69,10 @@ angular.module('oncokbApp')
                         delay: 500
                     }
                 };
-                $(element).qtip(options);
-
-
+                if(attrs.number !== undefined && attrs.number.length > 0){
+                    $(element).qtip(options);    
+                }
+                
                 scope.$watch("time", function (n, o) {
                     if(n) {
                         if($(element).data('qtip')) {
