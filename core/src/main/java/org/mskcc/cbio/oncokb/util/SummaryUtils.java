@@ -220,6 +220,10 @@ public class SummaryUtils {
         return sb.toString();
     }
 
+    public static String unknownOncogenicSummary() {
+        return "The oncogenic activity of this variant is unknown and it has not been specifically investigated by the OncoKB team.";
+    }
+    
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
         StringBuilder sb = new StringBuilder();
 
@@ -251,18 +255,19 @@ public class SummaryUtils {
                         }
                     }
                     if (lastEdit == null) {
-                        sb.append("The oncogenic activity of this variant is unknown.");
+                        sb.append(unknownOncogenicSummary());
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
                         sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this variant was available.");
                     }
                 } else {
-                    sb.append("The oncogenic activity of this variant is unknown.");
+                    sb.append(unknownOncogenicSummary());
                 }
             } else {
-                sb.append("The oncogenic activity of this variant is unknown.");
+                sb.append(unknownOncogenicSummary());
             }
         } else {
+            String altName = queryAlteration + " mutation";
             if (gene == null || alterations == null) {
                 return null;
             }
@@ -277,6 +282,7 @@ public class SummaryUtils {
 
             if (queryAlteration.toLowerCase().contains("fusions")) {
                 isPlural = true;
+                altName = queryAlteration;
             }
 
             int oncogenic = -1;
@@ -294,7 +300,7 @@ public class SummaryUtils {
                 if (appendThe) {
                     sb.append("The ");
                 }
-                sb.append(queryAlteration);
+                sb.append(altName);
 
                 if (isPlural) {
                     sb.append(" are");
@@ -319,7 +325,7 @@ public class SummaryUtils {
                     sb.append("the ");
                 }
 
-                sb.append(queryAlteration);
+                sb.append(altName);
 
                 if (isPlural) {
                     sb.append(" are");
@@ -407,11 +413,16 @@ public class SummaryUtils {
         Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
         Set<Alteration> highestAlts = (Set<Alteration>) map.get("alterations");
 
-        if (highestOncogenicity != null && (highestOncogenicity.getOncogenic() == "1" || highestOncogenicity.getOncogenic() == "2")) {
+        if (highestOncogenicity != null && (highestOncogenicity.getOncogenic().equals("1") || highestOncogenicity.getOncogenic().equals("2"))) {
 
             sb.append(" However, ");
             sb.append(allelesToStr(highestAlts));
-            sb.append((highestAlts.size() > 1 ? " are" : " is") + " known to be " + highestOncogenicity.getDescription().toLowerCase());
+            sb.append((highestAlts.size() > 1 ? " are" : " is"));
+            if(highestOncogenicity.getOncogenic().equals("1")) {
+                sb.append(" known to be " + highestOncogenicity.getDescription().toLowerCase());
+            }else {
+                sb.append(" " + highestOncogenicity.getDescription().toLowerCase());
+            }
             sb.append(", and therefore " + geneStr + " " + altStr + " is considered likely oncogenic.");
         }
 
