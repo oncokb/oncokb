@@ -47,7 +47,7 @@
       </span>
       
     </h2>
-    <p>Transcript: {{gene.transcripts.asArray()[0].isoform_override.text}}</p>
+    <p>Transcript: {{gene.transcripts.asArray()[0].isoform_override.text}}, {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</p>
     <p ng-if="userRole === 8">
       <strong>Status:</strong>
       <span ng-repeat="checkbox in checkboxes['geneStatus']">
