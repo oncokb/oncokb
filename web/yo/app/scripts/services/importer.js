@@ -200,11 +200,11 @@ angular.module('oncokbApp')
         function getVUSFullData(vus) {
             var vusData = [];
             if (vus) {
-                vus.asArray().forEach(function (vusItem) {
+                vus.asArray().forEach(function(vusItem) {
                     var datum = {};
                     datum.name = vusItem.name.getText();
                     datum.time = [];
-                    vusItem.time.asArray().forEach(function (time) {
+                    vusItem.time.asArray().forEach(function(time) {
                         var _time = {};
                         _time.value = time.value.getText();
                         _time.by = {};
@@ -212,15 +212,20 @@ angular.module('oncokbApp')
                         _time.by.email = time.by.email.getText();
                         datum.time.push(_time);
                     });
+                    if (vusItem.time && vusItem.time.length > 0) {
+                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
+                    }
                     datum.nameComments = [];
-                    vusItem.name_comments.asArray().forEach(function (nameComment) {
-                        var nameCommentItem = {};
-                        nameCommentItem.value = nameComment.content.getText();
-                        nameCommentItem.by = {};
-                        nameCommentItem.by.userName = nameComment.userName.getText();
-                        nameCommentItem.by.email = nameComment.email.getText();
-                        datum.nameComments.push(nameCommentItem);
-                    });
+                    if (vusItem.name_comments) {
+                        vusItem.name_comments.asArray().forEach(function(nameComment) {
+                            var nameCommentItem = {};
+                            nameCommentItem.value = nameComment.content.getText();
+                            nameCommentItem.by = {};
+                            nameCommentItem.by.userName = nameComment.userName.getText();
+                            nameCommentItem.by.email = nameComment.email.getText();
+                            datum.nameComments.push(nameCommentItem);
+                        });
+                    }
                     vusData.push(datum);
                 });
             }
@@ -234,7 +239,7 @@ angular.module('oncokbApp')
                 vus.asArray().forEach(function (vusItem) {
                     var datum = {};
                     datum.name = vusItem.name.getText();
-                    if(vusItem.time.length > 0) {
+                    if(vusItem.time && vusItem.time.length > 0) {
                         datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
                     }
                     vusData.push(datum);

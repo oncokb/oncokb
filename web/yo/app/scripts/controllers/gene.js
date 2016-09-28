@@ -29,7 +29,7 @@ angular.module('oncokbApp')
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
                                 var geneData = importer.getGeneData(gene, excludeObsolete);
-                                var vusData = importer.getVUSData(vus);
+                                var vusData = importer.getVUSFullData(vus);
                                 var params = {};
 
                                 if(geneData) {
@@ -2983,7 +2983,7 @@ angular.module('oncokbApp')
                 $scope.docStatus.savedGene = false;
 
                 var gene = importer.getGeneData(this.gene, true);
-                var vus = importer.getVUSData(this.vus);
+                var vus = importer.getVUSFullData(this.vus);
                 var params = {};
 
                 if(gene) {
