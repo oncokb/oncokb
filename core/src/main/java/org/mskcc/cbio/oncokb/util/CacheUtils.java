@@ -194,6 +194,7 @@ public class CacheUtils {
 
     static {
         try {
+            Long current = MainUtils.getCurrentTimestamp();
             GeneObservable.getInstance().addObserver(variantSummaryObserver);
             GeneObservable.getInstance().addObserver(variantTumorTypeSummaryObserver);
             GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
@@ -205,21 +206,41 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(evidencesObserver);
             GeneObservable.getInstance().addObserver(VUSObserver);
             GeneObservable.getInstance().addObserver(numbersObserver);
+            System.out.println("Observer: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
 
             genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
+            System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+            
+            Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
+            System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+            
+            Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, geneEvidences);
 
-            Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll()));
+            System.out.println("Separate all evidences: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+            
             Iterator it = mappedEvidence.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
                 evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
             }
+            System.out.println("Cache all evidences: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+            
             for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
                 setVUS(entry.getKey(), entry.getValue());
             }
+            System.out.println("Cache all VUSs: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+            
             allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
             allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
 
+            System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
         } catch (Exception e) {
             System.out.println(e);
         }

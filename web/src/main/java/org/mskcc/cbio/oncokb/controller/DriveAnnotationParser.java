@@ -60,7 +60,8 @@ public class DriveAnnotationParser {
                 JSONObject variant = vus.getJSONObject(i);
                 String mutationStr = variant.getString("name");
                 String lastEdit = variant.getString("lastEdit");
-
+                JSONArray nameComments = variant.getJSONArray("nameComments");
+                
                 Map<String, String> mutations = parseMutationString(mutationStr);
                 Set<Alteration> alterations = new HashSet<Alteration>();
 
@@ -87,6 +88,14 @@ public class DriveAnnotationParser {
                 if (lastEdit != null) {
                     Date date = new Date(Long.valueOf(lastEdit).longValue());
                     evidence.setLastEdit(date);
+                }
+                if(nameComments != null) {
+                    for (int j = 0; j < nameComments.length(); j++) {
+                        JSONObject item = nameComments.getJSONObject(j);
+                        if(item != null && item.getString("content") != null) {
+                            setDocuments(item.getString("content"), evidence);
+                        }
+                    }
                 }
                 evidenceBo.save(evidence);
             }

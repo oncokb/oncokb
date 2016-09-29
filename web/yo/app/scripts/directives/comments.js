@@ -184,8 +184,6 @@ angular.module('oncokbApp')
             }
 
             subject +=  ' by ' + $rootScope.user.name;
-
-            sendEmail(subject, content);
           }
         }
 

@@ -78,8 +78,6 @@ public class SendEmailController {
             }else{
                 return false;
             }
-
-            sendFromGMail(from, pass, to, subject, body);
             return true;
         }else {
             return false;
