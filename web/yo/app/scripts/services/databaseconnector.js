@@ -355,7 +355,6 @@ angular.module('oncokbApp')
                 if (dataFromFile) {
                     success(true);
                 } else {
-                    console.log(params);
                     SendEmail
                         .init(params)
                         .success(function (data) {

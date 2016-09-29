@@ -92,8 +92,8 @@ public class DriveAnnotationParser {
                 if(nameComments != null) {
                     for (int j = 0; j < nameComments.length(); j++) {
                         JSONObject item = nameComments.getJSONObject(j);
-                        if(item != null && item.getString("value") != null) {
-                            setDocuments(item.getString("value"), evidence);
+                        if(item != null && item.getString("content") != null) {
+                            setDocuments(item.getString("content"), evidence);
                         }
                     }
                 }

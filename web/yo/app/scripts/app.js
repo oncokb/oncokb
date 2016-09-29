@@ -30,13 +30,13 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    folderId: '0By19QWSOYlS_OUVwNVFWWHR3N1U', //testing folder
+    // folderId: '0By19QWSOYlS_OUVwNVFWWHR3N1U', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
     // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    // folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
+    folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -703,9 +703,9 @@ angular.module('oncokbApp').run(
             });
 
             // Other unidentify error
-            $rootScope.$on('oncokbError', function (data) {
+            $rootScope.$on('oncokbError', function (event, data) {
                 DatabaseConnector.sendEmail({
-                    sendTo: 'bugs.pro.exterminator',
+                    sendTo: 'bugs.pro.exterminator@gmail.com',
                     subject: 'OncoKB Bug.  Case Number:' +  stringUtils.getCaseNumber() + ' ' + data.reason,
                     content: 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message
                 }, function(){}, function(){});
