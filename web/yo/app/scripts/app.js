@@ -30,13 +30,13 @@ OncoKB.config = {
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0BzBfo69g8fP6X0JNOGdLdkxlalk', //testing folder
+    folderId: '0By19QWSOYlS_OUVwNVFWWHR3N1U', //testing folder
     // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
     //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
     // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
+    // folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -607,8 +607,8 @@ angular.module('oncokbApp', [
  * is revoked or expired.
  */
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'driveOncokbInfo', 'dialogs',
-        function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'driveOncokbInfo', 'dialogs', 'stringUtils',
+        function ($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs, stringUtils) {
             $rootScope.errors = [];
 
             //If data is loaded, the watch in nav controller should be triggered.
@@ -673,6 +673,7 @@ angular.module('oncokbApp').run(
                     }
                 }else{
                     dialogs.error('Error', 'OncoKB has error. Refresh page might solve the problem.');
+                    $rootScope.$emit('oncokbError', {message: "Couldn't connect to server. Time:" + stringUtils.getCurrentTimeForEmailCase(), reason: '', case: stringUtils.getCaseNumber()});
                 }
                 console.log('Data loaded.');
                 $rootScope.dataLoaded = true;
@@ -703,7 +704,11 @@ angular.module('oncokbApp').run(
 
             // Other unidentify error
             $rootScope.$on('oncokbError', function (data) {
-                DatabaseConnector.sendEmail({'sendTo': 'bugs.pro.exterminator', 'subject': 'OncoKB Bug: ' + data.reason, 'content': 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.reason + '\n\n' + 'Error message - cause:\n' + data.cause}, function(){}, function(){});
+                DatabaseConnector.sendEmail({
+                    sendTo: 'bugs.pro.exterminator',
+                    subject: 'OncoKB Bug.  Case Number:' +  stringUtils.getCaseNumber() + ' ' + data.reason,
+                    content: 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message
+                }, function(){}, function(){});
             });
 
             $rootScope.$watch('internal', function (n, o) {

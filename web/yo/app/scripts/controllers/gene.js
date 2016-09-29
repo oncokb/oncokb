@@ -28,8 +28,8 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = importer.getGeneData(gene, excludeObsolete);
-                                var vusData = importer.getVUSFullData(vus);
+                                var geneData = stringUtils.getGeneData(gene, excludeObsolete);
+                                var vusData = stringUtils.getVUSFullData(vus);
                                 var params = {};
 
                                 if(geneData) {
@@ -2886,8 +2886,8 @@ angular.module('oncokbApp')
             }
         }]
 )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf','FindRegex',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf','FindRegex', 'stringUtils',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils) {
             $scope.test = function (event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
@@ -2937,7 +2937,6 @@ angular.module('oncokbApp')
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
                         $scope.geneStatus[this.gene.mutations.length - 1] = new GeneStatusSingleton();
-                        sendEmail(this.gene.name.text + ': new MUTATION added -> ' + newMutationName, ' ');
                     }
                 }
             };
@@ -2975,15 +2974,15 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function () {
-                var gene = importer.getGeneData(this.gene);
+                var gene = stringUtils.getGeneData(this.gene);
                 console.log(gene);
             };
 
             $scope.updateGene = function () {
                 $scope.docStatus.savedGene = false;
 
-                var gene = importer.getGeneData(this.gene, true);
-                var vus = importer.getVUSFullData(this.vus);
+                var gene = stringUtils.getGeneData(this.gene, true);
+                var vus = stringUtils.getVUSFullData(this.vus);
                 var params = {};
 
                 if(gene) {
@@ -2992,6 +2991,8 @@ angular.module('oncokbApp')
                 if(vus) {
                     params.vus = JSON.stringify(vus);
                 }
+
+                $rootScope.$emit('oncokbError', {message: 'test', reason: 'etest'});
                 // console.log(gene);
                 DatabaseConnector.updateGene(params, function (result) {
                     $scope.docStatus.savedGene = true;
@@ -3001,10 +3002,8 @@ angular.module('oncokbApp')
                     $scope.docStatus.savedGene = true;
                     var errorMessage = 'An error has occurred when saving data, please contact the developer.';
 
-                    if ($scope.userRole === 8) {
-                        errorMessage += ' <br/> Error : ' + JSON.stringify(error);
-                    }
                     dialogs.error('Error', errorMessage);
+                    $rootScope.$emit('oncokbError', {message: errorMessage, reason: JSON.stringify(result)});
                     changeLastUpdate();
                 });
             };
@@ -3357,10 +3356,10 @@ angular.module('oncokbApp')
                 return PMIDs;
             }
             $scope.getAllPMIDs = function(){
-                var geneData = JSON.stringify(importer.getGeneData(this.gene, true));
+                var geneData = JSON.stringify(stringUtils.getGeneData(this.gene, true));
                 var annotationPMIDs = fetchPMIDs(FindRegex.result(geneData));
                 
-                var vusData = JSON.stringify(importer.getVUSFullData(this.vus));
+                var vusData = JSON.stringify(stringUtils.getVUSFullData(this.vus));
                 var vusPMIDs = fetchPMIDs(FindRegex.result(vusData));
                 
                 var messageContent = "<h4>Annotation ("+annotationPMIDs.length+")</h4>" + annotationPMIDs.join(', ');
@@ -3492,7 +3491,7 @@ angular.module('oncokbApp')
             };
 
             $scope.generatePDF = function () {
-                jspdf.create(importer.getGeneData(this.gene, true));
+                jspdf.create(stringUtils.getGeneData(this.gene, true));
             };
 
             $scope.isOpenFunc = function (type) {
@@ -4367,18 +4366,8 @@ angular.module('oncokbApp')
 
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function (error) {
-                var errorMessage = 'An error has occurred. This page will be redirected to Genes page';
-                var opts = {};
-                if ($scope.userRole === 8) {
-                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>Error code: 2';
-                    opts = {
-                        size: 'lg'
-                    };
-                    if(!_.isUndefined(error)) {
-                        errorMessage +=  '<br/>' + JSON.stringify(error);
-                    }
-                }
-                dialogs.error('Error', errorMessage, opts);
+                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
+                dialogs.error('Error', errorMessage);
                 documentClosed();
                 $location.path('/genes');
             });
@@ -4386,17 +4375,6 @@ angular.module('oncokbApp')
             // Other unidentify error
             $rootScope.$on('realtimeDoc.other_error', function (error) {
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                var opts = {};
-                if ($scope.userRole === 8) {
-                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>' + error;
-                    opts = {
-                        size: 'lg'
-                    };
-                    if(!_.isUndefined(error)) {
-                        errorMessage +=  '<br/>' + JSON.stringify(error);
-                    }
-                }
-                
                 dialogs.error('Error', errorMessage, opts);
                 documentClosed();
                 $location.path('/genes');
@@ -4405,17 +4383,6 @@ angular.module('oncokbApp')
             // Realtime documet not found
             $rootScope.$on('realtimeDoc.client_error', function (error) {
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                var opts = {};
-                if ($scope.userRole === 8) {
-                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>' + error;
-                    opts = {
-                        size: 'lg'
-                    };
-                    if(!_.isUndefined(error)) {
-                        errorMessage +=  '<br/>' + JSON.stringify(error);
-                    }
-                }
-
                 dialogs.error('Error', errorMessage, opts);
                 documentClosed();
                 $location.path('/genes');
@@ -4424,18 +4391,7 @@ angular.module('oncokbApp')
             // Realtime documet not found
             $rootScope.$on('realtimeDoc.not_found', function (error) {
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                var opts = {};
-                if ($scope.userRole === 8) {
-                    errorMessage += '<br/>Please pass the following error to developers: (this message will only be available if you are an administrator.) <br/>' + error;
-                    opts = {
-                        size: 'lg'
-                    };
-                    if(!_.isUndefined(error)) {
-                        errorMessage +=  '<br/>' + JSON.stringify(error);
-                    }
-                }
-
-                dialogs.error('Error', errorMessage, opts);
+                dialogs.error('Error', errorMessage);
                 documentClosed();
                 $location.path('/genes');
             });

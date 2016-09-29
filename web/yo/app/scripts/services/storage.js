@@ -8,7 +8,7 @@
  * Service in the oncokb.
  */
 angular.module('oncokbApp')
-  .service('storage', ['$q', '$rootScope', 'config', 'gapi',
+  .service('storage', ['$q', '$rootScope', 'config', 'gapi', 'stringUtils',
   /**
    * Handles document creation & loading for the app. Keeps only
    * one document loaded at a time.
@@ -17,7 +17,7 @@ angular.module('oncokbApp')
    * @param $rootScope
    * @param config
    */
-  function ($q, $rootScope, config, gapi) {
+  function ($q, $rootScope, config, gapi, stringUtils) {
     this.id = null;
     this.document = null;
 
@@ -404,7 +404,21 @@ angular.module('oncokbApp')
         $rootScope.$digest();
       }.bind(this);
       var onError = function (error) {
-        console.log('load on error', error);
+          var errorMessage = error.toString();
+          
+          if(error.isFatal && this.document) {
+              var gene = realtime.getModel().getRoot().get('gene');
+              var vus = realtime.getModel().getRoot().get('vus');
+              var geneData = stringUtils.getGeneData(gene, false);
+              var vusData = stringUtils.getVUSFullData(vus);
+              errorMessage += '\n\n' + "gene: " + geneData +
+                  "\n\nVUS: " + vusData
+          }
+          $rootScope.$emit('oncokbError', {
+              message: errorMessage, 
+              reason: error.type + ', Is fatal? ' + error.isFatal
+          });
+
         if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
           console.log('error: realtimeDoc.token_refresh_required');
           $rootScope.$emit('realtimeDoc.token_refresh_required');
@@ -420,7 +434,7 @@ angular.module('oncokbApp')
           $rootScope.$emit('realtimeDoc.other_error');
         }
         $rootScope.$digest();
-      };
+      }.bind(this);
       gapi.drive.realtime.load(id, onLoad, initialize, onError);
       return deferred.promise;
     };
