@@ -2992,8 +2992,6 @@ angular.module('oncokbApp')
                     params.vus = JSON.stringify(vus);
                 }
 
-                $rootScope.$emit('oncokbError', {message: 'test', reason: 'etest'});
-                // console.log(gene);
                 DatabaseConnector.updateGene(params, function (result) {
                     $scope.docStatus.savedGene = true;
                     console.log('success', result);
