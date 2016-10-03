@@ -25,7 +25,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String tumorTypeSummary;
     private Set<IndicatorQueryTreatment> treatments = new HashSet<>();
     private String dataVersion;
-    private Date lastUpdate;
+    private String lastUpdate;
     
     public IndicatorQueryResp() {
     }
@@ -134,11 +134,11 @@ public class IndicatorQueryResp implements java.io.Serializable {
         this.dataVersion = dataVersion;
     }
 
-    public Date getLastUpdate() {
+    public String getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(String lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 }

@@ -8,6 +8,9 @@ import java.util.*;
  * Created by hongxinzhang on 4/5/16.
  */
 public class MainUtils {
+    static String DataVersion = null;
+    static String DataVersionDate = null;
+
     public static Map<String, Object> GetRequestQueries(
         String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
         String evidenceType, String consequence, String proteinStart, String proteinEnd,
@@ -44,11 +47,11 @@ public class MainUtils {
         }
 
         if (alteration != null) {
-            String[] alts = alteration.trim().split("\\s*,\\s*");;
+            String[] alts = alteration.trim().split("\\s*,\\s*");
             if (queries.size() == alts.length) {
-                String[] consequences = consequence == null ? new String[0] : consequence.trim().split("\\s*,\\s*");;
-                String[] proteinStarts = proteinStart == null ? new String[0] : proteinStart.trim().split("\\s*,\\s*");;
-                String[] proteinEnds = proteinEnd == null ? new String[0] : proteinEnd.trim().split("\\s*,\\s*");;
+                String[] consequences = consequence == null ? new String[0] : consequence.trim().split("\\s*,\\s*");
+                String[] proteinStarts = proteinStart == null ? new String[0] : proteinStart.trim().split("\\s*,\\s*");
+                String[] proteinEnds = proteinEnd == null ? new String[0] : proteinEnd.trim().split("\\s*,\\s*");
 
                 for (int i = 0; i < queries.size(); i++) {
                     queries.get(i).setAlteration(alts[i]);
@@ -60,18 +63,18 @@ public class MainUtils {
                 return null;
             }
         }
-        
+
         String[] tumorTypes = tumorType == null ? new String[0] : tumorType.trim().split("\\s*,\\s*");
-        if(tumorTypes.length > 0) {
-           if(tumorTypes.length == 1) {
-               for (int i = 0; i < queries.size(); i++) {
-                   queries.get(i).setTumorType(tumorTypes[0]);
-               }
-           }else if(queries.size() == tumorTypes.length) {
-               for (int i = 0; i < queries.size(); i++) {
-                   queries.get(i).setTumorType(tumorTypes[i]);
-               }
-           }
+        if (tumorTypes.length > 0) {
+            if (tumorTypes.length == 1) {
+                for (int i = 0; i < queries.size(); i++) {
+                    queries.get(i).setTumorType(tumorTypes[0]);
+                }
+            } else if (queries.size() == tumorTypes.length) {
+                for (int i = 0; i < queries.size(); i++) {
+                    queries.get(i).setTumorType(tumorTypes[i]);
+                }
+            }
         }
 
         if (levels != null) {
@@ -82,7 +85,7 @@ public class MainUtils {
                     levelOfEvidences.add(level);
                 }
             }
-        }else {
+        } else {
             levelOfEvidences = new ArrayList<>(LevelUtils.getPublicLevels());
         }
 
@@ -273,6 +276,34 @@ public class MainUtils {
 
     public static Long getTimestampDiff(Long old) {
         return new Date().getTime() - old;
+    }
+
+    public static String getDataVersion() {
+        if (DataVersion == null) {
+            DataVersion = getProperty("data.version");
+        }
+        return DataVersion;
+    }
+
+    public static String getDataVersionDate() {
+        if (DataVersionDate == null) {
+            DataVersionDate = getProperty("data.version_date");
+        }
+        return DataVersionDate;
+    }
+
+    private static String getProperty(String propertyName) {
+        String version = "";
+        if (propertyName != null) {
+            try {
+                String tmpData = PropertiesUtils.getProperties(propertyName);
+                if (tmpData != null) {
+                    version = tmpData;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return version;
     }
 
     private static Boolean hasInfoForEffect(String effect) {

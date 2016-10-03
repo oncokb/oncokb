@@ -28,8 +28,8 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, excludeObsolete);
-                                var vusData = stringUtils.getVUSFullData(vus);
+                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true);
+                                var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
                                 if(geneData) {
@@ -2981,8 +2981,8 @@ angular.module('oncokbApp')
             $scope.updateGene = function () {
                 $scope.docStatus.savedGene = false;
 
-                var gene = stringUtils.getGeneData(this.gene, true);
-                var vus = stringUtils.getVUSFullData(this.vus);
+                var gene = stringUtils.getGeneData(this.gene, true, true);
+                var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
 
                 if(gene) {
@@ -3542,7 +3542,7 @@ angular.module('oncokbApp')
             };
 
             $scope.generatePDF = function () {
-                jspdf.create(stringUtils.getGeneData(this.gene, true));
+                jspdf.create(stringUtils.getGeneData(this.gene, true, true));
             };
 
             $scope.isOpenFunc = function (type) {
@@ -4370,6 +4370,7 @@ angular.module('oncokbApp')
                         console.log('\t checked token', new Date().getTime(), gapi.auth.getToken());
                     } else {
                         documentClosed();
+                        $rootScope.$emit('realtimeDoc.token_refresh_required');
                         console.log('error when renew token in interval func.');
                     }
                 });
@@ -4426,7 +4427,7 @@ angular.module('oncokbApp')
             // Other unidentify error
             $rootScope.$on('realtimeDoc.other_error', function (error) {
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                dialogs.error('Error', errorMessage, opts);
+                dialogs.error('Error', errorMessage);
                 documentClosed();
                 $location.path('/genes');
             });
@@ -4434,7 +4435,7 @@ angular.module('oncokbApp')
             // Realtime documet not found
             $rootScope.$on('realtimeDoc.client_error', function (error) {
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                dialogs.error('Error', errorMessage, opts);
+                dialogs.error('Error', errorMessage);
                 documentClosed();
                 $location.path('/genes');
             });

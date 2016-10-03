@@ -409,8 +409,8 @@ angular.module('oncokbApp')
           if(error.isFatal && this.document) {
               var gene = realtime.getModel().getRoot().get('gene');
               var vus = realtime.getModel().getRoot().get('vus');
-              var geneData = stringUtils.getGeneData(gene, false);
-              var vusData = stringUtils.getVUSFullData(vus);
+              var geneData = stringUtils.getGeneData(gene, false, false);
+              var vusData = stringUtils.getVUSFullData(vus, false);
               errorMessage += '\n\n' + "gene: " + geneData +
                   "\n\nVUS: " + vusData
           }
@@ -420,8 +420,14 @@ angular.module('oncokbApp')
           });
 
         if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
-          console.log('error: realtimeDoc.token_refresh_required');
-          $rootScope.$emit('realtimeDoc.token_refresh_required');
+            this.requireAuth(true).then(function (result) {
+                if (result && !result.error) {
+                    console.log('\t Renewed token', new Date().getTime(), gapi.auth.getToken());
+                } else {
+                    $rootScope.$emit('realtimeDoc.token_refresh_required');
+                    console.log('error when renew token in interval func.');
+                }
+            });
         } else if (error.type === gapi.drive.realtime.ErrorType.CLIENT_ERROR) {
           console.log('error: realtimeDoc.client_error');
           $rootScope.$emit('realtimeDoc.client_error');

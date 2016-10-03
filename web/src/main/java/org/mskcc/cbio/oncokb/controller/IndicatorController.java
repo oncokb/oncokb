@@ -54,7 +54,7 @@ public class IndicatorController {
                 Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
                 Set<Alteration> alleles = new HashSet<>();
                 List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
-                
+
                 if (relevantAlterations == null || relevantAlterations.size() == 0) {
                     indicatorQuery.setVariantExist(false);
 
@@ -64,8 +64,10 @@ public class IndicatorController {
                     }
                 } else {
                     indicatorQuery.setVariantExist(true);
-                    if (!relevantAlterations.isEmpty() && nonVUSAlts.isEmpty()) {
-                        alleles = AlterationUtils.getAlleleAlterations(relevantAlterations.iterator().next());
+                    if (!relevantAlterations.isEmpty() && !nonVUSAlts.isEmpty()) {
+                        for (Alteration alteration : relevantAlterations) {
+                            alleles.addAll(AlterationUtils.getAlleleAlterations(alteration));
+                        }
                     }
                 }
 
@@ -138,6 +140,8 @@ public class IndicatorController {
                 indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
                 indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
             }
+            indicatorQuery.setDataVersion(MainUtils.getDataVersion());
+            indicatorQuery.setLastUpdate(MainUtils.getDataVersionDate());
             result.add(indicatorQuery);
         }
         return result;
