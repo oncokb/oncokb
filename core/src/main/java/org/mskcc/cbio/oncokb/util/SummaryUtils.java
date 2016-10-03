@@ -106,8 +106,7 @@ public class SummaryUtils {
             }
             if (tumorTypeSummary != null) {
                 tumorTypeSummary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
-                sb.append(tumorTypeSummary)
-                    .append(" ");
+                sb.append(tumorTypeSummary);
             }
         } else {
 
