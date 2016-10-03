@@ -1,6 +1,7 @@
 <div ng-if="pubs.length > 0" style="margin-bottom: 10px">Publication IDs:
   <span ng-repeat="pub in pubs">
-    <span ng-if="pub.type === 'pmid'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}">{{pub.type | uppercase}}:{{pub.id}}</span>
-    <span ng-if="pub.type === 'nct'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}">{{pub.id}}</span>
+    <span ng-if="pub.type === 'pmid'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{pub.id}}" target="_blank">{{pub.type | uppercase}}:{{pub.id}}</a></span>
+    <span ng-if="pub.type === 'nct'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://clinicaltrials.gov/show/{{pub.id}}" target="_blank">{{pub.id}}</a></span>
+    <span ng-if="pub.type === 'abstract'" ng-class="pub.link.length > 0 ? 'geneKeywordSpan' : ''" qtip  type="{{pub.type}}" number="{{pub.link}}"><a href="{{pub.link}}" target="_blank">{{pub.id}}</a></span>
   </span>
 </div>
