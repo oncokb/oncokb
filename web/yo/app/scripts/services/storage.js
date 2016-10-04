@@ -8,7 +8,7 @@
  * Service in the oncokb.
  */
 angular.module('oncokbApp')
-  .service('storage', ['$q', '$rootScope', 'config', 'gapi', 'stringUtils',
+  .service('storage', ['$q', '$rootScope', '$route', 'config', 'gapi', 'stringUtils', 'dialogs',
   /**
    * Handles document creation & loading for the app. Keeps only
    * one document loaded at a time.
@@ -17,7 +17,7 @@ angular.module('oncokbApp')
    * @param $rootScope
    * @param config
    */
-  function ($q, $rootScope, config, gapi, stringUtils) {
+  function ($q, $rootScope, $route, config, gapi, stringUtils, dialogs) {
     this.id = null;
     this.document = null;
 
@@ -405,27 +405,17 @@ angular.module('oncokbApp')
       }.bind(this);
       var onError = function (error) {
           var errorMessage = error.toString();
-          
-          if(error.isFatal && this.document) {
-              var gene = realtime.getModel().getRoot().get('gene');
-              var vus = realtime.getModel().getRoot().get('vus');
-              var geneData = stringUtils.getGeneData(gene, false, false);
-              var vusData = stringUtils.getVUSFullData(vus, false);
-              errorMessage += '\n\n' + "gene: " + geneData +
-                  "\n\nVUS: " + vusData
-          }
-          $rootScope.$emit('oncokbError', {
-              message: errorMessage, 
-              reason: error.type + ', Is fatal? ' + error.isFatal
-          });
+          var sendEmail = true;
 
         if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
+            sendEmail = false;
             this.requireAuth(true).then(function (result) {
                 if (result && !result.error) {
                     console.log('\t Renewed token', new Date().getTime(), gapi.auth.getToken());
                 } else {
-                    $rootScope.$emit('realtimeDoc.token_refresh_required');
-                    console.log('error when renew token in interval func.');
+                    dialogs.error('Error', 'Your Google account token is expired. The page is going to be reloaded. ' +
+                        'If you continue seeing this issue. Please contact OncoKB team.');
+                    $route.reload();
                 }
             });
         } else if (error.type === gapi.drive.realtime.ErrorType.CLIENT_ERROR) {
@@ -439,6 +429,20 @@ angular.module('oncokbApp')
           console.log(error, id);
           $rootScope.$emit('realtimeDoc.other_error');
         }
+          if(sendEmail) {
+              if(error.isFatal && this.document) {
+                  var gene = realtime.getModel().getRoot().get('gene');
+                  var vus = realtime.getModel().getRoot().get('vus');
+                  var geneData = stringUtils.getGeneData(gene, false, false);
+                  var vusData = stringUtils.getVUSFullData(vus, false);
+                  errorMessage += '\n\n' + "gene: " + geneData +
+                      "\n\nVUS: " + vusData
+              }
+              $rootScope.$emit('oncokbError', {
+                  message: errorMessage,
+                  reason: error.type + ', Is fatal? ' + error.isFatal
+              });
+          }
         $rootScope.$digest();
       }.bind(this);
       gapi.drive.realtime.load(id, onLoad, initialize, onError);
