@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,8 +11,10 @@ import java.util.Set;
  */
 public class Alteration implements java.io.Serializable {
 
+    @JsonIgnore
     private Integer alterationId;
     private Gene gene;
+    @JsonIgnore
     private AlterationType alterationType;
     private VariantConsequence consequence;
 

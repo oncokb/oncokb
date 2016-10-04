@@ -34,6 +34,10 @@ public final class AlterationUtils {
         Integer start = -1;
         Integer end = 100000;
 
+        if (proteinChange == null) {
+            return;
+        }
+
         if (proteinChange.startsWith("p.")) {
             proteinChange = proteinChange.substring(2);
         }

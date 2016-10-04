@@ -103,4 +103,22 @@ public class GeneUtils {
             return new HashSet<>(geneBo.findAll());
         }
     }
+
+    public static Boolean isSameGene(Integer entrezGeneId, String hugoSymbol) {
+        Boolean flag = false;
+        Gene entrezGene = null;
+        Gene hugoGene = null;
+        if (entrezGeneId != null) {
+            entrezGene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+        }
+
+        if (hugoSymbol != null) {
+            hugoGene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        }
+
+        if (entrezGene != null && hugoGene != null && entrezGene.equals(hugoGene)) {
+            flag = true;
+        }
+        return flag;
+    }
 }

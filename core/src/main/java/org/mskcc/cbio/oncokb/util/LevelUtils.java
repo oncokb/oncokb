@@ -11,6 +11,8 @@ import java.util.*;
 public class LevelUtils {
     public static final List<LevelOfEvidence> LEVELS = Collections.unmodifiableList(
         new ArrayList<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_R3);
+            add(LevelOfEvidence.LEVEL_R2);
             add(LevelOfEvidence.LEVEL_4);
             add(LevelOfEvidence.LEVEL_3B);
             add(LevelOfEvidence.LEVEL_3A);
@@ -41,7 +43,7 @@ public class LevelUtils {
 
     public static LevelOfEvidence getHighestLevel(Set<LevelOfEvidence> levels) {
         Integer highestLevelIndex = -1;
-        for(LevelOfEvidence levelOfEvidence : levels) {
+        for (LevelOfEvidence levelOfEvidence : levels) {
             if (levelOfEvidence != null) {
                 Integer _index = LEVELS.indexOf(levelOfEvidence);
                 highestLevelIndex = _index > highestLevelIndex ? _index : highestLevelIndex;
@@ -162,5 +164,28 @@ public class LevelUtils {
             }
         }
         return levelOfEvidences;
+    }
+
+    public static Set<LevelOfEvidence> getAllLevels() {
+        return new HashSet<>(LEVELS);
+    }
+
+    public static Set<LevelOfEvidence> getSensitiveLevels() {
+        return new HashSet<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_1);
+            add(LevelOfEvidence.LEVEL_2A);
+            add(LevelOfEvidence.LEVEL_2B);
+            add(LevelOfEvidence.LEVEL_3A);
+            add(LevelOfEvidence.LEVEL_3B);
+            add(LevelOfEvidence.LEVEL_4);
+        }};
+    }
+
+    public static Set<LevelOfEvidence> getResistanceLevels() {
+        return new HashSet<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_R1);
+            add(LevelOfEvidence.LEVEL_R2);
+            add(LevelOfEvidence.LEVEL_R3);
+        }};
     }
 }

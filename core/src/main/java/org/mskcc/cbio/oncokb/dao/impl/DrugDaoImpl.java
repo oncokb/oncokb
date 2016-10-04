@@ -26,6 +26,11 @@ public class DrugDaoImpl extends GenericDaoImpl<Drug, Integer> implements DrugDa
 
     @Override
     public List<Drug> findDrugBySynonym(String synonym) {
-        return findByNamedQuery("findDrugByName", synonym);
+        return findByNamedQuery("findDrugBySynonym", synonym);
+    }
+
+    @Override
+    public List<Drug> findDrugByAtcCode(String atcCode) {
+        return findByNamedQuery("findDrugByAtcCode", atcCode);
     }
 }

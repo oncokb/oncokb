@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -11,6 +13,7 @@ import java.util.logging.Level;
  */
 public class EvidenceQueries implements java.io.Serializable {
     private List<Query> queries; //Optional, This id is passed from request. The identifier used to distinguish the query
+    @JsonIgnore
     private String geneStatus;
     private String evidenceTypes;
     private Set<LevelOfEvidence> levels;
