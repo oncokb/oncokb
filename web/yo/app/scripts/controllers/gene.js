@@ -2994,14 +2994,31 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.updateGene(params, function (result) {
                     $scope.docStatus.savedGene = true;
-                    console.log('success', result);
+                    DatabaseConnector
+                        .updateGeneCache($scope.gene.name.getText(),
+                        function() {
+                            console.log('success', result);
+                        },
+                        function() {
+                            console.log('error', result);
+                            var errorMessage = 'An error has occurred ' +
+                                'when updateing gene cache';
+
+                            $rootScope.$emit('oncokbError', 
+                                {message: errorMessage,
+                                    reason: JSON.stringify(result)});
+                        });
                     changeLastUpdate();
                 }, function (result) {
                     $scope.docStatus.savedGene = true;
-                    var errorMessage = 'An error has occurred when saving data, please contact the developer.';
+                    var errorMessage = 'An error has occurred when saving ' +
+                        'data, please contact the developer.';
 
-                    dialogs.error('Error', errorMessage);
-                    $rootScope.$emit('oncokbError', {message: errorMessage, reason: JSON.stringify(result)});
+                    // dialogs.error('Error', errorMessage);
+                    $rootScope.$emit('oncokbError',
+                        {message: 'An error has occurred when saving data. ' +
+                        'Gene: ' + $scope.gene.name.getText(),
+                            reason: JSON.stringify(result)});
                     changeLastUpdate();
                 });
             };

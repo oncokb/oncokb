@@ -310,6 +310,17 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
         });
     }
 
+    function updateGene(hugoSymbol) {
+        return $http({
+            url: OncoKB.config.apiLink + 'cache',
+            method: 'POST',
+            params: {
+                cmd: 'updateGene',
+                hugoSymbol: hugoSymbol
+            }
+        });
+    }
+    
     return {
         reset: function() {
             return setStatus('reset');
@@ -320,7 +331,8 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
         disable: function() {
             return setStatus('disable');
         },
-        getStatus: getStatus
+        getStatus: getStatus,
+        updateGene: updateGene
     };
 }]);
 
