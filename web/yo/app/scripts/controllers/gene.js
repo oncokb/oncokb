@@ -3002,7 +3002,8 @@ angular.module('oncokbApp')
                         function() {
                             console.log('error', result);
                             var errorMessage = 'An error has occurred ' +
-                                'when updateing gene cache';
+                                'when updating gene cache: ' +
+                                $scope.gene.name.getText();
 
                             $rootScope.$emit('oncokbError', 
                                 {message: errorMessage,
