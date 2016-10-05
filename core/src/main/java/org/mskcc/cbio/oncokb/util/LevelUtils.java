@@ -98,6 +98,17 @@ public class LevelUtils {
         }};
     }
 
+    public static Set<LevelOfEvidence> getPublicAndOtherIndicationLevels() {
+        return new HashSet<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_1);
+            add(LevelOfEvidence.LEVEL_R1);
+            add(LevelOfEvidence.LEVEL_2A);
+            add(LevelOfEvidence.LEVEL_2B);
+            add(LevelOfEvidence.LEVEL_3A);
+            add(LevelOfEvidence.LEVEL_3B);
+        }};
+    }
+
     public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level, Boolean sameIndication) {
         Set<LevelOfEvidence> convertLevels = new HashSet<>();
         convertLevels.add(LevelOfEvidence.LEVEL_0);
@@ -123,5 +134,19 @@ public class LevelUtils {
         }
         
         return level;
+    }
+
+    public static Set<LevelOfEvidence> parseStringLevelOfEvidences(String levelOfEvidenceStr) {
+        Set<LevelOfEvidence> levelOfEvidences = new HashSet<>();
+        if (levelOfEvidenceStr != null) {
+            String[] levelStrs = levelOfEvidenceStr.trim().split("\\s*,\\s*");
+            for (int i = 0; i < levelStrs.length; i++) {
+                LevelOfEvidence level = LevelOfEvidence.getByName(levelStrs[i]);
+                if (level != null) {
+                    levelOfEvidences.add(level);
+                }
+            }
+        }
+        return levelOfEvidences;
     }
 }

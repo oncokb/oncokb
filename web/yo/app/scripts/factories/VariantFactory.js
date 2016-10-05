@@ -226,7 +226,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', function($http)
 
     function updateGene(data) {
         return $http.post(
-            OncoKB.config.apiLink + 'driveAnnotation',
+            OncoKB.config.curationLink + 'driveAnnotation',
             data,
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -310,6 +310,20 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
         });
     }
 
+    function updateGene(hugoSymbol) {
+        var transform = function(data) {
+            return $.param(data);
+        };
+        return $http.post(
+            OncoKB.config.apiLink + 'cache', {
+                cmd: 'updateGene',
+                hugoSymbol: hugoSymbol
+            }, {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
+    }
+
     return {
         reset: function() {
             return setStatus('reset');
@@ -320,7 +334,8 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
         disable: function() {
             return setStatus('disable');
         },
-        getStatus: getStatus
+        getStatus: getStatus,
+        updateGene: updateGene
     };
 }]);
 
