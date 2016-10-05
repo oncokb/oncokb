@@ -58,46 +58,47 @@ public class DriveAnnotationParser {
 
             for (int i = 0; i < vus.length(); i++) {
                 JSONObject variant = vus.getJSONObject(i);
-                String mutationStr = variant.getString("name");
-                String lastEdit = variant.getString("lastEdit");
-                JSONArray nameComments = variant.getJSONArray("nameComments");
-                
-                Map<String, String> mutations = parseMutationString(mutationStr);
-                Set<Alteration> alterations = new HashSet<Alteration>();
+                String mutationStr = variant.has("name") ? variant.getString("name") : null;
+                String lastEdit = variant.has("lastEdit") ? variant.getString("lastEdit") : null;
+                JSONArray nameComments = variant.has("nameComments") ? variant.getJSONArray("nameComments") : null;
+                if (mutationStr != null) {
+                    Map<String, String> mutations = parseMutationString(mutationStr);
+                    Set<Alteration> alterations = new HashSet<Alteration>();
 
-                for (Map.Entry<String, String> mutation : mutations.entrySet()) {
-                    String proteinChange = mutation.getKey();
-                    String displayName = mutation.getValue();
-                    Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
-                    if (alteration == null) {
-                        alteration = new Alteration();
-                        alteration.setGene(gene);
-                        alteration.setAlterationType(type);
-                        alteration.setAlteration(proteinChange);
-                        alteration.setName(displayName);
-                        AlterationUtils.annotateAlteration(alteration, proteinChange);
-                        alterationBo.save(alteration);
+                    for (Map.Entry<String, String> mutation : mutations.entrySet()) {
+                        String proteinChange = mutation.getKey();
+                        String displayName = mutation.getValue();
+                        Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                        if (alteration == null) {
+                            alteration = new Alteration();
+                            alteration.setGene(gene);
+                            alteration.setAlterationType(type);
+                            alteration.setAlteration(proteinChange);
+                            alteration.setName(displayName);
+                            AlterationUtils.annotateAlteration(alteration, proteinChange);
+                            alterationBo.save(alteration);
+                        }
+                        alterations.add(alteration);
                     }
-                    alterations.add(alteration);
-                }
 
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.VUS);
-                evidence.setGene(gene);
-                evidence.setAlterations(alterations);
-                if (lastEdit != null) {
-                    Date date = new Date(Long.valueOf(lastEdit).longValue());
-                    evidence.setLastEdit(date);
-                }
-                if(nameComments != null) {
-                    for (int j = 0; j < nameComments.length(); j++) {
-                        JSONObject item = nameComments.getJSONObject(j);
-                        if(item != null && item.getString("content") != null) {
-                            setDocuments(item.getString("content"), evidence);
+                    Evidence evidence = new Evidence();
+                    evidence.setEvidenceType(EvidenceType.VUS);
+                    evidence.setGene(gene);
+                    evidence.setAlterations(alterations);
+                    if (lastEdit != null) {
+                        Date date = new Date(Long.valueOf(lastEdit).longValue());
+                        evidence.setLastEdit(date);
+                    }
+                    if (nameComments != null) {
+                        for (int j = 0; j < nameComments.length(); j++) {
+                            JSONObject item = nameComments.getJSONObject(j);
+                            if (item != null && item.has("content") && item.getString("content") != null) {
+                                setDocuments(item.getString("content"), evidence);
+                            }
                         }
                     }
+                    evidenceBo.save(evidence);
                 }
-                evidenceBo.save(evidence);
             }
         } else {
             if (gene == null) {
@@ -112,59 +113,62 @@ public class DriveAnnotationParser {
     private static void parseGene(JSONObject geneInfo, JSONArray vus) throws IOException {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
-            String hugo = geneInfo.getString("name").trim();
+            String hugo = geneInfo.has("name") ? geneInfo.getString("name").trim() : null;
             String status = geneInfo.has("status") ? geneInfo.getString("status").trim() : null;
-            Gene gene = geneBo.findGeneByHugoSymbol(hugo);
+
+            if (hugo != null) {
+                Gene gene = geneBo.findGeneByHugoSymbol(hugo);
 
 
-            if (gene == null) {
-                System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
-                gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
                 if (gene == null) {
+                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
+                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
+                    if (gene == null) {
 //                    throw new RuntimeException("Could not find gene "+hugo+" either.");
-                    System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+                        System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+                    } else {
+                        if (status != null) {
+                            gene.setStatus(status);
+                        }
+                        geneBo.save(gene);
+                    }
                 } else {
                     if (status != null) {
                         gene.setStatus(status);
+                        geneBo.saveOrUpdate(gene);
                     }
-                    geneBo.save(gene);
-                }
-            } else {
-                if (status != null) {
-                    gene.setStatus(status);
-                    geneBo.saveOrUpdate(gene);
-                }
-            }
-
-            if (gene != null) {
-                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-                AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-                List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene));
-                List<Alteration> alterations = alterationBo.findAlterationsByGene(Collections.singleton(gene));
-
-                for (Evidence evidence : evidences) {
-                    evidenceBo.delete(evidence);
                 }
 
-                for (Alteration alteration : alterations) {
-                    alterationBo.delete(alteration);
+                if (gene != null) {
+                    EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                    AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+                    List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene));
+                    List<Alteration> alterations = alterationBo.findAlterationsByGene(Collections.singleton(gene));
+
+                    for (Evidence evidence : evidences) {
+                        evidenceBo.delete(evidence);
+                    }
+
+                    for (Alteration alteration : alterations) {
+                        alterationBo.delete(alteration);
+                    }
+
+                    // summary
+                    parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null);
+
+                    // background
+                    parseGeneBackground(gene, geneInfo.has("background") ? geneInfo.getString("background").trim() : null);
+
+                    // mutations
+                    parseMutations(gene, geneInfo.has("mutations") ? geneInfo.getJSONArray("mutations") : null);
+
+                    // Variants of unknown significance
+                    parseVUS(gene, vus);
+
+                    CacheUtils.updateGene(gene.getEntrezGeneId());
+                } else {
+                    System.out.print("No gene name available");
                 }
-
-                // summary
-                parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null);
-
-                // background
-                parseGeneBackground(gene, geneInfo.has("background") ? geneInfo.getString("background").trim() : null);
-
-                // mutations
-                parseMutations(gene, geneInfo.has("mutations") ? geneInfo.getJSONArray("mutations") : null);
-
-                // Variants of unknown significance
-                parseVUS(gene, vus);
-
-                CacheUtils.updateGene(gene.getEntrezGeneId());
-            } else {
-                System.out.print("No gene name available");
             }
         }
     }
@@ -230,7 +234,7 @@ public class DriveAnnotationParser {
             String effect = getMutationEffect(mutationObj);
 
             // If both mutation effect and oncogenicity both unknown, ignore variant.
-            if (oncogenic != null && oncogenic.equals("-1") 
+            if (oncogenic != null && oncogenic.equals("-1")
                 && effect != null && effect.toLowerCase().equals("unknown")) {
                 return;
             }
