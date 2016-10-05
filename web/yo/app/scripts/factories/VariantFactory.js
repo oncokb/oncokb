@@ -311,16 +311,19 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
     }
 
     function updateGene(hugoSymbol) {
-        return $http({
-            url: OncoKB.config.apiLink + 'cache',
-            method: 'POST',
-            params: {
+        var transform = function(data) {
+            return $.param(data);
+        };
+        return $http.post(
+            OncoKB.config.apiLink + 'cache', {
                 cmd: 'updateGene',
                 hugoSymbol: hugoSymbol
-            }
-        });
+            }, {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
     }
-    
+
     return {
         reset: function() {
             return setStatus('reset');
