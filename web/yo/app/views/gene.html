@@ -141,10 +141,6 @@
             </span>
           </uib-accordion-heading>
           <uib-accordion ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
-            <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short mutation summary" ng-model="mutation.shortSummary.text"></p></span>-->
-            <span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional mutation summary" ng-model="mutation.summary.text"></p></span>
-            <pub-iframe ng-model="mutation.summary.text"></pub-iframe>
-
             <!-- Mutation Effect -->
             <uib-accordion-group ng-init="geneStatus[$index].oncogenic = {}" is-open="geneStatus[$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].oncogenic.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
               <uib-accordion-heading>
@@ -185,8 +181,16 @@
                 <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
                 <drive-realtime-string es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
               </p>
-              <span>
-                <drive-realtime-string es="mutation.shortSummary_eStatus" fe="fileEditable" t="'p'" object="mutation.shortSummary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
+                <!-- Migrate from mutation summary -->
+                <span>
+                <strong>Short description of oncogenicity:</strong>
+                <br/>
+                <drive-realtime-string fe="fileEditable" t="'p'" object="mutation.shortSummary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
+              </span>
+                <span>
+                <strong>Description of oncogenicity:</strong>
+                <br/>
+                <drive-realtime-string fe="fileEditable" t="'p'" object="mutation.summary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
               </span>
             </uib-accordion-group>
 

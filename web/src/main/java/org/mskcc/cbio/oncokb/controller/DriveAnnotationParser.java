@@ -230,6 +230,7 @@ public class DriveAnnotationParser {
             Set<Alteration> alterations = new HashSet<Alteration>();
 
             String oncogenic = getOncogenicity(mutationObj);
+            String oncogenicShortSummaryStr = null;
             String oncogenicSummaryStr = null;
             String effect = getMutationEffect(mutationObj);
 
@@ -239,8 +240,14 @@ public class DriveAnnotationParser {
                 return;
             }
 
+            // mutation summary
+            System.out.println("##    Oncogenicity Summary");
             if (mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
-                oncogenicSummaryStr = mutationObj.getString("shortSummary");
+                oncogenicShortSummaryStr = mutationObj.getString("shortSummary");
+            }
+
+            if (mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
+                oncogenicSummaryStr = mutationObj.getString("summary");
             }
 
             Map<String, String> mutations = parseMutationString(mutationStr);
@@ -260,23 +267,7 @@ public class DriveAnnotationParser {
                     alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
-                setOncogenic(gene, alteration, oncogenic, oncogenicSummaryStr);
-            }
-
-            // mutation summary
-            System.out.println("##    Summary");
-
-            if (mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
-                Evidence evidence = new Evidence();
-                evidence.setEvidenceType(EvidenceType.MUTATION_SUMMARY);
-                evidence.setAlterations(alterations);
-                evidence.setGene(gene);
-                evidence.setDescription(mutationObj.getString("summary"));
-                setDocuments(mutationObj.getString("summary"), evidence);
-                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-                evidenceBo.save(evidence);
-            } else {
-                System.out.println("    No info...");
+                setOncogenic(gene, alteration, oncogenic, oncogenicShortSummaryStr, oncogenicSummaryStr);
             }
 
             // mutation effect
@@ -363,7 +354,7 @@ public class DriveAnnotationParser {
         return oncogenic;
     }
 
-    private static void setOncogenic(Gene gene, Alteration alteration, String oncogenic, String oncogenicSummary) {
+    private static void setOncogenic(Gene gene, Alteration alteration, String oncogenic, String shortOncogenicSummary, String oncogenicSummary) {
         if (alteration != null && gene != null && (oncogenic != null || oncogenicSummary != null)) {
             List<Evidence> evidences = new ArrayList<>();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -374,14 +365,17 @@ public class DriveAnnotationParser {
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.ONCOGENIC);
                 evidence.setKnownEffect(oncogenic);
+                evidence.setShortDescription(shortOncogenicSummary);
                 evidence.setDescription(oncogenicSummary);
-                evidenceBo.save(evidence);
+                setDocuments(shortOncogenicSummary, evidence);
                 setDocuments(oncogenicSummary, evidence);
+                evidenceBo.save(evidence);
             } else if (oncogenic.equals("1") || oncogenic.equals("2")) {
                 evidences.get(0).setKnownEffect(oncogenic);
                 evidences.get(0).setDescription(oncogenicSummary);
-                evidenceBo.update(evidences.get(0));
+                setDocuments(shortOncogenicSummary, evidences.get(0));
                 setDocuments(oncogenicSummary, evidences.get(0));
+                evidenceBo.update(evidences.get(0));
             }
         }
     }
