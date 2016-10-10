@@ -93,7 +93,7 @@ public class PortalAlterationImporter {
         String joinedGenes = StringUtils.join(genes, ",");
         String studies[] = {"blca_tcga_pub", "brca_tcga_pub2015", "cesc_tcga", "coadread_tcga_pub", "hnsc_tcga_pub", "kich_tcga_pub", "kirc_tcga_pub", "kirp_tcga", "lihc_tcga", "luad_tcga_pub", "lusc_tcga_pub", "lgggbm_tcga_pub", "ov_tcga_pub", "thca_tcga_pub", "prad_tcga_pub", "sarc_tcga", "skcm_tcga", "stad_tcga_pub", "tgct_tcga", "ucec_tcga_pub"};
         String joinedStudies = StringUtils.join(studies, ",");
-        String studyUrl = "http://www.cbioportal.org/api/studies?study_ids=" + joinedStudies;
+        String studyUrl = "http://www.cbioportal.org/api-legacy/studies?study_ids=" + joinedStudies;
         String studyResult = FileUtils.readRemote(studyUrl);
         JSONArray studyJSONResult = new JSONArray(studyResult);
         PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
@@ -105,7 +105,7 @@ public class PortalAlterationImporter {
                 System.out.println("*****************************************************************************");
                 System.out.println("Importing portal alteration data for " + jObject.get("name").toString());
                 //get sequenced sample list for one study
-                String sequencedSamplesUrl = "http://www.cbioportal.org/api/samplelists?sample_list_ids=" + cancerStudy + "_sequenced";
+                String sequencedSamplesUrl = "http://www.cbioportal.org/api-legacy/samplelists?sample_list_ids=" + cancerStudy + "_sequenced";
                 String sequencedSamplesResult = FileUtils.readRemote(sequencedSamplesUrl);
                 JSONArray sequencedSamplesJSONResult = new JSONArray(sequencedSamplesResult);
                 if (sequencedSamplesJSONResult != null && sequencedSamplesJSONResult.length() > 0) {
@@ -113,7 +113,7 @@ public class PortalAlterationImporter {
 
                     String genetic_profile_id = cancerStudy + "_mutations";
                     String sample_list_id = cancerStudy + "_sequenced";
-                    String profileDataUrl = "http://www.cbioportal.org/api/geneticprofiledata?genetic_profile_ids=" + genetic_profile_id + "&genes=" + joinedGenes + "&sample_list_id=" + sample_list_id;
+                    String profileDataUrl = "http://www.cbioportal.org/api-legacy/geneticprofiledata?genetic_profile_ids=" + genetic_profile_id + "&genes=" + joinedGenes + "&sample_list_id=" + sample_list_id;
                     String alterationResult = FileUtils.readRemote(profileDataUrl);
                     JSONArray alterationJSONResult = new JSONArray(alterationResult);
 
