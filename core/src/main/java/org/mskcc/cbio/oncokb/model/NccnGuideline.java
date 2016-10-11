@@ -14,8 +14,8 @@ public class NccnGuideline implements java.io.Serializable {
     private String version;
     private String pages;
     private String category;
-    private String shortDescription;
     private String description;
+    private String additionalInfo;
 
     public NccnGuideline() {
     }
@@ -60,20 +60,20 @@ public class NccnGuideline implements java.io.Serializable {
         this.category = category;
     }
 
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     @Override
