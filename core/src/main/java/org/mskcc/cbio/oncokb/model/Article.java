@@ -19,7 +19,25 @@ public class Article implements java.io.Serializable {
     private String pages;
     private String authors;
     private String elocationId;
+    private String abstractContent;
+    private String link;
 
+    public String getAbstractContent() {
+        return abstractContent;
+    }
+
+    public void setAbstractContent(String abstractContent) {
+        this.abstractContent = abstractContent;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+    
     public Article() {
     }
 
@@ -27,7 +45,7 @@ public class Article implements java.io.Serializable {
         this.pmid = pmid;
     }
 
-    public Article(String pmid, String title, String journal, String pubDate, String volume, String issue, String pages, String authors, String elocationId) {
+    public Article(String pmid, String title, String journal, String pubDate, String volume, String issue, String pages, String authors, String elocationId, String abstractContent, String link) {
         this.pmid = pmid;
         this.title = title;
         this.journal = journal;
@@ -37,6 +55,8 @@ public class Article implements java.io.Serializable {
         this.pages = pages;
         this.authors = authors;
         this.elocationId = elocationId;
+        this.abstractContent = abstractContent;
+        this.link = link;
     }
 
     public Integer getArticleId() {
