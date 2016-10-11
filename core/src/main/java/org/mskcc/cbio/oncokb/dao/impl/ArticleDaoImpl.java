@@ -22,4 +22,9 @@ public class ArticleDaoImpl
         List<Article> list = findByNamedQuery("findArticleByPmid", pmid);
         return list.isEmpty() ? null : list.get(0);
     }
+    
+    public Article findArticleByAbstract(String abstractContent) {
+        List<Article> list = findByNamedQuery("findArticleByAbstract", abstractContent);
+        return list.isEmpty() ? null : list.get(0);
+    }
 }
