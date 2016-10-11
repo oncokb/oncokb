@@ -1787,15 +1787,17 @@ angular.module('oncokbApp')
                     '\tFDA approved indication\tLevel\tShortDescription\t' +
                     'Description\tObsolete');
 
+                console.info('Gene\tVariant\tTumorType\tTI\tTreatment' +
+                    '\tCategory\tShort\tFull');
                 changeData(0, function () {
                     console.info('Finished.');
                 });
             };
 
-            $scope.convertTumorTypes = function () {
+            $scope.convertData = function () {
                 console.info('Converting tumor types to OncoTree tumor types...');
 
-                convertLung(0, function () {
+                convertData(0, function () {
                     console.info('Finished.');
                 });
             };
@@ -2330,17 +2332,27 @@ angular.module('oncokbApp')
                             var model = realtime.getModel();
                             var gene = model.getRoot().get('gene');
                             if (gene) {
+                                var geneName = gene.name.getText();
+                                var result = [];
+                                console.log((index + 1) + ' Gene: ' + geneName);
                                 // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function (mutation, index) {
-                                    var oncogenic = mutation.oncogenic.getText();
-                                    var mutationEffect = mutation.effect.value.getText();
-                                    var oncogenicSummary = mutation.shortSummary.getText();
-                                    var mutationDesp = mutation.description.getText();
-                                    var mutationShortDesp = mutation.short.getText();
+                                    var summary = mutation.summary.getText();
+                                    var shortSummary = mutation.shortSummary.getText();
+                                    var desp = mutation.description.getText();
+                                    var shortDesp = mutation.short.getText();
                                     var tumorTypes = mutation.tumors;
                                     var mutationName = mutation.name.getText();
-                                    var containPMID = mutationShortDesp.indexOf('PMID') !==-1 || mutationDesp.indexOf('PMID') !==-1;
-                                    var category = [];
+
+                                    if(!stringUtils.isUndefinedOrEmpty(shortDesp) && stringUtils.isUndefinedOrEmpty(mutation.description.getText())) {
+                                        result = [geneName, mutationName, '', '', '', 'mutation description', shortDesp, desp];
+                                        console.log(result.join('\t'));
+                                    }
+                                    if(!stringUtils.isUndefinedOrEmpty(shortSummary) && stringUtils.isUndefinedOrEmpty(summary)) {
+                                        result = [geneName, mutationName, '', '', '', 'mutation summary', shortSummary, summary];
+                                        console.log(result.join('\t'));
+                                    }
+
                                     
                                     // if(isUndefinedOrEmpty(mutationEffect) &&
                                     //     (_.isString(oncogenic) && oncogenic.toLowerCase() === 'unknown') &&
@@ -2406,6 +2418,27 @@ angular.module('oncokbApp')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\t" + category.join(''));
 
                                     mutation.tumors.asArray().forEach(function(tumor) {
+                                        var tumorName = tumor.name.getText();
+                                        var tumorShortPrev = tumor.shortPrevalence.getText();
+                                        var tumorPrev = tumor.prevalence.getText();
+                                        var tumorShortNCCN = tumor.nccn.short.getText();
+                                        var tumorNCCN = tumor.nccn.description.getText();
+                                        var tumorShortProgImp = tumor.shortProgImp.getText();
+                                        var tumorProgImp = tumor.progImp.getText();
+
+                                        if(!stringUtils.isUndefinedOrEmpty(tumorShortPrev) && stringUtils.isUndefinedOrEmpty(tumorPrev)) {
+                                            result = [geneName, mutationName, tumorName, '', '', 'tumorPrev', tumorShortPrev, tumorPrev];
+                                            console.log(result.join('\t'));
+                                        }
+                                        if(!stringUtils.isUndefinedOrEmpty(tumorShortNCCN) && stringUtils.isUndefinedOrEmpty(tumorNCCN)) {
+                                            result = [geneName, mutationName, tumorName, '', '', 'tumorNCCN', tumorShortNCCN, tumorNCCN];
+                                            console.log(result.join('\t'));
+                                        }
+                                        if(!stringUtils.isUndefinedOrEmpty(tumorShortProgImp) && stringUtils.isUndefinedOrEmpty(tumorProgImp)) {
+                                            result = [geneName, mutationName, tumorName, '', '', 'ProgImp', tumorShortProgImp, tumorProgImp];
+                                            console.log(result.join('\t'));
+                                        }
+
                                         tumor.TI.asArray().forEach(function(ti) {
                                             ti.treatments.asArray().forEach(function(treatment) {
                                                 // if (treatment.level.getText() === 'R1') {
@@ -2572,7 +2605,7 @@ angular.module('oncokbApp')
                 }
             }
             
-             function convertLung(index, callback) {
+             function convertData(index, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
                     storage.getRealtimeDocument(document.id).then(function(realtime) {
@@ -2585,6 +2618,7 @@ angular.module('oncokbApp')
                             if (gene) {
                                 // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function(mutation) {
+                                    if(mutation.shor)
                                     mutation.tumors.asArray().forEach(function(tumor) {
                                         var tumorName = tumor.name.getText();
                                         var message = '\tGene: ' + gene.name.getText() +
@@ -2622,12 +2656,12 @@ angular.module('oncokbApp')
 
                                 //Google has limitation for numbere of requests within one second
                                 $timeout(function() {
-                                    convertLung(++index, callback);
+                                    convertData(++index, callback);
                                 },300, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
-                                    convertLung(++index, callback);
+                                    convertData(++index, callback);
                                 }, 300, false);
                             }
                         }

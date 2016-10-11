@@ -8,7 +8,7 @@
  * Factory in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('stringUtils', function() {
+    .factory('stringUtils', function(_) {
         function findMutationEffect(query) {
             var mapping = {
                 "Loss-of-function, dominant negative, or gain-of-function": {
@@ -1096,6 +1096,14 @@ angular.module('oncokbApp')
             return status;
         }
 
+        function isUndefinedOrEmpty(str) {
+            if(_.isUndefined(str)) {
+                return true;
+            }else {
+                return str.toString().trim() === '' ? true : false;
+            }
+        }
+
         function stringObject(object) {
             var result = [];
             for (var key in object) {
@@ -1130,6 +1138,7 @@ angular.module('oncokbApp')
             },
             getGeneData: getGeneData,
             getVUSData: getVUSData,
+            isUndefinedOrEmpty: isUndefinedOrEmpty,
             stringObject: stringObject,
             getVUSFullData: getVUSFullData
         };
