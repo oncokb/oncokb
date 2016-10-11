@@ -75,7 +75,11 @@ public class validation {
             for (Alteration alt : allAlts) {
                 ArrayList<Alteration> relevantAlts = relevantAlterationsMapping.get(alt);
                 for (Alteration relevantAlt : relevantAlts) {
-                    if (oncogenicityMapping.containsKey(alt) && oncogenicityMapping.containsKey(relevantAlt) && !oncogenicityMapping.get(alt).equals(oncogenicityMapping.get(relevantAlt))) {
+                    if (oncogenicityMapping.containsKey(alt)
+                        && oncogenicityMapping.get(alt) != null
+                        && oncogenicityMapping.get(relevantAlt) != null
+                        && oncogenicityMapping.containsKey(relevantAlt) 
+                        && !oncogenicityMapping.get(alt).equals(oncogenicityMapping.get(relevantAlt))) {
                         result0 += alt.toString() + ": " + Oncogenicity.getByLevel(oncogenicityMapping.get(alt)).getDescription() + ". Relevant alteration: " +  relevantAlt.toString() + ": " + Oncogenicity.getByLevel(oncogenicityMapping.get(relevantAlt)).getDescription() + "\n";
                         length0++;
                         break;
@@ -92,8 +96,12 @@ public class validation {
                         break;
                     }
                 }
-                if (oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(alt).equals(Oncogenicity.UNKNOWN.getOncogenic()) 
-                        && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(alt).equals(MutationEffect.UNKNOWN.getMutation_effect())) {
+                if (oncogenicityMapping.containsKey(alt)
+                    && oncogenicityMapping.get(alt) != null
+                    && oncogenicityMapping.get(alt).equals(Oncogenicity.UNKNOWN.getOncogenic()) 
+                    && mutationEffectMapping.containsKey(alt) 
+                    && mutationEffectMapping.get(alt) != null
+                    && mutationEffectMapping.get(alt).equals(MutationEffect.UNKNOWN.getMutation_effect())) {
                     Integer relevantsSize = relevantAlts.size();
                     Integer relevantCount = 0;
                     for (Alteration relevantAlt : relevantAlts) {
