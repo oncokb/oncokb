@@ -116,33 +116,6 @@
             </span>
           </uib-accordion-heading>
           <uib-accordion ng-if="geneStatus[$index].isOpen || (status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" close-others="false">
-            <!-- Mutation Effect -->
-            <uib-accordion-group ng-init="geneStatus[$index].oncogenic = {}" is-open="geneStatus[$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].oncogenic.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
-              <uib-accordion-heading>
-                <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[$index].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[$index].oncogenic.isOpen)"></i>
-                <span> Summary of biological effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'mutationEffect')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-                <span class="pull-right" ng-show="fileEditable">
-                   <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'"></e-status>
-                </span>
-              </uib-accordion-heading>
-              <div class="mutationEffect">
-                <strong class="header">Mutation effect:</strong>
-                <div class="content">
-                  <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutation_effect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
-                </div>
-              </div>
-              <span>
-                <strong>{{::mutation.short.display}}:</strong>
-                <br/>
-                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.short" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>
-              </span>
-              <span>
-                <strong>{{::mutation.description.display}}:</strong>
-                <br/>
-                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>
-              </span>
-            </uib-accordion-group>
-
             <!-- Oncogenicity -->
             <uib-accordion-group ng-init="geneStatus[$index].shortSummary = {}" is-open="geneStatus[$index].shortSummary.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].shortSummary.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
               <uib-accordion-heading>
@@ -158,16 +131,43 @@
               </p>
                 <!-- Migrate from mutation summary -->
                 <span>
-                <strong>Short description of oncogenicity:</strong>
+                <strong>Summary statement:</strong>
                 <br/>
                 <drive-realtime-string fe="fileEditable" t="'p'" object="mutation.shortSummary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
               </span>
                 <span>
-                <strong>Description of oncogenicity:</strong>
+                <strong>Description of Evidence:</strong>
                 <br/>
                 <drive-realtime-string fe="fileEditable" t="'p'" object="mutation.summary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
               </span>
             </uib-accordion-group>
+            
+            <!-- Mutation Effect -->
+            <uib-accordion-group ng-init="geneStatus[$index].oncogenic = {}" is-open="geneStatus[$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].oncogenic.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
+                  <uib-accordion-heading>
+                      <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[$index].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[$index].oncogenic.isOpen)"></i>
+                      <span> Summary of biological effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'mutationEffect')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+                      <span class="pull-right" ng-show="fileEditable">
+                   <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'"></e-status>
+                </span>
+                  </uib-accordion-heading>
+                  <div class="mutationEffect">
+                      <strong class="header">Mutation effect:</strong>
+                      <div class="content">
+                          <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutation_effect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
+                      </div>
+                  </div>
+                  <span>
+                <strong>Description of Evidence:</strong>
+                <br/>
+                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>
+              </span>
+                  <span>
+                <strong>Additional Information (Optional):</strong>
+                <br/>
+                <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.short" io="geneStatus[$index].oncogenic.isOpen"></drive-realtime-string>
+              </span>
+              </uib-accordion-group>
 
             <!-- tumor types -->
             <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="geneStatus[$parent.$index][$index] = {}; geneStatus[$parent.$index][$index].isOpen = false;" class="accordionMarginTop" ng-hide="status.hideAllObsolete && tumor.name_eStatus.get('obsolete') === 'true'">
@@ -208,8 +208,8 @@
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'"></e-status>
                       </span>
                     </uib-accordion-heading>
-                    <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ph="'Short prevalence'"></drive-realtime-string>
-                    <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ph="'Full prevalence'"></drive-realtime-string>
+                    <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
+                    <drive-realtime-string es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].prevalence.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                   </uib-accordion-group>
 
                   <!-- Prognostic implications -->
@@ -222,8 +222,8 @@
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'"></e-status>
                       </span>
                     </uib-accordion-heading>
-                    <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ph="'Short prognostic implications'"></drive-realtime-string>
-                    <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ph="'Full prognostic implications'"></drive-realtime-string>
+                    <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
+                    <drive-realtime-string es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].progImp.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                   </uib-accordion-group>
 
                   <!-- NCCN guidelines -->
@@ -255,14 +255,14 @@
                       <!--<drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'select'" object="tumor.nccn.category" o="nccnCategories"></drive-realtime-string>-->
                     <!--</p>-->
                     <span>
-                    <strong>{{::tumor.nccn.short.display}}:</strong>
-                    <br/>
-                    <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.short" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen"></drive-realtime-string>
-                    </span>
-                    <span>
-                    <strong>{{::tumor.nccn.description.display}}:</strong>
+                    <strong>Description of Evidence:</strong>
                     <br/>
                     <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen"></drive-realtime-string>
+                    </span>
+                    <span>
+                    <strong>Additional Information (Optional):</strong>
+                    <br/>
+                    <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.short" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].nccn.isOpen"></drive-realtime-string>
                     </span>
                   </uib-accordion-group>
 
@@ -328,14 +328,14 @@
                               </div>
                             </div>
                             <span>
-                              <strong>{{treatment.short.display}}:</strong>
-                              <br/>
-                              <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></drive-realtime-string>
-                            </span>
-                            <span>
-                              <strong>{{::treatment.description.display}}:</strong>
+                              <strong>Description of Evidence:</strong>
                               <br/>
                               <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></drive-realtime-string>
+                            </span>
+                            <span>
+                              <strong>Additional Information (Optional):</strong>
+                              <br/>
+                              <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></drive-realtime-string>
                             </span>
                           </uib-accordion-group>
                         </div>
