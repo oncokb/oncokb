@@ -22,8 +22,8 @@ public class Evidence implements java.io.Serializable {
     private OncoTreeType oncoTreeType;
     private Gene gene;
     private Set<Alteration> alterations;
-    private String shortDescription;
     private String description;
+    private String additionalInfo;
     private Set<Treatment> treatments;
     private String knownEffect;
     private String status;
@@ -42,14 +42,6 @@ public class Evidence implements java.io.Serializable {
 
     public void setEvidenceId(Integer evidenceId) {
         this.evidenceId = evidenceId;
-    }
-
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
     }
 
     public EvidenceType getEvidenceType() {
@@ -117,6 +109,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     public Set<Treatment> getTreatments() {
@@ -237,8 +237,8 @@ public class Evidence implements java.io.Serializable {
             subtype = e.subtype;
             gene = e.gene;
             alterations = e.alterations;
-            shortDescription = e.shortDescription;
             description = e.description;
+            additionalInfo = e.additionalInfo;
             treatments = e.treatments;
             knownEffect = e.knownEffect;
             status = e.status;

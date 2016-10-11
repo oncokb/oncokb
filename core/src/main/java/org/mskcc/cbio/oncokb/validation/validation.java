@@ -134,7 +134,7 @@ public class validation {
                         referencesMapping.put(alterationItem, EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem))));
                     }
                     if(!altsWithDescriptions.contains(alterationItem)){    
-                        if(evidenceItem.getDescription() != null && !evidenceItem.getDescription().isEmpty() || evidenceItem.getShortDescription() != null && !evidenceItem.getShortDescription().isEmpty()){
+                        if(evidenceItem.getDescription() != null && !evidenceItem.getDescription().isEmpty()){
                             altsWithDescriptions.add(alterationItem);
                         }
                     }

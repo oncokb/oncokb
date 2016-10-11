@@ -101,11 +101,7 @@ public class SummaryUtils {
         Set<Evidence> tumorTypeSummaryEvs = EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
         if (!tumorTypeSummaryEvs.isEmpty()) {
             Evidence ev = tumorTypeSummaryEvs.iterator().next();
-            String tumorTypeSummary = ev.getShortDescription();
-
-            if (tumorTypeSummary == null) {
-                tumorTypeSummary = ev.getDescription();
-            }
+            String tumorTypeSummary = ev.getDescription();
             if (tumorTypeSummary != null) {
                 tumorTypeSummary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
                 sb.append(tumorTypeSummary);
@@ -375,11 +371,7 @@ public class SummaryUtils {
         if (!geneSummaryEvs.isEmpty()) {
             Evidence ev = geneSummaryEvs.iterator().next();
             if (ev != null) {
-                summary = ev.getShortDescription();
-
-                if (summary == null) {
-                    summary = ev.getDescription();
-                }
+                summary = ev.getDescription();
 
                 if (summary != null) {
                     summary = StringEscapeUtils.escapeXml(summary).trim();

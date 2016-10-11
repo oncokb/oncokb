@@ -50,7 +50,7 @@ public class AllOncogenicMutationEffect {
                         }
                     }
                     
-                    System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + evidence.getEvidenceType() + "\t" + knownEffect + "\t" + evidence.getShortDescription() + "\t" + evidence.getDescription());
+                    System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + evidence.getEvidenceType() + "\t" + knownEffect + "\t" + evidence.getDescription());
                 }
             }
         }
