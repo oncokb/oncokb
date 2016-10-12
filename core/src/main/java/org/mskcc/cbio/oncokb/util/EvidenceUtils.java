@@ -578,11 +578,49 @@ public class EvidenceUtils {
             }
             maps.get(treatmentsName).add(evidence);
         }
-        
-        for(Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+
+        for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
-            filtered.addAll(highestEvis);
+            
+            // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
+            if(highestEvis.size() > 1) {
+                Set<LevelOfEvidence> checkLevels = new HashSet<>();
+                checkLevels.add(LevelOfEvidence.LEVEL_2B);
+                checkLevels.add(LevelOfEvidence.LEVEL_3B);
+                if(checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
+                    Set<Integer> evidenceIds = new HashSet<>();
+                    for (Evidence evidence : highestEvis) {
+                        evidenceIds.add(evidence.getEvidenceId());
+                    }
+                    Set<Evidence> originalEvis = EvidenceUtils.getEvidenceByEvidenceIds(evidenceIds);
+                    Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis);
+                    Set<Integer> filteredIds = new HashSet<>();
+                    for(Evidence evidence : highestOriginalEvis) {
+                        filteredIds.add(evidence.getEvidenceId());
+                    }
+                    for(Evidence evidence : highestEvis) {
+                        if(filteredIds.contains(evidence.getEvidenceId())) {
+                            filtered.add(evidence);
+                        }
+                    }
+                }else {
+                    filtered.add(highestEvis.iterator().next());
+                }
+            }else {
+                filtered.addAll(highestEvis);
+            }
         }
         return filtered;
+    }
+
+    public static Set<Evidence> getEvidenceByEvidenceIds(Set<Integer> ids) {
+        if (ids == null) {
+            return new HashSet<>();
+        }
+        if (CacheUtils.isEnabled()) {
+            return CacheUtils.getEvidencesByIds(ids);
+        } else {
+            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<Integer>(ids)));
+        }
     }
 }
