@@ -172,34 +172,34 @@ public class IndicatorController {
                     EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
 
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
-                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                    EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
-                        (levels != null ?
-                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicLevels())
-                    ));
-                if (highestLevelOnly) {
-                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
-                }
-                indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
-                highestLevels = findHighestLevel(treatmentEvidences);
-
-                LevelOfEvidence sensitive = highestLevels.get("sensitive");
-                if (sensitive != null) {
-                    Boolean sameIndication = false;
-                    if (oncoTreeTypes != null && !oncoTreeTypes.isEmpty()) {
-                        for (Evidence evidence : treatmentEvidences) {
-                            if (evidence.getLevelOfEvidence() != null &&
-                                CollectionUtils.intersection(
-                                    Collections.singleton(evidence.getOncoTreeType()), oncoTreeTypes).size() > 0) {
-                                sameIndication = true;
-                            }
-                        }
-                    }
-
-                    highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, sameIndication));
-                }
-                highestLevels.put("resistant", null);
+//                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+//                    EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
+//                        (levels != null ?
+//                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
+//                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicLevels())
+//                    ));
+//                if (highestLevelOnly) {
+//                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
+//                }
+//                indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
+//                highestLevels = findHighestLevel(treatmentEvidences);
+//
+//                LevelOfEvidence sensitive = highestLevels.get("sensitive");
+//                if (sensitive != null) {
+//                    Boolean sameIndication = false;
+//                    if (oncoTreeTypes != null && !oncoTreeTypes.isEmpty()) {
+//                        for (Evidence evidence : treatmentEvidences) {
+//                            if (evidence.getLevelOfEvidence() != null &&
+//                                CollectionUtils.intersection(
+//                                    Collections.singleton(evidence.getOncoTreeType()), oncoTreeTypes).size() > 0) {
+//                                sameIndication = true;
+//                            }
+//                        }
+//                    }
+//
+//                    highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, sameIndication));
+//                }
+//                highestLevels.put("resistant", null);
             }
             indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
             indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
