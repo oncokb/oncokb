@@ -82,7 +82,13 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @return
      */
     List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
-    
+
+    /**
+     * 
+     * @param ids
+     * @return
+     */
+    List<Evidence> findEvidencesByIds(List<Integer> ids);
     /**
      * 
      * @param alterations

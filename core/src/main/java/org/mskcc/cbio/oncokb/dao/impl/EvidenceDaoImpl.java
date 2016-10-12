@@ -4,23 +4,18 @@
  */
 package org.mskcc.cbio.oncokb.dao.impl;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.hibernate.Query;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author jgao
  */
 public class EvidenceDaoImpl
-            extends GenericDaoImpl<Evidence, Integer>
-            implements EvidenceDao {
+    extends GenericDaoImpl<Evidence, Integer>
+    implements EvidenceDao {
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration) {
         return findByNamedQuery("findEvidencesByAlteration", alteration.getAlterationId());
@@ -51,7 +46,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes(List<Alteration> alterations, List<String> tumorTypes, List<EvidenceType> evidenceTypes) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -64,7 +59,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -77,7 +72,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -90,7 +85,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndSubtypesAndEvidenceTypes(List<Alteration> alterations, List<String> subtypes, List<EvidenceType> evidenceTypes) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -103,7 +98,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<String> tumorTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -116,7 +111,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -130,7 +125,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -143,7 +138,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Evidence> findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence(List<Alteration> alterations, List<String> subtypes, List<EvidenceType> evidenceTypes, List<LevelOfEvidence> levelOfEvidences) {
         List<Integer> alterationIds = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alterationIds.add(alteration.getAlterationId());
         }
 
@@ -153,10 +148,10 @@ public class EvidenceDaoImpl
         return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence", params, values);
 
     }
-    
+
     @Override
     public List<Evidence> findEvidencesByAlteration(Alteration alteration, EvidenceType evidenceType) {
-        if (evidenceType==null) return findEvidencesByAlteration(alteration);
+        if (evidenceType == null) return findEvidencesByAlteration(alteration);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceType", alteration.getAlterationId(), evidenceType);
     }
 
@@ -174,25 +169,25 @@ public class EvidenceDaoImpl
         String[] values = {Integer.toString(alteration.getAlterationId()), tumorType};
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndTumorType", params, values);
     }
-    
+
     @Override
     public List<Evidence> findEvidencesByAlterationAndCancerType(Alteration alteration, EvidenceType evidenceType, String cancerType) {
-        if (cancerType==null) return findEvidencesByAlteration(alteration, evidenceType);
+        if (cancerType == null) return findEvidencesByAlteration(alteration, evidenceType);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndCancerType", alteration.getAlterationId(), evidenceType, cancerType);
     }
 
     @Override
     public List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, EvidenceType evidenceType, String cancerType) {
-        if (cancerType==null) return findEvidencesByAlteration(alteration, evidenceType);
+        if (cancerType == null) return findEvidencesByAlteration(alteration, evidenceType);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndCancerTypeNoSubtype", alteration.getAlterationId(), evidenceType, cancerType);
     }
 
     @Override
     public List<Evidence> findEvidencesByAlterationAndSubtype(Alteration alteration, EvidenceType evidenceType, String subtype) {
-        if (subtype==null) return findEvidencesByAlteration(alteration, evidenceType);
+        if (subtype == null) return findEvidencesByAlteration(alteration, evidenceType);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndSubtype", alteration.getAlterationId(), evidenceType, subtype);
     }
-    
+
     @Override
     public List<Evidence> findEvidencesByGene(Gene gene) {
         return findByNamedQuery("findEvidencesByGene", gene);
@@ -200,13 +195,13 @@ public class EvidenceDaoImpl
 
     @Override
     public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType) {
-        if (evidenceType==null) return findEvidencesByGene(gene);
+        if (evidenceType == null) return findEvidencesByGene(gene);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceType", gene, evidenceType);
     }
 
     @Override
     public List<Evidence> findEvidencesByGeneAndTumorType(Gene gene, EvidenceType evidenceType, String tumorType) {
-        if (tumorType==null) return findEvidencesByGene(gene, evidenceType);
+        if (tumorType == null) return findEvidencesByGene(gene, evidenceType);
         String[] params = {"gene", "et", "tt"};
         Object[] values = {gene, evidenceType, tumorType};
         return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndTumorType", params, values);
@@ -214,26 +209,34 @@ public class EvidenceDaoImpl
 
     @Override
     public List<Evidence> findEvidencesByGeneAndCancerType(Gene gene, EvidenceType evidenceType, String cancerType) {
-        if (cancerType==null) return findEvidencesByGene(gene, evidenceType);
+        if (cancerType == null) return findEvidencesByGene(gene, evidenceType);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndCancerType", gene, evidenceType, cancerType);
     }
 
     @Override
     public List<Evidence> findEvidencesByGeneAndCancerTypeNoSubtype(Gene gene, EvidenceType evidenceType, String cancerType) {
-        if (cancerType==null) return findEvidencesByGene(gene, evidenceType);
+        if (cancerType == null) return findEvidencesByGene(gene, evidenceType);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndCancerTypeNoSubtype", gene, evidenceType, cancerType);
     }
 
     @Override
     public List<Evidence> findEvidencesByGeneAndSubtype(Gene gene, EvidenceType evidenceType, String subtype) {
-        if (subtype==null) return findEvidencesByGene(gene, evidenceType);
+        if (subtype == null) return findEvidencesByGene(gene, evidenceType);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndSubtype", gene, evidenceType, subtype);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByIds(List<Integer> ids) {
+        if (ids == null) return new ArrayList<>();
+        String[] params = {"ids"};
+        List[] values = {ids};
+        return getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidencesByIds", params, values);
     }
 
     @Override
     public List<Object> findTumorTypesWithEvidencesForAlterations(List<Alteration> alterations) {
         List<Integer> alts = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alts.add(alteration.getAlterationId());
         }
         String[] params = {"alts"};
@@ -244,7 +247,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Object> findCancerTypesWithEvidencesForAlterations(List<Alteration> alterations) {
         List<Integer> alts = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alts.add(alteration.getAlterationId());
         }
         String[] params = {"alts"};
@@ -255,7 +258,7 @@ public class EvidenceDaoImpl
     @Override
     public List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations) {
         List<Integer> alts = new ArrayList<>();
-        for(Alteration alteration : alterations) {
+        for (Alteration alteration : alterations) {
             alts.add(alteration.getAlterationId());
         }
         String[] params = {"alts"};

@@ -40,7 +40,7 @@ public class CacheUtils {
     // Cache metadata from database
     private static Set<Gene> genes = new HashSet<>();
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
-    private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based evidences 
+    private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations 
 
     private static Observer variantSummaryObserver = new Observer() {
         @Override
@@ -482,14 +482,7 @@ public class CacheUtils {
 
     public static Set<Evidence> getEvidences(Gene gene) {
         if (evidences == null || evidences.size() == 0) {
-            Map<Gene, Set<Evidence>> mappedEvidence =
-                EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
-                    ApplicationContextSingleton.getEvidenceBo().findAll()));
-            Iterator it = mappedEvidence.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
-                evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
-            }
+            cacheAllEvidencesByGenes();
         }
 
         if (evidences.containsKey(gene.getEntrezGeneId())) {
@@ -498,6 +491,24 @@ public class CacheUtils {
         } else {
             return new HashSet<>();
         }
+    }
+
+    public static Set<Evidence> getEvidencesByIds(Set<Integer> ids) {
+        if (evidences == null || evidences.size() == 0) {
+            cacheAllEvidencesByGenes();
+        }
+
+        Set<Evidence> mappedEvis = new HashSet<>();
+        if(ids != null) {
+            for(Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+                for(Evidence evidence : map.getValue()) {
+                    if(ids.contains(evidence.getEvidenceId())) {
+                        mappedEvis.add(evidence);
+                    }
+                }
+            }
+        }
+        return mappedEvis;
     }
 
     public static Boolean containEvidences(Gene gene) {
@@ -545,6 +556,17 @@ public class CacheUtils {
             return true;
         } else {
             return false;
+        }
+    }
+    
+    private static void cacheAllEvidencesByGenes() {
+        Map<Gene, Set<Evidence>> mappedEvidence =
+            EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
+                ApplicationContextSingleton.getEvidenceBo().findAll()));
+        Iterator it = mappedEvidence.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
+            evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
         }
     }
 }
