@@ -102,7 +102,7 @@ public class IndicatorController {
             Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
                 gene, query.getAlteration(), query.getConsequence(),
                 query.getProteinStart(), query.getProteinEnd());
-            Set<Alteration> nonVUSAlts = AlterationUtils.excludeVUS(relevantAlterations);
+            Set<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             Set<Alteration> alleles = new HashSet<>();
             List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
@@ -146,7 +146,7 @@ public class IndicatorController {
             } else {
                 indicatorQuery.setAlleleExist(true);
             }
-            if (indicatorQuery.getVariantExist() && !indicatorQuery.getVUS()) {
+            if (indicatorQuery.getVariantExist() || nonVUSRelevantAlts.size() > 0) {
                 Oncogenicity oncogenicity = MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
                         Collections.singleton(EvidenceType.ONCOGENIC), null)
