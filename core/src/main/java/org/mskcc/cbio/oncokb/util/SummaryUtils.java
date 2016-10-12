@@ -14,6 +14,8 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
+    private static String[] SpecialMutations = {"amplification", "deletion", "fusion", "fusions"};
+    
     public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         if (gene == null) {
             return "";
@@ -267,6 +269,14 @@ public class SummaryUtils {
             }
         } else {
             String altName = queryAlteration + " mutation";
+            
+            if(isSpecialMutation(queryAlteration, false)) {
+                if(isSpecialMutation(queryAlteration, true)) {
+                    queryAlteration = queryAlteration.substring(0, 1).toUpperCase() + queryAlteration.substring(1);
+                }
+                altName = gene.getHugoSymbol() + " " + queryAlteration;
+            }
+            
             if (gene == null || alterations == null) {
                 return null;
             }
@@ -811,22 +821,17 @@ public class SummaryUtils {
 
         return ret + " mutation" + (alterations.size() > 1 ? "s" : "");
     }
-
-    private static String specialMutation(String mutationStr) {
-        String[] specialMutations = {"amplification", "deletion", "fusion", "fusions"};
+    
+    private static Boolean isSpecialMutation(String mutationStr, Boolean exactMatch) {
+        exactMatch = exactMatch || false;
         mutationStr = mutationStr.toString();
-
-        if (stringContainsItemFromList(mutationStr, specialMutations)) {
-            if (itemFromListAtEndString(mutationStr, specialMutations)) {
-                return mutationStr;
-            } else {
-
-            }
-        } else {
-            return mutationStr;
+        if (exactMatch) {
+            return stringIsFromList(mutationStr, SpecialMutations);
+        } else if (stringContainsItemFromList(mutationStr, SpecialMutations)
+            && itemFromListAtEndString(mutationStr, SpecialMutations)) {
+            return true;
         }
-
-        return mutationStr;
+        return false;
     }
 
     private static Boolean appendThe(String queryAlteration) {
@@ -843,6 +848,15 @@ public class SummaryUtils {
     public static boolean stringContainsItemFromList(String inputString, String[] items) {
         for (int i = 0; i < items.length; i++) {
             if (inputString.contains(items[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean stringIsFromList(String inputString, String[] items) {
+        for (int i = 0; i < items.length; i++) {
+            if (inputString.equalsIgnoreCase(items[i])) {
                 return true;
             }
         }

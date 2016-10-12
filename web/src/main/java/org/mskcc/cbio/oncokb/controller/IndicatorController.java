@@ -113,7 +113,7 @@ public class IndicatorController {
                 }
             } else {
                 indicatorQuery.setVariantExist(true);
-                if (!relevantAlterations.isEmpty() && !nonVUSAlts.isEmpty()) {
+                if (!relevantAlterations.isEmpty()) {
                     for (Alteration alteration : relevantAlterations) {
                         alleles.addAll(AlterationUtils.getAlleleAlterations(alteration));
                     }
