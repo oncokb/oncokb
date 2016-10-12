@@ -317,4 +317,25 @@ public class MainUtils {
             return true;
         }
     }
+
+    public static String listToString(List<String> list, String separator) {
+        if (list.isEmpty()) {
+            return "";
+        }
+
+        int n = list.size();
+        StringBuilder sb = new StringBuilder();
+        sb.append(list.get(0));
+        if (n == 1) {
+            return sb.toString();
+        }
+
+        for (int i = 1; i < n - 1; i++) {
+            sb.append(", ").append(list.get(i));
+        }
+
+        sb.append(separator).append(list.get(n - 1));
+
+        return sb.toString();
+    }
 }

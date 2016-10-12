@@ -53,6 +53,27 @@ public final class TreatmentUtils {
         }
         return getTreatmentsByGenesAndLevels(GeneUtils.getAllGenes(), levels);
     }
+    
+    public static String getTreatmentName(Set<Treatment> treatments, Boolean sorted) {
+        StringBuilder sb = new StringBuilder();
+        sorted = sorted == null ? false : sorted;
+        
+        List<String> treatmentNames = new ArrayList<>();
+        for(Treatment treatment : treatments) {
+            List<String> drugNames = new ArrayList<>();
+            for(Drug drug : treatment.getDrugs()) {
+                drugNames.add(drug.getDrugName());
+            }
+            if(sorted) {
+                Collections.sort(drugNames);
+            }
+            treatmentNames.add(MainUtils.listToString(drugNames, "+"));
+        }
+        if(sorted) {
+            Collections.sort(treatmentNames);
+        }
+        return MainUtils.listToString(treatmentNames, ", ");
+    }
 
     public static Set<Treatment> getTreatmentsByGeneAndLevels(Gene gene, Set<LevelOfEvidence> levels) {
         if (levels == null) {

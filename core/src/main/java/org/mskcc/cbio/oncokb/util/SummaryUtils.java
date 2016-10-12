@@ -508,7 +508,7 @@ public class SummaryUtils {
             alterationNames.add(alleleNamesStr((Set<Alteration>) entry.getValue()));
         }
 
-        return listToString(alterationNames, " and ");
+        return MainUtils.listToString(alterationNames, " and ");
     }
 
     private static Map<String, Object> geAlterationsWithHighestOncogenicity(Set<Alteration> alleles) {
@@ -631,7 +631,7 @@ public class SummaryUtils {
 //        if(levelZeroDrugs.size() > 0) {
 //            list.add(treatmentsToStringLevelZero(levelZeroDrugs, list.size()==0 & capFirstLetter));
 //        }
-        return listToString(list, " and ");
+        return MainUtils.listToString(list, " and ");
     }
 
     private static String treatmentsToStringLevelZero(Map<String, Set<String>> drugs, Boolean capFirstLetter) {
@@ -663,7 +663,7 @@ public class SummaryUtils {
                 .append("here are multiple FDA-approved agents");
         }
         sb.append(" for treatment of patients with ");
-        sb.append(tumorTypes.size() > 2 ? "different tumor types" : listToString(new ArrayList<String>(tumorTypes), " and "))
+        sb.append(tumorTypes.size() > 2 ? "different tumor types" : MainUtils.listToString(new ArrayList<String>(tumorTypes), " and "))
             .append(" irrespective of mutation status");
         return sb.toString();
     }
@@ -725,7 +725,7 @@ public class SummaryUtils {
                 sb.append("s");
             }
             sb.append(" ");
-            sb.append(listToString(new ArrayList<String>(drugs), " and "));
+            sb.append(MainUtils.listToString(new ArrayList<String>(drugs), " and "));
         }
         if (fda || nccn) {
             sb.append(" ");
@@ -803,12 +803,12 @@ public class SummaryUtils {
 
         List<String> list = new ArrayList<String>();
         for (Map.Entry<String, Set<String>> entry : mapGeneVariants.entrySet()) {
-            list.add(entry.getKey() + " " + listToString(new ArrayList<String>(entry.getValue()), " and "));
+            list.add(entry.getKey() + " " + MainUtils.listToString(new ArrayList<String>(entry.getValue()), " and "));
         }
 
         String gene = alterations.iterator().next().getGene().getHugoSymbol();
 
-        String ret = listToString(list, " or ");
+        String ret = MainUtils.listToString(list, " or ");
 
         if (!ret.startsWith(gene)) {
             ret = gene + " " + ret;
@@ -870,27 +870,6 @@ public class SummaryUtils {
             }
         }
         return false;
-    }
-
-    private static String listToString(List<String> list, String separator) {
-        if (list.isEmpty()) {
-            return "";
-        }
-
-        int n = list.size();
-        StringBuilder sb = new StringBuilder();
-        sb.append(list.get(0));
-        if (n == 1) {
-            return sb.toString();
-        }
-
-        for (int i = 1; i < n - 1; i++) {
-            sb.append(", ").append(list.get(i));
-        }
-
-        sb.append(separator).append(list.get(n - 1));
-
-        return sb.toString();
     }
 
 }

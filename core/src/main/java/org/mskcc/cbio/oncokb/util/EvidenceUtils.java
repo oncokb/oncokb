@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -359,7 +360,7 @@ public class EvidenceUtils {
         }
         return result;
     }
-    
+
     public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
@@ -541,6 +542,47 @@ public class EvidenceUtils {
         Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenicByEvidences(evidences);
         if (map.get(highestOncogenicity) != null)
             filtered = map.get(highestOncogenicity);
+        return filtered;
+    }
+
+    public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences) {
+        Map<LevelOfEvidence, Set<Evidence>> levels = new HashMap<>();
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getLevelOfEvidence() != null) {
+                if (!levels.containsKey(evidence.getLevelOfEvidence())) {
+                    levels.put(evidence.getLevelOfEvidence(), new HashSet<Evidence>());
+                }
+                levels.get(evidence.getLevelOfEvidence()).add(evidence);
+            }
+        }
+
+        Set<LevelOfEvidence> keys = levels.keySet();
+
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+        if (highestLevel != null) {
+            return levels.get(highestLevel);
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {
+        Map<String, Set<Evidence>> maps = new HashedMap();
+        Set<Evidence> filtered = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments(), true);
+            if (!maps.containsKey(treatmentsName)) {
+                maps.put(treatmentsName, new HashSet<Evidence>());
+            }
+            maps.get(treatmentsName).add(evidence);
+        }
+        
+        for(Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+            Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
+            filtered.addAll(highestEvis);
+        }
         return filtered;
     }
 }

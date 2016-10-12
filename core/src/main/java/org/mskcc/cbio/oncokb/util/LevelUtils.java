@@ -38,6 +38,17 @@ public class LevelUtils {
         return null;
     }
 
+    public static LevelOfEvidence getHighestLevel(Set<LevelOfEvidence> levels) {
+        Integer highestLevelIndex = -1;
+        for(LevelOfEvidence levelOfEvidence : levels) {
+            if (levelOfEvidence != null) {
+                Integer _index = LEVELS.indexOf(levelOfEvidence);
+                highestLevelIndex = _index > highestLevelIndex ? _index : highestLevelIndex;
+            }
+        }
+        return highestLevelIndex > -1 ? LEVELS.get(highestLevelIndex) : null;
+    }
+
     public static LevelOfEvidence getHighestLevelFromEvidenceByLevels(Set<Evidence> evidences, Set<LevelOfEvidence> levels) {
         if (levels == null) {
             return getHighestLevelFromEvidence(evidences);
@@ -47,7 +58,7 @@ public class LevelUtils {
 
             for (Evidence evidence : evidences) {
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
-                if(levels.contains(level)) {
+                if (levels.contains(level)) {
                     if (level != null) {
                         Integer _index = LEVELS.indexOf(level);
                         highestLevelIndex = _index > highestLevelIndex ? _index : highestLevelIndex;
@@ -88,7 +99,7 @@ public class LevelUtils {
         }
         return result;
     }
-    
+
     public static Set<LevelOfEvidence> getPublicLevels() {
         return new HashSet<LevelOfEvidence>() {{
             add(LevelOfEvidence.LEVEL_1);
@@ -122,17 +133,17 @@ public class LevelUtils {
         ignoreIndication.add(LevelOfEvidence.LEVEL_R2);
         ignoreIndication.add(LevelOfEvidence.LEVEL_R3);
 
-        if(level == null || ignoreIndication.contains(level))
+        if (level == null || ignoreIndication.contains(level))
             return null;
-        
-        if(convertLevels.contains(level)) {
-            if(sameIndication) {
+
+        if (convertLevels.contains(level)) {
+            if (sameIndication) {
                 return LevelOfEvidence.LEVEL_3A;
-            }else {
+            } else {
                 return LevelOfEvidence.LEVEL_3B;
             }
         }
-        
+
         return level;
     }
 
