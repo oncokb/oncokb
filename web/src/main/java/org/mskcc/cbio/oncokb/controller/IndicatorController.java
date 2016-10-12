@@ -57,7 +57,7 @@ public class IndicatorController {
 
         source = source == null ? "oncokb" : source;
 
-        Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
+        Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
         return processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
     }
 
@@ -77,7 +77,7 @@ public class IndicatorController {
 
         for (Query query : body.getQueries()) {
             result.add(processQuery(query, body.getGeneStatus(),
-                body.getLevels() == null ? LevelUtils.getPublicLevels() : body.getLevels(),
+                body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
                 source, body.getHighestLevelOnly()));
         }
         return result;
@@ -158,7 +158,7 @@ public class IndicatorController {
                         MainUtils.getTreatmentEvidenceTypes(),
                         (levels != null ?
                             new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicLevels())));
+                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
 
                 if (highestLevelOnly) {
                     treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
@@ -176,7 +176,7 @@ public class IndicatorController {
 //                    EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
 //                        (levels != null ?
 //                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-//                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicLevels())
+//                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())
 //                    ));
 //                if (highestLevelOnly) {
 //                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);

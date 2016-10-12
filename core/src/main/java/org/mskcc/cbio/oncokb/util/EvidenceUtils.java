@@ -395,32 +395,21 @@ public class EvidenceUtils {
                                     if (tempEvidence.getLevelOfEvidence() != null) {
                                         if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
                                             tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
-                                            tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                                            filtered.add(tempEvidence);
+                                            if (evidenceQuery.getLevelOfEvidences() == null
+                                                || evidenceQuery.getLevelOfEvidences().size() == 0
+                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_2B)) {
+                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+                                                filtered.add(tempEvidence);
+                                            }
                                         } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-                                            tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
-                                            filtered.add(tempEvidence);
+                                            if (evidenceQuery.getLevelOfEvidences() == null
+                                                || evidenceQuery.getLevelOfEvidences().size() == 0
+                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_3B)) {
+                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+                                                filtered.add(tempEvidence);
+                                            }
                                         }
                                     }
-//                                    Disable for now, unless cbioportal integration issue fixed
-//                                    if (tempEvidence.getLevelOfEvidence() != null) {
-//                                        if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
-//                                            tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
-//                                            if (evidenceQuery.getLevelOfEvidences() == null
-//                                                || evidenceQuery.getLevelOfEvidences().size() == 0
-//                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_2B)) {
-//                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-//                                                filtered.add(tempEvidence);
-//                                            }
-//                                        } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-//                                            if (evidenceQuery.getLevelOfEvidences() == null
-//                                                || evidenceQuery.getLevelOfEvidences().size() == 0
-//                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_3B)) {
-//                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
-//                                                filtered.add(tempEvidence);
-//                                            }
-//                                        }
-//                                    }
                                 }
                             }
                         }
@@ -572,22 +561,27 @@ public class EvidenceUtils {
         Set<Evidence> filtered = new HashSet<>();
 
         for (Evidence evidence : evidences) {
-            String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments(), true);
-            if (!maps.containsKey(treatmentsName)) {
-                maps.put(treatmentsName, new HashSet<Evidence>());
+            if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
+                String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments(), true);
+                if (!maps.containsKey(treatmentsName)) {
+                    maps.put(treatmentsName, new HashSet<Evidence>());
+                }
+                maps.get(treatmentsName).add(evidence);
+            } else{
+                // Keep all un-treatment evidences
+                filtered.add(evidence);
             }
-            maps.get(treatmentsName).add(evidence);
         }
 
         for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
-            
+
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
-            if(highestEvis.size() > 1) {
+            if (highestEvis.size() > 1) {
                 Set<LevelOfEvidence> checkLevels = new HashSet<>();
                 checkLevels.add(LevelOfEvidence.LEVEL_2B);
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
-                if(checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
+                if (checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
                     Set<Integer> evidenceIds = new HashSet<>();
                     for (Evidence evidence : highestEvis) {
                         evidenceIds.add(evidence.getEvidenceId());
@@ -595,18 +589,20 @@ public class EvidenceUtils {
                     Set<Evidence> originalEvis = EvidenceUtils.getEvidenceByEvidenceIds(evidenceIds);
                     Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis);
                     Set<Integer> filteredIds = new HashSet<>();
-                    for(Evidence evidence : highestOriginalEvis) {
+                    for (Evidence evidence : highestOriginalEvis) {
                         filteredIds.add(evidence.getEvidenceId());
                     }
-                    for(Evidence evidence : highestEvis) {
-                        if(filteredIds.contains(evidence.getEvidenceId())) {
+                    for (Evidence evidence : highestEvis) {
+                        if (filteredIds.contains(evidence.getEvidenceId())) {
                             filtered.add(evidence);
+                            // Only add one
+                            break;
                         }
                     }
-                }else {
+                } else {
                     filtered.add(highestEvis.iterator().next());
                 }
-            }else {
+            } else {
                 filtered.addAll(highestEvis);
             }
         }
