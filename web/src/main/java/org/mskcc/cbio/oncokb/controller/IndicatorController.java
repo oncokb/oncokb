@@ -146,7 +146,7 @@ public class IndicatorController {
             } else {
                 indicatorQuery.setAlleleExist(true);
             }
-            if (indicatorQuery.getVariantExist() || nonVUSRelevantAlts.size() > 0) {
+            if (nonVUSRelevantAlts.size() > 0) {
                 Oncogenicity oncogenicity = MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
                         Collections.singleton(EvidenceType.ONCOGENIC), null)
