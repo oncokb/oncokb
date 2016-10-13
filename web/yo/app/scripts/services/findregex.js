@@ -121,13 +121,18 @@ angular.module('oncokbApp')
                                     uniqueResultA.push({type: 'nct', id: _datum});
                                     break;
                                 case 2:
-                                    _datum = _datum.replace(/\(\s*Abstract\s*:\s*/ig, "");
-                                    var abstracts = _datum.match(/[^;]*;/gi), text = '', link = '', tempIndex = 0;
+                                    var abstractPattern = /\(\s*Abstract\s*:\s*([^\)]*);\s*\)/gi;
+                                    _datum = abstractPattern.exec(_datum)[1];                                    
+                                    var abstracts = _datum.split(';'), text = '', link = '';
                                     _.each(abstracts, function(item){
-                                        tempIndex = item.indexOf('.');
-                                        text = item.substring(0, tempIndex).trim();
-                                        link = item.substring(tempIndex+1, item.length-1).trim();
-                                        uniqueResultA.push({type: 'abstract', id: text, link: link});
+                                        var myRegexp = /(.*?)\.\s*(http.*)/g;
+                                        var match = myRegexp.exec(item);
+                                        if(match !== null) {
+                                          text = match[1];
+                                          link = match[2];
+                                          uniqueResultA.push({type: 'abstract', id: text, link: link});
+                                        }
+                                       
                                     });
                                     break;
                                 default:
