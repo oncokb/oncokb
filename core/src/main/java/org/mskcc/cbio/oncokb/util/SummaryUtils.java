@@ -14,6 +14,8 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
+    private static String[] SpecialMutations = {"amplification", "deletion", "fusion", "fusions"};
+    
     public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         if (gene == null) {
             return "";
@@ -267,6 +269,14 @@ public class SummaryUtils {
             }
         } else {
             String altName = queryAlteration + " mutation";
+            
+            if(isSpecialMutation(queryAlteration, false)) {
+                if(isSpecialMutation(queryAlteration, true)) {
+                    queryAlteration = queryAlteration.substring(0, 1).toUpperCase() + queryAlteration.substring(1);
+                }
+                altName = gene.getHugoSymbol() + " " + queryAlteration;
+            }
+            
             if (gene == null || alterations == null) {
                 return null;
             }
@@ -498,7 +508,7 @@ public class SummaryUtils {
             alterationNames.add(alleleNamesStr((Set<Alteration>) entry.getValue()));
         }
 
-        return listToString(alterationNames, " and ");
+        return MainUtils.listToString(alterationNames, " and ");
     }
 
     private static Map<String, Object> geAlterationsWithHighestOncogenicity(Set<Alteration> alleles) {
@@ -621,7 +631,7 @@ public class SummaryUtils {
 //        if(levelZeroDrugs.size() > 0) {
 //            list.add(treatmentsToStringLevelZero(levelZeroDrugs, list.size()==0 & capFirstLetter));
 //        }
-        return listToString(list, " and ");
+        return MainUtils.listToString(list, " and ");
     }
 
     private static String treatmentsToStringLevelZero(Map<String, Set<String>> drugs, Boolean capFirstLetter) {
@@ -653,7 +663,7 @@ public class SummaryUtils {
                 .append("here are multiple FDA-approved agents");
         }
         sb.append(" for treatment of patients with ");
-        sb.append(tumorTypes.size() > 2 ? "different tumor types" : listToString(new ArrayList<String>(tumorTypes), " and "))
+        sb.append(tumorTypes.size() > 2 ? "different tumor types" : MainUtils.listToString(new ArrayList<String>(tumorTypes), " and "))
             .append(" irrespective of mutation status");
         return sb.toString();
     }
@@ -715,7 +725,7 @@ public class SummaryUtils {
                 sb.append("s");
             }
             sb.append(" ");
-            sb.append(listToString(new ArrayList<String>(drugs), " and "));
+            sb.append(MainUtils.listToString(new ArrayList<String>(drugs), " and "));
         }
         if (fda || nccn) {
             sb.append(" ");
@@ -793,12 +803,12 @@ public class SummaryUtils {
 
         List<String> list = new ArrayList<String>();
         for (Map.Entry<String, Set<String>> entry : mapGeneVariants.entrySet()) {
-            list.add(entry.getKey() + " " + listToString(new ArrayList<String>(entry.getValue()), " and "));
+            list.add(entry.getKey() + " " + MainUtils.listToString(new ArrayList<String>(entry.getValue()), " and "));
         }
 
         String gene = alterations.iterator().next().getGene().getHugoSymbol();
 
-        String ret = listToString(list, " or ");
+        String ret = MainUtils.listToString(list, " or ");
 
         if (!ret.startsWith(gene)) {
             ret = gene + " " + ret;
@@ -811,22 +821,17 @@ public class SummaryUtils {
 
         return ret + " mutation" + (alterations.size() > 1 ? "s" : "");
     }
-
-    private static String specialMutation(String mutationStr) {
-        String[] specialMutations = {"amplification", "deletion", "fusion", "fusions"};
+    
+    private static Boolean isSpecialMutation(String mutationStr, Boolean exactMatch) {
+        exactMatch = exactMatch || false;
         mutationStr = mutationStr.toString();
-
-        if (stringContainsItemFromList(mutationStr, specialMutations)) {
-            if (itemFromListAtEndString(mutationStr, specialMutations)) {
-                return mutationStr;
-            } else {
-
-            }
-        } else {
-            return mutationStr;
+        if (exactMatch) {
+            return stringIsFromList(mutationStr, SpecialMutations);
+        } else if (stringContainsItemFromList(mutationStr, SpecialMutations)
+            && itemFromListAtEndString(mutationStr, SpecialMutations)) {
+            return true;
         }
-
-        return mutationStr;
+        return false;
     }
 
     private static Boolean appendThe(String queryAlteration) {
@@ -848,6 +853,15 @@ public class SummaryUtils {
         }
         return false;
     }
+    
+    public static boolean stringIsFromList(String inputString, String[] items) {
+        for (int i = 0; i < items.length; i++) {
+            if (inputString.equalsIgnoreCase(items[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static boolean itemFromListAtEndString(String inputString, String[] items) {
         for (int i = 0; i < items.length; i++) {
@@ -856,27 +870,6 @@ public class SummaryUtils {
             }
         }
         return false;
-    }
-
-    private static String listToString(List<String> list, String separator) {
-        if (list.isEmpty()) {
-            return "";
-        }
-
-        int n = list.size();
-        StringBuilder sb = new StringBuilder();
-        sb.append(list.get(0));
-        if (n == 1) {
-            return sb.toString();
-        }
-
-        for (int i = 1; i < n - 1; i++) {
-            sb.append(", ").append(list.get(i));
-        }
-
-        sb.append(separator).append(list.get(n - 1));
-
-        return sb.toString();
     }
 
 }

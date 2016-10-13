@@ -34,7 +34,9 @@ public class IndicatorController {
         @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
         @RequestParam(value = "geneStatus", required = false) String geneStatus,
         @RequestParam(value = "source", required = false) String source,
-        @RequestParam(value = "levels", required = false) String levels) {
+        @RequestParam(value = "levels", required = false) String levels,
+        @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly
+    ) {
 
         Query query = new Query();
         query.setId(id);
@@ -55,8 +57,8 @@ public class IndicatorController {
 
         source = source == null ? "oncokb" : source;
 
-        Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
-        return processQuery(query, geneStatus, levelOfEvidences, source);
+        Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
+        return processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -75,14 +77,16 @@ public class IndicatorController {
 
         for (Query query : body.getQueries()) {
             result.add(processQuery(query, body.getGeneStatus(),
-                body.getLevels() == null ? LevelUtils.getPublicLevels() : body.getLevels(), source));
+                body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
+                source, body.getHighestLevelOnly()));
         }
         return result;
     }
 
     private IndicatorQueryResp processQuery(Query query, String geneStatus,
-                                            Set<LevelOfEvidence> levels, String source) {
+                                            Set<LevelOfEvidence> levels, String source, Boolean highestLevelOnly) {
         geneStatus = geneStatus != null ? geneStatus : "complete";
+        highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
         indicatorQuery.setQuery(query);
@@ -98,7 +102,7 @@ public class IndicatorController {
             Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
                 gene, query.getAlteration(), query.getConsequence(),
                 query.getProteinStart(), query.getProteinEnd());
-            Set<Alteration> nonVUSAlts = AlterationUtils.excludeVUS(relevantAlterations);
+            Set<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             Set<Alteration> alleles = new HashSet<>();
             List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
@@ -113,7 +117,7 @@ public class IndicatorController {
                 }
             } else {
                 indicatorQuery.setVariantExist(true);
-                if (!relevantAlterations.isEmpty() && !nonVUSAlts.isEmpty()) {
+                if (!relevantAlterations.isEmpty()) {
                     for (Alteration alteration : relevantAlterations) {
                         alleles.addAll(AlterationUtils.getAlleleAlterations(alteration));
                     }
@@ -142,19 +146,23 @@ public class IndicatorController {
             } else {
                 indicatorQuery.setAlleleExist(true);
             }
-            if (indicatorQuery.getVariantExist() && !indicatorQuery.getVUS()) {
+            if (nonVUSRelevantAlts.size() > 0) {
                 Oncogenicity oncogenicity = MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
                         Collections.singleton(EvidenceType.ONCOGENIC), null)
                 );
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                Set<Evidence> treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
-                    MainUtils.getTreatmentEvidenceTypes(),
-                    (levels != null ?
-                        new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                            LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicLevels()));
+                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+                    EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
+                        MainUtils.getTreatmentEvidenceTypes(),
+                        (levels != null ?
+                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
+                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
 
+                if (highestLevelOnly) {
+                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
+                }
                 if (treatmentEvidences != null) {
                     indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
                     highestLevels = findHighestLevel(treatmentEvidences);
@@ -164,31 +172,34 @@ public class IndicatorController {
                     EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
 
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
-                Set<Evidence> treatmentEvidences = EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
-                    (levels != null ?
-                        new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                            LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicLevels())
-                );
-
-                indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
-                highestLevels = findHighestLevel(treatmentEvidences);
-
-                LevelOfEvidence sensitive = highestLevels.get("sensitive");
-                if (sensitive != null) {
-                    Boolean sameIndication = false;
-                    if (oncoTreeTypes != null && !oncoTreeTypes.isEmpty()) {
-                        for (Evidence evidence : treatmentEvidences) {
-                            if (evidence.getLevelOfEvidence() != null &&
-                                CollectionUtils.intersection(
-                                    Collections.singleton(evidence.getOncoTreeType()), oncoTreeTypes).size() > 0) {
-                                sameIndication = true;
-                            }
-                        }
-                    }
-
-                    highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, sameIndication));
-                }
-                highestLevels.put("resistant", null);
+//                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+//                    EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
+//                        (levels != null ?
+//                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
+//                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())
+//                    ));
+//                if (highestLevelOnly) {
+//                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
+//                }
+//                indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
+//                highestLevels = findHighestLevel(treatmentEvidences);
+//
+//                LevelOfEvidence sensitive = highestLevels.get("sensitive");
+//                if (sensitive != null) {
+//                    Boolean sameIndication = false;
+//                    if (oncoTreeTypes != null && !oncoTreeTypes.isEmpty()) {
+//                        for (Evidence evidence : treatmentEvidences) {
+//                            if (evidence.getLevelOfEvidence() != null &&
+//                                CollectionUtils.intersection(
+//                                    Collections.singleton(evidence.getOncoTreeType()), oncoTreeTypes).size() > 0) {
+//                                sameIndication = true;
+//                            }
+//                        }
+//                    }
+//
+//                    highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, sameIndication));
+//                }
+//                highestLevels.put("resistant", null);
             }
             indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
             indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());

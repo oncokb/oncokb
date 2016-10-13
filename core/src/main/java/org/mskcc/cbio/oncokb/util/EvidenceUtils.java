@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -359,7 +360,7 @@ public class EvidenceUtils {
         }
         return result;
     }
-    
+
     public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
@@ -394,32 +395,21 @@ public class EvidenceUtils {
                                     if (tempEvidence.getLevelOfEvidence() != null) {
                                         if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
                                             tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
-                                            tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                                            filtered.add(tempEvidence);
+                                            if (evidenceQuery.getLevelOfEvidences() == null
+                                                || evidenceQuery.getLevelOfEvidences().size() == 0
+                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_2B)) {
+                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+                                                filtered.add(tempEvidence);
+                                            }
                                         } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-                                            tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
-                                            filtered.add(tempEvidence);
+                                            if (evidenceQuery.getLevelOfEvidences() == null
+                                                || evidenceQuery.getLevelOfEvidences().size() == 0
+                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_3B)) {
+                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+                                                filtered.add(tempEvidence);
+                                            }
                                         }
                                     }
-//                                    Disable for now, unless cbioportal integration issue fixed
-//                                    if (tempEvidence.getLevelOfEvidence() != null) {
-//                                        if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
-//                                            tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
-//                                            if (evidenceQuery.getLevelOfEvidences() == null
-//                                                || evidenceQuery.getLevelOfEvidences().size() == 0
-//                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_2B)) {
-//                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-//                                                filtered.add(tempEvidence);
-//                                            }
-//                                        } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-//                                            if (evidenceQuery.getLevelOfEvidences() == null
-//                                                || evidenceQuery.getLevelOfEvidences().size() == 0
-//                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_3B)) {
-//                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
-//                                                filtered.add(tempEvidence);
-//                                            }
-//                                        }
-//                                    }
                                 }
                             }
                         }
@@ -542,5 +532,91 @@ public class EvidenceUtils {
         if (map.get(highestOncogenicity) != null)
             filtered = map.get(highestOncogenicity);
         return filtered;
+    }
+
+    public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences) {
+        Map<LevelOfEvidence, Set<Evidence>> levels = new HashMap<>();
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getLevelOfEvidence() != null) {
+                if (!levels.containsKey(evidence.getLevelOfEvidence())) {
+                    levels.put(evidence.getLevelOfEvidence(), new HashSet<Evidence>());
+                }
+                levels.get(evidence.getLevelOfEvidence()).add(evidence);
+            }
+        }
+
+        Set<LevelOfEvidence> keys = levels.keySet();
+
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+        if (highestLevel != null) {
+            return levels.get(highestLevel);
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {
+        Map<String, Set<Evidence>> maps = new HashedMap();
+        Set<Evidence> filtered = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
+                String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments(), true);
+                if (!maps.containsKey(treatmentsName)) {
+                    maps.put(treatmentsName, new HashSet<Evidence>());
+                }
+                maps.get(treatmentsName).add(evidence);
+            } else{
+                // Keep all un-treatment evidences
+                filtered.add(evidence);
+            }
+        }
+
+        for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+            Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
+
+            // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
+            if (highestEvis.size() > 1) {
+                Set<LevelOfEvidence> checkLevels = new HashSet<>();
+                checkLevels.add(LevelOfEvidence.LEVEL_2B);
+                checkLevels.add(LevelOfEvidence.LEVEL_3B);
+                if (checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
+                    Set<Integer> evidenceIds = new HashSet<>();
+                    for (Evidence evidence : highestEvis) {
+                        evidenceIds.add(evidence.getEvidenceId());
+                    }
+                    Set<Evidence> originalEvis = EvidenceUtils.getEvidenceByEvidenceIds(evidenceIds);
+                    Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis);
+                    Set<Integer> filteredIds = new HashSet<>();
+                    for (Evidence evidence : highestOriginalEvis) {
+                        filteredIds.add(evidence.getEvidenceId());
+                    }
+                    for (Evidence evidence : highestEvis) {
+                        if (filteredIds.contains(evidence.getEvidenceId())) {
+                            filtered.add(evidence);
+                            // Only add one
+                            break;
+                        }
+                    }
+                } else {
+                    filtered.add(highestEvis.iterator().next());
+                }
+            } else {
+                filtered.addAll(highestEvis);
+            }
+        }
+        return filtered;
+    }
+
+    public static Set<Evidence> getEvidenceByEvidenceIds(Set<Integer> ids) {
+        if (ids == null) {
+            return new HashSet<>();
+        }
+        if (CacheUtils.isEnabled()) {
+            return CacheUtils.getEvidencesByIds(ids);
+        } else {
+            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<Integer>(ids)));
+        }
     }
 }

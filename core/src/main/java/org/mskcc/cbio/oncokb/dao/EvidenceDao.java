@@ -235,6 +235,13 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
 
     /**
      * 
+     * @param ids
+     * @return
+     */
+    List<Evidence> findEvidencesByIds(List<Integer> ids);
+    
+    /**
+     * 
      * @param alterations
      * @return
      */

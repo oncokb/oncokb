@@ -186,6 +186,11 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
+    public List<Evidence> findEvidencesByIds(List<Integer> ids) {
+        return getDao().findEvidencesByIds(ids);
+    }
+
+    @Override
     public List<Drug> findDrugsByAlterations(Collection<Alteration> alterations) {
         List<Evidence> evidences = new ArrayList<Evidence>();
         for (Alteration alteration : alterations) {

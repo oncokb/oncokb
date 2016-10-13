@@ -35,7 +35,8 @@ public class EvidenceController {
         @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
         @RequestParam(value = "geneStatus", required = false) String geneStatus,
         @RequestParam(value = "source", required = false) String source,
-        @RequestParam(value = "levels", required = false) String levels) {
+        @RequestParam(value = "levels", required = false) String levels,
+        @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly) {
 
         List<List<Evidence>> evidences = new ArrayList<>();
 
@@ -49,7 +50,7 @@ public class EvidenceController {
         List<EvidenceQueryRes> evidenceQueries = processRequest(
             (List<Query>) requestQueries.get("queries"),
             new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            geneStatus, source, new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")));
+            geneStatus, source, new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {
@@ -81,13 +82,16 @@ public class EvidenceController {
                 evidenceTypes.add(EvidenceType.GENE_BACKGROUND);
             }
 
-            result = processRequest(requestQueries, evidenceTypes, body.getGeneStatus(), body.getSource(), body.getLevels());
+            result = processRequest(requestQueries, evidenceTypes, body.getGeneStatus(), body.getSource(),
+                body.getLevels(), body.getHighestLevelOnly());
         }
 
         return result;
     }
 
-    private List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes, String geneStatus, String source, Set<LevelOfEvidence> levelOfEvidences) {
+    private List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
+                                                  String geneStatus, String source,
+                                                  Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
         if (source == null) {
@@ -140,7 +144,8 @@ public class EvidenceController {
             }
         }
 
-        return assignEvidence(EvidenceUtils.getEvidence(evidenceQueries, evidenceTypes, geneStatus, levelOfEvidences), evidenceQueries);
+        return assignEvidence(EvidenceUtils.getEvidence(evidenceQueries, evidenceTypes, geneStatus, levelOfEvidences),
+            evidenceQueries, highestLevelOnly);
     }
 
     private Gene getGene(Integer entrezGeneId, String hugoSymbol) {
@@ -157,9 +162,14 @@ public class EvidenceController {
     }
 
 
-    private List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries) {
+    private List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
+                                                  Boolean highestLevelOnly) {
+        highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
+
         for (EvidenceQueryRes query : evidenceQueries) {
-            query.setEvidences(new ArrayList<>(EvidenceUtils.filterEvidence(evidences, query)));
+            query.setEvidences(
+                new ArrayList<>(
+                    EvidenceUtils.keepHighestLevelForSameTreatments(EvidenceUtils.filterEvidence(evidences, query))));
 
             // Attach evidence if query doesn't contain any alteration and has alleles.
             if ((query.getAlterations() == null || query.getAlterations().isEmpty() || AlterationUtils.excludeVUS(query.getGene(), new HashSet<>(query.getAlterations())).size() == 0) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
@@ -233,6 +243,12 @@ public class EvidenceController {
                         query.getEvidences().addAll(alleleEvidencesCopy);
                     }
                 }
+            }
+            
+            if(highestLevelOnly) {
+                query.setEvidences(
+                    new ArrayList<Evidence>(EvidenceUtils.getOnlyHighestLevelEvidences(
+                        new HashSet<Evidence>(query.getEvidences()))));
             }
         }
         return evidenceQueries;
