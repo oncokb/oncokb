@@ -1995,6 +1995,67 @@ angular.module('oncokbApp')
                 string = S(_string).collapseWhitespace().s;
                 return string;
             }
+
+            function changeDataBasedOnGenes(genes, index, callback) {
+                if(index < genes.length) {
+                    var documents = Documents.get({title: genes[index]});
+                    var document =
+                        _.isArray(documents) && documents.length === 1 ?
+                            documents[0] : null;
+                    if (document) {
+                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                console.log('did not get realtime document.');
+                            } else {
+                                // console.log(document.title, '\t\t', index + 1);
+                                var model = realtime.getModel();
+                                var gene = model.getRoot().get('gene');
+                                if (gene) {
+                                    var geneName = gene.name.getText();
+                                    console.log('----' + (index + 1) + ' ' + geneName + '----');
+                                    // model.beginCompoundOperation();
+                                    gene.mutations.asArray().forEach(function(mutation, index) {
+                                        var oncogenic = mutation.oncogenic.getText();
+                                        var mutationEffect = mutation.effect.value.getText();
+                                        var mutationName = mutation.name.getText();
+
+                                        if (mutationName.toLowerCase() === 'fusion' || mutationName.toLowerCase() === 'fusions') {
+                                            console.log(geneName + '\t' + mutationName);
+                                            console.log('\t' + oncogenic + '\t' + mutationEffect);
+                                            if(oncogenic !== 'Likely') {
+                                                console.log('\t\tOncogenic is changing to Likely.');
+                                                mutation.oncogenic.setText('Likely');
+                                            }
+                                            if(mutationEffect !== 'Likely Gain-of-function') {
+                                                console.log('\t\tMutation effect is changing to Likely Gain-of-function.');
+                                                mutation.effect.value.setText('Likely Gain-of-function');
+                                            }
+                                        }
+                                    });
+                                    // model.endCompoundOperation();
+                                    $timeout(function() {
+                                        changeData(genes, ++index, callback);
+                                    }, 500, false);
+                                } else {
+                                    console.log('\t\tNo gene model.');
+                                    $timeout(function() {
+                                        changeData(genes, ++index, callback);
+                                    }, 500, false);
+                                }
+                            }
+                        });
+                    }else {
+                        console.log('\t\tDocuments are wrong:' + documents);
+                        $timeout(function() {
+                            changeData(genes, ++index, callback);
+                        }, 500, false);
+                    }
+                }else {
+                    if(_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
             
             function changeData(index, callback) {
                 if(index < $scope.documents.length) {
