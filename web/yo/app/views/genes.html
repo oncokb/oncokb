@@ -27,6 +27,7 @@
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="convertMutationEffect()">Convert mutation effect and oncogenic</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="findRelevantVariants()">Find relevant variants</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="migrate()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Migrate</span></button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="showValidationResult()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Show Validation Result</span></button>-->
         </span>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
             <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th ng-show="userRole === 8">Status</th><th>Edit</th></tr></thead>

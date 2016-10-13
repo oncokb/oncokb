@@ -1842,6 +1842,14 @@ angular.module('oncokbApp')
                 });
             };
             
+            $scope.showValidationResult = function () {
+                console.info('Gene\tVariant\tCategory');
+
+                showValidationResult(0, function () {
+                    console.info('Finished.');
+                });
+            };
+            
             function getCancerTypesName(cancerTypes) {
                 var list = [];
                 cancerTypes.asArray().forEach(function(cancerType) {
@@ -2102,6 +2110,68 @@ angular.module('oncokbApp')
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
                                     changeData(++index, callback);
+                                }, 500, false);
+                            }
+                        }
+                    });
+                }else {
+                    if(_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function showValidationResult(index, callback) {
+                if(index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function (realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        } else {
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                var geneName = gene.name.getText();
+                                gene.mutations.asArray().forEach(function (mutation, index) {
+                                    var oncogenic = mutation.oncogenic.getText();
+                                    var mutationEffect = mutation.effect.value.getText();
+                                    var mutationName = mutation.name.getText();
+                                    
+                                    // Not obsoleted variants but are not curated
+                                    if(mutation.oncogenic_eStatus.get('curated')===false && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                        console.log(geneName + '\t' + mutationName + '\tRed hand');
+                                    }
+                                    
+                                    // Obsoleted variants
+                                    if(mutation.name_eStatus.get('obsolete') === 'true') {
+                                        console.log(geneName + '\t' + mutationName + '\tObsoleted');
+                                    }
+                                    
+                                    // Not obsolete variant, but oncogenic is obsoleted.
+                                    if(mutation.shortSummary_eStatus.get('obsolete')==='true' && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                        console.log(geneName + '\t' + mutationName + '\tNot obsolete variant, but oncogenic is obsoleted.');
+                                    }
+                                    
+                                    // Not obsolete variant, but mutation effect is obsoleted.
+                                    if(mutation.oncogenic_eStatus.get('obsolete')==='true' && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                        console.log(geneName + '\t' + mutationName + '\tNot obsolete variant, but mutation effect is obsoleted.');
+                                    }
+                                    
+                                    // Both Unknown/Unknow for oncogenicity and mutation effect
+                                    if (_.isString(oncogenic) &&
+                                        _.isString(mutationEffect) &&
+                                        oncogenic.toLowerCase() === 'unknown' &&
+                                        mutationEffect.toLowerCase() === 'unknown') {
+                                        console.log(geneName + '\t' + mutationName + '\tBoth unknown');
+                                    }
+                                });
+                                $timeout(function () {
+                                    showValidationResult(++index, callback);
+                                }, 500, false);
+                            } else {
+                                console.log('\t\tNo gene model.');
+                                $timeout(function () {
+                                    showValidationResult(++index, callback);
                                 }, 500, false);
                             }
                         }

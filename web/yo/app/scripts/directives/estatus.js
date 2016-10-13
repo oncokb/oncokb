@@ -85,7 +85,6 @@ angular.module('oncokbApp')
         };
 
         $scope.click = function(newStatus) {
-          console.log(newStatus);
           if(newStatus !== 'o') {
             $scope.vetted = $scope.getStatusByValue(newStatus);
             $scope.object.set('vetted', $scope.vetted.value);
