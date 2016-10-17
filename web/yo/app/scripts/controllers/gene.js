@@ -11,11 +11,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', 
         '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 
         'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 
-        'OncoKB', 'stringUtils', 'S',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils',
         function ($scope, $rootScope, $location, $timeout, $routeParams, _, 
                   config, importer, storage, Documents, users, 
                   DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, 
-                  OncoKB, stringUtils, S) {
+                  OncoKB, stringUtils, S, MainUtils) {
             function saveGene(docs, docIndex, excludeObsolete, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -1782,10 +1782,12 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.changeData = function () {
-                var levels = convertLevel4();
-                console.log(levels);
-                changeDataBasedOnGenes(Object.keys(levels), 0, levels, function () {
+            $scope.changeData = function() {
+                console.info('Gene\tVariant\tTumorType\tTreatment' +
+                    '\tFDA approved indication\tLevel\tShortDescription\t' +
+                    'Description\tObsolete');
+
+                changeData(0, function () {
                     console.info('Finished.');
                 });
             };
@@ -1848,481 +1850,8 @@ angular.module('oncokbApp')
                 });
             };
             
-            function getCancerTypesName(cancerTypes) {
-                var list = [];
-                cancerTypes.asArray().forEach(function(cancerType) {
-                    if (cancerType.subtype.length > 0) {
-                        var str = cancerType.subtype.getText();
-                        // if (cancerType.oncoTreeCode.length > 0) {
-                        //     str += '(' + cancerType.oncoTreeCode + ')';
-                        // }
-                        list.push(str);
-                    } else if (cancerType.cancerType.length > 0) {
-                        list.push(cancerType.cancerType.getText());
-                    }
-                });
-                return list.join(', ');
-            };
-            
             function convertLevel4() {
-                var level4 =[
-                    {
-                        "gene": "PIK3CA",
-                        "alteration": "Activating mutations",
-                        "tumorType": "Breast Cancer",
-                        "level": 4,
-                        "treatment": "BYL-719 + Everolimus",
-                        "pmids": "PMID: 23903756"
-                    },
-                    {
-                        "gene": "PIK3CA",
-                        "alteration": "Activating mutations",
-                        "tumorType": "Breast Cancer",
-                        "level": 4,
-                        "treatment": "BYL-719 + Fulvestrant",
-                        "pmids": "PMID: 25877889 "
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "L597Q",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "BGB659",
-                        "pmids": "PMID: 26343582 "
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "L597V",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "BGB659",
-                        "pmids": "PMID: 26343582 "
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G469A",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 20141835, (Abstract: Noeparast, A. et al. Abstract# 11091, ASCO 2015. http://meeting.ascopubs.org/cgi/content/abstract/33/15_suppl/11091)"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G469V",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G469R",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G464V",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G464E",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "D287H",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "V459L",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G466V",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G466E",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G466A",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "S467L",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G469E",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "N581S",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "N581I",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "D594N",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "D594G",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "D594A",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "D594H",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "F595L",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G596D",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "BRAF",
-                        "alteration": "G596R",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26343582"
-                    },
-                    {
-                        "gene": "RAF1",
-                        "alteration": "S257L",
-                        "tumorType": "Lung adenocarcinoma",
-                        "level": 4,
-                        "treatment": "Sorafenib",
-                        "pmids": "PMID: 24569458 "
-                    },
-                    {
-                        "gene": "ARAF",
-                        "alteration": "S214C",
-                        "tumorType": "Lung adenocarcinoma",
-                        "level": 4,
-                        "treatment": "Sorafenib",
-                        "pmids": "PMID: 24569458 "
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "S2215F",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "C1483F",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "F1888L",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "T1977K",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "L2230V",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "L1460P",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "M2327I",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "MTOR",
-                        "alteration": "R2505P",
-                        "tumorType": "clear cell renal cell cancer",
-                        "level": 4,
-                        "treatment": "Rapamycin/Everolimus/Temsirolimus",
-                        "pmids": "PMID: 27482884"
-                    },
-                    {
-                        "gene": "PTEN",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "Prostate Cancer",
-                        "level": 4,
-                        "treatment": "Enzalutamide + LY3023414",
-                        "pmids": "PMID: 21575859"
-                    },
-                    {
-                        "gene": "PTEN",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "All Tumors",
-                        "level": 4,
-                        "treatment": "GSK2636771",
-                        "pmids": "(Abstract: Arkenau, H. et al. Abstract# 2514^, ASCO 2014. http://meeting.ascopubs.org/cgi/content/abstract/32/15_suppl/2514)"
-                    },
-                    {
-                        "gene": "PTEN",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "All Tumors",
-                        "level": 4,
-                        "treatment": "AZD8186",
-                        "pmids": "PMID: 25398829, 25544636"
-                    },
-                    {
-                        "gene": "PTEN",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "All Tumors",
-                        "level": 4,
-                        "treatment": "LY3023414",
-                        "pmids": "(Abstract: Moore, K. et al. Abstract# 11075, ASCO 2015. http://meetinglibrary.asco.org/content/144556-156)"
-                    },
-                    {
-                        "gene": "NF1",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "Neurofibromatosis",
-                        "level": 4,
-                        "treatment": "PLX3397",
-                        "pmids": "PMID: 24718867"
-                    },
-                    {
-                        "gene": "NF1",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "Neurofibromatosis",
-                        "level": 4,
-                        "treatment": "Binimetinib",
-                        "pmids": "PMID: 26925841 "
-                    },
-                    {
-                        "gene": "NF1",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "Glioblastoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 26936308 "
-                    },
-                    {
-                        "gene": "NF1",
-                        "alteration": "Inacivating Mutations",
-                        "tumorType": "Meanoma",
-                        "level": 4,
-                        "treatment": "Trametinib",
-                        "pmids": "PMID: 25243813, 24576830"
-                    },
-                    {
-                        "gene": "CDKN2A",
-                        "alteration": "Inactivating Mutations/ Loss",
-                        "tumorType": "Breast Cancer",
-                        "level": 4,
-                        "treatment": "Palbociclib + Letrozole",
-                        "pmids": "PMID: 25524798, 26715889 "
-                    },
-                    {
-                        "gene": "EGFR",
-                        "alteration": "Exon 20 insertions",
-                        "tumorType": "Non-small cell lung cancer",
-                        "level": 4,
-                        "treatment": "AP32788",
-                        "pmids": "Gonzalvez, F. et al. AACR Annual Meeting; Presentation: AP32788, a potent and selective inhibitor of EGFR and HER2 oncogenic mutants, including exon 20 insertions, in preclinical models; 2016"
-                    },
-                    {
-                        "gene": "EGFR",
-                        "alteration": "G719A",
-                        "tumorType": "Non-small cell lung cancer",
-                        "level": 4,
-                        "treatment": "AP32788",
-                        "pmids": "Gonzalvez, F. et al. AACR Annual Meeting; Presentation: AP32788, a potent and selective inhibitor of EGFR and HER2 oncogenic mutants, including exon 20 insertions, in preclinical models; 2016"
-                    },
-                    {
-                        "gene": "EGFR",
-                        "alteration": "S768I",
-                        "tumorType": "Non-small cell lung cancer",
-                        "level": 4,
-                        "treatment": "AP32788",
-                        "pmids": "Gonzalvez, F. et al. AACR Annual Meeting; Presentation: AP32788, a potent and selective inhibitor of EGFR and HER2 oncogenic mutants, including exon 20 insertions, in preclinical models; 2016"
-                    },
-                    {
-                        "gene": "EGFR",
-                        "alteration": "L861R",
-                        "tumorType": "Non-small cell lung cancer",
-                        "level": 4,
-                        "treatment": "AP32788",
-                        "pmids": "Gonzalvez, F. et al. AACR Annual Meeting; Presentation: AP32788, a potent and selective inhibitor of EGFR and HER2 oncogenic mutants, including exon 20 insertions, in preclinical models; 2016"
-                    },
-                    {
-                        "gene": "ERBB2",
-                        "alteration": "Exon 20 insertion",
-                        "tumorType": "Non-small cell lung cancer",
-                        "level": 4,
-                        "treatment": "AP32788",
-                        "pmids": "Gonzalvez, F. et al. AACR Annual Meeting; Presentation: AP32788, a potent and selective inhibitor of EGFR and HER2 oncogenic mutants, including exon 20 insertions, in preclinical models; 2016"
-                    },
-                    {
-                        "gene": "CDKN2A",
-                        "alteration": "Inactivating Mutations/ Loss",
-                        "tumorType": "Esophagogastric Cancer",
-                        "level": 4,
-                        "treatment": "Palbociclib",
-                        "pmids": "PMID: 26380006"
-                    },
-                    {
-                        "gene": "EZH2",
-                        "alteration": "Inactivating Mutations",
-                        "tumorType": "Diffuse Large Cell B-cell Lymphoma",
-                        "level": 4,
-                        "treatment": "GSK126",
-                        "pmids": "PMID: 23051747 "
-                    },
-                    {
-                        "gene": "EZH2",
-                        "alteration": "Inactivating Mutations",
-                        "tumorType": "Diffuse Large Cell B-cell Lymphoma",
-                        "level": 4,
-                        "treatment": "Tazemetostat",
-                        "pmids": "PMID: 24563539; (Abstract: Ribrag, V. et al. Blood 126:473, 2015. http://www.bloodjournal.org/content/126/23/473.abstract)"
-                    },
-                    {
-                        "gene": "EZH2",
-                        "alteration": "Inactivating Mutations",
-                        "tumorType": "Melanoma",
-                        "level": 4,
-                        "treatment": "Tazemetostat",
-                        "pmids": "PMID: 26304929"
-                    },
-                    {
-                        "gene": "MDM2",
-                        "alteration": "Amplification",
-                        "tumorType": "Liposarcoma",
-                        "level": 4,
-                        "treatment": "DS-3032b",
-                        "pmids": "(Abstract: Gounder, M. et al. J. Clin. Oncol. ASCO Abstract 258, 2016. http://meetinglibrary.asco.org/content/166204-176; Bauer, T. et al. AACR Abstract B27, 2015. http://mct.aacrjournals.org/content/14/12_Supplement_2/B27)"
-                    },
-                    {
-                        "gene": "MDM2",
-                        "alteration": "Amplification",
-                        "tumorType": "Liposarcoma",
-                        "level": 4,
-                        "treatment": "SAR405838",
-                        "pmids": "PMID: 26475335 "
-                    },
-                    {
-                        "gene": "ESR1",
-                        "alteration": "Y537S",
-                        "tumorType": "Breast Cancer",
-                        "level": 4,
-                        "treatment": "GDC-0810",
-                        "pmids": "PMID: 27410477, PMID: 24185512"
-                    },
-                    {
-                        "gene": "ESR1",
-                        "alteration": "D538G",
-                        "tumorType": "Breast Cancer",
-                        "level": 4,
-                        "treatment": "GDC-0810",
-                        "pmids": "PMID: 27410477, PMID: 24185512"
-                    }
-                ];
+                var level4 = [];
                 var level4Obj = {};
                 _.each(level4, function(datum) {
                     _.each(datum, function(content, key) {
@@ -2505,10 +2034,72 @@ angular.module('oncokbApp')
                 });
                 return index;
             }
-            
-            function changeDataBasedOnGenes(genes, index, levels, callback) {
+
+            function changeDataBasedOnGenes(genes, index, callback) {
                 if(index < genes.length) {
                     var documents = Documents.get({title: genes[index]});
+                    var document =
+                        _.isArray(documents) && documents.length === 1 ?
+                            documents[0] : null;
+                    if (document) {
+                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                console.log('did not get realtime document.');
+                            } else {
+                                // console.log(document.title, '\t\t', index + 1);
+                                var model = realtime.getModel();
+                                var gene = model.getRoot().get('gene');
+                                if (gene) {
+                                    var geneName = gene.name.getText();
+                                    console.log('----' + (index + 1) + ' ' + geneName + '----');
+                                    // model.beginCompoundOperation();
+                                    gene.mutations.asArray().forEach(function(mutation, index) {
+                                        var oncogenic = mutation.oncogenic.getText();
+                                        var mutationEffect = mutation.effect.value.getText();
+                                        var mutationName = mutation.name.getText();
+
+                                        if (mutationName.toLowerCase() === 'fusion' || mutationName.toLowerCase() === 'fusions') {
+                                            console.log(geneName + '\t' + mutationName);
+                                            console.log('\t' + oncogenic + '\t' + mutationEffect);
+                                            if(oncogenic !== 'Likely') {
+                                                console.log('\t\tOncogenic is changing to Likely.');
+                                                mutation.oncogenic.setText('Likely');
+                                            }
+                                            if(mutationEffect !== 'Likely Gain-of-function') {
+                                                console.log('\t\tMutation effect is changing to Likely Gain-of-function.');
+                                                mutation.effect.value.setText('Likely Gain-of-function');
+                                            }
+                                        }
+                                    });
+                                    // model.endCompoundOperation();
+                                    $timeout(function() {
+                                        changeDataBasedOnGenes(genes, ++index, callback);
+                                    }, 500, false);
+                                } else {
+                                    console.log('\t\tNo gene model.');
+                                    $timeout(function() {
+                                        changeDataBasedOnGenes(genes, ++index, callback);
+                                    }, 500, false);
+                                }
+                            }
+                        });
+                    }else {
+                        console.log('\t\tDocuments are wrong:' + documents);
+                        $timeout(function() {
+                            changeDataBasedOnGenes(genes, ++index, callback);
+                        }, 500, false);
+                    }
+                }else {
+                    if(_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function insertTreatment(levels, levelIndex, callback) {
+                if (levelIndex < levels.length) {
+                    var record = levels[levelIndex];
+                    var documents = Documents.get({title: record.gene});
                     var document =
                         _.isArray(documents) && documents.length === 1 ?
                             documents[0] : null;
@@ -2521,100 +2112,196 @@ angular.module('oncokbApp')
                                 var gene = model.getRoot().get('gene');
                                 if (gene) {
                                     var geneName = gene.name.getText();
-                                    // model.beginCompoundOperation();
+                                    var foundMutation = false;
+                                    console.info(stringUtils.stringObject(record));
 
-                                    var levelMutations = Object.keys(levels[geneName]);
-                                    gene.mutations.asArray().forEach(function(mutation, index) {
+                                    gene.mutations.asArray().forEach(function(mutation) {
                                         var mutationName = mutation.name.getText();
-
-                                        if (isExist(levelMutations,mutationName)) {
-                                            var levelMutationIndex = findIndexIgnorecase(levelMutations, mutationName);
-                                            var levelTumors = Object.keys(levels[geneName][levelMutations[levelMutationIndex]]);
+                                        if (isExist([record.mutation], mutationName)) {
+                                            var foundTT = false;
                                             mutation.tumors.asArray().forEach(function(tumor) {
-                                                var tumorName = tumor.name.getText();
-                                                if (isExist(levelTumors,tumorName)) {
-                                                    var levelTumorIndex = findIndexIgnorecase(levelTumors, tumorName);
+
+                                                if (isExist([record.tumorType], MainUtils.getCancerTypesName(tumor.cancerTypes))) {
                                                     tumor.TI.asArray().forEach(function(ti) {
                                                         if (ti.name.getText() === 'Investigational implications for sensitivity to therapy') {
-                                                            var levelTreatments = Object.keys(levels[geneName][levelMutations[levelMutationIndex]][levelTumors[levelTumorIndex]]);
+                                                            var foundTreatment = false;
                                                             ti.treatments.asArray().forEach(function(treatment) {
                                                                 var treatmentName = treatment.name.getText();
-                                                                if (isExist(levelTreatments, treatmentName)) {
-                                                                    var levelTreatmentIndex = findIndexIgnorecase(levelTreatments, treatmentName);
-                                                                    console.log(geneName + '\t' + mutationName + '\t' + tumorName + '\t' + levelTreatments[levelTreatmentIndex]);
+                                                                if (isExist([record.treatment], treatmentName)) {
                                                                     // Treatment exists
-                                                                    levelTreatments.splice(levelTreatmentIndex, 1);
+                                                                    console.info('\tTreatment exists');
+                                                                    foundTreatment = true;
+                                                                    if(treatment.level.getText() === '4') {
+                                                                        if(treatment.description.getText().indexOf(record.pmids) === -1) {
+                                                                            console.info(record.pmids, treatment.description.getText())
+                                                                            treatment.description.setText(treatment.description.getText() + ' ' + record.pmids);
+                                                                        }else {
+                                                                            console.error('\tPMIDs exist');
+                                                                        }
+                                                                    }else{
+                                                                        console.error('\tThe exist treatment is not level 4');
+                                                                    }
                                                                 }
                                                             });
-                                                            if (levelTreatments.length > 0) {
-                                                                console.log('Need to create new treatments');
-                                                                console.log(geneName + '\t' + mutationName + '\t' + tumorName + '\t' + levelTreatments);
+                                                            if (!foundTreatment) {
+                                                                // Create new treatment
+                                                                var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                console.log('\tNeed to create new treatments');
+                                                                newTreatment.description.setText(record.pmids);
+                                                                newTreatment.level.setText('4');
+                                                                ti.treatments.push(newTreatment);
                                                             }
                                                         }
                                                     });
-                                                    levelTumors.splice(levelTumorIndex, 1);
+                                                    $timeout(function() {
+                                                        insertTreatment(levels, ++levelIndex, callback);
+                                                    }, 500, false);
+                                                    foundTT = true;
                                                 }
                                             });
-                                            if (levelTumors.length > 0) {
+                                            if (!foundTT) {
                                                 // Need to create tumor type
-                                                _.each(levelTumors, function(tumor) {
-                                                    DatabaseConnector.getOncoTreeTumorTypeByName(tumor, true)
-                                                        .then(function(data) {
-                                                            if(_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
-                                                                var _tumorType = model.create(OncoKB.Tumor);
-
-                                                                _.each(data.data, function(ct) {
-                                                                    if(ct.mainType && ct.mainType.name) {
-                                                                        var cancerType = model.create(OncoKB.CancerType);
-                                                                        cancerType.cancerType.setText(ct.mainType.name);
-                                                                        if(ct.code) {
-                                                                            cancerType.oncoTreeCode.setText(ct.code);
-                                                                        }
-                                                                        if(ct.name) {
-                                                                            cancerType.subtype.setText(ct.name);
-                                                                        }
-                                                                        cancerType.cancerType_eStatus.set('obsolete', 'false');
-                                                                        cancerType.subtype_eStatus.set('obsolete', 'false');
-                                                                        cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
-                                                                        _tumorType.cancerTypes.push(cancerType);
-                                                                    }
-                                                                });
-                                                                for (var i = 0; i < 4; i++) {
-                                                                    var __ti = model.create(OncoKB.TI);
-                                                                    var __status = i < 2 ? 1 : 0; // 1: Standard, 0: Investigational
-                                                                    var __type = i % 2 === 0 ? 1 : 0; //1: sensitivity, 0: resistance
-                                                                    var __name = (__status ? 'Standard' : 'Investigational') + ' implications for ' + (__type ? 'sensitivity' : 'resistance') + ' to therapy';
-
-                                                                    __ti.types.set('status', __status.toString());
-                                                                    __ti.types.set('type', __type.toString());
-                                                                    __ti.name.setText(__name);
-                                                                    _tumorType.TI.push(__ti);
+                                                console.log('Need to create tumor type');
+                                                DatabaseConnector.getOncoTreeTumorTypeByName(record.tumorType, true)
+                                                    .then(function(data) {
+                                                        if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                            var newTumorType = MainUtils.createTumorType(model);
+                                                            _.each(data.data, function(ct) {
+                                                                if (ct.mainType && ct.mainType.name) {
+                                                                    var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                                    newTumorType.cancerTypes.push(cancerType);
                                                                 }
-                                                                console.info('Newly generated tumor type', _tumorType, _tumorType.cancerTypes, _tumorType.cancerTypes.get(0));
-                                                                // mutation.tumors.push(_tumorType);
-                                                            }else{
-                                                                console.error('No OncoTree match on', tumor);
-                                                            }
-                                                        });
-                                                    
-                                                });
+                                                            });
+
+                                                            var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                            newTreatment.description.setText(record.pmids);
+                                                            newTreatment.level.setText('4');
+                                                            newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                            mutation.tumors.push(newTumorType);
+                                                            console.info('\tNewly generated tumor type', newTumorType.toString());
+                                                            $timeout(function() {
+                                                                insertTreatment(levels, ++levelIndex, callback);
+                                                            }, 500, false);
+                                                        } else {
+                                                            DatabaseConnector.getOncoTreeTumorTypesByMainType(record.tumorType)
+                                                                .then(function(data) {
+                                                                    if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                                        var newTumorType = MainUtils.createTumorType(model);
+                                                                        _.each(data.data, function(ct) {
+                                                                            if (ct.mainType && ct.mainType.name) {
+                                                                                var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                                                newTumorType.cancerTypes.push(cancerType);
+                                                                            }
+                                                                        });
+
+                                                                        var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                        newTreatment.description.setText(record.pmids);
+                                                                        newTreatment.level.setText('4');
+                                                                        newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                        mutation.tumors.push(newTumorType);
+                                                                    } else {
+                                                                        console.error('\tNo OncoTree match');
+                                                                        if (isExist(['all tumors'], record.tumorType)) {
+                                                                            var newTumorType = MainUtils.createTumorType(model);
+                                                                            var cancerType = MainUtils.createCancerType(model, record.tumorType);
+                                                                            newTumorType.cancerTypes.push(cancerType);
+
+                                                                            var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                            newTreatment.description.setText(record.pmids);
+                                                                            newTreatment.level.setText('4');
+                                                                            newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                            mutation.tumors.push(newTumorType);
+                                                                        }else {
+                                                                            console.log('\tNot special tumor type neither');
+                                                                        }
+                                                                    }
+                                                                    $timeout(function() {
+                                                                        insertTreatment(levels, ++levelIndex, callback);
+                                                                    }, 500, false);
+                                                                });
+                                                        }
+                                                    });
                                             }
-                                            levelMutations.splice(levelMutationIndex, 1);
+                                            foundMutation = true;
                                         }
                                     });
 
-                                    if (levelMutations.length > 0) {
+                                    if (!foundMutation) {
                                         console.log('Need to create new mutation');
-                                        console.log(geneName, levelMutations);
+                                        var newMutation = MainUtils.createMutation(model, record.mutation);
+                                        DatabaseConnector.getOncoTreeTumorTypeByName(record.tumorType, true)
+                                            .then(function(data) {
+                                                if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                    var newTumorType = MainUtils.createTumorType(model);
+                                                    _.each(data.data, function(ct) {
+                                                        if (ct.mainType && ct.mainType.name) {
+                                                            var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                            newTumorType.cancerTypes.push(cancerType);
+                                                        }
+                                                    });
+
+                                                    // mutation.tumors.push(_tumorType);
+
+                                                    var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                    newTreatment.description.setText(record.pmids);
+                                                    newTreatment.level.setText('4');
+                                                    newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                    newMutation.tumors.push(newTumorType);
+                                                    gene.mutations.push(newMutation);
+                                                    $timeout(function() {
+                                                        insertTreatment(levels, ++levelIndex, callback);
+                                                    }, 500, false);
+                                                } else {
+                                                    DatabaseConnector.getOncoTreeTumorTypesByMainType(record.tumorType)
+                                                        .then(function(data) {
+                                                            if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                                var newTumorType = MainUtils.createTumorType(model);
+                                                                _.each(data.data, function(ct) {
+                                                                    if (ct.mainType && ct.mainType.name) {
+                                                                        var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                                        newTumorType.cancerTypes.push(cancerType);
+                                                                    }
+                                                                });
+
+                                                                var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                newTreatment.description.setText(record.pmids);
+                                                                newTreatment.level.setText('4');
+                                                                newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                newMutation.tumors.push(newTumorType);
+                                                            } else {
+                                                                console.error('\tNo OncoTree match on');
+                                                                if (isExist(['all tumors'], record.tumorType)) {
+                                                                    var newTumorType = MainUtils.createTumorType(model);
+                                                                    var cancerType = MainUtils.createCancerType(model, record.tumorType);
+                                                                    newTumorType.cancerTypes.push(cancerType);
+
+                                                                    var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                    newTreatment.description.setText(record.pmids);
+                                                                    newTreatment.level.setText('4');
+                                                                    newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                    newMutation.tumors.push(newTumorType);
+                                                                }else {
+                                                                    console.log('\tNot special tumor type neither');
+                                                                }
+                                                            }
+                                                            gene.mutations.push(newMutation);
+                                                            $timeout(function() {
+                                                                insertTreatment(levels, ++levelIndex, callback);
+                                                            }, 500, false);
+                                                        });
+                                                }
+                                            });
                                     }
-                                    // model.endCompoundOperation();
-                                    $timeout(function() {
-                                        changeDataBasedOnGenes(genes, ++index, levels, callback);
-                                    }, 500, false);
                                 } else {
                                     console.log('\t\tNo gene model.');
                                     $timeout(function() {
-                                        changeDataBasedOnGenes(genes, ++index, levels, callback);
+                                        insertTreatment(levels, ++levelIndex, callback);
                                     }, 500, false);
                                 }
                             }
@@ -2622,7 +2309,7 @@ angular.module('oncokbApp')
                     } else {
                         console.log('\t\tDocuments are wrong:' + documents);
                         $timeout(function() {
-                            changeDataBasedOnGenes(genes, ++index, levels, callback);
+                            insertTreatment(levels, ++levelIndex, callback);
                         }, 500, false);
                     }
                 } else {
@@ -2724,7 +2411,7 @@ angular.module('oncokbApp')
                                                 // if (treatment.level.getText() === 'R1') {
                                             var result = [gene.name.getText(), 
                                                 mutation.name.getText(), 
-                                                getCancerTypesName(tumor.cancerTypes), 
+                                                MainUtils.getCancerTypesName(tumor.cancerTypes), 
                                                 treatment.name.getText(),
                                                 treatment.indication.getText(),
                                                 treatment.level.getText(),

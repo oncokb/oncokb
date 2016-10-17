@@ -355,7 +355,7 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
         if (!type || !query) {
             return null;
         }
-        exactMatch = _.isBoolean(exactMatch) ? true : exactMatch;
+        exactMatch = !_.isBoolean(exactMatch) ? true : exactMatch;
         return $http.get(OncoKB.config.oncoTreeLink +
             'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch + '&version=oncokb');
     }
