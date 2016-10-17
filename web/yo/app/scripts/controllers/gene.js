@@ -11,11 +11,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', 
         '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 
         'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 
-        'OncoKB', 'stringUtils', 'S',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils',
         function ($scope, $rootScope, $location, $timeout, $routeParams, _, 
                   config, importer, storage, Documents, users, 
                   DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, 
-                  OncoKB, stringUtils, S) {
+                  OncoKB, stringUtils, S, MainUtils) {
             function saveGene(docs, docIndex, excludeObsolete, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -1782,7 +1782,7 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.changeData = function () {
+            $scope.changeData = function() {
                 console.info('Gene\tVariant\tTumorType\tTreatment' +
                     '\tFDA approved indication\tLevel\tShortDescription\t' +
                     'Description\tObsolete');
@@ -1850,21 +1850,40 @@ angular.module('oncokbApp')
                 });
             };
             
-            function getCancerTypesName(cancerTypes) {
-                var list = [];
-                cancerTypes.asArray().forEach(function(cancerType) {
-                    if (cancerType.subtype.length > 0) {
-                        var str = cancerType.subtype.getText();
-                        // if (cancerType.oncoTreeCode.length > 0) {
-                        //     str += '(' + cancerType.oncoTreeCode + ')';
-                        // }
-                        list.push(str);
-                    } else if (cancerType.cancerType.length > 0) {
-                        list.push(cancerType.cancerType.getText());
+            function convertLevel4() {
+                var level4 = [];
+                var level4Obj = {};
+                _.each(level4, function(datum) {
+                    _.each(datum, function(content, key) {
+                        datum[key] = content.toString().trim();
+                    });
+                    
+                    if(!datum.gene || !datum.alteration ||
+                        !datum.tumorType || datum.level !== '4' ||
+                        !datum.treatment) {
+                        console.error(datum);
+                    }else {
+                        if(!level4Obj.hasOwnProperty(datum.gene)) {
+                            level4Obj[datum.gene] = {};
+                        }
+                        if(!level4Obj[datum.gene]
+                                .hasOwnProperty(datum.alteration)) {
+                            level4Obj[datum.gene][datum.alteration] = {};
+                        }
+                        if(!level4Obj[datum.gene][datum.alteration]
+                                .hasOwnProperty(datum.tumorType)) {
+                            level4Obj[datum.gene][datum.alteration][datum.tumorType] = {};
+                        }
+                        if(!level4Obj[datum.gene][datum.alteration][datum.tumorType]
+                                .hasOwnProperty(datum.treatment)) {
+                            level4Obj[datum.gene][datum.alteration][datum.tumorType][datum.treatment] = [];
+                        }
+                        level4Obj[datum.gene][datum.alteration][datum.tumorType][datum.treatment].push(datum.pmids);
                     }
                 });
-                return list.join(', ');
-            };
+                
+                return level4Obj;
+            }
             
             function convertOncogenic(oncogenic) {
                 var result = 'Unknown';
@@ -1996,6 +2015,26 @@ angular.module('oncokbApp')
                 return string;
             }
 
+            function isExist(array, string) {
+                var mark = false;
+                _.each(array, function(item) {
+                    if(item.toString().toLowerCase() === string.toString().toLowerCase()) {
+                        mark = true;
+                    }
+                });
+                return mark;
+            }
+            
+            function findIndexIgnorecase(array, string) {
+                var index = -1;
+                _.each(array, function(item, ind) {
+                    if(item.toString().toLowerCase() === string.toString().toLowerCase()) {
+                        index = ind;
+                    }
+                });
+                return index;
+            }
+
             function changeDataBasedOnGenes(genes, index, callback) {
                 if(index < genes.length) {
                     var documents = Documents.get({title: genes[index]});
@@ -2034,12 +2073,12 @@ angular.module('oncokbApp')
                                     });
                                     // model.endCompoundOperation();
                                     $timeout(function() {
-                                        changeData(genes, ++index, callback);
+                                        changeDataBasedOnGenes(genes, ++index, callback);
                                     }, 500, false);
                                 } else {
                                     console.log('\t\tNo gene model.');
                                     $timeout(function() {
-                                        changeData(genes, ++index, callback);
+                                        changeDataBasedOnGenes(genes, ++index, callback);
                                     }, 500, false);
                                 }
                             }
@@ -2047,11 +2086,234 @@ angular.module('oncokbApp')
                     }else {
                         console.log('\t\tDocuments are wrong:' + documents);
                         $timeout(function() {
-                            changeData(genes, ++index, callback);
+                            changeDataBasedOnGenes(genes, ++index, callback);
                         }, 500, false);
                     }
                 }else {
                     if(_.isFunction(callback)) {
+                        callback();
+                    }
+                }
+            }
+            
+            function insertTreatment(levels, levelIndex, callback) {
+                if (levelIndex < levels.length) {
+                    var record = levels[levelIndex];
+                    var documents = Documents.get({title: record.gene});
+                    var document =
+                        _.isArray(documents) && documents.length === 1 ?
+                            documents[0] : null;
+                    if (document) {
+                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                console.log('did not get realtime document.');
+                            } else {
+                                var model = realtime.getModel();
+                                var gene = model.getRoot().get('gene');
+                                if (gene) {
+                                    var geneName = gene.name.getText();
+                                    var foundMutation = false;
+                                    console.info(stringUtils.stringObject(record));
+
+                                    gene.mutations.asArray().forEach(function(mutation) {
+                                        var mutationName = mutation.name.getText();
+                                        if (isExist([record.mutation], mutationName)) {
+                                            var foundTT = false;
+                                            mutation.tumors.asArray().forEach(function(tumor) {
+
+                                                if (isExist([record.tumorType], MainUtils.getCancerTypesName(tumor.cancerTypes))) {
+                                                    tumor.TI.asArray().forEach(function(ti) {
+                                                        if (ti.name.getText() === 'Investigational implications for sensitivity to therapy') {
+                                                            var foundTreatment = false;
+                                                            ti.treatments.asArray().forEach(function(treatment) {
+                                                                var treatmentName = treatment.name.getText();
+                                                                if (isExist([record.treatment], treatmentName)) {
+                                                                    // Treatment exists
+                                                                    console.info('\tTreatment exists');
+                                                                    foundTreatment = true;
+                                                                    if(treatment.level.getText() === '4') {
+                                                                        if(treatment.description.getText().indexOf(record.pmids) === -1) {
+                                                                            console.info(record.pmids, treatment.description.getText())
+                                                                            treatment.description.setText(treatment.description.getText() + ' ' + record.pmids);
+                                                                        }else {
+                                                                            console.error('\tPMIDs exist');
+                                                                        }
+                                                                    }else{
+                                                                        console.error('\tThe exist treatment is not level 4');
+                                                                    }
+                                                                }
+                                                            });
+                                                            if (!foundTreatment) {
+                                                                // Create new treatment
+                                                                var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                console.log('\tNeed to create new treatments');
+                                                                newTreatment.description.setText(record.pmids);
+                                                                newTreatment.level.setText('4');
+                                                                ti.treatments.push(newTreatment);
+                                                            }
+                                                        }
+                                                    });
+                                                    $timeout(function() {
+                                                        insertTreatment(levels, ++levelIndex, callback);
+                                                    }, 500, false);
+                                                    foundTT = true;
+                                                }
+                                            });
+                                            if (!foundTT) {
+                                                // Need to create tumor type
+                                                console.log('Need to create tumor type');
+                                                DatabaseConnector.getOncoTreeTumorTypeByName(record.tumorType, true)
+                                                    .then(function(data) {
+                                                        if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                            var newTumorType = MainUtils.createTumorType(model);
+                                                            _.each(data.data, function(ct) {
+                                                                if (ct.mainType && ct.mainType.name) {
+                                                                    var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                                    newTumorType.cancerTypes.push(cancerType);
+                                                                }
+                                                            });
+
+                                                            var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                            newTreatment.description.setText(record.pmids);
+                                                            newTreatment.level.setText('4');
+                                                            newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                            mutation.tumors.push(newTumorType);
+                                                            console.info('\tNewly generated tumor type', newTumorType.toString());
+                                                            $timeout(function() {
+                                                                insertTreatment(levels, ++levelIndex, callback);
+                                                            }, 500, false);
+                                                        } else {
+                                                            DatabaseConnector.getOncoTreeTumorTypesByMainType(record.tumorType)
+                                                                .then(function(data) {
+                                                                    if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                                        var newTumorType = MainUtils.createTumorType(model);
+                                                                        _.each(data.data, function(ct) {
+                                                                            if (ct.mainType && ct.mainType.name) {
+                                                                                var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                                                newTumorType.cancerTypes.push(cancerType);
+                                                                            }
+                                                                        });
+
+                                                                        var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                        newTreatment.description.setText(record.pmids);
+                                                                        newTreatment.level.setText('4');
+                                                                        newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                        mutation.tumors.push(newTumorType);
+                                                                    } else {
+                                                                        console.error('\tNo OncoTree match');
+                                                                        if (isExist(['all tumors'], record.tumorType)) {
+                                                                            var newTumorType = MainUtils.createTumorType(model);
+                                                                            var cancerType = MainUtils.createCancerType(model, record.tumorType);
+                                                                            newTumorType.cancerTypes.push(cancerType);
+
+                                                                            var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                            newTreatment.description.setText(record.pmids);
+                                                                            newTreatment.level.setText('4');
+                                                                            newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                            mutation.tumors.push(newTumorType);
+                                                                        }else {
+                                                                            console.log('\tNot special tumor type neither');
+                                                                        }
+                                                                    }
+                                                                    $timeout(function() {
+                                                                        insertTreatment(levels, ++levelIndex, callback);
+                                                                    }, 500, false);
+                                                                });
+                                                        }
+                                                    });
+                                            }
+                                            foundMutation = true;
+                                        }
+                                    });
+
+                                    if (!foundMutation) {
+                                        console.log('Need to create new mutation');
+                                        var newMutation = MainUtils.createMutation(model, record.mutation);
+                                        DatabaseConnector.getOncoTreeTumorTypeByName(record.tumorType, true)
+                                            .then(function(data) {
+                                                if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                    var newTumorType = MainUtils.createTumorType(model);
+                                                    _.each(data.data, function(ct) {
+                                                        if (ct.mainType && ct.mainType.name) {
+                                                            var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                            newTumorType.cancerTypes.push(cancerType);
+                                                        }
+                                                    });
+
+                                                    // mutation.tumors.push(_tumorType);
+
+                                                    var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                    newTreatment.description.setText(record.pmids);
+                                                    newTreatment.level.setText('4');
+                                                    newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                    newMutation.tumors.push(newTumorType);
+                                                    gene.mutations.push(newMutation);
+                                                    $timeout(function() {
+                                                        insertTreatment(levels, ++levelIndex, callback);
+                                                    }, 500, false);
+                                                } else {
+                                                    DatabaseConnector.getOncoTreeTumorTypesByMainType(record.tumorType)
+                                                        .then(function(data) {
+                                                            if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
+                                                                var newTumorType = MainUtils.createTumorType(model);
+                                                                _.each(data.data, function(ct) {
+                                                                    if (ct.mainType && ct.mainType.name) {
+                                                                        var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
+                                                                        newTumorType.cancerTypes.push(cancerType);
+                                                                    }
+                                                                });
+
+                                                                var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                newTreatment.description.setText(record.pmids);
+                                                                newTreatment.level.setText('4');
+                                                                newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                newMutation.tumors.push(newTumorType);
+                                                            } else {
+                                                                console.error('\tNo OncoTree match on');
+                                                                if (isExist(['all tumors'], record.tumorType)) {
+                                                                    var newTumorType = MainUtils.createTumorType(model);
+                                                                    var cancerType = MainUtils.createCancerType(model, record.tumorType);
+                                                                    newTumorType.cancerTypes.push(cancerType);
+
+                                                                    var newTreatment = MainUtils.createTreatment(model, record.treatment);
+                                                                    newTreatment.description.setText(record.pmids);
+                                                                    newTreatment.level.setText('4');
+                                                                    newTumorType.TI.get(2).treatments.push(newTreatment);
+
+                                                                    newMutation.tumors.push(newTumorType);
+                                                                }else {
+                                                                    console.log('\tNot special tumor type neither');
+                                                                }
+                                                            }
+                                                            gene.mutations.push(newMutation);
+                                                            $timeout(function() {
+                                                                insertTreatment(levels, ++levelIndex, callback);
+                                                            }, 500, false);
+                                                        });
+                                                }
+                                            });
+                                    }
+                                } else {
+                                    console.log('\t\tNo gene model.');
+                                    $timeout(function() {
+                                        insertTreatment(levels, ++levelIndex, callback);
+                                    }, 500, false);
+                                }
+                            }
+                        });
+                    } else {
+                        console.log('\t\tDocuments are wrong:' + documents);
+                        $timeout(function() {
+                            insertTreatment(levels, ++levelIndex, callback);
+                        }, 500, false);
+                    }
+                } else {
+                    if (_.isFunction(callback)) {
                         callback();
                     }
                 }
@@ -2149,7 +2411,7 @@ angular.module('oncokbApp')
                                                 // if (treatment.level.getText() === 'R1') {
                                             var result = [gene.name.getText(), 
                                                 mutation.name.getText(), 
-                                                getCancerTypesName(tumor.cancerTypes), 
+                                                MainUtils.getCancerTypesName(tumor.cancerTypes), 
                                                 treatment.name.getText(),
                                                 treatment.indication.getText(),
                                                 treatment.level.getText(),

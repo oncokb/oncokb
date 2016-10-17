@@ -1094,6 +1094,16 @@ angular.module('oncokbApp')
             });
             return status;
         }
+
+        function stringObject(object) {
+            var result = [];
+            for (var key in object) {
+                if (object.hasOwnProperty(key)) {
+                    result.push(key + ': ' + object[key]);
+                }
+            }
+            return result.join('\t');
+        }
         
         // Public API here
         return {
@@ -1119,6 +1129,7 @@ angular.module('oncokbApp')
             },
             getGeneData: getGeneData,
             getVUSData: getVUSData,
+            stringObject: stringObject,
             getVUSFullData: getVUSFullData
         };
     });
