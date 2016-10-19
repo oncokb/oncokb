@@ -11,6 +11,7 @@ import java.util.*;
 public class LevelUtils {
     public static final List<LevelOfEvidence> LEVELS = Collections.unmodifiableList(
         new ArrayList<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_4);
             add(LevelOfEvidence.LEVEL_3B);
             add(LevelOfEvidence.LEVEL_3A);
             add(LevelOfEvidence.LEVEL_2B);
@@ -106,6 +107,7 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_R1);
             add(LevelOfEvidence.LEVEL_2A);
             add(LevelOfEvidence.LEVEL_3A);
+            add(LevelOfEvidence.LEVEL_4);
         }};
     }
 
@@ -117,6 +119,7 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_2B);
             add(LevelOfEvidence.LEVEL_3A);
             add(LevelOfEvidence.LEVEL_3B);
+            add(LevelOfEvidence.LEVEL_4);
         }};
     }
 

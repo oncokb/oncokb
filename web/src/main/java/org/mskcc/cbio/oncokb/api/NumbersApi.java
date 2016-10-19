@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.*;
 
+import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
@@ -113,10 +114,14 @@ public class NumbersApi {
             if (CacheUtils.getNumbers("main") == null) {
                 mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
 
-                List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
-                Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
+                Set<Alteration> alterations = new HashSet<>(ApplicationContextSingleton.getAlterationBo().findAll());
+                alterations = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
+                alterations = AlterationUtils.excludeGeneralAlterations(alterations);
 
-                mainNumber.setAlteration(excludeVUS.size());
+                for(Alteration alteration : alterations) {
+                    System.out.println(alteration.getGene().getHugoSymbol() + "\t" + alteration.getName());
+                }
+                mainNumber.setAlteration(alterations.size());
                 mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
                 mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
                 CacheUtils.setNumbers("main", mainNumber);

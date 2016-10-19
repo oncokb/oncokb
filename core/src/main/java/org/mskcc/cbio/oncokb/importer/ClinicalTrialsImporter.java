@@ -88,7 +88,7 @@ public class ClinicalTrialsImporter {
     private static ClinicalTrial parseClinicalTrialsGov(String nctId, DocumentBuilder db) throws SAXException, IOException {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         
-        String strUrl = "http://clinicaltrials.gov/show/"+nctId+"?displayxml=true";
+        String strUrl = "https://clinicaltrials.gov/show/"+nctId+"?displayxml=true";
         
         Document doc = db.parse(strUrl);
         Element docEle = doc.getDocumentElement();
@@ -304,7 +304,7 @@ public class ClinicalTrialsImporter {
         for (String url : urls) {
             int pg = 1;
             while (true) {
-                String urlCts = "http://clinicaltrials.gov"+url+"&displayxml=true&pg="+pg;
+                String urlCts = "https://clinicaltrials.gov"+url+"&displayxml=true&pg="+pg;
                 System.out.println(urlCts);
                 Document doc = null;
                 for (int iTry=0; iTry<10 && doc==null; iTry++) {
@@ -351,7 +351,7 @@ public class ClinicalTrialsImporter {
     private static List<String> getUrlsConditions() throws IOException {
         List<String> urlConditions = new ArrayList<String>();
         
-        String urlConditionList = "http://clinicaltrials.gov/ct2/search/browse?brwse=cond_cat_BC04&brwse-force=true";
+        String urlConditionList = "https://clinicaltrials.gov/ct2/search/browse?brwse=cond_cat_BC04&brwse-force=true";
         String[] lines = FileUtils.readRemote(urlConditionList).split("\n");
         Pattern p = Pattern.compile("/ct2/results\\?[^\"']+");
         for (String line : lines) {

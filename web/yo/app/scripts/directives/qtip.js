@@ -26,7 +26,7 @@ angular.module('oncokbApp')
                     if (attrs.type && attrs.number) {
                         switch (attrs.type) {
                             case 'pmid':
-                                src += 'http://www.ncbi.nlm.nih.gov/pubmed/' + attrs.number;
+                                src += 'https://www.ncbi.nlm.nih.gov/pubmed/' + attrs.number;
                                 break;
                             case 'nct':
                                 src += 'https://clinicaltrials.gov/show/' + attrs.number;
