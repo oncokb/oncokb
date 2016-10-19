@@ -12,11 +12,11 @@ angular.module('oncokbApp')
         var allRegex = {
             pmid: {
                 regex: /PMID:?\s*([0-9]+,?\s*)+/ig,
-                link: 'http://www.ncbi.nlm.nih.gov/pubmed/'
+                link: 'https://www.ncbi.nlm.nih.gov/pubmed/'
             },
             nct: {
                 regex: /NCT:?[0-9]+/ig,
-                link: 'http://clinicaltrials.gov/show/'
+                link: 'https://clinicaltrials.gov/show/'
             },
             abstract: {
                 regex: /\(\s*Abstract\s*:[^\)]*;\s*\)/ig

@@ -22,7 +22,7 @@ public final class NcbiEUtils {
         throw new AssertionError();
     }
     
-    private static final String URL_NCBI_EUTILS = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
+    private static final String URL_NCBI_EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
     
     public static Article readPubmedArticle(String pmid) {
         String url = URL_NCBI_EUTILS + "esummary.fcgi?db=pubmed&retmode=json&id="+pmid;
