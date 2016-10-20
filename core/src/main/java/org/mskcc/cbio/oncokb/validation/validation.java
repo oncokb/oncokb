@@ -5,6 +5,7 @@
  */
 package org.mskcc.cbio.oncokb.validation;
 
+import java.util.Properties;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -17,12 +18,16 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
-
+import com.google.api.services.drive.model.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.mskcc.cbio.oncokb.util.GoogleAuth;
 
 /**
@@ -30,13 +35,29 @@ import org.mskcc.cbio.oncokb.util.GoogleAuth;
  * @author jiaojiao
  */
 public class validation {
-    private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6fkNjY0RSQlNtRUgyRHVNeWJ5ZzFkU2twVGtYR19Bb1dld0JZY0VPd3hCTms";
-    private static final String REPORT_DATA_TEMPLATE = "1yjcti-clYq61RKAPcXD33lutcjCW82FLwk8KaPntO7A";
+
     public static void main(String[] args) throws IOException, GeneralSecurityException, URISyntaxException, ServiceException {
+        String propFileName = "properties/config.properties";
+        Properties prop = new Properties();
+        ValidationConfig config = new ValidationConfig();
+        InputStream inputStream = config.getStram(propFileName);
+        
+        if(inputStream != null) {
+            try {
+                prop.load(inputStream);
+            } catch (IOException ex) {
+                Logger.getLogger(validation.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+        }
+      
+        String REPORT_PARENT_FOLDER = prop.getProperty("google.report_parent_folder");
+        String REPORT_DATA_TEMPLATE = prop.getProperty("google.report_data_template");
         Drive driveService = GoogleAuth.getDriveService();
         System.out.println("Got drive service");
         String fileName = "Validator Report";            
-        com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
+        File file = new File();
         file.setTitle(fileName);
         file.setParents(Arrays.asList(new ParentReference().setId(REPORT_PARENT_FOLDER)));
         file.setDescription("New File created from server");
