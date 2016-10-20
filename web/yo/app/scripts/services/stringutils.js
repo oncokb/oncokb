@@ -864,13 +864,14 @@ angular.module('oncokbApp')
             return vusData;
         }
 
-        function getGeneData(realtime, excludeObsolete, excludeComments) {
+        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands) {
             /* jshint -W106 */
             var gene = {};
             var geneData = realtime;
 
             excludeObsolete = _.isBoolean(excludeObsolete) ? excludeObsolete : false;
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
+            excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : true;
             
             gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments);
             gene.mutations = [];
@@ -887,7 +888,7 @@ angular.module('oncokbApp')
                 gene.transcripts.push(_transcript);
             });
             geneData.mutations.asArray().forEach(function (e) {
-                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && e.oncogenic_eStatus.get('curated')!==false){
+                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && (!excludeRedHands || e.oncogenic_eStatus.get('curated') !== false)){
                     var _mutation = {};
                     _mutation.tumors = [];
                     _mutation.effect = {};

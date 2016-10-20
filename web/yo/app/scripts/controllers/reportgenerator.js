@@ -8,8 +8,8 @@
  * Controller of the oncokb
  */
 angular.module('oncokbApp')
-    .controller('ReportgeneratorCtrl',
-    function($scope, FileUploader, dialogs) {
+    .controller('ReportgeneratorCtrl',['$scope', 'FileUploader', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout',
+    function($scope, FileUploader, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout) {
         function initUploader() {
             var uploader = $scope.uploader = new FileUploader();
 
@@ -77,5 +77,118 @@ angular.module('oncokbApp')
                 rendering: false
             };
             initUploader();
+            $scope.resultTable = false;
+            $scope.loading = false;
+            $scope.disableButton = true;
+            var geneNames = [];
+            if (OncoKB.global.genes) {
+                storage.requireAuth(true).then(function () {
+                    storage.retrieveAllFiles().then(function (result) {
+                        Documents.set(result);
+                        Documents.setStatus(OncoKB.global.genes);
+                        $scope.documents = Documents.get();
+                        _.each($scope.documents, function(doc){
+                            geneNames.push(doc.title);
+                        });
+                        $scope.geneNames = geneNames;
+                    });
+                });
+            } else {
+                DatabaseConnector.getAllGene(function (data) {
+                    OncoKB.global.genes = data;
+                    storage.requireAuth(true).then(function () {
+                        storage.retrieveAllFiles().then(function (result) {
+                            Documents.set(result);
+                            Documents.setStatus(OncoKB.global.genes);
+                            $scope.documents = Documents.get();
+                            _.each($scope.documents, function(doc){
+                                geneNames.push(doc.title);
+                            });
+                            $scope.geneNames = geneNames;                            
+                        });
+                    });
+                });
+            }
+            
         };
-    });
+        $scope.dt = {};
+        $scope.dt.dtOptions = {
+            paging: false,
+            hasBootstrap: true,
+        
+            scrollY: 500,
+            scrollCollapse: true
+           
+        };
+        $scope.searchResults = [];
+        $scope.geneNames = [];
+        var results = [];
+        $scope.checkInputStatus = function(){
+            $scope.disableButton = true;
+            if(!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && ($scope.redHand || $scope.obsolete || $scope.unknown)){
+                $scope.disableButton = false;
+            }
+        }
+        $scope.searchVariants = function(inputGenes, index){
+            $scope.loading = true;
+            if(index === 0)results = [];
+            var documents = Documents.get({title: inputGenes[index]});
+            var document = _.isArray(documents) && documents.length === 1 ? documents[0] : null;
+            if (document) {
+                storage.getRealtimeDocument(document.id).then(function(realtime) {
+                    if (realtime && realtime.error) {
+                        console.log('did not get realtime document.');
+                    } else {
+                        var model = realtime.getModel();
+                        var gene = model.getRoot().get('gene');
+                        if (gene) {
+                            var gene = stringUtils.getGeneData(gene, false, false, false);
+                            if($scope.redHand){
+                                _.each(gene.mutations, function(mutation){
+                                    if(mutation.oncogenic_eStatus.curated === false){
+                                        results.push({gene: gene.name, annotation: mutation.name, status: 'Red Hand'});
+                                    }
+                                });
+                            }
+                            if($scope.obsolete){
+                                if(gene.summary_eStatus.obsolete === 'true'){
+                                    results.push({gene: gene.name, annotation: 'summary', status: 'obsolete'});
+                                }
+                                if(gene.background_eStatus.obsolete === 'true'){
+                                    results.push({gene: gene.name, annotation: 'background', status: 'obsolete'});
+                                }
+                                _.each(gene.mutations, function(mutation){
+                                    if(mutation.name_eStatus.obsolete === 'true'){
+                                        results.push({gene: gene.name, annotation: mutation.name, status: 'obsolete'});
+                                    }
+                                });
+                            }
+                            if($scope.unknown){
+                                _.each(gene.mutations, function(mutation){
+                                    if(mutation.effect.value === 'Unknown' && mutation.oncogenic === 'Unknown'){
+                                        results.push({gene: gene.name, annotation: mutation.name, status: 'Unknown/Unknown'});
+                                    }
+                                });
+                            } 
+                            if(index === inputGenes.length - 1){
+                                $scope.searchResults = results;
+                                $scope.resultTable = true;
+                                $scope.loading = false;
+                                
+                            }else{
+                                $timeout(function () {
+                                    index++;
+                                    $scope.searchVariants(inputGenes, index);
+                                }, 200);
+                            }
+                            
+                        } else {
+                            console.log('\t\tNo gene model.');
+
+                        }
+                    }
+                });
+            }
+        }
+        
+    }]);

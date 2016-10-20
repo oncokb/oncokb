@@ -16,5 +16,58 @@
             <tool-xlsx ng-if="status.isXLSX" open="status.isXLSX" file="fileItem" rendering="status.rendering"></tool-xlsx>
             <tool-xml ng-if="status.isXML" open="status.isXML" file="fileItem" rendering="status.rendering"></tool-xml>
         </div>
-    </div>
+        <hr/>
+        <h3>Check variants by status</h3>
+        <br/>
+        <div class="row">
+            <div class="col-sm-1">Genes:</div>
+            <div class="col-sm-3">
+                <select chosen multiple
+                        data-placeholder="Enter A Gene"
+                        ng-model="inputGenes"
+                        ng-options="m as m for m in geneNames"
+                        ng-change="checkInputStatus()"
+                        class="chosen-select">
+                    <option value=""></option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <input id="redHand" type="checkbox" ng-model="redHand" ng-change="checkInputStatus()"/>
+                <label for="redHand">Red Hand</label>
+            </div>
+            <div class="col-sm-2">
+                <input id="obsolete" type="checkbox" ng-model="obsolete" ng-change="checkInputStatus()"/>
+                <label for="obsolete">Obsolete</label>
+            </div>
+            <div class="col-sm-3">
+                <input id="unknown" type="checkbox" ng-model="unknown" ng-change="checkInputStatus()"/>
+                <label for="unknown">Unknown/Unknown</label>
+            </div>
+            <div class="col-sm-1">
+                <button type="button" class="btn btn-default" ng-click="searchVariants(inputGenes, 0)" ng-disabled="disableButton"> Submit </button>
+            </div>
+            
+        </div>
+
+     <br/><br/><br/>
+    <table ng-if="resultTable" datatable="ng" class="row-border hover" dt-options="dt.dtOptions">
+        <thead>
+        <tr>
+            <th>Gene</th>
+            <th>Annotation</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="x in searchResults">
+            <td><strong><a href="#/gene/{{x.gene}}" target="_blank">{{ x.gene }}</a></strong></td>
+            <td>{{ x.annotation}}</td>
+            <td>{{ x.status}}</td>
+        </tr>
+        </tbody>
+    </table>
+
+        <br/><br/><br/>
+        <loading ng-model="loading" content="Please wait, we are loading gene information."></loading>
+</div>
 </div>
