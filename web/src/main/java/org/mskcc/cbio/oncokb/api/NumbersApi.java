@@ -118,9 +118,6 @@ public class NumbersApi {
                 alterations = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
                 alterations = AlterationUtils.excludeGeneralAlterations(alterations);
 
-                for(Alteration alteration : alterations) {
-                    System.out.println(alteration.getGene().getHugoSymbol() + "\t" + alteration.getName());
-                }
                 mainNumber.setAlteration(alterations.size());
                 mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
                 mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
