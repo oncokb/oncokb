@@ -15,7 +15,7 @@ public class SummaryUtils {
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
     private static String[] SpecialMutations = {"amplification", "deletion", "fusion", "fusions"};
-    
+
     public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         if (gene == null) {
             return "";
@@ -224,7 +224,7 @@ public class SummaryUtils {
     public static String unknownOncogenicSummary() {
         return "The oncogenic activity of this variant is unknown and it has not been specifically investigated by the OncoKB team.";
     }
-    
+
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
         StringBuilder sb = new StringBuilder();
 
@@ -269,14 +269,14 @@ public class SummaryUtils {
             }
         } else {
             String altName = queryAlteration + " mutation";
-            
-            if(isSpecialMutation(queryAlteration, false)) {
-                if(isSpecialMutation(queryAlteration, true)) {
+
+            if (isSpecialMutation(queryAlteration, false)) {
+                if (isSpecialMutation(queryAlteration, true)) {
                     queryAlteration = queryAlteration.substring(0, 1).toUpperCase() + queryAlteration.substring(1);
                 }
                 altName = gene.getHugoSymbol() + " " + queryAlteration;
             }
-            
+
             if (gene == null || alterations == null) {
                 return null;
             }
@@ -427,9 +427,9 @@ public class SummaryUtils {
             sb.append(" However, ");
             sb.append(allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is"));
-            if(highestOncogenicity.getOncogenic().equals("1")) {
+            if (highestOncogenicity.getOncogenic().equals("1")) {
                 sb.append(" known to be " + highestOncogenicity.getDescription().toLowerCase());
-            }else {
+            } else {
                 sb.append(" " + highestOncogenicity.getDescription().toLowerCase());
             }
             sb.append(", and therefore " + geneStr + " " + altStr + " is considered likely oncogenic.");
@@ -482,12 +482,35 @@ public class SummaryUtils {
             String residue = tmp.getRefResidues();
             String location = Integer.toString(tmp.getProteinStart());
             Set<String> variantResidue = new TreeSet<>();
+            Set<Alteration> withoutVariantResidues = new HashSet<>();
 
             for (Alteration alteration : alterations) {
-                variantResidue.add(alteration.getVariantResidues());
+                if (alteration.getVariantResidues() == null) {
+                    withoutVariantResidues.add(alteration);
+                } else {
+                    variantResidue.add(alteration.getVariantResidues());
+                }
             }
+            
+            StringBuilder sb = new StringBuilder();
+            
+            if(variantResidue.size() > 0) {
+                sb.append(residue + location + StringUtils.join(variantResidue, "/"));
+            }
+            
+            if(withoutVariantResidues.size() > 0) {
+                List<String> alterationNames = new ArrayList<>();
+                for(Alteration alteration : withoutVariantResidues) {
+                    alterationNames.add(alteration.getName());
+                }
+                if(variantResidue.size() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(MainUtils.listToString(alterationNames, ", "));
+            }
+            
 
-            return residue + location + StringUtils.join(variantResidue, "/");
+            return sb.toString();
         } else {
             return "";
         }
@@ -821,7 +844,7 @@ public class SummaryUtils {
 
         return ret + " mutation" + (alterations.size() > 1 ? "s" : "");
     }
-    
+
     private static Boolean isSpecialMutation(String mutationStr, Boolean exactMatch) {
         exactMatch = exactMatch || false;
         mutationStr = mutationStr.toString();
@@ -853,7 +876,7 @@ public class SummaryUtils {
         }
         return false;
     }
-    
+
     public static boolean stringIsFromList(String inputString, String[] items) {
         for (int i = 0; i < items.length; i++) {
             if (inputString.equalsIgnoreCase(items[i])) {
