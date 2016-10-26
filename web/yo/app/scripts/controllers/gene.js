@@ -1574,7 +1574,7 @@ angular.module('oncokbApp')
             getCacheStatus();
             // getAllMainTypes();
 
-            var newGenes = ['KMT5A'];
+            var newGenes = ['AGO2','BABAM1','CARM1','CDC42','CSDE1','CYLD','CYSLTR2','DROSHA','DUSP4','ELF3','EPAS1','ERF','EZH1','FAM123B','FAM58A','HLA-B','INPPL1','KMT2B','KMT5A','KNSTRN','LYN','MAPKAP1','KMT2A','KMT2D','KMT2C','MSH3','MSI1','MSI2','NTHL1','NUF2','PDCD1LG2','PPARG','PPP4R2','PRDM14','PREX2','PRKCI','PRKD1','PTP4A1','RAC2','RAD51L1','RAD51L3','RECQL','RRAGC','RRAS','RRAS2','RTEL1','RXRA','SESN1','SESN2','SESN3','SHOC2','SLX4','SMYD3','SOS1','SPRED1','STK19','TAP1','TAP2','TEK','TP53BP1','UPF1','WHSC1','WHSC1L1','WWTR1'];
 
             $scope.migrate = function () {
                 //console.log($scope.documents);
@@ -3037,7 +3037,7 @@ angular.module('oncokbApp')
                                 console.log('More than one matched document have been found: ', hugoSymbol);
                             }
                             if (mutation) {
-                                storage.getRealtimeDocument(document[0].id).then(function (realtime) {
+                                storage.getRealtimeDocument(document[0].id).then(function(realtime) {
                                     if (realtime && realtime.error) {
                                         console.log('did not get realtime document.');
                                     } else {
@@ -3047,7 +3047,7 @@ angular.module('oncokbApp')
                                         var gene = model.getRoot().get('gene');
                                         var exists = false;
                                         //gene.mutations.clear();
-                                        gene.mutations.asArray().forEach(function (e, i) {
+                                        gene.mutations.asArray().forEach(function(e, i) {
                                             if (e.name.getText().toLowerCase() === mutation.toLowerCase()) {
                                                 console.log('\t\tAlteration already exists, ignore.' + e.name.getText());
                                                 exists = true;
@@ -3093,20 +3093,20 @@ angular.module('oncokbApp')
                                             model.endCompoundOperation();
                                             console.log('\t\tNew mutation has been added: ', mutation);
                                         }
-                                        $timeout(function () {
+                                        $timeout(function() {
                                             initAutoMutation(list, ++listIndex, callback);
                                         }, 200, false);
                                     }
                                 });
                             } else {
                                 console.log('\tNo alteration has been fount on gene: ', hugoSymbol);
-                                $timeout(function () {
+                                $timeout(function() {
                                     initAutoMutation(list, ++listIndex, callback);
                                 }, 200, false);
                             }
                         } else {
                             console.log('\tNo document has been fount on gene: ', hugoSymbol);
-                            $timeout(function () {
+                            $timeout(function() {
                                 initAutoMutation(list, ++listIndex, callback);
                             }, 200, false);
                         }
@@ -3123,15 +3123,15 @@ angular.module('oncokbApp')
             function initial(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
-                    storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function (evt) {
+                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function(evt) {
                                 if (!evt.isSaving) {
                                     realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
                                     storage.closeDocument();
-                                    $timeout(function () {
+                                    $timeout(function() {
                                         initial(docs, ++docIndex, callback);
                                     }, 200, false);
                                 }
@@ -3143,7 +3143,7 @@ angular.module('oncokbApp')
                             if (gene) {
 
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function (mutation) {
+                                gene.mutations.asArray().forEach(function(mutation) {
                                     if (!mutation.shortSummary_eStatus.has('obsolete')) {
                                         mutation.shortSummary_eStatus.set('obsolete', 'false');
                                     }
@@ -3172,7 +3172,7 @@ angular.module('oncokbApp')
                                 model.endCompoundOperation();
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function () {
+                                $timeout(function() {
                                     initial(docs, ++docIndex, callback);
                                 }, 200, false);
                             }
@@ -3189,15 +3189,15 @@ angular.module('oncokbApp')
             function removeHotspot(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
-                    storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function (evt) {
+                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function(evt) {
                                 if (!evt.isSaving) {
                                     realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
                                     storage.closeDocument();
-                                    $timeout(function () {
+                                    $timeout(function() {
                                         removeHotspot(docs, ++docIndex, callback);
                                     }, 200, false);
                                 }
@@ -3209,7 +3209,7 @@ angular.module('oncokbApp')
                             if (gene) {
                                 var removeIndice = [];
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function (mutation, index) {
+                                gene.mutations.asArray().forEach(function(mutation, index) {
                                     if (mutation.oncogenic_eStatus.has('hotspot')) {
                                         if (mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
                                             console.log('\t\tMutation: ', mutation.name.getText());
@@ -3246,7 +3246,7 @@ angular.module('oncokbApp')
                                         }
                                     }
 
-                                    mutation.tumors.asArray().forEach(function (tumor) {
+                                    mutation.tumors.asArray().forEach(function(tumor) {
                                         if (tumor.prevalence_eStatus.has('hotspot')) {
                                             tumor.prevalence_eStatus.delete('hotspot');
                                         }
@@ -3258,8 +3258,8 @@ angular.module('oncokbApp')
                                         }
 
                                         //console.log('Add tumor estatus');
-                                        tumor.TI.asArray().forEach(function (ti) {
-                                            ti.treatments.asArray().forEach(function (treatment) {
+                                        tumor.TI.asArray().forEach(function(ti) {
+                                            ti.treatments.asArray().forEach(function(treatment) {
                                                 if (treatment.name_eStatus.has('hotspot')) {
                                                     treatment.name_eStatus.delete('hotspot');
                                                 }
@@ -3267,10 +3267,10 @@ angular.module('oncokbApp')
                                         });
                                     });
                                 });
-                                removeIndice.sort(function (a, b) {
+                                removeIndice.sort(function(a, b) {
                                     return b - a;
                                 });
-                                removeIndice.forEach(function (index) {
+                                removeIndice.forEach(function(index) {
                                     gene.mutations.remove(index);
                                 });
                                 console.log(removeIndice);
@@ -3280,7 +3280,7 @@ angular.module('oncokbApp')
                                 //}, 200, false);
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function () {
+                                $timeout(function() {
                                     removeHotspot(docs, ++docIndex, callback);
                                 }, 200, false);
                             }
@@ -3296,19 +3296,23 @@ angular.module('oncokbApp')
 
             function createDoc(index) {
                 if (index < newGenes.length) {
-                    storage.requireAuth().then(function () {
-                        console.log(index, ' -> Creating', newGenes[index]);
-                        // storage.createDocument(newGenes[index], '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M').then(function (file) {
-                        storage.createDocument(newGenes[index]).then(function (result) {
-                            if (result && result.error) {
-                                console.log('Error when creating docuemnt.');
-                            } else {
-                                $timeout(function () {
-                                    createDoc(++index);
-                                }, 2000);
-                            }
-                        });
-                    });
+                    var gene = newGenes[index];
+                    var _documents = Documents.get({'title': gene});
+                    if (!_.isArray(_documents) || _documents.length === 0) {
+                        // console.log(gene);
+                        MainUtils.createGene(gene)
+                            .then(function(result) {
+                                if (result && result.error) {
+                                    console.log('Error when creating docuemnt.');
+                                } else {
+                                    $timeout(function() {
+                                        createDoc(++index);
+                                    }, 2000);
+                                }
+                            });
+                    } else {
+                        createDoc(++index);
+                    }
                 } else {
                     console.log('finished');
                 }

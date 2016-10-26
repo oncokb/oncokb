@@ -27,6 +27,7 @@ angular.module('oncokbApp')
         'Cache',
         'OncoTree',
         'InternalAccess',
+        'ApiUtils',
         function($timeout,
                  $q,
                  config,
@@ -559,9 +560,21 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
-            function getIsoForms() {
+            function getIsoforms() {
                 var deferred = $q.defer();
-                ApiUtils.getIsoForms()
+                ApiUtils.getIsoforms()
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+
+            function getOncogeneTSG() {
+                var deferred = $q.defer();
+                ApiUtils.getOncogeneTSG()
                     .success(function(data) {
                         deferred.resolve(data);
                     })
@@ -638,6 +651,7 @@ angular.module('oncokbApp')
                 'getOncoTreeTumorTypesByMainTypes': getOncoTreeTumorTypesByMainTypes,
                 'getOncoTreeTumorTypeByName': getOncoTreeTumorTypeByName,
                 'testAccess': testAccess,
-                'getIsoForms': getIsoForms
+                'getIsoforms': getIsoforms,
+                'getOncogeneTSG': getOncogeneTSG
             };
         }]);

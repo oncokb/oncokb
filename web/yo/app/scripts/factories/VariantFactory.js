@@ -388,11 +388,16 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
 angular.module('oncokbApp').factory('ApiUtils', ['$http', function($http) {
     'use strict';
 
-    function getIsoForms() {
-        return $http.get('https://raw.githubusercontent.com/mskcc/vcf2maf/master/data/isoform_overrides_at_mskcc');
+    function getIsoforms() {
+        return $http.get('data/isoformMskcc.json');
+    }
+
+    function getOncogeneTSG() {
+        return $http.get('data/oncogeneTSG.json');
     }
 
     return {
-        getIsoForms: getIsoForms
+        getIsoforms: getIsoforms,
+        getOncogeneTSG: getOncogeneTSG
     };
 }]);
