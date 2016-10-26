@@ -384,3 +384,15 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
         getTumorTypesByMainTypes: getTumorTypesByMainTypes
     };
 }]);
+
+angular.module('oncokbApp').factory('ApiUtils', ['$http', function($http) {
+    'use strict';
+
+    function getIsoForms() {
+        return $http.get('https://raw.githubusercontent.com/mskcc/vcf2maf/master/data/isoform_overrides_at_mskcc');
+    }
+
+    return {
+        getIsoForms: getIsoForms
+    };
+}]);
