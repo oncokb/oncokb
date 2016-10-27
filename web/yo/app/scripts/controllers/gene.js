@@ -1850,42 +1850,6 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.importISOForm = function() {
-                $.getJSON("data/ISOForm.json", function(response){
-                    $scope.documents.forEach(function (document) {
-                        storage.getRealtimeDocument(document.id).then(function(realtime) {
-                            if (realtime && realtime.error) {
-                                console.log('Did not get realtime document.');
-                            } else {
-                                var model = realtime.getModel();
-                                var gene = model.getRoot().get('gene');
-                                if (gene) {
-                                    //remove old transcripts values
-                                    for(var i = 0;i < gene.transcripts.length;i++){
-                                        gene.transcripts.remove(i);
-                                    }
-                                    //loop throught the ISOform data, find the corresponding transcirpt and save to gene transcripts attribute
-                                    for(var i = 0; i< response.length;i++){
-                                        if(response[i].gene_name === gene.name.getText()){
-                                            var ISOForm = model.create(OncoKB.ISOForm);
-                                            ISOForm.isoform_override.setText(response[i].isoform_override);
-                                            ISOForm.gene_name.setText(response[i].gene_name);
-                                            ISOForm.dmp_refseq_id.setText(response[i].dmp_refseq_id);
-                                            ISOForm.ccds_id.setText(response[i].ccds_id);
-                                            gene.transcripts.push(ISOForm);
-                                            break;
-                                        }
-                                    }
-                                    console.log('importing transcript data for ', gene.name.getText());
-                                } else {
-                                    console.log('\t\tNo gene model.');
-                                }
-                            }
-                        });
-                    })
-                })
-            }
-            
             function convertLevel4() {
                 var level4 = [];
                 var level4Obj = {};
@@ -3299,11 +3263,10 @@ angular.module('oncokbApp')
                     var gene = newGenes[index];
                     var _documents = Documents.get({'title': gene});
                     if (!_.isArray(_documents) || _documents.length === 0) {
-                        // console.log(gene);
                         MainUtils.createGene(gene)
                             .then(function(result) {
                                 if (result && result.error) {
-                                    console.log('Error when creating docuemnt.');
+                                    console.log('Error creating document.');
                                 } else {
                                     $timeout(function() {
                                         createDoc(++index);

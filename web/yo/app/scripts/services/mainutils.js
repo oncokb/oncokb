@@ -11,7 +11,13 @@ angular.module('oncokbApp')
     .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector) {
         var isoforms = {};
         var oncogeneTSG = {};
-        //   Create gene
+
+        /**
+         * Create new Gene document
+         * @param {string} hugoSymbol Gene Hugo Symbol
+         * @param {string} parentFolderId The folder where to put new document
+         * @returns {*|h.promise|promise|r.promise|d.promise}
+         */
         function createGene(hugoSymbol, parentFolderId) {
             var deferred = $q.defer();
             if (_.isString(hugoSymbol)) {
@@ -173,6 +179,12 @@ angular.module('oncokbApp')
             return null;
         }
 
+        /**
+         * Create Google Realtime isoform model
+         * @param model Google realtime document
+         * @param {object} isoform
+         * @returns {*}
+         */
         function createIsoform(model, isoform) {
             if (_.isObject(isoform) && model) {
                 var Isoform = model.create(OncoKB.ISOForm);
@@ -193,6 +205,11 @@ angular.module('oncokbApp')
             return null;
         }
 
+        /**
+         * Output cancer type name, either subtype or cancerType
+         * @param cancerTypes
+         * @returns {string}
+         */
         function getCancerTypesName(cancerTypes) {
             if (!cancerTypes) {
                 return null;
@@ -207,8 +224,13 @@ angular.module('oncokbApp')
                 }
             });
             return list.join(', ');
-        };
+        }
 
+        /**
+         * Util to find isoform info by giving hugo symbol
+         * @param {string} hugoSymbol
+         * @returns {*|h.promise|promise|r.promise|d.promise}
+         */
         function getIsoform(hugoSymbol) {
             var deferred = $q.defer();
             if (Object.keys(isoforms).length == 0) {
@@ -232,6 +254,11 @@ angular.module('oncokbApp')
             return deferred.promise;
         }
 
+        /**
+         * Util to find gene type by giving hugo symbol
+         * @param {string} hugoSymbol
+         * @returns {*|h.promise|promise|r.promise|d.promise}
+         */
         function getOncogeneTSG(hugoSymbol) {
             var deferred = $q.defer();
             if (Object.keys(oncogeneTSG).length == 0) {
