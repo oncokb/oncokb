@@ -29,6 +29,7 @@ angular.module('oncokbApp')
                                         var gene = model.getRoot().get('gene');
                                         if (!gene) {
                                             gene = model.create('Gene');
+                                            gene.name.setText(hugoSymbol);
                                             model.getRoot().set('gene', gene);
                                         }
                                         if (!model.getRoot().get('vus')) {

@@ -1574,7 +1574,7 @@ angular.module('oncokbApp')
             getCacheStatus();
             // getAllMainTypes();
 
-            var newGenes = ['AGO2','BABAM1','CARM1','CDC42','CSDE1','CYLD','CYSLTR2','DROSHA','DUSP4','ELF3','EPAS1','ERF','EZH1','FAM123B','FAM58A','HLA-B','INPPL1','KMT2B','KMT5A','KNSTRN','LYN','MAPKAP1','KMT2A','KMT2D','KMT2C','MSH3','MSI1','MSI2','NTHL1','NUF2','PDCD1LG2','PPARG','PPP4R2','PRDM14','PREX2','PRKCI','PRKD1','PTP4A1','RAC2','RAD51L1','RAD51L3','RECQL','RRAGC','RRAS','RRAS2','RTEL1','RXRA','SESN1','SESN2','SESN3','SHOC2','SLX4','SMYD3','SOS1','SPRED1','STK19','TAP1','TAP2','TEK','TP53BP1','UPF1','WHSC1','WHSC1L1','WWTR1'];
+            var newGenes = [];
 
             $scope.migrate = function () {
                 //console.log($scope.documents);
@@ -2356,9 +2356,9 @@ angular.module('oncokbApp')
             }
             
             function changeData(index, callback) {
-                if(index < $scope.documents.length) {
+                if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
-                    storage.getRealtimeDocument(document.id).then(function (realtime) {
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
