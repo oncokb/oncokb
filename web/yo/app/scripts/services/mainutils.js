@@ -8,10 +8,90 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _) {
-        //   Create gene
-        function createGene() {
+    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector) {
+        var isoforms = {};
+        var oncogeneTSG = {};
 
+        /**
+         * Create new Gene document
+         * @param {string} hugoSymbol Gene Hugo Symbol
+         * @param {string} parentFolderId The folder where to put new document
+         * @returns {*|h.promise|promise|r.promise|d.promise}
+         */
+        function createGene(hugoSymbol, parentFolderId) {
+            var deferred = $q.defer();
+            if (_.isString(hugoSymbol)) {
+                storage.requireAuth().then(function() {
+                    console.log('Creating gene ', hugoSymbol);
+                    storage.createDocument(hugoSymbol, parentFolderId)
+                        .then(function(result) {
+                            if (result && result.error) {
+                                console.error('\tError when creating document.');
+                                deferred.reject(result);
+                            } else {
+                                storage.getRealtimeDocument(result.id)
+                                    .then(function(file) {
+                                        var model = file.getModel();
+                                        var gene = model.getRoot().get('gene');
+                                        if (!gene) {
+                                            gene = model.create('Gene');
+                                            gene.name.setText(hugoSymbol);
+                                            model.getRoot().set('gene', gene);
+                                        }
+                                        if (!model.getRoot().get('vus')) {
+                                            var vus = model.createList();
+                                            model.getRoot().set('vus', vus);
+                                        }
+                                        $q.all([getIsoform(hugoSymbol),
+                                            getOncogeneTSG(hugoSymbol)])
+                                            .then(function(result) {
+                                                if (_.isArray(result)) {
+                                                    var isoform = result[0];
+                                                    var geneType = result[1];
+                                                    if (isoform && isoform.error) {
+                                                        console.error('\tError when getting isoforms.');
+                                                    } else if (isoform && isoform.gene_name) {
+                                                        var isoformModel = createIsoform(model, isoform);
+                                                        gene.transcripts.push(isoformModel);
+                                                    } else {
+                                                        console.error('\tNo isoform found!!');
+                                                    }
+
+                                                    if (geneType && geneType.error) {
+                                                        console.error('\tError when getting gene type.');
+                                                    } else if (geneType && geneType.classification) {
+                                                        var type = '';
+                                                        var key = '';
+                                                        switch (geneType.classification) {
+                                                            case 'TSG':
+                                                                type = 'Tumor Suppressor';
+                                                                key = 'TSG'
+                                                                break;
+                                                            case 'Oncogene':
+                                                                type = 'Oncogene';
+                                                                key = 'OCG'
+                                                                break;
+                                                            default:
+                                                                type = '';
+                                                                break;
+                                                        }
+                                                        if (type) {
+                                                            gene.type.set(key, type);
+                                                        }
+                                                    } else {
+                                                        console.log('\tNo gene type found.');
+                                                    }
+                                                }
+                                                deferred.resolve();
+                                            }, function(error) {
+                                                console.error('Failed to load isoform/geneType', error);
+                                            })
+                                    });
+                            }
+                        });
+                });
+            }
+            return deferred.promise;
         }
 
         /**
@@ -99,8 +179,39 @@ angular.module('oncokbApp')
             return null;
         }
 
+        /**
+         * Create Google Realtime isoform model
+         * @param model Google realtime document
+         * @param {object} isoform
+         * @returns {*}
+         */
+        function createIsoform(model, isoform) {
+            if (_.isObject(isoform) && model) {
+                var Isoform = model.create(OncoKB.ISOForm);
+                if (isoform.isoform_override) {
+                    Isoform.isoform_override.setText(isoform.isoform_override);
+                }
+                if (isoform.gene_name) {
+                    Isoform.gene_name.setText(isoform.gene_name);
+                }
+                if (isoform.dmp_refseq_id) {
+                    Isoform.dmp_refseq_id.setText(isoform.dmp_refseq_id);
+                }
+                if (isoform.ccds_id) {
+                    Isoform.ccds_id.setText(isoform.ccds_id);
+                }
+                return Isoform;
+            }
+            return null;
+        }
+
+        /**
+         * Output cancer type name, either subtype or cancerType
+         * @param cancerTypes
+         * @returns {string}
+         */
         function getCancerTypesName(cancerTypes) {
-            if(!cancerTypes) {
+            if (!cancerTypes) {
                 return null;
             }
             var list = [];
@@ -113,14 +224,72 @@ angular.module('oncokbApp')
                 }
             });
             return list.join(', ');
-        };
-        
+        }
+
+        /**
+         * Util to find isoform info by giving hugo symbol
+         * @param {string} hugoSymbol
+         * @returns {*|h.promise|promise|r.promise|d.promise}
+         */
+        function getIsoform(hugoSymbol) {
+            var deferred = $q.defer();
+            if (Object.keys(isoforms).length == 0) {
+                DatabaseConnector.getIsoforms()
+                    .then(function(result) {
+                        if (_.isArray(result)) {
+                            _.each(result, function(item) {
+                                if (_.isObject(item) &&
+                                    _.isString(item.gene_name)) {
+                                    isoforms[item.gene_name] = item;
+                                }
+                            });
+                        }
+                        return deferred.resolve(isoforms[hugoSymbol]);
+                    }, function(error) {
+                        deferred.reject();
+                    });
+            } else {
+                deferred.resolve(isoforms[hugoSymbol]);
+            }
+            return deferred.promise;
+        }
+
+        /**
+         * Util to find gene type by giving hugo symbol
+         * @param {string} hugoSymbol
+         * @returns {*|h.promise|promise|r.promise|d.promise}
+         */
+        function getOncogeneTSG(hugoSymbol) {
+            var deferred = $q.defer();
+            if (Object.keys(oncogeneTSG).length == 0) {
+                DatabaseConnector.getOncogeneTSG(hugoSymbol)
+                    .then(function(result) {
+                        if (_.isArray(result)) {
+                            _.each(result, function(item) {
+                                if (_.isObject(item) &&
+                                    _.isString(item.gene)) {
+                                    oncogeneTSG[item.gene] = item;
+                                }
+                            });
+                        }
+                        deferred.resolve(oncogeneTSG[hugoSymbol]);
+                    }, function(error) {
+                        deferred.reject();
+                    });
+            } else {
+                deferred.resolve(oncogeneTSG[hugoSymbol]);
+            }
+            return deferred.promise;
+        }
+
         return {
             getCancerTypesName: getCancerTypesName,
             createGene: createGene,
             createMutation: createMutation,
             createTumorType: createTumorType,
             createCancerType: createCancerType,
-            createTreatment: createTreatment
+            createTreatment: createTreatment,
+            getIsoform: getIsoform,
+            getOncogeneTSG: getOncogeneTSG
         };
     });

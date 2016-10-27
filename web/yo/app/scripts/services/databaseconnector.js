@@ -27,6 +27,7 @@ angular.module('oncokbApp')
         'Cache',
         'OncoTree',
         'InternalAccess',
+        'ApiUtils',
         function($timeout,
                  $q,
                  config,
@@ -44,7 +45,9 @@ angular.module('oncokbApp')
                  ServerUtils,
                  Cache,
                  OncoTree,
-                 InternalAccess) {
+                 InternalAccess,
+                 ApiUtils
+        ) {
 
             var numOfLocks = {},
                 data = {};
@@ -557,6 +560,30 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
+            function getIsoforms() {
+                var deferred = $q.defer();
+                ApiUtils.getIsoforms()
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+
+            function getOncogeneTSG() {
+                var deferred = $q.defer();
+                ApiUtils.getOncogeneTSG()
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+            
             // Public API here
             return {
                 'getGeneAlterationTumorType': function(callback) {
@@ -623,6 +650,8 @@ angular.module('oncokbApp')
                 'getOncoTreeTumorTypesByMainType': getOncoTreeTumorTypesByMainType,
                 'getOncoTreeTumorTypesByMainTypes': getOncoTreeTumorTypesByMainTypes,
                 'getOncoTreeTumorTypeByName': getOncoTreeTumorTypeByName,
-                'testAccess': testAccess
+                'testAccess': testAccess,
+                'getIsoforms': getIsoforms,
+                'getOncogeneTSG': getOncogeneTSG
             };
         }]);

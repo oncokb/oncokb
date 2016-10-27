@@ -1849,7 +1849,7 @@ angular.module('oncokbApp')
                     console.info('Finished.');
                 });
             };
-            
+
             function convertLevel4() {
                 var level4 = [];
                 var level4Obj = {};
@@ -2320,9 +2320,9 @@ angular.module('oncokbApp')
             }
             
             function changeData(index, callback) {
-                if(index < $scope.documents.length) {
+                if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
-                    storage.getRealtimeDocument(document.id).then(function (realtime) {
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
@@ -3001,7 +3001,7 @@ angular.module('oncokbApp')
                                 console.log('More than one matched document have been found: ', hugoSymbol);
                             }
                             if (mutation) {
-                                storage.getRealtimeDocument(document[0].id).then(function (realtime) {
+                                storage.getRealtimeDocument(document[0].id).then(function(realtime) {
                                     if (realtime && realtime.error) {
                                         console.log('did not get realtime document.');
                                     } else {
@@ -3011,7 +3011,7 @@ angular.module('oncokbApp')
                                         var gene = model.getRoot().get('gene');
                                         var exists = false;
                                         //gene.mutations.clear();
-                                        gene.mutations.asArray().forEach(function (e, i) {
+                                        gene.mutations.asArray().forEach(function(e, i) {
                                             if (e.name.getText().toLowerCase() === mutation.toLowerCase()) {
                                                 console.log('\t\tAlteration already exists, ignore.' + e.name.getText());
                                                 exists = true;
@@ -3057,20 +3057,20 @@ angular.module('oncokbApp')
                                             model.endCompoundOperation();
                                             console.log('\t\tNew mutation has been added: ', mutation);
                                         }
-                                        $timeout(function () {
+                                        $timeout(function() {
                                             initAutoMutation(list, ++listIndex, callback);
                                         }, 200, false);
                                     }
                                 });
                             } else {
                                 console.log('\tNo alteration has been fount on gene: ', hugoSymbol);
-                                $timeout(function () {
+                                $timeout(function() {
                                     initAutoMutation(list, ++listIndex, callback);
                                 }, 200, false);
                             }
                         } else {
                             console.log('\tNo document has been fount on gene: ', hugoSymbol);
-                            $timeout(function () {
+                            $timeout(function() {
                                 initAutoMutation(list, ++listIndex, callback);
                             }, 200, false);
                         }
@@ -3087,15 +3087,15 @@ angular.module('oncokbApp')
             function initial(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
-                    storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function (evt) {
+                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function(evt) {
                                 if (!evt.isSaving) {
                                     realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
                                     storage.closeDocument();
-                                    $timeout(function () {
+                                    $timeout(function() {
                                         initial(docs, ++docIndex, callback);
                                     }, 200, false);
                                 }
@@ -3107,7 +3107,7 @@ angular.module('oncokbApp')
                             if (gene) {
 
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function (mutation) {
+                                gene.mutations.asArray().forEach(function(mutation) {
                                     if (!mutation.shortSummary_eStatus.has('obsolete')) {
                                         mutation.shortSummary_eStatus.set('obsolete', 'false');
                                     }
@@ -3136,7 +3136,7 @@ angular.module('oncokbApp')
                                 model.endCompoundOperation();
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function () {
+                                $timeout(function() {
                                     initial(docs, ++docIndex, callback);
                                 }, 200, false);
                             }
@@ -3153,15 +3153,15 @@ angular.module('oncokbApp')
             function removeHotspot(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
-                    storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
-                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function (evt) {
+                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function(evt) {
                                 if (!evt.isSaving) {
                                     realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
                                     storage.closeDocument();
-                                    $timeout(function () {
+                                    $timeout(function() {
                                         removeHotspot(docs, ++docIndex, callback);
                                     }, 200, false);
                                 }
@@ -3173,7 +3173,7 @@ angular.module('oncokbApp')
                             if (gene) {
                                 var removeIndice = [];
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function (mutation, index) {
+                                gene.mutations.asArray().forEach(function(mutation, index) {
                                     if (mutation.oncogenic_eStatus.has('hotspot')) {
                                         if (mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
                                             console.log('\t\tMutation: ', mutation.name.getText());
@@ -3210,7 +3210,7 @@ angular.module('oncokbApp')
                                         }
                                     }
 
-                                    mutation.tumors.asArray().forEach(function (tumor) {
+                                    mutation.tumors.asArray().forEach(function(tumor) {
                                         if (tumor.prevalence_eStatus.has('hotspot')) {
                                             tumor.prevalence_eStatus.delete('hotspot');
                                         }
@@ -3222,8 +3222,8 @@ angular.module('oncokbApp')
                                         }
 
                                         //console.log('Add tumor estatus');
-                                        tumor.TI.asArray().forEach(function (ti) {
-                                            ti.treatments.asArray().forEach(function (treatment) {
+                                        tumor.TI.asArray().forEach(function(ti) {
+                                            ti.treatments.asArray().forEach(function(treatment) {
                                                 if (treatment.name_eStatus.has('hotspot')) {
                                                     treatment.name_eStatus.delete('hotspot');
                                                 }
@@ -3231,10 +3231,10 @@ angular.module('oncokbApp')
                                         });
                                     });
                                 });
-                                removeIndice.sort(function (a, b) {
+                                removeIndice.sort(function(a, b) {
                                     return b - a;
                                 });
-                                removeIndice.forEach(function (index) {
+                                removeIndice.forEach(function(index) {
                                     gene.mutations.remove(index);
                                 });
                                 console.log(removeIndice);
@@ -3244,7 +3244,7 @@ angular.module('oncokbApp')
                                 //}, 200, false);
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function () {
+                                $timeout(function() {
                                     removeHotspot(docs, ++docIndex, callback);
                                 }, 200, false);
                             }
@@ -3260,19 +3260,22 @@ angular.module('oncokbApp')
 
             function createDoc(index) {
                 if (index < newGenes.length) {
-                    storage.requireAuth().then(function () {
-                        console.log(index, ' -> Creating', newGenes[index]);
-                        // storage.createDocument(newGenes[index], '0BzBfo69g8fP6Mnk3RjVrZ0pJX3M').then(function (file) {
-                        storage.createDocument(newGenes[index]).then(function (result) {
-                            if (result && result.error) {
-                                console.log('Error when creating docuemnt.');
-                            } else {
-                                $timeout(function () {
-                                    createDoc(++index);
-                                }, 2000);
-                            }
-                        });
-                    });
+                    var gene = newGenes[index];
+                    var _documents = Documents.get({'title': gene});
+                    if (!_.isArray(_documents) || _documents.length === 0) {
+                        MainUtils.createGene(gene)
+                            .then(function(result) {
+                                if (result && result.error) {
+                                    console.log('Error creating document.');
+                                } else {
+                                    $timeout(function() {
+                                        createDoc(++index);
+                                    }, 2000);
+                                }
+                            });
+                    } else {
+                        createDoc(++index);
+                    }
                 } else {
                     console.log('finished');
                 }

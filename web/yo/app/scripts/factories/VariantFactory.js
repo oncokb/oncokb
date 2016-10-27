@@ -384,3 +384,20 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
         getTumorTypesByMainTypes: getTumorTypesByMainTypes
     };
 }]);
+
+angular.module('oncokbApp').factory('ApiUtils', ['$http', function($http) {
+    'use strict';
+
+    function getIsoforms() {
+        return $http.get('data/isoformMskcc.json');
+    }
+
+    function getOncogeneTSG() {
+        return $http.get('data/oncogeneTSG.json');
+    }
+
+    return {
+        getIsoforms: getIsoforms,
+        getOncogeneTSG: getOncogeneTSG
+    };
+}]);
