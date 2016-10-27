@@ -46,7 +46,7 @@ module.exports = function (grunt) {
       },
       compass: {
         files: ['<%= oncokb.app %>/styles/{,*/}*.{scss,sass}'],
-        tasks: ['compass:server', 'autoprefixer']
+        tasks: ['compass:server', 'postcss']
       },
       gruntfile: {
         files: ['Gruntfile.js']
@@ -146,18 +146,21 @@ module.exports = function (grunt) {
     },
 
     // Add vendor prefixed styles
-    autoprefixer: {
-      options: {
-        browsers: ['last 1 version']
-      },
-      dist: {
-        files: [{
-          expand: true,
-          cwd: '.tmp/styles/',
-          src: '{,*/}*.css',
-          dest: '.tmp/styles/'
-        }]
-      }
+    postcss: {
+        options: {
+          map: true,
+          processors: [
+              require('autoprefixer')({browsers: 'last 2 versions'}), // add vendor prefixes
+          ]
+        },
+        dist: {
+          files: [{
+              expand: true,
+              cwd: '.tmp/styles/',
+              src: '{,*/}*.css',
+              dest: '.tmp/styles/'
+          }]
+        }
     },
 
     // Automatically inject Bower components into the app
@@ -457,7 +460,7 @@ module.exports = function (grunt) {
       'clean:server',
       'wiredep',
       'concurrent:server',
-      'autoprefixer',
+      'postcss',
       'connect:livereload',
       'watch'
     ]);
@@ -477,7 +480,7 @@ module.exports = function (grunt) {
     'wiredep',
     'useminPrepare:html',
     'concurrent:dist',
-    'autoprefixer',
+    'postcss',
     'concat',
     'ngAnnotate',
     'copy:dist',
