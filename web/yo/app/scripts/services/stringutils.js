@@ -863,6 +863,8 @@ angular.module('oncokbApp')
             }
             return vusData;
         }
+        
+        
 
         function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands) {
             /* jshint -W106 */
@@ -1037,6 +1039,9 @@ angular.module('oncokbApp')
                         }
                         if (model[e + '_timeStamp']) {
                             object[e + '_timeStamp'] = getTimeStamp(model[e + '_timeStamp']);
+                        }
+                        if (model[e + '_uuid']) {
+                            object[e + '_uuid'] = model[e + '_uuid'].getText();
                         }
                     }
                 }

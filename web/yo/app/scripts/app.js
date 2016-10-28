@@ -36,14 +36,15 @@ OncoKB.config = {
     //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
     // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
     // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
+    folderId: '0By19QWSOYlS_VkVWa1NFUTZmQUE', //curation folder 09/08/2016,
+    statusFolderId: '0By19QWSOYlS_dm8teXpMZlowbG8',
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
         'curator':4, // 0100
         'admin':  8  // 1000
     },
-    backupFolderId: '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk',
+    backupFolderId: '0BzBfo69g8fP6fldsUFY0T21HVV9za3UwbXViT0FTa0t6TG1uRVdLWWJaYlAyOWVqQXBRN3c',
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/api/legacy-api/',
@@ -53,7 +54,7 @@ OncoKB.config = {
     // curationLink: 'http://localhost:8080/api/legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {},
-    testing: false
+    testing: true
 };
 
 OncoKB.config.accessLevels.public = OncoKB.config.userRoles.public | OncoKB.config.userRoles.user  | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin;
@@ -360,6 +361,19 @@ OncoKB.curateInfo = {
         ccds_id: {
             type: 'string'
         }
+    },
+    'Status': {
+        status: {
+            type: 'map'
+        }
+    },
+    'StatusRecord': {
+        eStatus: {
+            type: 'map'
+        },
+        timeStamp: {
+            type: 'map'
+        }
     }
 };
 
@@ -382,6 +396,7 @@ OncoKB.setUp = function(object) {
 OncoKB.keyMappings = {type: {'TSG': '', 'OCG': ''}};
 
 OncoKB.initialize = function() {
+    //debugger;
     var nonSetUp = ['TI'];
     var keys = window._.keys(OncoKB.curateInfo);
     var keysL = keys.length;
@@ -413,10 +428,11 @@ OncoKB.initialize = function() {
                     this.types = model.createMap({'status': '0', 'type': '0'});
                 }else {
                     if(OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
-                        if(['Comment', 'TimeStamp', 'EStatus'].indexOf(id) === -1) {
+                        if(['Comment', 'TimeStamp', 'EStatus', 'StatusRecord', 'Status'].indexOf(id) === -1) {
                             this[__key + '_comments'] = model.createList();
                             this[__key + '_timeStamp'] = model.createMap();
                             this[__key + '_eStatus'] = model.createMap();
+                            this[__key + '_uuid'] = model.createString('');
                         }
                         switch (OncoKB.curateInfo[id][__key].type) {
                             case 'string':
@@ -441,10 +457,11 @@ OncoKB.initialize = function() {
         //Register every field of OncoKB into document
         for(var j=0; j<_keysL; j++) {
             OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
-            if(['Comment', 'TimeStamp', 'EStatus'].indexOf(_key) === -1) {
+            if(['Comment', 'TimeStamp', 'EStatus', 'StatusRecord', 'Status'].indexOf(_key) === -1) {
                 OncoKB[_key].prototype[_keys[j] + '_comments'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_comments');
                 OncoKB[_key].prototype[_keys[j] + '_timeStamp'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_timeStamp');
                 OncoKB[_key].prototype[_keys[j] + '_eStatus'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_eStatus');
+                OncoKB[_key].prototype[_keys[j] + '_uuid'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_uuid');
             }
         }
 

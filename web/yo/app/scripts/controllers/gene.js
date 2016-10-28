@@ -8,13 +8,13 @@
  * Controller of the oncokb
  */
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout', 
-        '$routeParams', '_', 'config', 'importer', 'storage', 'documents', 
-        'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 
+    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
+        '$routeParams', '_', 'config', 'importer', 'storage', 'documents',
+        'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
         'OncoKB', 'stringUtils', 'S', 'mainUtils',
-        function ($scope, $rootScope, $location, $timeout, $routeParams, _, 
-                  config, importer, storage, Documents, users, 
-                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, 
+        function ($scope, $rootScope, $location, $timeout, $routeParams, _,
+                  config, importer, storage, Documents, users,
+                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                   OncoKB, stringUtils, S, MainUtils) {
             function saveGene(docs, docIndex, excludeObsolete, callback) {
                 if (docIndex < docs.length) {
@@ -32,10 +32,10 @@ angular.module('oncokbApp')
                                 var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
-                                if(geneData) {
+                                if (geneData) {
                                     params.gene = JSON.stringify(geneData);
                                 }
-                                if(vusData) {
+                                if (vusData) {
                                     params.vus = JSON.stringify(vusData);
                                 }
                                 DatabaseConnector.updateGene(params,
@@ -108,6 +108,151 @@ angular.module('oncokbApp')
                     }
                 }
             };
+            $scope.startUUIDImporting = function () {
+                importUUIDs($scope.documents, 0);
+            };
+
+            //_.each(_.keys(OncoKB.curateInfo), function(key){
+            //    
+            //});
+
+            var geneKeys = _.keys(OncoKB.curateInfo.Gene);
+            var mutationKeys = _.keys(OncoKB.curateInfo.Mutation);
+            var tumorKeys = _.keys(OncoKB.curateInfo.Tumor);
+            var cancerTypesKeys = _.keys(OncoKB.curateInfo.CancerType);
+            var TIKeys = _.keys(OncoKB.curateInfo.TI);
+            var nccnKeys = _.keys(OncoKB.curateInfo.NCCN);
+            var interactAltsKeys = _.keys(OncoKB.curateInfo.InteractAlts);
+
+            var statusRecordObj = {};
+
+            function setUUID(jsonData, model) {
+                _.each(_.keys(jsonData), function (item) {
+                    if (item.endsWith("_uuid")) {
+                        model[item].setText(UUIDjs.create(4).toString());
+                    } else if (model[item] && model[item].type === 'List') {
+                        _.each(model[item].asArray(), function (itemModel, index) {
+                            setUUID(jsonData[item][index], itemModel);
+                        });
+                    }
+                });
+            }
+
+            function importUUIDs(docs, docIndex) {
+                var fileId = docs[docIndex].id;
+                storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    if (realtime && realtime.error) {
+                        console.log('did not get realtime document.');
+                    } else {
+                        var model = realtime.getModel();
+                        var gene = model.getRoot().get('gene');
+                        if (gene) {
+                            var jsonGene = stringUtils.getGeneData(gene);
+                            setUUID(jsonGene, gene);
+                            console.log('Done setting uuid for ', gene.name.getText());
+                        } else {
+                            console.log('No gene model');
+                        }
+
+                    }
+
+                    docIndex++;
+                    if (docIndex < docs.length) {
+                        $timeout(function () {
+                            importUUIDs(docs, docIndex);
+                        }, 200, false);
+                    } else {
+                        console.log('It is finished!');
+                    }
+
+                });
+            };
+            $scope.addStatusRecord = function () {
+                addStatusRecordItem($scope.documents, 0);
+            }
+            function setMapping(jsonGeneData, statusRecord, statusModel) {
+                var lastEdit, lastUpdate, statusRecordObj;
+                _.each(_.keys(jsonGeneData), function (item) {
+                    if (jsonGeneData[item] && item.indexOf("_") === -1) {
+                        if (!_.isArray(jsonGeneData[item])) {
+                            statusRecordObj = statusModel.create(OncoKB.StatusRecord);
+                            statusRecordObj.eStatus = statusModel.createMap();
+                            if (jsonGeneData[item + "_eStatus"]) {
+                                statusRecordObj.eStatus.set("obsolete", jsonGeneData[item + "_eStatus"].obsolete);
+                                statusRecordObj.eStatus.set("vetted", jsonGeneData[item + "_eStatus"].vetted);
+                            }
+                            statusRecordObj.timeStamp = statusModel.createMap();
+                            if (jsonGeneData[item + "_timeStamp"]) {
+                                if (jsonGeneData[item + "_timeStamp"].lastEdit) {
+                                    lastEdit = statusModel.create(OncoKB.TimeStamp);
+                                    lastEdit.value.setText(jsonGeneData[item + "_timeStamp"].lastEdit.value);
+                                    lastEdit.by.setText(jsonGeneData[item + "_timeStamp"].lastEdit.by);
+                                    statusRecordObj.timeStamp.set("lastEdit", lastEdit);
+                                }
+                                if (jsonGeneData[item + "_timeStamp"].lastUpdate) {
+                                    lastUpdate = statusModel.create(OncoKB.TimeStamp);
+                                    lastUpdate.value.setText(jsonGeneData[item + "_timeStamp"].lastUpdate.value);
+                                    lastUpdate.by.setText(jsonGeneData[item + "_timeStamp"].lastUpdate.by);
+                                    statusRecordObj.timeStamp.set("lastUpdate", lastUpdate);
+                                }
+                            }
+
+                            if (jsonGeneData[item + "_uuid"] && jsonGeneData[item + "_uuid"] !== '') {
+                                statusRecord.status.set(jsonGeneData[item + "_uuid"], statusRecordObj);
+                            }
+                        } else {
+                            _.each(jsonGeneData[item], function (itemSecondary) {
+                                setMapping(itemSecondary, statusRecord, statusModel);
+                            });
+                        }
+
+                    }
+                });
+
+            }
+
+            function addStatusRecordItem(docs, docIndex) {
+                var fileId = docs[docIndex].id;
+                storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    if (realtime && realtime.error) {
+                        console.log('did not get realtime document.');
+                    } else {
+                        var model = realtime.getModel();
+                        var gene = model.getRoot().get('gene');
+                        var tempGeneData = stringUtils.getGeneData(gene);
+                        storage.requireAuth(true).then(function () {
+                            storage.createDocument(tempGeneData.name, config.statusFolderId).then(function (statusFile) {
+                                console.log('Created file for ', tempGeneData.name);
+                                storage.getRealtimeDocument(statusFile.id).then(function (statusDocRealtime) {
+                                    if (statusDocRealtime && statusDocRealtime.error) {
+                                        console.log('did not get statusDocRealtime document.');
+                                    } else {
+                                        var statusModel = statusDocRealtime.getModel();
+                                        var statusRecord = statusModel.create(OncoKB.Status);
+
+                                        setMapping(tempGeneData, statusRecord, statusModel);
+
+                                        statusModel.getRoot().set('status', statusRecord);
+                                        console.log('Done setting status for ', tempGeneData.name);
+                                        docIndex++;
+                                        if (docIndex < docs.length) {
+                                            $timeout(function () {
+                                                addStatusRecordItem(docs, docIndex);
+                                            }, 500, false);
+                                        } else {
+                                            console.log('It is finished!');
+                                        }
+                                    }
+                                });
+                            });
+                        });
+
+
+                    }
+
+
+                });
+            };
 
             $scope.backup = function () {
                 $scope.status.backup = false;
@@ -115,7 +260,7 @@ angular.module('oncokbApp')
                     $scope.status.backup = true;
                 });
             };
-            
+
             $scope.redirect = function (path) {
                 $location.path(path);
             };
@@ -1604,7 +1749,7 @@ angular.module('oncokbApp')
                         return e.trim();
                     });
                     _genes.forEach(function (_gene) {
-                        if(_gene) {
+                        if (_gene) {
                             genes.push({'email': key, 'gene': _gene});
                         }
                     });
@@ -1654,7 +1799,7 @@ angular.module('oncokbApp')
                                                 }, 100);
                                             }
                                         });
-                                    }else {
+                                    } else {
                                         console.log('\tDont need to do anything on ', genePermission.email);
                                         $timeout(function () {
                                             givePermissionSub(++index);
@@ -1663,7 +1808,7 @@ angular.module('oncokbApp')
                                 }
                             });
                         });
-                    }else {
+                    } else {
                         console.log('\tThis gene document is not available');
                         $timeout(function () {
                             givePermissionSub(++index);
@@ -1705,7 +1850,7 @@ angular.module('oncokbApp')
                         $timeout(function () {
                             resetPermissionSub(++index);
                         }, 100);
-                    }else {
+                    } else {
                         console.log('\tThis gene document is not available');
                         $timeout(function () {
                             resetPermissionSub(++index);
@@ -1782,7 +1927,7 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.changeData = function() {
+            $scope.changeData = function () {
                 console.info('Gene\tVariant\tTumorType\tTreatment' +
                     '\tFDA approved indication\tLevel\tShortDescription\t' +
                     'Description\tObsolete');
@@ -1809,39 +1954,39 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.changeCacheStatus = function() {
+            $scope.changeCacheStatus = function () {
                 if ($scope.status.cache === 'enabled') {
                     DatabaseConnector.disableCache()
-                        .then(function() {
+                        .then(function () {
                             $scope.status.cache = 'disabled';
-                        }, function() {
+                        }, function () {
                             $scope.status.cache = 'unknown';
                         });
                 } else if ($scope.status.cache === 'disabled') {
                     DatabaseConnector.enableCache()
-                        .then(function() {
+                        .then(function () {
                             $scope.status.cache = 'enabled';
-                        }, function() {
+                        }, function () {
                             $scope.status.cache = 'unknown';
                         });
                 }
             };
 
-            $scope.resetCache = function() {
+            $scope.resetCache = function () {
                 DatabaseConnector.resetCache()
-                    .then(function() {
+                    .then(function () {
                         console.log('succeed.');
-                    }, function() {
+                    }, function () {
                         console.log('failed.');
                     });
             };
-            
-            $scope.convertMutationEffect = function() {
-                convertMutationEffect(0, function() {
+
+            $scope.convertMutationEffect = function () {
+                convertMutationEffect(0, function () {
                     console.log('Done converting mutation effect.');
                 });
             };
-            
+
             $scope.showValidationResult = function () {
                 console.info('Gene\tVariant\tCategory');
 
@@ -1849,42 +1994,40 @@ angular.module('oncokbApp')
                     console.info('Finished.');
                 });
             };
-            
+
             function convertLevel4() {
                 var level4 = [];
                 var level4Obj = {};
-                _.each(level4, function(datum) {
-                    _.each(datum, function(content, key) {
+                _.each(level4, function (datum) {
+                    _.each(datum, function (content, key) {
                         datum[key] = content.toString().trim();
                     });
-                    
-                    if(!datum.gene || !datum.alteration ||
-                        !datum.tumorType || datum.level !== '4' ||
-                        !datum.treatment) {
+
+                    if (!datum.gene || !datum.alteration || !datum.tumorType || datum.level !== '4' || !datum.treatment) {
                         console.error(datum);
-                    }else {
-                        if(!level4Obj.hasOwnProperty(datum.gene)) {
+                    } else {
+                        if (!level4Obj.hasOwnProperty(datum.gene)) {
                             level4Obj[datum.gene] = {};
                         }
-                        if(!level4Obj[datum.gene]
+                        if (!level4Obj[datum.gene]
                                 .hasOwnProperty(datum.alteration)) {
                             level4Obj[datum.gene][datum.alteration] = {};
                         }
-                        if(!level4Obj[datum.gene][datum.alteration]
+                        if (!level4Obj[datum.gene][datum.alteration]
                                 .hasOwnProperty(datum.tumorType)) {
                             level4Obj[datum.gene][datum.alteration][datum.tumorType] = {};
                         }
-                        if(!level4Obj[datum.gene][datum.alteration][datum.tumorType]
+                        if (!level4Obj[datum.gene][datum.alteration][datum.tumorType]
                                 .hasOwnProperty(datum.treatment)) {
                             level4Obj[datum.gene][datum.alteration][datum.tumorType][datum.treatment] = [];
                         }
                         level4Obj[datum.gene][datum.alteration][datum.tumorType][datum.treatment].push(datum.pmids);
                     }
                 });
-                
+
                 return level4Obj;
             }
-            
+
             function convertOncogenic(oncogenic) {
                 var result = 'Unknown';
                 if (oncogenic) {
@@ -1927,7 +2070,7 @@ angular.module('oncokbApp')
             function convertMutationEffect(index, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
-                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                    storage.getRealtimeDocument(document.id).then(function (realtime) {
                         if (realtime && realtime.error) {
                             console.log('did not get realtime document.');
                         } else {
@@ -1937,12 +2080,12 @@ angular.module('oncokbApp')
                             if (gene) {
                                 var geneIndex = index + 1;
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function(mutation, index) {
+                                gene.mutations.asArray().forEach(function (mutation, index) {
                                     if (mutation.effect && mutation.effect.value.getText()) {
                                         var effect = mutation.effect.value.getText();
-                                        var newEffects = ['Gain-of-function','Likely Gain-of-function','Loss-of-function','Likely Loss-of-function','Switch-of-function','Likely Switch-of-function','Neutral','Likely Neutral','Unknown'];
-                                        
-                                        if(newEffects.indexOf(effect) === -1) {
+                                        var newEffects = ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Unknown'];
+
+                                        if (newEffects.indexOf(effect) === -1) {
                                             if (mutation.effect.value.getText().toLowerCase() === 'other') {
                                                 if (mutation.effect.addOn.getText()) {
                                                     effect = mutation.effect.addOn.getText();
@@ -1958,14 +2101,14 @@ angular.module('oncokbApp')
                                                     }
                                                 }
                                             }
-    
+
                                             var message = geneIndex + '\t' + document.title + '\t' + mutation.name + '\tmutation effect\t' + effect;
                                             mutation.effect.value.setText(stringUtils.findMutationEffect(effect));
                                             message += '\t' + stringUtils.findMutationEffect(effect);
                                             console.log(message);
-                                        }else {
-                                            var message = geneIndex + '\t' + document.title 
-                                                + '\t' + mutation.name + '\tmutation effect\t' 
+                                        } else {
+                                            var message = geneIndex + '\t' + document.title
+                                                + '\t' + mutation.name + '\tmutation effect\t'
                                                 + effect + ' ' + mutation.effect.addOn.getText()
                                                 + '\t' + effect + '\t1';
                                             console.log(message);
@@ -1981,12 +2124,12 @@ angular.module('oncokbApp')
                                     }
                                 });
                                 model.endCompoundOperation();
-                                $timeout(function() {
+                                $timeout(function () {
                                     convertMutationEffect(++index, callback);
                                 }, 1000, false);
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function() {
+                                $timeout(function () {
                                     convertMutationEffect(++index, callback);
                                 }, 1000, false);
                             }
@@ -1998,11 +2141,11 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            
+
             function getCacheStatus() {
-                DatabaseConnector.getCacheStatus().then(function(result) {
+                DatabaseConnector.getCacheStatus().then(function (result) {
                     $scope.status.cache = result.hasOwnProperty('status') ? result.status : 'unknown';
-                }, function(result) {
+                }, function (result) {
                     $scope.status.cache = 'unknown';
                 })
             }
@@ -2017,18 +2160,18 @@ angular.module('oncokbApp')
 
             function isExist(array, string) {
                 var mark = false;
-                _.each(array, function(item) {
-                    if(item.toString().toLowerCase() === string.toString().toLowerCase()) {
+                _.each(array, function (item) {
+                    if (item.toString().toLowerCase() === string.toString().toLowerCase()) {
                         mark = true;
                     }
                 });
                 return mark;
             }
-            
+
             function findIndexIgnorecase(array, string) {
                 var index = -1;
-                _.each(array, function(item, ind) {
-                    if(item.toString().toLowerCase() === string.toString().toLowerCase()) {
+                _.each(array, function (item, ind) {
+                    if (item.toString().toLowerCase() === string.toString().toLowerCase()) {
                         index = ind;
                     }
                 });
@@ -2036,13 +2179,13 @@ angular.module('oncokbApp')
             }
 
             function changeDataBasedOnGenes(genes, index, callback) {
-                if(index < genes.length) {
+                if (index < genes.length) {
                     var documents = Documents.get({title: genes[index]});
                     var document =
                         _.isArray(documents) && documents.length === 1 ?
                             documents[0] : null;
                     if (document) {
-                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        storage.getRealtimeDocument(document.id).then(function (realtime) {
                             if (realtime && realtime.error) {
                                 console.log('did not get realtime document.');
                             } else {
@@ -2053,7 +2196,7 @@ angular.module('oncokbApp')
                                     var geneName = gene.name.getText();
                                     console.log('----' + (index + 1) + ' ' + geneName + '----');
                                     // model.beginCompoundOperation();
-                                    gene.mutations.asArray().forEach(function(mutation, index) {
+                                    gene.mutations.asArray().forEach(function (mutation, index) {
                                         var oncogenic = mutation.oncogenic.getText();
                                         var mutationEffect = mutation.effect.value.getText();
                                         var mutationName = mutation.name.getText();
@@ -2061,41 +2204,41 @@ angular.module('oncokbApp')
                                         if (mutationName.toLowerCase() === 'fusion' || mutationName.toLowerCase() === 'fusions') {
                                             console.log(geneName + '\t' + mutationName);
                                             console.log('\t' + oncogenic + '\t' + mutationEffect);
-                                            if(oncogenic !== 'Likely') {
+                                            if (oncogenic !== 'Likely') {
                                                 console.log('\t\tOncogenic is changing to Likely.');
                                                 mutation.oncogenic.setText('Likely');
                                             }
-                                            if(mutationEffect !== 'Likely Gain-of-function') {
+                                            if (mutationEffect !== 'Likely Gain-of-function') {
                                                 console.log('\t\tMutation effect is changing to Likely Gain-of-function.');
                                                 mutation.effect.value.setText('Likely Gain-of-function');
                                             }
                                         }
                                     });
                                     // model.endCompoundOperation();
-                                    $timeout(function() {
+                                    $timeout(function () {
                                         changeDataBasedOnGenes(genes, ++index, callback);
                                     }, 500, false);
                                 } else {
                                     console.log('\t\tNo gene model.');
-                                    $timeout(function() {
+                                    $timeout(function () {
                                         changeDataBasedOnGenes(genes, ++index, callback);
                                     }, 500, false);
                                 }
                             }
                         });
-                    }else {
+                    } else {
                         console.log('\t\tDocuments are wrong:' + documents);
-                        $timeout(function() {
+                        $timeout(function () {
                             changeDataBasedOnGenes(genes, ++index, callback);
                         }, 500, false);
                     }
-                }else {
-                    if(_.isFunction(callback)) {
+                } else {
+                    if (_.isFunction(callback)) {
                         callback();
                     }
                 }
             }
-            
+
             function insertTreatment(levels, levelIndex, callback) {
                 if (levelIndex < levels.length) {
                     var record = levels[levelIndex];
@@ -2104,7 +2247,7 @@ angular.module('oncokbApp')
                         _.isArray(documents) && documents.length === 1 ?
                             documents[0] : null;
                     if (document) {
-                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        storage.getRealtimeDocument(document.id).then(function (realtime) {
                             if (realtime && realtime.error) {
                                 console.log('did not get realtime document.');
                             } else {
@@ -2115,30 +2258,30 @@ angular.module('oncokbApp')
                                     var foundMutation = false;
                                     console.info(stringUtils.stringObject(record));
 
-                                    gene.mutations.asArray().forEach(function(mutation) {
+                                    gene.mutations.asArray().forEach(function (mutation) {
                                         var mutationName = mutation.name.getText();
                                         if (isExist([record.mutation], mutationName)) {
                                             var foundTT = false;
-                                            mutation.tumors.asArray().forEach(function(tumor) {
+                                            mutation.tumors.asArray().forEach(function (tumor) {
 
                                                 if (isExist([record.tumorType], MainUtils.getCancerTypesName(tumor.cancerTypes))) {
-                                                    tumor.TI.asArray().forEach(function(ti) {
+                                                    tumor.TI.asArray().forEach(function (ti) {
                                                         if (ti.name.getText() === 'Investigational implications for sensitivity to therapy') {
                                                             var foundTreatment = false;
-                                                            ti.treatments.asArray().forEach(function(treatment) {
+                                                            ti.treatments.asArray().forEach(function (treatment) {
                                                                 var treatmentName = treatment.name.getText();
                                                                 if (isExist([record.treatment], treatmentName)) {
                                                                     // Treatment exists
                                                                     console.info('\tTreatment exists');
                                                                     foundTreatment = true;
-                                                                    if(treatment.level.getText() === '4') {
-                                                                        if(treatment.description.getText().indexOf(record.pmids) === -1) {
+                                                                    if (treatment.level.getText() === '4') {
+                                                                        if (treatment.description.getText().indexOf(record.pmids) === -1) {
                                                                             console.info(record.pmids, treatment.description.getText())
                                                                             treatment.description.setText(treatment.description.getText() + ' ' + record.pmids);
-                                                                        }else {
+                                                                        } else {
                                                                             console.error('\tPMIDs exist');
                                                                         }
-                                                                    }else{
+                                                                    } else {
                                                                         console.error('\tThe exist treatment is not level 4');
                                                                     }
                                                                 }
@@ -2153,7 +2296,7 @@ angular.module('oncokbApp')
                                                             }
                                                         }
                                                     });
-                                                    $timeout(function() {
+                                                    $timeout(function () {
                                                         insertTreatment(levels, ++levelIndex, callback);
                                                     }, 500, false);
                                                     foundTT = true;
@@ -2163,10 +2306,10 @@ angular.module('oncokbApp')
                                                 // Need to create tumor type
                                                 console.log('Need to create tumor type');
                                                 DatabaseConnector.getOncoTreeTumorTypeByName(record.tumorType, true)
-                                                    .then(function(data) {
+                                                    .then(function (data) {
                                                         if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
                                                             var newTumorType = MainUtils.createTumorType(model);
-                                                            _.each(data.data, function(ct) {
+                                                            _.each(data.data, function (ct) {
                                                                 if (ct.mainType && ct.mainType.name) {
                                                                     var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
                                                                     newTumorType.cancerTypes.push(cancerType);
@@ -2180,15 +2323,15 @@ angular.module('oncokbApp')
 
                                                             mutation.tumors.push(newTumorType);
                                                             console.info('\tNewly generated tumor type', newTumorType.toString());
-                                                            $timeout(function() {
+                                                            $timeout(function () {
                                                                 insertTreatment(levels, ++levelIndex, callback);
                                                             }, 500, false);
                                                         } else {
                                                             DatabaseConnector.getOncoTreeTumorTypesByMainType(record.tumorType)
-                                                                .then(function(data) {
+                                                                .then(function (data) {
                                                                     if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
                                                                         var newTumorType = MainUtils.createTumorType(model);
-                                                                        _.each(data.data, function(ct) {
+                                                                        _.each(data.data, function (ct) {
                                                                             if (ct.mainType && ct.mainType.name) {
                                                                                 var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
                                                                                 newTumorType.cancerTypes.push(cancerType);
@@ -2214,11 +2357,11 @@ angular.module('oncokbApp')
                                                                             newTumorType.TI.get(2).treatments.push(newTreatment);
 
                                                                             mutation.tumors.push(newTumorType);
-                                                                        }else {
+                                                                        } else {
                                                                             console.log('\tNot special tumor type neither');
                                                                         }
                                                                     }
-                                                                    $timeout(function() {
+                                                                    $timeout(function () {
                                                                         insertTreatment(levels, ++levelIndex, callback);
                                                                     }, 500, false);
                                                                 });
@@ -2233,10 +2376,10 @@ angular.module('oncokbApp')
                                         console.log('Need to create new mutation');
                                         var newMutation = MainUtils.createMutation(model, record.mutation);
                                         DatabaseConnector.getOncoTreeTumorTypeByName(record.tumorType, true)
-                                            .then(function(data) {
+                                            .then(function (data) {
                                                 if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
                                                     var newTumorType = MainUtils.createTumorType(model);
-                                                    _.each(data.data, function(ct) {
+                                                    _.each(data.data, function (ct) {
                                                         if (ct.mainType && ct.mainType.name) {
                                                             var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
                                                             newTumorType.cancerTypes.push(cancerType);
@@ -2252,15 +2395,15 @@ angular.module('oncokbApp')
 
                                                     newMutation.tumors.push(newTumorType);
                                                     gene.mutations.push(newMutation);
-                                                    $timeout(function() {
+                                                    $timeout(function () {
                                                         insertTreatment(levels, ++levelIndex, callback);
                                                     }, 500, false);
                                                 } else {
                                                     DatabaseConnector.getOncoTreeTumorTypesByMainType(record.tumorType)
-                                                        .then(function(data) {
+                                                        .then(function (data) {
                                                             if (_.isObject(data) && _.isArray(data.data) && data.data.length > 0) {
                                                                 var newTumorType = MainUtils.createTumorType(model);
-                                                                _.each(data.data, function(ct) {
+                                                                _.each(data.data, function (ct) {
                                                                     if (ct.mainType && ct.mainType.name) {
                                                                         var cancerType = MainUtils.createCancerType(model, ct.mainType.name, ct.name, ct.code);
                                                                         newTumorType.cancerTypes.push(cancerType);
@@ -2286,12 +2429,12 @@ angular.module('oncokbApp')
                                                                     newTumorType.TI.get(2).treatments.push(newTreatment);
 
                                                                     newMutation.tumors.push(newTumorType);
-                                                                }else {
+                                                                } else {
                                                                     console.log('\tNot special tumor type neither');
                                                                 }
                                                             }
                                                             gene.mutations.push(newMutation);
-                                                            $timeout(function() {
+                                                            $timeout(function () {
                                                                 insertTreatment(levels, ++levelIndex, callback);
                                                             }, 500, false);
                                                         });
@@ -2300,7 +2443,7 @@ angular.module('oncokbApp')
                                     }
                                 } else {
                                     console.log('\t\tNo gene model.');
-                                    $timeout(function() {
+                                    $timeout(function () {
                                         insertTreatment(levels, ++levelIndex, callback);
                                     }, 500, false);
                                 }
@@ -2308,7 +2451,7 @@ angular.module('oncokbApp')
                         });
                     } else {
                         console.log('\t\tDocuments are wrong:' + documents);
-                        $timeout(function() {
+                        $timeout(function () {
                             insertTreatment(levels, ++levelIndex, callback);
                         }, 500, false);
                     }
@@ -2318,9 +2461,9 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            
+
             function changeData(index, callback) {
-                if(index < $scope.documents.length) {
+                if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
                     storage.getRealtimeDocument(document.id).then(function (realtime) {
                         if (realtime && realtime.error) {
@@ -2339,9 +2482,9 @@ angular.module('oncokbApp')
                                     var mutationShortDesp = mutation.short.getText();
                                     var tumorTypes = mutation.tumors;
                                     var mutationName = mutation.name.getText();
-                                    var containPMID = mutationShortDesp.indexOf('PMID') !==-1 || mutationDesp.indexOf('PMID') !==-1;
+                                    var containPMID = mutationShortDesp.indexOf('PMID') !== -1 || mutationDesp.indexOf('PMID') !== -1;
                                     var category = [];
-                                    
+
                                     // if(isUndefinedOrEmpty(mutationEffect) &&
                                     //     (_.isString(oncogenic) && oncogenic.toLowerCase() === 'unknown') &&
                                     //     isUndefinedOrEmpty(oncogenicSummary) &&
@@ -2356,7 +2499,7 @@ angular.module('oncokbApp')
                                     // if(mutation.name_eStatus.get('obsolete') === 'true') {
                                     //     console.log("Obsoleted\t" + gene.name.getText() + '\t' + mutation.name.getText());
                                     // }
-                                    
+
                                     // if(mutationName.indexOf(',') !== -1 || mutationName.indexOf('/') !== -1 ) {
                                     //     console.log("String mutation\t" + gene.name.getText() + '\t' + mutation.name.getText());
                                     // }
@@ -2382,7 +2525,7 @@ angular.module('oncokbApp')
                                     // isUndefinedOrEmpty(mutationShortDesp)) {
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\tNo mutation effect but has treatments.");
                                     // }
-                                    
+
                                     // if(isUndefinedOrEmpty(mutationEffect)) {
                                     //     category[0] = '0';
                                     // }else {
@@ -2405,21 +2548,21 @@ angular.module('oncokbApp')
                                     //     mutation.name_eStatus.get('obsolete') === 'false')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\t" + category.join(''));
 
-                                    mutation.tumors.asArray().forEach(function(tumor) {
-                                        tumor.TI.asArray().forEach(function(ti) {
-                                            ti.treatments.asArray().forEach(function(treatment) {
+                                    mutation.tumors.asArray().forEach(function (tumor) {
+                                        tumor.TI.asArray().forEach(function (ti) {
+                                            ti.treatments.asArray().forEach(function (treatment) {
                                                 // if (treatment.level.getText() === 'R1') {
-                                            var result = [gene.name.getText(), 
-                                                mutation.name.getText(), 
-                                                MainUtils.getCancerTypesName(tumor.cancerTypes), 
-                                                treatment.name.getText(),
-                                                treatment.indication.getText(),
-                                                treatment.level.getText(),
-                                                getString(treatment.short.getText()),
-                                                getString(treatment.description.getText()),
-                                                treatment.name_eStatus.get('obsolete')
-                                            ];
-                                            console.log(result.join('\t'));
+                                                var result = [gene.name.getText(),
+                                                    mutation.name.getText(),
+                                                    MainUtils.getCancerTypesName(tumor.cancerTypes),
+                                                    treatment.name.getText(),
+                                                    treatment.indication.getText(),
+                                                    treatment.level.getText(),
+                                                    getString(treatment.short.getText()),
+                                                    getString(treatment.description.getText()),
+                                                    treatment.name_eStatus.get('obsolete')
+                                                ];
+                                                console.log(result.join('\t'));
                                                 // }
                                             })
                                         });
@@ -2437,15 +2580,15 @@ angular.module('oncokbApp')
                             }
                         }
                     });
-                }else {
-                    if(_.isFunction(callback)) {
+                } else {
+                    if (_.isFunction(callback)) {
                         callback();
                     }
                 }
             }
-            
+
             function showValidationResult(index, callback) {
-                if(index < $scope.documents.length) {
+                if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
                     storage.getRealtimeDocument(document.id).then(function (realtime) {
                         if (realtime && realtime.error) {
@@ -2459,27 +2602,27 @@ angular.module('oncokbApp')
                                     var oncogenic = mutation.oncogenic.getText();
                                     var mutationEffect = mutation.effect.value.getText();
                                     var mutationName = mutation.name.getText();
-                                    
+
                                     // Not obsoleted variants but are not curated
-                                    if(mutation.oncogenic_eStatus.get('curated')===false && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                    if (mutation.oncogenic_eStatus.get('curated') === false && mutation.name_eStatus.get('obsolete') !== 'true') {
                                         console.log(geneName + '\t' + mutationName + '\tRed hand');
                                     }
-                                    
+
                                     // Obsoleted variants
-                                    if(mutation.name_eStatus.get('obsolete') === 'true') {
+                                    if (mutation.name_eStatus.get('obsolete') === 'true') {
                                         console.log(geneName + '\t' + mutationName + '\tObsoleted');
                                     }
-                                    
+
                                     // Not obsolete variant, but oncogenic is obsoleted.
-                                    if(mutation.shortSummary_eStatus.get('obsolete')==='true' && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                    if (mutation.shortSummary_eStatus.get('obsolete') === 'true' && mutation.name_eStatus.get('obsolete') !== 'true') {
                                         console.log(geneName + '\t' + mutationName + '\tNot obsolete variant, but oncogenic is obsoleted.');
                                     }
-                                    
+
                                     // Not obsolete variant, but mutation effect is obsoleted.
-                                    if(mutation.oncogenic_eStatus.get('obsolete')==='true' && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                    if (mutation.oncogenic_eStatus.get('obsolete') === 'true' && mutation.name_eStatus.get('obsolete') !== 'true') {
                                         console.log(geneName + '\t' + mutationName + '\tNot obsolete variant, but mutation effect is obsoleted.');
                                     }
-                                    
+
                                     // Both Unknown/Unknow for oncogenicity and mutation effect
                                     if (_.isString(oncogenic) &&
                                         _.isString(mutationEffect) &&
@@ -2499,29 +2642,29 @@ angular.module('oncokbApp')
                             }
                         }
                     });
-                }else {
-                    if(_.isFunction(callback)) {
+                } else {
+                    if (_.isFunction(callback)) {
                         callback();
                     }
                 }
             }
 
             function isUndefinedOrEmpty(str) {
-                if(_.isUndefined(str)) {
+                if (_.isUndefined(str)) {
                     return true;
-                }else {
-                    return str.toString().trim() === '' ? true : false; 
+                } else {
+                    return str.toString().trim() === '' ? true : false;
                 }
             }
-            
+
             function findRelevantVariants(list, index, callback) {
                 if (index < list.length) {
                     var result = Documents.get({title: list[index].gene});
                     var document = _.isArray(result) ? result[0] : '';
-                    var message = (index+1) + '\t' + list[index].gene + ' ' + list[index].alt;
-                    
+                    var message = (index + 1) + '\t' + list[index].gene + ' ' + list[index].alt;
+
                     if (document) {
-                        storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        storage.getRealtimeDocument(document.id).then(function (realtime) {
                             if (realtime && realtime.error) {
                                 console.log('Did not get realtime document.');
                             } else {
@@ -2530,7 +2673,7 @@ angular.module('oncokbApp')
                                 if (gene) {
                                     // model.beginCompoundOperation();
                                     var found = [];
-                                    gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
+                                    gene.mutations.asArray().forEach(function (mutation, mutationIndex) {
                                         if (mutation.name.getText().trim().toLowerCase() === list[index].alt.trim().toLowerCase()) {
                                             found.push(mutationIndex);
                                         }
@@ -2539,7 +2682,7 @@ angular.module('oncokbApp')
                                     if (found.length > 0) {
                                         message += '\t\tFound mapping';
                                         if (found.length > 1) {
-                                            message += '\t\tFound duplicates.\t' +  JSON.stringify(found);
+                                            message += '\t\tFound duplicates.\t' + JSON.stringify(found);
                                         }
                                     } else {
                                         message += '\t\tNo mapping';
@@ -2548,12 +2691,12 @@ angular.module('oncokbApp')
                                     // model.endCompoundOperation();
 
                                     //Google has limitation for numbere of requests within one second
-                                    $timeout(function() {
+                                    $timeout(function () {
                                         findRelevantVariants(list, ++index, callback);
                                     }, 300, false);
                                 } else {
                                     console.log('\t\tNo gene model.');
-                                    $timeout(function() {
+                                    $timeout(function () {
                                         findRelevantVariants(list, ++index, callback);
                                     }, 300, false);
                                 }
@@ -2561,7 +2704,7 @@ angular.module('oncokbApp')
                         });
                     } else {
                         console.log('\t\tNo gene found.');
-                        $timeout(function() {
+                        $timeout(function () {
                             findRelevantVariants(list, ++index, callback);
                         }, 300, false);
                     }
@@ -2571,11 +2714,11 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            
-             function convertLung(index, callback) {
+
+            function convertLung(index, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
-                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                    storage.getRealtimeDocument(document.id).then(function (realtime) {
                         if (realtime && realtime.error) {
                             console.log('Did not get realtime document.');
                         } else {
@@ -2584,18 +2727,18 @@ angular.module('oncokbApp')
                             var gene = model.getRoot().get('gene');
                             if (gene) {
                                 // model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function(mutation) {
-                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                gene.mutations.asArray().forEach(function (mutation) {
+                                    mutation.tumors.asArray().forEach(function (tumor) {
                                         var tumorName = tumor.name.getText();
                                         var message = '\tGene: ' + gene.name.getText() +
                                             '\tMutation: ' + mutation.name.getText() +
                                             '\tTumor type: ' + tumorName;
-                                        
+
                                         var hasNLung = false;
                                         var hasSLung = false;
                                         var sLungIndices = [];
-                                        
-                                        _.each(tumor.cancerTypes.asArray(), function(ct, ctIndex) {
+
+                                        _.each(tumor.cancerTypes.asArray(), function (ct, ctIndex) {
                                             if (ct.cancerType.getText().trim() === 'Small Cell Lung Cancer') {
                                                 sLungIndices.push(ctIndex);
                                                 hasSLung = true;
@@ -2608,10 +2751,10 @@ angular.module('oncokbApp')
                                         if (hasNLung && hasSLung) {
                                             message += '\t' + JSON.stringify(sLungIndices);
                                             console.log(message);
-                                            
+
                                             if (sLungIndices.length > 1) {
                                                 console.error("\t\t\t\tHas multiple small cell");
-                                            }else if(sLungIndices.length === 1){
+                                            } else if (sLungIndices.length === 1) {
                                                 console.log('\t\t\t\tRemoving...');
                                                 // tumor.cancerTypes.remove(sLungIndices[0]);
                                             }
@@ -2621,12 +2764,12 @@ angular.module('oncokbApp')
                                 // model.endCompoundOperation();
 
                                 //Google has limitation for numbere of requests within one second
-                                $timeout(function() {
+                                $timeout(function () {
                                     convertLung(++index, callback);
-                                },300, false);
+                                }, 300, false);
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function() {
+                                $timeout(function () {
                                     convertLung(++index, callback);
                                 }, 300, false);
                             }
@@ -2638,11 +2781,11 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            
+
             function convertTumorTypeToOncoTree(index, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
-                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                    storage.getRealtimeDocument(document.id).then(function (realtime) {
                         if (realtime && realtime.error) {
                             console.log('Did not get realtime document.');
                         } else {
@@ -2651,9 +2794,9 @@ angular.module('oncokbApp')
                             var gene = model.getRoot().get('gene');
                             if (gene) {
                                 model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function(mutation, index) {
+                                gene.mutations.asArray().forEach(function (mutation, index) {
                                     // var tumors = {};
-                                    mutation.tumors.asArray().forEach(function(tumor) {
+                                    mutation.tumors.asArray().forEach(function (tumor) {
                                         //Convert to desired OncoTree tumor types
                                         // if(tumors.hasOwnProperty(tumor.name.getText())) {
                                         //     var message = '\tGene: ' + gene.name.getText() +
@@ -2663,16 +2806,16 @@ angular.module('oncokbApp')
                                         // }else {
                                         //     tumors[tumor.name.getText()] = 1;
                                         // }
-                                        var tt = tumor.name.getText().toString().trim().toLowerCase().replace('’',"'");
+                                        var tt = tumor.name.getText().toString().trim().toLowerCase().replace('’', "'");
                                         var message = '\tGene: ' + gene.name.getText() +
                                             '\tMutation: ' + mutation.name.getText() +
                                             '\tTumor type: ' + tumor.name.getText();
                                         var mapped = $scope.mappedTumorTypes[tt];
                                         if (_.isArray(mapped) && mapped.length > 0) {
                                             var mappedName = [];
-                                            _.each(mapped, function(map, index) {
+                                            _.each(mapped, function (map, index) {
                                                 var exist = false;
-                                                _.each(tumor.cancerTypes.asArray(), function(ct) {
+                                                _.each(tumor.cancerTypes.asArray(), function (ct) {
                                                     if (ct.cancerType.getText() === map.name) {
                                                         exist = true;
                                                     }
@@ -2696,14 +2839,14 @@ angular.module('oncokbApp')
                                     });
                                 });
                                 model.endCompoundOperation();
-                                
+
                                 //Google has limitation for numbere of requests within one second
-                                $timeout(function() {
+                                $timeout(function () {
                                     convertTumorTypeToOncoTree(++index, callback);
-                                },500, false);
+                                }, 500, false);
                             } else {
                                 console.log('\t\tNo gene model.');
-                                $timeout(function() {
+                                $timeout(function () {
                                     convertTumorTypeToOncoTree(++index, callback);
                                 }, 500, false);
                             }
@@ -2716,30 +2859,30 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.loopTumorTypes = function() {
-                getAllOncoTreeTumorTypes(0, function() {
+            $scope.loopTumorTypes = function () {
+                getAllOncoTreeTumorTypes(0, function () {
                     console.log($scope.mappedTumorTypes);
                 });
             }
-            
+
             function getOncoTreeTumorType(tumorType) {
-                if(tumorType) {
+                if (tumorType) {
                     tumorType = tumorType.toString().trim();
-                    if($scope.mappedTumorTypes.hasOwnProperty(tumorType)) {
+                    if ($scope.mappedTumorTypes.hasOwnProperty(tumorType)) {
                         return $scope.mappedTumorTypes[tumorType];
-                    }else {
+                    } else {
                         console.log('\t\tNot found.');
                         return null;
                     }
-                }else {
+                } else {
                     console.log('\t\tThere is no tumor type provided.');
                     return null;
                 }
             }
-            
+
             function getAllOncoTreeTumorTypes(index, callback) {
                 if (index < $scope.tumorTypes.length) {
-                    var _tumorType = $scope.tumorTypes[index].name.toString().trim().toLowerCase().replace('’',"'");
+                    var _tumorType = $scope.tumorTypes[index].name.toString().trim().toLowerCase().replace('’', "'");
                     var _oncotree = $scope.tumorTypes[index].oncotree;
                     console.log((index + 1) + '\t' + _tumorType);
                     var mainType = findMainType(_oncotree);
@@ -2752,7 +2895,7 @@ angular.module('oncokbApp')
                     } else {
                         console.error('\t\tCannot find main type in OncoTree database.')
                     }
-                    $timeout(function() {
+                    $timeout(function () {
                         getAllOncoTreeTumorTypes(++index, callback);
                     }, 10, false);
                 } else {
@@ -2762,18 +2905,18 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            
+
             function findMainType(mainType) {
                 var mainTypes = [];
                 if (mainType !== 'Skin Cancer, Non-Melanoma') {
-                    mainTypes = mainType.split(',').map(function(item) {
+                    mainTypes = mainType.split(',').map(function (item) {
                         return item.toString().trim();
                     });
                 } else {
                     mainTypes = ['Skin Cancer, Non-Melanoma'];
                 }
                 var map = [];
-                _.each(mainTypes, function(mt) {
+                _.each(mainTypes, function (mt) {
                     for (var i = 0; i < $scope.oncoTree.mainTypes.length; i++) {
                         if ($scope.oncoTree.mainTypes[i].name.toString().trim().toLowerCase() === mt.toLowerCase()) {
                             map.push($scope.oncoTree.mainTypes[i]);
@@ -2784,11 +2927,11 @@ angular.module('oncokbApp')
 
                 return map;
             }
-            
+
             function getAllMainTypes() {
                 DatabaseConnector.getOncoTreeMainTypes()
-                    .then(function(result) {
-                        if(result && _.isArray(result.data)) {
+                    .then(function (result) {
+                        if (result && _.isArray(result.data)) {
                             $scope.oncoTree.mainTypes = result.data;
                             $scope.oncoTree.mainTypes.push({
                                 name: "All Liquid Tumors"
@@ -2805,16 +2948,16 @@ angular.module('oncokbApp')
                             $scope.oncoTree.mainTypes.push({
                                 name: "All Pediatric Tumors"
                             });
-                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function(mainType) {
+                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function (mainType) {
                                 return mainType.name;
-                            })).then(function(data) {
+                            })).then(function (data) {
                                 if (_.isObject(data) && _.isArray(data.data)) {
                                     if (data.data.length !== result.data.length) {
                                         console.error('The number of returned tumor types is not matched with number of main types.')
                                     } else {
                                         var tumorTypes = {};
                                         var allTumorTypes = [];
-                                        _.each(result.data, function(mainType, i) {
+                                        _.each(result.data, function (mainType, i) {
                                             tumorTypes[mainType.name] = data.data[i];
                                             allTumorTypes.push(data.data[i]);
                                         });
@@ -2822,7 +2965,7 @@ angular.module('oncokbApp')
                                         $scope.oncoTree.allTumorTypes = allTumorTypes;
                                     }
                                 }
-                            }, function(error) {
+                            }, function (error) {
                                 //TODO: if OncoTree server returns error.
                             });
                         } else {
@@ -2830,7 +2973,7 @@ angular.module('oncokbApp')
                         }
                     });
             }
-            
+
             function getAlteration(codon, aa) {
                 var alteration = [];
                 if (codon) {
@@ -3279,7 +3422,7 @@ angular.module('oncokbApp')
             }
         }]
 )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf','FindRegex', 'stringUtils',
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils',
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils) {
             $scope.test = function (event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
@@ -3317,9 +3460,9 @@ angular.module('oncokbApp')
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
                         _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
                         var filteredContent = [];
-                        _.each(newMutationName.split(','), function(item){
+                        _.each(newMutationName.split(','), function (item) {
                             item = item.trim();
-                            if(item.length > 0){
+                            if (item.length > 0) {
                                 filteredContent.push(item);
                             }
                         });
@@ -3366,11 +3509,6 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.getData = function () {
-                var gene = stringUtils.getGeneData(this.gene);
-                console.log(gene);
-            };
-
             $scope.updateGene = function () {
                 $scope.docStatus.savedGene = false;
 
@@ -3378,10 +3516,10 @@ angular.module('oncokbApp')
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
 
-                if(gene) {
+                if (gene) {
                     params.gene = JSON.stringify(gene);
                 }
-                if(vus) {
+                if (vus) {
                     params.vus = JSON.stringify(vus);
                 }
 
@@ -3389,18 +3527,20 @@ angular.module('oncokbApp')
                     $scope.docStatus.savedGene = true;
                     DatabaseConnector
                         .updateGeneCache($scope.gene.name.getText(),
-                        function() {
+                        function () {
                             console.log('success', result);
                         },
-                        function() {
+                        function () {
                             console.log('error', result);
                             var errorMessage = 'An error has occurred ' +
                                 'when updating gene cache: ' +
                                 $scope.gene.name.getText();
 
-                            $rootScope.$emit('oncokbError', 
-                                {message: errorMessage,
-                                    reason: JSON.stringify(result)});
+                            $rootScope.$emit('oncokbError',
+                                {
+                                    message: errorMessage,
+                                    reason: JSON.stringify(result)
+                                });
                         });
                     changeLastUpdate();
                 }, function (result) {
@@ -3410,9 +3550,11 @@ angular.module('oncokbApp')
 
                     // dialogs.error('Error', errorMessage);
                     $rootScope.$emit('oncokbError',
-                        {message: 'An error has occurred when saving data. ' +
-                        'Gene: ' + $scope.gene.name.getText(),
-                            reason: JSON.stringify(result)});
+                        {
+                            message: 'An error has occurred when saving data. ' +
+                            'Gene: ' + $scope.gene.name.getText(),
+                            reason: JSON.stringify(result)
+                        });
                     changeLastUpdate();
                 });
             };
@@ -3436,7 +3578,7 @@ angular.module('oncokbApp')
 
             $scope.addTumorType = function (mutation, mutationIndex) {
                 var newTumorTypesName = getNewCancerTypesName($scope.meta.newCancerTypes);
-                
+
                 if (mutation && newTumorTypesName) {
                     var _tumorType = '';
                     var exists = false;
@@ -3453,16 +3595,16 @@ angular.module('oncokbApp')
                     } else {
                         model.beginCompoundOperation();
                         _tumorType = model.create(OncoKB.Tumor);
-                        
-                        _.each($scope.meta.newCancerTypes, function(ct) {
-                            if(ct.mainType && ct.mainType.name) {
+
+                        _.each($scope.meta.newCancerTypes, function (ct) {
+                            if (ct.mainType && ct.mainType.name) {
                                 var cancerType = model.create(OncoKB.CancerType);
                                 cancerType.cancerType.setText(ct.mainType.name);
-                                if(ct.subtype) {
-                                    if(ct.subtype.code) {
+                                if (ct.subtype) {
+                                    if (ct.subtype.code) {
                                         cancerType.oncoTreeCode.setText(ct.subtype.code);
                                     }
-                                    if(ct.subtype.name) {
+                                    if (ct.subtype.name) {
                                         cancerType.subtype.setText(ct.subtype.name);
                                     }
                                 }
@@ -3496,7 +3638,7 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.modifyTumorType = function(tumorType) {
+            $scope.modifyTumorType = function (tumorType) {
                 var dlg = dialogs.create('views/modifyTumorTypes.html', 'ModifyTumorTypeCtrl', {
                     model: $scope.realtimeDocument.getModel(),
                     cancerTypes: tumorType.cancerTypes,
@@ -3504,13 +3646,13 @@ angular.module('oncokbApp')
                 }, {
                     size: 'lg'
                 });
-                dlg.result.then(function(name) {
+                dlg.result.then(function (name) {
                     $scope.name = name;
-                }, function() {
+                }, function () {
                     $scope.name = 'You decided not to enter in your name, that makes me sad.';
                 });
             };
-            
+
             //Add new therapeutic implication
             $scope.addTI = function (ti, index, newTIName, mutationIndex, tumorIndex, tiIndex) {
                 if (ti && newTIName) {
@@ -3653,7 +3795,7 @@ angular.module('oncokbApp')
                     // console.log(e.effect);
                     // console.log(e.oncogenic);
                     // console.log(e.description);]
-                    e.tumors.asArray().forEach(function(tumortype) {
+                    e.tumors.asArray().forEach(function (tumortype) {
                         console.log(tumortype);
                         // tumortype.cancerTypes.asArray().forEach(function(cancerType) {
                         //     console.log(cancerType);
@@ -3663,9 +3805,9 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.getCancerTypesName = function(cancerTypes) {
+            $scope.getCancerTypesName = function (cancerTypes) {
                 var list = [];
-                cancerTypes.asArray().forEach(function(cancerType) {
+                cancerTypes.asArray().forEach(function (cancerType) {
                     if (cancerType.subtype.length > 0) {
                         var str = cancerType.subtype.getText();
                         // if (cancerType.oncoTreeCode.length > 0) {
@@ -3681,7 +3823,7 @@ angular.module('oncokbApp')
 
             function getNewCancerTypesName(cancerTypes) {
                 var list = [];
-                _.each(cancerTypes, function(cancerType) {
+                _.each(cancerTypes, function (cancerType) {
                     if (cancerType.subtype && cancerType.subtype.name && cancerType.subtype.name.length > 0) {
                         var str = cancerType.subtype.name;
                         if (cancerType.subtype.code.length > 0) {
@@ -3694,7 +3836,7 @@ angular.module('oncokbApp')
                 });
                 return list.join(', ');
             }
-            
+
             $scope.updateGeneColor = function () {
                 if ($scope.gene && $scope.document && $scope.document.hasOwnProperty('modifiedDate')) {
                     if (new Date($scope.document.modifiedDate).getTime() > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
@@ -3702,7 +3844,7 @@ angular.module('oncokbApp')
                     } else {
                         return 'black';
                     }
-                }else {
+                } else {
                     return 'black';
                 }
             };
@@ -3754,12 +3896,12 @@ angular.module('oncokbApp')
                 $scope.model.undo();
                 regenerateGeneStatus();
             };
-            function fetchResults(data){
+            function fetchResults(data) {
                 var PMIDs = [], abstracts = [];
-                _.each(data, function(item){ 
-                    if(item.type === 'pmid'){
-                        PMIDs.push(item.id); 
-                    }else if(item.type === 'abstract'){
+                _.each(data, function (item) {
+                    if (item.type === 'pmid') {
+                        PMIDs.push(item.id);
+                    } else if (item.type === 'abstract') {
                         abstracts.push(item.id);
                     }
                 });
@@ -3767,68 +3909,69 @@ angular.module('oncokbApp')
                 abstracts.sort();
                 return {PMIDs: PMIDs, abstracts: abstracts};
             }
-            $scope.getAllCitations = function(){
+
+            $scope.getAllCitations = function () {
                 var results = [];
                 var geneData = JSON.stringify(stringUtils.getGeneData(this.gene, true));
                 results = fetchResults(FindRegex.result(geneData));
                 var annotationPMIDs = results.PMIDs, annotationAbstracts = results.abstracts;
-                
+
                 var vusData = JSON.stringify(stringUtils.getVUSFullData(this.vus));
-                results  = fetchResults(FindRegex.result(vusData));
+                results = fetchResults(FindRegex.result(vusData));
                 var vusPMIDs = results.PMIDs, vusAbstracts = results.abstracts;
                 var hasAnnotation = (annotationPMIDs.length + annotationAbstracts.length > 0) ? true : false;
                 var hasVUS = (vusPMIDs.length + vusAbstracts.length > 0) ? true : false;
-                
+
                 //we only seperate citations information to tabs when both annotation and vus citations exist and there are too much info to fit in one tab
                 var tabFlag = hasAnnotation && hasVUS && (annotationPMIDs.length > 80 || annotationAbstracts.length > 10 || vusPMIDs.length > 80 || vusAbstracts.length > 10);
                 var messageContent = [];
-                if(!hasAnnotation && !hasVUS){
+                if (!hasAnnotation && !hasVUS) {
                     messageContent.push('No information available!');
-                }else if(tabFlag){
+                } else if (tabFlag) {
                     messageContent.push('<ul class="nav nav-tabs">');
-                    if(hasAnnotation){
+                    if (hasAnnotation) {
                         messageContent.push('<li class="active"><a data-toggle="tab" href="#home"><h4>Annotation</h4></a></li>');
                     }
-                    if(hasVUS){
+                    if (hasVUS) {
                         messageContent.push('<li><a data-toggle="tab" href="#menu1"><h4>VUS</h4></a></li>');
                     }
                     messageContent.push('</ul><div class="tab-content">');
-                    if(hasAnnotation){
+                    if (hasAnnotation) {
                         messageContent.push('<div id="home" class="tab-pane fade in active"><h4>PMIDs (' + annotationPMIDs.length + ')</h4><p>' + annotationPMIDs.join(', ') + '</p>');
-                        if(annotationAbstracts.length > 0){
+                        if (annotationAbstracts.length > 0) {
                             messageContent.push('<h4>Abstracts (' + annotationAbstracts.length + ')</h4><p>' + annotationAbstracts.join(', ') + '</p>');
                         }
                         messageContent.push('</div>');
                     }
-                    if(hasVUS){
+                    if (hasVUS) {
                         messageContent.push('<div id="menu1" class="tab-pane fade"><h4>PMIDs (' + vusPMIDs.length + ')</h4><p>' + vusPMIDs.join(', ') + '</p>');
-                        if(vusAbstracts.length > 0){
+                        if (vusAbstracts.length > 0) {
                             messageContent.push('<h4>Abstracts (' + vusAbstracts.length + ')</h4><p>' + vusAbstracts.join(', ') + '</p>');
                         }
                         messageContent.push('</div>');
                     }
                     messageContent.push('</div>');
-                }else{
-                    if(hasAnnotation){
+                } else {
+                    if (hasAnnotation) {
                         messageContent.push('<h3 style="color:black">Annotation</h3>');
-                        if(annotationPMIDs.length > 0){
+                        if (annotationPMIDs.length > 0) {
                             messageContent.push('<h4>PMIDs (' + annotationPMIDs.length + ')</h4><p>' + annotationPMIDs.join(', ') + '</p>');
                         }
-                        if(annotationAbstracts.length > 0){
+                        if (annotationAbstracts.length > 0) {
                             messageContent.push('<h4>Abstracts (' + annotationAbstracts.length + ')</h4><p>' + annotationAbstracts.join(', ') + '</p>');
                         }
                     }
-                    
-                    if(hasVUS){
+
+                    if (hasVUS) {
                         messageContent.push('<hr/><h3 style="color:black">VUS</h3>');
-                        if(vusPMIDs.length > 0){
+                        if (vusPMIDs.length > 0) {
                             messageContent.push('<h4>PMIDs (' + vusPMIDs.length + ')</h4><p>' + vusPMIDs.join(', ') + '</p>');
                         }
-                        if(vusAbstracts.length > 0){
+                        if (vusAbstracts.length > 0) {
                             messageContent.push('<h4>Abstracts (' + vusAbstracts.length + ')</h4><p>' + vusAbstracts.join(', ') + '</p>');
                         }
                     }
-                }               
+                }
                 dialogs.notify('All Citations', messageContent.join(''), {size: 'lg'});
             }
             $scope.curatorsName = function () {
@@ -4041,19 +4184,19 @@ angular.module('oncokbApp')
             };
 
             $scope.checkEmpty = function (mutation, type) {
-                if(type === 'mutationEffect') {
+                if (type === 'mutationEffect') {
                     if (mutation.effect.value.text === '' && mutation.description.text === '' && mutation.short.text === '') {
                         return true;
                     } else {
                         return false;
                     }
-                }else if(type === 'oncogenicity') {
+                } else if (type === 'oncogenicity') {
                     if ((mutation.oncogenic.text === '' || mutation.oncogenic.text === 'false') && mutation.shortSummary.text === '') {
                         return true;
                     } else {
                         return false;
                     }
-                }else {
+                } else {
                     return false;
                 }
             };
@@ -4075,14 +4218,14 @@ angular.module('oncokbApp')
             // Calculate number of 'number' elements within the object
             function getNoNKeys(object) {
                 var count = 0;
-                for(var key in object) {
-                    if(!isNaN(key)) {
+                for (var key in object) {
+                    if (!isNaN(key)) {
                         count++;
                     }
                 }
                 return count;
             }
-            
+
             // Only do the simple check wheter the numebr of array has been changed.
             // It's a little triky to monitor all content. 
             function regenerateGeneStatus() {
@@ -4095,10 +4238,10 @@ angular.module('oncokbApp')
                 if ($scope.gene.mutations.length !== getNoNKeys($scope.geneStatus)) {
                     changeMutation = true;
                 }
-                $scope.gene.mutations.asArray().forEach(function(mutation, mutationIndex) {
+                $scope.gene.mutations.asArray().forEach(function (mutation, mutationIndex) {
                     if (changeMutation) {
                         geneStatus[mutationIndex] = $.extend($scope.geneStatus[mutationIndex], new GeneStatusSingleton());
-                        mutationKeys.forEach(function(key) {
+                        mutationKeys.forEach(function (key) {
                             if (mutation[key]) {
                                 geneStatus[mutationIndex][key] = new GeneStatusSingleton();
                             }
@@ -4113,22 +4256,22 @@ angular.module('oncokbApp')
                         if (mutation.tumors.length !== getNoNKeys($scope.geneStatus[mutationIndex])) {
                             changeTT = true;
                         }
-                        mutation.tumors.asArray().forEach(function(tumor, tumorIndex) {
-                            if(changeTT) {
+                        mutation.tumors.asArray().forEach(function (tumor, tumorIndex) {
+                            if (changeTT) {
                                 geneStatus[mutationIndex][tumorIndex] = $.extend($scope.geneStatus[mutationIndex][tumorIndex], new GeneStatusSingleton());
                             }
-                            tumorKeys.forEach(function(key) {
+                            tumorKeys.forEach(function (key) {
                                 if (tumor[key] && changeTT) {
                                     geneStatus[mutationIndex][tumorIndex][key] = new GeneStatusSingleton();
                                 }
-                                tumor.TI.asArray(function(therapyType, therapyTypeIndex) {
+                                tumor.TI.asArray(function (therapyType, therapyTypeIndex) {
                                     geneStatus[mutationIndex][tumorIndex][therapyTypeIndex] = $scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex];
                                     var changeT = false;
 
                                     if (therapyType.treatment.length !== getNoNKeys($scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex])) {
                                         changeT = true;
                                     }
-                                    therapyType.treatments.asArray(function(treatment, treatmentIndex) {
+                                    therapyType.treatments.asArray(function (treatment, treatmentIndex) {
                                         geneStatus[mutationIndex][tumorIndex][therapyTypeIndex][treatmentIndex] = changeT ? new GeneStatusSingleton() : $scope.geneStatus[mutationIndex][tumorIndex][therapyTypeIndex][treatmentIndex];
                                     });
                                 });
@@ -4409,8 +4552,8 @@ angular.module('oncokbApp')
 
             function getOncoTreeMainTypes() {
                 DatabaseConnector.getOncoTreeMainTypes()
-                    .then(function(result) {
-                        if(result.data) {
+                    .then(function (result) {
+                        if (result.data) {
                             $scope.oncoTree.mainTypes = result.data;
                             $scope.oncoTree.mainTypes.push({
                                 id: -1,
@@ -4432,16 +4575,16 @@ angular.module('oncokbApp')
                                 id: -5,
                                 name: "All Pediatric Tumors"
                             });
-                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function(mainType) {
+                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function (mainType) {
                                 return mainType.name;
-                            })).then(function(data) {
+                            })).then(function (data) {
                                 if (_.isObject(data) && _.isArray(data.data)) {
                                     if (data.data.length !== result.data.length) {
                                         console.error('The number of returned tumor types is not matched with number of main types.')
                                     } else {
                                         var tumorTypes = {};
                                         var allTumorTypes = [];
-                                        _.each(result.data, function(mainType, i) {
+                                        _.each(result.data, function (mainType, i) {
                                             tumorTypes[mainType.name] = data.data[i];
                                             allTumorTypes = _.union(allTumorTypes, data.data[i]);
                                         });
@@ -4456,11 +4599,11 @@ angular.module('oncokbApp')
                                         };
                                     }
                                 }
-                            }, function(error) {
+                            }, function (error) {
                                 //TODO: if OncoTree server returns error.
                             });
                         }
-                    }, function(error) {
+                    }, function (error) {
                         console.log(error);
                     });
             }
@@ -4625,91 +4768,92 @@ angular.module('oncokbApp')
                 }]
             };
 
-            $scope.$watch('meta.newCancerTypes', function(n, o) {
-                if(n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
+            $scope.$watch('meta.newCancerTypes', function (n, o) {
+                if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                     $scope.meta.newCancerTypes.push({
                         mainType: '',
                         subtype: '',
                         oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
                     });
                 }
-                for(var i = n.length-2 ; i >= 0 ; i--) {
-                    if(!n[i].mainType && !n[i].subtype) {
+                for (var i = n.length - 2; i >= 0; i--) {
+                    if (!n[i].mainType && !n[i].subtype) {
                         n.splice(i, 1);
                         i--;
                     }
                 }
-                function callback(index, result, type){
-                    if(type === 'mainType') {
+                function callback(index, result, type) {
+                    if (type === 'mainType') {
                         n[index].oncoTreeTumorTypes = result;
-                    }else {
+                    } else {
                         n[index].mainType = result;
                     }
                     var next = index + 1;
-                    if(next < n.length - 1) {
-                        if(n[next].subtype) {
+                    if (next < n.length - 1) {
+                        if (n[next].subtype) {
                             findMainTypeBySubtype(next, n[next].subtype, callback);
-                        }else {
+                        } else {
                             findTumorTypeByMainType(next, n[next].mainType, callback);
                         }
                     }
                 }
-                if(n.length > 1) {
-                    if(n[0].subtype) {
+
+                if (n.length > 1) {
+                    if (n[0].subtype) {
                         findMainTypeBySubtype(0, n[0].subtype, callback)
-                    }else {
+                    } else {
                         findTumorTypeByMainType(0, n[0].mainType, callback);
                     }
                 }
             }, true);
 
             function findTumorTypeByMainType(index, mainType, callback) {
-                if(mainType && mainType.name) {
-                    if($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
-                        if(_.isFunction(callback)) {
+                if (mainType && mainType.name) {
+                    if ($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
+                        if (_.isFunction(callback)) {
                             callback(index, $scope.oncoTree.tumorTypes[mainType.name], 'mainType');
                         }
-                    }else {
+                    } else {
                         DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
-                            .then(function(result) {
-                                if(result.data) {
+                            .then(function (result) {
+                                if (result.data) {
                                     $scope.oncoTree.tumorTypes[mainType.name] = result.data;
-                                    if(_.isFunction(callback)) {
+                                    if (_.isFunction(callback)) {
                                         callback(index, result.data, 'mainType');
                                     }
                                 }
-                            }, function() {
-                                if(_.isFunction(callback)) {
+                            }, function () {
+                                if (_.isFunction(callback)) {
                                     callback(index, '', 'mainType');
                                 }
                             });
                     }
-                }else {
-                    if(_.isFunction(callback)) {
+                } else {
+                    if (_.isFunction(callback)) {
                         callback(index, '', 'mainType');
                     }
                 }
             }
 
             function findMainTypeBySubtype(index, subtype, callback) {
-                if(subtype && subtype.mainType && subtype.mainType.name) {
+                if (subtype && subtype.mainType && subtype.mainType.name) {
                     var match = -1;
-                    for(var i = 0 ; i < $scope.oncoTree.mainTypes.length ; i ++) {
-                        if($scope.oncoTree.mainTypes[i].name === subtype.mainType.name) {
+                    for (var i = 0; i < $scope.oncoTree.mainTypes.length; i++) {
+                        if ($scope.oncoTree.mainTypes[i].name === subtype.mainType.name) {
                             match = i;
                             break;
                         }
                     }
-                    if(_.isFunction(callback)) {
-                        callback(index, match > -1 ? $scope.oncoTree.mainTypes[match]: '', 'subtype');
+                    if (_.isFunction(callback)) {
+                        callback(index, match > -1 ? $scope.oncoTree.mainTypes[match] : '', 'subtype');
                     }
-                }else {
-                    if(_.isFunction(callback)) {
+                } else {
+                    if (_.isFunction(callback)) {
                         callback(index, '', 'subtype');
                     }
                 }
             }
-            
+
             $scope.status = {
                 expandAll: false,
                 hideAllEmpty: false,
@@ -4743,34 +4887,34 @@ angular.module('oncokbApp')
                 }
             });
 
-            $scope.$watch('meta.newMainType',function(n, o) {
-               if(_.isArray(n) && n.length > 0) {
-                   var _tumorTypes = [];
-                   var locks = 0;
-                   _.each(n, function(mainType) {
-                       if($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
-                           _tumorTypes = _.union(_tumorTypes, $scope.oncoTree.tumorTypes[mainType.name]);
-                       }else {
-                           locks++;
-                           DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
-                               .then(function(result) {
-                                   if(result.data) {
-                                       $scope.oncoTree.tumorTypes[mainType.name] = result.data;
-                                       _tumorTypes = _.union(_tumorTypes, result.data);
-                                   }
-                                   locks--;
-                               }, function() {
-                                   locks--;
-                               });
-                       }
-                   });
-                   var interval = $interval(function() {
-                       if(locks === 0) {
-                           $scope.meta.currentOncoTreeTumorTypes = _tumorTypes;
-                           $interval.cancel(interval);
-                       }
-                   }, 100);
-               }
+            $scope.$watch('meta.newMainType', function (n, o) {
+                if (_.isArray(n) && n.length > 0) {
+                    var _tumorTypes = [];
+                    var locks = 0;
+                    _.each(n, function (mainType) {
+                        if ($scope.oncoTree.tumorTypes.hasOwnProperty(mainType.name)) {
+                            _tumorTypes = _.union(_tumorTypes, $scope.oncoTree.tumorTypes[mainType.name]);
+                        } else {
+                            locks++;
+                            DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
+                                .then(function (result) {
+                                    if (result.data) {
+                                        $scope.oncoTree.tumorTypes[mainType.name] = result.data;
+                                        _tumorTypes = _.union(_tumorTypes, result.data);
+                                    }
+                                    locks--;
+                                }, function () {
+                                    locks--;
+                                });
+                        }
+                    });
+                    var interval = $interval(function () {
+                        if (locks === 0) {
+                            $scope.meta.currentOncoTreeTumorTypes = _tumorTypes;
+                            $interval.cancel(interval);
+                        }
+                    }, 100);
+                }
             });
             getDriveOncokbInfo();
             getOncoTreeMainTypes();
@@ -4791,10 +4935,10 @@ angular.module('oncokbApp')
             loadFile().then(function (file) {
                 $scope.realtimeDocument = file;
                 var _documents = Documents.get({'title': $scope.fileTitle});
-                if(_.isArray(_documents) && _documents.length > 0) {
+                if (_.isArray(_documents) && _documents.length > 0) {
                     $scope.document = _documents[0];
                 }
-                
+
                 if ($scope.fileTitle) {
                     var model = $scope.realtimeDocument.getModel();
                     if (!model.getRoot().get('gene')) {
@@ -4823,6 +4967,18 @@ angular.module('oncokbApp')
                     }
                 } else {
                     $scope.model = '';
+                }
+            });
+            loadFile('status').then(function (file) {
+                $scope.statusRealtimeDocument = file;
+                var _documents = Documents.get({'title': $scope.fileTitle}, true);
+                if (_.isArray(_documents) && _documents.length > 0) {
+                    $scope.statusDocument = _documents[0];
+                }
+
+                if ($scope.fileTitle) {
+                    var model = $scope.statusRealtimeDocument.getModel();
+                    $scope.geneStatus = model.getRoot().get('status');
                 }
             });
 
@@ -4865,7 +5021,7 @@ angular.module('oncokbApp')
             });
         }]
 )
-    .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, DatabaseConnector) {
+    .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, DatabaseConnector) {
         $scope.meta = {
             model: data.model,
             oncoTree: data.oncoTree,
@@ -4873,15 +5029,15 @@ angular.module('oncokbApp')
             newCancerTypes: []
         }
 
-        $scope.cancel = function() {
+        $scope.cancel = function () {
             $modalInstance.dismiss('canceled');
         }; // end cancel
 
-        $scope.save = function() {
+        $scope.save = function () {
             $scope.meta.model.beginCompoundOperation();
 
             $scope.meta.cancerTypes.clear();
-            _.each($scope.meta.newCancerTypes, function(ct) {
+            _.each($scope.meta.newCancerTypes, function (ct) {
                 if (ct.mainType.name) {
                     var cancerType = $scope.meta.model.create(OncoKB.CancerType);
                     cancerType.cancerType.setText(ct.mainType.name);
@@ -4906,13 +5062,13 @@ angular.module('oncokbApp')
             $modalInstance.close();
         }; // end save
 
-        $scope.hitEnter = function(evt) {
+        $scope.hitEnter = function (evt) {
             if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.name, null) || angular.equals($scope.name, ''))) {
                 $scope.save();
             }
         };
 
-        $scope.$watch('meta.newCancerTypes', function(n, o) {
+        $scope.$watch('meta.newCancerTypes', function (n, o) {
             // console.log('meta.newcancertypes watch has been called.',n, o);
             if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                 $scope.meta.newCancerTypes.push({
@@ -4923,7 +5079,7 @@ angular.module('oncokbApp')
             }
             for (var i = n.length - 2; i >= 0; i--) {
                 if (!n[i].mainType) {
-                    if(n[i].mainType != '') {
+                    if (n[i].mainType != '') {
                         n.splice(i, 1);
                         i--;
                     }
@@ -4932,10 +5088,10 @@ angular.module('oncokbApp')
             function callback(index, mainType, subType, oncoTreeTumorTypes) {
                 n[index].oncoTreeTumorTypes = oncoTreeTumorTypes ? oncoTreeTumorTypes : $scope.meta.oncoTree.allTumorTypes;
 
-                if(mainType) {
+                if (mainType) {
                     n[index].mainType = mainType;
                 }
-                
+
                 var next = index + 1;
                 if (next < n.length - 1) {
                     findCancerType(next, n[next].mainType, n[next].subtype, callback);
@@ -4962,7 +5118,7 @@ angular.module('oncokbApp')
 
         function initNewCancerTypes() {
             var newCancerTypes = [];
-            _.each($scope.meta.cancerTypes.asArray(), function(cancerType) {
+            _.each($scope.meta.cancerTypes.asArray(), function (cancerType) {
                 var mainType = findMainType(cancerType.cancerType.getText());
                 var subtype = findSubtype(cancerType.subtype.getText());
                 newCancerTypes.push({

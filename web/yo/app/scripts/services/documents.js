@@ -12,28 +12,31 @@ angular.module('oncokbApp')
         // AngularJS will instantiate a singleton by calling "new" on this function
         var self = this;
         self.documents = [];
+        self.statusDocs = [];
         self.documentsL = 0;
-
-        function searchById(id) {
+        
+        function searchById(id, fileType) {
+            var tempDocs = (fileType === 'status' ? self.statusDocs : self.documents);
             for (var i = 0; i < self.documentsL; i++) {
-                if(self.documents[i].id === id) {
-                    return self.documents[i];
+                if(tempDocs[i].id === id) {
+                    return tempDocs[i];
                 }
             }
             return false;
         }
 
         //Ideally should only return one file, but may have duplicates
-        function searchByTitle(title) {
+        function searchByTitle(title, fileType) {
+            var tempDocs = (fileType === 'status' ? self.statusDocs : self.documents);
             var seletecd = [];
             for (var i = 0; i < self.documentsL; i++) {
-                if(self.documents[i].title === title) {
-                    seletecd.push(self.documents[i]);
+                if(tempDocs[i].title === title) {
+                    seletecd.push(tempDocs[i]);
                 }
             }
             return seletecd;
         }
-
+        
         function getPermission(index, callback) {
             if(index < self.documentsL) {
                 storage.getPermission(self.documents[index].id).then(function(file){
@@ -122,29 +125,33 @@ angular.module('oncokbApp')
                 }
                 return deferred.promise;
             },
-            set: function(documents){
+            set: function(documents, fileType){
                 if(angular.isArray(documents)) {
-                    self.documents = documents;
-                    self.documentsL = documents.length;
-                    setCurators();
+                    if(fileType === 'status'){
+                        self.statusDocs = documents;
+                    }else{
+                        self.documents = documents;
+                        self.documentsL = documents.length;
+                        setCurators();  
+                    }
                 }
             },
             setStatus: setStatus,
             updateStatus: updateStatus,
             setCurators: setCurators,
-            get: function(params){
+            get: function(params, fileType){
 
                 //Only ID and Title accepted
                 if(angular.isObject(params)) {
                     if(params.hasOwnProperty('id')) {
-                        return searchById(params.id);
+                        return searchById(params.id, fileType);
                     }else if(params.hasOwnProperty('title')){
-                        return searchByTitle(params.title);
+                        return searchByTitle(params.title, fileType);
                     }else {
                         return false;
                     }
                 }
-                return self.documents;
+                return (fileType === 'status' ? self.statusDocs : self.documents);
             }
         };
     });

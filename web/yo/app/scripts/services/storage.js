@@ -217,14 +217,14 @@ angular.module('oncokbApp')
      *
      * @param {Function} callback Function to call when the request is complete.
      */
-    this.retrieveAllFiles = function() {
+    this.retrieveAllFiles = function(fileType) {
         var retrievePageOfFiles = function(request, result) {
             request.execute(function(resp) {
               result = result.concat(resp.items);
               var nextPageToken = resp.nextPageToken;
               if (nextPageToken) {
                 request = gapi.client.drive.files.list({
-                    'q' : '"' + config.folderId + '" in parents',
+                    'q' : '"' + (fileType === 'status' ?  config.statusFolderId : config.folderId) + '" in parents',
                     'pageToken': nextPageToken,
                     'maxResults': 300
                 });
@@ -239,7 +239,7 @@ angular.module('oncokbApp')
         var deferred = $q.defer();
         gapi.client.load('drive', 'v2', function() {
             var initialRequest = gapi.client.drive.files.list({
-                    'q' : '"' + config.folderId + '" in parents'
+                    'q' : '"' + (fileType === 'status' ?  config.statusFolderId : config.folderId) + '" in parents'
                 });
             retrievePageOfFiles(initialRequest, []);
         });
