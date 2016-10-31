@@ -120,7 +120,6 @@ public class DriveAnnotationParser {
             if (hugo != null) {
                 Gene gene = geneBo.findGeneByHugoSymbol(hugo);
 
-
                 if (gene == null) {
                     System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
                     gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
@@ -133,6 +132,26 @@ public class DriveAnnotationParser {
                 }
 
                 if (gene != null) {
+                    JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
+                    String oncogene = geneType.has("OCG") ? geneType.getString("OCG").trim() : null;
+                    String tsg = geneType.has("TSG") ? geneType.getString("TSG").trim() : null;
+
+                    if (oncogene != null) {
+                        if (oncogene.equals("OCG")) {
+                            gene.setOncogene(true);
+                        } else {
+                            gene.setOncogene(false);
+                        }
+                    }
+                    if (tsg != null) {
+                        if (tsg.equals("TSG")) {
+                            gene.setTSG(true);
+                        } else {
+                            gene.setTSG(false);
+                        }
+                    }
+                    geneBo.saveOrUpdate(gene);
+
                     EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
                     AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
                     List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene));
@@ -162,6 +181,8 @@ public class DriveAnnotationParser {
                 } else {
                     System.out.print("No gene name available");
                 }
+            } else {
+                System.out.println("No hugoSymbol available");
             }
         }
     }
