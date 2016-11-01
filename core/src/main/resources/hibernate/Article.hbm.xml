@@ -9,7 +9,7 @@
       <generator class="identity"/>
     </id>
     <property name="pmid" type="string">
-      <column name="pmid" not-null="true"/>
+      <column name="pmid"/>
     </property>
     <property name="title" type="string">
       <column length="1000" name="title"/>
@@ -35,8 +35,17 @@
     <property name="elocationId" type="string">
       <column name="elocationId"/>
     </property>
+    <property name="abstractContent" type="string">
+      <column name="abstract_content"/>
+    </property>
+    <property name="link" type="string">
+      <column name="link"/>
+    </property>
   </class>
   <query name="findArticleByPmid">
         from Article a where a.pmid=?
+  </query>
+  <query name="findArticleByAbstract">
+        from Article a where a.abstractContent=?
   </query>
 </hibernate-mapping>

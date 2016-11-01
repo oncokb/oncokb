@@ -16,4 +16,8 @@ public class ArticleBoImpl extends GenericBoImpl<Article, ArticleDao> implements
     public Article findArticleByPmid(String pmid) {
         return getDao().findArticleByPmid(pmid);
     }
+    @Override
+    public Article findArticleByAbstract(String abstractContent) {
+        return getDao().findArticleByAbstract(abstractContent);
+    }
 }

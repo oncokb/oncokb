@@ -786,6 +786,8 @@ public class DriveAnnotationParser {
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         Pattern pmidPattern = Pattern.compile("PMIDs?:\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
+        Pattern abstractPattern = Pattern.compile("\\(\\s*Abstract\\s*:([^\\)]*);\\s*\\)", Pattern.CASE_INSENSITIVE);
+        Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(str);
         int start = 0;
         while (m.find(start)) {
@@ -816,6 +818,35 @@ public class DriveAnnotationParser {
             start = m.end();
         }
 
+        Matcher abstractMatch = abstractPattern.matcher(str);
+        start = 0;
+        String abstracts = "", abContent = "", abLink = "";
+        while(abstractMatch.find(start)){
+            abstracts = abstractMatch.group(1).trim();
+            for(String abs : abstracts.split(";")){
+                Matcher abItems = abItemPattern.matcher(abs);
+                if(abItems.find()){
+                    abContent = abItems.group(1).trim();
+                    abLink = abItems.group(2).trim();
+                }
+                if(!abContent.isEmpty()){
+                    Article doc = new Article();
+                    doc.setAbstractContent(abContent);
+                    doc.setLink(abLink);
+                    if(articleBo.findArticleByAbstract(abContent) == null){
+                        articleBo.save(doc);
+                        docs.add(doc);
+                    }
+                    
+                }
+                abContent = "";
+                abLink = "";
+
+            }
+            start = abstractMatch.end();
+            
+        }
+        
         evidence.addArticles(docs);
         evidence.addClinicalTrials(clinicalTrials);
     }
