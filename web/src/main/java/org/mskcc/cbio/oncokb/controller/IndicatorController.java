@@ -124,6 +124,8 @@ public class IndicatorController {
                 }
             }
 
+            indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), query.getProteinStart(), query.getProteinEnd()));
+            
             if (query.getTumorType() != null) {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
                 // Tumor type summary

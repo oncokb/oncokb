@@ -20,6 +20,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
     private Boolean VUS;
+    private Boolean hotspot;
     private String geneSummary;
     private String variantSummary;
     private String tumorTypeSummary;
@@ -84,6 +85,14 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setVUS(Boolean VUS) {
         this.VUS = VUS;
+    }
+
+    public Boolean getHotspot() {
+        return hotspot;
+    }
+
+    public void setHotspot(Boolean hotspot) {
+        this.hotspot = hotspot;
     }
 
     public Boolean getAlleleExist() {
