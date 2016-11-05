@@ -20,6 +20,41 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_1);
         }}
     );
+    
+    public static final List<LevelOfEvidence> SENSITIVE_LEVELS = Collections.unmodifiableList(
+        new ArrayList<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_4);
+            add(LevelOfEvidence.LEVEL_3B);
+            add(LevelOfEvidence.LEVEL_3A);
+            add(LevelOfEvidence.LEVEL_2B);
+            add(LevelOfEvidence.LEVEL_2A);
+            add(LevelOfEvidence.LEVEL_1);
+        }}
+    );
+
+    public static final List<LevelOfEvidence> RESISTANCE_LEVELS = Collections.unmodifiableList(
+        new ArrayList<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_R1);
+        }}
+    );
+
+    public static final List<LevelOfEvidence> PUBLIC_LEVELS = Collections.unmodifiableList(
+        new ArrayList<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_1);
+            add(LevelOfEvidence.LEVEL_R1);
+            add(LevelOfEvidence.LEVEL_2A);
+            add(LevelOfEvidence.LEVEL_3A);
+            add(LevelOfEvidence.LEVEL_4);
+        }}
+    );
+
+    public static final List<LevelOfEvidence> OTHER_INDICATION_LEVELS = Collections.unmodifiableList(
+        new ArrayList<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_2B);
+            add(LevelOfEvidence.LEVEL_3B);
+        }}
+    );
+
 
     public static LevelOfEvidence getHighestLevelFromEvidence(Set<Evidence> evidences) {
         if (evidences != null) {
@@ -102,25 +137,14 @@ public class LevelUtils {
     }
 
     public static Set<LevelOfEvidence> getPublicLevels() {
-        return new HashSet<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_1);
-            add(LevelOfEvidence.LEVEL_R1);
-            add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_4);
-        }};
+        return new HashSet<>(PUBLIC_LEVELS);
     }
 
     public static Set<LevelOfEvidence> getPublicAndOtherIndicationLevels() {
-        return new HashSet<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_1);
-            add(LevelOfEvidence.LEVEL_R1);
-            add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_2B);
-            add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_3B);
-            add(LevelOfEvidence.LEVEL_4);
-        }};
+        Set<LevelOfEvidence> levels = new HashSet<>();
+        levels.addAll(PUBLIC_LEVELS);
+        levels.addAll(OTHER_INDICATION_LEVELS);
+        return levels;
     }
 
     public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level, Boolean sameIndication) {
@@ -162,5 +186,21 @@ public class LevelUtils {
             }
         }
         return levelOfEvidences;
+    }
+    
+    public static Boolean isSensitiveLevel (LevelOfEvidence levelOfEvidence) {
+        Boolean flag = false;
+        if(levelOfEvidence != null && SENSITIVE_LEVELS.contains(levelOfEvidence)) {
+            flag = true;
+        }
+        return flag;
+    }
+    
+    public static Boolean isResistanceLevel (LevelOfEvidence levelOfEvidence) {
+        Boolean flag = false;
+        if(levelOfEvidence != null && RESISTANCE_LEVELS.contains(levelOfEvidence)) {
+            flag = true;
+        }
+        return flag;
     }
 }
