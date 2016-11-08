@@ -22,7 +22,7 @@ public final class AlterationUtils {
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
     private final static String[] generalAlts = {"activating mutations", "activating mutation", "inactivating mutations", "inactivating mutation", "all mutations", "all mutation", "wildtype", "wildtypes"};
     private final static Set<String> generalAlterations = new HashSet<>(Arrays.asList(generalAlts));
-    private final static String fusionRegex = "((\\w*)-(\\w*)) (?i)fusion";
+    private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
         throw new AssertionError();
