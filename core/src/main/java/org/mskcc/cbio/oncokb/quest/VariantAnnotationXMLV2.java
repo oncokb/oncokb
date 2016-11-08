@@ -272,7 +272,7 @@ public final class VariantAnnotationXMLV2 {
                 }
                 parts = line.split("\t");
                 tempGene = GeneUtils.getGeneByHugoSymbol(parts[0]);
-                if(sequencedGenes.contains(tempGene) && diagnosis.equals(parts[1]) && !genesWithMutation.contains(tempGene)){
+                if(sequencedGenes.contains(tempGene) && diagnosis.equalsIgnoreCase(parts[1]) && !genesWithMutation.contains(tempGene)){
                     tempAlteration.setGene(tempGene);
                     tempAlteration.setAlteration("Wildtype");
                     tempAlteration.setAlterationType(AlterationType.MUTATION); 
@@ -312,7 +312,7 @@ public final class VariantAnnotationXMLV2 {
                     Element currentNode = (Element)cancerTypeNodes.item(j);
                     relevant = currentNode.getAttributes().getNamedItem("relevant_to_patient_disease").getNodeValue();
                     NodeList levelNodes = currentNode.getElementsByTagName("level");
-                    if(relevant.equals("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
+                    if(relevant.equalsIgnoreCase("Yes") && currentNode.getElementsByTagName("level").getLength() > 0){
                         levelIndex = 100;
                         for(int k = 0; k < levelNodes.getLength();k++){
                             tempLevel = levelNodes.item(k).getTextContent().toUpperCase();
