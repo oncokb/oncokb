@@ -567,7 +567,7 @@ public class EvidenceUtils {
                     maps.put(treatmentsName, new HashSet<Evidence>());
                 }
                 maps.get(treatmentsName).add(evidence);
-            } else{
+            } else {
                 // Keep all un-treatment evidences
                 filtered.add(evidence);
             }
@@ -618,5 +618,26 @@ public class EvidenceUtils {
         } else {
             return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<Integer>(ids)));
         }
+    }
+
+    public static Set<Evidence> filterEvidenceByKnownEffect(Set<Evidence> evidences, String knownEffect) {
+        if (knownEffect == null) {
+            return null;
+        }
+        Set<Evidence> result = new HashSet<>();
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect().equalsIgnoreCase(knownEffect)) {
+                result.add(evidence);
+            }
+        }
+        return result;
+    }
+
+    public static Set<Evidence> getSensitiveEvidences(Set<Evidence> evidences) {
+       return filterEvidenceByKnownEffect(evidences, "sensitive");
+    }
+
+    public static Set<Evidence> getResistanceEvidences(Set<Evidence> evidences) {
+        return filterEvidenceByKnownEffect(evidences, "resistant");
     }
 }

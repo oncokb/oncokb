@@ -22,6 +22,7 @@ public final class AlterationUtils {
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
     private final static String[] generalAlts = {"activating mutations", "activating mutation", "inactivating mutations", "inactivating mutation", "all mutations", "all mutation", "wildtype", "wildtypes"};
     private final static Set<String> generalAlterations = new HashSet<>(Arrays.asList(generalAlts));
+    private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
         throw new AssertionError();
@@ -175,6 +176,33 @@ public final class AlterationUtils {
         return variantName;
     }
 
+    public static Boolean isFusion(String variant) {
+        Boolean flag = false;
+        if (variant != null && Pattern.matches(fusionRegex, variant)) {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public static Alteration getRevertFusions(Alteration alteration) {
+        Alteration revertFusionAlt = null;
+        if (alteration != null && alteration.getAlteration() != null
+            && isFusion(alteration.getAlteration())) {
+            Pattern pattern = Pattern.compile(fusionRegex);
+            Matcher matcher = pattern.matcher(alteration.getAlteration());
+            if (matcher.matches() && matcher.groupCount() == 3) {
+                // Revert fusion
+                String geneA = matcher.group(2);
+                String geneB = matcher.group(3);
+                String revertFusion = geneB + "-" + geneA + " fusion";
+
+                revertFusionAlt = alterationBo.findAlteration(alteration.getGene(),
+                    alteration.getAlterationType(), revertFusion);
+            }
+        }
+        return revertFusionAlt;
+    }
+
     public static String trimAlterationName(String alteration) {
         if (alteration != null) {
             if (alteration.startsWith("p.")) {
@@ -298,7 +326,7 @@ public final class AlterationUtils {
         if (VUS == null) {
             VUS = new HashSet<>();
         }
-        
+
         for (Alteration alteration : alterations) {
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
@@ -360,6 +388,21 @@ public final class AlterationUtils {
             }
         }
 
+        if (isFusion(alteration)) {
+            Alteration alt = new Alteration();
+            alt.setAlteration(alteration);
+            alt.setAlterationType(AlterationType.MUTATION);
+            alt.setGene(gene);
+
+            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+            Alteration revertFusion = getRevertFusions(alt);
+            if (revertFusion != null) {
+                List<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, new ArrayList<>(fullAlterations));
+                if (alts != null) {
+                    alterations.addAll(alts);
+                }
+            }
+        }
         return alterations;
     }
 
@@ -369,10 +412,10 @@ public final class AlterationUtils {
 
     public static Set<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<>();
-        
-        if(CacheUtils.isEnabled()) {
+
+        if (CacheUtils.isEnabled()) {
             alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
-        }else {
+        } else {
             alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
         }
         List<Alteration> alleles =

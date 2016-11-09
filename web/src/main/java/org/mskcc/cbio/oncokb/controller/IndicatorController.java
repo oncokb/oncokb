@@ -161,45 +161,28 @@ public class IndicatorController {
                                 LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
 
                 if (highestLevelOnly) {
-                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
+                    Set<Evidence> filteredEvis = new HashSet<>();
+                    // Get highest sensitive evidences
+                    Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(treatmentEvidences);
+                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences));
+
+                    // Get highest resistance evidences
+                    Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
+                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+
+                    treatmentEvidences = filteredEvis;
                 }
                 if (treatmentEvidences != null) {
-                    indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
-                    highestLevels = findHighestLevel(treatmentEvidences);
+                    Set<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
+
+                    indicatorQuery.setTreatments(treatments);
+                    highestLevels = findHighestLevel(treatments);
                 }
             } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
                 Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
 
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
-//                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-//                    EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
-//                        (levels != null ?
-//                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-//                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())
-//                    ));
-//                if (highestLevelOnly) {
-//                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
-//                }
-//                indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
-//                highestLevels = findHighestLevel(treatmentEvidences);
-//
-//                LevelOfEvidence sensitive = highestLevels.get("sensitive");
-//                if (sensitive != null) {
-//                    Boolean sameIndication = false;
-//                    if (oncoTreeTypes != null && !oncoTreeTypes.isEmpty()) {
-//                        for (Evidence evidence : treatmentEvidences) {
-//                            if (evidence.getLevelOfEvidence() != null &&
-//                                CollectionUtils.intersection(
-//                                    Collections.singleton(evidence.getOncoTreeType()), oncoTreeTypes).size() > 0) {
-//                                sameIndication = true;
-//                            }
-//                        }
-//                    }
-//
-//                    highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, sameIndication));
-//                }
-//                highestLevels.put("resistant", null);
             }
             indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
             indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
@@ -240,36 +223,24 @@ public class IndicatorController {
         return false;
     }
 
-    private Map<String, LevelOfEvidence> findHighestLevel(Set<Evidence> evidences) {
-        List<LevelOfEvidence> sensitiveLevels = new ArrayList<>();
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_4);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_3B);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_3A);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_2B);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_2A);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_1);
-
-        List<LevelOfEvidence> resistanceLevels = new ArrayList<>();
-        resistanceLevels.add(LevelOfEvidence.LEVEL_R3);
-        resistanceLevels.add(LevelOfEvidence.LEVEL_R2);
-        resistanceLevels.add(LevelOfEvidence.LEVEL_R1);
-
+    private Map<String, LevelOfEvidence> findHighestLevel(Set<IndicatorQueryTreatment> treatments) {
         int levelSIndex = -1;
         int levelRIndex = -1;
 
         Map<String, LevelOfEvidence> levels = new HashMap<>();
 
-        if (evidences != null) {
-            for (Evidence evidence : evidences) {
-                if (evidence.getLevelOfEvidence() != null) {
+        if (treatments != null) {
+            for (IndicatorQueryTreatment treatment : treatments) {
+                LevelOfEvidence levelOfEvidence = treatment.getLevel();
+                if (levelOfEvidence != null) {
                     int _index = -1;
-                    if (evidence.getKnownEffect().equalsIgnoreCase("sensitive")) {
-                        _index = sensitiveLevels.indexOf(evidence.getLevelOfEvidence());
+                    if (LevelUtils.isSensitiveLevel(levelOfEvidence)) {
+                        _index = LevelUtils.SENSITIVE_LEVELS.indexOf(levelOfEvidence);
                         if (_index > levelSIndex) {
                             levelSIndex = _index;
                         }
-                    } else if (evidence.getKnownEffect().equalsIgnoreCase("resistant")) {
-                        _index = resistanceLevels.indexOf(evidence.getLevelOfEvidence());
+                    } else if (LevelUtils.isResistanceLevel(levelOfEvidence)) {
+                        _index = LevelUtils.RESISTANCE_LEVELS.indexOf(levelOfEvidence);
                         if (_index > levelRIndex) {
                             levelRIndex = _index;
                         }
@@ -277,8 +248,8 @@ public class IndicatorController {
                 }
             }
         }
-        levels.put("sensitive", levelSIndex > -1 ? sensitiveLevels.get(levelSIndex) : null);
-        levels.put("resistant", levelRIndex > -1 ? resistanceLevels.get(levelRIndex) : null);
+        levels.put("sensitive", levelSIndex > -1 ? LevelUtils.SENSITIVE_LEVELS.get(levelSIndex) : null);
+        levels.put("resistant", levelRIndex > -1 ? LevelUtils.RESISTANCE_LEVELS.get(levelRIndex) : null);
         return levels;
     }
 }
