@@ -298,7 +298,7 @@ public final class AlterationUtils {
         if (VUS == null) {
             VUS = new HashSet<>();
         }
-        
+
         for (Alteration alteration : alterations) {
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
@@ -363,16 +363,12 @@ public final class AlterationUtils {
         return alterations;
     }
 
-    public static List<Alteration> getRelevantAlterations(Alteration alteration) {
-        return alterationBo.findRelevantAlterations(alteration, null);
-    }
-
     public static Set<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<>();
-        
-        if(CacheUtils.isEnabled()) {
+
+        if (CacheUtils.isEnabled()) {
             alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
-        }else {
+        } else {
             alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
         }
         List<Alteration> alleles =
@@ -384,20 +380,24 @@ public final class AlterationUtils {
         return filterAllelesBasedOnLocation(new HashSet<>(alleles), alteration.getProteinStart());
     }
 
-    public static Set<Alteration> getRelevantAlterations(
-        Gene gene, String alteration, String consequence,
-        Integer proteinStart, Integer proteinEnd) {
-        if (gene == null) {
+    public static Set<Alteration> getRelevantAlterations(Alteration alteration) {
+        if (alteration == null || alteration.getGene() == null) {
             return new HashSet<>();
         }
-        String id = gene.getHugoSymbol() + alteration + (consequence == null ? "" : consequence);
+        Gene gene = alteration.getGene();
+        VariantConsequence consequence = alteration.getConsequence();
+        String term = consequence == null ? null : consequence.getTerm();
+        Integer proteinStart = alteration.getProteinStart();
+        Integer proteinEnd = alteration.getProteinEnd();
+
+        String id = gene.getHugoSymbol() + alteration.getAlteration() + (consequence == null ? "" : consequence);
 
         if (CacheUtils.isEnabled()) {
             if (!CacheUtils.containRelevantAlterations(gene.getEntrezGeneId(), id)) {
                 CacheUtils.setRelevantAlterations(
                     gene.getEntrezGeneId(), id,
                     getAlterations(
-                        gene, alteration, consequence,
+                        gene, alteration.getAlteration(), term,
                         proteinStart, proteinEnd,
                         getAllAlterations(gene)));
             }
@@ -405,7 +405,7 @@ public final class AlterationUtils {
             return CacheUtils.getRelevantAlterations(gene.getEntrezGeneId(), id);
         } else {
             return getAlterations(
-                gene, alteration, consequence,
+                gene, alteration.getAlteration(), term,
                 proteinStart, proteinEnd,
                 getAllAlterations(gene));
         }

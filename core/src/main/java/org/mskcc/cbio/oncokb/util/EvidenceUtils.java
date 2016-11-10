@@ -49,6 +49,9 @@ public class EvidenceUtils {
     public static Set<Evidence> getRelevantEvidences(
         Query query, String source, String geneStatus,
         Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
+        if (query == null) {
+            return new HashSet<>();
+        }
         Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol())
             : GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         if (gene != null) {
@@ -56,10 +59,9 @@ public class EvidenceUtils {
                 (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
-
-            Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
-                gene, query.getAlteration(), query.getConsequence(),
-                query.getProteinStart(), query.getProteinEnd());
+            Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+            Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
 
             Set<Evidence> relevantEvidences;
             List<OncoTreeType> relevantTumorTypes = new ArrayList<>();
@@ -567,7 +569,7 @@ public class EvidenceUtils {
                     maps.put(treatmentsName, new HashSet<Evidence>());
                 }
                 maps.get(treatmentsName).add(evidence);
-            } else{
+            } else {
                 // Keep all un-treatment evidences
                 filtered.add(evidence);
             }
