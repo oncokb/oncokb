@@ -1781,14 +1781,21 @@ angular.module('oncokbApp')
                     }
                 });
             };
-
+ 
             $scope.changeData = function() {
-                console.info('Gene\tVariant\tTumorType\tTreatment' +
-                    '\tFDA approved indication\tLevel\tShortDescription\t' +
-                    'Description\tObsolete');
-
-                changeData(0, function () {
-                    console.info('Finished.');
+                var results = ["Gene\tVariant\tTumorType\tTreatment\tFDA approved indication\tLevel\tShortDescription\tDescription\tObsolete"];
+                changeData(0, results, function () {
+                    $.post("http://localhost:8080/oncokb/legacy-api/utils/spreadSheet", 
+                            {
+                                fileName: "Testing", 
+                                parentFolderId: "0BzBfo69g8fP6fldsUFY0T21HVV9za3UwbXViT0FTa0t6TG1uRVdLWWJaYlAyOWVqQXBRN3c",
+                                content: results.join("\n")
+                            }
+                        ).done(function(response){
+                            //If the file is large, it might take some time. Meanwhile if you open the google spreadsheet generated, you can see the line inserting
+                            //When the console print out "success", it means the file is done saving                             
+                            console.log(response);
+                        });
                 });
             };
 
@@ -2319,7 +2326,7 @@ angular.module('oncokbApp')
                 }
             }
             
-            function changeData(index, callback) {
+            function changeData(index, results, callback) {
                 if (index < $scope.documents.length) {
                     var document = $scope.documents[index];
                     storage.getRealtimeDocument(document.id).then(function(realtime) {
@@ -2331,6 +2338,7 @@ angular.module('oncokbApp')
                             var gene = model.getRoot().get('gene');
                             if (gene) {
                                 // model.beginCompoundOperation();
+                                console.log(index+1, gene.name.getText());
                                 gene.mutations.asArray().forEach(function (mutation, index) {
                                     var oncogenic = mutation.oncogenic.getText();
                                     var mutationEffect = mutation.effect.value.getText();
@@ -2419,7 +2427,7 @@ angular.module('oncokbApp')
                                                 getString(treatment.description.getText()),
                                                 treatment.name_eStatus.get('obsolete')
                                             ];
-                                            console.log(result.join('\t'));
+                                            results.push(result.join('\t'));
                                                 // }
                                             })
                                         });
@@ -2427,12 +2435,12 @@ angular.module('oncokbApp')
                                 });
                                 // model.endCompoundOperation();
                                 $timeout(function () {
-                                    changeData(++index, callback);
+                                    changeData(++index, results, callback);
                                 }, 500, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
-                                    changeData(++index, callback);
+                                    changeData(++index, results, callback);
                                 }, 500, false);
                             }
                         }

@@ -1,9 +1,13 @@
 package org.mskcc.cbio.oncokb.controller;
 
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.ParentReference;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.util.common.base.Joiner;
+import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.util.GoogleAuth;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.springframework.stereotype.Controller;
@@ -13,11 +17,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Created by Hongxin on 9/1/15.
@@ -187,4 +193,55 @@ public class UtilsController {
         }
         return sb.toString();
     }
+    
+    @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, value="/legacy-api/utils/spreadSheet")
+    public @ResponseBody String generateSpreadSheet (
+            @ApiParam(value = "Google Spreadsheet Name that you want to save data to")  @RequestParam(required = true) String fileName,
+            @ApiParam(value = "Parent ID of Google Spreadsheet that you want to save data to")  @RequestParam(required = false) String parentFolderId,
+            @ApiParam(value = "File content including header. Lines are seperated by \n and columns are seperated by \t")  @RequestParam(required = true) String content) throws IOException, GeneralSecurityException, URISyntaxException, ServiceException  {
+        //set default parent folder Id, which is OncoKB/DATA/Auto Generated Files
+        if(parentFolderId == null || parentFolderId.equals("")){
+            parentFolderId = "0By19QWSOYlS_VUtndWpENDc5cFE";
+        }
+        
+        Drive driveService = GoogleAuth.getDriveService();
+        System.out.println("Got drive service");
+        File file = new File();
+        file.setTitle(fileName);
+        file.setParents(Arrays.asList(new ParentReference().setId(parentFolderId)));
+        file.setDescription("New File created from server");
+        System.out.println("Copying file");
+
+        file = driveService.files().copy("1gPmHpuCL9G78rddF9Za5qb73W_U9DWH7-gMmIQC5hj0", file).execute();
+
+        System.out.println("Successfully copied file. Start to change file content");
+
+        //get the data ready for process
+        String[] contentData = content.split("\\n");
+        
+        String[] fakeHeaders = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"};
+        String fileId = file.getId();
+        URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
+
+        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
+        SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
+
+        WorksheetFeed worksheetFeed = service.getFeed(spreadSheetEntry.getWorksheetFeedUrl(), WorksheetFeed.class);
+        List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
+        WorksheetEntry worksheet1 = worksheets.get(0);
+        
+        // Fetch the list feed of the worksheets.
+        URL listFeedUrl1 = worksheet1.getListFeedUrl();
+        
+        for(int i = 0;i < contentData.length;i++){
+            String[] lineData = contentData[i].split("\\t");
+            ListEntry contentRow  = new ListEntry();
+            for(int j = 0;j < lineData.length;j++){
+                contentRow.getCustomElements().setValueLocal(fakeHeaders[j], lineData[j]);
+            }
+            service.insert(listFeedUrl1, contentRow);
+        }
+        return "success";
+    }
+
 }
