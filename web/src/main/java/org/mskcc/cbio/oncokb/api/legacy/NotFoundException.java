@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.api;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class NotFoundException extends ApiException {

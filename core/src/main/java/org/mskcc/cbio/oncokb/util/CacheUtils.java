@@ -37,8 +37,9 @@ public class CacheUtils {
 
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
-    // Cache metadata from database
+    // Cache data from database
     private static Set<Gene> genes = new HashSet<>();
+    private static Set<Drug> drugs = new HashSet<>();
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
     private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations 
 
@@ -144,6 +145,13 @@ public class CacheUtils {
         }
     };
 
+    private static Observer drugsObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+        }
+    };
+
     private static Observer relevantEvidencesObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
@@ -206,11 +214,16 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(evidencesObserver);
             GeneObservable.getInstance().addObserver(VUSObserver);
             GeneObservable.getInstance().addObserver(numbersObserver);
+            GeneObservable.getInstance().addObserver(drugsObserver);
             System.out.println("Observer: " + MainUtils.getTimestampDiff(current));
             current = MainUtils.getCurrentTimestamp();
 
             genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
             System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+
+            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+            System.out.println("Cache all drugs: " + MainUtils.getTimestampDiff(current));
             current = MainUtils.getCurrentTimestamp();
             
             Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
@@ -482,6 +495,13 @@ public class CacheUtils {
             genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         }
         return genes;
+    }
+    
+    public static Set<Drug> getAllDrugs() {
+        if (drugs.size() == 0) {
+            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+        }
+        return drugs;
     }
 
     public static Set<Evidence> getEvidences(Gene gene) {

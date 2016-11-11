@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.api;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;

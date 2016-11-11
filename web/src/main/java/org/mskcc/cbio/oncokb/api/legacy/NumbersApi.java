@@ -1,8 +1,9 @@
-package org.mskcc.cbio.oncokb.api;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.mskcc.cbio.oncokb.api.legacy.NotFoundException;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGene;
 import org.mskcc.cbio.oncokb.response.ApiNumbersGenes;

@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.api;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

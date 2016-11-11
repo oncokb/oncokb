@@ -25,5 +25,12 @@ public interface DrugDao extends GenericDao<Drug, Integer> {
      * @return 
      */
     List<Drug> findDrugBySynonym(String synonym);
+
+    /**
+     *
+     * @param atcCode
+     * @return
+     */
+    List<Drug> findDrugByAtcCode(String atcCode);
     
 }

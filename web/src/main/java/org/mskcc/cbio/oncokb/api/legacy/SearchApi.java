@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.api;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -117,59 +117,7 @@ public class SearchApi {
 
         if (hugoSymbol != null) {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-            if (gene != null) {
-                Long oldTime = new Date().getTime();
-                Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
-
-                alterations = AlterationUtils.excludeVUS(gene, alterations);
-                alterations = AlterationUtils.excludeGeneralAlterations(alterations);
-
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
-
-                Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
-                    add(EvidenceType.MUTATION_EFFECT);
-                    add(EvidenceType.ONCOGENIC);
-                }};
-                Map<Alteration, Map<EvidenceType, Set<Evidence>>> evidences = new HashMap<>();
-
-                for (Alteration alteration : alterations) {
-                    Map<EvidenceType, Set<Evidence>> map = new HashMap<>();
-                    map.put(EvidenceType.ONCOGENIC, new HashSet<Evidence>());
-                    map.put(EvidenceType.MUTATION_EFFECT, new HashSet<Evidence>());
-                    evidences.put(alteration, map);
-                }
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Initialize evidences.");
-
-                Map<Gene, Set<Evidence>> geneEvidences =
-                    EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene evidences.");
-
-                for (Evidence evidence : geneEvidences.get(gene)) {
-                    for (Alteration alteration : evidence.getAlterations()) {
-                        if (evidences.containsKey(alteration)) {
-                            evidences.get(alteration).get(evidence.getEvidenceType()).add(evidence);
-                        }
-                    }
-                }
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Seperate evidences.");
-
-                for (Map.Entry<Alteration, Map<EvidenceType, Set<Evidence>>> entry : evidences.entrySet()) {
-                    Alteration alteration = entry.getKey();
-                    Map<EvidenceType, Set<Evidence>> map = entry.getValue();
-
-                    BiologicalVariant variant = new BiologicalVariant();
-                    variant.setVariant(alteration);
-                    Oncogenicity oncogenicity = Oncogenicity.getByLevel(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.ONCOGENIC, map.get(EvidenceType.ONCOGENIC)));
-
-                    Map<String, String> properMapping = MainUtils.matchOncogenicMutation(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.MUTATION_EFFECT, map.get(EvidenceType.MUTATION_EFFECT)), oncogenicity == null ? null : oncogenicity.getDescription());
-                    variant.setOncogenic(properMapping.get("oncogenic"));
-                    variant.setMutationEffect(properMapping.get("mutationEffect"));
-                    variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
-                    variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
-                    variants.add(variant);
-                }
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Created biological annotations.");
-            }
+            variants = MainUtils.getBiologicalVariants(gene);
         }
         instance.setData(variants);
         meta.setCode(status.value());
@@ -194,64 +142,7 @@ public class SearchApi {
 
         if (hugoSymbol != null) {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-            if (gene != null) {
-                Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
-                alterations = AlterationUtils.excludeVUS(gene, alterations);
-                Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
-                    add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-                    add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
-                    add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-                }};
-                Map<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
-                Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
-
-                for (Alteration alteration : alterations) {
-                    evidences.put(alteration, new HashMap<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>());
-                }
-
-                Map<Gene, Set<Evidence>> geneEvidences =
-                    EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
-
-                for (Evidence evidence : geneEvidences.get(gene)) {
-                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
-
-                    if (oncoTreeType != null) {
-                        for (Alteration alteration : evidence.getAlterations()) {
-                            if (evidences.containsKey(alteration)) {
-                                if (!evidences.get(alteration).containsKey(oncoTreeType)) {
-                                    evidences.get(alteration).put(oncoTreeType, new HashMap<LevelOfEvidence, Set<Evidence>>());
-                                }
-                                if (publicLevels.contains(evidence.getLevelOfEvidence())) {
-                                    LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
-                                    if (!evidences.get(alteration).get(oncoTreeType).containsKey(levelOfEvidence)) {
-                                        evidences.get(alteration).get(oncoTreeType).put(levelOfEvidence, new HashSet<Evidence>());
-                                    }
-                                    evidences.get(alteration).get(oncoTreeType).get(levelOfEvidence).add(evidence);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                for (Map.Entry<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
-                    Alteration alteration = entry.getKey();
-                    Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
-
-                    for (Map.Entry<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
-                        OncoTreeType oncoTreeType = _entry.getKey();
-
-                        for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : _entry.getValue().entrySet()) {
-                            ClinicalVariant variant = new ClinicalVariant();
-                            variant.setOncoTreeType(oncoTreeType);
-                            variant.setVariant(alteration);
-                            variant.setLevel(__entry.getKey().getLevel());
-                            variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
-                            variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
-                            variants.add(variant);
-                        }
-                    }
-                }
-            }
+            variants = MainUtils.getClinicalVariants(gene);
         }
 
         instance.setData(variants);
