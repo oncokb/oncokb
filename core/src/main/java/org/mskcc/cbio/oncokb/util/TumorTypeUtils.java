@@ -484,26 +484,30 @@ public class TumorTypeUtils {
                 queries.put(query);
             }
             postData.put("queries", queries);
-            
-            Map map = JsonUtils.jsonToMap(HttpUtils.postRequest(url, postData.toString()));
 
-            if (map.get("data") != null) {
-                for (List<Map<String, Object>> queryResult : (List<List<Map<String, Object>>>) map.get("data")) {
-                    for (Map<String, Object> datum : queryResult) {
-                        OncoTreeType subtype = new OncoTreeType();
-                        Map<String, String> mainType = (Map<String, String>) datum.get("mainType");
-                        if (mainType != null) {
-                            subtype.setCancerType(mainType.get("name"));
+            String response = HttpUtils.postRequest(url, postData.toString());
+            if(response != null && !response.equals("TIMEOUT")) {
+                Map map = JsonUtils.jsonToMap(response);
+
+                if (map.get("data") != null) {
+                    for (List<Map<String, Object>> queryResult : (List<List<Map<String, Object>>>) map.get("data")) {
+                        for (Map<String, Object> datum : queryResult) {
+                            OncoTreeType subtype = new OncoTreeType();
+                            Map<String, String> mainType = (Map<String, String>) datum.get("mainType");
+                            if (mainType != null) {
+                                subtype.setCancerType(mainType.get("name"));
+                            }
+                            subtype.setSubtype((String) datum.get("name"));
+                            subtype.setCode((String) datum.get("code"));
+                            subtype.setLevel((String) datum.get("level"));
+                            subtype.setTissue((String) datum.get("tissue"));
+                            subtypes.add(subtype);
                         }
-                        subtype.setSubtype((String) datum.get("name"));
-                        subtype.setCode((String) datum.get("code"));
-                        subtype.setLevel((String) datum.get("level"));
-                        subtype.setTissue((String) datum.get("tissue"));
-                        subtypes.add(subtype);
                     }
                 }
+            }else {
+                System.out.println("Error access OncoTree Service.");
             }
-
         } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();

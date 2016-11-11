@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -22,6 +23,10 @@ public class HttpUtils {
 
                 // Send post request
                 con.setDoOutput(true);
+                
+                // Set timeout to 5 seconds
+                con.setConnectTimeout(10000);
+                
                 DataOutputStream wr = new DataOutputStream(con.getOutputStream());
                 wr.writeBytes(postBody);
                 wr.flush();
@@ -33,6 +38,9 @@ public class HttpUtils {
 
                 return FileUtils.readStream(con.getInputStream());
 
+            } catch (SocketTimeoutException e) {
+                System.out.println("Requesting " + url + " TIMEOUT.");
+                return "TIMEOUT";
             } catch (Exception e) {
                 System.out.println(e);
                 e.printStackTrace();
