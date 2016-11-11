@@ -24,7 +24,7 @@ public class HttpUtils {
                 // Send post request
                 con.setDoOutput(true);
                 
-                // Set timeout to 5 seconds
+                // Set timeout to 10 seconds
                 con.setConnectTimeout(10000);
                 
                 DataOutputStream wr = new DataOutputStream(con.getOutputStream());
