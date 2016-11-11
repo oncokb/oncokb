@@ -91,6 +91,9 @@ public class IndicatorController {
         IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
         indicatorQuery.setQuery(query);
 
+        if (query == null) {
+            return indicatorQuery;
+        }
         Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
             GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
         indicatorQuery.setGeneExist(gene == null ? false : true);
@@ -99,9 +102,12 @@ public class IndicatorController {
             // Gene summary
             indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
 
-            Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
-                gene, query.getAlteration(), query.getConsequence(),
-                query.getProteinStart(), query.getProteinEnd());
+            Alteration alt = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+
+            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+
+            Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
             Set<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             Set<Alteration> alleles = new HashSet<>();
@@ -110,10 +116,8 @@ public class IndicatorController {
             if (relevantAlterations == null || relevantAlterations.size() == 0) {
                 indicatorQuery.setVariantExist(false);
 
-                Alteration alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
-                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-                if (alteration != null) {
-                    alleles = AlterationUtils.getAlleleAlterations(alteration);
+                if (alt != null) {
+                    alleles = AlterationUtils.getAlleleAlterations(alt);
                 }
             } else {
                 indicatorQuery.setVariantExist(true);
@@ -124,17 +128,19 @@ public class IndicatorController {
                 }
             }
 
+            indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), alt.getProteinStart(), alt.getProteinEnd()));
+
             if (query.getTumorType() != null) {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
                 // Tumor type summary
-                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query.getAlteration(),
+                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, alt.getAlteration(),
                     new ArrayList<Alteration>(relevantAlterations), query.getTumorType(),
                     new HashSet<OncoTreeType>(oncoTreeTypes)));
             }
 
             // Mutation summary
             indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
-                new ArrayList<Alteration>(relevantAlterations), query.getAlteration(), false));
+                new ArrayList<Alteration>(relevantAlterations), alt.getAlteration(), false));
 
             indicatorQuery.setVUS(isVUS(
                 EvidenceUtils.getRelevantEvidences(query, source,

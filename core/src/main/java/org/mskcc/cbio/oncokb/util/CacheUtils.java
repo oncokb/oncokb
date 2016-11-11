@@ -241,6 +241,10 @@ public class CacheUtils {
 
             System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current));
             current = MainUtils.getCurrentTimestamp();
+            
+            HotspotUtils.getHotspots();
+            System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
         } catch (Exception e) {
             System.out.println(e);
         }

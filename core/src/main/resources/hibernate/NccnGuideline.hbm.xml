@@ -21,12 +21,12 @@
     <property name="category" type="string">
       <column name="category"/>
     </property>
-    <property name="shortDescription" type="string">
-      <column length="65535" name="short_description"/>
-    </property>
     <property name="description" type="string">
       <column length="65535" name="description"/>
     </property>
+      <property name="additionalInfo" type="string">
+          <column length="65535" name="additional_info"/>
+      </property>
   </class>
   
   <query name="findNccnGuideline">

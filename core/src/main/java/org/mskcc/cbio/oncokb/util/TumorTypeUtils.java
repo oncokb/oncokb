@@ -4,10 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.OncoTreeType;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -116,7 +113,7 @@ public class TumorTypeUtils {
     public static List<OncoTreeType> getOncoTreeCancerTypes(List<String> cancerTypes) {
         List<OncoTreeType> mapped = new ArrayList<>();
 
-        if(cancerTypes != null) {
+        if (cancerTypes != null) {
             for (String cancerType : cancerTypes) {
                 for (OncoTreeType oncoTreeType : allOncoTreeCancerTypes) {
                     if (cancerType.equalsIgnoreCase(oncoTreeType.getCancerType())) {
@@ -190,7 +187,7 @@ public class TumorTypeUtils {
     public static List<OncoTreeType> getOncoTreeSubtypesByCode(List<String> codes) {
         List<OncoTreeType> mapped = new ArrayList<>();
 
-        if(codes != null) {
+        if (codes != null) {
             for (String code : codes) {
                 for (OncoTreeType oncoTreeType : allOncoTreeSubtypes) {
                     if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
@@ -350,7 +347,7 @@ public class TumorTypeUtils {
         }
 
         OncoTreeType allTumor = getMappedOncoTreeAllTumor();
-        if(allTumor != null) {
+        if (allTumor != null) {
             ret.add(allTumor);
         }
         return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
@@ -364,10 +361,10 @@ public class TumorTypeUtils {
         if (mapped == null) {
             mapped = getOncoTreeSubtypeByName(tumorType);
         }
-        
+
         if (mapped == null) {
             mapped = getOncoTreeCancerType(tumorType);
-        }else {
+        } else {
             //Also include the cancer type into relevant types
             types.add(getOncoTreeCancerType(mapped.getCancerType()));
         }
@@ -428,11 +425,11 @@ public class TumorTypeUtils {
         }
 
         cbioTumorType = cbioTumorType == null ? null : cbioTumorType.toLowerCase();
-        
+
         if (cbioTumorType == null) {
             return new LinkedHashSet<>();
         }
-        
+
         List<OncoTreeType> ret = cbioTumorTypeMap.get(cbioTumorType);
 
         if (ret == null || ret.size() == 0) {
@@ -441,12 +438,12 @@ public class TumorTypeUtils {
                 ret = new ArrayList<>(oncoTreeTypes);
             }
         }
-        
+
         OncoTreeType allTumor = getMappedOncoTreeAllTumor();
-        if(allTumor != null) {
+        if (allTumor != null) {
             ret.add(allTumor);
         }
-        
+
         return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
     }
 
@@ -475,7 +472,6 @@ public class TumorTypeUtils {
         List<OncoTreeType> subtypes = new ArrayList<>();
         try {
             String url = ONCO_TREE_API_URL + "tumorTypes/search";
-            URL obj = new URL(url);
             JSONObject postData = new JSONObject();
             postData.put("version", "oncokb");
 
@@ -489,42 +485,29 @@ public class TumorTypeUtils {
             }
             postData.put("queries", queries);
 
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            String response = HttpUtils.postRequest(url, postData.toString());
+            if(response != null && !response.equals("TIMEOUT")) {
+                Map map = JsonUtils.jsonToMap(response);
 
-            //add reuqest header
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(postData.toString());
-            wr.flush();
-            wr.close();
-
-            int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
-
-            Map map = JsonUtils.jsonToMap(FileUtils.readStream(con.getInputStream()));
-
-            if (map.get("data") != null) {
-                for (List<Map<String, Object>> queryResult : (List<List<Map<String, Object>>>) map.get("data")) {
-                    for (Map<String, Object> datum : queryResult) {
-                        OncoTreeType subtype = new OncoTreeType();
-                        Map<String, String> mainType = (Map<String, String>) datum.get("mainType");
-                        if (mainType != null) {
-                            subtype.setCancerType(mainType.get("name"));
+                if (map.get("data") != null) {
+                    for (List<Map<String, Object>> queryResult : (List<List<Map<String, Object>>>) map.get("data")) {
+                        for (Map<String, Object> datum : queryResult) {
+                            OncoTreeType subtype = new OncoTreeType();
+                            Map<String, String> mainType = (Map<String, String>) datum.get("mainType");
+                            if (mainType != null) {
+                                subtype.setCancerType(mainType.get("name"));
+                            }
+                            subtype.setSubtype((String) datum.get("name"));
+                            subtype.setCode((String) datum.get("code"));
+                            subtype.setLevel((String) datum.get("level"));
+                            subtype.setTissue((String) datum.get("tissue"));
+                            subtypes.add(subtype);
                         }
-                        subtype.setSubtype((String) datum.get("name"));
-                        subtype.setCode((String) datum.get("code"));
-                        subtype.setLevel((String) datum.get("level"));
-                        subtype.setTissue((String) datum.get("tissue"));
-                        subtypes.add(subtype);
                     }
                 }
+            }else {
+                System.out.println("Error access OncoTree Service.");
             }
-
         } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
