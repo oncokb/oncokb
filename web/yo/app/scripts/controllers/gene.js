@@ -2350,23 +2350,42 @@ angular.module('oncokbApp')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + (tumorTypes.length === 0 ? "\tNo cancer type" : "\tHas cancer type"));
                                     //     // mutation.oncogenic.setText('');
                                     // }
-                                    // if(mutation.oncogenic_eStatus.get('curated')===false && mutation.name_eStatus.get('obsolete') !== 'true') {
+                                    // if (mutation.oncogenic_eStatus.get('curated') === false && mutation.name_eStatus.get('obsolete') !== 'true') {
                                     //     console.log("Red hand\t" + gene.name.getText() + '\t' + mutation.name.getText());
                                     // }
-                                    // if(mutation.name_eStatus.get('obsolete') === 'true') {
+                                    // if (mutation.name_eStatus.get('obsolete') === 'true') {
                                     //     console.log("Obsoleted\t" + gene.name.getText() + '\t' + mutation.name.getText());
                                     // }
-                                    
+
+                                    // if (!isUndefinedOrEmpty(oncogenic) && !isUndefinedOrEmpty(mutationEffect)) {
+                                    //     var lOncogenic = oncogenic.toLowerCase();
+                                    //     var lME = mutationEffect.toLowerCase();
+                                    //     if (lOncogenic === 'unknown') {
+                                    //         if (lME === 'unknown') {
+                                    //             console.log("Both Unknown\t" + gene.name.getText() + '\t' + mutation.name.getText() + '\t' + oncogenic + '\t' + mutationEffect);
+                                    //         } else {
+                                    //             console.log("Oncogenic Unknown\t" + gene.name.getText() + '\t' + mutation.name.getText() + '\t' + oncogenic + '\t' + mutationEffect);
+                                    //         }
+                                    //     } else if (lME === 'unknown') {
+                                    //         console.log("ME Unknown\t" + gene.name.getText() + '\t' + mutation.name.getText() + '\t' + oncogenic + '\t' + mutationEffect);
+                                    //     }
+                                    // }else {
+                                    //     console.log("Both Empty\t" + gene.name.getText() + '\t' + mutation.name.getText() + '\t' + oncogenic + '\t' + mutationEffect);
+                                    // }
                                     // if(mutationName.indexOf(',') !== -1 || mutationName.indexOf('/') !== -1 ) {
                                     //     console.log("String mutation\t" + gene.name.getText() + '\t' + mutation.name.getText());
                                     // }
                                     //
-                                    // if(mutationName.indexOf('Fusions') !== -1 ) {
-                                    //     console.log("Fusions\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // if (isUndefinedOrEmpty(mutationName)) {
+                                    //     console.error('Mutation Name is empty');
+                                    // } else {
+                                    //     if (mutationName.toLowerCase().indexOf('fusion') !== -1) {
+                                    //         console.log("Fusions\t" + gene.name.getText() + '\t' + mutation.name.getText() + '\t' + oncogenic + '\t' + mutationEffect);
+                                    //     }
                                     // }
                                     //
-                                    // if(mutationName.indexOf('Truncat') !== -1 ) {
-                                    //     console.log("Truncating mutations\t" + gene.name.getText() + '\t' + mutation.name.getText());
+                                    // if (mutationName.indexOf('Truncat') !== -1) {
+                                    //     console.log("Truncating mutations\t" + gene.name.getText() + '\t' + mutation.name.getText() + '\t' + oncogenic + '\t' + mutationEffect);
                                     // }
                                     //
                                     // if(mutationName.indexOf('Delet') !== -1 ) {
@@ -2405,35 +2424,35 @@ angular.module('oncokbApp')
                                     //     mutation.name_eStatus.get('obsolete') === 'false')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\t" + category.join(''));
 
-                                    mutation.tumors.asArray().forEach(function(tumor) {
-                                        tumor.TI.asArray().forEach(function(ti) {
-                                            ti.treatments.asArray().forEach(function(treatment) {
-                                                // if (treatment.level.getText() === 'R1') {
-                                            var result = [gene.name.getText(), 
-                                                mutation.name.getText(), 
-                                                MainUtils.getCancerTypesName(tumor.cancerTypes), 
-                                                treatment.name.getText(),
-                                                treatment.indication.getText(),
-                                                treatment.level.getText(),
-                                                getString(treatment.short.getText()),
-                                                getString(treatment.description.getText()),
-                                                treatment.name_eStatus.get('obsolete')
-                                            ];
-                                            console.log(result.join('\t'));
-                                                // }
-                                            })
-                                        });
-                                    });
+                                    // mutation.tumors.asArray().forEach(function(tumor) {
+                                    //     tumor.TI.asArray().forEach(function(ti) {
+                                    //         ti.treatments.asArray().forEach(function(treatment) {
+                                    //             // if (treatment.level.getText() === 'R1') {
+                                    //         var result = [gene.name.getText(), 
+                                    //             mutation.name.getText(), 
+                                    //             MainUtils.getCancerTypesName(tumor.cancerTypes), 
+                                    //             treatment.name.getText(),
+                                    //             treatment.indication.getText(),
+                                    //             treatment.level.getText(),
+                                    //             getString(treatment.short.getText()),
+                                    //             getString(treatment.description.getText()),
+                                    //             treatment.name_eStatus.get('obsolete')
+                                    //         ];
+                                    //         console.log(result.join('\t'));
+                                    //             // }
+                                    //         })
+                                    //     });
+                                    // });
                                 });
                                 // model.endCompoundOperation();
                                 $timeout(function () {
                                     changeData(++index, callback);
-                                }, 500, false);
+                                }, 100, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
                                     changeData(++index, callback);
-                                }, 500, false);
+                                }, 100, false);
                             }
                         }
                     });
