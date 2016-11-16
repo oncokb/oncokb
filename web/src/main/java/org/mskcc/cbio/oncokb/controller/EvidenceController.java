@@ -18,9 +18,9 @@ import java.util.*;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/legacy-api/evidence.json")
+//@RequestMapping(value = "/legacy-api/evidence.json")
 public class EvidenceController {
-    @RequestMapping(method = RequestMethod.GET)
+//    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     List<List<Evidence>> getEvidence(
@@ -61,7 +61,7 @@ public class EvidenceController {
         return evidences;
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+//    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     List<EvidenceQueryRes> getEvidence(
