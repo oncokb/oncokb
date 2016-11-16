@@ -89,6 +89,7 @@ public class EvidenceController {
         return result;
     }
 
+    // TODO: support hugoSymbol/entrezGeneId fusion without primary gene, see indicator controller
     private List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
                                                   String geneStatus, String source,
                                                   Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {

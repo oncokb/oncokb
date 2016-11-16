@@ -212,6 +212,10 @@ public class CacheUtils {
             genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
             System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current));
             current = MainUtils.getCurrentTimestamp();
+
+            setAllAlterations();
+            System.out.println("Cache all alterations: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
             
             Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
             System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current));
@@ -478,6 +482,18 @@ public class CacheUtils {
             genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         }
         return genes;
+    }
+    
+    public static void setAllAlterations() {
+        List<Alteration> allAlterations = ApplicationContextSingleton.getAlterationBo().findAll();
+        
+        for(Alteration alteration : allAlterations) {
+            Gene gene = alteration.getGene();
+            if(!alterations.containsKey(gene.getEntrezGeneId())) {
+                alterations.put(gene.getEntrezGeneId(), new HashSet<Alteration>());
+            }
+            alterations.get(gene.getEntrezGeneId()).add(alteration);
+        }
     }
 
     public static Set<Evidence> getEvidences(Gene gene) {
