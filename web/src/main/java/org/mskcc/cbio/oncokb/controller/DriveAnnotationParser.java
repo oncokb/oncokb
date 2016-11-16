@@ -121,7 +121,7 @@ public class DriveAnnotationParser {
 
                 // Don't save any gene not in the gene list.
                 if (gene == null) {
-                    System.out.println("Gene is not in 417 genes list.");
+                    System.out.println("Gene is not in 418 genes list.");
 //                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
 //                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
 //                    if (gene == null) {
