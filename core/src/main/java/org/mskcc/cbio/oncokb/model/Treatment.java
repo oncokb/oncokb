@@ -7,25 +7,33 @@ import java.util.Set;
 
 
 /**
- * 
  * @author jgao
  */
 public class Treatment implements java.io.Serializable {
 
 
-    private Integer treatmentId;
+    private Integer id;
+    private String uuid;
     private Set<Drug> drugs = new HashSet<Drug>(0);
     private Set<String> approvedIndications = new HashSet<String>(0);
 
     public Treatment() {
     }
 
-    public Integer getTreatmentId() {
-        return treatmentId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setTreatmentId(Integer treatmentId) {
-        this.treatmentId = treatmentId;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Set<Drug> getDrugs() {
@@ -66,8 +74,7 @@ public class Treatment implements java.io.Serializable {
         return true;
     }
 
-    
-    
+
 }
 
 

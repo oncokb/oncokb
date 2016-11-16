@@ -3,11 +3,9 @@
 <!--this file is not used for config hibernate. please use /spring/beans/Hibernate.xml-->
 <hibernate-configuration>
   <session-factory>
-    <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
     <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/oncokb</property>
     <property name="hibernate.connection.username">root</property>
-    <property name="hibernate.show_sql">true</property>
     <property name="hibernate.dialect">org.mskcc.cbio.oncokb.util.UTF8MySQLDialect</property>
     <property name="hibernate.show_sql">false</property>
     <property name="hibernate.connection.useUnicode">true</property>
@@ -15,7 +13,7 @@
     <property name="hibernate.connection.charSet">utf8</property>
     <property name="hibernate.current_session_context_class">thread</property>
       <property name="hibernate.connection.release_mode">after_statement</property>
-<!--    <property name="hibernate.hbm2ddl.auto">create</property>-->
+    <property name="hibernate.hbm2ddl.auto">create</property>
     <!--<property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>-->
     <!--2nd level caching-->
     <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
@@ -32,6 +30,5 @@
     <mapping resource="hibernate/Treatment.hbm.xml"/>
     <mapping resource="hibernate/Gene.hbm.xml"/>
     <mapping resource="hibernate/VariantConsequence.hbm.xml"/>
-    <mapping resource="hibernate/Status.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

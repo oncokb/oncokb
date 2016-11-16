@@ -3974,21 +3974,6 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.setGeneStatus = function () {
-                var newStatus = {
-                    geneId: $scope.gene.name.text,
-                    status: $scope.gene.status.text
-                };
-                Documents.updateStatus(newStatus);
-                DatabaseConnector.setGeneStatus(newStatus).then(function (result) {
-                    if (result && result.error) {
-                        console.error(result);
-                    } else {
-                        console.info(result);
-                    }
-                });
-            };
-
             $scope.generatePDF = function () {
                 jspdf.create(stringUtils.getGeneData(this.gene, true, true));
             };
@@ -4581,7 +4566,6 @@ angular.module('oncokbApp')
             $scope.checkboxes = {
                 'oncogenic': ['Yes', 'Likely', 'Likely Neutral', 'Unknown'],
                 'mutation_effect': ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Unknown'],
-                'geneStatus': ['Complete', 'Proceed with caution', 'Not ready'],
                 'hotspot': ['TRUE', 'FALSE'],
                 'TSG': ['Tumor Suppressor'],
                 'OCG': ['Oncogene']

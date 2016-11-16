@@ -204,20 +204,9 @@ public class EvidenceUtils {
 
                 if (query.getAlterations() != null) {
                     for (Alteration alt : query.getAlterations()) {
-                        int altId = alt.getAlterationId();
-
-//                    if (geneStatus == null || geneStatus == "") {
-                        geneStatus = "all";
-//                    }
-                        geneStatus = geneStatus.toLowerCase();
-                        if (geneStatus.equals("all") || query.getGene().getStatus().toLowerCase().equals(geneStatus)) {
-                            if (!alterations.containsKey(altId)) {
-                                alterations.put(altId, alt);
-                            }
-                        } else {
-                            if (!alterationsME.containsKey(altId)) {
-                                alterationsME.put(altId, alt);
-                            }
+                        int altId = alt.getId();
+                        if (!alterations.containsKey(altId)) {
+                            alterations.put(altId, alt);
                         }
                     }
                 }
@@ -586,16 +575,16 @@ public class EvidenceUtils {
                 if (checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
                     Set<Integer> evidenceIds = new HashSet<>();
                     for (Evidence evidence : highestEvis) {
-                        evidenceIds.add(evidence.getEvidenceId());
+                        evidenceIds.add(evidence.getId());
                     }
                     Set<Evidence> originalEvis = EvidenceUtils.getEvidenceByEvidenceIds(evidenceIds);
                     Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis);
                     Set<Integer> filteredIds = new HashSet<>();
                     for (Evidence evidence : highestOriginalEvis) {
-                        filteredIds.add(evidence.getEvidenceId());
+                        filteredIds.add(evidence.getId());
                     }
                     for (Evidence evidence : highestEvis) {
-                        if (filteredIds.contains(evidence.getEvidenceId())) {
+                        if (filteredIds.contains(evidence.getId())) {
                             filtered.add(evidence);
                             // Only add one
                             break;
@@ -722,7 +711,7 @@ public class EvidenceUtils {
 
 
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
-                                                        Boolean highestLevelOnly) {
+                                                         Boolean highestLevelOnly) {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         for (EvidenceQueryRes query : evidenceQueries) {
@@ -752,7 +741,7 @@ public class EvidenceUtils {
                     if (recordMatchHighestOncogenicity != null) {
                         Oncogenicity alleleOncogenicity = MainUtils.setToAlleleOncogenicity(highestOncogenic);
                         Evidence evidence = new Evidence();
-                        evidence.setEvidenceId(recordMatchHighestOncogenicity.getEvidenceId());
+                        evidence.setId(recordMatchHighestOncogenicity.getId());
                         evidence.setGene(recordMatchHighestOncogenicity.getGene());
                         evidence.setEvidenceType(EvidenceType.ONCOGENIC);
                         evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getDescription());
@@ -780,7 +769,7 @@ public class EvidenceUtils {
 
                     Evidence mutationEffect = new Evidence();
                     Evidence example = mutationEffectsEvis.iterator().next();
-                    mutationEffect.setEvidenceId(example.getEvidenceId());
+                    mutationEffect.setId(example.getId());
                     mutationEffect.setGene(example.getGene());
                     mutationEffect.setEvidenceType(EvidenceType.MUTATION_EFFECT);
                     mutationEffect.setKnownEffect(MainUtils.getAlleleConflictsMutationEffect(effects));

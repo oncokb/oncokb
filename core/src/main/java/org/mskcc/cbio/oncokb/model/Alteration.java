@@ -12,7 +12,8 @@ import java.util.Set;
 public class Alteration implements java.io.Serializable {
 
     @JsonIgnore
-    private Integer alterationId;
+    private Integer id;
+    private Integer uuid;
     private Gene gene;
     @JsonIgnore
     private AlterationType alterationType;
@@ -24,8 +25,7 @@ public class Alteration implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String variantResidues;
-    private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
-    private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);;
+    private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);
 
     public Set<PortalAlteration> getPortalAlterations() {
         return portalAlterations;
@@ -34,24 +34,24 @@ public class Alteration implements java.io.Serializable {
     public void setPortalAlterations(Set<PortalAlteration> portalAlterations) {
         this.portalAlterations = portalAlterations;
     }
+
     public Alteration() {
     }
 
-    public Set<ClinicalTrial> getClinicalTrials() {
-        return clinicalTrials;
+    public Integer getId() {
+        return id;
     }
 
-    public void setClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
-        this.clinicalTrials = clinicalTrials;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public Integer getAlterationId() {
-        return this.alterationId;
+    public Integer getUuid() {
+        return uuid;
     }
 
-
-    public void setAlterationId(Integer alterationId) {
-        this.alterationId = alterationId;
+    public void setUuid(Integer uuid) {
+        this.uuid = uuid;
     }
 
     public Gene getGene() {

@@ -109,50 +109,6 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
-            function getGeneStatus(params) {
-                var deferred = $q.defer();
-                if (dataFromFile) {
-                    GeneStatus.getFromFile(params)
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function(result) {
-                            deferred.reject(result);
-                        });
-                } else {
-                    GeneStatus.getFromServer(params)
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function(result) {
-                            deferred.reject(result);
-                        });
-                }
-                return deferred.promise;
-            }
-
-            function setGeneStatus(params) {
-                var deferred = $q.defer();
-                if (dataFromFile) {
-                    GeneStatus.setToFile(params)
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function(result) {
-                            deferred.reject(result);
-                        });
-                } else {
-                    GeneStatus.setToServer(params)
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function(result) {
-                            deferred.reject(result);
-                        });
-                }
-                return deferred.promise;
-            }
-
             function getAllAlteration(callback, timestamp) {
                 if (dataFromFile) {
                     Alteration.getFromFile()
@@ -629,8 +585,6 @@ angular.module('oncokbApp')
                 'getAllTumorType': getAllTumorType,
                 'updateGene': updateGene,
                 'sendEmail': sendEmail,
-                'setGeneStatus': setGeneStatus,
-                'getGeneStatus': getGeneStatus,
                 'getHotspotList': getHotspotList,
                 'getAutoMutationList': getAutoMutationList,
                 'getCacheStatus': getCacheStatus,

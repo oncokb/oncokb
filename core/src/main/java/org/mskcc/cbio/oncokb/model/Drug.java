@@ -12,13 +12,12 @@ import java.util.Set;
  */
 public class Drug implements java.io.Serializable {
 
-   
+
     @JsonIgnore
-    private Integer drugId;
+    private Integer id;
+    private String uuid;
     private String drugName;
     private Set<String> synonyms = new HashSet<String>(0);
-    @JsonIgnore
-    private Boolean fdaApproved;
     private Set<String> atcCodes;
     @JsonIgnore
     private String description;
@@ -30,20 +29,25 @@ public class Drug implements java.io.Serializable {
         this.drugName = drugName;
     }
 
-
-    public Integer getDrugId() {
-        return this.drugId;
+    public Integer getId() {
+        return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public void setDrugId(Integer drugId) {
-        this.drugId = drugId;
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getDrugName() {
         return this.drugName;
     }
-
 
     public void setDrugName(String drugName) {
         this.drugName = drugName;
@@ -53,20 +57,9 @@ public class Drug implements java.io.Serializable {
         return this.synonyms;
     }
 
-
     public void setSynonyms(Set<String> synonyms) {
         this.synonyms = synonyms;
     }
-
-    public Boolean isFdaApproved() {
-        return this.fdaApproved;
-    }
-
-
-    public void setFdaApproved(Boolean fdaApproved) {
-        this.fdaApproved = fdaApproved;
-    }
-
 
     @Override
     public int hashCode() {

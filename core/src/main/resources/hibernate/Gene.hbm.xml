@@ -15,15 +15,15 @@
         <property name="name" type="string">
             <column name="name" length="500" not-null="true" />
         </property>
-        <property name="status" type="string">
+        <property name="TSG" type="boolean">
+            <column name="TSG" not-null="false" />
+        </property>
+        <property name="oncogene" type="boolean">
+            <column name="oncogene" not-null="false" />
+        </property>
+        <property name="curatedIsoform" type="string">
             <column name="status" length="100" not-null="false"/>
         </property>
-        <set name="geneLabels" table="gene_label" lazy="false">
-            <key>
-                <column name="entrez_gene_id" not-null="true" />
-            </key>
-            <element column="label" type="string"></element> 
-        </set>
         <set name="geneAliases" table="gene_alias" lazy="false">
             <key>
                 <column name="entrez_gene_id" not-null="true" />

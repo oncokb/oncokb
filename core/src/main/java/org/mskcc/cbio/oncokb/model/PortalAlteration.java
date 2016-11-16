@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class PortalAlteration {
 
-    private Integer portalAlterationID;
+    private Integer id;
     private String cancerType;
     private String cancerStudy;
     private String sampleId;
@@ -46,12 +46,13 @@ public class PortalAlteration {
         proteinEndPosition = pa.proteinEndPosition;
         alterationType = pa.alterationType;
     }
-    public Integer getPortalAlterationID() {
-        return portalAlterationID;
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setPortalAlterationID(Integer portalAlterationID) {
-        this.portalAlterationID = portalAlterationID;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getCancerType() {

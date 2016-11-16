@@ -59,10 +59,6 @@ public final class ApplicationContextSingleton {
         return DrugBo.class.cast(getApplicationContext().getBean("drugBo"));
     }
 
-    public static StatusBo getStatusBo() {
-        return StatusBo.class.cast(getApplicationContext().getBean("statusBo"));
-    }
-
     public static PortalAlterationBo getPortalAlterationBo() {
         return PortalAlterationBo.class.cast(getApplicationContext().getBean("portalAlterationBo"));
     }

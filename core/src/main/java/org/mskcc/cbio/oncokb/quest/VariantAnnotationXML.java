@@ -431,12 +431,6 @@ public final class VariantAnnotationXML {
         }
         sb.append("</phase>\n");
 
-        for (Alteration alteration : trial.getAlterations()) {
-            sb.append(indent).append("    <biomarker>");
-            sb.append(StringEscapeUtils.escapeXml(alteration.toString()));
-            sb.append("</biomarker>\n");
-        }
-
         for (Drug drug : trial.getDrugs()) {
             sb.append(indent).append("    <intervention>");
             sb.append(StringEscapeUtils.escapeXml(drug.getDrugName()));

@@ -64,7 +64,6 @@ public class PiHelperDrugImporter {
             }
             drug.setDescription(description);
             drug.setAtcCodes(new HashSet<String>(Arrays.asList(atcCodes.split(";"))));
-            drug.setFdaApproved(Boolean.valueOf(fdaApproved));
             
             drugBo.save(drug);
         }

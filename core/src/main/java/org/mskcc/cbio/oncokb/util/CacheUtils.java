@@ -323,7 +323,7 @@ public class CacheUtils {
                 geneEvidences = evidences.get(entrezGeneId);
             }
             for (Evidence evidence : geneEvidences) {
-                if (mappedEntrez.contains(evidence.getEvidenceId())) {
+                if (mappedEntrez.contains(evidence.getId())) {
                     mappedEvidences.add(evidence);
                 }
             }
@@ -367,7 +367,7 @@ public class CacheUtils {
         }
         Set<Integer> mappedEvidenceIds = new HashSet<>();
         for (Evidence evidence : evidences) {
-            mappedEvidenceIds.add(evidence.getEvidenceId());
+            mappedEvidenceIds.add(evidence.getId());
         }
         relevantEvidences.get(entrezGeneId).put(variant, mappedEvidenceIds);
     }
@@ -424,7 +424,7 @@ public class CacheUtils {
             Set<Alteration> mappedAlts = new HashSet<>();
             Set<Alteration> geneAlts = alterations.get(entrezGeneId);
             for (Alteration alteration : geneAlts) {
-                if (mappedAltsIds.contains(alteration.getAlterationId())) {
+                if (mappedAltsIds.contains(alteration.getId())) {
                     mappedAlts.add(alteration);
                 }
             }
@@ -445,7 +445,7 @@ public class CacheUtils {
         }
         Set<Integer> mappedAltsIds = new HashSet<>();
         for (Alteration alteration : alts) {
-            mappedAltsIds.add(alteration.getAlterationId());
+            mappedAltsIds.add(alteration.getId());
         }
         relevantAlterations.get(entrezGeneId).put(variant, mappedAltsIds);
     }
@@ -526,7 +526,7 @@ public class CacheUtils {
         if(ids != null) {
             for(Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
                 for(Evidence evidence : map.getValue()) {
-                    if(ids.contains(evidence.getEvidenceId())) {
+                    if(ids.contains(evidence.getId())) {
                         mappedEvis.add(evidence);
                     }
                 }

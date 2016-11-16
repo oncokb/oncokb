@@ -18,7 +18,6 @@ public class ShortGeneUtils {
             shortGene.setHugoSymbol(gene.getHugoSymbol());
             shortGene.setName(gene.getName());
             shortGene.setGeneAliases(gene.getGeneAliases());
-            shortGene.setGeneLabels(gene.getGeneLabels());
             return shortGene;
         } else {
             return null;

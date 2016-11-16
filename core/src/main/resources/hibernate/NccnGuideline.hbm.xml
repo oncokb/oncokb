@@ -1,35 +1,38 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class name="org.mskcc.cbio.oncokb.model.NccnGuideline" table="nccn_guideline">
-    <cache usage="nonstrict-read-write"/>
-    <id name="nccnGuidelineId" type="java.lang.Integer">
-      <column name="nccn_guideline_id"/>
-      <generator class="identity"/>
-    </id>
-    <property name="disease" type="string">
-      <column name="disease"/>
-    </property>
-    <property name="pages" type="string">
-      <column name="pages"/>
-    </property>
-    <property name="version" type="string">
-      <column name="version"/>
-    </property>
-    <property name="category" type="string">
-      <column name="category"/>
-    </property>
-    <property name="description" type="string">
-      <column length="65535" name="description"/>
-    </property>
-      <property name="additionalInfo" type="string">
-          <column length="65535" name="additional_info"/>
-      </property>
-  </class>
-  
-  <query name="findNccnGuideline">
+    <class name="org.mskcc.cbio.oncokb.model.NccnGuideline" table="nccn_guideline">
+        <cache usage="nonstrict-read-write"/>
+        <id name="id" type="java.lang.Integer">
+            <column name="id"/>
+            <generator class="identity"/>
+        </id>
+        <property name="uuid" type="string">
+            <column length="40" name="uuid"/>
+        </property>
+        <property name="disease" type="string">
+            <column name="disease"/>
+        </property>
+        <property name="pages" type="string">
+            <column name="pages"/>
+        </property>
+        <property name="version" type="string">
+            <column name="version"/>
+        </property>
+        <property name="category" type="string">
+            <column name="category"/>
+        </property>
+        <property name="description" type="string">
+            <column length="65535" name="description"/>
+        </property>
+        <property name="additionalInfo" type="string">
+            <column length="65535" name="additional_info"/>
+        </property>
+    </class>
+
+    <query name="findNccnGuideline">
         <![CDATA[from NccnGuideline n where n.disease=? and n.version=? and n.pages=?]]>
-  </query>
+    </query>
 </hibernate-mapping>

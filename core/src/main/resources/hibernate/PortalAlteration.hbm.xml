@@ -5,8 +5,8 @@
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncokb.model.PortalAlteration" table="portal_alteration">
         <!--        <cache usage="nonstrict-read-write"/>-->
-        <id name="portalAlterationID" type="java.lang.Integer">
-            <column name="portalAlteration_id" />
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
             <generator class="identity" />
         </id>
 
@@ -48,12 +48,12 @@
 
     </class>
     <query name="findPortalAlterationCountByGene">
-        <![CDATA[select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.portalAlterationID = ap.portalAlterationID and pa.gene=? group by pa.cancerStudy]]>
+        <![CDATA[select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.id and pa.gene=? group by pa.cancerStudy]]>
     </query>
     <query name="findPortalAlterationCount">
         <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy]]>
     </query>
     <query name="findMutationMapperData">
-        <![CDATA[select distinct pa from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.portalAlterationID = ap.portalAlterationID and pa.gene=?]]>
+        <![CDATA[select distinct pa from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.portalAlterationID and pa.gene=?]]>
     </query>
 </hibernate-mapping>
