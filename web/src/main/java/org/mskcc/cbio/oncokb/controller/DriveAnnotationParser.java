@@ -119,19 +119,20 @@ public class DriveAnnotationParser {
             if (hugo != null) {
                 Gene gene = geneBo.findGeneByHugoSymbol(hugo);
 
-
+                // Don't save any gene not in the gene list.
                 if (gene == null) {
-                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
-                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
-                    if (gene == null) {
-//                    throw new RuntimeException("Could not find gene "+hugo+" either.");
-                        System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
-                    } else {
-                        if (status != null) {
-                            gene.setStatus(status);
-                        }
-                        geneBo.save(gene);
-                    }
+                    System.out.println("Gene is not in 417 genes list.");
+//                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
+//                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
+//                    if (gene == null) {
+////                    throw new RuntimeException("Could not find gene "+hugo+" either.");
+//                        System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+//                    } else {
+//                        if (status != null) {
+//                            gene.setStatus(status);
+//                        }
+//                        geneBo.save(gene);
+//                    }
                 } else {
                     if (status != null) {
                         gene.setStatus(status);

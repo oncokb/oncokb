@@ -28,6 +28,7 @@ public class IndicatorController {
         @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,
+        @RequestParam(value = "alterationType", required = false) String alterationType,
         @RequestParam(value = "tumorType", required = false) String tumorType,
         @RequestParam(value = "consequence", required = false) String consequence,
         @RequestParam(value = "proteinStart", required = false) String proteinStart,
@@ -46,6 +47,7 @@ public class IndicatorController {
         }
         query.setHugoSymbol(hugoSymbol);
         query.setAlteration(alteration);
+        query.setAlterationType(alterationType);
         query.setTumorType(tumorType);
         query.setConsequence(consequence);
         if (proteinStart != null) {
@@ -91,17 +93,63 @@ public class IndicatorController {
         IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
         indicatorQuery.setQuery(query);
 
-        Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
-            GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
-        indicatorQuery.setGeneExist(gene == null ? false : true);
+        Gene gene = null;
+        Set<Alteration> relevantAlterations = new HashSet<>();
+
+        // Deal with fusion without primary gene
+        // TODO: support entrezGeneId fusion
+        if (query.getHugoSymbol() != null
+            && query.getAlterationType() != null &&
+            query.getAlterationType().equalsIgnoreCase("fusion")) {
+            List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
+            Set<String> geneStrsSet = new HashSet<>();
+            if (geneStrsList != null) {
+                geneStrsSet = new HashSet<>(geneStrsList);
+            }
+            if (geneStrsSet.size() == 2) {
+                List<Gene> tmpGenes = new ArrayList<>();
+                for (String geneStr : geneStrsSet) {
+                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
+                    if (tmpGene != null) {
+                        tmpGenes.add(tmpGene);
+                    }
+                }
+                if (tmpGenes.size() > 0) {
+                    query.setAlteration(query.getHugoSymbol() + " fusion");
+                    for (Gene tmpGene : tmpGenes) {
+                        Set<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(
+                            tmpGene, query.getAlteration(), null, null, null
+                        );
+                        if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
+                            gene = tmpGene;
+                            relevantAlterations = tmpRelevantAlts;
+                            break;
+                        }
+                    }
+                    // None of relevant alterations found in both genes.
+                    if (gene == null) {
+                        gene = tmpGenes.get(0);
+                    }
+                }
+            }
+        } else {
+            gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
+                GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
+            relevantAlterations = AlterationUtils.getRelevantAlterations(
+                gene, query.getAlteration(), query.getConsequence(),
+                query.getProteinStart(), query.getProteinEnd());
+
+        }
 
         if (gene != null) {
+            query.setHugoSymbol(gene.getHugoSymbol());
+            query.setEntrezGeneId(gene.getEntrezGeneId());
+
+            indicatorQuery.setGeneExist(true);
+
             // Gene summary
             indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
 
-            Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(
-                gene, query.getAlteration(), query.getConsequence(),
-                query.getProteinStart(), query.getProteinEnd());
             Set<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             Set<Alteration> alleles = new HashSet<>();
@@ -186,7 +234,10 @@ public class IndicatorController {
             }
             indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
             indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
+        } else {
+            indicatorQuery.setGeneExist(false);
         }
+
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
         indicatorQuery.setLastUpdate(MainUtils.getDataVersionDate());
 
