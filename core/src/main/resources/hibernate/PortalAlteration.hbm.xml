@@ -54,6 +54,6 @@
         <![CDATA[select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy]]>
     </query>
     <query name="findMutationMapperData">
-        <![CDATA[select distinct pa from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.portalAlterationID and pa.gene=?]]>
+        <![CDATA[select distinct pa from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.id and pa.gene=?]]>
     </query>
 </hibernate-mapping>

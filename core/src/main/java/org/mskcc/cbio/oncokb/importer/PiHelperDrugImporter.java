@@ -53,16 +53,13 @@ public class PiHelperDrugImporter {
             }
             
             String synonyms = parts[2];
-            String description = parts[3];
             String atcCodes = parts[5];
-            String fdaApproved = parts[6];
             
             Drug drug = new Drug();
             drug.setDrugName(name);
             if (!synonyms.isEmpty()) {
                 drug.setSynonyms(new HashSet<String>(Arrays.asList(synonyms.split(";"))));
             }
-            drug.setDescription(description);
             drug.setAtcCodes(new HashSet<String>(Arrays.asList(atcCodes.split(";"))));
             
             drugBo.save(drug);

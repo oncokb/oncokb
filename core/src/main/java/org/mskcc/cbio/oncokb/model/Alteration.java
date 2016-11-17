@@ -13,6 +13,7 @@ public class Alteration implements java.io.Serializable {
 
     @JsonIgnore
     private Integer id;
+    @JsonIgnore
     private Integer uuid;
     private Gene gene;
     @JsonIgnore
@@ -25,6 +26,7 @@ public class Alteration implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String variantResidues;
+    @JsonIgnore
     private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);
 
     public Set<PortalAlteration> getPortalAlterations() {

@@ -22,7 +22,7 @@
             <column name="oncogene" not-null="false" />
         </property>
         <property name="curatedIsoform" type="string">
-            <column name="status" length="100" not-null="false"/>
+            <column name="curatedIsoform" length="100" not-null="false"/>
         </property>
         <set name="geneAliases" table="gene_alias" lazy="false">
             <key>

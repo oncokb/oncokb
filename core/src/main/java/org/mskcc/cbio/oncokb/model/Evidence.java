@@ -16,6 +16,7 @@ import java.util.Set;
 public class Evidence implements java.io.Serializable {
     @JsonIgnore
     private Integer id;
+    @JsonIgnore
     private String uuid;
     private EvidenceType evidenceType;
 

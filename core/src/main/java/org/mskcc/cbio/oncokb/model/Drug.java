@@ -15,6 +15,7 @@ public class Drug implements java.io.Serializable {
 
     @JsonIgnore
     private Integer id;
+    @JsonIgnore
     private String uuid;
     private String drugName;
     private Set<String> synonyms = new HashSet<String>(0);

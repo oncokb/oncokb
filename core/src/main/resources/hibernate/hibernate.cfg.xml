@@ -13,7 +13,7 @@
     <property name="hibernate.connection.charSet">utf8</property>
     <property name="hibernate.current_session_context_class">thread</property>
       <property name="hibernate.connection.release_mode">after_statement</property>
-    <property name="hibernate.hbm2ddl.auto">create</property>
+    <!--<property name="hibernate.hbm2ddl.auto">create</property>-->
     <!--<property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>-->
     <!--2nd level caching-->
     <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
