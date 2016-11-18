@@ -631,6 +631,27 @@ public class EvidenceUtils {
             return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<Integer>(ids)));
         }
     }
+    
+    public static Set<Evidence> filterEvidenceByKnownEffect(Set<Evidence> evidences, String knownEffect) {
+        if (knownEffect == null) {
+            return null;
+        }
+        Set<Evidence> result = new HashSet<>();
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect().equalsIgnoreCase(knownEffect)) {
+                result.add(evidence);
+            }
+        }
+        return result;
+    }
+
+    public static Set<Evidence> getSensitiveEvidences(Set<Evidence> evidences) {
+        return filterEvidenceByKnownEffect(evidences, "sensitive");
+    }
+
+    public static Set<Evidence> getResistanceEvidences(Set<Evidence> evidences) {
+        return filterEvidenceByKnownEffect(evidences, "resistant");
+    }
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
@@ -794,32 +815,20 @@ public class EvidenceUtils {
             }
 
             if (highestLevelOnly) {
-                query.setEvidences(
-                    new ArrayList<Evidence>(EvidenceUtils.getOnlyHighestLevelEvidences(
-                        new HashSet<Evidence>(query.getEvidences()))));
+                Set<Evidence> allEvidences = new HashSet<>(query.getEvidences());
+                List<Evidence> filteredEvidences = new ArrayList<>();
+
+                // Get highest sensitive evidences
+                Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(allEvidences);
+                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences));
+
+                // Get highest resistance evidences
+                Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(allEvidences);
+                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+
+                query.setEvidences(filteredEvidences);
             }
         }
         return evidenceQueries;
-    }
-
-    public static Set<Evidence> filterEvidenceByKnownEffect(Set<Evidence> evidences, String knownEffect) {
-        if (knownEffect == null) {
-            return null;
-        }
-        Set<Evidence> result = new HashSet<>();
-        for (Evidence evidence : evidences) {
-            if (evidence.getKnownEffect().equalsIgnoreCase(knownEffect)) {
-                result.add(evidence);
-            }
-        }
-        return result;
-    }
-
-    public static Set<Evidence> getSensitiveEvidences(Set<Evidence> evidences) {
-       return filterEvidenceByKnownEffect(evidences, "sensitive");
-    }
-
-    public static Set<Evidence> getResistanceEvidences(Set<Evidence> evidences) {
-        return filterEvidenceByKnownEffect(evidences, "resistant");
     }
 }

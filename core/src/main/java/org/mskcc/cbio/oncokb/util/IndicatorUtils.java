@@ -17,23 +17,72 @@ public class IndicatorUtils {
         IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
         indicatorQuery.setQuery(query);
 
+        Gene gene = null;
+        Set<Alteration> relevantAlterations = new HashSet<>();
+
         if (query == null) {
             return indicatorQuery;
         }
-        Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
-            GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
-        indicatorQuery.setGeneExist(gene == null ? false : true);
+        // Deal with fusion without primary gene
+        // TODO: support entrezGeneId fusion
+        if (query.getHugoSymbol() != null
+            && query.getAlterationType() != null &&
+            query.getAlterationType().equalsIgnoreCase("fusion")) {
+            List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
+            Set<String> geneStrsSet = new HashSet<>();
+            if (geneStrsList != null) {
+                geneStrsSet = new HashSet<>(geneStrsList);
+            }
+            if (geneStrsSet.size() == 2) {
+                List<Gene> tmpGenes = new ArrayList<>();
+                for (String geneStr : geneStrsSet) {
+                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
+                    if (tmpGene != null) {
+                        tmpGenes.add(tmpGene);
+                    }
+                }
+                if (tmpGenes.size() > 0) {
+                    query.setAlteration(query.getHugoSymbol() + " fusion");
+                    for (Gene tmpGene : tmpGenes) {
+                        Alteration alt = AlterationUtils.getAlteration(tmpGene.getHugoSymbol(), query.getAlteration(),
+                            null, null, null, null);
+                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-        if (gene != null) {
-            // Gene summary
-            indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
+                        Set<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(alt);
+                        if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
+                            gene = tmpGene;
+                            relevantAlterations = tmpRelevantAlts;
+                            break;
+                        }
+                    }
+                    // None of relevant alterations found in both genes.
+                    if (gene == null) {
+                        gene = tmpGenes.get(0);
+                    }
+                }
+            }
+        } else {
+            gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
+                GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
 
-            Alteration alt = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
+            Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                 null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
 
             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-            Set<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+            relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+        }
+
+
+        if (gene != null) {
+            query.setHugoSymbol(gene.getHugoSymbol());
+            query.setEntrezGeneId(gene.getEntrezGeneId());
+
+            indicatorQuery.setGeneExist(true);
+
+            // Gene summary
+            indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
+
             Set<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             Set<Alteration> alleles = new HashSet<>();
@@ -42,8 +91,10 @@ public class IndicatorUtils {
             if (relevantAlterations == null || relevantAlterations.size() == 0) {
                 indicatorQuery.setVariantExist(false);
 
-                if (alt != null) {
-                    alleles = AlterationUtils.getAlleleAlterations(alt);
+                Alteration alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
+                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                if (alteration != null) {
+                    alleles = AlterationUtils.getAlleleAlterations(alteration);
                 }
             } else {
                 indicatorQuery.setVariantExist(true);
@@ -54,19 +105,19 @@ public class IndicatorUtils {
                 }
             }
 
-            indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), alt.getProteinStart(), alt.getProteinEnd()));
+            indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), query.getProteinStart(), query.getProteinEnd()));
 
             if (query.getTumorType() != null) {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
                 // Tumor type summary
-                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, alt.getAlteration(),
+                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query.getAlteration(),
                     new ArrayList<Alteration>(relevantAlterations), query.getTumorType(),
                     new HashSet<OncoTreeType>(oncoTreeTypes)));
             }
 
             // Mutation summary
             indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
-                new ArrayList<Alteration>(relevantAlterations), alt.getAlteration(), false));
+                new ArrayList<Alteration>(relevantAlterations), query.getAlteration(), false));
 
             indicatorQuery.setVUS(isVUS(
                 EvidenceUtils.getRelevantEvidences(query, source,
@@ -93,48 +144,33 @@ public class IndicatorUtils {
                                 LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
 
                 if (highestLevelOnly) {
-                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
+                    Set<Evidence> filteredEvis = new HashSet<>();
+                    // Get highest sensitive evidences
+                    Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(treatmentEvidences);
+                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences));
+
+                    // Get highest resistance evidences
+                    Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
+                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+
+                    treatmentEvidences = filteredEvis;
                 }
                 if (treatmentEvidences != null) {
-                    indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
-                    highestLevels = findHighestLevel(treatmentEvidences);
+                    Set<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
+
+                    indicatorQuery.setTreatments(treatments);
+                    highestLevels = findHighestLevel(treatments);
                 }
             } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
                 Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
 
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
-//                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-//                    EvidenceUtils.getEvidence(alleles, MainUtils.getTreatmentEvidenceTypes(),
-//                        (levels != null ?
-//                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-//                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())
-//                    ));
-//                if (highestLevelOnly) {
-//                    treatmentEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(treatmentEvidences);
-//                }
-//                indicatorQuery.setTreatments(getIndicatorQueryTreatments(treatmentEvidences));
-//                highestLevels = findHighestLevel(treatmentEvidences);
-//
-//                LevelOfEvidence sensitive = highestLevels.get("sensitive");
-//                if (sensitive != null) {
-//                    Boolean sameIndication = false;
-//                    if (oncoTreeTypes != null && !oncoTreeTypes.isEmpty()) {
-//                        for (Evidence evidence : treatmentEvidences) {
-//                            if (evidence.getLevelOfEvidence() != null &&
-//                                CollectionUtils.intersection(
-//                                    Collections.singleton(evidence.getOncoTreeType()), oncoTreeTypes).size() > 0) {
-//                                sameIndication = true;
-//                            }
-//                        }
-//                    }
-//
-//                    highestLevels.put("sensitive", LevelUtils.setToAlleleLevel(sensitive, sameIndication));
-//                }
-//                highestLevels.put("resistant", null);
             }
             indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
             indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
+        } else {
+            indicatorQuery.setGeneExist(false);
         }
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
         indicatorQuery.setLastUpdate(MainUtils.getDataVersionDate());
@@ -172,36 +208,24 @@ public class IndicatorUtils {
         return false;
     }
 
-    private static Map<String, LevelOfEvidence> findHighestLevel(Set<Evidence> evidences) {
-        List<LevelOfEvidence> sensitiveLevels = new ArrayList<>();
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_4);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_3B);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_3A);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_2B);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_2A);
-        sensitiveLevels.add(LevelOfEvidence.LEVEL_1);
-
-        List<LevelOfEvidence> resistanceLevels = new ArrayList<>();
-        resistanceLevels.add(LevelOfEvidence.LEVEL_R3);
-        resistanceLevels.add(LevelOfEvidence.LEVEL_R2);
-        resistanceLevels.add(LevelOfEvidence.LEVEL_R1);
-
+    private static Map<String, LevelOfEvidence> findHighestLevel(Set<IndicatorQueryTreatment> treatments) {
         int levelSIndex = -1;
         int levelRIndex = -1;
 
         Map<String, LevelOfEvidence> levels = new HashMap<>();
 
-        if (evidences != null) {
-            for (Evidence evidence : evidences) {
-                if (evidence.getLevelOfEvidence() != null) {
+        if (treatments != null) {
+            for (IndicatorQueryTreatment treatment : treatments) {
+                LevelOfEvidence levelOfEvidence = treatment.getLevel();
+                if (levelOfEvidence != null) {
                     int _index = -1;
-                    if (evidence.getKnownEffect().equalsIgnoreCase("sensitive")) {
-                        _index = sensitiveLevels.indexOf(evidence.getLevelOfEvidence());
+                    if (LevelUtils.isSensitiveLevel(levelOfEvidence)) {
+                        _index = LevelUtils.SENSITIVE_LEVELS.indexOf(levelOfEvidence);
                         if (_index > levelSIndex) {
                             levelSIndex = _index;
                         }
-                    } else if (evidence.getKnownEffect().equalsIgnoreCase("resistant")) {
-                        _index = resistanceLevels.indexOf(evidence.getLevelOfEvidence());
+                    } else if (LevelUtils.isResistanceLevel(levelOfEvidence)) {
+                        _index = LevelUtils.RESISTANCE_LEVELS.indexOf(levelOfEvidence);
                         if (_index > levelRIndex) {
                             levelRIndex = _index;
                         }
@@ -209,8 +233,8 @@ public class IndicatorUtils {
                 }
             }
         }
-        levels.put("sensitive", levelSIndex > -1 ? sensitiveLevels.get(levelSIndex) : null);
-        levels.put("resistant", levelRIndex > -1 ? resistanceLevels.get(levelRIndex) : null);
+        levels.put("sensitive", levelSIndex > -1 ? LevelUtils.SENSITIVE_LEVELS.get(levelSIndex) : null);
+        levels.put("resistant", levelRIndex > -1 ? LevelUtils.RESISTANCE_LEVELS.get(levelRIndex) : null);
         return levels;
     }
 }
