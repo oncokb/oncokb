@@ -24,6 +24,9 @@
         <property name="curatedIsoform" type="string">
             <column name="curatedIsoform" length="100" not-null="false"/>
         </property>
+        <property name="curatedRefSeq" type="string">
+            <column name="curatedRefSeq" length="100" not-null="false"/>
+        </property>
         <set name="geneAliases" table="gene_alias" lazy="false">
             <key>
                 <column name="entrez_gene_id" not-null="true" />

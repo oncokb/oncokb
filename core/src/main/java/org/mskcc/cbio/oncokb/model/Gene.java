@@ -17,6 +17,7 @@ public class Gene implements Serializable {
     private Boolean TSG;
     private Boolean oncogene;
     private String curatedIsoform;
+    private String curatedRefSeq;
 
     private Set<String> geneAliases = new HashSet<String>(0);
 
@@ -96,6 +97,14 @@ public class Gene implements Serializable {
 
     public void setCuratedIsoform(String curatedIsoform) {
         this.curatedIsoform = curatedIsoform;
+    }
+
+    public String getCuratedRefSeq() {
+        return curatedRefSeq;
+    }
+
+    public void setCuratedRefSeq(String curatedRefSeq) {
+        this.curatedRefSeq = curatedRefSeq;
     }
 
     public int hashCode() {
