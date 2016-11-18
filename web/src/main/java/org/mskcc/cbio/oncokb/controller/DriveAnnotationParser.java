@@ -227,6 +227,13 @@ public class DriveAnnotationParser {
             String variantSummary = null;
             String effect = getMutationEffect(mutationObj);
             
+            // If both mutation effect and oncogenicity both unknown, ignore variant.
+            if (oncogenic != null && oncogenic.equals("-1")
+                && effect != null && effect.toLowerCase().equals("inconclusive")
+                && gene.getHugoSymbol().equals("EGFR")) {
+                return;
+            }
+            
             System.out.println("##    Oncogenicity Summary");
             if (mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
                 variantSummary = mutationObj.getString("shortSummary");
