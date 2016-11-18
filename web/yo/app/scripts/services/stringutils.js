@@ -1140,6 +1140,7 @@ angular.module('oncokbApp')
             getVUSData: getVUSData,
             isUndefinedOrEmpty: isUndefinedOrEmpty,
             stringObject: stringObject,
-            getVUSFullData: getVUSFullData
+            getVUSFullData: getVUSFullData,
+            getTextString: getString
         };
     });
