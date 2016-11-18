@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +16,7 @@ public class Gene implements Serializable {
     private int entrezGeneId;
     private String hugoSymbol;
     private String name;
+    @ApiModelProperty(value = "tumorSuppressorGene")
     private Boolean TSG;
     private Boolean oncogene;
     private String curatedIsoform;
