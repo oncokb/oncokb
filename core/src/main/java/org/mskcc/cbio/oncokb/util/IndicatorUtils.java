@@ -64,13 +64,14 @@ public class IndicatorUtils {
         } else {
             gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
                 GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
+            if (gene != null) {
+                Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
 
-            Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-            relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+                relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+            }
         }
 
 
@@ -105,7 +106,14 @@ public class IndicatorUtils {
                 }
             }
 
-            indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), query.getProteinStart(), query.getProteinEnd()));
+            if (query.getProteinEnd() == null || query.getProteinStart() == null) {
+                Alteration alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
+                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                AlterationUtils.annotateAlteration(alteration, query.getAlteration());
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), alteration.getProteinStart(), alteration.getProteinEnd()));
+            } else {
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), query.getProteinStart(), query.getProteinEnd()));
+            }
 
             if (query.getTumorType() != null) {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);

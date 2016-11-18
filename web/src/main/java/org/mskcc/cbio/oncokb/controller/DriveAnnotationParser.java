@@ -710,14 +710,14 @@ public class DriveAnnotationParser {
                 // TODO:
                 //throw new RuntimeException("no level of evidence");
             } else {
-                String level = drugObj.getString("level").trim().toLowerCase();
+                String level = drugObj.getString("level").trim();
                 if (level.equals("2")) {
 
                     if (evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE
                         || evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY) {
-                        level = "2a";
+                        level = "2A";
                     } else {
-                        level = "2b";
+                        level = "2B";
                     }
                 }
 
