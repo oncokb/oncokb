@@ -143,14 +143,14 @@ public class DriveAnnotationParser {
                     JSONArray transcripts = geneInfo.has("transcripts") ? geneInfo.getJSONArray("transcripts") : null;
 
                     if (oncogene != null) {
-                        if (oncogene.equals("OCG")) {
+                        if (oncogene.equals("Oncogene")) {
                             gene.setOncogene(true);
                         } else {
                             gene.setOncogene(false);
                         }
                     }
                     if (tsg != null) {
-                        if (tsg.equals("TSG")) {
+                        if (tsg.equals("Tumor Suppressor")) {
                             gene.setTSG(true);
                         } else {
                             gene.setTSG(false);
