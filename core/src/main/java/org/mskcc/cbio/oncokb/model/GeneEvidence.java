@@ -88,9 +88,8 @@ public class GeneEvidence extends GeneralEvidence {
 
     public GeneEvidence(Evidence e) {
         this.setGene(e.getGene());
-        this.setEvidenceId(e.getEvidenceId());
+        this.setEvidenceId(e.getId());
         this.setEvidenceType(e.getEvidenceType());
-        this.setStatus(e.getStatus());
         this.setLastEdit(e.getLastEdit());
         this.setArticles(e.getArticles());
         this.setDesc(e.getDescription());

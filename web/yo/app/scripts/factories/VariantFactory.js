@@ -51,49 +51,6 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('GeneStatus', ['$http', function($http) {
-    'use strict';
-
-    function getFromServer(params) {
-        console.log(params);
-        return $http({
-            url: OncoKB.config.apiLink + 'geneStatus.json',
-            method: 'GET',
-            params: {geneId: params.geneId || ''}
-        });
-    }
-
-    function setToServer(params) {
-        console.log(params);
-        var transform = function(data) {
-            return $.param(data);
-        };
-        return $http.post(
-            OncoKB.config.apiLink + 'geneStatus.json',
-            {geneId: params.geneId || '', status: params.status || 'Not ready'},
-            {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                transformRequest: transform
-            });
-    }
-
-    function getFromFile() {
-        return $http.get('data/geneStatus.json');
-    }
-
-    function setToFile(params) {
-        console.log(params);
-        return $http.get('data/geneStatus.json');
-    }
-
-    return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile,
-        setToServer: setToServer,
-        setToFile: setToFile
-    };
-}]);
-
 angular.module('oncokbApp').factory('Alteration', ['$http', function($http) {
     'use strict';
 

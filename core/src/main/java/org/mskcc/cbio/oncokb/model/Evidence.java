@@ -15,9 +15,11 @@ import java.util.Set;
  */
 public class Evidence implements java.io.Serializable {
     @JsonIgnore
-    private Integer evidenceId;
+    private Integer id;
+    @JsonIgnore
+    private String uuid;
     private EvidenceType evidenceType;
-    
+
     private String cancerType;
     private String subtype;
     private OncoTreeType oncoTreeType;
@@ -27,7 +29,6 @@ public class Evidence implements java.io.Serializable {
     private String additionalInfo;
     private Set<Treatment> treatments;
     private String knownEffect;
-    private String status;
     private Date lastEdit;
     private LevelOfEvidence levelOfEvidence;
     private Set<Article> articles;
@@ -37,12 +38,20 @@ public class Evidence implements java.io.Serializable {
     public Evidence() {
     }
 
-    public Integer getEvidenceId() {
-        return evidenceId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setEvidenceId(Integer evidenceId) {
-        this.evidenceId = evidenceId;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public EvidenceType getEvidenceType() {
@@ -68,20 +77,20 @@ public class Evidence implements java.io.Serializable {
     public void setSubtype(String subtype) {
         this.subtype = subtype;
     }
-    
+
     public void setOncoTreeType(OncoTreeType oncoTreeType) {
         this.oncoTreeType = oncoTreeType;
     }
 
     public OncoTreeType getOncoTreeType() {
-        if(this.oncoTreeType != null)
+        if (this.oncoTreeType != null)
             return this.oncoTreeType;
 
         OncoTreeType oncoTreeType = null;
 
-        if(this.subtype != null) {
+        if (this.subtype != null) {
             oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);
-        }else if (this.cancerType != null) {
+        } else if (this.cancerType != null) {
             oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(this.cancerType);
         }
 
@@ -136,14 +145,6 @@ public class Evidence implements java.io.Serializable {
         this.knownEffect = knownEffect;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public Date getLastEdit() {
         return lastEdit;
     }
@@ -172,8 +173,8 @@ public class Evidence implements java.io.Serializable {
         if (this.articles == null) {
             this.articles = articles;
         } else {
-            for(Article article : articles) {
-                if(!this.articles.contains(article)) {
+            for (Article article : articles) {
+                if (!this.articles.contains(article)) {
                     this.articles.add(article);
                 }
             }
@@ -200,8 +201,8 @@ public class Evidence implements java.io.Serializable {
         if (this.clinicalTrials == null) {
             this.clinicalTrials = clinicalTrials;
         } else {
-            for(ClinicalTrial trial : clinicalTrials) {
-                if(!this.clinicalTrials.contains(trial)) {
+            for (ClinicalTrial trial : clinicalTrials) {
+                if (!this.clinicalTrials.contains(trial)) {
                     this.clinicalTrials.add(trial);
                 }
             }
@@ -211,9 +212,10 @@ public class Evidence implements java.io.Serializable {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 67 * hash + Objects.hashCode(this.evidenceId == null ? this : this.evidenceId);
+        hash = 67 * hash + Objects.hashCode(this.id == null ? this : this.id);
         return hash;
     }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -224,32 +226,31 @@ public class Evidence implements java.io.Serializable {
             return false;
         }
         final Evidence other = (Evidence) obj;
-        if (this.evidenceId == null || other.evidenceId == null ||
-                !Objects.equals(this.evidenceId, other.evidenceId)) {
+        if (this.id == null || other.id == null ||
+            !Objects.equals(this.id, other.id)) {
             return false;
         }
         return true;
     }
-    
-    public Evidence(Evidence e){
-            evidenceId = e.evidenceId;
-            evidenceType = e.evidenceType;
-            cancerType = e.cancerType;
-            subtype = e.subtype;
-            gene = e.gene;
-            alterations = e.alterations;
-            description = e.description;
-            additionalInfo = e.additionalInfo;
-            treatments = e.treatments;
-            knownEffect = e.knownEffect;
-            status = e.status;
-            lastEdit = e.lastEdit;
-            levelOfEvidence = e.levelOfEvidence;
-            articles = e.articles;
-            nccnGuidelines = e.nccnGuidelines;
-            clinicalTrials = e.clinicalTrials;
+
+    public Evidence(Evidence e) {
+        id = e.id;
+        uuid = e.uuid;
+        evidenceType = e.evidenceType;
+        cancerType = e.cancerType;
+        subtype = e.subtype;
+        gene = e.gene;
+        alterations = e.alterations;
+        description = e.description;
+        additionalInfo = e.additionalInfo;
+        treatments = e.treatments;
+        knownEffect = e.knownEffect;
+        lastEdit = e.lastEdit;
+        levelOfEvidence = e.levelOfEvidence;
+        articles = e.articles;
+        nccnGuidelines = e.nccnGuidelines;
+        clinicalTrials = e.clinicalTrials;
     }
-    
 }
 
 

@@ -55,14 +55,6 @@ public final class GeneLabelImporter {
                         + " to " + gene.getHugoSymbol());
             }
             
-            Set<String> labels = new HashSet<String>();
-            for (int j=2; j<parts.length; j++) {
-                if (parts[j].equals("1")) {
-                    labels.add(headers[j]);
-                }
-            }
-            gene.setGeneLabels(labels);
-            
             geneBo.saveOrUpdate(gene);
         }
         

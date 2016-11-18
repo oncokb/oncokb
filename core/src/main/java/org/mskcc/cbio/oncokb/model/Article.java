@@ -2,14 +2,18 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 /**
- *
  * @author jgao
  */
 public class Article implements java.io.Serializable {
-    private Integer articleId;
+    @JsonIgnore
+    private Integer id;
+    @JsonIgnore
+    private String uuid;
     private String pmid;
     private String title;
     private String journal;
@@ -37,7 +41,7 @@ public class Article implements java.io.Serializable {
     public void setLink(String link) {
         this.link = link;
     }
-    
+
     public Article() {
     }
 
@@ -59,12 +63,20 @@ public class Article implements java.io.Serializable {
         this.link = link;
     }
 
-    public Integer getArticleId() {
-        return articleId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setArticleId(Integer articleId) {
-        this.articleId = articleId;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getPmid() {
@@ -138,21 +150,21 @@ public class Article implements java.io.Serializable {
     public void setElocationId(String elocationId) {
         this.elocationId = elocationId;
     }
-    
+
     public String getReference() {
         StringBuilder sb = new StringBuilder();
         sb.append(authors).append(". ")
-                .append(journal).append(". ");
-        if (pubDate!=null)
+            .append(journal).append(". ");
+        if (pubDate != null)
             sb.append(pubDate).append(";");
-        if (volume!=null)
+        if (volume != null)
             sb.append(volume);
-        if (issue!=null)
+        if (issue != null)
             sb.append("(").append(issue).append(")");
-        if (pages!=null)
+        if (pages != null)
             sb.append(pages);
         sb.append(".");
-        
+
         return sb.toString();
     }
 
@@ -177,5 +189,5 @@ public class Article implements java.io.Serializable {
         }
         return true;
     }
-    
+
 }

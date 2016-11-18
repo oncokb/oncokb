@@ -78,9 +78,9 @@ public class AllTreatmentsWithPMIDs {
                                 try {
                                     articleRep = Integer.parseInt(article.getPmid());
                                 } catch (NumberFormatException e) {
-                                    articleRep = -article.getArticleId();
+                                    articleRep = -article.getId();
                                 } catch (NullPointerException e) {
-                                    articleRep = -article.getArticleId();
+                                    articleRep = -article.getId();
                                 }
                                 PMIDs.add(articleRep);
                             }

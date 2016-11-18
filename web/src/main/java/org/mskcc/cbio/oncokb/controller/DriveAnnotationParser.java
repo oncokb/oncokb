@@ -116,7 +116,6 @@ public class DriveAnnotationParser {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
             String hugo = geneInfo.has("name") ? geneInfo.getString("name").trim() : null;
-            String status = geneInfo.has("status") ? geneInfo.getString("status").trim() : null;
 
             if (hugo != null) {
                 Gene gene = geneBo.findGeneByHugoSymbol(hugo);
@@ -129,15 +128,7 @@ public class DriveAnnotationParser {
 //                    throw new RuntimeException("Could not find gene "+hugo+" either.");
                         System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
                     } else {
-                        if (status != null) {
-                            gene.setStatus(status);
-                        }
                         geneBo.save(gene);
-                    }
-                } else {
-                    if (status != null) {
-                        gene.setStatus(status);
-                        geneBo.saveOrUpdate(gene);
                     }
                 }
 
@@ -235,21 +226,21 @@ public class DriveAnnotationParser {
             String doe = null;
             String variantSummary = null;
             String effect = getMutationEffect(mutationObj);
-
+            
             // If both mutation effect and oncogenicity both unknown, ignore variant.
             if (oncogenic != null && oncogenic.equals("-1")
-                && effect != null && effect.toLowerCase().equals("unknown")) {
+                && effect != null && effect.toLowerCase().equals("inconclusive")
+                && gene.getHugoSymbol().equals("EGFR")) {
                 return;
             }
-
-            // mutation summary
+            
             System.out.println("##    Oncogenicity Summary");
             if (mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
-                doe = mutationObj.getString("shortSummary");
+                variantSummary = mutationObj.getString("shortSummary");
             }
 
             if (mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
-                variantSummary = mutationObj.getString("summary");
+                doe = mutationObj.getString("summary");
             }
 
             Map<String, String> mutations = parseMutationString(mutationStr);
@@ -352,7 +343,7 @@ public class DriveAnnotationParser {
                 case "likely neutral":
                     oncogenic = "0";
                     break;
-                case "unknown":
+                case "inconclusive":
                     oncogenic = "-1";
                     break;
                 default:

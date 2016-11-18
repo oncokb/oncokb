@@ -1915,8 +1915,8 @@ angular.module('oncokbApp')
                         case 'Likely Neutral':
                             result = 'Likely Neutral';
                             break;
-                        case 'Unknown':
-                            result = 'Unknown';
+                        case 'Inconclusive':
+                            result = 'Inconclusive';
                             break;
                         default:
                             console.log('Couldn\'t find mapping for', oncogenic);
@@ -1942,7 +1942,7 @@ angular.module('oncokbApp')
                                 gene.mutations.asArray().forEach(function(mutation, index) {
                                     if (mutation.effect && mutation.effect.value.getText()) {
                                         var effect = mutation.effect.value.getText();
-                                        var newEffects = ['Gain-of-function','Likely Gain-of-function','Loss-of-function','Likely Loss-of-function','Switch-of-function','Likely Switch-of-function','Neutral','Likely Neutral','Unknown'];
+                                        var newEffects = ['Gain-of-function','Likely Gain-of-function','Loss-of-function','Likely Loss-of-function','Switch-of-function','Likely Switch-of-function','Neutral','Likely Neutral','Inconclusive'];
                                         
                                         if(newEffects.indexOf(effect) === -1) {
                                             if (mutation.effect.value.getText().toLowerCase() === 'other') {
@@ -2337,6 +2337,8 @@ angular.module('oncokbApp')
                                 console.log((index + 1) + ' Gene: ' + geneName);
                                 // model.beginCompoundOperation();
                                 gene.mutations.asArray().forEach(function (mutation, index) {
+                                    var oncogenic = mutation.oncogenic.getText().trim().toLowerCase();
+                                    var mutationEffect = mutation.effect.value.getText().trim().toLowerCase();
                                     var summary = mutation.summary.getText();
                                     var shortSummary = mutation.shortSummary.getText();
                                     var desp = mutation.description.getText();
@@ -2344,18 +2346,37 @@ angular.module('oncokbApp')
                                     var tumorTypes = mutation.tumors;
                                     var mutationName = mutation.name.getText();
 
-                                    if(!stringUtils.isUndefinedOrEmpty(shortDesp) && stringUtils.isUndefinedOrEmpty(mutation.description.getText())) {
-                                        result = [geneName, mutationName, '', '', '', 'mutation description', shortDesp, desp];
-                                        console.log(result.join('\t'));
-                                    }
-                                    if(!stringUtils.isUndefinedOrEmpty(shortSummary) && stringUtils.isUndefinedOrEmpty(summary)) {
-                                        result = [geneName, mutationName, '', '', '', 'mutation summary', shortSummary, summary];
-                                        console.log(result.join('\t'));
-                                    }
+                                    // if(oncogenic === 'unknown') {
+                                    //     result = [geneName, mutationName, '', '', '', 'Change oncogenic to inconclusive', mutation.oncogenic.getText()];
+                                    //     console.log(result.join('\t'));
+                                    //     mutation.oncogenic.setText('Inconclusive');
+                                    // }
+                                    //
+                                    // if(mutationEffect === 'unknown') {
+                                    //     result = [geneName, mutationName, '', '', '', 'Change ME to inconclusive', mutation.effect.value.getText()];
+                                    //     console.log(result.join('\t'));
+                                    //     mutation.effect.value.setText('Inconclusive');
+                                    // }
+                                    //
+                                    // if(!stringUtils.isUndefinedOrEmpty(shortDesp)) {
+                                    //     result = [geneName, mutationName, '', '', '', 'Biological effect', shortDesp, desp];
+                                    //     console.log(result.join('\t'));
+                                    //     mutation.description.setText(shortDesp);
+                                    //     mutation.short.setText(desp);
+                                    // }
+                                    //
+                                    // if(!stringUtils.isUndefinedOrEmpty(shortSummary)) {
+                                    //     result = [geneName, mutationName, '', '', '', 'Clinical Effect', shortSummary, summary];
+                                    //     console.log(result.join('\t'));
+                                    //     if(stringUtils.isUndefinedOrEmpty(summary)) {
+                                    //         mutation.summary.setText(shortSummary);
+                                    //         mutation.shortSummary.setText('');
+                                    //     }
+                                    // }
 
                                     
                                     // if(isUndefinedOrEmpty(mutationEffect) &&
-                                    //     (_.isString(oncogenic) && oncogenic.toLowerCase() === 'unknown') &&
+                                    //     (_.isString(oncogenic) && oncogenic.toLowerCase() === 'inconclusive') &&
                                     //     isUndefinedOrEmpty(oncogenicSummary) &&
                                     //     isUndefinedOrEmpty(mutationDesp) &&
                                     //     isUndefinedOrEmpty(mutationShortDesp)) {
@@ -2417,56 +2438,73 @@ angular.module('oncokbApp')
                                     //     mutation.name_eStatus.get('obsolete') === 'false')
                                     //     console.log(gene.name.getText() + '\t' + mutation.name.getText() + "\t" + category.join(''));
 
-                                    mutation.tumors.asArray().forEach(function(tumor) {
-                                        var tumorName = tumor.name.getText();
-                                        var tumorShortPrev = tumor.shortPrevalence.getText();
-                                        var tumorPrev = tumor.prevalence.getText();
-                                        var tumorShortNCCN = tumor.nccn.short.getText();
-                                        var tumorNCCN = tumor.nccn.description.getText();
-                                        var tumorShortProgImp = tumor.shortProgImp.getText();
-                                        var tumorProgImp = tumor.progImp.getText();
+                                    // mutation.tumors.asArray().forEach(function(tumor) {
+                                        // var tumorName = MainUtils.getCancerTypesName(tumor.cancerTypes);
+                                        // var tumorShortPrev = tumor.shortPrevalence.getText();
+                                        // var tumorPrev = tumor.prevalence.getText();
+                                        // var tumorShortNCCN = tumor.nccn.short.getText();
+                                        // var tumorNCCN = tumor.nccn.description.getText();
+                                        // var tumorShortProgImp = tumor.shortProgImp.getText();
+                                        // var tumorProgImp = tumor.progImp.getText();
+                                        //
+                                        // if(!stringUtils.isUndefinedOrEmpty(tumorShortPrev)) {
+                                        //     result = [geneName, mutationName, tumorName, '', '', 'tumorPrev', tumorShortPrev, tumorPrev];
+                                        //     console.log(result.join('\t'));
+                                        //     tumor.prevalence.setText(tumorShortPrev);
+                                        //     tumor.shortPrevalence.setText(tumorPrev);
+                                        // }
+                                        // if(!stringUtils.isUndefinedOrEmpty(tumorShortNCCN)) {
+                                        //     result = [geneName, mutationName, tumorName, '', '', 'tumorNCCN', tumorShortNCCN, tumorNCCN];
+                                        //     console.log(result.join('\t'));
+                                        //     tumor.nccn.description.setText(tumorShortNCCN);
+                                        //     tumor.nccn.short.setText(tumorNCCN);
+                                        // }
+                                        // if(!stringUtils.isUndefinedOrEmpty(tumorShortProgImp)) {
+                                        //     result = [geneName, mutationName, tumorName, '', '', 'ProgImp', tumorShortProgImp, tumorProgImp];
+                                        //     console.log(result.join('\t'));
+                                        //     tumor.progImp.setText(tumorShortProgImp);
+                                        //     tumor.shortProgImp.setText(tumorProgImp);
+                                        // }
 
-                                        if(!stringUtils.isUndefinedOrEmpty(tumorShortPrev) && stringUtils.isUndefinedOrEmpty(tumorPrev)) {
-                                            result = [geneName, mutationName, tumorName, '', '', 'tumorPrev', tumorShortPrev, tumorPrev];
-                                            console.log(result.join('\t'));
-                                        }
-                                        if(!stringUtils.isUndefinedOrEmpty(tumorShortNCCN) && stringUtils.isUndefinedOrEmpty(tumorNCCN)) {
-                                            result = [geneName, mutationName, tumorName, '', '', 'tumorNCCN', tumorShortNCCN, tumorNCCN];
-                                            console.log(result.join('\t'));
-                                        }
-                                        if(!stringUtils.isUndefinedOrEmpty(tumorShortProgImp) && stringUtils.isUndefinedOrEmpty(tumorProgImp)) {
-                                            result = [geneName, mutationName, tumorName, '', '', 'ProgImp', tumorShortProgImp, tumorProgImp];
-                                            console.log(result.join('\t'));
-                                        }
-
-                                        tumor.TI.asArray().forEach(function(ti) {
-                                            ti.treatments.asArray().forEach(function(treatment) {
+                                        // tumor.TI.asArray().forEach(function(ti) {
+                                        //     var tiName = ti.name.getText();
+                                            // ti.treatments.asArray().forEach(function(treatment) {
+                                            //     var treatmentName = treatment.name.getText();
+                                            //     var short = treatment.short.getText();
+                                            //     var full = treatment.description.getText();
+                                            //
+                                            //     if(!stringUtils.isUndefinedOrEmpty(short)) {
+                                            //         result = [geneName, mutationName, tumorName, tiName, treatmentName, 'treatment', short, full];
+                                            //         console.log(result.join('\t'));
+                                            //         treatment.description.setText(short);
+                                            //         treatment.short.setText(full);
+                                            //     }
                                                 // if (treatment.level.getText() === 'R1') {
-                                            var result = [gene.name.getText(), 
-                                                mutation.name.getText(), 
-                                                MainUtils.getCancerTypesName(tumor.cancerTypes), 
-                                                treatment.name.getText(),
-                                                treatment.indication.getText(),
-                                                treatment.level.getText(),
-                                                getString(treatment.short.getText()),
-                                                getString(treatment.description.getText()),
-                                                treatment.name_eStatus.get('obsolete')
-                                            ];
-                                            console.log(result.join('\t'));
+                                            // var result = [gene.name.getText(), 
+                                            //     mutation.name.getText(), 
+                                            //     MainUtils.getCancerTypesName(tumor.cancerTypes), 
+                                            //     treatment.name.getText(),
+                                            //     treatment.indication.getText(),
+                                            //     treatment.level.getText(),
+                                            //     getString(treatment.short.getText()),
+                                            //     getString(treatment.description.getText()),
+                                            //     treatment.name_eStatus.get('obsolete')
+                                            // ];
+                                            // console.log(result.join('\t'));
                                                 // }
-                                            })
-                                        });
-                                    });
+                                            // });
+                                        // });
+                                    // });
                                 });
                                 // model.endCompoundOperation();
                                 $timeout(function () {
                                     changeData(++index, callback);
-                                }, 500, false);
+                                }, 100, false);
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function () {
                                     changeData(++index, callback);
-                                }, 500, false);
+                                }, 100, false);
                             }
                         }
                     });
@@ -2513,12 +2551,12 @@ angular.module('oncokbApp')
                                         console.log(geneName + '\t' + mutationName + '\tNot obsolete variant, but mutation effect is obsoleted.');
                                     }
                                     
-                                    // Both Unknown/Unknow for oncogenicity and mutation effect
+                                    // Both inconclusive/inconclusive for oncogenicity and mutation effect
                                     if (_.isString(oncogenic) &&
                                         _.isString(mutationEffect) &&
-                                        oncogenic.toLowerCase() === 'unknown' &&
-                                        mutationEffect.toLowerCase() === 'unknown') {
-                                        console.log(geneName + '\t' + mutationName + '\tBoth unknown');
+                                        oncogenic.toLowerCase() === 'inconclusive' &&
+                                        mutationEffect.toLowerCase() === 'inconclusive') {
+                                        console.log(geneName + '\t' + mutationName + '\tBoth inconclusive');
                                     }
                                 });
                                 $timeout(function () {
@@ -3974,21 +4012,6 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.setGeneStatus = function () {
-                var newStatus = {
-                    geneId: $scope.gene.name.text,
-                    status: $scope.gene.status.text
-                };
-                Documents.updateStatus(newStatus);
-                DatabaseConnector.setGeneStatus(newStatus).then(function (result) {
-                    if (result && result.error) {
-                        console.error(result);
-                    } else {
-                        console.info(result);
-                    }
-                });
-            };
-
             $scope.generatePDF = function () {
                 jspdf.create(stringUtils.getGeneData(this.gene, true, true));
             };
@@ -4579,9 +4602,8 @@ angular.module('oncokbApp')
             $scope.newGene = {};
             $scope.collaborators = {};
             $scope.checkboxes = {
-                'oncogenic': ['Yes', 'Likely', 'Likely Neutral', 'Unknown'],
-                'mutation_effect': ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Unknown'],
-                'geneStatus': ['Complete', 'Proceed with caution', 'Not ready'],
+                'oncogenic': ['Yes', 'Likely', 'Likely Neutral', 'Inconclusive'],
+                'mutation_effect': ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Inconclusive'],
                 'hotspot': ['TRUE', 'FALSE'],
                 'TSG': ['Tumor Suppressor'],
                 'OCG': ['Oncogene']
