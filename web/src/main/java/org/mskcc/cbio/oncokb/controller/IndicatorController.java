@@ -33,6 +33,7 @@ public class IndicatorController {
         @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,
+        @RequestParam(value = "alterationType", required = false) String alterationType,
         @RequestParam(value = "tumorType", required = false) String tumorType,
         @RequestParam(value = "consequence", required = false) String consequence,
         @RequestParam(value = "proteinStart", required = false) String proteinStart,
@@ -51,6 +52,7 @@ public class IndicatorController {
         }
         query.setHugoSymbol(hugoSymbol);
         query.setAlteration(alteration);
+        query.setAlterationType(alterationType);
         query.setTumorType(tumorType);
         query.setConsequence(consequence);
         if (proteinStart != null) {
