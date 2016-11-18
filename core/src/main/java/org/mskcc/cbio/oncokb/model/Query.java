@@ -15,6 +15,7 @@ public class Query implements java.io.Serializable {
     private String hugoSymbol;
     private Integer entrezGeneId;
     private String alteration;
+    private String alterationType;
     private String tumorType;
     private String consequence;
     private Integer proteinStart;
@@ -53,6 +54,14 @@ public class Query implements java.io.Serializable {
 
     public void setAlteration(String alteration) {
         this.alteration = alteration;
+    }
+
+    public String getAlterationType() {
+        return alterationType;
+    }
+
+    public void setAlterationType(String alterationType) {
+        this.alterationType = alterationType;
     }
 
     public String getTumorType() {

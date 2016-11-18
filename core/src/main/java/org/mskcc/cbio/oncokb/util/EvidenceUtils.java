@@ -801,4 +801,25 @@ public class EvidenceUtils {
         }
         return evidenceQueries;
     }
+
+    public static Set<Evidence> filterEvidenceByKnownEffect(Set<Evidence> evidences, String knownEffect) {
+        if (knownEffect == null) {
+            return null;
+        }
+        Set<Evidence> result = new HashSet<>();
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect().equalsIgnoreCase(knownEffect)) {
+                result.add(evidence);
+            }
+        }
+        return result;
+    }
+
+    public static Set<Evidence> getSensitiveEvidences(Set<Evidence> evidences) {
+       return filterEvidenceByKnownEffect(evidences, "sensitive");
+    }
+
+    public static Set<Evidence> getResistanceEvidences(Set<Evidence> evidences) {
+        return filterEvidenceByKnownEffect(evidences, "resistant");
+    }
 }

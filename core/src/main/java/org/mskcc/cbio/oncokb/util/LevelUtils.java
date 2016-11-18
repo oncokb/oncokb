@@ -10,18 +10,28 @@ import java.util.*;
  */
 public class LevelUtils {
     public static final List<LevelOfEvidence> LEVELS = Collections.unmodifiableList(
-        new ArrayList<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_R3);
-            add(LevelOfEvidence.LEVEL_R2);
-            add(LevelOfEvidence.LEVEL_4);
-            add(LevelOfEvidence.LEVEL_3B);
-            add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_2B);
-            add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_R1);
-            add(LevelOfEvidence.LEVEL_1);
-        }}
+        Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
+            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_1)
     );
+
+    public static final List<LevelOfEvidence> SENSITIVE_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
+            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1)
+    );
+
+    public static final List<LevelOfEvidence> RESISTANCE_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_R1)
+    );
+
+    public static final List<LevelOfEvidence> PUBLIC_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_2A,
+            LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_4)
+    );
+
+    public static final List<LevelOfEvidence> OTHER_INDICATION_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3B)
+    );
+
 
     public static LevelOfEvidence getHighestLevelFromEvidence(Set<Evidence> evidences) {
         if (evidences != null) {
@@ -104,39 +114,22 @@ public class LevelUtils {
     }
 
     public static Set<LevelOfEvidence> getPublicLevels() {
-        return new HashSet<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_1);
-            add(LevelOfEvidence.LEVEL_R1);
-            add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_4);
-        }};
+        return new HashSet<>(PUBLIC_LEVELS);
     }
 
     public static Set<LevelOfEvidence> getPublicAndOtherIndicationLevels() {
-        return new HashSet<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_1);
-            add(LevelOfEvidence.LEVEL_R1);
-            add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_2B);
-            add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_3B);
-            add(LevelOfEvidence.LEVEL_4);
-        }};
+        Set<LevelOfEvidence> levels = new HashSet<>();
+        levels.addAll(PUBLIC_LEVELS);
+        levels.addAll(OTHER_INDICATION_LEVELS);
+        return levels;
     }
 
     public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level, Boolean sameIndication) {
-        Set<LevelOfEvidence> convertLevels = new HashSet<>();
-        convertLevels.add(LevelOfEvidence.LEVEL_0);
-        convertLevels.add(LevelOfEvidence.LEVEL_1);
-        convertLevels.add(LevelOfEvidence.LEVEL_2A);
-        convertLevels.add(LevelOfEvidence.LEVEL_2B);
-        convertLevels.add(LevelOfEvidence.LEVEL_3A);
+        List<LevelOfEvidence> convertLevels = Arrays.asList(LevelOfEvidence.LEVEL_0, LevelOfEvidence.LEVEL_1,
+            LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A);
 
-        Set<LevelOfEvidence> ignoreIndication = new HashSet<>();
-        ignoreIndication.add(LevelOfEvidence.LEVEL_R1);
-        ignoreIndication.add(LevelOfEvidence.LEVEL_R2);
-        ignoreIndication.add(LevelOfEvidence.LEVEL_R3);
+        List<LevelOfEvidence> ignoreIndication = Arrays.asList(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_R2,
+            LevelOfEvidence.LEVEL_R3);
 
         if (level == null || ignoreIndication.contains(level))
             return null;
@@ -164,6 +157,22 @@ public class LevelUtils {
             }
         }
         return levelOfEvidences;
+    }
+
+    public static Boolean isSensitiveLevel(LevelOfEvidence levelOfEvidence) {
+        Boolean flag = false;
+        if (levelOfEvidence != null && SENSITIVE_LEVELS.contains(levelOfEvidence)) {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public static Boolean isResistanceLevel(LevelOfEvidence levelOfEvidence) {
+        Boolean flag = false;
+        if (levelOfEvidence != null && RESISTANCE_LEVELS.contains(levelOfEvidence)) {
+            flag = true;
+        }
+        return flag;
     }
 
     public static Set<LevelOfEvidence> getAllLevels() {
