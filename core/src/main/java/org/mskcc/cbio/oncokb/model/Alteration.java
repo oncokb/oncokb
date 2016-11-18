@@ -14,7 +14,7 @@ public class Alteration implements java.io.Serializable {
     @JsonIgnore
     private Integer id;
     @JsonIgnore
-    private Integer uuid;
+    private String uuid;
     private Gene gene;
     @JsonIgnore
     private AlterationType alterationType;
@@ -48,11 +48,11 @@ public class Alteration implements java.io.Serializable {
         this.id = id;
     }
 
-    public Integer getUuid() {
+    public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(Integer uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 

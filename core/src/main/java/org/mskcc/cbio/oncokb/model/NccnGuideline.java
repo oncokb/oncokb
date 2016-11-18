@@ -2,13 +2,17 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 /**
  * @author jgao
  */
 public class NccnGuideline implements java.io.Serializable {
+    @JsonIgnore
     private Integer id;
+    @JsonIgnore
     private String uuid;
     private String disease;
     private String version;

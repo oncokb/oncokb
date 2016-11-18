@@ -5,14 +5,13 @@
  */
 package org.mskcc.cbio.oncokb.model;
 
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- *
  * @author jiaojiao
  */
 public class PortalAlteration {
-
+    @JsonIgnore
     private Integer id;
     private String cancerType;
     private String cancerStudy;
@@ -36,6 +35,7 @@ public class PortalAlteration {
         this.proteinEndPosition = proteinEndPosition;
         this.alterationType = alterationType;
     }
+
     public PortalAlteration(PortalAlteration pa) {
         cancerType = pa.cancerType;
         cancerStudy = pa.cancerStudy;
