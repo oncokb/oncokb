@@ -103,7 +103,7 @@ public class MainUtils {
     }
 
     public static String findHighestMutationEffect(Set<String> mutationEffect) {
-        String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Unknown", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
+        String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Inconclusive", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
         List<String> list = Arrays.asList(effects);
         Integer index = 100;
         for (String effect : mutationEffect) {
@@ -165,8 +165,8 @@ public class MainUtils {
             case "likely neutral":
                 oncogenic = "Likely Neutral";
                 break;
-            case "unknown":
-                oncogenic = "Unknown";
+            case "inconclusive":
+                oncogenic = "Inconclusive";
                 break;
             default:
                 oncogenic = "";
@@ -311,7 +311,7 @@ public class MainUtils {
             return false;
         }
 
-        if (effect.equalsIgnoreCase("unknown") || effect.isEmpty()) {
+        if (effect.equalsIgnoreCase("inconclusive") || effect.isEmpty()) {
             return false;
         } else {
             return true;

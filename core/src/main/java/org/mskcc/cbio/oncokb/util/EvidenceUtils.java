@@ -450,7 +450,7 @@ public class EvidenceUtils {
         }
 
         if (evidenceType.equals(EvidenceType.MUTATION_EFFECT) && result.size() > 1) {
-            String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Unknown", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
+            String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Inconclusive", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
             List<String> list = Arrays.asList(effects);
             Integer index = 100;
             for (String effect : result) {
@@ -459,7 +459,7 @@ public class EvidenceUtils {
                 }
             }
             if (index == -1) {
-                return "Unknown";
+                return "Inconclusive";
             } else {
                 return list.get(index);
             }

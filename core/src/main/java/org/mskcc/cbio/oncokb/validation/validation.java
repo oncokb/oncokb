@@ -174,16 +174,16 @@ public class validation {
                 }
                 if (oncogenicityMapping.containsKey(alt)
                     && oncogenicityMapping.get(alt) != null
-                    && oncogenicityMapping.get(alt).equals(Oncogenicity.UNKNOWN.getOncogenic()) 
+                    && oncogenicityMapping.get(alt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic()) 
                     && mutationEffectMapping.containsKey(alt) 
                     && mutationEffectMapping.get(alt) != null
-                    && mutationEffectMapping.get(alt).equals(MutationEffect.UNKNOWN.getMutation_effect())) {
+                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutation_effect())) {
                     Integer relevantsSize = relevantAlts.size();
                     Integer relevantCount = 0;
                     for (Alteration relevantAlt : relevantAlts) {
                         relevantCount++;
-                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.UNKNOWN.getOncogenic()) 
-                                && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.UNKNOWN.getMutation_effect())) {
+                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic()) 
+                                && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutation_effect())) {
                             ListEntry row = new ListEntry();
                         row.getCustomElements().setValueLocal("Gene", relevantAlt.getGene().getHugoSymbol());
                         row.getCustomElements().setValueLocal("Alteration", relevantAlt.getAlteration());

@@ -10,7 +10,7 @@ package org.mskcc.cbio.oncokb.model;
  */
 public enum MutationEffect {
     GAIN_OF_FUNCTION ("Gain-of-function"),
-    UNKNOWN ("Unknown"),
+    INCONCLUSIVE ("Inconclusive"),
     LOSS_OF_FUNCTION ("Loss-of-function"),
     LIKELY_LOSS_OF_FUNCTION ("Likely Loss-of-function"),
     LIKELY_GAIN_OF_FUNCTION ("Likely Gain-of-function"),

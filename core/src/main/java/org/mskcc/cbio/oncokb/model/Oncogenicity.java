@@ -13,7 +13,7 @@ public enum Oncogenicity {
     YES ("1", "Oncogenic"),
     LIKELY ("2", "Likely Oncogenic"),
     LIKELY_NEUTRAL ("0", "Likely Neutral"),
-    UNKNOWN ("-1", "Unknown");
+    INCONCLUSIVE ("-1", "Inconclusive");
     
     private Oncogenicity(String oncogenic, String description) {
         this.oncogenic = oncogenic;

@@ -226,21 +226,14 @@ public class DriveAnnotationParser {
             String doe = null;
             String variantSummary = null;
             String effect = getMutationEffect(mutationObj);
-
-            // If both mutation effect and oncogenicity both unknown, ignore variant.
-            if (oncogenic != null && oncogenic.equals("-1")
-                && effect != null && effect.toLowerCase().equals("unknown")) {
-                return;
-            }
-
-            // mutation summary
+            
             System.out.println("##    Oncogenicity Summary");
             if (mutationObj.has("shortSummary") && !mutationObj.getString("shortSummary").isEmpty()) {
-                doe = mutationObj.getString("shortSummary");
+                variantSummary = mutationObj.getString("shortSummary");
             }
 
             if (mutationObj.has("summary") && !mutationObj.getString("summary").isEmpty()) {
-                variantSummary = mutationObj.getString("summary");
+                doe = mutationObj.getString("summary");
             }
 
             Map<String, String> mutations = parseMutationString(mutationStr);
@@ -343,7 +336,7 @@ public class DriveAnnotationParser {
                 case "likely neutral":
                     oncogenic = "0";
                     break;
-                case "unknown":
+                case "inconclusive":
                     oncogenic = "-1";
                     break;
                 default:
