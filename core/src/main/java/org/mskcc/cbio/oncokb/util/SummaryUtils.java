@@ -84,16 +84,17 @@ public class SummaryUtils {
         
         queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
 
-        if (isSpecialMutation(queryAlteration, false)) {
-            if (isSpecialMutation(queryAlteration, true)) {
-                queryAlteration = queryAlteration.substring(0, 1).toUpperCase() + queryAlteration.substring(1);
-            }
+        if (isSpecialMutation(queryAlteration, true)) {
+            queryAlteration = queryAlteration.toLowerCase();
         }
 
+        if (AlterationUtils.isSingularGeneralAlteration(queryAlteration)) {
+            queryAlteration = queryAlteration + "s";
+        }
+        
         Boolean appendThe = appendThe(queryAlteration);
 
-        if (gene == null || alterations == null || alterations.isEmpty()
-            || relevantTumorTypes == null || relevantTumorTypes.isEmpty()) {
+        if (gene == null || alterations == null || relevantTumorTypes == null) {
             return "";
         }
 
@@ -108,6 +109,14 @@ public class SummaryUtils {
                 tumorTypeSummary = getTumorTypeSummaryFromEvidences(new ArrayList<>(EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null)));
                 if (tumorTypeSummary != null) {
                     ttSummaryNotGenerated = false;
+                }
+
+                // Get Other Tumor Types summary within this alteration
+                if (ttSummaryNotGenerated) {
+                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(new ArrayList<>(EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null)));
+                    if (tumorTypeSummary != null) {
+                        ttSummaryNotGenerated = false;
+                    }
                 }
             }
         }
@@ -938,7 +947,9 @@ public class SummaryUtils {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
-        if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
+        if (isSpecialMutation(queryAlteration, true)) {
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+        } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
             sb.append(queryAlteration + " positive");
         } else if (isSpecialMutation(queryAlteration, false)
             || (alteration.getConsequence() != null
