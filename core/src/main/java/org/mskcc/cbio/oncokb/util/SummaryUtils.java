@@ -28,9 +28,6 @@ public class SummaryUtils {
 
         StringBuilder sb = new StringBuilder();
 
-        queryTumorType = queryTumorType == null ? null : (StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase());
-
-
         //Mutation summary (MUTATION_SUMMARY: Deprecated)
 //            List<Evidence> mutationSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_SUMMARY));
 //            if (!mutationSummaryEvs.isEmpty()) {
@@ -66,7 +63,6 @@ public class SummaryUtils {
 
     public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
-        String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
         Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
 
         StringBuilder sb = new StringBuilder();
@@ -85,6 +81,8 @@ public class SummaryUtils {
         //Tumor type summary
         Boolean ttSummaryNotGenerated = true;
         String tumorTypeSummary = null;
+        
+        queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
 
         if (isSpecialMutation(queryAlteration, false)) {
             if (isSpecialMutation(queryAlteration, true)) {
@@ -413,8 +411,6 @@ public class SummaryUtils {
 
     public static String fullSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
-
-        queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
 
         sb.append(geneSummary(gene));
 
