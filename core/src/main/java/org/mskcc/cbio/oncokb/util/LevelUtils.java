@@ -135,10 +135,12 @@ public class LevelUtils {
             return null;
 
         if (convertLevels.contains(level)) {
-            if (sameIndication) {
-                return LevelOfEvidence.LEVEL_3A;
-            } else {
-                return LevelOfEvidence.LEVEL_3B;
+            if (!sameIndication) {
+                if(level.equals(LevelOfEvidence.LEVEL_3A)) {
+                    return LevelOfEvidence.LEVEL_3B;
+                }else{
+                    return LevelOfEvidence.LEVEL_2B;
+                }
             }
         }
 
