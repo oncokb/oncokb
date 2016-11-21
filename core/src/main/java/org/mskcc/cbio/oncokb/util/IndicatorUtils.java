@@ -159,11 +159,12 @@ public class IndicatorUtils {
                 Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
                 treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+                    EvidenceUtils.convertEvidenceLevel(
                     EvidenceUtils.getEvidence(alleles,
                         MainUtils.getTreatmentEvidenceTypes(),
                         (levels != null ?
                             new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
+                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
             }
             

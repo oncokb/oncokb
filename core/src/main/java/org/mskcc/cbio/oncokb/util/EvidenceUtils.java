@@ -352,6 +352,26 @@ public class EvidenceUtils {
         return result;
     }
 
+    public static Set<Evidence> convertEvidenceLevel(Set<Evidence> evidences, Set<OncoTreeType> tumorTypes) {
+        Set<Evidence> tmpEvidences = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            Evidence tmpEvidence = new Evidence(evidence);
+            if (CollectionUtils.intersection(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes).isEmpty()) {
+                if (tmpEvidence.getLevelOfEvidence() != null) {
+                    if (tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
+                        tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+                        tmpEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
+                    } else if (tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
+                        tmpEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+                    }
+                }
+            }
+            tmpEvidences.add(tmpEvidence);
+        }
+        return tmpEvidences;
+    }
+
     public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
@@ -631,7 +651,7 @@ public class EvidenceUtils {
             return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<Integer>(ids)));
         }
     }
-    
+
     public static Set<Evidence> filterEvidenceByKnownEffect(Set<Evidence> evidences, String knownEffect) {
         if (knownEffect == null) {
             return null;
