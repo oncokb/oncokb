@@ -3,7 +3,6 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.ShortGene;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -72,27 +71,6 @@ public class GeneUtils {
         }
 
         return genes;
-    }
-
-    public static Set<ShortGene> searchShortGene(String keywords) {
-        Set<ShortGene> shortGenes = new HashSet<>();
-        Set<Gene> genes = searchGene(keywords);
-
-        for (Gene gene : genes) {
-            shortGenes.add(convertToShort(gene));
-        }
-        return shortGenes;
-    }
-
-    public static ShortGene convertToShort(Gene gene) {
-        ShortGene shortGene = null;
-        if (gene != null) {
-            shortGene = new ShortGene();
-            shortGene.setEntrezGeneId(gene.getEntrezGeneId());
-            shortGene.setHugoSymbol(gene.getHugoSymbol());
-            shortGene.setGeneAliases(gene.getGeneAliases());
-        }
-        return shortGene;
     }
 
     public static Set<Gene> getAllGenes() {

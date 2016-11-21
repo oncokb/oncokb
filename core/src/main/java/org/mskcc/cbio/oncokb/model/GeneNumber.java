@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class GeneNumber {
 
-    private ShortGene gene = null;
+    private Gene gene = null;
     private Integer alteration = null;
     private Integer tumorType = null;
     private String highestLevel = null;
@@ -18,11 +18,11 @@ public class GeneNumber {
      **/
     @ApiModelProperty(value = "")
     @JsonProperty("gene")
-    public ShortGene getShortGene() {
+    public Gene getGene() {
         return gene;
     }
 
-    public void setShortGene(ShortGene gene) {
+    public void setGene(Gene gene) {
         this.gene = gene;
     }
 

@@ -6,6 +6,7 @@
 
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -21,7 +22,9 @@ public final class AlterationUtils {
     private static List<String> oncogenicList = Arrays.asList(new String[]{"", "-1", "0", "2", "1"});
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
     private final static String[] generalAlts = {"activating mutations", "activating mutation", "inactivating mutations", "inactivating mutation", "all mutations", "all mutation", "wildtype", "wildtypes"};
+    private final static String[] singularGeneralAlt = {"activating mutation", "inactivating mutation", "all mutations"};
     private final static Set<String> generalAlterations = new HashSet<>(Arrays.asList(generalAlts));
+    private final static Set<String> singularGeneralAlterations = new HashSet<>(Arrays.asList(singularGeneralAlt));
     private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
@@ -38,7 +41,7 @@ public final class AlterationUtils {
         if (alteration == null) {
             return;
         }
-        
+
         if (proteinChange == null) {
             proteinChange = "";
         }
@@ -160,28 +163,24 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         }
-    }
 
-    public static String getVariantName(String gene, String alteration) {
-        //Gene + mutation name
-        String variantName = "";
-
-        if (gene != null && alteration != null && alteration.toLowerCase().contains(gene.toLowerCase())) {
-            variantName = alteration;
-        } else {
-            variantName = (gene != null ? (gene + " ") : "") + (alteration != null ? alteration : "");
-        }
-
-        if (alteration != null) {
-            if (alteration.toLowerCase().contains("fusion")) {
-//            variantName = variantName.concat(" event");
-            } else if (alteration.toLowerCase().contains("deletion") || alteration.toLowerCase().contains("amplification")) {
-                //Keep the variant name
-            } else {
-                variantName = variantName.concat(" mutation");
+        if (alteration.getAlteration() != null) {
+            if (isSingularGeneralAlteration(alteration.getAlteration())) {
+                alteration.setAlteration(alteration.getAlteration() + "s");
             }
         }
-        return variantName;
+    }
+
+    public static Boolean isSingularGeneralAlteration(String alteration) {
+        if (alteration == null) {
+            return false;
+        }
+        for (String name : singularGeneralAlterations) {
+            if (name.equalsIgnoreCase(alteration)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Boolean isFusion(String variant) {
@@ -469,6 +468,20 @@ public final class AlterationUtils {
             return false;
         } else {
             return true;
+        }
+    }
+
+    public static Alteration findAlteration(Gene gene, String alteration) {
+        if (CacheUtils.isEnabled()) {
+            Set<Alteration> alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
+            for (Alteration al : alterations) {
+                if (al.getAlteration().equalsIgnoreCase(alteration)) {
+                    return al;
+                }
+            }
+            return null;
+        } else {
+            return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
         }
     }
 

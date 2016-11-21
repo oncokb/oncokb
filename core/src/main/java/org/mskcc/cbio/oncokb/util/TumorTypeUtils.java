@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.OncoTreeType;
+import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,16 +15,10 @@ import java.util.*;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
-
-    private static final String TUMOR_TYPE_ALL_TUMORS = "All Tumors";
     private static final String ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
     private static List<OncoTreeType> allOncoTreeCancerTypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeCancerTypesFromSource());
-        add(new OncoTreeType(null, null, "All Tumors", null, null));
-        add(new OncoTreeType(null, null, "All Liquid Tumors", null, null));
-        add(new OncoTreeType(null, null, "All Solid Tumors", null, null));
-        add(new OncoTreeType(null, null, "All Pediatric Tumors", null, null));
-        add(new OncoTreeType(null, null, "Germline Disposition", null, null));
+        addAll(getAllSpecialTumorOncoTreeTypes());
     }};
     private static List<OncoTreeType> allOncoTreeSubtypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeSubtypesByCancerTypesFromSource(allOncoTreeCancerTypes));
@@ -220,9 +215,9 @@ public class TumorTypeUtils {
      *
      * @return
      */
-    public static OncoTreeType getMappedOncoTreeAllTumor() {
+    public static OncoTreeType getMappedSpecialTumor(SpecialTumorType specialTumorType) {
         for (OncoTreeType cancerType : allOncoTreeCancerTypes) {
-            if (cancerType.getCancerType().equalsIgnoreCase(TUMOR_TYPE_ALL_TUMORS)) {
+            if (cancerType.getCancerType().equalsIgnoreCase(specialTumorType.getTumorType())) {
                 return cancerType;
             }
         }
@@ -239,7 +234,7 @@ public class TumorTypeUtils {
         List<OncoTreeType> matches = new ArrayList<>();
         List<OncoTreeType> allCancerTypes = getAllCancerTypes();
         List<OncoTreeType> allSubtypes = getAllSubtypes();
-        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
+        OncoTreeType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
 
         for (OncoTreeType query : cancerTypeQueries) {
             if (query != null && !query.equals(allTumor)) {
@@ -290,7 +285,7 @@ public class TumorTypeUtils {
         if (questTumorTypeMap == null) {
             questTumorTypeMap = new HashMap<String, List<OncoTreeType>>();
 
-            OncoTreeType tumorTypeAll = getMappedOncoTreeAllTumor();
+            OncoTreeType tumorTypeAll = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
 
             List<String> lines;
             try {
@@ -346,7 +341,7 @@ public class TumorTypeUtils {
             }
         }
 
-        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
+        OncoTreeType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
         if (allTumor != null) {
             ret.add(allTumor);
         }
@@ -378,7 +373,7 @@ public class TumorTypeUtils {
         if (cbioTumorTypeMap == null) {
             cbioTumorTypeMap = new HashMap<String, List<OncoTreeType>>();
 
-            OncoTreeType tumorTypeAll = getMappedOncoTreeAllTumor();
+            OncoTreeType tumorTypeAll = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
 
             List<String> lines;
             try {
@@ -439,7 +434,7 @@ public class TumorTypeUtils {
             }
         }
 
-        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
+        OncoTreeType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
         if (allTumor != null) {
             ret.add(allTumor);
         }
@@ -513,5 +508,13 @@ public class TumorTypeUtils {
             e.printStackTrace();
         }
         return subtypes;
+    }
+
+    private static Set<OncoTreeType> getAllSpecialTumorOncoTreeTypes() {
+        Set<OncoTreeType> types = new HashSet<>();
+        for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
+            types.add(new OncoTreeType(null, null, specialTumorType.getTumorType(), null, null));
+        }
+        return types;
     }
 }

@@ -559,10 +559,6 @@ public class CacheUtils {
         evidences.put(gene.getEntrezGeneId(), newEvidences);
     }
 
-    public static Set<ShortGene> getAllShortGenes() {
-        return ShortGeneUtils.getShortGenesFromGenes(genes);
-    }
-
     public static void updateGene(Integer entrezGeneId) {
         GeneObservable.getInstance().update("update", entrezGeneId.toString());
     }

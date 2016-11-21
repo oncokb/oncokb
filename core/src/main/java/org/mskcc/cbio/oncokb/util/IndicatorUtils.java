@@ -137,6 +137,9 @@ public class IndicatorUtils {
             } else {
                 indicatorQuery.setAlleleExist(true);
             }
+
+            Set<Evidence> treatmentEvidences = null;
+            
             if (nonVUSRelevantAlts.size() > 0) {
                 Oncogenicity oncogenicity = MainUtils.findHighestOncogenicByEvidences(
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
@@ -144,13 +147,28 @@ public class IndicatorUtils {
                 );
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
 
-                Set<Evidence> treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+                treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
                         MainUtils.getTreatmentEvidenceTypes(),
                         (levels != null ?
                             new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
                                 LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
 
+                
+            } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
+                Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
+                    EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
+                treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+                    EvidenceUtils.convertEvidenceLevel(
+                    EvidenceUtils.getEvidence(alleles,
+                        MainUtils.getTreatmentEvidenceTypes(),
+                        (levels != null ?
+                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
+                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
+                indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
+            }
+            
+            if(treatmentEvidences != null) {
                 if (highestLevelOnly) {
                     Set<Evidence> filteredEvis = new HashSet<>();
                     // Get highest sensitive evidences
@@ -168,15 +186,10 @@ public class IndicatorUtils {
 
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(treatments);
+                    indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
+                    indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
                 }
-            } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
-                Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
-                    EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
-
-                indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
             }
-            indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
-            indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
         } else {
             indicatorQuery.setGeneExist(false);
         }
