@@ -90,7 +90,7 @@ public class SearchApi {
         ApiGenes instance = new ApiGenes();
         RespMeta meta = new RespMeta();
         HttpStatus status = HttpStatus.OK;
-        Set<ShortGene> genes = GeneUtils.searchShortGene(query);
+        Set<Gene> genes = GeneUtils.searchGene(query);
 
         if (genes.size() == 0) {
             status = HttpStatus.NO_CONTENT;

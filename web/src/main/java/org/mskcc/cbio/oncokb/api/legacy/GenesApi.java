@@ -5,11 +5,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.RespMeta;
-import org.mskcc.cbio.oncokb.model.ShortGene;
 import org.mskcc.cbio.oncokb.response.ApiGene;
 import org.mskcc.cbio.oncokb.response.ApiGenes;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.ShortGeneUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -42,7 +40,7 @@ public class GenesApi {
 
         ApiGenes instance = new ApiGenes();
 
-        Set<ShortGene> genes = ShortGeneUtils.getAllShortGenes();
+        Set<Gene> genes = GeneUtils.getAllGenes();
         instance.setData(genes);
 
         RespMeta meta = new RespMeta();
@@ -66,8 +64,7 @@ public class GenesApi {
         ApiGene apiGene = new ApiGene();
 
         Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-        ShortGene shortGene = gene != null ? ShortGeneUtils.getShortGeneFromGene(gene) : null;
-        apiGene.setData(shortGene);
+        apiGene.setData(gene);
 
         RespMeta meta = new RespMeta();
         meta.setCode(HttpStatus.OK.value());

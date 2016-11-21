@@ -14,7 +14,7 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    private static String[] SpecialMutations = {"amplification", "deletion", "fusion", "fusions"};
+    private static String[] SpecialMutations = {"amplification", "deletion", "fusion", "fusions", "activating mutations", "inactivating mutations", "all mutations", "truncating mutations"};
 
     public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         if (gene == null) {
@@ -81,8 +81,19 @@ public class SummaryUtils {
         //Tumor type summary
         Boolean ttSummaryNotGenerated = true;
         String tumorTypeSummary = null;
-        
+
         queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
+
+        if (queryAlteration != null) {
+            queryAlteration = queryAlteration.trim();
+        }
+
+        if (queryTumorType != null) {
+            queryTumorType = queryTumorType.trim();
+            if (queryTumorType.endsWith(" tumor")) {
+                queryTumorType = queryTumorType.substring(0, queryTumorType.lastIndexOf(" tumor")) + " tumors";
+            }
+        }
 
         if (isSpecialMutation(queryAlteration, true)) {
             queryAlteration = queryAlteration.toLowerCase();
@@ -91,7 +102,7 @@ public class SummaryUtils {
         if (AlterationUtils.isSingularGeneralAlteration(queryAlteration)) {
             queryAlteration = queryAlteration + "s";
         }
-        
+
         Boolean appendThe = appendThe(queryAlteration);
 
         if (gene == null || alterations == null || relevantTumorTypes == null) {
@@ -198,6 +209,11 @@ public class SummaryUtils {
                         .append(queryTumorType == null ? "tumors" : queryTumorType)
                         .append(" harboring the " + altName)
                         .append(" is unknown.");
+                } else if (gene.getHugoSymbol().equals("EGFR")) {
+                    // Special summary specifically designed for investigated/non-investigate VUSs
+                    sb.append("While EGFR tyrosine kinase inhibitors such as erlotinib, gefitinib and afatinib are " +
+                        "FDA-approved for the treatment of patients with non-small cell lung cancer (NSCLC), " +
+                        "their clinical utility in patients with " + altName + " " + queryTumorType + " is unknown.");
                 } else {
                     // no FDA or NCCN drugs for the variant in any tumor type -- remove wild type evidence
                     Set<Evidence> evs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, sensitivityEvidenceTypes);
@@ -242,7 +258,7 @@ public class SummaryUtils {
                 //                sb.append("Please refer to the clinical trials section. ");
             }
             tumorTypeSummary = sb.toString();
-        }else {
+        } else {
             tumorTypeSummary = replaceSpecialCharacterInTumorTypeSummary(tumorTypeSummary, gene, queryAlteration, queryTumorType);
         }
 
@@ -926,7 +942,7 @@ public class SummaryUtils {
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
         if (isSpecialMutation(queryAlteration, true)) {
-            sb.append(queryAlteration);
+            sb.append(queryAlteration.toLowerCase());
         } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")
             || isSpecialMutation(queryAlteration, false)
             || (alteration.getConsequence() != null
@@ -947,15 +963,19 @@ public class SummaryUtils {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
-        if (isSpecialMutation(queryAlteration, true)) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+        if (isSpecialMutation(queryAlteration, true) && !queryAlteration.toLowerCase().equals("fusions")) {
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
         } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
+            if(queryAlteration.toLowerCase().equals("fusions")) {
+                queryAlteration = "fusion";
+            }
             sb.append(queryAlteration + " positive");
         } else if (isSpecialMutation(queryAlteration, false)
             || (alteration.getConsequence() != null
             && (alteration.getConsequence().getTerm().equals("inframe_deletion")
             || alteration.getConsequence().getTerm().equals("inframe_insertion")))
             || StringUtils.containsIgnoreCase(queryAlteration, "indel")
+            || StringUtils.containsIgnoreCase(queryAlteration, "delins")
             ) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration + " altered");
         } else {
@@ -963,17 +983,20 @@ public class SummaryUtils {
         }
         return sb.toString();
     }
-    
+
     private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, String queryAlteration, String queryTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, queryAlteration);
         String alterationName = getGeneMutationNameInVariantSummary(gene, queryAlteration);
         summary = summary.replace("[[variant]]", altName + " " + queryTumorType);
+        summary = summary.replace("[[gene]] [[mutation]] [[[mutation]]]", alterationName);
+        summary = summary.replace("[[gene]] [[mutation]] [[mutant]]", altName);
+        summary = summary.replace("[[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[gene]]", gene.getHugoSymbol());
         summary = summary.replace("[[mutation]] [[[mutation]]]", alterationName);
-        summary = summary.replace("[[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[mutation]]", queryAlteration);
         summary = summary.replace("[[tumorType]]", queryTumorType);
         summary = summary.replace("[[tumor type]]", queryTumorType);
+        summary = summary.replace("[[fusion name]]", altName);
         summary = summary.replace("[[fusion name]]", altName);
         return summary;
     }

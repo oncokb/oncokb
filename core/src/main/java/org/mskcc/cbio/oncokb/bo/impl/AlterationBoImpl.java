@@ -190,6 +190,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 alterations.add(alt);
             }
         }
+        
+        // Add all mutations
+//        Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "all mutations");
+//        if (alt != null) {
+//            alterations.add(alt);
+//        }
 
         return alterations;
     }
