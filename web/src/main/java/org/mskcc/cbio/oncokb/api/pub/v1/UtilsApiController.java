@@ -92,7 +92,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<ApiListResp> utilsAllActionableGenesGet() {
+    public ResponseEntity<ApiListResp> utilsAllActionableVariantsGet() {
         ApiListResp apiListResp = new ApiListResp();
         Meta meta = MetaUtils.getOKMeta();
         HttpStatus status = HttpStatus.OK;
@@ -123,7 +123,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilsAllActionableGenesTxtGet() {
+    public ResponseEntity<String> utilsAllActionableVariantsTxtGet() {
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
 

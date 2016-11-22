@@ -33,19 +33,19 @@ public interface UtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet();
 
-    @ApiOperation(value = "", notes = "Get All Actionable Genes.", response = ActionableGene.class, responseContainer = "List", tags = "Utils")
+    @ApiOperation(value = "", notes = "Get All Actionable Variants.", response = ActionableGene.class, responseContainer = "List", tags = "Utils")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ActionableGene.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/utils/allActionableGenes", produces = {"application/json", "text/tsv"},
+    @RequestMapping(value = "/utils/allActionableVariants", produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<ApiListResp> utilsAllActionableGenesGet();
+    ResponseEntity<ApiListResp> utilsAllActionableVariantsGet();
 
 
-    @ApiOperation(value = "", notes = "Get All Annotated Variants in text file.", tags = "Utils")
+    @ApiOperation(value = "", notes = "Get All Actionable Variants in text file.", tags = "Utils")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/utils/allActionableGenes.txt",
+    @RequestMapping(value = "/utils/allActionableVariants.txt",
         method = RequestMethod.GET)
-    ResponseEntity<String> utilsAllActionableGenesTxtGet();
+    ResponseEntity<String> utilsAllActionableVariantsTxtGet();
 }
