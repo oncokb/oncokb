@@ -1,14 +1,17 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncokb.model.Drug" table="drug">
         <cache usage="nonstrict-read-write"/>
-        <id name="drugId" type="java.lang.Integer">
-            <column name="drug_id" />
-            <generator class="identity" />
+        <id name="id" type="java.lang.Integer">
+            <column name="id"/>
+            <generator class="identity"/>
         </id>
+        <property name="uuid" type="string">
+            <column length="40" name="uuid"/>
+        </property>
         <property name="drugName" type="string">
             <column name="drug_name" not-null="true"/>
         </property>
@@ -17,26 +20,27 @@
         </property>
         <set name="synonyms" table="drug_synonym" lazy="false">
             <key>
-                <column name="drug_id" not-null="true" />
+                <column name="drug_id" not-null="true"/>
             </key>
-            <element column="synonym" type="string"></element> 
+            <element column="synonym" type="string"></element>
         </set>
         <set name="atcCodes" table="drug_atccode" lazy="false">
             <key>
-                <column name="drug_id" not-null="true" />
+                <column name="drug_id" not-null="true"/>
             </key>
-            <element column="atccode" type="string"></element> 
+            <element column="atccode" type="string"></element>
         </set>
-        <property name="fdaApproved" type="boolean">
-            <column name="fda_approved"/>
-        </property>
     </class>
     
     <query name="findDrugByName">
         <![CDATA[from Drug d where d.drugName=?]]>
     </query>
-    
+
     <query name="findDrugBySynonym">
         <![CDATA[select d from Drug d join d.synonyms s where s=?]]>
+    </query>
+
+    <query name="findDrugByAtcCode">
+        <![CDATA[select d from Drug d join d.atcCodes a where a=?]]>
     </query>
 </hibernate-mapping>

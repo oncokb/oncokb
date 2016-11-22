@@ -15,4 +15,5 @@ public interface ArticleDao extends GenericDao<Article, Integer> {
      * @return gene object or null
      */
     Article findArticleByPmid(String pmid);
+    Article findArticleByAbstract(String abstractContent);
 }

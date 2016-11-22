@@ -125,7 +125,7 @@ angular.module('oncokbApp')
         var results = [];
         $scope.checkInputStatus = function(){
             $scope.disableButton = true;
-            if(!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && ($scope.redHand || $scope.obsolete || $scope.unknown)){
+            if(!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && ($scope.redHand || $scope.obsolete || $scope.inconclusive)){
                 $scope.disableButton = false;
             }
         }
@@ -163,10 +163,10 @@ angular.module('oncokbApp')
                                     }
                                 });
                             }
-                            if($scope.unknown){
+                            if($scope.inconclusive){
                                 _.each(gene.mutations, function(mutation){
-                                    if(mutation.effect.value === 'Unknown' && mutation.oncogenic === 'Unknown'){
-                                        results.push({gene: gene.name, annotation: mutation.name, status: 'Unknown/Unknown'});
+                                    if(mutation.effect.value === 'Inconclusive' && mutation.oncogenic === 'Inconclusive'){
+                                        results.push({gene: gene.name, annotation: mutation.name, status: 'Inconclusive/Inconclusive'});
                                     }
                                 });
                             } 

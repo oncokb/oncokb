@@ -16,10 +16,11 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Boolean geneExist;
     private Boolean variantExist;
     private Boolean alleleExist;
-    private String oncogenic; //1: Oncogenic; 2: Likely Oncogenic; 0: Likely Neutral -1: Unknown
+    private String oncogenic; //1: Oncogenic; 2: Likely Oncogenic; 0: Likely Neutral -1: Inconclusive
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
     private Boolean VUS;
+    private Boolean hotspot;
     private String geneSummary;
     private String variantSummary;
     private String tumorTypeSummary;
@@ -84,6 +85,14 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setVUS(Boolean VUS) {
         this.VUS = VUS;
+    }
+
+    public Boolean getHotspot() {
+        return hotspot;
+    }
+
+    public void setHotspot(Boolean hotspot) {
+        this.hotspot = hotspot;
     }
 
     public Boolean getAlleleExist() {

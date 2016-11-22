@@ -5,10 +5,13 @@
 <hibernate-mapping>
     <class name="org.mskcc.cbio.oncokb.model.Evidence" table="evidence">
         <cache usage="nonstrict-read-write"/>
-        <id name="EvidenceId" type="java.lang.Integer">
-            <column name="evidence_id"/>
+        <id name="id" type="java.lang.Integer">
+            <column name="id"/>
             <generator class="identity"/>
         </id>
+        <property name="uuid" type="string">
+            <column length="40" name="uuid"/>
+        </property>
         <property column="evidence_type" name="evidenceType">
             <type name="org.hibernate.type.EnumType">
                 <param name="enumClass">org.mskcc.cbio.oncokb.model.EvidenceType</param>
@@ -51,14 +54,11 @@
                 <param name="useNamed">true</param>
             </type>
         </property>
-        <property name="shortDescription" type="string">
-            <column length="65535" name="short_description"/>
-        </property>
         <property name="description" type="string">
             <column length="65535" name="description"/>
         </property>
-        <property name="status" type="string">
-            <column length="50" name="status"/>
+        <property name="additionalInfo" type="string">
+            <column length="65535" name="additional_info"/>
         </property>
         <property name="lastEdit" type="date">
             <column name="last_edit"/>
@@ -89,61 +89,61 @@
         </set>
     </class>
     <query name="findEvidencesByAlteration">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=?]]>
     </query>
     <query name="findEvidencesByAlterationAndTumorType">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=:alt and (e.cancerType=:tt or e.subtype=:tt)]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=:alt and (e.cancerType=:tt or e.subtype=:tt)]]>
     </query>
     <query name="findEvidencesByAlterationAndCancerType">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.cancerType=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.cancerType=?]]>
     </query>
     <query name="findEvidencesByAlterationAndCancerTypeNoSubtype">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.cancerType=? and e.subtype is null]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.cancerType=? and e.subtype is null]]>
     </query>
     <query name="findEvidencesByAlterationAndSubtype">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.subtype=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.subtype=?]]>
     </query>
     <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tt)) and  e.evidenceType in (:ets)]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tt)) and  e.evidenceType in (:ets)]]>
     </query>
     <query name="findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets)]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets)]]>
     </query>
     <query name="findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.subtype is null]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.subtype is null]]>
     </query>
     <query name="findEvidencesByAlterationsAndSubtypesAndEvidenceTypes">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets)]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets)]]>
     </query>
     <query name="findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tts)) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tts)) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
     </query>
     <query name="findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
     </query>
     <query name="findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) and e.subtype is null ]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) and e.subtype is null ]]>
     </query>
     <query name="findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) ]]>
     </query>
     <query name="findEvidencesByAlterationAndEvidenceType">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=?]]>
     </query>
     <query name="findEvidencesByAlterationAndEvidenceTypeAndLevels">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.levelOfEvidence=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.levelOfEvidence=?]]>
     </query>
     <query name="findEvidencesByAlterationAndEvidenceTypeAndTumorType">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=:alt and e.evidenceType=:et and (e.cancerType=:tt or e.subtype=:tt)]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=:alt and e.evidenceType=:et and (e.cancerType=:tt or e.subtype=:tt)]]>
     </query>
     <query name="findEvidencesByAlterationAndEvidenceTypeAndCancerType">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.cancerType=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.cancerType=?]]>
     </query>
     <query name="findEvidencesByAlterationAndEvidenceTypeAndCancerTypeNoSubtype">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.cancerType=? and e.subtype is null ]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.cancerType=? and e.subtype is null ]]>
     </query>
     <query name="findEvidencesByAlterationAndEvidenceTypeAndSubtype">
-        <![CDATA[select e from Evidence e join e.alterations a where a.alterationId=? and e.evidenceType=? and e.subtype=?]]>
+        <![CDATA[select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.subtype=?]]>
     </query>
     <query name="findEvidencesByGene">
         <![CDATA[select e from Evidence e where e.gene=?]]>
@@ -185,16 +185,19 @@
         <![CDATA[select e from Evidence e join e.alterations a where e.gene=? and e.subtype=?]]>
     </query>
     <query name="findEvidencesByIds">
-        <![CDATA[select e from Evidence e where e.EvidenceId in (:ids)]]>
+        <![CDATA[select e from Evidence e where e.id in (:ids)]]>
+    </query>
+    <query name="findEvidencesByUUIDs">
+        <![CDATA[select e from Evidence e where e.uuid in (:uuids)]]>
     </query>
     <query name="findTumorTypesWithEvidencesForAlterations">
-        <![CDATA[select distinct e.cancerType, e.subtype from Evidence e join e.alterations a where a.alterationId in (:alts) ]]>
+        <![CDATA[select distinct e.cancerType, e.subtype from Evidence e join e.alterations a where a.id in (:alts) ]]>
     </query>
     <query name="findCancerTypesWithEvidencesForAlterations">
-        <![CDATA[select distinct e.cancerType from Evidence e join e.alterations a where a.alterationId in (:alts)]]>
+        <![CDATA[select distinct e.cancerType from Evidence e join e.alterations a where a.id in (:alts)]]>
     </query>
     <query name="findSubtypesWithEvidencesForAlterations">
-        <![CDATA[select distinct e.subtype from Evidence e join e.alterations a where a.alterationId in (:alts)]]>
+        <![CDATA[select distinct e.subtype from Evidence e join e.alterations a where a.id in (:alts)]]>
     </query>
     <query name="findAllCancerTypes">
         <![CDATA[select distinct e.cancerType from Evidence e where e.cancerType is not null]]>

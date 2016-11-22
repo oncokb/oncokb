@@ -87,11 +87,7 @@ public final class VariantAnnotationXML {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");
             sb.append("    <description>");
-            if (ev.getShortDescription() != null) {
-                sb.append(StringEscapeUtils.escapeXml(ev.getShortDescription()).trim());
-            } else {
-                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
-            }
+            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
             sb.append("</description>\n");
             exportRefereces(ev, sb, "    ");
             sb.append("</gene_annotation>\n");
@@ -111,11 +107,7 @@ public final class VariantAnnotationXML {
             }
             sb.append("</effect>\n");
             sb.append("    <description>");
-            if (ev.getShortDescription() != null) {
-                sb.append(StringEscapeUtils.escapeXml(ev.getShortDescription()).trim());
-            } else if (ev.getDescription() != null) {
-                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
-            }
+            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
             sb.append("</description>\n");
             if (ev != null) {
                 exportRefereces(ev, sb, "    ");
@@ -138,10 +130,7 @@ public final class VariantAnnotationXML {
                 sbTumorType.append("    <prevalence>\n");
                 sbTumorType.append("        <description>\n");
                 for (Evidence ev : prevalanceEbs) {
-                    String description = ev.getShortDescription();
-                    if (description == null) {
-                        description = ev.getDescription();
-                    }
+                    String description = ev.getDescription();
                     if (description != null) {
                         sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
                     }
@@ -161,10 +150,7 @@ public final class VariantAnnotationXML {
                 sbTumorType.append("    <prognostic_implications>\n");
                 sbTumorType.append("        <description>\n");
                 for (Evidence ev : prognosticEbs) {
-                    String description = ev.getShortDescription();
-                    if (description == null) {
-                        description = ev.getDescription();
-                    }
+                    String description = ev.getDescription();
                     if (description != null) {
                         sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
                     }
@@ -445,12 +431,6 @@ public final class VariantAnnotationXML {
         }
         sb.append("</phase>\n");
 
-        for (Alteration alteration : trial.getAlterations()) {
-            sb.append(indent).append("    <biomarker>");
-            sb.append(StringEscapeUtils.escapeXml(alteration.toString()));
-            sb.append("</biomarker>\n");
-        }
-
         for (Drug drug : trial.getDrugs()) {
             sb.append(indent).append("    <intervention>");
             sb.append(StringEscapeUtils.escapeXml(drug.getDrugName()));
@@ -491,9 +471,7 @@ public final class VariantAnnotationXML {
         }
 
         sb.append(indent).append("<description>");
-        if (evidence.getShortDescription() != null) {
-            sb.append(StringEscapeUtils.escapeXml(evidence.getShortDescription()).trim());
-        } else if (evidence.getDescription() != null) {
+        if (evidence.getDescription() != null) {
             sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
         }
         sb.append("</description>\n");

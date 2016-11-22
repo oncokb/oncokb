@@ -20,7 +20,7 @@ public interface DrugBo extends GenericBo<Drug> {
      * @param drugNames
      * @return 
      */
-    List<Drug> findDrugsByName(Collection<String> drugNames);
+    List<Drug> findDrugsByNames(Collection<String> drugNames);
     
     /**
      * 
@@ -34,7 +34,14 @@ public interface DrugBo extends GenericBo<Drug> {
      * @param synonym
      * @return 
      */
-    List<Drug> findDrugBySynonym(String synonym);
+    List<Drug> findDrugsBySynonym(String synonym);
+
+    /**
+     *
+     * @param atcCode
+     * @return
+     */
+    List<Drug> findDrugsByAtcCode(String atcCode);
     
     /**
      * 

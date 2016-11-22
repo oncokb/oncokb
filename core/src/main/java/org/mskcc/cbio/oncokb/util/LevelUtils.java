@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class LevelUtils {
     public static final List<LevelOfEvidence> LEVELS = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
+        Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
             LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_1)
     );
 
@@ -135,10 +135,12 @@ public class LevelUtils {
             return null;
 
         if (convertLevels.contains(level)) {
-            if (sameIndication) {
-                return LevelOfEvidence.LEVEL_3A;
-            } else {
-                return LevelOfEvidence.LEVEL_3B;
+            if (!sameIndication) {
+                if(level.equals(LevelOfEvidence.LEVEL_3A)) {
+                    return LevelOfEvidence.LEVEL_3B;
+                }else{
+                    return LevelOfEvidence.LEVEL_2B;
+                }
             }
         }
 
@@ -173,5 +175,28 @@ public class LevelUtils {
             flag = true;
         }
         return flag;
+    }
+
+    public static Set<LevelOfEvidence> getAllLevels() {
+        return new HashSet<>(LEVELS);
+    }
+
+    public static Set<LevelOfEvidence> getSensitiveLevels() {
+        return new HashSet<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_1);
+            add(LevelOfEvidence.LEVEL_2A);
+            add(LevelOfEvidence.LEVEL_2B);
+            add(LevelOfEvidence.LEVEL_3A);
+            add(LevelOfEvidence.LEVEL_3B);
+            add(LevelOfEvidence.LEVEL_4);
+        }};
+    }
+
+    public static Set<LevelOfEvidence> getResistanceLevels() {
+        return new HashSet<LevelOfEvidence>() {{
+            add(LevelOfEvidence.LEVEL_R1);
+            add(LevelOfEvidence.LEVEL_R2);
+            add(LevelOfEvidence.LEVEL_R3);
+        }};
     }
 }

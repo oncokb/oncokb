@@ -2,12 +2,13 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
  * @author jgao
  */
 public class Gene implements Serializable {
@@ -15,9 +16,12 @@ public class Gene implements Serializable {
     private int entrezGeneId;
     private String hugoSymbol;
     private String name;
-    private String status;
+    @ApiModelProperty(value = "tumorSuppressorGene")
+    private Boolean TSG;
+    private Boolean oncogene;
+    private String curatedIsoform;
+    private String curatedRefSeq;
 
-    private Set<String> geneLabels = new HashSet<String>(0);
     private Set<String> geneAliases = new HashSet<String>(0);
 
     public Gene() {
@@ -28,14 +32,12 @@ public class Gene implements Serializable {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
         this.name = name;
-        this.status = "not ready";
     }
+
     public Gene(int entrezGeneId, String hugoSymbol, String name, String summary, Set<String> geneLabels, Set<String> geneAliases) {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
         this.name = name;
-        this.status = "not ready";
-        this.geneLabels = geneLabels;
         this.geneAliases = geneAliases;
     }
 
@@ -67,23 +69,6 @@ public class Gene implements Serializable {
         this.name = name;
     }
 
-    public Set<String> getGeneLabels() {
-        return this.geneLabels;
-    }
-
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setGeneLabels(Set<String> geneLabels) {
-        this.geneLabels = geneLabels;
-    }
-
     public Set<String> getGeneAliases() {
         return this.geneAliases;
     }
@@ -93,6 +78,37 @@ public class Gene implements Serializable {
         this.geneAliases = geneAliases;
     }
 
+    public Boolean getTSG() {
+        return TSG;
+    }
+
+    public void setTSG(Boolean TSG) {
+        this.TSG = TSG;
+    }
+
+    public Boolean getOncogene() {
+        return oncogene;
+    }
+
+    public void setOncogene(Boolean oncogene) {
+        this.oncogene = oncogene;
+    }
+
+    public String getCuratedIsoform() {
+        return curatedIsoform;
+    }
+
+    public void setCuratedIsoform(String curatedIsoform) {
+        this.curatedIsoform = curatedIsoform;
+    }
+
+    public String getCuratedRefSeq() {
+        return curatedRefSeq;
+    }
+
+    public void setCuratedRefSeq(String curatedRefSeq) {
+        this.curatedRefSeq = curatedRefSeq;
+    }
 
     public int hashCode() {
         int hash = 3;

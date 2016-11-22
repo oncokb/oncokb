@@ -3,8 +3,8 @@ package org.mskcc.cbio.oncokb.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.RespMeta;
-import org.mskcc.cbio.oncokb.model.ShortGene;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,18 +14,18 @@ import java.util.Set;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class ApiGenes {
 
-    private Set<ShortGene> data = new HashSet<ShortGene>();
+    private Set<Gene> data = new HashSet<Gene>();
     private RespMeta meta = new RespMeta();
 
     /**
      **/
     @ApiModelProperty(value = "")
     @JsonProperty("data")
-    public Set<ShortGene> getData() {
+    public Set<Gene> getData() {
         return data;
     }
 
-    public void setData(Set<ShortGene> data) {
+    public void setData(Set<Gene> data) {
         this.data = data;
     }
 

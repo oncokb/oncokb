@@ -2,17 +2,19 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 
 /**
- *
  * @author jgao
  */
 public class ClinicalTrial implements java.io.Serializable {
-    private Integer trialId;
+    @JsonIgnore
+    private Integer id;
     private String nctId;
     private String cdrId;
     private String title;
@@ -24,19 +26,16 @@ public class ClinicalTrial implements java.io.Serializable {
     private String lastChangedDate;
     private Set<String> countries = new HashSet<String>(0);
     private Set<Drug> drugs = new HashSet<Drug>(0);
-    private Set<Gene> genes = new HashSet<Gene>(0);
-    private Set<Alteration> alterations = new HashSet<Alteration>(0);
-    
 
     public ClinicalTrial() {
     }
 
-    public Integer getTrialId() {
-        return trialId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setTrialId(Integer trialId) {
-        this.trialId = trialId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getNctId() {
@@ -118,7 +117,7 @@ public class ClinicalTrial implements java.io.Serializable {
     public void setCountries(Set<String> countries) {
         this.countries = countries;
     }
-    
+
     public boolean isInUSA() {
         return countries.contains("United States");
     }
@@ -131,30 +130,14 @@ public class ClinicalTrial implements java.io.Serializable {
         this.drugs = drugs;
     }
 
-    public Set<Gene> getGenes() {
-        return genes;
-    }
-
-    public void setGenes(Set<Gene> genes) {
-        this.genes = genes;
-    }
-
-    public Set<Alteration> getAlterations() {
-        return alterations;
-    }
-
-    public void setAlterations(Set<Alteration> alterations) {
-        this.alterations = alterations;
-    }
-
-    public  boolean isOpen() {
-        return recruitingStatus!=null &&
-                !recruitingStatus.equalsIgnoreCase("Terminated") &&
-                !recruitingStatus.equalsIgnoreCase("Suspended") &&
-                !recruitingStatus.equalsIgnoreCase("Completed") &&
-                !recruitingStatus.equalsIgnoreCase("Closed") &&
-                !recruitingStatus.equalsIgnoreCase("Active, not recruiting") &&
-                !recruitingStatus.equalsIgnoreCase("Withdrawn");
+    public boolean isOpen() {
+        return recruitingStatus != null &&
+            !recruitingStatus.equalsIgnoreCase("Terminated") &&
+            !recruitingStatus.equalsIgnoreCase("Suspended") &&
+            !recruitingStatus.equalsIgnoreCase("Completed") &&
+            !recruitingStatus.equalsIgnoreCase("Closed") &&
+            !recruitingStatus.equalsIgnoreCase("Active, not recruiting") &&
+            !recruitingStatus.equalsIgnoreCase("Withdrawn");
     }
 
     @Override
@@ -178,6 +161,6 @@ public class ClinicalTrial implements java.io.Serializable {
         }
         return true;
     }
-    
-    
+
+
 }

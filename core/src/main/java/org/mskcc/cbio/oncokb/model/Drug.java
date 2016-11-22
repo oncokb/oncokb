@@ -1,23 +1,27 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
 
 /**
- * 
  * @author jgao
  */
 public class Drug implements java.io.Serializable {
 
 
-     private Integer drugId;
-     private String drugName;
-     private Set<String> synonyms = new HashSet<String>(0);
-     private Boolean fdaApproved;
-     private Set<String> atcCodes;
-     private String description;
+    @JsonIgnore
+    private Integer id;
+    @JsonIgnore
+    private String uuid;
+    private String drugName;
+    private Set<String> synonyms = new HashSet<String>(0);
+    private Set<String> atcCodes;
+    @JsonIgnore
+    private String description;
 
     public Drug() {
     }
@@ -25,46 +29,40 @@ public class Drug implements java.io.Serializable {
     public Drug(String drugName) {
         this.drugName = drugName;
     }
-   
-    
-    public Integer getDrugId() {
-        return this.drugId;
+
+    public Integer getId() {
+        return id;
     }
-    
-    
-    public void setDrugId(Integer drugId) {
-        this.drugId = drugId;
+
+    public void setId(Integer id) {
+        this.id = id;
     }
-    
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public String getDrugName() {
         return this.drugName;
     }
-    
-    
+
     public void setDrugName(String drugName) {
         this.drugName = drugName;
     }
-    
+
     public Set<String> getSynonyms() {
         return this.synonyms;
     }
-    
-    
+
     public void setSynonyms(Set<String> synonyms) {
         this.synonyms = synonyms;
     }
-    
-    public Boolean isFdaApproved() {
-        return this.fdaApproved;
-    }
-    
-    
-    public void setFdaApproved(Boolean fdaApproved) {
-        this.fdaApproved = fdaApproved;
-    }
 
-    
-     @Override
+    @Override
     public int hashCode() {
         int hash = 5;
         hash = 29 * hash + (this.drugName != null ? this.drugName.hashCode() : 0);
@@ -87,8 +85,8 @@ public class Drug implements java.io.Serializable {
         this.description = description;
     }
 
-    
-     @Override
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -102,8 +100,8 @@ public class Drug implements java.io.Serializable {
         }
         return true;
     }
-    
-    
+
+
 }
 
 

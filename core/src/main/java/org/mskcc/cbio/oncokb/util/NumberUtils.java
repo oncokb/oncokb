@@ -19,7 +19,7 @@ public class NumberUtils {
             Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
             GeneNumber geneNumber = new GeneNumber();
 
-            geneNumber.setShortGene(ShortGeneUtils.getShortGeneFromGene(pair.getKey()));
+            geneNumber.setGene(pair.getKey());
 
             LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(pair.getValue());
             geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
@@ -45,7 +45,7 @@ public class NumberUtils {
             Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
             GeneNumber geneNumber = new GeneNumber();
 
-            geneNumber.setShortGene(ShortGeneUtils.getShortGeneFromGene(pair.getKey()));
+            geneNumber.setGene(pair.getKey());
 
             LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), levels);
             geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);

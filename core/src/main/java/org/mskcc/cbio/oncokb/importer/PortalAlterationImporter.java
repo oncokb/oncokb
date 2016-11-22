@@ -70,7 +70,9 @@ public class PortalAlterationImporter {
             System.out.println("No mutation type mapping for " + mutation_type);
         } else {
             for (String consequence : consequences) {
-                alterations.addAll(AlterationUtils.getRelevantAlterations(gene, proteinChange, consequence, proteinStartPosition, proteinEndPosition));
+                Alteration alt = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(),
+                    proteinChange, null, consequence, proteinStartPosition, proteinEndPosition);
+                alterations.addAll(AlterationUtils.getRelevantAlterations(alt));
             }
             alterationsSet = AlterationUtils.excludeVUS(new HashSet<>(alterations));
         }
@@ -128,7 +130,7 @@ public class PortalAlterationImporter {
                         String sampleId = jObject.getString("sample_id");
 
 
-                        Gene gene = entrez_gene_id == null ? GeneUtils.getGeneByHugoSymbol(hugo_gene_symbol) : 
+                        Gene gene = entrez_gene_id == null ? GeneUtils.getGeneByHugoSymbol(hugo_gene_symbol) :
                             GeneUtils.getGeneByEntrezId(entrez_gene_id);
 
                         portalAlteration = new PortalAlteration(cancerType, cancerStudy, sampleId, gene, proteinChange, proteinStartPosition, proteinEndPosition, mutation_type);

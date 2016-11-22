@@ -5,8 +5,8 @@
  */
 package org.mskcc.cbio.oncokb.validation;
 
-import java.util.Properties;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.ListEntry;
@@ -18,7 +18,8 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
-import com.google.api.services.drive.model.File;
+import org.mskcc.cbio.oncokb.util.GoogleAuth;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,10 +29,8 @@ import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.mskcc.cbio.oncokb.util.GoogleAuth;
 
 /**
- *
  * @author jiaojiao
  */
 public class validation {
@@ -41,8 +40,8 @@ public class validation {
         Properties prop = new Properties();
         ValidationConfig config = new ValidationConfig();
         InputStream inputStream = config.getStram(propFileName);
-        
-        if(inputStream != null) {
+
+        if (inputStream != null) {
             try {
                 prop.load(inputStream);
             } catch (IOException ex) {
@@ -51,12 +50,12 @@ public class validation {
         } else {
             throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
         }
-      
+
         String REPORT_PARENT_FOLDER = prop.getProperty("google.report_parent_folder");
         String REPORT_DATA_TEMPLATE = prop.getProperty("google.report_data_template");
         Drive driveService = GoogleAuth.getDriveService();
         System.out.println("Got drive service");
-        String fileName = "Validator Report";            
+        String fileName = "Validator Report";
         File file = new File();
         file.setTitle(fileName);
         file.setParents(Arrays.asList(new ParentReference().setId(REPORT_PARENT_FOLDER)));
@@ -67,7 +66,7 @@ public class validation {
         file = driveService.files().copy(REPORT_DATA_TEMPLATE, file).execute();
 
         System.out.println("Successfully copied file. Start to change file content");
-        
+
         String fileId = file.getId();
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
 
@@ -75,23 +74,23 @@ public class validation {
         SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
 
         WorksheetFeed worksheetFeed = service.getFeed(
-        spreadSheetEntry.getWorksheetFeedUrl(), WorksheetFeed.class);
+            spreadSheetEntry.getWorksheetFeedUrl(), WorksheetFeed.class);
         List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
-        WorksheetEntry worksheet1 = worksheets.get(1), 
-                worksheet2 = worksheets.get(2), 
-                worksheet3 = worksheets.get(3), 
-                worksheet4 = worksheets.get(4), 
-                worksheet5 = worksheets.get(5), 
-                worksheet6 = worksheets.get(6);
-        
+        WorksheetEntry worksheet1 = worksheets.get(1),
+            worksheet2 = worksheets.get(2),
+            worksheet3 = worksheets.get(3),
+            worksheet4 = worksheets.get(4),
+            worksheet5 = worksheets.get(5),
+            worksheet6 = worksheets.get(6);
+
         // Fetch the list feed of the worksheets.
-        URL listFeedUrl1 = worksheet1.getListFeedUrl(), 
-            listFeedUrl2 = worksheet2.getListFeedUrl(), 
-            listFeedUrl3 = worksheet3.getListFeedUrl(), 
-            listFeedUrl4 = worksheet4.getListFeedUrl(), 
-            listFeedUrl5 = worksheet5.getListFeedUrl(), 
+        URL listFeedUrl1 = worksheet1.getListFeedUrl(),
+            listFeedUrl2 = worksheet2.getListFeedUrl(),
+            listFeedUrl3 = worksheet3.getListFeedUrl(),
+            listFeedUrl4 = worksheet4.getListFeedUrl(),
+            listFeedUrl5 = worksheet5.getListFeedUrl(),
             listFeedUrl6 = worksheet6.getListFeedUrl();
-        
+
 
         Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
         Set<Gene> genes = GeneUtils.getAllGenes();
@@ -112,7 +111,7 @@ public class validation {
                 allVariants = evidenceItem.getAlterations();
                 allAlts.addAll(allVariants);
                 for (Alteration alterationItem : allVariants) {
-                    relevantAlterationsMapping.put(alterationItem, new ArrayList<Alteration>(AlterationUtils.getRelevantAlterations(gene, alterationItem.getAlteration(), null, null, null)) );
+                    relevantAlterationsMapping.put(alterationItem, new ArrayList<Alteration>(AlterationUtils.getRelevantAlterations(alterationItem)));
                     if (evidenceItem.getEvidenceType().toString().equals("ONCOGENIC")) {
                         oncogenicityMapping.put(alterationItem, evidenceItem.getKnownEffect());
                     }
@@ -125,16 +124,16 @@ public class validation {
                         }
                         multipleMutationEffects.get(alterationItem).add(evidenceItem);
                     }
-                    if(referencesMapping.containsKey(alterationItem)){
+                    if (referencesMapping.containsKey(alterationItem)) {
                         Set<String> oldPMIDs = referencesMapping.get(alterationItem);
                         Set<String> newPMIDs = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
                         newPMIDs.addAll(oldPMIDs);
                         referencesMapping.put(alterationItem, newPMIDs);
-                    }else{
+                    } else {
                         referencesMapping.put(alterationItem, EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem))));
                     }
-                    if(!altsWithDescriptions.contains(alterationItem)){    
-                        if(evidenceItem.getDescription() != null && !evidenceItem.getDescription().isEmpty() || evidenceItem.getShortDescription() != null && !evidenceItem.getShortDescription().isEmpty()){
+                    if (!altsWithDescriptions.contains(alterationItem)) {
+                        if (evidenceItem.getDescription() != null && !evidenceItem.getDescription().isEmpty()) {
                             altsWithDescriptions.add(alterationItem);
                         }
                     }
@@ -146,12 +145,12 @@ public class validation {
                     if (oncogenicityMapping.containsKey(alt)
                         && oncogenicityMapping.get(alt) != null
                         && oncogenicityMapping.get(relevantAlt) != null
-                        && oncogenicityMapping.containsKey(relevantAlt) 
+                        && oncogenicityMapping.containsKey(relevantAlt)
                         && !oncogenicityMapping.get(alt).equals(oncogenicityMapping.get(relevantAlt))) {
                         ListEntry row = new ListEntry();
                         row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
                         row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        row.getCustomElements().setValueLocal("Oncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(alt)).getDescription() );
+                        row.getCustomElements().setValueLocal("Oncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(alt)).getDescription());
                         row.getCustomElements().setValueLocal("RelevantAlteration", relevantAlt.getAlteration());
                         row.getCustomElements().setValueLocal("RelevantAlterationOncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(relevantAlt)).getDescription());
                         service.insert(listFeedUrl1, row);
@@ -165,7 +164,7 @@ public class validation {
                         ListEntry row = new ListEntry();
                         row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
                         row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        row.getCustomElements().setValueLocal("MutationEffect", mutationEffectMapping.get(alt) );
+                        row.getCustomElements().setValueLocal("MutationEffect", mutationEffectMapping.get(alt));
                         row.getCustomElements().setValueLocal("RelevantAlteration", relevantAlt.getAlteration());
                         row.getCustomElements().setValueLocal("RelevantAlterationMutationEffect", mutationEffectMapping.get(relevantAlt));
                         service.insert(listFeedUrl2, row);
@@ -174,43 +173,43 @@ public class validation {
                 }
                 if (oncogenicityMapping.containsKey(alt)
                     && oncogenicityMapping.get(alt) != null
-                    && oncogenicityMapping.get(alt).equals(Oncogenicity.UNKNOWN.getOncogenic()) 
-                    && mutationEffectMapping.containsKey(alt) 
+                    && oncogenicityMapping.get(alt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
+                    && mutationEffectMapping.containsKey(alt)
                     && mutationEffectMapping.get(alt) != null
-                    && mutationEffectMapping.get(alt).equals(MutationEffect.UNKNOWN.getMutation_effect())) {
+                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutation_effect())) {
                     Integer relevantsSize = relevantAlts.size();
                     Integer relevantCount = 0;
                     for (Alteration relevantAlt : relevantAlts) {
                         relevantCount++;
-                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.UNKNOWN.getOncogenic()) 
-                                && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.UNKNOWN.getMutation_effect())) {
+                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt) != null && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
+                            && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutation_effect())) {
                             ListEntry row = new ListEntry();
-                        row.getCustomElements().setValueLocal("Gene", relevantAlt.getGene().getHugoSymbol());
-                        row.getCustomElements().setValueLocal("Alteration", relevantAlt.getAlteration());
-                        service.insert(listFeedUrl3, row);
+                            row.getCustomElements().setValueLocal("Gene", relevantAlt.getGene().getHugoSymbol());
+                            row.getCustomElements().setValueLocal("Alteration", relevantAlt.getAlteration());
+                            service.insert(listFeedUrl3, row);
 
                         }
                     }
                 }
                 if (!oncogenicityMapping.containsKey(alt) && !mutationEffectMapping.containsKey(alt) && !VUSAlterations.contains(alt) && !specialAlterations.contains(alt.getAlteration()) && !altsWithDescriptions.contains(alt)) {
                     ListEntry row = new ListEntry();
-                        row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
-                        row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        service.insert(listFeedUrl4, row);
+                    row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
+                    row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
+                    service.insert(listFeedUrl4, row);
 
                 }
                 if (oncogenicityMapping.containsKey(alt) && mutationEffectMapping.containsKey(alt) && referencesMapping.get(alt).size() == 0) {
                     ListEntry row = new ListEntry();
-                        row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
-                        row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        service.insert(listFeedUrl5, row);
+                    row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
+                    row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
+                    service.insert(listFeedUrl5, row);
 
                 }
                 if (multipleMutationEffects.containsKey(alt) && multipleMutationEffects.get(alt).size() > 1) {
                     ListEntry row = new ListEntry();
-                        row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
-                        row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        service.insert(listFeedUrl6, row);
+                    row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
+                    row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
+                    service.insert(listFeedUrl6, row);
 
                 }
 

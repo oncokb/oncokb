@@ -23,7 +23,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     }
     
     @Override
-    public List<Drug> findDrugsByName(Collection<String> drugNames) {
+    public List<Drug> findDrugsByNames(Collection<String> drugNames) {
         List<Drug> drugs = new ArrayList<Drug>();
         for (String drugName : drugNames) {
             Drug drug = getDao().findDrugByName(drugName);
@@ -35,7 +35,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     }
 
     @Override
-    public List<Drug> findDrugBySynonym(String synonym) {
+    public List<Drug> findDrugsBySynonym(String synonym) {
         return getDao().findDrugBySynonym(synonym);
     }
 
@@ -46,7 +46,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
             return Collections.singletonList(drug);
         }
         
-        return findDrugBySynonym(drugNameOrSynonym);
+        return findDrugsBySynonym(drugNameOrSynonym);
     }
 
     @Override
@@ -57,5 +57,10 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
         }
         
         return null;
+    }
+
+    @Override
+    public List<Drug> findDrugsByAtcCode(String atcCode) {
+        return getDao().findDrugByAtcCode(atcCode);
     }
 }

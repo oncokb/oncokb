@@ -3,11 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.OncoTreeType;
+import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -17,16 +15,10 @@ import java.util.*;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
-
-    private static final String TUMOR_TYPE_ALL_TUMORS = "All Tumors";
     private static final String ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
     private static List<OncoTreeType> allOncoTreeCancerTypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeCancerTypesFromSource());
-        add(new OncoTreeType(null, null, "All Tumors", null, null));
-        add(new OncoTreeType(null, null, "All Liquid Tumors", null, null));
-        add(new OncoTreeType(null, null, "All Solid Tumors", null, null));
-        add(new OncoTreeType(null, null, "All Pediatric Tumors", null, null));
-        add(new OncoTreeType(null, null, "Germline Disposition", null, null));
+        addAll(getAllSpecialTumorOncoTreeTypes());
     }};
     private static List<OncoTreeType> allOncoTreeSubtypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeSubtypesByCancerTypesFromSource(allOncoTreeCancerTypes));
@@ -116,7 +108,7 @@ public class TumorTypeUtils {
     public static List<OncoTreeType> getOncoTreeCancerTypes(List<String> cancerTypes) {
         List<OncoTreeType> mapped = new ArrayList<>();
 
-        if(cancerTypes != null) {
+        if (cancerTypes != null) {
             for (String cancerType : cancerTypes) {
                 for (OncoTreeType oncoTreeType : allOncoTreeCancerTypes) {
                     if (cancerType.equalsIgnoreCase(oncoTreeType.getCancerType())) {
@@ -190,7 +182,7 @@ public class TumorTypeUtils {
     public static List<OncoTreeType> getOncoTreeSubtypesByCode(List<String> codes) {
         List<OncoTreeType> mapped = new ArrayList<>();
 
-        if(codes != null) {
+        if (codes != null) {
             for (String code : codes) {
                 for (OncoTreeType oncoTreeType : allOncoTreeSubtypes) {
                     if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
@@ -223,9 +215,9 @@ public class TumorTypeUtils {
      *
      * @return
      */
-    public static OncoTreeType getMappedOncoTreeAllTumor() {
+    public static OncoTreeType getMappedSpecialTumor(SpecialTumorType specialTumorType) {
         for (OncoTreeType cancerType : allOncoTreeCancerTypes) {
-            if (cancerType.getCancerType().equalsIgnoreCase(TUMOR_TYPE_ALL_TUMORS)) {
+            if (cancerType.getCancerType().equalsIgnoreCase(specialTumorType.getTumorType())) {
                 return cancerType;
             }
         }
@@ -242,7 +234,7 @@ public class TumorTypeUtils {
         List<OncoTreeType> matches = new ArrayList<>();
         List<OncoTreeType> allCancerTypes = getAllCancerTypes();
         List<OncoTreeType> allSubtypes = getAllSubtypes();
-        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
+        OncoTreeType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
 
         for (OncoTreeType query : cancerTypeQueries) {
             if (query != null && !query.equals(allTumor)) {
@@ -293,7 +285,7 @@ public class TumorTypeUtils {
         if (questTumorTypeMap == null) {
             questTumorTypeMap = new HashMap<String, List<OncoTreeType>>();
 
-            OncoTreeType tumorTypeAll = getMappedOncoTreeAllTumor();
+            OncoTreeType tumorTypeAll = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
 
             List<String> lines;
             try {
@@ -349,8 +341,8 @@ public class TumorTypeUtils {
             }
         }
 
-        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
-        if(allTumor != null) {
+        OncoTreeType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
+        if (allTumor != null) {
             ret.add(allTumor);
         }
         return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
@@ -364,10 +356,10 @@ public class TumorTypeUtils {
         if (mapped == null) {
             mapped = getOncoTreeSubtypeByName(tumorType);
         }
-        
+
         if (mapped == null) {
             mapped = getOncoTreeCancerType(tumorType);
-        }else {
+        } else {
             //Also include the cancer type into relevant types
             types.add(getOncoTreeCancerType(mapped.getCancerType()));
         }
@@ -381,7 +373,7 @@ public class TumorTypeUtils {
         if (cbioTumorTypeMap == null) {
             cbioTumorTypeMap = new HashMap<String, List<OncoTreeType>>();
 
-            OncoTreeType tumorTypeAll = getMappedOncoTreeAllTumor();
+            OncoTreeType tumorTypeAll = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
 
             List<String> lines;
             try {
@@ -428,11 +420,11 @@ public class TumorTypeUtils {
         }
 
         cbioTumorType = cbioTumorType == null ? null : cbioTumorType.toLowerCase();
-        
+
         if (cbioTumorType == null) {
             return new LinkedHashSet<>();
         }
-        
+
         List<OncoTreeType> ret = cbioTumorTypeMap.get(cbioTumorType);
 
         if (ret == null || ret.size() == 0) {
@@ -441,12 +433,12 @@ public class TumorTypeUtils {
                 ret = new ArrayList<>(oncoTreeTypes);
             }
         }
-        
-        OncoTreeType allTumor = getMappedOncoTreeAllTumor();
-        if(allTumor != null) {
+
+        OncoTreeType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
+        if (allTumor != null) {
             ret.add(allTumor);
         }
-        
+
         return ret == null ? new LinkedHashSet<OncoTreeType>() : new LinkedHashSet<>(ret);
     }
 
@@ -475,7 +467,6 @@ public class TumorTypeUtils {
         List<OncoTreeType> subtypes = new ArrayList<>();
         try {
             String url = ONCO_TREE_API_URL + "tumorTypes/search";
-            URL obj = new URL(url);
             JSONObject postData = new JSONObject();
             postData.put("version", "oncokb");
 
@@ -489,46 +480,41 @@ public class TumorTypeUtils {
             }
             postData.put("queries", queries);
 
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            String response = HttpUtils.postRequest(url, postData.toString());
+            if(response != null && !response.equals("TIMEOUT")) {
+                Map map = JsonUtils.jsonToMap(response);
 
-            //add reuqest header
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(postData.toString());
-            wr.flush();
-            wr.close();
-
-            int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
-
-            Map map = JsonUtils.jsonToMap(FileUtils.readStream(con.getInputStream()));
-
-            if (map.get("data") != null) {
-                for (List<Map<String, Object>> queryResult : (List<List<Map<String, Object>>>) map.get("data")) {
-                    for (Map<String, Object> datum : queryResult) {
-                        OncoTreeType subtype = new OncoTreeType();
-                        Map<String, String> mainType = (Map<String, String>) datum.get("mainType");
-                        if (mainType != null) {
-                            subtype.setCancerType(mainType.get("name"));
+                if (map.get("data") != null) {
+                    for (List<Map<String, Object>> queryResult : (List<List<Map<String, Object>>>) map.get("data")) {
+                        for (Map<String, Object> datum : queryResult) {
+                            OncoTreeType subtype = new OncoTreeType();
+                            Map<String, String> mainType = (Map<String, String>) datum.get("mainType");
+                            if (mainType != null) {
+                                subtype.setCancerType(mainType.get("name"));
+                            }
+                            subtype.setSubtype((String) datum.get("name"));
+                            subtype.setCode((String) datum.get("code"));
+                            subtype.setLevel((String) datum.get("level"));
+                            subtype.setTissue((String) datum.get("tissue"));
+                            subtypes.add(subtype);
                         }
-                        subtype.setSubtype((String) datum.get("name"));
-                        subtype.setCode((String) datum.get("code"));
-                        subtype.setLevel((String) datum.get("level"));
-                        subtype.setTissue((String) datum.get("tissue"));
-                        subtypes.add(subtype);
                     }
                 }
+            }else {
+                System.out.println("Error access OncoTree Service.");
             }
-
         } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
         }
         return subtypes;
+    }
+
+    private static Set<OncoTreeType> getAllSpecialTumorOncoTreeTypes() {
+        Set<OncoTreeType> types = new HashSet<>();
+        for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
+            types.add(new OncoTreeType(null, null, specialTumorType.getTumorType(), null, null));
+        }
+        return types;
     }
 }

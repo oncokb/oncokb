@@ -93,6 +93,9 @@ public class SummaryController {
                 case "variantCustomized":
                     summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
+                case "tumorType":
+                    summary = SummaryUtils.tumorTypeSummary(query.getGene(), query.getQueryAlteration(), query.getAlterations(), query.getQueryTumorType(), new HashSet<OncoTreeType>(query.getTumorTypes()));
+                    break;
                 default:
                     summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;

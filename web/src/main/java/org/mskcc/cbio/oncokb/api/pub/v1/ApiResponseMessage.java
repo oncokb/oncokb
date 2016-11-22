@@ -1,9 +1,12 @@
-package org.mskcc.cbio.oncokb.api;
+package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import javax.xml.bind.annotation.XmlTransient;
 
+@javax.annotation.Generated(
+    value = "class io.swagger.codegen.languages.SpringCodegen",
+    date = "2016-10-14T18:47:53.991Z")
+
 @javax.xml.bind.annotation.XmlRootElement
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class ApiResponseMessage {
     public static final int ERROR = 1;
     public static final int WARNING = 2;

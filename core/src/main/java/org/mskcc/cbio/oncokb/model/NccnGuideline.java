@@ -2,30 +2,42 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 /**
- *
  * @author jgao
  */
 public class NccnGuideline implements java.io.Serializable {
-    private Integer nccnGuidelineId;
+    @JsonIgnore
+    private Integer id;
+    @JsonIgnore
+    private String uuid;
     private String disease;
     private String version;
     private String pages;
     private String category;
-    private String shortDescription;
     private String description;
+    private String additionalInfo;
 
     public NccnGuideline() {
     }
 
-    public Integer getNccnGuidelineId() {
-        return nccnGuidelineId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setNccnGuidelineId(Integer nccnGuidelineId) {
-        this.nccnGuidelineId = nccnGuidelineId;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getDisease() {
@@ -60,14 +72,6 @@ public class NccnGuideline implements java.io.Serializable {
         this.category = category;
     }
 
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -76,10 +80,18 @@ public class NccnGuideline implements java.io.Serializable {
         this.description = description;
     }
 
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + Objects.hashCode(this.nccnGuidelineId);
+        hash = 89 * hash + Objects.hashCode(this.id);
         return hash;
     }
 
@@ -92,12 +104,11 @@ public class NccnGuideline implements java.io.Serializable {
             return false;
         }
         final NccnGuideline other = (NccnGuideline) obj;
-        if (!Objects.equals(this.nccnGuidelineId, other.nccnGuidelineId)) {
+        if (!Objects.equals(this.id, other.id)) {
             return false;
         }
         return true;
     }
-    
-    
-    
+
+
 }

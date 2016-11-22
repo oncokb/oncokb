@@ -15,4 +15,5 @@ public interface ArticleBo extends GenericBo<Article> {
      * @return 
      */
     Article findArticleByPmid(String pmid);
+    Article findArticleByAbstract(String abstractContent);
 }

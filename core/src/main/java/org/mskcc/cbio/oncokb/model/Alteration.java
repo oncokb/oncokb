@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,8 +11,12 @@ import java.util.Set;
  */
 public class Alteration implements java.io.Serializable {
 
-    private Integer alterationId;
+    @JsonIgnore
+    private Integer id;
+    @JsonIgnore
+    private String uuid;
     private Gene gene;
+    @JsonIgnore
     private AlterationType alterationType;
     private VariantConsequence consequence;
 
@@ -20,8 +26,8 @@ public class Alteration implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String variantResidues;
-    private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
-    private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);;
+    @JsonIgnore
+    private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);
 
     public Set<PortalAlteration> getPortalAlterations() {
         return portalAlterations;
@@ -30,24 +36,24 @@ public class Alteration implements java.io.Serializable {
     public void setPortalAlterations(Set<PortalAlteration> portalAlterations) {
         this.portalAlterations = portalAlterations;
     }
+
     public Alteration() {
     }
 
-    public Set<ClinicalTrial> getClinicalTrials() {
-        return clinicalTrials;
+    public Integer getId() {
+        return id;
     }
 
-    public void setClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
-        this.clinicalTrials = clinicalTrials;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public Integer getAlterationId() {
-        return this.alterationId;
+    public String getUuid() {
+        return uuid;
     }
 
-
-    public void setAlterationId(Integer alterationId) {
-        this.alterationId = alterationId;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Gene getGene() {
