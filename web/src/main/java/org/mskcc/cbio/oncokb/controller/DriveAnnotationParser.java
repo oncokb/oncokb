@@ -25,7 +25,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 /**
  * @author jgao
  * 
- * 1. PMIDs in Additional Inforamtion are not parsed.
+ * 1. Additional Inforamtion is not parsed.
  */
 @Controller
 public class DriveAnnotationParser {
@@ -316,9 +316,9 @@ public class DriveAnnotationParser {
                 (mutationObj.getString("description").trim().isEmpty() ? null :
                     mutationObj.getString("description").trim())
                 : null;
-            String additionalME = mutationObj.has("short") ?
-                (mutationObj.getString("short").trim().isEmpty() ? null : mutationObj.getString("short").trim())
-                : null;
+//            String additionalME = mutationObj.has("short") ?
+//                (mutationObj.getString("short").trim().isEmpty() ? null : mutationObj.getString("short").trim())
+//                : null;
 
             if (effect != null || effectDesc != null) {
                 // save
@@ -332,9 +332,9 @@ public class DriveAnnotationParser {
                     setDocuments(effectDesc, evidence);
                 }
 
-                if ((additionalME != null && !additionalME.trim().isEmpty())) {
-                    evidence.setAdditionalInfo(additionalME);
-                }
+//                if ((additionalME != null && !additionalME.trim().isEmpty())) {
+//                    evidence.setAdditionalInfo(additionalME);
+//                }
 
                 evidence.setKnownEffect(effect);
 
@@ -501,11 +501,11 @@ public class DriveAnnotationParser {
             evidence.setCancerType(oncoTreeType.getCancerType());
             evidence.setSubtype(oncoTreeType.getCode());
 
-            if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
-                System.out.println("###         Short prevalence: " + alterations.toString());
-                String additionalInfo = cancerObj.getString("shortPrevalence").trim();
-                evidence.setAdditionalInfo(additionalInfo);
-            }
+//            if (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty()) {
+//                System.out.println("###         Short prevalence: " + alterations.toString());
+//                String additionalInfo = cancerObj.getString("shortPrevalence").trim();
+//                evidence.setAdditionalInfo(additionalInfo);
+//            }
 
             if (cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) {
                 System.out.println("###         Full prevalence: " + alterations.toString());
@@ -529,11 +529,11 @@ public class DriveAnnotationParser {
             evidence.setCancerType(oncoTreeType.getCancerType());
             evidence.setSubtype(oncoTreeType.getCode());
 
-            if (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty()) {
-                System.out.println("###         Short prognostic implications: " + alterations.toString());
-                String additionalInfo = cancerObj.getString("shortProgImp").trim();
-                evidence.setAdditionalInfo(additionalInfo);
-            }
+//            if (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty()) {
+//                System.out.println("###         Short prognostic implications: " + alterations.toString());
+//                String additionalInfo = cancerObj.getString("shortProgImp").trim();
+//                evidence.setAdditionalInfo(additionalInfo);
+//            }
 
             if (cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) {
                 System.out.println("###         Full prognostic implications: " + alterations.toString());
@@ -731,10 +731,10 @@ public class DriveAnnotationParser {
             }
 
             // description
-            if (drugObj.has("short") && !drugObj.getString("short").trim().isEmpty()) {
-                String additionalInfo = drugObj.getString("short").trim();
-                evidence.setAdditionalInfo(additionalInfo);
-            }
+//            if (drugObj.has("short") && !drugObj.getString("short").trim().isEmpty()) {
+//                String additionalInfo = drugObj.getString("short").trim();
+//                evidence.setAdditionalInfo(additionalInfo);
+//            }
             if (drugObj.has("description") && !drugObj.getString("description").trim().isEmpty()) {
                 String desc = drugObj.getString("description").trim();
                 evidence.setDescription(desc);
@@ -793,11 +793,11 @@ public class DriveAnnotationParser {
         nccnGuideline.setCategory(category);
         nccnGuideline.setDescription(nccnDescription);
 
-        if (nccnObj.has("short") && !nccnObj.getString("short").trim().isEmpty()) {
-            String additionalInfo = nccnObj.getString("short").trim();
-            evidence.setAdditionalInfo(additionalInfo);
-            nccnGuideline.setAdditionalInfo(additionalInfo);
-        }
+//        if (nccnObj.has("short") && !nccnObj.getString("short").trim().isEmpty()) {
+//            String additionalInfo = nccnObj.getString("short").trim();
+//            evidence.setAdditionalInfo(additionalInfo);
+//            nccnGuideline.setAdditionalInfo(additionalInfo);
+//        }
 
         nccnGuideLineBo.save(nccnGuideline);
 
