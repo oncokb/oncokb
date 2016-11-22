@@ -59,7 +59,7 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
                 "\n" +
                 "In order to expose the data structure, we return object model in the Swagger response class " +
                 "directly instead of envelope structure. So you may not be able to reproduce data structure through" +
-                " swagger.json directly. Please let us know if you want to do so. ",
+                " swagger.json directly.",
             "v1.0.0",
             "http://oncokb.org/#/terms",
             new Contact("OncoKB", "http://www.oncokb.org", "team@oncokb.org"),
