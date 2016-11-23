@@ -386,31 +386,6 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.removeHotspot = function() {
-                removeHotspot($scope.documents, 0, function() {
-                });
-            };
-
-            $scope.initialHotspot = function() {
-                DatabaseConnector.getHotspotList(function(data) {
-                    if (data) {
-                        initHotspot(data, 0, function() {
-                            console.log('finished......');
-                        });
-                    }
-                });
-            };
-
-            $scope.initialAutoMutation = function() {
-                DatabaseConnector.getAutoMutationList(function(data) {
-                    if (data) {
-                        initAutoMutation(data, 0, function() {
-                            console.log('finished......');
-                        });
-                    }
-                });
-            };
-
             $scope.changeData = function() {
                 console.info('Gene\tVariant\tTumorType\tTreatment' +
                     '\tFDA approved indication\tLevel\tShortDescription\t' +
@@ -1434,230 +1409,6 @@ angular.module('oncokbApp')
                 return alteration;
             }
 
-            function initHotspot(list, listIndex, callback) {
-                if (listIndex < list.length) {
-                    var hugoSymbol = list[listIndex].hugoSymbol || null;
-                    var codon = list[listIndex].codon || null;
-                    var aa = list[listIndex].aa || null;
-                    var alterations = getAlteration(codon, aa) || null;
-                    var pmid = list[listIndex].pmid || null;
-                    var qval = Number(list[listIndex].qval) || null;
-                    var tumorType = list[listIndex].tumorType || null;
-                    // console.log('Got gene symbol.', list[listIndex]);
-                    if (hugoSymbol) {
-                        var document = Documents.get({title: hugoSymbol});
-                        // console.log('Got gene document.', document);
-
-                        if (document instanceof Array && document.length > 0) {
-                            if (document.length > 1) {
-                                console.log('More than one matched document have been found: ', hugoSymbol);
-                            }
-                            if (alterations && alterations.length > 0) {
-                                storage.getRealtimeDocument(document[0].id).then(function(realtime) {
-                                    if (realtime && realtime.error) {
-                                        console.log('did not get realtime document.');
-                                    } else {
-                                        console.log(list[listIndex].hugoSymbol, '\t\t', listIndex + 1);
-                                        console.log('\t Initializing hotspot...');
-                                        var model = realtime.getModel();
-                                        var gene = model.getRoot().get('gene');
-                                        var index = -1;
-                                        // gene.mutations.clear();
-
-                                        model.beginCompoundOperation();
-                                        alterations.forEach(function(alt, i) {
-                                            index = -1;
-                                            gene.mutations.asArray().forEach(function(e, i) {
-                                                if (e.name.getText().toLowerCase() === alt.toLowerCase()) {
-                                                    console.log('\t\tAlteration already exists, ignore.' + e.name.getText());
-                                                    index = i;
-                                                }
-                                            });
-                                            var _mutation;
-                                            if (index > -1) {
-                                                _mutation = gene.mutations.get(index);
-                                                if (_mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
-                                                    console.log('\t\t\t\tCONTENT::::');
-                                                    console.log('\t\t\t\tmutation effect: ', _mutation.effect.value.getText());
-                                                    _mutation.effect.value.setText('');
-                                                    console.log('\t\t\t\tmutation effect addon: ', _mutation.effect.addOn.getText());
-                                                    _mutation.effect.addOn.setText('');
-                                                    console.log('\t\t\t\toncogenic: ', _mutation.oncogenic.getText());
-                                                    _mutation.oncogenic.setText('');
-                                                    console.log('\t\t\t\tdescription: ', _mutation.description.getText());
-                                                    _mutation.description.setText('');
-
-                                                    if (pmid) {
-                                                        _mutation.oncogenic_eStatus.set('hotspotAddon', (pmid === 'mdanderson' ? '' : 'PMID: ') + pmid);
-                                                        _mutation.oncogenic_eStatus.set('curated', false);
-                                                    } else {
-                                                        _mutation.oncogenic_eStatus.set('hotspotAddon', 'This mutated amino acid was identified as a recurrent hotspot (statistical significance, q-value < 0.01) in a set of 11,119 tumor samples of various cancer types (based on Chang M. et al. Nature Biotech. 2015).');
-                                                        _mutation.oncogenic_eStatus.set('curated', true);
-                                                    }
-                                                } else {
-                                                    console.log('\t\tThis mutation exists, but has hotspot marked as false change the mutation to hotspot mutation ', alt);
-
-                                                    _mutation.oncogenic_eStatus.set('hotspot', 'TRUE');
-                                                    if (pmid) {
-                                                        _mutation.oncogenic_eStatus.set('hotspotAddon', (pmid === 'mdanderson' ? '' : 'PMID: ') + pmid);
-                                                    } else {
-                                                        _mutation.oncogenic_eStatus.set('hotspotAddon', 'This mutated amino acid was identified as a recurrent hotspot (statistical significance, q-value < 0.01) in a set of 11,119 tumor samples of various cancer types (based on Chang M. et al. Nature Biotech. 2015).');
-                                                    }
-                                                }
-                                            } else {
-                                                _mutation = '';
-                                                _mutation = model.create(OncoKB.Mutation);
-                                                _mutation.name.setText(alt);
-                                                _mutation.oncogenic_eStatus.set('obsolete', 'false');
-                                                _mutation.oncogenic_eStatus.set('vetted', 'uv');
-
-                                                // if (qval !== null) {
-                                                //    _mutation.oncogenic_eStatus.set('hotspotQvalue', qval);
-                                                // }
-                                                // if (tumorType !== null) {
-                                                //    _mutation.oncogenic_eStatus.set('hotspotTumorType', tumorType);
-                                                // }
-
-                                                if (pmid) {
-                                                    _mutation.oncogenic_eStatus.set('hotspotAddon', (pmid === 'mdanderson' ? '' : 'PMID: ') + pmid);
-                                                    _mutation.oncogenic_eStatus.set('curated', false);
-                                                } else {
-                                                    _mutation.oncogenic_eStatus.set('hotspotAddon', 'This mutated amino acid was identified as a recurrent hotspot (statistical significance, q-value < 0.01) in a set of 11,119 tumor samples of various cancer types (based on Chang M. et al. Nature Biotech. 2015).');
-                                                    _mutation.oncogenic_eStatus.set('curated', true);
-                                                }
-
-                                                gene.mutations.push(_mutation);
-                                                console.log('New mutation has been added: ', alt);
-                                            }
-                                        });
-                                        model.endCompoundOperation();
-                                        $timeout(function() {
-                                            initHotspot(list, ++listIndex, callback);
-                                        }, 200, false);
-                                    }
-                                });
-                            } else {
-                                console.log('No alteration has been fount on gene: ', hugoSymbol);
-                                $timeout(function() {
-                                    initHotspot(list, ++listIndex, callback);
-                                }, 200, false);
-                            }
-                        } else {
-                            console.log('No document has been fount on gene: ', hugoSymbol);
-                            $timeout(function() {
-                                initHotspot(list, ++listIndex, callback);
-                            }, 200, false);
-                        }
-                    }
-                } else {
-                    if (callback) {
-                        callback();
-                    }
-                    console.log('finished.');
-                }
-            }
-
-            function initAutoMutation(list, listIndex, callback) {
-                if (listIndex < list.length) {
-                    var hugoSymbol = list[listIndex].hugoSymbol || null;
-                    var mutation = list[listIndex].mutation || null;
-                    var mutationEffect = list[listIndex].mutationEffect || null;
-                    var mutationEffectAddon = list[listIndex].mutationEffectAddon || null;
-                    var oncogenic = list[listIndex].oncogenic || null;
-                    var curated = list[listIndex].curated || null;
-                    var shortDescription = list[listIndex].shortDescription || null;
-                    var fullDescription = list[listIndex].fullDescription || null;
-
-                    if (hugoSymbol) {
-                        var document = Documents.get({title: hugoSymbol});
-                        // console.log('Got gene document.', document);
-
-                        if (document instanceof Array && document.length > 0) {
-                            if (document.length > 1) {
-                                console.log('More than one matched document have been found: ', hugoSymbol);
-                            }
-                            if (mutation) {
-                                storage.getRealtimeDocument(document[0].id).then(function(realtime) {
-                                    if (realtime && realtime.error) {
-                                        console.log('did not get realtime document.');
-                                    } else {
-                                        console.log(list[listIndex].hugoSymbol, '\t\t', listIndex + 1);
-                                        console.log('\t Initializing status...');
-                                        var model = realtime.getModel();
-                                        var gene = model.getRoot().get('gene');
-                                        var exists = false;
-                                        // gene.mutations.clear();
-                                        gene.mutations.asArray().forEach(function(e) {
-                                            if (e.name.getText().toLowerCase() === mutation.toLowerCase()) {
-                                                console.log('\t\tAlteration already exists, ignore.' + e.name.getText());
-                                                exists = true;
-                                            }
-                                        });
-                                        if (!exists) {
-                                            model.beginCompoundOperation();
-                                            var _mutation = '';
-                                            _mutation = model.create(OncoKB.Mutation);
-                                            _mutation.name.setText(mutation);
-                                            _mutation.oncogenic_eStatus.set('obsolete', 'false');
-                                            _mutation.oncogenic_eStatus.set('vetted', 'uv');
-
-                                            if (oncogenic) {
-                                                _mutation.oncogenic.setText(oncogenic);
-                                            }
-
-                                            if (curated !== null) {
-                                                if (curated.toLowerCase() === 'false') {
-                                                    curated = false;
-                                                } else {
-                                                    curated = true;
-                                                }
-                                                _mutation.oncogenic_eStatus.set('curated', curated);
-                                            }
-                                            if (mutationEffect) {
-                                                _mutation.effect.value.setText(mutationEffect);
-                                                if (mutationEffectAddon) {
-                                                    _mutation.effect.addOn.setText(mutationEffectAddon);
-                                                }
-                                            }
-
-                                            if (shortDescription) {
-                                                _mutation.short.setText(shortDescription);
-                                            }
-
-                                            if (fullDescription) {
-                                                _mutation.description.setText(fullDescription);
-                                            }
-
-                                            gene.mutations.push(_mutation);
-                                            model.endCompoundOperation();
-                                            console.log('\t\tNew mutation has been added: ', mutation);
-                                        }
-                                        $timeout(function() {
-                                            initAutoMutation(list, ++listIndex, callback);
-                                        }, 200, false);
-                                    }
-                                });
-                            } else {
-                                console.log('\tNo alteration has been fount on gene: ', hugoSymbol);
-                                $timeout(function() {
-                                    initAutoMutation(list, ++listIndex, callback);
-                                }, 200, false);
-                            }
-                        } else {
-                            console.log('\tNo document has been fount on gene: ', hugoSymbol);
-                            $timeout(function() {
-                                initAutoMutation(list, ++listIndex, callback);
-                            }, 200, false);
-                        }
-                    }
-                } else {
-                    if (callback) {
-                        callback();
-                    }
-                    console.log('finished.');
-                }
-            }
-
             function initial(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -1723,114 +1474,6 @@ angular.module('oncokbApp')
                 }
             }
 
-            function removeHotspot(docs, docIndex, callback) {
-                if (docIndex < docs.length) {
-                    var fileId = docs[docIndex].id;
-                    storage.getRealtimeDocument(fileId).then(function(realtime) {
-                        if (realtime && realtime.error) {
-                            console.log('did not get realtime document.');
-                        } else {
-                            realtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, function(evt) {
-                                if (!evt.isSaving) {
-                                    realtime.removeEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED);
-                                    storage.closeDocument();
-                                    $timeout(function() {
-                                        removeHotspot(docs, ++docIndex, callback);
-                                    }, 200, false);
-                                }
-                            });
-                            console.log(docs[docIndex].title, '\t\t', docIndex + 1);
-                            console.log('\t Removing hotspot...');
-                            var model = realtime.getModel();
-                            var gene = model.getRoot().get('gene');
-                            if (gene) {
-                                var removeIndice = [];
-                                model.beginCompoundOperation();
-                                gene.mutations.asArray().forEach(function(mutation, index) {
-                                    if (mutation.oncogenic_eStatus.has('hotspot')) {
-                                        if (mutation.oncogenic_eStatus.get('hotspot') === 'TRUE') {
-                                            console.log('\t\tMutation: ', mutation.name.getText());
-                                            if (mutation.tumors.length === 0 && mutation.effect.value.getText().trim() === '' && mutation.effect.addOn.getText().trim() === '' && mutation.oncogenic.getText().trim() === '' && mutation.short.getText().trim() === '' && mutation.description.getText().trim() === '') {
-                                                removeIndice.push(index);
-                                                console.log('\t\t\tFound empty hotspot mutation.');
-                                            } else {
-                                                console.log('\t\t\tHotspot mutation, but has content in it');
-                                                console.log('\t\t\t\tCONTENT::::');
-                                                console.log('\t\t\t\tNumber of tumors:', mutation.tumors.length);
-                                                console.log('\t\t\t\tmutation effect: "' + mutation.effect.value.getText() + '"');
-                                                console.log('\t\t\t\tmutation effect addon: "' + mutation.effect.addOn.getText() + '"');
-                                                console.log('\t\t\t\toncogenic: "' + mutation.oncogenic.getText() + '"');
-                                                console.log('\t\t\t\tShort description: "' + mutation.short.getText() + '"');
-                                                console.log('\t\t\t\tdescription: "' + mutation.description.getText() + '"');
-
-                                                if (mutation.oncogenic_eStatus.has('hotspot')) {
-                                                    console.log('\t\t\t\t\tRemove hotspot.', mutation.oncogenic_eStatus.get('hotspot'));
-                                                    mutation.oncogenic_eStatus.delete('hotspot');
-                                                }
-                                                if (mutation.oncogenic_eStatus.has('hotspotQvalue')) {
-                                                    console.log('\t\t\t\t\tRemove hotspot qvalue.', mutation.oncogenic_eStatus.get('hotspotQvalue'));
-                                                    mutation.oncogenic_eStatus.delete('hotspotQvalue');
-                                                }
-                                                if (mutation.oncogenic_eStatus.has('hotspotTumorType')) {
-                                                    console.log('\t\t\t\t\tRemove hotspot tumor type.', mutation.oncogenic_eStatus.get('hotspotTumorType'));
-                                                    mutation.oncogenic_eStatus.delete('hotspotTumorType');
-                                                }
-                                                if (mutation.oncogenic_eStatus.has('hotspotAddon')) {
-                                                    console.log('\t\t\t\t\tRemove hotspot addon.', mutation.oncogenic_eStatus.get('hotspotAddon'));
-                                                    mutation.oncogenic_eStatus.delete('hotspotAddon');
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    mutation.tumors.asArray().forEach(function(tumor) {
-                                        if (tumor.prevalence_eStatus.has('hotspot')) {
-                                            tumor.prevalence_eStatus.delete('hotspot');
-                                        }
-                                        if (tumor.progImp_eStatus.has('hotspot')) {
-                                            tumor.progImp_eStatus.set('hotspot');
-                                        }
-                                        if (tumor.nccn_eStatus.has('hotspot')) {
-                                            tumor.nccn_eStatus.set('hotspot');
-                                        }
-
-                                        // console.log('Add tumor estatus');
-                                        tumor.TI.asArray().forEach(function(ti) {
-                                            ti.treatments.asArray().forEach(function(treatment) {
-                                                if (treatment.name_eStatus.has('hotspot')) {
-                                                    treatment.name_eStatus.delete('hotspot');
-                                                }
-                                            });
-                                        });
-                                    });
-                                });
-                                removeIndice.sort(function(a, b) {
-                                    return b - a;
-                                });
-                                removeIndice.forEach(function(index) {
-                                    gene.mutations.remove(index);
-                                });
-                                console.log(removeIndice);
-                                model.endCompoundOperation();
-                                // $timeout(function () {
-                                //    removeHotspot(docs, ++docIndex, callback);
-                                // }, 200, false);
-                            } else {
-                                console.log('\t\tNo gene model.');
-                                $timeout(function() {
-                                    removeHotspot(docs, ++docIndex, callback);
-                                }, 200, false);
-                            }
-                        }
-                    });
-                } else {
-                    if (callback) {
-                        callback();
-                    }
-                    console.log('finished.');
-                }
-            }
-
             function createDoc(index) {
                 if (index < newGenes.length) {
                     var gene = newGenes[index];
@@ -1855,8 +1498,8 @@ angular.module('oncokbApp')
             }
         }]
     )
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'driveOncokbInfo', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils',
-        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, DriveOncokbInfo, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', 'dialogs', 'importer', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils',
+        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, dialogs, importer, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils) {
             $scope.test = function(event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
@@ -1880,14 +1523,32 @@ angular.module('oncokbApp')
                 if (this.gene && newMutationName) {
                     newMutationName = newMutationName.toString().trim();
                     var exists = false;
+                    var isVUS = false;
+                    var mutationNameBlackList = [
+                        'activating mutations',
+                        'activating mutation',
+                        'inactivating mutations',
+                        'inactivating mutation'
+                    ];
                     this.gene.mutations.asArray().forEach(function(e) {
                         if (e.name.getText().toLowerCase() === newMutationName.toLowerCase()) {
                             exists = true;
                         }
                     });
+                    this.vus.asArray().forEach(function(e) {
+                        if (e.name.getText().toLowerCase() === newMutationName.toLowerCase()) {
+                            isVUS = true;
+                        }
+                    });
 
-                    if (exists) {
+                    if (mutationNameBlackList
+                            .indexOf(newMutationName.toLowerCase()) !== -1) {
+                        dialogs.notify('Warning',
+                            'This mutation name is not allowed.');
+                    } else if (exists) {
                         dialogs.notify('Warning', 'Mutation exists.');
+                    } else if (isVUS) {
+                        dialogs.notify('Warning', 'Mutation is in VUS list.');
                     } else {
                         var _mutation = '';
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
@@ -2632,6 +2293,11 @@ angular.module('oncokbApp')
                 status.set('curated', !status.get('curated'));
             };
 
+            $scope.mutationNameEditable = function(mutationName) {
+                return $scope.fileEditable && !($scope.userRole !== 8 &&
+                    $scope.suggestedMutations.indexOf(mutationName) !== -1);
+            };
+
             // Calculate number of 'number' elements within the object
             function getNoNKeys(object) {
                 var count = 0;
@@ -2754,26 +2420,39 @@ angular.module('oncokbApp')
                 return watchersWithoutDuplicates.length;
             }
 
-            function getDriveOncokbInfo() {
-                var pubMedLinks = DriveOncokbInfo.getPubMed({gene: $scope.fileTitle});
-                var pubMedLinksLength = 0;
-                $scope.suggestedMutations = DriveOncokbInfo.getMutation($scope.fileTitle) || [];
-                if ($scope.suggestedMutations.length === 0) {
-                    $scope.addMutationPlaceholder = 'Based on our search criteria no hotspot mutation found. Please curate according to literature.';
+            function sendEmail(subject, content) {
+                if ($scope.userRole < 8) {
+                    var param = {subject: subject, content: content};
+
+                    DatabaseConnector.sendEmail(
+                        param,
+                        function(result) {
+                            console.log('success', result);
+                        },
+                        function(result) {
+                            console.log('failed', result);
+                        }
+                    );
                 }
+            }
 
-                $scope.pubMedLinks = {
-                    gene: pubMedLinks.gene.pubMedLinks || [],
-                    mutations: pubMedLinks.mutations.pubMedMutationLinks || {}
-                };
-
-                _.each($scope.pubMedLinks.mutations, function(item) {
-                    pubMedLinksLength += item.length;
-                });
-
-                $scope.pubMedMutationLength = Object.keys($scope.pubMedLinks.mutations).length;
-                $scope.pubMedMutationLinksLength = pubMedLinksLength;
-                $scope.pubMedLinksLength = pubMedLinksLength + $scope.pubMedLinks.gene.length;
+            function getSuggestedMutations() {
+                var defaultPlaceHolder = 'No suggestion found. Please curate according to literature.';
+                DatabaseConnector.getSuggestedVariants()
+                    .then(function(resp) {
+                        if (resp && _.isArray(resp.data) && resp.data.length > 0) {
+                            $scope.suggestedMutations = resp.data;
+                        } else {
+                            $scope.suggestedMutations = [];
+                        }
+                    }, function() {
+                        $scope.suggestedMutations = [];
+                    })
+                    .finally(function() {
+                        if ($scope.suggestedMutations.length === 0) {
+                            $scope.addMutationPlaceholder = defaultPlaceHolder;
+                        }
+                    });
             }
 
             function bindDocEvents() {
@@ -3184,6 +2863,7 @@ angular.module('oncokbApp')
                 mainTypes: [],
                 tumorTypes: {}
             };
+            $scope.suggestedMutations = [];
             $scope.meta = {
                 newCancerTypes: [{
                     mainType: '',
@@ -3336,7 +3016,6 @@ angular.module('oncokbApp')
                     }, 100);
                 }
             });
-            getDriveOncokbInfo();
             getOncoTreeMainTypes();
             $interval(function() {
                 storage.requireAuth(true).then(function(result) {
@@ -3350,43 +3029,45 @@ angular.module('oncokbApp')
                 });
             }, 600000);
 
-            loadFile().then(function(file) {
-                $scope.realtimeDocument = file;
-                var _documents = Documents.get({title: $scope.fileTitle});
-                if (_.isArray(_documents) && _documents.length > 0) {
-                    $scope.document = _documents[0];
-                }
+            loadFile()
+                .then(function(file) {
+                    $scope.realtimeDocument = file;
+                    var _documents = Documents.get({title: $scope.fileTitle});
+                    if (_.isArray(_documents) && _documents.length > 0) {
+                        $scope.document = _documents[0];
+                    }
 
-                if ($scope.fileTitle) {
-                    var model = $scope.realtimeDocument.getModel();
-                    if (model.getRoot().get('gene')) {
-                        var numAccordion = 0;
-                        model.getRoot().get('gene').mutations.asArray().forEach(function(mutation) {
-                            numAccordion += mutation.tumors.length;
-                            mutation.tumors.asArray().forEach(function(tumor) {
-                                numAccordion += 8;
-                                tumor.TI.asArray().forEach(function(ti) {
-                                    numAccordion += ti.treatments.length;
+                    if ($scope.fileTitle) {
+                        var model = $scope.realtimeDocument.getModel();
+                        if (model.getRoot().get('gene')) {
+                            var numAccordion = 0;
+                            model.getRoot().get('gene').mutations.asArray().forEach(function(mutation) {
+                                numAccordion += mutation.tumors.length;
+                                mutation.tumors.asArray().forEach(function(tumor) {
+                                    numAccordion += 8;
+                                    tumor.TI.asArray().forEach(function(ti) {
+                                        numAccordion += ti.treatments.length;
+                                    });
                                 });
                             });
-                        });
-                        console.log(numAccordion);
-                        $scope.status.numAccordion = numAccordion;
-                        $scope.gene = model.getRoot().get('gene');
-                        $scope.model = model;
-                        afterCreateGeneModel();
+                            console.log(numAccordion);
+                            $scope.status.numAccordion = numAccordion;
+                            $scope.gene = model.getRoot().get('gene');
+                            $scope.model = model;
+                            afterCreateGeneModel();
+                        } else {
+                            var gene = model.create('Gene');
+                            model.getRoot().set('gene', gene);
+                            $scope.gene = gene;
+                            $scope.gene.name.setText($scope.fileTitle);
+                            $scope.model = model;
+                            afterCreateGeneModel();
+                        }
                     } else {
-                        var gene = model.create('Gene');
-                        model.getRoot().set('gene', gene);
-                        $scope.gene = gene;
-                        $scope.gene.name.setText($scope.fileTitle);
-                        $scope.model = model;
-                        afterCreateGeneModel();
+                        $scope.model = '';
                     }
-                } else {
-                    $scope.model = '';
-                }
-            });
+                })
+                .finally(getSuggestedMutations);
 
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function() {

@@ -21,11 +21,16 @@ public final class AlterationUtils {
     private static List<String> oncogenicList = Arrays.asList(new String[]{
         "", Oncogenicity.INCONCLUSIVE.getOncogenic(), Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
+
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-    private final static String[] generalAlts = {"activating mutations", "activating mutation", "inactivating mutations", "inactivating mutation", "all mutations", "all mutation", "wildtype", "wildtypes"};
-    private final static String[] singularGeneralAlt = {"activating mutation", "inactivating mutation", "all mutations"};
-    private final static Set<String> generalAlterations = new HashSet<>(Arrays.asList(generalAlts));
-    private final static Set<String> singularGeneralAlterations = new HashSet<>(Arrays.asList(singularGeneralAlt));
+
+    private final static String[] inferredAlts = {"Oncogenic Mutations", "Gain-of-function Mutations",
+        "Loss-of-function Mutations", "Switch-of-function Mutations"};
+    private final static List<String> inferredAlterations = Arrays.asList(inferredAlts);
+
+    private final static String[] structureAlts = {"Truncating Mutations", "Fusions", "Amplification", "Deletion"};
+    private final static List<String> structureAlterations = Arrays.asList(structureAlts);
+
     private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
@@ -195,24 +200,6 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         }
-
-        if (alteration.getAlteration() != null) {
-            if (isSingularGeneralAlteration(alteration.getAlteration())) {
-                alteration.setAlteration(alteration.getAlteration() + "s");
-            }
-        }
-    }
-
-    public static Boolean isSingularGeneralAlteration(String alteration) {
-        if (alteration == null) {
-            return false;
-        }
-        for (String name : singularGeneralAlterations) {
-            if (name.equalsIgnoreCase(alteration)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static Boolean isFusion(String variant) {
@@ -390,11 +377,11 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static List<Alteration> excludeGeneralAlterations(List<Alteration> alterations) {
+    public static List<Alteration> excludeInferredAlterations(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
         for (Alteration alteration : alterations) {
             String name = alteration.getAlteration().toLowerCase();
-            if (name != null && !generalAlterations.contains(name)) {
+            if (name != null && !inferredAlterations.contains(name)) {
                 result.add(alteration);
             }
         }
@@ -472,10 +459,11 @@ public final class AlterationUtils {
         List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
+        alleles = filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
 
         // Remove alteration itself
         alleles.remove(alteration);
-        return filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
+        return alleles;
     }
 
     public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {
@@ -563,9 +551,6 @@ public final class AlterationUtils {
                 && alteration.getProteinStart().equals(location)) {
 
                 result.add(alteration);
-            } else if (alteration.getAlteration() != null
-                && alteration.getAlteration().toLowerCase().contains("activating")) {
-                result.add(alteration);
             }
         }
         return result;
@@ -573,35 +558,61 @@ public final class AlterationUtils {
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.MUTATION_EFFECT));
-        boolean activating = false, inactivating = false;
-        for (Evidence evidence : mutationEffectEvs) {
-            String effect = evidence.getKnownEffect();
-            if (effect != null) {
-                effect = effect.toLowerCase();
-                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
-                    inactivating = true;
-                } else if (effect.contains("activating") || effect.contains("gain-of-function")
-                    || effect.contains("switch-of-function")) {
-                    activating = true;
-                }
+        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
+        boolean isOncogenic = false;
+        for (Evidence evidence : oncogenicEvs) {
+            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
+            if (oncogenicity != null
+                && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY))) {
+                isOncogenic = true;
+                break;
             }
         }
-
-        return inactivating || activating;
+        return isOncogenic;
     }
 
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {
         Set<Alteration> oncogenicMutations = new HashSet<>();
-        Alteration alt = findAlteration(alteration.getGene(), "inactivating mutations");
-        if (alt != null) {
-            oncogenicMutations.add(alt);
-        }
-
-        alt = findAlteration(alteration.getGene(), "activating mutations");
+        Alteration alt = findAlteration(alteration.getGene(), "oncogenic mutations");
         if (alt != null) {
             oncogenicMutations.add(alt);
         }
         return oncogenicMutations;
+    }
+
+    public static List<String> getGeneralAlterations() {
+        List<String> suggestedAlterations = new ArrayList<>();
+        suggestedAlterations.addAll(inferredAlterations);
+        suggestedAlterations.addAll(structureAlterations);
+        return suggestedAlterations;
+    }
+
+    public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {
+        exactMatch = exactMatch || false;
+        if (exactMatch) {
+            return AlterationUtils.getGeneralAlterations().contains(mutationStr);
+        } else if (stringContainsItemFromList(mutationStr, getGeneralAlterations())
+            && itemFromListAtEndString(mutationStr, getGeneralAlterations())) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean stringContainsItemFromList(String inputString, List<String> items) {
+        for (String item : items) {
+            if (inputString.contains(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean itemFromListAtEndString(String inputString, List<String> items) {
+        for (String item : items) {
+            if (inputString.endsWith(item)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

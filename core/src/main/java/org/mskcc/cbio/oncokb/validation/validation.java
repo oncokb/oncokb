@@ -95,7 +95,7 @@ public class validation {
         Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Integer count = 0;
-        ArrayList<String> specialAlterations = new ArrayList<>(Arrays.asList("Inactivating Mutations", "Activating Mutations", "Fusions", "Inactivating", "Wildtype", "Amplification", "Fusions"));
+        List<String> specialAlterations = AlterationUtils.getGeneralAlterations();
         for (Gene gene : genes) {
             Set<Evidence> evidences = allGeneBasedEvidences.get(gene);
             Set<Alteration> VUSAlterations = AlterationUtils.findVUSFromEvidences(evidences);
@@ -150,9 +150,9 @@ public class validation {
                         ListEntry row = new ListEntry();
                         row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
                         row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        row.getCustomElements().setValueLocal("Oncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(alt)).getOncogenic());
+                        row.getCustomElements().setValueLocal("Oncogenicty", Oncogenicity.getByEffect(oncogenicityMapping.get(alt)).getOncogenic());
                         row.getCustomElements().setValueLocal("RelevantAlteration", relevantAlt.getAlteration());
-                        row.getCustomElements().setValueLocal("RelevantAlterationOncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(relevantAlt)).getOncogenic());
+                        row.getCustomElements().setValueLocal("RelevantAlterationOncogenicty", Oncogenicity.getByEffect(oncogenicityMapping.get(relevantAlt)).getOncogenic());
                         service.insert(listFeedUrl1, row);
                         break;
                     }

@@ -15,11 +15,11 @@ angular.module('oncokbApp')
         'DriveAnnotation',
         'SendEmail',
         'DataSummary',
-        'ServerUtils',
         'Cache',
         'OncoTree',
         'InternalAccess',
         'ApiUtils',
+        'PrivateApiUtils',
         function($timeout,
                  $q,
                  config,
@@ -33,11 +33,11 @@ angular.module('oncokbApp')
                  DriveAnnotation,
                  SendEmail,
                  DataSummary,
-                 ServerUtils,
                  Cache,
                  OncoTree,
                  InternalAccess,
-                 ApiUtils) {
+                 ApiUtils,
+                 PrivateApiUtils) {
             var numOfLocks = {};
             var data = {};
 
@@ -324,46 +324,6 @@ angular.module('oncokbApp')
                 }, 100);
             }
 
-            function getHotspotList(callback) {
-                if (dataFromFile) {
-                    ServerUtils.hotspot.getFromFile()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                } else {
-                    ServerUtils.hotspot.getFromServer()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                }
-            }
-
-            function getAutoMutationList(callback) {
-                if (dataFromFile) {
-                    ServerUtils.autoMutation.getFromFile()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                } else {
-                    ServerUtils.autoMutation.hotspot.getFromServer()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                }
-            }
-
             function testAccess(successCallback, failCallback) {
                 InternalAccess
                     .success(function(data, status, headers, config) {
@@ -529,6 +489,25 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
+            function getSuggestedVariants() {
+                var deferred = $q.defer();
+                if (dataFromFile) {
+                    deferred.resolve({
+                        meta: '',
+                        data: ['Fusion']
+                    });
+                } else {
+                    PrivateApiUtils.getSuggestedVariants()
+                        .success(function(data) {
+                            deferred.resolve(data);
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                }
+                return deferred.promise;
+            }
+
             // Public API here
             return {
                 getGeneAlterationTumorType: function(callback) {
@@ -574,8 +553,6 @@ angular.module('oncokbApp')
                 getAllTumorType: getAllTumorType,
                 updateGene: updateGene,
                 sendEmail: sendEmail,
-                getHotspotList: getHotspotList,
-                getAutoMutationList: getAutoMutationList,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {
                     return setCache('disable');
@@ -595,6 +572,7 @@ angular.module('oncokbApp')
                 getOncoTreeTumorTypeByName: getOncoTreeTumorTypeByName,
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,
-                getOncogeneTSG: getOncogeneTSG
+                getOncogeneTSG: getOncogeneTSG,
+                getSuggestedVariants: getSuggestedVariants
             };
         }]);

@@ -199,47 +199,6 @@ angular.module('oncokbApp').factory('InternalAccess', ['$http', 'OncoKB', functi
     return $http.get(OncoKB.config.apiLink + 'access');
 }]);
 
-angular.module('oncokbApp').factory('ServerUtils', ['$http', 'OncoKB', function($http, OncoKB) {
-    'use strict';
-
-    function getFromServer(type) {
-        if (type === 'hotspot') {
-            return $http.get(OncoKB.config.apiLink + 'utils?cmd=hotspot');
-        } else if (type === 'autoMutation') {
-            return $http.get(OncoKB.config.apiLink + 'utils?cmd=autoMutation');
-        }
-        return null;
-    }
-
-    function getFromFile(type) {
-        if (type === 'hotspot') {
-            return $http.get('data/hotspot.json');
-        } else if (type === 'autoMutation') {
-            return $http.get('data/autoMutation.json');
-        }
-        return null;
-    }
-
-    return {
-        hotspot: {
-            getFromServer: function() {
-                return getFromServer('hotspot');
-            },
-            getFromFile: function() {
-                return getFromFile('hotspot');
-            }
-        },
-        autoMutation: {
-            getFromServer: function() {
-                return getFromServer('autoMutation');
-            },
-            getFromFile: function() {
-                return getFromFile('autoMutation');
-            }
-        }
-    };
-}]);
-
 angular.module('oncokbApp').factory('Cache', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
@@ -356,3 +315,17 @@ angular.module('oncokbApp').factory('ApiUtils', ['$http', function($http) {
         getOncogeneTSG: getOncogeneTSG
     };
 }]);
+
+angular.module('oncokbApp')
+    .factory('PrivateApiUtils', ['$http', 'OncoKB', function($http, OncoKB) {
+        'use strict';
+
+        function getSuggestedVariants() {
+            return $http.get(OncoKB.config.privateApiLink +
+                'utils/suggestedVariants');
+        }
+
+        return {
+            getSuggestedVariants: getSuggestedVariants
+        };
+    }]);

@@ -165,44 +165,39 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        // TODO: add activating or inactivating alterations.
-        // This code needs to be removed and use isOncogenicAlteration in AlterationUtil once we change all
-        // Inactivating/Activating Mutations to Oncogenic Mutations
+        // Looking for inferred mutations.
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
-        boolean activating = false, inactivating = false;
+        Set<String> effects = new HashSet<>();
+
         for (Evidence evidence : mutationEffectEvs) {
             String effect = evidence.getKnownEffect();
             if (effect != null) {
                 effect = effect.toLowerCase();
-                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
-                    inactivating = true;
-                } else if (effect.contains("activating") || effect.contains("gain-of-function")
-                    || effect.contains("switch-of-function")) {
-                    activating = true;
+                effect = effect.replaceAll("likely", "");
+                effect = effect.replaceAll(" ", "");
+
+                effects.add(effect);
+            }
+        }
+
+        for(String effect : effects) {
+            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), effect + " mutations");
+            if (alt != null) {
+                alterations.add(alt);
+            }
+        }
+
+        // Looking for oncogenic mutations
+        for(Alteration alt : alterations) {
+            if(AlterationUtils.isOncogenicAlteration(alt)) {
+                Alteration oncogenicMutations = findAlteration(alt.getGene(), alt.getAlterationType(), "oncogenic mutations");
+                if (oncogenicMutations != null) {
+                    alterations.add(oncogenicMutations);
                 }
+                break;
             }
         }
-
-        if (inactivating) {
-            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "inactivating mutations");
-            if (alt != null) {
-                alterations.add(alt);
-            }
-        }
-
-        if (activating) {
-            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "activating mutations");
-            if (alt != null) {
-                alterations.add(alt);
-            }
-        }
-
-        // Add all mutations
-//        Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "all mutations");
-//        if (alt != null) {
-//            alterations.add(alt);
-//        }
 
         return alterations;
     }
