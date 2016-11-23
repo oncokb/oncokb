@@ -108,7 +108,151 @@ angular.module('oncokbApp')
                     }
                 }
             };
+            $scope.startUUIDImporting = function () {
+                importUUIDs($scope.documents, 0);
+            };
 
+            //_.each(_.keys(OncoKB.curateInfo), function(key){
+            //    
+            //});
+
+            var geneKeys = _.keys(OncoKB.curateInfo.Gene);
+            var mutationKeys = _.keys(OncoKB.curateInfo.Mutation);
+            var tumorKeys = _.keys(OncoKB.curateInfo.Tumor);
+            var cancerTypesKeys = _.keys(OncoKB.curateInfo.CancerType);
+            var TIKeys = _.keys(OncoKB.curateInfo.TI);
+            var nccnKeys = _.keys(OncoKB.curateInfo.NCCN);
+            var interactAltsKeys = _.keys(OncoKB.curateInfo.InteractAlts);
+
+            var statusRecordObj = {};
+
+            function setUUID(jsonData, model) {
+                _.each(_.keys(jsonData), function (item) {
+                    if(item.endsWith("_uuid")) {
+                        model[item].setText(UUIDjs.create(4).toString());
+                    } else if(model[item] && model[item].type === 'List') {
+                        _.each(model[item].asArray(), function (itemModel, index) {
+                            setUUID(jsonData[item][index], itemModel);
+                        });
+                    }
+                });
+            }
+
+            function importUUIDs(docs, docIndex) {
+                var fileId = docs[docIndex].id;
+                storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    if(realtime && realtime.error) {
+                        console.log('did not get realtime document.');
+                    } else {
+                        var model = realtime.getModel();
+                        var gene = model.getRoot().get('gene');
+                        if(gene) {
+                            var jsonGene = stringUtils.getGeneData(gene);
+                            setUUID(jsonGene, gene);
+                            console.log('Done setting uuid for ', gene.name.getText());
+                        } else {
+                            console.log('No gene model');
+                        }
+
+                    }
+
+                    docIndex++;
+                    if(docIndex < docs.length) {
+                        $timeout(function () {
+                            importUUIDs(docs, docIndex);
+                        }, 200, false);
+                    } else {
+                        console.log('It is finished!');
+                    }
+
+                });
+            };
+            $scope.addStatusRecord = function () {
+                addStatusRecordItem($scope.documents, 0);
+            }
+            function setMapping(jsonGeneData, statusRecord, statusModel) {
+                var lastEdit, lastUpdate, statusRecordObj;
+                _.each(_.keys(jsonGeneData), function (item) {
+                    if(jsonGeneData[item] && item.indexOf("_") === -1) {
+                        if(!_.isArray(jsonGeneData[item])) {
+                            statusRecordObj = statusModel.create(OncoKB.StatusRecord);
+                            statusRecordObj.eStatus = statusModel.createMap();
+                            if(jsonGeneData[item + "_eStatus"]) {
+                                statusRecordObj.eStatus.set("obsolete", jsonGeneData[item + "_eStatus"].obsolete);
+                                statusRecordObj.eStatus.set("vetted", jsonGeneData[item + "_eStatus"].vetted);
+                            }
+                            statusRecordObj.timeStamp = statusModel.createMap();
+                            if(jsonGeneData[item + "_timeStamp"]) {
+                                if(jsonGeneData[item + "_timeStamp"].lastEdit) {
+                                    lastEdit = statusModel.create(OncoKB.TimeStamp);
+                                    lastEdit.value.setText(jsonGeneData[item + "_timeStamp"].lastEdit.value);
+                                    lastEdit.by.setText(jsonGeneData[item + "_timeStamp"].lastEdit.by);
+                                    statusRecordObj.timeStamp.set("lastEdit", lastEdit);
+                                }
+                                if(jsonGeneData[item + "_timeStamp"].lastUpdate) {
+                                    lastUpdate = statusModel.create(OncoKB.TimeStamp);
+                                    lastUpdate.value.setText(jsonGeneData[item + "_timeStamp"].lastUpdate.value);
+                                    lastUpdate.by.setText(jsonGeneData[item + "_timeStamp"].lastUpdate.by);
+                                    statusRecordObj.timeStamp.set("lastUpdate", lastUpdate);
+                                }
+                            }
+
+                            if(jsonGeneData[item + "_uuid"] && jsonGeneData[item + "_uuid"] !== '') {
+                                statusRecord.status.set(jsonGeneData[item + "_uuid"], statusRecordObj);
+                            }
+                        } else {
+                            _.each(jsonGeneData[item], function (itemSecondary) {
+                                setMapping(itemSecondary, statusRecord, statusModel);
+                            });
+                        }
+
+                    }
+                });
+
+            }
+
+            function addStatusRecordItem(docs, docIndex) {
+                var fileId = docs[docIndex].id;
+                storage.getRealtimeDocument(fileId).then(function (realtime) {
+                    if(realtime && realtime.error) {
+                        console.log('did not get realtime document.');
+                    } else {
+                        var model = realtime.getModel();
+                        var gene = model.getRoot().get('gene');
+                        var tempGeneData = stringUtils.getGeneData(gene);
+                        storage.requireAuth(true).then(function () {
+                            storage.createDocument(tempGeneData.name, config.statusFolderId).then(function (statusFile) {
+                                console.log('Created file for ', tempGeneData.name);
+                                storage.getRealtimeDocument(statusFile.id).then(function (statusDocRealtime) {
+                                    if(statusDocRealtime && statusDocRealtime.error) {
+                                        console.log('did not get statusDocRealtime document.');
+                                    } else {
+                                        var statusModel = statusDocRealtime.getModel();
+                                        var statusRecord = statusModel.create(OncoKB.Status);
+
+                                        setMapping(tempGeneData, statusRecord, statusModel);
+
+                                        statusModel.getRoot().set('status', statusRecord);
+                                        console.log('Done setting status for ', tempGeneData.name);
+                                        docIndex++;
+                                        if(docIndex < docs.length) {
+                                            $timeout(function () {
+                                                addStatusRecordItem(docs, docIndex);
+                                            }, 500, false);
+                                        } else {
+                                            console.log('It is finished!');
+                                        }
+                                    }
+                                });
+                            });
+                        });
+
+
+                    }
+
+
+                });
+            };
             $scope.backup = function () {
                 $scope.status.backup = false;
                 importer.backup(function () {

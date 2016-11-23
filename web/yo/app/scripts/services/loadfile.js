@@ -9,18 +9,18 @@
  */
 angular.module('oncokbApp')
   .service('loadFile', function loadFile($route, $location, $q, storage, documents) {
-    return function() {
+    return function(fileType) {
         function check() {
             var deferred = $q.defer();
             storage.requireAuth(true, userId).then(function () {
-                var _documents = documents.get({'title': title});
+                var _documents = documents.get({'title': title}, fileType);
 
                 if(angular.isArray(_documents) && _documents.length > 0) {
                     deferred.resolve(storage.getRealtimeDocument(_documents[0].id));
                 }else {
-                    storage.retrieveAllFiles().then(function(result){
-                        documents.set(result);
-                        var __documents = documents.get({'title': title});
+                    storage.retrieveAllFiles(fileType).then(function(result){
+                        documents.set(result, fileType);
+                        var __documents = documents.get({'title': title}, fileType);
                         if(angular.isArray(__documents) && __documents.length > 0) {
                             deferred.resolve(storage.getRealtimeDocument(__documents[0].id));
                         }else {
