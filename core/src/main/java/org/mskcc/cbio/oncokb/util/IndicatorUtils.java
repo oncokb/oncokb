@@ -145,7 +145,7 @@ public class IndicatorUtils {
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
                         Collections.singleton(EvidenceType.ONCOGENIC), null)
                 );
-                indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
+                indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getOncogenic());
 
                 treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                     EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
@@ -164,7 +164,7 @@ public class IndicatorUtils {
                         (levels != null ?
                             new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
                                 LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
-                indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
+                indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getOncogenic());
             }
             
             if(treatmentEvidences != null) {

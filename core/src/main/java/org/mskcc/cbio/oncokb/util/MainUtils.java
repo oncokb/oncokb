@@ -102,22 +102,36 @@ public class MainUtils {
         return newDate;
     }
 
-    public static String findHighestMutationEffect(Set<String> mutationEffect) {
-        String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Inconclusive", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
-        List<String> list = Arrays.asList(effects);
+    public static MutationEffect findHighestMutationEffect(Set<MutationEffect> mutationEffect) {
+        MutationEffect[] effects = {
+            MutationEffect.GAIN_OF_FUNCTION,
+            MutationEffect.LIKELY_GAIN_OF_FUNCTION,
+            MutationEffect.INCONCLUSIVE,
+            MutationEffect.LIKELY_NEUTRAL,
+            MutationEffect.NEUTRAL,
+            MutationEffect.LIKELY_SWITCH_OF_FUNCTION,
+            MutationEffect.SWITCH_OF_FUNCTION,
+            MutationEffect.LIKELY_LOSS_OF_FUNCTION,
+            MutationEffect.LOSS_OF_FUNCTION
+        };
+        List<MutationEffect> list = Arrays.asList(effects);
         Integer index = 100;
-        for (String effect : mutationEffect) {
+        for (MutationEffect effect : mutationEffect) {
             if (list.indexOf(effect) < index) {
                 index = list.indexOf(effect);
             }
         }
-        return index == 100 ? "" : list.get(index);
+        return index == 100 ? null : list.get(index);
     }
 
     public static Oncogenicity findHighestOncogenic(Set<Oncogenicity> oncogenic) {
-        String[] effects = {"-1", "0", "2", "1"};
+        String[] effects = {
+            Oncogenicity.INCONCLUSIVE.getOncogenic(),
+            Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
+            Oncogenicity.LIKELY.getOncogenic(),
+            Oncogenicity.YES.getOncogenic()
+        };
         List<String> list = Arrays.asList(effects);
-        String level = "";
         Integer index = -2;
 
         for (Oncogenicity datum : oncogenic) {
@@ -132,64 +146,45 @@ public class MainUtils {
         return index == -2 ? null : Oncogenicity.getByLevel(list.get(index));
     }
 
-    public static String idealOncogenicityByMutationEffect(String mutationEffect) {
+    public static Oncogenicity idealOncogenicityByMutationEffect(MutationEffect mutationEffect) {
         if (mutationEffect == null) {
-            return "";
+            return null;
         }
 
-        mutationEffect = mutationEffect.toLowerCase();
-        String oncogenic;
+        Oncogenicity oncogenic;
 
         switch (mutationEffect) {
-            case "gain-of-function":
-                oncogenic = "Oncogenic";
+            case GAIN_OF_FUNCTION:
+                oncogenic = Oncogenicity.YES;
                 break;
-            case "likely gain-of-function":
-                oncogenic = "Likely Oncogenic";
+            case LIKELY_GAIN_OF_FUNCTION:
+                oncogenic = Oncogenicity.LIKELY;
                 break;
-            case "loss-of-function":
-                oncogenic = "Oncogenic";
+            case LOSS_OF_FUNCTION:
+                oncogenic = Oncogenicity.YES;
                 break;
-            case "likely loss-of-function":
-                oncogenic = "Likely Oncogenic";
+            case LIKELY_LOSS_OF_FUNCTION:
+                oncogenic = Oncogenicity.LIKELY;
                 break;
-            case "switch-of-function":
-                oncogenic = "Oncogenic";
+            case SWITCH_OF_FUNCTION:
+                oncogenic = Oncogenicity.YES;
                 break;
-            case "likely switch-of-function":
-                oncogenic = "Likely Oncogenic";
+            case LIKELY_SWITCH_OF_FUNCTION:
+                oncogenic = Oncogenicity.LIKELY;
                 break;
-            case "neutral":
-                oncogenic = "Likely Neutral";
+            case NEUTRAL:
+                oncogenic = Oncogenicity.LIKELY_NEUTRAL;
                 break;
-            case "likely neutral":
-                oncogenic = "Likely Neutral";
+            case LIKELY_NEUTRAL:
+                oncogenic = Oncogenicity.LIKELY_NEUTRAL;
                 break;
-            case "inconclusive":
-                oncogenic = "Inconclusive";
+            case INCONCLUSIVE:
+                oncogenic = Oncogenicity.INCONCLUSIVE;
                 break;
             default:
-                oncogenic = "";
+                oncogenic = null;
         }
         return oncogenic;
-    }
-
-    public static Map<String, String> matchOncogenicMutation(String mutationEffect, String oncogenic) {
-        Map<String, String> match = new HashMap<>();
-
-        mutationEffect = mutationEffect == null ? "" : mutationEffect;
-        oncogenic = oncogenic == null ? "" : oncogenic;
-
-        if (!hasInfoForEffect(mutationEffect) && hasInfoForEffect(oncogenic)) {
-            //TODO: how to handle this situation
-        } else if (!hasInfoForEffect(oncogenic) && hasInfoForEffect(mutationEffect)) {
-            oncogenic = idealOncogenicityByMutationEffect(mutationEffect);
-        }
-
-        match.put("oncogenic", oncogenic);
-        match.put("mutationEffect", mutationEffect);
-
-        return match;
     }
 
     public static Set<EvidenceType> getTreatmentEvidenceTypes() {
@@ -214,7 +209,12 @@ public class MainUtils {
     }
 
     public static Oncogenicity findHighestOncogenicByEvidences(Set<Evidence> evidences) {
-        List<String> levels = Arrays.asList("-1", "0", "2", "1");
+        List<Oncogenicity> oncogenicities = Arrays.asList(
+            Oncogenicity.INCONCLUSIVE,
+            Oncogenicity.LIKELY_NEUTRAL,
+            Oncogenicity.LIKELY,
+            Oncogenicity.YES
+        );
 
         int index = -1;
 
@@ -222,7 +222,7 @@ public class MainUtils {
             for (Evidence evidence : evidences) {
                 if (evidence.getKnownEffect() != null) {
                     int _index = -1;
-                    _index = levels.indexOf(evidence.getKnownEffect());
+                    _index = oncogenicities.indexOf(Oncogenicity.getByLevel(evidence.getKnownEffect()));
                     if (_index > index) {
                         index = _index;
                     }
@@ -230,7 +230,7 @@ public class MainUtils {
             }
         }
 
-        return index > -1 ? Oncogenicity.getByLevel(levels.get(index)) : null;
+        return index > -1 ? oncogenicities.get(index) : null;
     }
 
     public static Oncogenicity setToAlleleOncogenicity(Oncogenicity oncogenicity) {
@@ -304,18 +304,6 @@ public class MainUtils {
             }
         }
         return version;
-    }
-
-    private static Boolean hasInfoForEffect(String effect) {
-        if (effect == null) {
-            return false;
-        }
-
-        if (effect.equalsIgnoreCase("inconclusive") || effect.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     public static String listToString(List<String> list, String separator) {
@@ -412,11 +400,13 @@ public class MainUtils {
 
                 BiologicalVariant variant = new BiologicalVariant();
                 variant.setVariant(alteration);
-                Oncogenicity oncogenicity = Oncogenicity.getByLevel(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.ONCOGENIC, map.get(EvidenceType.ONCOGENIC)));
-
-                Map<String, String> properMapping = MainUtils.matchOncogenicMutation(EvidenceUtils.getKnownEffectFromEvidence(EvidenceType.MUTATION_EFFECT, map.get(EvidenceType.MUTATION_EFFECT)), oncogenicity == null ? null : oncogenicity.getDescription());
-                variant.setOncogenic(properMapping.get("oncogenic"));
-                variant.setMutationEffect(properMapping.get("mutationEffect"));
+                Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
+                MutationEffect mutationEffect = EvidenceUtils.getMutationEffectFromEvidence(map.get(EvidenceType.MUTATION_EFFECT));
+                if ((oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) && mutationEffect != null) {
+                    oncogenicity = idealOncogenicityByMutationEffect(mutationEffect);
+                }
+                variant.setOncogenic(oncogenicity == null ? null : oncogenicity.getOncogenic());
+                variant.setMutationEffect(mutationEffect == null ? null : mutationEffect.getMutationEffect());
                 variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
                 variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
                 variants.add(variant);
