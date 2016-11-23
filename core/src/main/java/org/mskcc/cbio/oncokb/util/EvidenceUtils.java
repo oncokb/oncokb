@@ -471,31 +471,36 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static String getKnownEffectFromEvidence(EvidenceType evidenceType, Set<Evidence> evidences) {
-        Set<String> result = new HashSet<>();
+    public static MutationEffect getMutationEffectFromEvidence(Set<Evidence> evidences) {
+        Set<MutationEffect> result = new HashSet<>();
 
         for (Evidence evidence : evidences) {
-            if (evidence.getEvidenceType().equals(evidenceType) && evidence.getKnownEffect() != null) {
-                result.add(evidence.getKnownEffect());
+            if (evidence.getKnownEffect() != null) {
+                result.add(MutationEffect.getByName(evidence.getKnownEffect()));
             }
         }
 
-        if (evidenceType.equals(EvidenceType.MUTATION_EFFECT) && result.size() > 1) {
-            String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Inconclusive", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
-            List<String> list = Arrays.asList(effects);
-            Integer index = 100;
-            for (String effect : result) {
-                if (list.indexOf(effect) < index) {
-                    index = list.indexOf(effect);
-                }
-            }
-            if (index == -1) {
-                return "Inconclusive";
-            } else {
-                return list.get(index);
+        if (result.size() > 1) {
+            return MainUtils.findHighestMutationEffect(result);
+        } else {
+            return result.iterator().next();
+        }
+    }
+
+    public static Oncogenicity getOncogenicityFromEvidence(Set<Evidence> evidences) {
+        Set<Oncogenicity> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect() != null) {
+                result.add(Oncogenicity.getByLevel(evidence.getKnownEffect()));
             }
         }
-        return StringUtils.join(result, ", ");
+
+        if (result.size() > 1) {
+            return MainUtils.findHighestOncogenic(result);
+        } else {
+            return result.iterator().next();
+        }
     }
 
     public static Set<String> getPmids(Set<Evidence> evidences) {
@@ -808,7 +813,7 @@ public class EvidenceUtils {
                         evidence.setId(recordMatchHighestOncogenicity.getId());
                         evidence.setGene(recordMatchHighestOncogenicity.getGene());
                         evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                        evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getDescription());
+                        evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getOncogenic());
                         query.getEvidences().add(evidence);
                     }
                 }
