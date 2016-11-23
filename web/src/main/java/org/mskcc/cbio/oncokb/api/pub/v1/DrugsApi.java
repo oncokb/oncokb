@@ -18,9 +18,9 @@ public interface DrugsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/drugs",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/drugs",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> drugsGet();
 
 
@@ -28,9 +28,9 @@ public interface DrugsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/drugs/lookup",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/drugs/lookup",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> drugsLookupGet(
         @ApiParam(value = "Drug Name") @RequestParam(value = "name", required = false) String name
 //        , @ApiParam(value = "") @RequestParam(value = "fdaApproved", required = false) String fdaApproved

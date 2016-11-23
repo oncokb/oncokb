@@ -23,9 +23,9 @@ public interface GenesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GeneEvidence.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/genes/{entrezGeneId}/evidences",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/genes/{entrezGeneId}/evidences",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> genesEntrezGeneIdEvidencesGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
         , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND, MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS, PREVALENCE, PROGNOSTIC_IMPLICATION, TUMOR_TYPE_SUMMARY, NCCN_GUIDELINES, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, CLINICAL_TRIAL") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
@@ -36,9 +36,9 @@ public interface GenesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiObjectResp.class)})
-    @RequestMapping(value = "/genes/{entrezGeneId}",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/genes/{entrezGeneId}",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiObjectResp> genesEntrezGeneIdGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
     );
@@ -48,9 +48,9 @@ public interface GenesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/genes/{entrezGeneId}/variants",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/genes/{entrezGeneId}/variants",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> genesEntrezGeneIdVariantsGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
     );
@@ -60,9 +60,9 @@ public interface GenesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/genes",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/genes",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> genesGet();
 
 
@@ -70,9 +70,9 @@ public interface GenesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/genes/lookup",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/genes/lookup",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> genesLookupGet(@ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
     );

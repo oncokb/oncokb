@@ -35,9 +35,9 @@ public interface EvidencesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/evidences/lookup",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/evidences/lookup",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> evidencesLookupGet(
         @ApiParam(value = "The entrez gene ID. Use comma to seperate multi-queries.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Use comma to seperate multi-queries.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
@@ -56,10 +56,10 @@ public interface EvidencesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/evidences/lookup",
-        consumes = {"application/json"},
-        produces = {"application/json"},
-        method = RequestMethod.POST)
+//    @RequestMapping(value = "/evidences/lookup",
+//        consumes = {"application/json"},
+//        produces = {"application/json"},
+//        method = RequestMethod.POST)
     ResponseEntity<ApiListResp> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body
     );
     

@@ -40,7 +40,7 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/swagger-ui.html").setViewName("redirect:/api/v1/swagger-ui.html");
+//        registry.addViewController("/swagger-ui.html").setViewName("redirect:/api/v1/swagger-ui.html");
     }
 
     @Bean
