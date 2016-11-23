@@ -262,13 +262,13 @@ public class DriveAnnotationParser {
 
             Set<Alteration> alterations = new HashSet<Alteration>();
 
-            String oncogenic = getOncogenicity(mutationObj);
+            Oncogenicity oncogenic = getOncogenicity(mutationObj);
             String doe = null;
             String variantSummary = null;
             String effect = getMutationEffect(mutationObj);
 
             // If both mutation effect and oncogenicity both unknown, ignore variant.
-            if (oncogenic != null && oncogenic.equals("-1")
+            if (oncogenic != null && oncogenic.equals(Oncogenicity.INCONCLUSIVE)
                 && effect != null && effect.toLowerCase().equals("inconclusive")
                 && gene.getHugoSymbol().equals("EGFR")) {
                 return;
@@ -368,23 +368,23 @@ public class DriveAnnotationParser {
             : null;
     }
 
-    private static String getOncogenicity(JSONObject mutationObj) {
-        String oncogenic = null;
+    private static Oncogenicity getOncogenicity(JSONObject mutationObj) {
+        Oncogenicity oncogenic = null;
         if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
             String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
 
             switch (oncogenicStr) {
                 case "yes":
-                    oncogenic = "1";
+                    oncogenic = Oncogenicity.YES;
                     break;
                 case "likely":
-                    oncogenic = "2";
+                    oncogenic = Oncogenicity.LIKELY;
                     break;
                 case "likely neutral":
-                    oncogenic = "0";
+                    oncogenic = Oncogenicity.LIKELY_NEUTRAL;
                     break;
                 case "inconclusive":
-                    oncogenic = "-1";
+                    oncogenic = Oncogenicity.INCONCLUSIVE;
                     break;
                 default:
                     break;
@@ -393,7 +393,7 @@ public class DriveAnnotationParser {
         return oncogenic;
     }
 
-    private static void setOncogenic(Gene gene, Alteration alteration, String oncogenic, String doe) {
+    private static void setOncogenic(Gene gene, Alteration alteration, Oncogenicity oncogenic, String doe) {
         if (alteration != null && gene != null && (oncogenic != null || doe != null)) {
             List<Evidence> evidences = new ArrayList<>();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -403,12 +403,12 @@ public class DriveAnnotationParser {
                 evidence.setGene(gene);
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                evidence.setKnownEffect(oncogenic);
+                evidence.setKnownEffect(oncogenic.getOncogenic());
                 evidence.setDescription(doe);
                 setDocuments(doe, evidence);
                 evidenceBo.save(evidence);
-            } else if (oncogenic.equals("1") || oncogenic.equals("2")) {
-                evidences.get(0).setKnownEffect(oncogenic);
+            } else if (oncogenic.equals(Oncogenicity.YES) || oncogenic.equals(Oncogenicity.LIKELY)) {
+                evidences.get(0).setKnownEffect(oncogenic.getOncogenic());
                 evidences.get(0).setDescription(doe);
                 setDocuments(doe, evidences.get(0));
                 evidenceBo.update(evidences.get(0));

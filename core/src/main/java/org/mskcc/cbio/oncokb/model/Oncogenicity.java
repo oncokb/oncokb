@@ -10,25 +10,19 @@ import java.util.Map;
  * @author jgao
  */
 public enum Oncogenicity {
-    YES ("1", "Oncogenic"),
-    LIKELY ("2", "Likely Oncogenic"),
-    LIKELY_NEUTRAL ("0", "Likely Neutral"),
-    INCONCLUSIVE ("-1", "Inconclusive");
+    YES ("Oncogenic"),
+    LIKELY ("Likely Oncogenic"),
+    LIKELY_NEUTRAL ("Likely Neutral"),
+    INCONCLUSIVE ("Inconclusive");
     
-    private Oncogenicity(String oncogenic, String description) {
+    private Oncogenicity(String oncogenic) {
         this.oncogenic = oncogenic;
-        this.description = description;
     }
     
     private final String oncogenic;
-    private final String description;
 
     public String getOncogenic() {
         return oncogenic;
-    }
-
-    public String getDescription() {
-        return description;
     }
     
     private static final Map<String, Oncogenicity> map = new HashMap<String, Oncogenicity>();
