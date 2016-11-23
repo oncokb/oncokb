@@ -340,18 +340,18 @@ public class SummaryUtils {
                 isPlural = true;
             }
 
-            int oncogenic = -1;
+            Oncogenicity oncogenic = null;
             for (Alteration a : alterations) {
                 Set<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
                 if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
                     Evidence evidence = oncogenicEvidences.iterator().next();
-                    if (evidence != null && evidence.getKnownEffect() != null && Integer.parseInt(evidence.getKnownEffect()) >= 0) {
-                        oncogenic = Integer.parseInt(evidence.getKnownEffect());
+                    if (evidence != null && evidence.getKnownEffect() != null) {
+                        oncogenic = Oncogenicity.getByLevel(evidence.getKnownEffect());
                         break;
                     }
                 }
             }
-            if (oncogenic >= 0) {
+            if (oncogenic != null && !oncogenic.equals(Oncogenicity.INCONCLUSIVE)) {
                 if (appendThe) {
                     sb.append("The ");
                 }
@@ -363,12 +363,12 @@ public class SummaryUtils {
                     sb.append(" is");
                 }
 
-                if (oncogenic == 0) {
+                if (oncogenic.equals(Oncogenicity.LIKELY_NEUTRAL)) {
                     sb.append(" likely neutral.");
                 } else {
-                    if (oncogenic == 2) {
+                    if (oncogenic.equals(Oncogenicity.LIKELY)) {
                         sb.append(" likely");
-                    } else if (oncogenic == 1) {
+                    } else if (oncogenic.equals(Oncogenicity.YES)) {
                         sb.append(" known to be");
                     }
 
@@ -468,9 +468,9 @@ public class SummaryUtils {
             sb.append(allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is"));
             if (highestOncogenicity.getOncogenic().equals("1")) {
-                sb.append(" known to be " + highestOncogenicity.getDescription().toLowerCase());
+                sb.append(" known to be " + highestOncogenicity.getOncogenic().toLowerCase());
             } else {
-                sb.append(" " + highestOncogenicity.getDescription().toLowerCase());
+                sb.append(" " + highestOncogenicity.getOncogenic().toLowerCase());
             }
             sb.append(", and therefore " + geneStr + " " + altStr + " is considered likely oncogenic.");
         }

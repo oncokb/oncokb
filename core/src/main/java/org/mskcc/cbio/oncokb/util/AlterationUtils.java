@@ -19,7 +19,9 @@ import java.util.regex.Pattern;
  * @author jgao
  */
 public final class AlterationUtils {
-    private static List<String> oncogenicList = Arrays.asList(new String[]{"", "-1", "0", "2", "1"});
+    private static List<String> oncogenicList = Arrays.asList(new String[]{
+        "", Oncogenicity.INCONCLUSIVE.getOncogenic(), Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
+        Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
     private final static String[] generalAlts = {"activating mutations", "activating mutation", "inactivating mutations", "inactivating mutation", "all mutations", "all mutation", "wildtype", "wildtypes"};
     private final static String[] singularGeneralAlt = {"activating mutation", "inactivating mutation", "all mutations"};
