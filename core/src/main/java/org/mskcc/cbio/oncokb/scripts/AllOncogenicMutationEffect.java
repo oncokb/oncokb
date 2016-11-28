@@ -43,12 +43,6 @@ public class AllOncogenicMutationEffect {
                 
                 for(Evidence evidence : relevantEvidences) {
                     String knownEffect = evidence.getKnownEffect();
-                    if(evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                        Oncogenicity oncogenicity = Oncogenicity.getByLevel(knownEffect);
-                        if(oncogenicity != null) {
-                            knownEffect = oncogenicity.getDescription();
-                        }
-                    }
                     
                     System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + evidence.getEvidenceType() + "\t" + knownEffect + "\t" + evidence.getDescription());
                 }
@@ -56,12 +50,12 @@ public class AllOncogenicMutationEffect {
         }
     }
 
-    private static String getMutationEffect(List<Evidence> evidences) {
-        Set<String> mutationEffect = new HashSet<>();
+    private static MutationEffect getMutationEffect(List<Evidence> evidences) {
+        Set<MutationEffect> mutationEffect = new HashSet<>();
 
         for (Evidence evidence : evidences) {
             if (evidence.getEvidenceType().equals(EvidenceType.MUTATION_EFFECT)) {
-                mutationEffect.add(evidence.getKnownEffect());
+                mutationEffect.add(MutationEffect.getByName(evidence.getKnownEffect()));
             }
         }
         return MainUtils.findHighestMutationEffect(mutationEffect);
