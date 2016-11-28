@@ -47,6 +47,7 @@ OncoKB.config = {
     // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/internal/legacy-api/',
+    //apiLink: 'http://localhost:8080/oncokb/legacy-api/',
     // apiLink: 'http://localhost:8080/internal/legacy-api/',
     // apiLink: 'legacy-api/',
     curationLink: 'legacy-api/',
@@ -417,6 +418,7 @@ OncoKB.initialize = function() {
                             this[__key + '_comments'] = model.createList();
                             this[__key + '_timeStamp'] = model.createMap();
                             this[__key + '_eStatus'] = model.createMap();
+                            this[__key + '_uuid'] = model.createString('');
                         }
                         switch (OncoKB.curateInfo[id][__key].type) {
                             case 'string':
@@ -445,6 +447,7 @@ OncoKB.initialize = function() {
                 OncoKB[_key].prototype[_keys[j] + '_comments'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_comments');
                 OncoKB[_key].prototype[_keys[j] + '_timeStamp'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_timeStamp');
                 OncoKB[_key].prototype[_keys[j] + '_eStatus'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_eStatus');
+                OncoKB[_key].prototype[_keys[j] + '_uuid'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_uuid');
             }
         }
 
