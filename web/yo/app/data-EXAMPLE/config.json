@@ -1,0 +1,21 @@
+{
+    "clientId": "",
+    "scopes": [
+        "https://www.googleapis.com/auth/plus.profile.emails.read",
+        "https://www.googleapis.com/auth/drive.file"
+    ],
+    "folderId": "0BzBfo69g8fP6NkgtWGZxd0NjcWs",
+    "userRoles": {
+        "public": 1,
+        "user": 2,
+        "curator": 4,
+        "admin": 8
+    },
+    "backupFolderId": "0BzBfo69g8fP6LWozVE56Mk1RYkU",
+    "users": "",
+    "apiLink": "legacy-api/",
+    "curationLink": "legacy-api/",
+    "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
+    "testing": true
+}
+
