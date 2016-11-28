@@ -4,11 +4,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config', 'importer', 'storage', 'documents',
         'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs',
         function($scope, $rootScope, $location, $timeout, $routeParams, _,
                  config, importer, storage, Documents, users,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi) {
+                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs) {
             function saveGene(docs, docIndex, excludeObsolete, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -99,6 +99,51 @@ angular.module('oncokbApp')
                     });
                 }
             };
+
+            $scope.startFEUUIDImportingFE = function() {
+                importUUIDs($scope.documents, 0);
+            };
+
+            function importUUIDs(docs, docIndex) {
+                var fileId = docs[docIndex].id;
+                storage.getRealtimeDocument(fileId).then(function(realtime) {
+                    if (realtime && realtime.error) {
+                        console.log('did not get realtime document.');
+                    } else {
+                        var model = realtime.getModel();
+                        var gene = model.getRoot().get('gene');
+                        if (gene) {
+                            var jsonGene = stringUtils.getGeneData(gene);
+                            setUUID(jsonGene, gene);
+                            console.log('Done setting uuid for ', gene.name.getText());
+                        } else {
+                            console.log('No gene model');
+                        }
+                    }
+
+                    docIndex++;
+                    if (docIndex < docs.length) {
+                        $timeout(function() {
+                            importUUIDs(docs, docIndex);
+                        }, 500, false);
+                    } else {
+                        console.log('It is finished!');
+                    }
+                });
+            }
+
+            function setUUID(jsonData, model) {
+                _.each(_.keys(jsonData), function(item) {
+                    if (item.endsWith('_uuid')) {
+                        model[item].setText(UUIDjs.create(4).toString());
+                    } else if (item.indexOf('_') === -1 && model[item] && model[item].type === 'List') {
+                        model[item + '_uuid'].setText(UUIDjs.create(4).toString());
+                        _.each(model[item].asArray(), function(itemModel, index) {
+                            setUUID(jsonData[item][index], itemModel);
+                        });
+                    }
+                });
+            }
 
             $scope.backup = function() {
                 $scope.status.backup = false;
