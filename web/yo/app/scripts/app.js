@@ -26,8 +26,7 @@ OncoKB.tree = {};
 // OncoKB configurations, reading from config.json
 // All contents here are pointing to few examples files.
 OncoKB.config = {
-    // Please register your application first in Google developer console.
-    "clientId": "",
+    "clientId": "", // Your client ID from google developer console
     "scopes": [
         "https://www.googleapis.com/auth/plus.profile.emails.read",
         "https://www.googleapis.com/auth/drive.file"
@@ -40,7 +39,7 @@ OncoKB.config = {
         "admin": 8
     },
     "backupFolderId": "0BzBfo69g8fP6LWozVE56Mk1RYkU",  // Example backup folder
-    "users": "", // The google spreadsheet ID which used to manage the user info
+    "users": "", // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission.
     "apiLink": "legacy-api/",
     "curationLink": "legacy-api/",
     "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
