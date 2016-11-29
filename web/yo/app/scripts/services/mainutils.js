@@ -16,7 +16,7 @@ angular.module('oncokbApp')
          * Create new Gene document
          * @param {string} hugoSymbol Gene Hugo Symbol
          * @param {string} parentFolderId The folder where to put new document
-         * @returns {*|h.promise|promise|r.promise|d.promise}
+         * @return {*|h.promise|promise|r.promise|d.promise} Promise
          */
         function createGene(hugoSymbol, parentFolderId) {
             var deferred = $q.defer();
@@ -63,17 +63,17 @@ angular.module('oncokbApp')
                                                         var type = '';
                                                         var key = '';
                                                         switch (geneType.classification) {
-                                                            case 'TSG':
-                                                                type = 'Tumor Suppressor';
-                                                                key = 'TSG'
-                                                                break;
-                                                            case 'Oncogene':
-                                                                type = 'Oncogene';
-                                                                key = 'OCG'
-                                                                break;
-                                                            default:
-                                                                type = '';
-                                                                break;
+                                                        case 'TSG':
+                                                            type = 'Tumor Suppressor';
+                                                            key = 'TSG';
+                                                            break;
+                                                        case 'Oncogene':
+                                                            type = 'Oncogene';
+                                                            key = 'OCG';
+                                                            break;
+                                                        default:
+                                                            type = '';
+                                                            break;
                                                         }
                                                         if (type) {
                                                             gene.type.set(key, type);
@@ -85,7 +85,7 @@ angular.module('oncokbApp')
                                                 deferred.resolve();
                                             }, function(error) {
                                                 console.error('Failed to load isoform/geneType', error);
-                                            })
+                                            });
                                     });
                             }
                         });
@@ -96,16 +96,16 @@ angular.module('oncokbApp')
 
         /**
          * Create Google realtime mutation
-         * @param model Google realtime gene model
-         * @param mutationName mutation name.
+         * @param {object} model Google realtime gene model
+         * @param {string} mutationName mutation name.
          * Could be multiple, separated by comma.
-         * @returns {OncoKB.Mutation}
+         * @return {OncoKB.Mutation} OncoKB.Mutation
          */
         function createMutation(model, mutationName) {
             if (_.isString(mutationName)) {
                 mutationName = _.filter(mutationName
                     .trim().split(','), function(item) {
-                    return item ? true : false;
+                    return _.isString(item);
                 }).join(',');
                 var mutation = model.create(OncoKB.Mutation);
                 mutation.name.setText(mutationName);
@@ -118,15 +118,15 @@ angular.module('oncokbApp')
 
         /**
          * Create OncoKB Tumor, it is list of Cancer Type
-         * @param model
-         * @returns {OncoKB.Tumor}
+         * @param {object} model Google Realtime document gene model
+         * @return {OncoKB.Tumor} OncoKB.Tumor
          */
         function createTumorType(model) {
             var tumorType = model.create(OncoKB.Tumor);
             for (var i = 0; i < 4; i++) {
                 var __ti = model.create(OncoKB.TI);
                 var __status = i < 2 ? 1 : 0; // 1: Standard, 0: Investigational
-                var __type = i % 2 === 0 ? 1 : 0; //1: sensitivity, 0: resistance
+                var __type = i % 2 === 0 ? 1 : 0; // 1: sensitivity, 0: resistance
                 var __name = (__status ? 'Standard' : 'Investigational') + ' implications for ' + (__type ? 'sensitivity' : 'resistance') + ' to therapy';
 
                 __ti.types.set('status', __status.toString());
@@ -139,11 +139,11 @@ angular.module('oncokbApp')
 
         /**
          * Create single OncoTree cancer type
-         * @param model Google Realtime document gene model
-         * @param cancerType OncoTree main type name
-         * @param subtype OncoTree subtype name
-         * @param oncoTreeCode Subtype code
-         * @returns {OncoKB.CancerType} OncoKB.CancerType
+         * @param {object} model Google Realtime document gene model
+         * @param {string} cancerType OncoTree main type name
+         * @param {string} subtype OncoTree subtype name
+         * @param {stirng} oncoTreeCode Subtype code
+         * @return {OncoKB.CancerType} OncoKB.CancerType
          */
         function createCancerType(model, cancerType, subtype, oncoTreeCode) {
             if (_.isString(cancerType)) {
@@ -165,9 +165,9 @@ angular.module('oncokbApp')
 
         /**
          * Create new treatment object
-         * @param model Google realtime document
-         * @param treatmentName New treatment name
-         * @returns {OncoKB.Treatment}
+         * @param {object} model Google realtime document
+         * @param {string} treatmentName New treatment name
+         * @return {OncoKB.Treatment} OncoKB.Treatment
          */
         function createTreatment(model, treatmentName) {
             if (_.isString(treatmentName) && treatmentName) {
@@ -181,9 +181,9 @@ angular.module('oncokbApp')
 
         /**
          * Create Google Realtime isoform model
-         * @param model Google realtime document
-         * @param {object} isoform
-         * @returns {*}
+         * @param {object} model Google realtime document
+         * @param {object} isoform gene isofom info
+         * @return {*} return OncoKB.Isoform
          */
         function createIsoform(model, isoform) {
             if (_.isObject(isoform) && model) {
@@ -207,8 +207,8 @@ angular.module('oncokbApp')
 
         /**
          * Output cancer type name, either subtype or cancerType
-         * @param cancerTypes
-         * @returns {string}
+         * @param {array} cancerTypes List of cancer types
+         * @return {string} TumorType name
          */
         function getCancerTypesName(cancerTypes) {
             if (!cancerTypes) {
@@ -228,12 +228,12 @@ angular.module('oncokbApp')
 
         /**
          * Util to find isoform info by giving hugo symbol
-         * @param {string} hugoSymbol
-         * @returns {*|h.promise|promise|r.promise|d.promise}
+         * @param {string} hugoSymbol Gene Hugo Symbol
+         * @return {*|h.promise|promise|r.promise|d.promise} Promise
          */
         function getIsoform(hugoSymbol) {
             var deferred = $q.defer();
-            if (Object.keys(isoforms).length == 0) {
+            if (Object.keys(isoforms).length === 0) {
                 DatabaseConnector.getIsoforms()
                     .then(function(result) {
                         if (_.isArray(result)) {
@@ -245,7 +245,7 @@ angular.module('oncokbApp')
                             });
                         }
                         return deferred.resolve(isoforms[hugoSymbol]);
-                    }, function(error) {
+                    }, function() {
                         deferred.reject();
                     });
             } else {
@@ -256,12 +256,12 @@ angular.module('oncokbApp')
 
         /**
          * Util to find gene type by giving hugo symbol
-         * @param {string} hugoSymbol
-         * @returns {*|h.promise|promise|r.promise|d.promise}
+         * @param {string} hugoSymbol Gene Hugo Symbol
+         * @return {*|h.promise|promise|r.promise|d.promise} Promise
          */
         function getOncogeneTSG(hugoSymbol) {
             var deferred = $q.defer();
-            if (Object.keys(oncogeneTSG).length == 0) {
+            if (Object.keys(oncogeneTSG).length === 0) {
                 DatabaseConnector.getOncogeneTSG(hugoSymbol)
                     .then(function(result) {
                         if (_.isArray(result)) {
@@ -273,7 +273,7 @@ angular.module('oncokbApp')
                             });
                         }
                         deferred.resolve(oncogeneTSG[hugoSymbol]);
-                    }, function(error) {
+                    }, function() {
                         deferred.reject();
                     });
             } else {

@@ -1,7 +1,7 @@
 
 var d3 = window.d3;
 var $ = window.$;
-var Tree = (function() {
+window.Tree = (function() {
     'use strict';
 
     var m = [20, 120, 20, 50],
@@ -59,7 +59,7 @@ var Tree = (function() {
 
     function formatTree(name, tree, description) {
         var ret = {
-            name: name, 
+            name: name,
             description: description[name].description || []
         };
         var root = tree[name];
@@ -153,9 +153,9 @@ var Tree = (function() {
         });
 
         //Calculate the transform information for each node.
-        nodes.forEach(function(d) { 
+        nodes.forEach(function(d) {
           if(d.depth === 0){
-            d.y = 0; 
+            d.y = 0;
           }else{
             var _y = 0,
                 _length = d.depth;
@@ -172,7 +172,7 @@ var Tree = (function() {
                 }
               }
             }
-            d.y = _y; 
+            d.y = _y;
           }
         });
 
@@ -201,7 +201,7 @@ var Tree = (function() {
                   var _position = {};
                   for(var i = 0, desL = d.description.length; i < desL; i++) {
                       if(d.description[i].hasOwnProperty('Evidence Type')){
-                          
+
                             switch(d.description[i]['Evidence Type']) {
                                 case 'MUTATION_EFFECT':
                                     qtipText += '<b>Mutation Effect: ' + d.description[i]['Known Effect'] + '</b><br>' + d.description[i].Description + '<br>';
@@ -211,7 +211,7 @@ var Tree = (function() {
                                     break;
                         }
                       }
-                      
+
                       if(i+1 !== desL){
                         qtipText += '<hr/>';
                       }
@@ -228,7 +228,7 @@ var Tree = (function() {
                       hide: {fixed:true, delay: 100},
                       position: _position
                   });
-              } 
+              }
               return d.name; })
 
             .style('fill-opacity', 1e-6);
@@ -302,7 +302,7 @@ var Tree = (function() {
         });
         return a.join(' ');
     }
-    
+
     // Toggle children.
     function toggle(d) {
       if (d.children) {

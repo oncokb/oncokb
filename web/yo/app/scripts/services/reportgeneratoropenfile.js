@@ -8,5 +8,5 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('reportGeneratorOpenFile', function () {
+    .service('reportGeneratorOpenFile', function() {
     });

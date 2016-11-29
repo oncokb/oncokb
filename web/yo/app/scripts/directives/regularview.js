@@ -1,42 +1,36 @@
 'use strict';
 
-/**
- * @ngdoc directive
- * @name oncokb.directive:regularView
- * @description
- * # regularView
- */
 angular.module('oncokbApp')
-    .directive('regularView', ['FindRegex', function (FindRegex) {
+    .directive('regularView', ['FindRegex', function(FindRegex) {
         function link($scope) {
             $scope.getDrugHeader = function(key, data) {
                 var header = '';
 
-                if(key !== 'sensitive_to') {
+                if (key !== 'sensitive_to') {
                     header += $scope.displayProcess(key) + ': ';
                 }
 
-                if(typeof data === 'object') {
-                    if(data.hasOwnProperty('treatment')) {
+                if (typeof data === 'object') {
+                    if (data.hasOwnProperty('treatment')) {
                         var hasTreatment = false;
-                        data.treatment.forEach(function(e){
-                            if(e.hasOwnProperty('drug')) {
+                        data.treatment.forEach(function(e) {
+                            if (e.hasOwnProperty('drug')) {
                                 var hasDrug = false;
-                                e.drug.forEach(function(e1){
-                                    if(e1.hasOwnProperty('name')) {
+                                e.drug.forEach(function(e1) {
+                                    if (e1.hasOwnProperty('name')) {
                                         hasDrug = true;
                                         header += e1.name + ' + ';
                                     }
                                 });
-                                if(hasDrug){
+                                if (hasDrug) {
                                     hasTreatment = true;
-                                    header = header.substr(0, header.length-3);
+                                    header = header.substr(0, header.length - 3);
                                 }
                             }
                             header += ' & ';
                         });
-                        if(hasTreatment){
-                            header = header.substr(0, header.length-3);
+                        if (hasTreatment) {
+                            header = header.substr(0, header.length - 3);
                         }
                     }
                 }
@@ -44,84 +38,77 @@ angular.module('oncokbApp')
             };
             $scope.getDrugBody = function(data) {
                 var body = '';
-                if(hasEvidenceLevel(data)) {
+                if (hasEvidenceLevel(data)) {
                     body += 'Highest Level of Evidence: ' + data.level_of_evidence_for_patient_indication.level + '<br/>';
                 }
-                body += (data.hasOwnProperty('description') && angular.isString(data.description))?FindRegex.get(data.description):'';
+                body += (data.hasOwnProperty('description') && angular.isString(data.description)) ? FindRegex.get(data.description) : '';
                 return body;
             };
             $scope.hasGeneralStatement = function(data) {
-                if(typeof data === 'object' && data.hasOwnProperty('general_statement')) {
+                if (typeof data === 'object' && data.hasOwnProperty('general_statement')) {
                     return true;
-                }else {
-                    return false;
                 }
+                return false;
             };
             $scope.generateNCCN = function(nccn) {
                 var str = '<i>';
 
-                str += (nccn.hasOwnProperty('disease') && angular.isString(nccn.disease))?('Disease: ' + nccn.disease):'';
-                str += (nccn.hasOwnProperty('version') && angular.isString(nccn.version))?(' Version: ' + nccn.version):'';
-                str += (nccn.hasOwnProperty('pages') && angular.isString(nccn.pages))?(' Pages: ' + nccn.pages):'';
+                str += (nccn.hasOwnProperty('disease') && angular.isString(nccn.disease)) ? ('Disease: ' + nccn.disease) : '';
+                str += (nccn.hasOwnProperty('version') && angular.isString(nccn.version)) ? (' Version: ' + nccn.version) : '';
+                str += (nccn.hasOwnProperty('pages') && angular.isString(nccn.pages)) ? (' Pages: ' + nccn.pages) : '';
 
                 str += '</i>';
-                str += (nccn.hasOwnProperty('description') && angular.isString(nccn.description))?('<br>' + FindRegex.get(nccn.description) + '<br/>'):'';
+                str += (nccn.hasOwnProperty('description') && angular.isString(nccn.description)) ? ('<br>' + FindRegex.get(nccn.description) + '<br/>') : '';
 
                 return str;
             };
             $scope.generateTrial = function(trial) {
                 var str = '';
 
-                if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
+                if (typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
                     $scope.isCollapsed[trial.trial_id] = {
                         purpose: true,
-                        eligibility_criteria: true
+                        eligibilityCriteria: true
                     };
                 }
 
-                str += trial.hasOwnProperty('trial_id')?('TRIAL ID: ' + FindRegex.get(trial.trial_id) + (trial.hasOwnProperty('phase')?(' / ' + trial.phase): '') + '<br/>'):'';
-                str += trial.hasOwnProperty('title')?('TITLE: ' + trial.title + '<br/>'):'';
+                str += trial.hasOwnProperty('trial_id') ? ('TRIAL ID: ' + FindRegex.get(trial.trial_id) + (trial.hasOwnProperty('phase') ? (' / ' + trial.phase) : '') + '<br/>') : '';
+                str += trial.hasOwnProperty('title') ? ('TITLE: ' + trial.title + '<br/>') : '';
 
                 // str += trial.hasOwnProperty('description')?('<br>' + FindRegex.get(trial.description) + '<br/>'):'';
                 return str;
             };
 
             $scope.getCollapseIcon = function(trial, attr) {
-                if(typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr] ) {
+                if (typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr]) {
                     return 'images/add.svg';
-                }else{
-                    return 'images/subtract.svg';
                 }
+                return 'images/subtract.svg';
             };
 
             $scope.findRegex = FindRegex.get;
 
             $scope.isNonArray = function(object) {
-                if(!angular.isArray(object)) {
+                if (!angular.isArray(object)) {
                     return true;
-                }else {
-                    return false;
                 }
-            }
+                return false;
+            };
 
             $scope.isArray = function(object) {
-                if(angular.isArray(object)) {
+                if (angular.isArray(object)) {
                     return true;
-                }else {
-                    return false;
                 }
-            }
-            
+                return false;
+            };
+
             function hasEvidenceLevel(data) {
-                if(typeof data === 'object' && 
-                    data.hasOwnProperty('level_of_evidence_for_patient_indication') && 
-                    /* jshint -W069 */
-                    data['level_of_evidence_for_patient_indication'].hasOwnProperty('level')) {
-                    /* jshint +W069 */
+                if (typeof data === 'object' &&
+                    data.hasOwnProperty('level_of_evidence_for_patient_indication') &&
+                    data.level_of_evidence_for_patient_indication.hasOwnProperty('level')) {
                     return true;
-                }else {
-                    return false;
                 }
+                return false;
             }
         }
 
