@@ -935,23 +935,23 @@ public class SummaryUtils {
 
     private static String getGeneMutationNameInVariantSummary(Gene gene, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
-        sb.append(gene.getHugoSymbol() + " ");
         Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
         if (alteration == null) {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
         if (isSpecialMutation(queryAlteration, true)) {
-            sb.append(queryAlteration.toLowerCase());
-        } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")
-            || isSpecialMutation(queryAlteration, false)
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
+        } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
+            sb.append(queryAlteration);
+        } else if (isSpecialMutation(queryAlteration, false)
             || (alteration.getConsequence() != null
             && (alteration.getConsequence().getTerm().equals("inframe_deletion")
             || alteration.getConsequence().getTerm().equals("inframe_insertion")))
             || StringUtils.containsIgnoreCase(queryAlteration, "indel")) {
-            sb.append(queryAlteration + " alteration");
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
         } else {
-            sb.append(queryAlteration + " mutation");
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " mutation");
         }
         return sb.toString();
     }
@@ -963,23 +963,26 @@ public class SummaryUtils {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
-        if (isSpecialMutation(queryAlteration, true) && !queryAlteration.toLowerCase().equals("fusions")) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
-        } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
-            if(queryAlteration.toLowerCase().equals("fusions")) {
-                queryAlteration = "fusion";
+        if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
+            if (queryAlteration.toLowerCase().equals("fusions")) {
+                queryAlteration = gene.getHugoSymbol() +  " fusion";
             }
             sb.append(queryAlteration + " positive");
-        } else if (isSpecialMutation(queryAlteration, false)
-            || (alteration.getConsequence() != null
-            && (alteration.getConsequence().getTerm().equals("inframe_deletion")
-            || alteration.getConsequence().getTerm().equals("inframe_insertion")))
-            || StringUtils.containsIgnoreCase(queryAlteration, "indel")
-            || StringUtils.containsIgnoreCase(queryAlteration, "delins")
-            ) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " altered");
         } else {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " mutant");
+            sb.append(gene.getHugoSymbol() + " ");
+            if (isSpecialMutation(queryAlteration, true)) {
+                sb.append(queryAlteration.toLowerCase());
+            } else if (isSpecialMutation(queryAlteration, false)
+                || (alteration.getConsequence() != null
+                && (alteration.getConsequence().getTerm().equals("inframe_deletion")
+                || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+                || StringUtils.containsIgnoreCase(queryAlteration, "indel")
+                || StringUtils.containsIgnoreCase(queryAlteration, "delins")
+                ) {
+                sb.append(queryAlteration + " altered");
+            } else {
+                sb.append(queryAlteration + " mutant");
+            }
         }
         return sb.toString();
     }
