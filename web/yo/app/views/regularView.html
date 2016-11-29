@@ -35,7 +35,7 @@
                             <h4>{{displayProcess(content)}}</h4>
                             <!--Repeat by content attributes(sensitive_to, resistant_to)-->
                             <p ng-if="hasGeneralStatement(cancerType[content])">{{cancerType[content].general_statement.sensitivity.description}}</p>
-                            
+
                             <!--show investigational/standared therapy-->
                             <div ng-if="specialAttr.indexOf(content) !== -1" ng-repeat="(key, value) in cancerType[content]">
 
@@ -55,9 +55,9 @@
                                 <div uib-collapse="isCollapsed[trial.trial_id]['purpose']">
                                     <div class="well well-lg">{{trial.purpose}}</div>
                                 </div>
-                                <span>ELIGIBILITY CRITERIA</span><img  ng-click="setCollapsed(trial, 'eligibility_criteria')" ng-src="{{getCollapseIcon(trial, 'eligibility_criteria')}}" class='icon'></img>
-                                <div uib-collapse="isCollapsed[trial.trial_id]['eligibility_criteria']">
-                                    <div class="well well-lg">{{trial.eligibility_criteria}}</div>
+                                <span>ELIGIBILITY CRITERIA</span><img  ng-click="setCollapsed(trial, 'eligibilityCriteria')" ng-src="{{getCollapseIcon(trial, 'eligibilityCriteria')}}" class='icon'></img>
+                                <div uib-collapse="isCollapsed[trial.trial_id]['eligibilityCriteria']">
+                                    <div class="well well-lg">{{trial.eligibilityCriteria}}</div>
                                 </div>
                             </div>
 

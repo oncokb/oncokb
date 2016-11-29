@@ -7,14 +7,14 @@
  * # qtip
  */
 angular.module('oncokbApp')
-    .directive('qtip', function () {
+    .directive('qtip', function() {
         return {
             restrict: 'A',
             scope: {
                 time: '=',
                 by: '='
             },
-            link: function (scope, element, attrs) {
+            link: function(scope, element, attrs) {
                 var src = '';
                 var content = '';
                 var hideEvent = 'mouseleave';
@@ -25,17 +25,17 @@ angular.module('oncokbApp')
                     src = '<iframe width="600px" height="400px" src=\'';
                     if (attrs.type && attrs.number) {
                         switch (attrs.type) {
-                            case 'pmid':
-                                src += 'https://www.ncbi.nlm.nih.gov/pubmed/' + attrs.number;
-                                break;
-                            case 'nct':
-                                src += 'https://clinicaltrials.gov/show/' + attrs.number;
-                                break;
-                            case 'abstract':
-                                src += attrs.number;
-                                break;
-                            default:
-                                break;
+                        case 'pmid':
+                            src += 'https://www.ncbi.nlm.nih.gov/pubmed/' + attrs.number;
+                            break;
+                        case 'nct':
+                            src += 'https://clinicaltrials.gov/show/' + attrs.number;
+                            break;
+                        case 'abstract':
+                            src += attrs.number;
+                            break;
+                        default:
+                            break;
                         }
                     }
                     src += '\'></iframe>';
@@ -69,13 +69,13 @@ angular.module('oncokbApp')
                         delay: 500
                     }
                 };
-                if(attrs.number !== undefined && attrs.number.length > 0){
-                    $(element).qtip(options);    
+                if (attrs.number !== undefined && attrs.number.length > 0) {
+                    $(element).qtip(options);
                 }
-                
-                scope.$watch("time", function (n, o) {
-                    if(n) {
-                        if($(element).data('qtip')) {
+
+                scope.$watch('time', function(n) {
+                    if (n) {
+                        if ($(element).data('qtip')) {
                             $(element).qtip('api').set('content.text', '<span>Last edit: ' + new Date(scope.time).toLocaleDateString() + '</span><br/><span>By: ' + scope.by + '</span>');
                         }
                     }

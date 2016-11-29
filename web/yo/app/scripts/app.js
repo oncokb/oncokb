@@ -1,5 +1,4 @@
 'use strict';
-/*jshint -W083 */
 /**
  * @ngdoc overview
  * @name oncokb
@@ -11,318 +10,318 @@
 var OncoKB = {};
 var gapi = window.gapi;
 
-//Global variables
+// Global variables
 OncoKB.global = {};
-//OncoKB.global.genes
-//OncoKB.global.alterations
-//OncoKB.global.tumorTypes
-//OncoKB.global.treeEvidence
-//OncoKB.global.processedData
+// OncoKB.global.genes
+// OncoKB.global.alterations
+// OncoKB.global.tumorTypes
+// OncoKB.global.treeEvidence
+// OncoKB.global.processedData
 
-//Variables for tree tab
+// Variables for tree tab
 OncoKB.tree = {};
-//processedData
+// processedData
 
 // OncoKB configurations, reading from config.json
 // All contents here are pointing to few examples files.
 OncoKB.config = {
-    "clientId": "", // Your client ID from google developer console
-    "scopes": [
-        "https://www.googleapis.com/auth/plus.profile.emails.read",
-        "https://www.googleapis.com/auth/drive.file"
+    clientId: '', // Your client ID from google developer console
+    scopes: [
+        'https://www.googleapis.com/auth/plus.profile.emails.read',
+        'https://www.googleapis.com/auth/drive.file'
     ],
-    "folderId": "0BzBfo69g8fP6NkgtWGZxd0NjcWs", // Example folder
-    "userRoles": {
-        "public": 1,
-        "user": 2,
-        "curator": 4,
-        "admin": 8
+    folderId: '0BzBfo69g8fP6NkgtWGZxd0NjcWs', // Example folder
+    userRoles: {
+        public: 1,
+        user: 2,
+        curator: 4,
+        admin: 8
     },
-    "backupFolderId": "0BzBfo69g8fP6LWozVE56Mk1RYkU",  // Example backup folder
-    "users": "", // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission.
-    "apiLink": "legacy-api/",
-    "curationLink": "legacy-api/",
-    "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
-    "testing": true
+    backupFolderId: '0BzBfo69g8fP6LWozVE56Mk1RYkU',  // Example backup folder
+    users: '', // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission.
+    apiLink: 'legacy-api/',
+    curationLink: 'legacy-api/',
+    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
+    testing: true
 };
 
 OncoKB.curateInfo = {
-    'Gene': {
-        'name': {
+    Gene: {
+        name: {
             type: 'string'
         },
-        'status': {
+        status: {
             type: 'string'
         },
-        'shortSummary': {
+        shortSummary: {
             type: 'string',
             display: 'Short description of summary'
         },
-        'summary': {
+        summary: {
             type: 'string',
             display: 'Summary'
         },
-        'shortBackground': {
+        shortBackground: {
             type: 'string',
             display: 'Short description of background'
         },
-        'background': {
+        background: {
             type: 'string',
             display: 'Background'
         },
-        'mutations': {
+        mutations: {
             type: 'list'
         },
-        'curators': {
+        curators: {
             type: 'list'
         },
-        'transcripts': {
+        transcripts: {
             type: 'list'
         },
-        'type': {
+        type: {
             type: 'map'
         }
     },
-    'Mutation': {
-        'name': {
+    Mutation: {
+        name: {
             type: 'string'
         },
-        'summary': {
+        summary: {
             type: 'string',
             display: 'Description of summary'
         },
-        'shortSummary': {
+        shortSummary: {
             type: 'string',
             display: 'Description of oncogenicity'
         },
-        'oncogenic': {
+        oncogenic: {
             type: 'string',
             display: 'Oncogenic'
         },
-        'effect': {
+        effect: {
             type: 'ME'
         },
-        'short': {
+        short: {
             type: 'string',
             display: 'Short description of mutation effect'
         },
-        'description': {
+        description: {
             type: 'string',
             display: 'Description of mutation effect'
         },
-        'tumors': {
+        tumors: {
             type: 'list'
         }
     },
-    'Curator': {
-        'name': {
+    Curator: {
+        name: {
             type: 'string'
         },
-        'email': {
+        email: {
             type: 'string'
         }
     },
-    'NCCN': {
-        'therapy': {
+    NCCN: {
+        therapy: {
             type: 'string',
             display: 'Therapy'
         },
-        'disease': {
+        disease: {
             type: 'string',
             display: 'Disease'
         },
-        'version': {
+        version: {
             type: 'string',
             display: 'Version'
         },
-        'pages': {
+        pages: {
             type: 'string',
             display: 'Pages'
         },
-        'category': {
+        category: {
             type: 'string',
             display: 'NCCN category of evidence and consensus'
         },
-        'short': {
+        short: {
             type: 'string',
             display: 'Short description of evidence'
         },
-        'description': {
+        description: {
             type: 'string',
             display: 'Description of evidence'
         }
     },
-    'InteractAlts': {
-        'alterations': {
+    InteractAlts: {
+        alterations: {
             type: 'string',
             display: 'Alterations'
         },
-        'short': {
+        short: {
             type: 'string',
             display: 'Short description'
         },
-        'description': {
+        description: {
             type: 'string',
             display: 'Description'
         }
     },
-    'CancerType': {
-        'cancerType': {
+    CancerType: {
+        cancerType: {
             type: 'string'
         },
-        'subtype': {
+        subtype: {
             type: 'string'
         },
-        'oncoTreeCode': {
+        oncoTreeCode: {
             type: 'string'
         },
-        'operation': {
-            type: 'string' //TODO: May be used for exclude or other operation.
+        operation: {
+            type: 'string' // TODO: May be used for exclude or other operation.
         }
     },
-    'Tumor': {
-        'name': {
+    Tumor: {
+        name: {
             type: 'string'
         },
-        'cancerTypes': {
+        cancerTypes: {
             type: 'list'
         },
-        'summary': {
+        summary: {
             type: 'string'
         },
-        'shortSummary': {
+        shortSummary: {
             type: 'string',
             display: 'Short description of summary'
         },
-        'prevalence': {
+        prevalence: {
             type: 'string',
             display: 'Prevalence'
         },
-        'shortPrevalence': {
+        shortPrevalence: {
             type: 'string',
             display: 'Short prevalence'
         },
-        'progImp': {
+        progImp: {
             type: 'string',
             display: 'Prognostic implications'
         },
-        'shortProgImp': {
+        shortProgImp: {
             type: 'string',
             display: 'Short prognostic implications'
         },
-        'trials': {
+        trials: {
             type: 'list'
         },
-        'TI': {
+        TI: {
             type: 'list'
         },
-        'nccn': {
+        nccn: {
             type: 'NCCN'
         },
-        'interactAlts': {
+        interactAlts: {
             type: 'InteractAlts'
         }
     },
-    'TI': {
-        'name': {
+    TI: {
+        name: {
             type: 'string'
         },
-        'types': {},
-        'treatments': {
+        types: {},
+        treatments: {
             type: 'list'
         },
-        'description': {
+        description: {
             type: 'string',
             display: 'Description of evidence'
         },
-        'short': {
+        short: {
             type: 'string',
             display: 'Short description of evidence'
         }
     },
-    'Treatment': {
-        'name': {
+    Treatment: {
+        name: {
             type: 'string'
         },
-        'type': {
+        type: {
             type: 'string'
         },
-        'level': {
+        level: {
             type: 'string',
             display: 'Highest level of evidence'
         },
-        'indication': {
+        indication: {
             type: 'string',
             display: 'FDA approved indications'
         },
-        'short': {
+        short: {
             type: 'string',
             display: 'Short description of evidence'
         },
-        'description': {
+        description: {
             type: 'string',
             display: 'Description of evidence'
         },
-        'trials': {
+        trials: {
             type: 'string'
         }
     },
-    //Mutation effect
-    'ME': {
-        'value': {
+    // Mutation effect
+    ME: {
+        value: {
             type: 'string'
         },
-        'addOn': {
+        addOn: {
             type: 'string'
         }
     },
-    'Comment': {
-        'date': {
+    Comment: {
+        date: {
             type: 'string'
         },
-        'userName': {
+        userName: {
             type: 'string'
         },
-        'email': {
+        email: {
             type: 'string'
         },
-        'content': {
+        content: {
             type: 'string'
         },
-        'resolved': {
+        resolved: {
             type: 'string'
         }
     },
-    'TimeStamp': {
-        'value': {
+    TimeStamp: {
+        value: {
             type: 'string'
         },
-        //Edit by
-        'by': {
+        // Edit by
+        by: {
             type: 'string'
         }
     },
-    'TimeStampWithCurator': {
-        'value': {
+    TimeStampWithCurator: {
+        value: {
             type: 'string'
         },
-        //Edit by
-        'by': {
+        // Edit by
+        by: {
             type: 'Curator'
         }
     },
-    'EStatus': {
-        'value': {
+    EStatus: {
+        value: {
             type: 'string'
         },
-        'by': {
+        by: {
             type: 'string'
         },
-        'date': {
+        date: {
             type: 'string'
         }
     },
-    'VUSItem': {
+    VUSItem: {
         name: {
             type: 'string'
         },
@@ -330,7 +329,8 @@ OncoKB.curateInfo = {
             type: 'list'
         }
     },
-    'ISOForm': {
+    /* eslint camelcase: ["error", {properties: "never"}]*/
+    ISOForm: {
         isoform_override: {
             type: 'string'
         },
@@ -362,7 +362,7 @@ OncoKB.setUp = function(object) {
         }
     }
 };
-OncoKB.keyMappings = {type: {'TSG': '', 'OCG': ''}};
+OncoKB.keyMappings = {type: {TSG: '', OCG: ''}};
 
 OncoKB.initialize = function() {
     var nonSetUp = ['TI'];
@@ -374,8 +374,8 @@ OncoKB.initialize = function() {
         var _keys = window._.keys(OncoKB.curateInfo[_key]);
         var _keysL = _keys.length;
 
-        //Google Realtime data module for annotation curation
-        //Gene is the main entry
+        // Google Realtime data module for annotation curation
+        // Gene is the main entry
         OncoKB[_key] = function() {
         };
 
@@ -395,37 +395,35 @@ OncoKB.initialize = function() {
                 var __key = atrrs[j];
                 if (__key === 'types' && id === 'TI') {
                     this.types = model.createMap({
-                        'status': '0',
-                        'type': '0'
+                        status: '0',
+                        type: '0'
                     });
-                } else {
-                    if (OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
-                        if (['Comment', 'TimeStamp', 'EStatus'].indexOf(id) === -1) {
-                            this[__key + '_comments'] = model.createList();
-                            this[__key + '_timeStamp'] = model.createMap();
-                            this[__key + '_eStatus'] = model.createMap();
-                        }
-                        switch (OncoKB.curateInfo[id][__key].type) {
-                            case 'string':
-                                this[__key] = model.createString('');
-                                break;
-                            case 'list':
-                                this[__key] = model.createList();
-                                break;
-                            case 'map':
-                                this[__key] = model.createMap(OncoKB.keyMappings[__key]);
-                                break;
-                            default:
-                                this[__key] = model.create(OncoKB.curateInfo[id][__key].type);
-                                break;
-                        }
+                } else if (OncoKB.curateInfo[id][__key].hasOwnProperty('type')) {
+                    if (['Comment', 'TimeStamp', 'EStatus'].indexOf(id) === -1) {
+                        this[__key + '_comments'] = model.createList();
+                        this[__key + '_timeStamp'] = model.createMap();
+                        this[__key + '_eStatus'] = model.createMap();
+                    }
+                    switch (OncoKB.curateInfo[id][__key].type) {
+                    case 'string':
+                        this[__key] = model.createString('');
+                        break;
+                    case 'list':
+                        this[__key] = model.createList();
+                        break;
+                    case 'map':
+                        this[__key] = model.createMap(OncoKB.keyMappings[__key]);
+                        break;
+                    default:
+                        this[__key] = model.create(OncoKB.curateInfo[id][__key].type);
+                        break;
                     }
                 }
             }
             this.setUp();
         };
 
-        //Register every field of OncoKB into document
+        // Register every field of OncoKB into document
         for (var j = 0; j < _keysL; j++) {
             OncoKB[_key].prototype[_keys[j]] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j]);
             if (['Comment', 'TimeStamp', 'EStatus'].indexOf(_key) === -1) {
@@ -435,17 +433,17 @@ OncoKB.initialize = function() {
             }
         }
 
-        //Register custom type
+        // Register custom type
         gapi.drive.realtime.custom.registerType(OncoKB[_key], _key);
 
-        //Set realtime API initialize function for each type, this function only runs one time when create new data model
+        // Set realtime API initialize function for each type, this function only runs one time when create new data model
         gapi.drive.realtime.custom.setInitializer(OncoKB[_key], OncoKB[_key].prototype.initialize);
 
-        //Set on loaded function, this function will be loaded everyone the document been pulled from google drive
-        if (nonSetUp.indexOf(_key) !== -1) {
-            gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key]);
-        } else {
+        // Set on loaded function, this function will be loaded everyone the document been pulled from google drive
+        if (nonSetUp.indexOf(_key) === -1) {
             gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key], OncoKB[_key].prototype.setUp);
+        } else {
+            gapi.drive.realtime.custom.setOnLoaded(OncoKB[_key]);
         }
     }
 };
@@ -483,6 +481,8 @@ var oncokbApp = angular.module('oncokbApp', [
     .constant('Levenshtein', window.Levenshtein)
     .constant('XLSX', window.XLSX)
     .constant('PDF', window.jsPDF)
+    .constant('gapi', window.gapi)
+    .constant('Tree', window.Tree)
     .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
         var access = config.accessLevels;
 
@@ -526,23 +526,23 @@ var oncokbApp = angular.module('oncokbApp', [
             })
             .when('/feedback', {
                 templateUrl: 'views/feedback.html',
-                //controller: 'FeedbackCtrl',
+                // controller: 'FeedbackCtrl',
                 access: access.admin,
                 internalUse: true
             })
-            //.when('/vus', {
+            // .when('/vus', {
             //    templateUrl: 'views/vus.html',
             //    controller: 'VUSCtrl',
             //    access: access.admin,
             //    internalUse: true
-            //})
-            //.when('/dataSummary', {
+            // })
+            // .when('/dataSummary', {
             //    templateUrl: 'views/datasummary.html',
             //    controller: 'DatasummaryCtrl',
             //    access: access.admin,
             //    internalUse: true
             //
-            //})
+            // })
             .otherwise({
                 redirectTo: '/'
             });
@@ -598,7 +598,7 @@ angular.module('oncokbApp').run(
         function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs, stringUtils) {
             $rootScope.errors = [];
 
-            //If data is loaded, the watch in nav controller should be triggered.
+            // If data is loaded, the watch in nav controller should be triggered.
             $rootScope.dataLoaded = false;
 
             $rootScope.internal = true;
@@ -639,7 +639,6 @@ angular.module('oncokbApp').run(
             };
 
             DatabaseConnector.getOncokbInfo(function(oncokbInfo) {
-
                 if (oncokbInfo) {
                     if (oncokbInfo.users) {
                         Users.setUsers(oncokbInfo.users);
@@ -686,10 +685,8 @@ angular.module('oncokbApp').run(
                 if (Access.isLoggedIn() && Access.getURL()) {
                     $location.path(Access.getURL());
                     Access.setURL('');
-                } else {
-                    if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl === 'views/welcome.html') {
-                        $location.path('/genes');
-                    }
+                } else if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl === 'views/welcome.html') {
+                    $location.path('/genes');
                 }
             });
 
@@ -715,10 +712,12 @@ angular.module('oncokbApp').run(
  * Bootstrap the app
  */
 (function(_, gapi, angular, $) {
+    /**
+     * Get OncoKB configurations
+     */
     function fetchData() {
         var initInjector = angular.injector(['ng']);
         var $http = initInjector.get('$http');
-        var $q = initInjector.get('$q');
 
         gapi.load('auth:client:drive-share:drive-realtime', function() {
             $http.get('data/config.json').then(function(response) {
@@ -735,13 +734,16 @@ angular.module('oncokbApp').run(
                     oncokbApp.constant('config', OncoKB.config);
                     bootstrapApplication();
                 }
-            }, function(errorResponse) {
+            }, function() {
                 var dialogs = initInjector.get('dialogs');
-                dialogs.error('Error', "");
+                dialogs.error('Error', '');
             });
         });
     }
 
+    /**
+     * Bootstrap Angular application
+     */
     function bootstrapApplication() {
         angular.element(document).ready(function() {
             angular.bootstrap(document, ['oncokbApp']);
@@ -749,4 +751,4 @@ angular.module('oncokbApp').run(
     }
 
     fetchData();
-}(window._, window.gapi, window.angular, window.jQuery));
+})(window._, window.gapi, window.angular, window.jQuery);

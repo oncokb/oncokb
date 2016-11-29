@@ -1,6 +1,6 @@
 var $ = window.$;
 
-angular.module('oncokbApp').factory('TumorType', ['$http', function($http) {
+angular.module('oncokbApp').factory('TumorType', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
     function getFromServer() {
@@ -17,7 +17,7 @@ angular.module('oncokbApp').factory('TumorType', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('Gene', ['$http', function($http) {
+angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
     function getFromServer() {
@@ -51,7 +51,7 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('Alteration', ['$http', function($http) {
+angular.module('oncokbApp').factory('Alteration', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
     function getFromServer() {
@@ -68,7 +68,7 @@ angular.module('oncokbApp').factory('Alteration', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', function($http) {
+angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
     function getFromServer() {
@@ -85,14 +85,12 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', function($http)
     };
 }]);
 
-angular.module('oncokbApp')
-    .config(function($httpProvider) {
-        $httpProvider.interceptors.push('xmlHttpInterceptor');
-    }).factory(('SearchVariant'), ['$http', function($http) {
-    'use strict';
+angular.module('oncokbApp').config(function($httpProvider) {
+    $httpProvider.interceptors.push('xmlHttpInterceptor');
+}).factory(('SearchVariant'), ['$http', 'OncoKB', function($http, OncoKB) {
     function getAnnotation(params) {
-        var _params = angular.copy(params),
-            _url = OncoKB.config.apiLink + 'var_annotation?';
+        var _params = angular.copy(params);
+        var _url = OncoKB.config.apiLink + 'var_annotation?';
 
         for (var _key in _params) {
             if (typeof _params[_key] !== 'undefined' && _params[_key] && _params[_key] !== '') {
@@ -122,7 +120,7 @@ angular.module('oncokbApp')
     };
 }]);
 
-angular.module('oncokbApp').factory('GenerateDoc', ['$http', function($http) {
+angular.module('oncokbApp').factory('GenerateDoc', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
         return $.param(data);
@@ -131,7 +129,7 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http', function($http) {
     function getDoc(params) {
         return $http.post(
             OncoKB.config.apiLink + 'generateGoogleDoc',
-            {'reportParams': JSON.stringify(params)},
+            {reportParams: JSON.stringify(params)},
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                 transformRequest: transform
@@ -154,7 +152,7 @@ angular.module('oncokbApp').factory('GenerateDoc', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('SendEmail', ['$http', function($http) {
+angular.module('oncokbApp').factory('SendEmail', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
         return $.param(data);
@@ -175,7 +173,7 @@ angular.module('oncokbApp').factory('SendEmail', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('DriveAnnotation', ['$http', function($http) {
+angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
         return $.param(data);
@@ -196,12 +194,12 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', function($http)
     };
 }]);
 
-angular.module('oncokbApp').factory('InternalAccess', ['$http', function($http) {
+angular.module('oncokbApp').factory('InternalAccess', 'OncoKB', ['$http', function($http, OncoKB) {
     'use strict';
     return $http.get(OncoKB.config.apiLink + 'access');
 }]);
 
-angular.module('oncokbApp').factory('ServerUtils', ['$http', function($http) {
+angular.module('oncokbApp').factory('ServerUtils', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
     function getFromServer(type) {
@@ -242,7 +240,7 @@ angular.module('oncokbApp').factory('ServerUtils', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
+angular.module('oncokbApp').factory('Cache', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
         return $.param(data);
@@ -296,10 +294,10 @@ angular.module('oncokbApp').factory('Cache', ['$http', function($http) {
     };
 }]);
 
-angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
+angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', function($http, OncoKB, _) {
     'use strict';
 
-    function getMainType(status) {
+    function getMainType() {
         return $http.get(OncoKB.config.oncoTreeLink + 'mainTypes?version=oncokb');
     }
 
@@ -312,7 +310,7 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
         if (!type || !query) {
             return null;
         }
-        exactMatch = !_.isBoolean(exactMatch) ? true : exactMatch;
+        exactMatch = _.isBoolean(exactMatch) ? exactMatch : true;
         return $http.get(OncoKB.config.oncoTreeLink +
             'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch + '&version=oncokb');
     }
@@ -320,15 +318,15 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', function($http) {
     function getTumorTypesByMainTypes(mainTypes) {
         var queries = _.map(mainTypes, function(mainType) {
             return {
-                'type': 'maintype',
-                'query': mainType,
-                'exactMatch': true
-            }
+                type: 'maintype',
+                query: mainType,
+                exactMatch: true
+            };
         });
         return $http.post(OncoKB.config.oncoTreeLink + 'tumorTypes/search',
             {
-                'queries': queries,
-                'version': 'oncokb'
+                queries: queries,
+                version: 'oncokb'
             }, {
                 headers: {'Content-Type': 'application/json'}
             });

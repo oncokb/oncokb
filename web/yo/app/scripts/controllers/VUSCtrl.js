@@ -8,14 +8,6 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('VUSCtrl', function ($scope, DatabaseConnector, OncoKB, $timeout, documents) {
-
-
-        //function init(){
-        //    $scope.rendering = true;
-        //    $scope.rendering = false;
-        //}
-
+    .controller('VUSCtrl', function($scope) {
         $scope.rendering = false;
-        //$scope.init = init;
     });
