@@ -30,6 +30,7 @@ public class MvcConfigurationPrivate extends MvcConfiguration {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/api/private").setViewName("redirect:/api/private/swagger-ui.html");
+        registry.addViewController("/api/private/").setViewName("redirect:/api/private/swagger-ui.html");
     }
     
     @Bean
