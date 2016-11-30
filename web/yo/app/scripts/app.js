@@ -735,8 +735,7 @@ angular.module('oncokbApp').run(
                     bootstrapApplication();
                 }
             }, function() {
-                var dialogs = initInjector.get('dialogs');
-                dialogs.error('Error', '');
+                console.error('Failed to load JSON configuration file.');
             });
         });
     }

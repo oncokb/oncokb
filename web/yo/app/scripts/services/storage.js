@@ -3,18 +3,19 @@
 angular.module('oncokbApp')
     .service('storage', ['$q', '$rootScope', '$route', 'config', 'gapi', 'stringUtils', 'dialogs',
         function($q, $rootScope, $route, config, gapi, stringUtils, dialogs) {
-            this.id = null;
-            this.document = null;
+            var self = {};
+            self.id = null;
+            self.document = null;
 
             /**
              * Close the current document.
              */
-            this.closeDocument = function() {
-                if (this.document) {
-                    this.document.close();
+            self.closeDocument = function() {
+                if (self.document) {
+                    self.document.close();
                 }
-                this.document = null;
-                this.id = null;
+                self.document = null;
+                self.id = null;
             };
 
             /**
@@ -23,7 +24,7 @@ angular.module('oncokbApp')
              * @param {string} id realtime document id
              * @return {angular.$q.promise} Promise
              */
-            this.getDocument = function(id) {
+            self.getDocument = function(id) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log('get document', result);
@@ -42,7 +43,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.getPermission = function(id) {
+            self.getPermission = function(id) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     if (result && !result.error) {
@@ -60,7 +61,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.createFolder = function(parentID) {
+            self.createFolder = function(parentID) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log(result);
@@ -85,7 +86,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.insertPermission = function(id, email, type, role) {
+            self.insertPermission = function(id, email, type, role) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log(result);
@@ -112,7 +113,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.updatePermission = function(fileId, permissionId, newRole) {
+            self.updatePermission = function(fileId, permissionId, newRole) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log(result);
@@ -141,7 +142,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.deletePermission = function(fileId, permissionId) {
+            self.deletePermission = function(fileId, permissionId) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log(result);
@@ -162,7 +163,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.getUserInfo = function(userId) {
+            self.getUserInfo = function(userId) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log('get user info', result);
@@ -187,20 +188,20 @@ angular.module('oncokbApp')
              * @param {string} id realtime document id
              * @return {angular.$q.promise} Promise
              */
-            this.getRealtimeDocument = function(id) {
-                if (this.id === id) {
-                    return $q.when(this.document);
-                } else if (this.document) {
-                    this.closeDocument();
+            self.getRealtimeDocument = function(id) {
+                if (self.id === id) {
+                    return $q.when(self.document);
+                } else if (self.document) {
+                    self.closeDocument();
                 }
-                return this.load(id);
+                return self.load(id);
             };
 
             /**
              * Retrieve a list of File resources.
              * @return {d.promise|promise|*|h.promise|f} Promise
              */
-            this.retrieveAllFiles = function() {
+            self.retrieveAllFiles = function() {
                 var deferred = $q.defer();
 
                 var retrievePageOfFiles = function(request, result) {
@@ -234,7 +235,7 @@ angular.module('oncokbApp')
              *  Retrieve a list of File resources.
              * @return {d.promise|promise|*|h.promise|f} Promise
              */
-            this.retrieveAllChildrenFiles = function() {
+            self.retrieveAllChildrenFiles = function() {
                 var deferred = $q.defer();
                 var retrievePageOfFiles = function(request, result) {
                     request.execute(function(resp) {
@@ -260,7 +261,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.downloadFile = function(file) {
+            self.downloadFile = function(file) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     if (result && !result.error) {
@@ -294,7 +295,7 @@ angular.module('oncokbApp')
              * @param {string} parentId The parent folder Id which is used to store the new document
              * @return {angular.$q.promise} Promise
              */
-            this.createDocument = function(title, parentId) {
+            self.createDocument = function(title, parentId) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log('Completes', result);
@@ -320,7 +321,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            this.checkToken = function() {
+            self.checkToken = function() {
                 var token = gapi.auth.getToken();
                 var now = Date.now() / 1000;
 
@@ -338,7 +339,7 @@ angular.module('oncokbApp')
              * @param {string} userId User id
              * @return {angular.$q.promise} Promise
              */
-            this.requireAuth = function(immediateMode, userId) {
+            self.requireAuth = function(immediateMode, userId) {
                 var token = gapi.auth.getToken();
                 var now = Date.now() / 1000;
 
@@ -375,22 +376,22 @@ angular.module('oncokbApp')
              * @param {string} id realtime document id
              * @return {angular.$q.promise} Promise
              */
-            this.load = function(id) {
+            self.load = function(id) {
                 var deferred = $q.defer();
                 var initialize = function() {
                 };
                 var onLoad = function(document) {
-                    this.setDocument(id, document);
+                    self.setDocument(id, document);
                     deferred.resolve(document);
                     $rootScope.$digest();
-                }.bind(this);
+                };
                 var onError = function(error) {
                     var errorMessage = error.toString();
                     var sendEmail = true;
 
                     if (error.type === gapi.drive.realtime.ErrorType.TOKEN_REFRESH_REQUIRED) {
                         sendEmail = false;
-                        this.requireAuth(true).then(function(result) {
+                        self.requireAuth(true).then(function(result) {
                             if (result && !result.error) {
                                 console.log('\t Renewed token', new Date().getTime(), gapi.auth.getToken());
                             } else {
@@ -411,9 +412,9 @@ angular.module('oncokbApp')
                         $rootScope.$emit('realtimeDoc.other_error');
                     }
                     if (sendEmail) {
-                        if (error.isFatal && this.document) {
-                            var gene = this.document.getModel().getRoot().get('gene');
-                            var vus = this.document.getModel().getRoot().get('vus');
+                        if (error.isFatal && self.document) {
+                            var gene = self.document.getModel().getRoot().get('gene');
+                            var vus = self.document.getModel().getRoot().get('vus');
                             var geneData = stringUtils.getGeneData(gene, false, false);
                             var vusData = stringUtils.getVUSFullData(vus, false);
                             errorMessage += '\n\ngene: ' + geneData +
@@ -425,7 +426,7 @@ angular.module('oncokbApp')
                         });
                     }
                     $rootScope.$digest();
-                }.bind(this);
+                };
                 gapi.drive.realtime.load(id, onLoad, initialize, onError);
                 return deferred.promise;
             };
@@ -435,21 +436,21 @@ angular.module('oncokbApp')
              *
              * @param {object} event Event
              */
-            this.changeListener = function(event) {
+            self.changeListener = function(event) {
                 if (!event.isLocal) {
                     $rootScope.$digest();
                 }
             };
 
-            this.setDocument = function(id, document) {
+            self.setDocument = function(id, document) {
                 document.getModel().getRoot().addEventListener(
                     gapi.drive.realtime.EventType.OBJECT_CHANGED,
-                    this.changeListener);
-                this.document = document;
-                this.id = id;
+                    self.changeListener);
+                self.document = document;
+                self.id = id;
             };
 
-            this.updateFile = function(fileId, fileMetadata, fileData) {
+            self.updateFile = function(fileId, fileMetadata, fileData) {
                 var boundary = '-------314159265358979323846';
                 var delimiter = '\r\n--' + boundary + '\r\n';
                 var closeDelim = '\r\n--' + boundary + '--';
@@ -494,5 +495,6 @@ angular.module('oncokbApp')
                 };
                 return deferred.promise;
             };
+            return self;
         }]
     );

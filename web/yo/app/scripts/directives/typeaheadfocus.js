@@ -34,7 +34,6 @@ angular.module('oncokbApp')
                 }
 
                 function emptyOrMatch(actual, expected) {
-                    console.log(arguments);
                     if (expected === ' ') {
                         return true;
                     }

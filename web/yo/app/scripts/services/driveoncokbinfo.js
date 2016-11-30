@@ -9,7 +9,7 @@
  */
 angular.module('oncokbApp')
     .service('driveOncokbInfo', function driveOncokbInfo(_) {
-        var self = this;
+        var self = {};
         self.genes = {};
         self.genesA = [];
         self.genesL = 0;

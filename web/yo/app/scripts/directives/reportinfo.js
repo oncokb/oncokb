@@ -12,10 +12,10 @@ angular.module('oncokbApp')
             restrict: 'E',
             compile: function(element, attrs) {
                 var title = attrs.title || '';
-                var oneCell = attrs.oneCell === 'false';
-                var border = attrs.border === 'false';
+                var oneCell = attrs.oneCell !== 'false';
+                var border = attrs.border !== 'false';
                 var content = attrs.content || '';
-                var margin = attrs.margin === 'false';
+                var margin = attrs.margin !== 'false';
 
                 var htmlText = '<div style="display: inline-block; width: 100%;' + ((margin && border) ? 'margin: 5px 0;' : '') + '">' +
                     '<div style="width:80%; float:left"><b>' + title + '</b></div>' +

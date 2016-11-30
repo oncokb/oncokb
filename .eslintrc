@@ -11,6 +11,9 @@
         "angular": 1
     },
     "rules": {
+        "require-jsdoc": 1,
+        "comma-dangle": 0,
+        "no-var": 0,
         "max-len": 0,
         "quotes": [
             2,

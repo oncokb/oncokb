@@ -9,7 +9,7 @@
  */
 angular.module('oncokbApp')
     .service('access', function access($rootScope, storage, config, users, gapi) {
-        var self = this;
+        var self = {};
         var userRoles = config.userRoles;
         // var accessLevel = config.accessLevel;
         var loginCallback = '';
