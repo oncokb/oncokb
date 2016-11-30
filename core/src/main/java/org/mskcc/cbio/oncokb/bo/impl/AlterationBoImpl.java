@@ -41,14 +41,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             for(String cons: consequence.getTerm().split("\\s*,\\s*")) {
                 VariantConsequence tmpConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(cons);
                 if (alterations != null && alterations.size() > 0) {
-                    Set<Alteration> filter = new HashSet<>();
-
                     for (Alteration alteration : alterations) {
                         if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(tmpConsequence) && alteration.getProteinStart() <= start && alteration.getProteinEnd() >= end) {
-                            filter.add(alteration);
+                            result.add(alteration);
                         }
                     }
-                    result.addAll(filter);
                 } else {
                     List<Alteration> queryResult = getDao().findMutationsByConsequenceAndPosition(gene, tmpConsequence, start, end);
                     if(queryResult != null) {

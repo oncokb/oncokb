@@ -119,8 +119,6 @@ public final class AlterationUtils {
                             break;
                         case "mut":
                             consequence = "any";
-                        case "indel":
-                            consequence = "inframe_insertion,inframe_deletion";
                     }
                 } else {
                     p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
