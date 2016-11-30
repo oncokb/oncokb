@@ -9,7 +9,7 @@
  */
 angular.module('oncokbApp')
     .service('importer', function importer($timeout, documents, S, storage, OncoKB, $q, _, stringUtils) {
-        var self = this;
+        var self = {};
         self.docs = [];
         self.docsL = 0;
         self.newFolder = '';

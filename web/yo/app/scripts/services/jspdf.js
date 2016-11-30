@@ -221,5 +221,7 @@ angular.module('oncokbApp')
             }
         }
 
-        this.create = create;
+        return {
+            create: create
+        };
     });

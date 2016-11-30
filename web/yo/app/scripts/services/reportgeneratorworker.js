@@ -10,7 +10,7 @@
 angular.module('oncokbApp')
     .service('reportGeneratorWorker', function($q, DatabaseConnector, GenerateReportDataService, reportGeneratorParseAnnotation, reportGenerator) {
         var worker = function(data, patientId) {
-            var self = this;
+            var self = {};
             self.parseAnnotation = function(data) {
                 self.annotation = reportGeneratorParseAnnotation.parse(data);
             };
@@ -92,6 +92,7 @@ angular.module('oncokbApp')
                 }
             };
             self.init();
+            return self;
         };
 
         return (worker);
@@ -116,21 +117,6 @@ angular.module('oncokbApp')
             // self is categorised by XLSX entries
 
             if (angular.isObject(data) && !angular.isArray(data)) {
-                _.each(data, function(item, key) {
-                    if (angular.isArray(item)) {
-                        item.forEach(function(e) {
-                            var _worker = new ReportGeneratorWorker(e);
-                            _worker.parent.name = key;
-                            workers.push(_worker);
-                        });
-                    } else {
-                        _.each(item, function(value, patientId) {
-                            var _worker = new ReportGeneratorWorker(value, patientId);
-                            _worker.parent.name = key;
-                            workers.push(_worker);
-                        });
-                    }
-                });
                 _.each(data, function(item, key) {
                     if (angular.isArray(item)) {
                         item.forEach(function(e) {
@@ -255,8 +241,8 @@ angular.module('oncokbApp')
                     var matchA = _a.match(regex) || ['-1']; // If no match found, give lowest priority
                     var matchB = _b.match(regex) || ['-1'];
 
-                    var largestA = Math.max.apply(Math, matchA);
-                    var largestB = Math.max.apply(Math, matchB);
+                    var largestA = Math.max(matchA);
+                    var largestB = Math.max(matchB);
 
                     if (largestA - largestB > 0) {
                         return -1;

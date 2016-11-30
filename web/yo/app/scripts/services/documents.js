@@ -10,7 +10,7 @@
 angular.module('oncokbApp')
     .service('documents', function documents(storage, $rootScope, $q, users) {
         // AngularJS will instantiate a singleton by calling "new" on this function
-        var self = this;
+        var self = {};
         self.documents = [];
         self.documentsL = 0;
 

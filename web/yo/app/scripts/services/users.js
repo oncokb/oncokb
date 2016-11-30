@@ -12,7 +12,7 @@
  */
 angular.module('oncokbApp')
     .service('users', function user(config) {
-        var self = this;
+        var self = {};
 
         self.me = {};
         self.users = {};
