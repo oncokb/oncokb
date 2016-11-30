@@ -12,10 +12,7 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author jgao
@@ -38,19 +35,27 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     @Override
     public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, List<Alteration> alterations) {
-        if (alterations != null && alterations.size() > 0) {
-            List<Alteration> filter = new ArrayList<>();
-
-            for (Alteration alteration : alterations) {
-                if (gene != null && consequence != null
-                    && alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence) && alteration.getProteinStart() <= start && alteration.getProteinEnd() >= end) {
-                    filter.add(alteration);
+        Set<Alteration> result = new HashSet<>();
+        
+        if(gene != null && consequence != null) {
+            for(String cons: consequence.getTerm().split("\\s*,\\s*")) {
+                VariantConsequence tmpConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(cons);
+                if (alterations != null && alterations.size() > 0) {
+                    for (Alteration alteration : alterations) {
+                        if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(tmpConsequence) && alteration.getProteinStart() <= start && alteration.getProteinEnd() >= end) {
+                            result.add(alteration);
+                        }
+                    }
+                } else {
+                    List<Alteration> queryResult = getDao().findMutationsByConsequenceAndPosition(gene, tmpConsequence, start, end);
+                    if(queryResult != null) {
+                        result.addAll(queryResult);
+                    }
                 }
             }
-            return filter;
-        } else {
-            return getDao().findMutationsByConsequenceAndPosition(gene, consequence, start, end);
         }
+        
+        return new ArrayList<>(result);
     }
 
     @Override

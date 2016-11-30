@@ -164,7 +164,20 @@ public class Alteration implements java.io.Serializable {
 
     @Override
     public String toString() {
-        return gene + " " + alteration;
+        return "Alteration{" +
+            "id=" + id +
+            ", uuid='" + uuid + '\'' +
+            ", gene=" + gene +
+            ", alterationType=" + alterationType +
+            ", consequence=" + (consequence == null ? null : consequence.getTerm()) +
+            ", alteration='" + alteration + '\'' +
+            ", name='" + name + '\'' +
+            ", refResidues='" + refResidues + '\'' +
+            ", proteinStart=" + proteinStart +
+            ", proteinEnd=" + proteinEnd +
+            ", variantResidues='" + variantResidues + '\'' +
+            ", portalAlterations=" + portalAlterations +
+            '}';
     }
 }
 
