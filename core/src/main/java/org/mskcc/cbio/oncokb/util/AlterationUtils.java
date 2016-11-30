@@ -6,7 +6,6 @@
 
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -76,61 +75,84 @@ public final class AlterationUtils {
                 consequence = "missense_variant";
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
+            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?delins([A-Z]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
-                end = Integer.valueOf(m.group(2));
-                String v = m.group(3);
-                switch (v) {
-                    case "mis":
-                        consequence = "missense_variant";
-                        break;
-                    case "ins":
-                        consequence = "inframe_insertion";
-                        break;
-                    case "del":
-                        consequence = "inframe_deletion";
-                        break;
-                    case "fs":
-                        consequence = "frameshift_variant";
-                        break;
-                    case "trunc":
-                        consequence = "feature_truncation";
-                        break;
-                    case "mut":
-                        consequence = "any";
+                if(m.group(3)!= null) {
+                    end = Integer.valueOf(m.group(3));
+                }else {
+                    end = start;
+                }
+                Integer deletion = end - start + 1;
+                Integer insertion = m.group(4).length();
+                
+                if(insertion - deletion > 0) {
+                    consequence = "inframe_insertion";
+                }else if(insertion - deletion  == 0 ) {
+                    consequence = "missense_variant";
+                }else {
+                    consequence = "inframe_deletion";
                 }
             } else {
-                p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
+                p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
                 m = p.matcher(proteinChange);
                 if (m.matches()) {
-                    ref = m.group(1);
-                    start = Integer.valueOf(m.group(2));
-                    end = start;
-
-                    consequence = "frameshift_variant";
+                    start = Integer.valueOf(m.group(1));
+                    end = Integer.valueOf(m.group(2));
+                    String v = m.group(3);
+                    switch (v) {
+                        case "mis":
+                            consequence = "missense_variant";
+                            break;
+                        case "ins":
+                            consequence = "inframe_insertion";
+                            break;
+                        case "del":
+                            consequence = "inframe_deletion";
+                            break;
+                        case "fs":
+                            consequence = "frameshift_variant";
+                            break;
+                        case "trunc":
+                            consequence = "feature_truncation";
+                            break;
+                        case "mut":
+                            consequence = "any";
+                        case "indel":
+                            consequence = "inframe_insertion,inframe_deletion";
+                    }
                 } else {
-                    p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
+                    p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
                     m = p.matcher(proteinChange);
                     if (m.matches()) {
                         ref = m.group(1);
                         start = Integer.valueOf(m.group(2));
                         end = start;
-                        String v = m.group(3);
-                        switch (v) {
-                            case "ins":
-                                consequence = "inframe_insertion";
-                                break;
-                            case "del":
-                                consequence = "inframe_deletion";
-                                break;
-                        }
+
+                        consequence = "frameshift_variant";
                     } else {
-                        p = Pattern.compile("_splice");
+                        p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
                         m = p.matcher(proteinChange);
-                        if (m.find()) {
-                            consequence = "splice_region_variant";
+                        if (m.matches()) {
+                            ref = m.group(1);
+                            start = Integer.valueOf(m.group(2));
+                            end = start;
+                            String v = m.group(3);
+                            switch (v) {
+                                case "ins":
+                                    consequence = "inframe_insertion";
+                                    break;
+                                case "del":
+                                    consequence = "inframe_deletion";
+                                    break;
+                            }
+                        } else {
+                            p = Pattern.compile("_splice");
+                            m = p.matcher(proteinChange);
+                            if (m.find()) {
+                                consequence = "splice_region_variant";
+                            }
                         }
                     }
                 }
@@ -144,6 +166,10 @@ public final class AlterationUtils {
 
         VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
 
+        if(variantConsequence == null) {
+            variantConsequence = new VariantConsequence(consequence, null, false);
+        }
+        
         if (alteration.getRefResidues() == null && ref != null && !ref.isEmpty()) {
             alteration.setRefResidues(ref);
         }
@@ -246,6 +272,11 @@ public final class AlterationUtils {
         VariantConsequence variantConsequence = null;
         if (consequence != null) {
             variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
+            
+            if(variantConsequence == null) {
+                variantConsequence = new VariantConsequence();
+                variantConsequence.setTerm(consequence);
+            }
         }
         alt.setConsequence(variantConsequence);
 
@@ -360,23 +391,23 @@ public final class AlterationUtils {
 
         if (gene != null && alteration != null) {
             if (consequence != null) {
-                //Consequence format  a, b+c, d ... each variant pair (gene + alteration) could have one or multiple consequences. Multiple consequences are separated by '+'
-                for (String con : consequence.split("\\+")) {
-                    Alteration alt = new Alteration();
-                    alt.setAlteration(alteration);
-                    variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(con);
-                    alt.setConsequence(variantConsequence);
-                    alt.setAlterationType(AlterationType.MUTATION);
-                    alt.setGene(gene);
-                    alt.setProteinStart(proteinStart);
-                    alt.setProteinEnd(proteinEnd);
+                Alteration alt = new Alteration();
+                alt.setAlteration(alteration);
+                variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
+                if(variantConsequence == null) {
+                    variantConsequence = new VariantConsequence(consequence, null, false);
+                }
+                alt.setConsequence(variantConsequence);
+                alt.setAlterationType(AlterationType.MUTATION);
+                alt.setGene(gene);
+                alt.setProteinStart(proteinStart);
+                alt.setProteinEnd(proteinEnd);
 
-                    AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                    List<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
-                    if (!alts.isEmpty()) {
-                        alterations.addAll(alts);
-                    }
+                List<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                if (!alts.isEmpty()) {
+                    alterations.addAll(alts);
                 }
             } else {
                 Alteration alt = new Alteration();
