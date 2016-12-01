@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
@@ -89,7 +90,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
-        //TODO: add activating or inactivating alterations
+        // TODO: add activating or inactivating alterations.
+        // This code needs to be removed and use isOncogenicAlteration in AlterationUtil once we change all
+        // Inactivating/Activating Mutations to Oncogenic Mutations
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
         boolean activating = false, inactivating = false;
@@ -177,20 +180,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             if (alt != null) {
                 alterations.add(alt);
             }
-
-            alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "loss-of-function mutations");
-            if (alt != null) {
-                alterations.add(alt);
-            }
         }
 
         if (activating) {
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "activating mutations");
-            if (alt != null) {
-                alterations.add(alt);
-            }
-
-            alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "gain-of-function mutations");
             if (alt != null) {
                 alterations.add(alt);
             }
