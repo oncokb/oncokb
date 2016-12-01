@@ -31,7 +31,7 @@ public final class AlterationUtils {
     }
 
     public static void annotateAlteration(Alteration alteration, String proteinChange) {
-        String consequence = "N/A";
+        String consequence = "any";
         String ref = null;
         String var = null;
         Integer start = -1;
@@ -79,19 +79,19 @@ public final class AlterationUtils {
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
-                if(m.group(3)!= null) {
+                if (m.group(3) != null) {
                     end = Integer.valueOf(m.group(3));
-                }else {
+                } else {
                     end = start;
                 }
                 Integer deletion = end - start + 1;
                 Integer insertion = m.group(4).length();
-                
-                if(insertion - deletion > 0) {
+
+                if (insertion - deletion > 0) {
                     consequence = "inframe_insertion";
-                }else if(insertion - deletion  == 0 ) {
+                } else if (insertion - deletion == 0) {
                     consequence = "missense_variant";
-                }else {
+                } else {
                     consequence = "inframe_deletion";
                 }
             } else {
@@ -164,10 +164,10 @@ public final class AlterationUtils {
 
         VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
 
-        if(variantConsequence == null) {
+        if (variantConsequence == null) {
             variantConsequence = new VariantConsequence(consequence, null, false);
         }
-        
+
         if (alteration.getRefResidues() == null && ref != null && !ref.isEmpty()) {
             alteration.setRefResidues(ref);
         }
@@ -270,8 +270,8 @@ public final class AlterationUtils {
         VariantConsequence variantConsequence = null;
         if (consequence != null) {
             variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
-            
-            if(variantConsequence == null) {
+
+            if (variantConsequence == null) {
                 variantConsequence = new VariantConsequence();
                 variantConsequence.setTerm(consequence);
             }
@@ -392,7 +392,7 @@ public final class AlterationUtils {
                 Alteration alt = new Alteration();
                 alt.setAlteration(alteration);
                 variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
-                if(variantConsequence == null) {
+                if (variantConsequence == null) {
                     variantConsequence = new VariantConsequence(consequence, null, false);
                 }
                 alt.setConsequence(variantConsequence);
@@ -450,10 +450,17 @@ public final class AlterationUtils {
         } else {
             alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
         }
-        List<Alteration> alleles =
-            alterationBo.findMutationsByConsequenceAndPosition(
-                alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
-                alteration.getProteinEnd(), alterations);
+
+        Set<Alteration> alleles = new HashSet<>(alterationBo.findMutationsByConsequenceAndPosition(
+            alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
+            alteration.getProteinEnd(), alterations));
+
+        for (Alteration allele : alleles) {
+            if (isOncogenicAlteration(allele)) {
+                alleles.addAll(getOncogenicMutations(allele));
+                break;
+            }
+        }
         // Remove alteration itself
         alleles.remove(alteration);
         return filterAllelesBasedOnLocation(new HashSet<>(alleles), alteration.getProteinStart());
@@ -524,9 +531,45 @@ public final class AlterationUtils {
                 && alteration.getProteinStart().equals(location)) {
 
                 result.add(alteration);
+            } else if (alteration.getAlteration() != null
+                && alteration.getAlteration().toLowerCase().contains("activating")) {
+                result.add(alteration);
+            }
+        }
+        return result;
+    }
+
+    public static Boolean isOncogenicAlteration(Alteration alteration) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.MUTATION_EFFECT));
+        boolean activating = false, inactivating = false;
+        for (Evidence evidence : mutationEffectEvs) {
+            String effect = evidence.getKnownEffect();
+            if (effect != null) {
+                effect = effect.toLowerCase();
+                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
+                    inactivating = true;
+                } else if (effect.contains("activating") || effect.contains("gain-of-function")
+                    || effect.contains("switch-of-function")) {
+                    activating = true;
+                }
             }
         }
 
-        return result;
+        return inactivating || activating;
+    }
+    
+    public static Set<Alteration> getOncogenicMutations(Alteration alteration) {
+        Set<Alteration> oncogenicMutations = new HashSet<>();
+        Alteration alt = findAlteration(alteration.getGene(), "inactivating mutations");
+        if (alt != null) {
+            oncogenicMutations.add(alt);
+        }
+
+        alt = findAlteration(alteration.getGene(), "activating mutations");
+        if (alt != null) {
+            oncogenicMutations.add(alt);
+        }
+        return oncogenicMutations;
     }
 }
