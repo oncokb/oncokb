@@ -26,17 +26,10 @@ OncoKB.tree = {};
 OncoKB.config = {
     clientId: '19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com',
     scopes: [
-        // 'https://www.googleapis.com/auth/plus.me',
         'https://www.googleapis.com/auth/plus.profile.emails.read',
         'https://www.googleapis.com/auth/drive.file'
     ],
-    // folderId: '0By19QWSOYlS_OUVwNVFWWHR3N1U', //testing folder
-    // folderId: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk', //curation folder
-    //folderId: '0BzBfo69g8fP6fnprU0xGUWM2bV9raVpJajNzYU1NQ2c2blVvZkRJdTRobjhmQTdDVWFzUm8', //curation folder 2-27
-    //folderId: '0BzBfo69g8fP6TVJWa0g3a1o3cjA', //one of backup folder
-    // folderId: '0BzBfo69g8fP6ekVBaGoxT1lKd1E', //one of backup folder under knowledgebase
-    // folderId: '0BzBfo69g8fP6dUo0SVVVemNvQ00', //curation folder 08/02/2015
-    folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E', //curation folder 09/08/2016
+    folderId: '0By19QWSOYlS_VHNwNy1wMDRza0E',
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
@@ -44,13 +37,9 @@ OncoKB.config = {
         'admin':  8  // 1000
     },
     backupFolderId: '0BzBfo69g8fP6fnFseDhMSmgxYmk5OW91VDRUbllfMjZ1X2RreWxvSDdPYnRyYTdmRmVJNlk',
-    // users: '1cq6_RchacNwwiBQTSegi5NyZvmZI00W8GM1K3_4WboY', //TEST FILE
     users: '0BzBfo69g8fP6fmdkVnlOQWdpLWtHdFM4Ml9vNGxJMWpNLTNUM0lhcEc2MHhKNkVfSlZjMkk',
     apiLink: 'http://dashi.cbio.mskcc.org:38080/internal/legacy-api/',
-    // apiLink: 'http://localhost:8080/internal/legacy-api/',
-    // apiLink: 'legacy-api/',
     curationLink: 'legacy-api/',
-    // curationLink: 'http://localhost:8080/internal/legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     accessLevels: {},
     testing: false
