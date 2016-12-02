@@ -136,7 +136,7 @@ angular.module('oncokbApp')
                             var model = realtime.getModel();
                             var geneModel = model.getRoot().get('gene');
                             if (geneModel) {
-                                var gene = stringUtils.getGeneData(gene, false, false, false);
+                                var gene = stringUtils.getGeneData(geneModel, false, false, false);
                                 if ($scope.redHand) {
                                     _.each(gene.mutations, function(mutation) {
                                         if (mutation.oncogenic_eStatus.curated === false) {
