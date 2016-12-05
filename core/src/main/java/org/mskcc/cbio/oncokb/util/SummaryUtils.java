@@ -955,7 +955,8 @@ public class SummaryUtils {
             || (alteration.getConsequence() != null
             && (alteration.getConsequence().getTerm().equals("inframe_deletion")
             || alteration.getConsequence().getTerm().equals("inframe_insertion")))
-            || StringUtils.containsIgnoreCase(queryAlteration, "indel")) {
+            || StringUtils.containsIgnoreCase(queryAlteration, "indel")
+            || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
         } else {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration + " mutation");
@@ -985,6 +986,7 @@ public class SummaryUtils {
                 || alteration.getConsequence().getTerm().equals("inframe_insertion")))
                 || StringUtils.containsIgnoreCase(queryAlteration, "indel")
                 || StringUtils.containsIgnoreCase(queryAlteration, "delins")
+                || StringUtils.containsIgnoreCase(queryAlteration, "splice")
                 ) {
                 sb.append(queryAlteration + " altered");
             } else {
