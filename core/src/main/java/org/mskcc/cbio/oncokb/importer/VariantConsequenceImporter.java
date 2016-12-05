@@ -45,5 +45,8 @@ public class VariantConsequenceImporter {
             variantConsequenceBo.save(variantConsequence);
         }
         
+        // Save NA special case
+        VariantConsequence variantConsequence = new VariantConsequence("NA", "NA", false);
+        variantConsequenceBo.save(variantConsequence);
     }
 }

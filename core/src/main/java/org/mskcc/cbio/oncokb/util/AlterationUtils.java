@@ -31,7 +31,7 @@ public final class AlterationUtils {
     }
 
     public static void annotateAlteration(Alteration alteration, String proteinChange) {
-        String consequence = "any";
+        String consequence = "NA";
         String ref = null;
         String var = null;
         Integer start = -1;
