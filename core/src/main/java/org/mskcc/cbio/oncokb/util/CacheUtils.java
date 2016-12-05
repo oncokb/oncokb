@@ -422,10 +422,10 @@ public class CacheUtils {
         variantTumorTypeSummary.get(entrezGeneId).get(variant).put(tumorType, summary);
     }
 
-    public static Set<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
+    public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
         if (relevantAlterations.containsKey(entrezGeneId) && relevantAlterations.get(entrezGeneId).containsKey(variant)) {
             Set<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
-            Set<Alteration> mappedAlts = new HashSet<>();
+            List<Alteration> mappedAlts = new ArrayList<>();
             Set<Alteration> geneAlts = alterations.get(entrezGeneId);
             for (Alteration alteration : geneAlts) {
                 if (mappedAltsIds.contains(alteration.getId())) {
@@ -434,7 +434,7 @@ public class CacheUtils {
             }
             return mappedAlts;
         } else {
-            return new HashSet<>();
+            return new ArrayList<>();
         }
     }
 
@@ -443,7 +443,7 @@ public class CacheUtils {
             relevantAlterations.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setRelevantAlterations(Integer entrezGeneId, String variant, Set<Alteration> alts) {
+    public static void setRelevantAlterations(Integer entrezGeneId, String variant, List<Alteration> alts) {
         if (!relevantAlterations.containsKey(entrezGeneId)) {
             relevantAlterations.put(entrezGeneId, new HashMap<String, Set<Integer>>());
         }

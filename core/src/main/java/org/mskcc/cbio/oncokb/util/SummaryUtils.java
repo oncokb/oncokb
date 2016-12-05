@@ -117,14 +117,14 @@ public class SummaryUtils {
         if (ttSummaryNotGenerated) {
             Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
             if (alteration != null) {
-                tumorTypeSummary = getTumorTypeSummaryFromEvidences(new ArrayList<>(EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null)));
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
                 if (tumorTypeSummary != null) {
                     ttSummaryNotGenerated = false;
                 }
 
                 // Get Other Tumor Types summary within this alteration
                 if (ttSummaryNotGenerated) {
-                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(new ArrayList<>(EvidenceUtils.getEvidence(Collections.singleton(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null)));
+                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
                     if (tumorTypeSummary != null) {
                         ttSummaryNotGenerated = false;
                     }
@@ -134,17 +134,25 @@ public class SummaryUtils {
 
         // Get all tumor type summary evidence for relevant alterations
         if (ttSummaryNotGenerated) {
-            tumorTypeSummary = getTumorTypeSummaryFromEvidences(new ArrayList<>(EvidenceUtils.getEvidence(new HashSet<>(alterations), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null)));
-            if (tumorTypeSummary != null) {
-                ttSummaryNotGenerated = false;
+            // Base on the priority of relevant alterations
+            for(Alteration alteration : alterations) {
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+                if (tumorTypeSummary != null) {
+                    ttSummaryNotGenerated = false;
+                    break;
+                }
             }
         }
 
         // Get Other Tumor Types summary
         if (ttSummaryNotGenerated) {
-            tumorTypeSummary = getTumorTypeSummaryFromEvidences(new ArrayList<>(EvidenceUtils.getEvidence(new HashSet<>(alterations), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null)));
-            if (tumorTypeSummary != null) {
-                ttSummaryNotGenerated = false;
+            // Base on the priority of relevant alterations
+            for(Alteration alteration : alterations) {
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                if (tumorTypeSummary != null) {
+                    ttSummaryNotGenerated = false;
+                    break;
+                }
             }
         }
 
@@ -154,8 +162,7 @@ public class SummaryUtils {
                 EnumSet.of(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,
                     EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
             Map<LevelOfEvidence, List<Evidence>> evidencesByLevel = groupEvidencesByLevel(new ArrayList<Evidence>(
-                EvidenceUtils.getEvidence(
-                    new HashSet<Alteration>(alterations),
+                EvidenceUtils.getEvidence(alterations,
                     sensitivityEvidenceTypes, relevantTumorTypes, null)));
             List<Evidence> evidences = new ArrayList<>();
             //                if (!evidencesByLevel.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -185,7 +192,7 @@ public class SummaryUtils {
             } else {
                 // no FDA or NCCN in the patient tumor type with the variant
                 Map<LevelOfEvidence, List<Evidence>> evidencesByLevelOtherTumorType = groupEvidencesByLevel(
-                    new ArrayList<Evidence>(EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), sensitivityEvidenceTypes, null))
+                    EvidenceUtils.getEvidence(alterations, sensitivityEvidenceTypes, null)
                 );
                 evidences.clear();
                 //                    if (!evidencesByLevelOtherTumorType.get(LevelOfEvidence.LEVEL_0).isEmpty()) {
@@ -276,7 +283,7 @@ public class SummaryUtils {
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
         StringBuilder sb = new StringBuilder();
 
-        if (gene == null || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations)).size() == 0) {
+        if (gene == null || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(alterations).size() == 0) {
             if (gene != null && queryAlteration != null) {
                 Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), null, null, null);
                 if (alteration == null) {
@@ -290,8 +297,8 @@ public class SummaryUtils {
 
                 if (AlterationUtils.hasAlleleAlterations(alteration)) {
                     sb.append(" " + alleleSummary(alteration));
-                } else if (AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations)).size() == 0) {
-                    Set<Evidence> evidences = EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), Collections.singleton(EvidenceType.VUS), null);
+                } else if (AlterationUtils.excludeVUS(alterations).size() == 0) {
+                    List<Evidence> evidences = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.VUS), null);
                     Date lastEdit = null;
                     for (Evidence evidence : evidences) {
                         if (evidence.getLastEdit() == null) {
@@ -342,7 +349,7 @@ public class SummaryUtils {
 
             int oncogenic = -1;
             for (Alteration a : alterations) {
-                Set<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singleton(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
+                List<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singletonList(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
                 if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
                     Evidence evidence = oncogenicEvidences.iterator().next();
                     if (evidence != null && evidence.getKnownEffect() != null && Integer.parseInt(evidence.getKnownEffect()) >= 0) {
@@ -391,7 +398,7 @@ public class SummaryUtils {
             }
 
             if (addition) {
-                Set<Evidence> oncogenicEvs = EvidenceUtils.getEvidence(new HashSet<Alteration>(alterations), Collections.singleton(EvidenceType.ONCOGENIC), null);
+                List<Evidence> oncogenicEvs = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.ONCOGENIC), null);
                 List<String> clinicalSummaries = new ArrayList<>();
 
                 for (Evidence evidence : oncogenicEvs) {
@@ -476,7 +483,7 @@ public class SummaryUtils {
         }
 
         // Detemin whether allele alterations have treatments
-        Set<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(alleles, MainUtils.getSensitiveTreatmentEvidenceTypes(), null);
+        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), null);
         LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
         Set<Treatment> treatments = new HashSet<>();
         Set<Alteration> highestLevelTreatmentRelatedAlts = new HashSet<>();
@@ -581,7 +588,7 @@ public class SummaryUtils {
         for (Alteration alt : alleles) {
             Set<EvidenceType> evidenceTypes = new HashSet<>();
             evidenceTypes.add(EvidenceType.ONCOGENIC);
-            Set<Evidence> allelesOnco = EvidenceUtils.getEvidence(Collections.singleton(alt), evidenceTypes, null);
+            List<Evidence> allelesOnco = EvidenceUtils.getEvidence(Collections.singletonList(alt), evidenceTypes, null);
 
             for (Evidence evidence : allelesOnco) {
                 String oncoStr = evidence.getKnownEffect();

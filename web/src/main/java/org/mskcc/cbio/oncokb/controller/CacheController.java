@@ -58,7 +58,7 @@ public class CacheController {
 
         if (gene != null) {
             result.put("allVars", AlterationUtils.getAllAlterations(gene));
-            result.put("excludedVars", AlterationUtils.excludeVUS(gene, AlterationUtils.getAllAlterations(gene)));
+            result.put("excludedVars", AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene))));
 
             Map<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
@@ -67,7 +67,7 @@ public class CacheController {
                 add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
             }};
 
-            for (Alteration alteration : AlterationUtils.excludeVUS(gene, AlterationUtils.getAllAlterations(gene))) {
+            for (Alteration alteration : AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)))) {
                 evidences.put(alteration, new HashMap<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>());
             }
 

@@ -25,7 +25,7 @@ public class NumberUtils {
             geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
 
             Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
-            Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new HashSet<Alteration>(alterations));
+            List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));
             geneNumber.setAlteration(excludeVUS.size());
             geneNumbers.add(geneNumber);
         }
@@ -51,7 +51,7 @@ public class NumberUtils {
             geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
 
             Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
-            Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new HashSet<Alteration>(alterations));
+            List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));
             geneNumber.setAlteration(excludeVUS.size());
             geneNumbers.add(geneNumber);
         }

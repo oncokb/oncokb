@@ -335,8 +335,8 @@ public final class AlterationUtils {
         return alterations;
     }
 
-    public static Set<Alteration> excludeVUS(Set<Alteration> alterations) {
-        Set<Alteration> result = new HashSet<>();
+    public static List<Alteration> excludeVUS(List<Alteration> alterations) {
+        List<Alteration> result = new ArrayList<>();
         Set<Alteration> VUS = new HashSet<>();
         Set<Gene> allGenes = CacheUtils.getAllGenes();
         for (Gene gene : allGenes) {
@@ -355,8 +355,8 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static Set<Alteration> excludeVUS(Gene gene, Set<Alteration> alterations) {
-        Set<Alteration> result = new HashSet<>();
+    public static List<Alteration> excludeVUS(Gene gene, List<Alteration> alterations) {
+        List<Alteration> result = new ArrayList<>();
         Set<Alteration> VUS = CacheUtils.getVUS(gene.getEntrezGeneId());
 
         if (VUS == null) {
@@ -372,8 +372,8 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static Set<Alteration> excludeGeneralAlterations(Set<Alteration> alterations) {
-        Set<Alteration> result = new HashSet<>();
+    public static List<Alteration> excludeGeneralAlterations(List<Alteration> alterations) {
+        List<Alteration> result = new ArrayList<>();
         for (Alteration alteration : alterations) {
             String name = alteration.getAlteration().toLowerCase();
             if (name != null && !generalAlterations.contains(name)) {
@@ -383,8 +383,8 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static Set<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
-        Set<Alteration> alterations = new HashSet<>();
+    public static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
+        List<Alteration> alterations = new ArrayList<>();
         VariantConsequence variantConsequence = null;
 
         if (gene != null && alteration != null) {
@@ -466,9 +466,9 @@ public final class AlterationUtils {
         return filterAllelesBasedOnLocation(new HashSet<>(alleles), alteration.getProteinStart());
     }
 
-    public static Set<Alteration> getRelevantAlterations(Alteration alteration) {
+    public static List<Alteration> getRelevantAlterations(Alteration alteration) {
         if (alteration == null || alteration.getGene() == null) {
-            return new HashSet<>();
+            return new ArrayList<>();
         }
         Gene gene = alteration.getGene();
         VariantConsequence consequence = alteration.getConsequence();
@@ -498,9 +498,11 @@ public final class AlterationUtils {
     }
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {
-        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+        Set<Alteration> setAlleles = AlterationUtils.getAlleleAlterations(alteration);
+        List<Alteration> alleles = setAlleles == null ? new ArrayList<Alteration>() : new ArrayList<>(setAlleles);
+        
         alleles = AlterationUtils.excludeVUS(alleles);
-        if (alleles == null || alleles.size() == 0) {
+        if (alleles.size() == 0) {
             return false;
         } else {
             return true;

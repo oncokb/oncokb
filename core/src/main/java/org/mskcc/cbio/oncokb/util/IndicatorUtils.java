@@ -18,7 +18,7 @@ public class IndicatorUtils {
         indicatorQuery.setQuery(query);
 
         Gene gene = null;
-        Set<Alteration> relevantAlterations = new HashSet<>();
+        List<Alteration> relevantAlterations = new ArrayList<>();
 
         if (query == null) {
             return indicatorQuery;
@@ -48,7 +48,7 @@ public class IndicatorUtils {
                             null, null, null, null);
                         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                        Set<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(alt);
+                        List<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(alt);
                         if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
                             gene = tmpGene;
                             relevantAlterations = tmpRelevantAlts;
@@ -84,7 +84,7 @@ public class IndicatorUtils {
             // Gene summary
             indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
 
-            Set<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
+            List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             Set<Alteration> alleles = new HashSet<>();
             List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
@@ -156,11 +156,10 @@ public class IndicatorUtils {
 
                 
             } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
-                Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(
-                    EvidenceUtils.getEvidence(alleles, Collections.singleton(EvidenceType.ONCOGENIC), null)));
+                Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
                 treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                     EvidenceUtils.convertEvidenceLevel(
-                    EvidenceUtils.getEvidence(alleles,
+                    EvidenceUtils.getEvidence(new ArrayList<>(alleles),
                         MainUtils.getTreatmentEvidenceTypes(),
                         (levels != null ?
                             new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,

@@ -27,9 +27,9 @@ import java.util.*;
  */
 public class PortalAlterationImporter {
 
-    public static Set<Alteration> findAlterationList(Gene gene, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
+    public static List<Alteration> findAlterationList(Gene gene, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
         List<Alteration> alterations = new ArrayList<>();
-        Set<Alteration> alterationsSet = new HashSet<>();
+        List<Alteration> alterationsSet = new ArrayList<>();
         HashMap<String, String[]> mapper = new HashMap<>();
         mapper.put("Targeted_Region", new String[]{"inframe_deletion", "inframe_insertion"});
         mapper.put("COMPLEX_INDEL", new String[]{"inframe_deletion", "inframe_insertion"});
@@ -74,7 +74,7 @@ public class PortalAlterationImporter {
                     proteinChange, null, consequence, proteinStartPosition, proteinEndPosition);
                 alterations.addAll(AlterationUtils.getRelevantAlterations(alt));
             }
-            alterationsSet = AlterationUtils.excludeVUS(new HashSet<>(alterations));
+            alterationsSet = AlterationUtils.excludeVUS(alterations);
         }
 
         return alterationsSet;
@@ -138,7 +138,7 @@ public class PortalAlterationImporter {
 
                         Set<PortalAlteration> portalAlterations = new HashSet<>();
 
-                        Set<Alteration> oncoKBAlterations = findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition);
+                        List<Alteration> oncoKBAlterations = findAlterationList(gene, proteinChange, mutation_type, proteinStartPosition, proteinEndPosition);
 
                         for (Alteration oncoKBAlteration : oncoKBAlterations) {
                             portalAlterations = oncoKBAlteration.getPortalAlterations();

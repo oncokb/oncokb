@@ -59,6 +59,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return new ArrayList<>(result);
     }
 
+    /**
+     * Find all relevant alterations. The order is important. The list should be generated based on priority.
+     * @param alteration
+     * @param fullAlterations
+     * @return
+     */
     @Override
     public List<Alteration> findRelevantAlterations(Alteration alteration, List<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<Alteration>();

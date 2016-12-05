@@ -34,7 +34,7 @@ public class AlterationLevel {
         System.out.println("Gene\tAlteration\tTumor Type\tLevel\tTreatment\tPMIDs\tExist");
         for (Gene gene : genes) {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
-            Set<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(new HashSet<>(alterations));
+            List<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(alterations);
             for (Alteration alteration : alterationsWithoutVUS) {
                 List<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
                 List<Evidence> relevantEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidencesByAlteration(relevantAlts);
