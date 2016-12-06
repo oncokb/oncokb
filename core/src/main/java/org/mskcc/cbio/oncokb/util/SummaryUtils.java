@@ -148,7 +148,7 @@ public class SummaryUtils {
         if (ttSummaryNotGenerated) {
             // Base on the priority of relevant alterations
             for(Alteration alteration : alterations) {
-                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
                 if (tumorTypeSummary != null) {
                     ttSummaryNotGenerated = false;
                     break;
