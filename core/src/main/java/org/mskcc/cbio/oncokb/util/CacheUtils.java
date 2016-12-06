@@ -455,7 +455,11 @@ public class CacheUtils {
     }
 
     public static Set<Alteration> getAlterations(Integer entrezGeneId) {
-        return alterations.get(entrezGeneId);
+        Set<Alteration> alterations = alterations.get(entrezGeneId);
+        if(alterations == null){
+            alterations = new HashSet<Alteration>();
+        }
+        return alterations;
     }
 
     public static Boolean containAlterations(Integer entrezGeneId) {
