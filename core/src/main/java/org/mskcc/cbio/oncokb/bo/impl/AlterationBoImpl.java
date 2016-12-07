@@ -96,25 +96,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
-        // TODO: add activating or inactivating alterations.
-        // This code needs to be removed and use isOncogenicAlteration in AlterationUtil once we change all
-        // Inactivating/Activating Mutations to Oncogenic Mutations
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
-        boolean activating = false, inactivating = false;
-        for (Evidence evidence : mutationEffectEvs) {
-            String effect = evidence.getKnownEffect();
-            if (effect != null) {
-                effect = effect.toLowerCase();
-                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
-                    inactivating = true;
-                } else if (effect.contains("activating") || effect.contains("gain-of-function")
-                    || effect.contains("switch-of-function")) {
-                    activating = true;
-                }
-            }
-        }
-
         //If alteration contains 'fusion'
         if (alteration.getAlteration() != null && alteration.getAlteration().toLowerCase().contains("fusion")) {
             boolean matchFusionForBothPatnerGenes = false;
@@ -181,6 +162,25 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        // TODO: add activating or inactivating alterations.
+        // This code needs to be removed and use isOncogenicAlteration in AlterationUtil once we change all
+        // Inactivating/Activating Mutations to Oncogenic Mutations
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
+        boolean activating = false, inactivating = false;
+        for (Evidence evidence : mutationEffectEvs) {
+            String effect = evidence.getKnownEffect();
+            if (effect != null) {
+                effect = effect.toLowerCase();
+                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
+                    inactivating = true;
+                } else if (effect.contains("activating") || effect.contains("gain-of-function")
+                    || effect.contains("switch-of-function")) {
+                    activating = true;
+                }
+            }
+        }
+        
         if (inactivating) {
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "inactivating mutations");
             if (alt != null) {
