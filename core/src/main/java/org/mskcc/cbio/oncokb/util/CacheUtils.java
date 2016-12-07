@@ -35,7 +35,7 @@ public class CacheUtils {
     private static Map<String, List<OncoTreeType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Object> numbers = new HashMap<>();
 
-    private static String status = "disabled"; //Current cacheUtils status. Applicable value: disabled enabled
+    private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
     // Cache data from database
     private static Set<Gene> genes = new HashSet<>();
