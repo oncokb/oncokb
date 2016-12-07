@@ -7,4 +7,3 @@
 #
 # Current valid authorities: ROLE_USER, ROLE_MANAGER
 #
-ABL1	BCR-ABL1 Fusion	Acute Lymphoid Leukemia	Imatinib is FDA-approved for the treatment of patients with BCR-ABL1 fusion positive acute lymphoid or chronic myelogenous leukemias.
