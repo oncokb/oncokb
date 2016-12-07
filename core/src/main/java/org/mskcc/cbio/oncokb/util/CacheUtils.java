@@ -24,7 +24,7 @@ import java.util.*;
 public class CacheUtils {
     private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
     private static Map<Integer, Map<String, Map<String, String>>> variantTumorTypeSummary = new HashMap<>();
-    private static Map<Integer, Map<String, Set<Integer>>> relevantAlterations = new HashMap<>();
+    private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     // The key would be entrezGeneId, variant name and evidence ID. -1 will be used to store gene irrelevant evidences.
     private static Map<Integer, Map<String, Set<Integer>>> relevantEvidences = new HashMap<>();
@@ -429,14 +429,19 @@ public class CacheUtils {
 
     public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
         if (relevantAlterations.containsKey(entrezGeneId) && relevantAlterations.get(entrezGeneId).containsKey(variant)) {
-            Set<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
+            List<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
             List<Alteration> mappedAlts = new ArrayList<>();
             Set<Alteration> geneAlts = alterations.get(entrezGeneId);
-            for (Alteration alteration : geneAlts) {
-                if (mappedAltsIds.contains(alteration.getId())) {
-                    mappedAlts.add(alteration);
+            
+            // Need to keep the order of mappedAltsIds
+            for(Integer mappedAlt : mappedAltsIds) {
+                for (Alteration alteration : geneAlts) {
+                    if (mappedAlt.equals(alteration.getId())) {
+                        mappedAlts.add(alteration);
+                    }
                 }
             }
+            
             return mappedAlts;
         } else {
             return new ArrayList<>();
@@ -450,9 +455,9 @@ public class CacheUtils {
 
     public static void setRelevantAlterations(Integer entrezGeneId, String variant, List<Alteration> alts) {
         if (!relevantAlterations.containsKey(entrezGeneId)) {
-            relevantAlterations.put(entrezGeneId, new HashMap<String, Set<Integer>>());
+            relevantAlterations.put(entrezGeneId, new HashMap<String, List<Integer>>());
         }
-        Set<Integer> mappedAltsIds = new HashSet<>();
+        List<Integer> mappedAltsIds = new ArrayList<>();
         for (Alteration alteration : alts) {
             mappedAltsIds.add(alteration.getId());
         }

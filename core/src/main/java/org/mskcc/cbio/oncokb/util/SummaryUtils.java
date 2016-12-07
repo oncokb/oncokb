@@ -148,7 +148,7 @@ public class SummaryUtils {
                     }
 
                     // Special case for AKT1 E17K alleles
-                    if (gene.getHugoSymbol().equals("AKT1") && alteration.getProteinStart() == 17) {
+                    if (gene.getHugoSymbol().equals("AKT1") && alteration.getProteinStart().equals(17)) {
                         OncoTreeType breastCancer = TumorTypeUtils.getOncoTreeCancerType("Breast Cancer");
                         OncoTreeType ovarianCancer = TumorTypeUtils.getOncoTreeCancerType("Ovarian Cancer");
 
@@ -159,7 +159,7 @@ public class SummaryUtils {
                         } else {
                             tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E17K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
                         }
-                    } else if (gene.getHugoSymbol().equals("ARAF") && alteration.getProteinStart() == 214) {
+                    } else if (gene.getHugoSymbol().equals("ARAF") && alteration.getProteinStart().equals(214)) {
                         // Special case for ARAF S214A/F
                         OncoTreeType histiocytosis = TumorTypeUtils.getOncoTreeCancerType("Histiocytosis");
                         OncoTreeType NSCLC = TumorTypeUtils.getOncoTreeCancerType("Non-Small Cell Lung Cancer");
@@ -171,7 +171,7 @@ public class SummaryUtils {
                         } else {
                             tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "S214A")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
                         }
-                    } else if (gene.getHugoSymbol().equals("MTOR") && alteration.getProteinStart() == 2014) {
+                    } else if (gene.getHugoSymbol().equals("MTOR") && alteration.getProteinStart().equals(2014)) {
                         // Special case for MTOR E2014K
                         OncoTreeType bladderCancer = TumorTypeUtils.getOncoTreeCancerType("Bladder Cancer");
                         if (relevantTumorTypes.contains(bladderCancer)) {
