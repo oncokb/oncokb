@@ -434,42 +434,42 @@ public class SummaryUtils {
         }
 
         // Detemin whether allele alterations have treatments
-        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), null);
-        LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
-        Set<Treatment> treatments = new HashSet<>();
-        Set<Alteration> highestLevelTreatmentRelatedAlts = new HashSet<>();
-
-        // If there are no treatments for the alleles, try to find whether there are alleles are oncogenic or likely oncogenic
-        if (treatmentsEvis != null && treatmentsEvis.size() > 0) {
-            for (Evidence evidence : treatmentsEvis) {
-                if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(highestLevel)) {
-                    treatments.addAll(evidence.getTreatments());
-                    for (Alteration alt : evidence.getAlterations()) {
-                        if (alleles.contains(alt)) {
-                            highestLevelTreatmentRelatedAlts.add(alt);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (treatments.size() > 0) {
-            String treatmentStr = "";
-            if (treatments.size() > 1) {
-                treatmentStr = "multiple targeted therapies";
-            } else {
-                Set<String> drugs = new HashSet<>();
-                for (Drug drug : treatments.iterator().next().getDrugs()) {
-                    drugs.add(drug.getDrugName());
-                }
-                treatmentStr = StringUtils.join(drugs, " + ");
-            }
-
-            sb.append(" " + geneStr + " " + allelesToStr(highestLevelTreatmentRelatedAlts) + " mutant tumors have demonstrated sensitivity to "
-                + treatmentStr + ", therefore "
-                + geneStr + " " + altStr + " is considered likely sensitive to"
-                + (treatments.size() > 1 ? " these therapies." : " this therapy."));
-        }
+//        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), null);
+//        LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
+//        Set<Treatment> treatments = new HashSet<>();
+//        Set<Alteration> highestLevelTreatmentRelatedAlts = new HashSet<>();
+//
+//        // If there are no treatments for the alleles, try to find whether there are alleles are oncogenic or likely oncogenic
+//        if (treatmentsEvis != null && treatmentsEvis.size() > 0) {
+//            for (Evidence evidence : treatmentsEvis) {
+//                if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(highestLevel)) {
+//                    treatments.addAll(evidence.getTreatments());
+//                    for (Alteration alt : evidence.getAlterations()) {
+//                        if (alleles.contains(alt)) {
+//                            highestLevelTreatmentRelatedAlts.add(alt);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (treatments.size() > 0) {
+//            String treatmentStr = "";
+//            if (treatments.size() > 1) {
+//                treatmentStr = "multiple targeted therapies";
+//            } else {
+//                Set<String> drugs = new HashSet<>();
+//                for (Drug drug : treatments.iterator().next().getDrugs()) {
+//                    drugs.add(drug.getDrugName());
+//                }
+//                treatmentStr = StringUtils.join(drugs, " + ");
+//            }
+//
+//            sb.append(" " + geneStr + " " + allelesToStr(highestLevelTreatmentRelatedAlts) + " mutant tumors have demonstrated sensitivity to "
+//                + treatmentStr + ", therefore "
+//                + geneStr + " " + altStr + " is considered likely sensitive to"
+//                + (treatments.size() > 1 ? " these therapies." : " this therapy."));
+//        }
 
         return sb.toString();
     }
