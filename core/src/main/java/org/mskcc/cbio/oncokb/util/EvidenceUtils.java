@@ -718,7 +718,7 @@ public class EvidenceUtils {
                         query.setAlterations(relevantAlts);
 
                         Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
-                        Set<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
+                        List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                         query.setAlleles(new ArrayList<>(allelesAlts));
                     } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
                         // if no alteration assigned, but has tumor type

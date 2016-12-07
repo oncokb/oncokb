@@ -442,7 +442,7 @@ public final class AlterationUtils {
         return alterations;
     }
 
-    public static Set<Alteration> getAlleleAlterations(Alteration alteration) {
+    public static List<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<>();
 
         if (CacheUtils.isEnabled()) {
@@ -451,9 +451,9 @@ public final class AlterationUtils {
             alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
         }
 
-        Set<Alteration> alleles = new HashSet<>(alterationBo.findMutationsByConsequenceAndPosition(
+        List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
-            alteration.getProteinEnd(), alterations));
+            alteration.getProteinEnd(), alterations);
 
         for (Alteration allele : alleles) {
             if (isOncogenicAlteration(allele)) {
@@ -463,7 +463,7 @@ public final class AlterationUtils {
         }
         // Remove alteration itself
         alleles.remove(alteration);
-        return filterAllelesBasedOnLocation(new HashSet<>(alleles), alteration.getProteinStart());
+        return filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
     }
 
     public static List<Alteration> getRelevantAlterations(Alteration alteration) {
@@ -498,8 +498,7 @@ public final class AlterationUtils {
     }
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {
-        Set<Alteration> setAlleles = AlterationUtils.getAlleleAlterations(alteration);
-        List<Alteration> alleles = setAlleles == null ? new ArrayList<Alteration>() : new ArrayList<>(setAlleles);
+        List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
         
         alleles = AlterationUtils.excludeVUS(alleles);
         if (alleles.size() == 0) {
@@ -523,8 +522,8 @@ public final class AlterationUtils {
         }
     }
 
-    public static Set<Alteration> filterAllelesBasedOnLocation(Set<Alteration> alterations, Integer location) {
-        Set<Alteration> result = new HashSet<>();
+    public static List<Alteration> filterAllelesBasedOnLocation(List<Alteration> alterations, Integer location) {
+        List<Alteration> result = new ArrayList<>();
 
         for (Alteration alteration : alterations) {
             if (alteration.getProteinStart() != null

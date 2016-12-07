@@ -86,7 +86,7 @@ public class IndicatorUtils {
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-            Set<Alteration> alleles = new HashSet<>();
+            List<Alteration> alleles = new ArrayList<>();
             List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
 
             if (relevantAlterations == null || relevantAlterations.size() == 0) {
