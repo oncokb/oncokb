@@ -30,14 +30,14 @@ public class AllOncogenicMutationEffect {
         System.out.println("Gene\tAlteration\tEvidence type\tKnown effect\tShort Description\tDescription");
         for (Gene gene : genes) {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
-            Set<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(new HashSet<>(alterations));
+            List<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(alterations);
             for (Alteration alteration : alterationsWithoutVUS) {
                 List<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
                 Set<EvidenceType> evidenceTypes = new HashSet<>();
                 evidenceTypes.add(EvidenceType.MUTATION_EFFECT);
                 evidenceTypes.add(EvidenceType.ONCOGENIC);
 
-                Set<Evidence> relevantEvidences = EvidenceUtils.getEvidence(new HashSet<>(relevantAlts), evidenceTypes, null);
+                List<Evidence> relevantEvidences = EvidenceUtils.getEvidence(relevantAlts, evidenceTypes, null);
 
 //                System.out.println(gene.getHugoSymbol() + "\t" + alteration.getAlteration() + "\t" + getMutationEffect(relevantEvidences) + "\t" + getOncogenic(relevantEvidences));
                 

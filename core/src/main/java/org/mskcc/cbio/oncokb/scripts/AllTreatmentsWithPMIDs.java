@@ -33,7 +33,7 @@ public class AllTreatmentsWithPMIDs {
         System.out.println("Gene\tAlteration\tLevel\tCancer Type\tSubtype\tTreatment\tPMIDs\t Treatment updated from v1.1\tAlteration newly added");
         for (Gene gene : genes) {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
-            Set<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(new HashSet<>(alterations));
+            List<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(alterations);
             for (Alteration alteration : alterationsWithoutVUS) {
                 List<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
                 List<Evidence> relevantEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidencesByAlteration(relevantAlts);

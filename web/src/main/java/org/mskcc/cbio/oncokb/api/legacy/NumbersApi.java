@@ -115,8 +115,8 @@ public class NumbersApi {
             if (CacheUtils.getNumbers("main") == null) {
                 mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
 
-                Set<Alteration> alterations = new HashSet<>(ApplicationContextSingleton.getAlterationBo().findAll());
-                alterations = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
+                List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
+                alterations = AlterationUtils.excludeVUS(alterations);
                 alterations = AlterationUtils.excludeGeneralAlterations(alterations);
 
                 mainNumber.setAlteration(alterations.size());
@@ -128,7 +128,7 @@ public class NumbersApi {
             }
         }else {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
-            Set<Alteration> excludeVUS = AlterationUtils.excludeVUS(new HashSet<Alteration>(alterations));
+            List<Alteration> excludeVUS = AlterationUtils.excludeVUS(alterations);
 
             mainNumber.setAlteration(excludeVUS.size());
             mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());

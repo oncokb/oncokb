@@ -372,9 +372,9 @@ public class MainUtils {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {
             Long oldTime = new Date().getTime();
-            Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
+            List<Alteration> alterations;
 
-            alterations = AlterationUtils.excludeVUS(gene, alterations);
+            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
             alterations = AlterationUtils.excludeGeneralAlterations(alterations);
 
 //                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
@@ -429,8 +429,8 @@ public class MainUtils {
     public static Set<ClinicalVariant> getClinicalVariants(Gene gene) {
         Set<ClinicalVariant> variants = new HashSet<>();
         if (gene != null) {
-            Set<Alteration> alterations = new HashSet<>(AlterationUtils.getAllAlterations(gene));
-            alterations = AlterationUtils.excludeVUS(gene, alterations);
+            List<Alteration> alterations;
+            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                 add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
                 add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
