@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('reportItem', function (stringUtils, $rootScope) {
+    .service('reportItem', function (stringUtils, $rootScope, _) {
         var specialKeyChars = 'o_n_c_o_k_b';
         function Item(geneName, mutation, tumorType){
             this.geneName = geneName || 'N/A';
@@ -190,13 +190,18 @@ angular.module('oncokbApp')
                 }else {
                     if(angular.isArray(description)){
                         var str = [];
+                        var allTumorStr = '';
+                        
                         description.forEach(function(e){
                             if(e['Cancer type'].toString().toLowerCase() === 'all tumors' && str.length > 0) {
-                                str.unshift(e.value.toString().trim());
+                                allTumorStr = e.value.toString().trim();
                             }else {
                                 str.push(e.value.toString().trim());
                             }
                         });
+                        if(allTumorStr) {
+                            str.push(allTumorStr);
+                        }
                         description = str.join(' ');
                     }else{
                         description = '';
@@ -641,21 +646,17 @@ angular.module('oncokbApp')
 
                 //Show all tumor info first
                 if(angular.isArray(cancerTypeInfo.prevalence.description)){
-                    var alltumor;
+                    var alltumor = [];
                     targetValue = [];
 
                     for(var i = 0; i < cancerTypeInfo.prevalence.description.length ; i++) {
                         if(cancerTypeInfo.prevalence.description[i].hasOwnProperty('Cancer type') && /all tumor/ig.test(cancerTypeInfo.prevalence.description[i]['Cancer type'].toString().toLowerCase())){
-                            alltumor = cancerTypeInfo.prevalence.description[i];
-                            cancerTypeInfo.prevalence.description.splice(i);
+                            alltumor.push(cancerTypeInfo.prevalence.description[i]);
+                            cancerTypeInfo.prevalence.description.splice(i, 1);
                         }
                     }
-
-                    if(alltumor){
-                        cancerTypeInfo.prevalence.description.unshift(alltumor);
-                    }
-
-                    cancerTypeInfo.prevalence.description.forEach(function(e){
+                    
+                    _.union(cancerTypeInfo.prevalence.description, alltumor).forEach(function(e){
                         if(e.hasOwnProperty('value')){
                             targetValue.push(e.value);
                         }
