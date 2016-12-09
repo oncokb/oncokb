@@ -190,19 +190,16 @@ angular.module('oncokbApp')
                 }else {
                     if(angular.isArray(description)){
                         var str = [];
-                        var allTumorStr = '';
+                        var allTumors = [];
                         
                         description.forEach(function(e){
                             if(e['Cancer type'].toString().toLowerCase() === 'all tumors' && str.length > 0) {
-                                allTumorStr = e.value.toString().trim();
+                                allTumors.push(e.value.toString().trim());
                             }else {
                                 str.push(e.value.toString().trim());
                             }
                         });
-                        if(allTumorStr) {
-                            str.push(allTumorStr);
-                        }
-                        description = str.join(' ');
+                        description = _.union(str, allTumors).join(' ');
                     }else{
                         description = '';
                         console.log('PROGNOSTIC IMPLICATIONS --- not string --- not array');
