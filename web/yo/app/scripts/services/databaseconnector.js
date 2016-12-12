@@ -1,12 +1,5 @@
 'use strict';
 
-/**
- * @ngdoc service
- * @name oncokb.DatabaseConnector
- * @description
- * # DatabaseConnector
- * Factory in the oncokb.
- */
 angular.module('oncokbApp')
     .factory('DatabaseConnector', [
         '$timeout',
@@ -44,13 +37,11 @@ angular.module('oncokbApp')
                  Cache,
                  OncoTree,
                  InternalAccess,
-                 ApiUtils
-        ) {
+                 ApiUtils) {
+            var numOfLocks = {};
+            var data = {};
 
-            var numOfLocks = {},
-                data = {};
-
-            //When running locally, set this to true, all servlet will read data from relative files.
+            // When running locally, set this to true, all servlet will read data from relative files.
             var dataFromFile = config.testing || false;
 
             function getAllGene(callback, timestamp) {
@@ -62,7 +53,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -76,7 +67,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -116,7 +107,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -130,7 +121,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -148,7 +139,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -162,7 +153,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -180,7 +171,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -194,7 +185,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -212,7 +203,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -226,7 +217,7 @@ angular.module('oncokbApp')
                             }
                             callback(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             if (timestamp) {
                                 numOfLocks[timestamp]--;
                             }
@@ -241,7 +232,7 @@ angular.module('oncokbApp')
                         .success(function(data) {
                             success(data);
                         })
-                        .error(function(result) {
+                        .error(function() {
                             fail();
                         });
                 } else {
@@ -306,7 +297,7 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                //Disable send email service
+                // Disable send email service
                 success(true);
 
                 if (dataFromFile) {
@@ -414,35 +405,35 @@ angular.module('oncokbApp')
                     }
                 } else {
                     switch (operation) {
-                        case 'disable':
-                            Cache.disable()
-                                .success(function(data) {
-                                    deferred.resolve(data);
-                                })
-                                .error(function(result) {
-                                    deferred.reject(result);
-                                });
-                            break;
-                        case 'enable':
-                            Cache.enable()
-                                .success(function(data) {
-                                    deferred.resolve(data);
-                                })
-                                .error(function(result) {
-                                    deferred.reject(result);
-                                });
-                            break;
-                        case 'reset':
-                            Cache.reset()
-                                .success(function(data) {
-                                    deferred.resolve(data);
-                                })
-                                .error(function(result) {
-                                    deferred.reject(result);
-                                });
-                            break;
-                        default:
-                            break;
+                    case 'disable':
+                        Cache.disable()
+                            .success(function(data) {
+                                deferred.resolve(data);
+                            })
+                            .error(function(result) {
+                                deferred.reject(result);
+                            });
+                        break;
+                    case 'enable':
+                        Cache.enable()
+                            .success(function(data) {
+                                deferred.resolve(data);
+                            })
+                            .error(function(result) {
+                                deferred.reject(result);
+                            });
+                        break;
+                    case 'reset':
+                        Cache.reset()
+                            .success(function(data) {
+                                deferred.resolve(data);
+                            })
+                            .error(function(result) {
+                                deferred.reject(result);
+                            });
+                        break;
+                    default:
+                        break;
                     }
                 }
                 return deferred.promise;
@@ -452,9 +443,7 @@ angular.module('oncokbApp')
                 var deferred = $q.defer();
                 if (dataFromFile) {
                     deferred.resolve();
-                } else if (!hugoSymbol) {
-                    deferred.reject();
-                } else {
+                } else if (hugoSymbol) {
                     Cache.updateGene(hugoSymbol)
                         .success(function(data) {
                             deferred.resolve(data);
@@ -462,6 +451,8 @@ angular.module('oncokbApp')
                         .error(function(result) {
                             deferred.reject(result);
                         });
+                } else {
+                    deferred.reject();
                 }
                 return deferred.promise;
             }
@@ -537,10 +528,10 @@ angular.module('oncokbApp')
                     });
                 return deferred.promise;
             }
-            
+
             // Public API here
             return {
-                'getGeneAlterationTumorType': function(callback) {
+                getGeneAlterationTumorType: function(callback) {
                     var timestamp = new Date().getTime().toString();
 
                     numOfLocks[timestamp] = 3;
@@ -558,7 +549,7 @@ angular.module('oncokbApp')
 
                     timeout(callback, timestamp);
                 },
-                'getGeneTumorType': function(callback) {
+                getGeneTumorType: function(callback) {
                     var timestamp = new Date().getTime().toString();
 
                     numOfLocks[timestamp] = 2;
@@ -573,37 +564,37 @@ angular.module('oncokbApp')
 
                     timeout(callback, timestamp);
                 },
-                'getAllEvidence': getAllEvidence,
-                'getAllGene': getAllGene,
-                'getDataSummary': getDataSummary,
-                'searchAnnotation': searchVariant,
-                'googleDoc': generateGoogleDoc,
-                'createGoogleFolder': createGoogleFolder,
-                'getOncokbInfo': getOncokbInfo,
-                'getAllTumorType': getAllTumorType,
-                'updateGene': updateGene,
-                'sendEmail': sendEmail,
-                'getHotspotList': getHotspotList,
-                'getAutoMutationList': getAutoMutationList,
-                'getCacheStatus': getCacheStatus,
-                'disableCache': function() {
+                getAllEvidence: getAllEvidence,
+                getAllGene: getAllGene,
+                getDataSummary: getDataSummary,
+                searchAnnotation: searchVariant,
+                googleDoc: generateGoogleDoc,
+                createGoogleFolder: createGoogleFolder,
+                getOncokbInfo: getOncokbInfo,
+                getAllTumorType: getAllTumorType,
+                updateGene: updateGene,
+                sendEmail: sendEmail,
+                getHotspotList: getHotspotList,
+                getAutoMutationList: getAutoMutationList,
+                getCacheStatus: getCacheStatus,
+                disableCache: function() {
                     return setCache('disable');
                 },
-                'enableCache': function() {
+                enableCache: function() {
                     return setCache('enable');
                 },
-                'resetCache': function() {
+                resetCache: function() {
                     return setCache('reset');
                 },
-                'updateGeneCache': function(hugoSymbol) {
-                    return updateGeneCache(hugoSymbol)
+                updateGeneCache: function(hugoSymbol) {
+                    return updateGeneCache(hugoSymbol);
                 },
-                'getOncoTreeMainTypes': getOncoTreeMainTypes,
-                'getOncoTreeTumorTypesByMainType': getOncoTreeTumorTypesByMainType,
-                'getOncoTreeTumorTypesByMainTypes': getOncoTreeTumorTypesByMainTypes,
-                'getOncoTreeTumorTypeByName': getOncoTreeTumorTypeByName,
-                'testAccess': testAccess,
-                'getIsoforms': getIsoforms,
-                'getOncogeneTSG': getOncogeneTSG
+                getOncoTreeMainTypes: getOncoTreeMainTypes,
+                getOncoTreeTumorTypesByMainType: getOncoTreeTumorTypesByMainType,
+                getOncoTreeTumorTypesByMainTypes: getOncoTreeTumorTypesByMainTypes,
+                getOncoTreeTumorTypeByName: getOncoTreeTumorTypeByName,
+                testAccess: testAccess,
+                getIsoforms: getIsoforms,
+                getOncogeneTSG: getOncogeneTSG
             };
         }]);

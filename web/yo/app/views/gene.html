@@ -43,16 +43,16 @@
           <!--<span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty-->
         <!--</button>-->
         <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
-        
+
       </span>
-        
+
     </h2>
     <p ng-if="gene.transcripts.asArray().length > 0">Transcript: {{gene.transcripts.asArray()[0].isoform_override.text}}, {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</p>
     <h3>{{::gene.summary.display}}:
         <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{::gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'"></e-status></h3>
     <p class="doubleH" ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" ng-model="gene.summary.text"></p>
-    <span style="float:left">                
+    <span style="float:left">
         <drive-realtime-string fe="fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
     </span>
     <span style="float:left">
@@ -128,7 +128,7 @@
                 <drive-realtime-string fe="fileEditable" t="'p'" object="mutation.summary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
               </span>
             </uib-accordion-group>
-            
+
             <!-- Mutation Effect -->
             <uib-accordion-group ng-init="geneStatus[$index].oncogenic = {}" is-open="geneStatus[$index].oncogenic.isOpen" class="levelTwoHeader" ng-hide="((!!geneStatus[$index].oncogenic.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
                   <uib-accordion-heading>
@@ -141,7 +141,7 @@
                   <div class="mutationEffect">
                       <strong class="header">Mutation effect:</strong>
                       <div class="content">
-                          <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutation_effect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
+                          <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutationEffect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
                       </div>
                   </div>
                   <span>
