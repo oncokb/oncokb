@@ -3,7 +3,7 @@ Repository for OncoKB, a precision oncology knowledge base.
 We use Google Reatime API to store all information curators generated.
 We use MySQL to store data after reviewing.
 
-Currant repository contains server-side and curation platform.
+Current repository contains server-side and curation platform.
 If you wish to deploy/modify OncoKB public website, please refer to OncoKB Public section.
 
 #Front-end
