@@ -88,7 +88,7 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 * AngularJS files **must follow** [John Papa's Angular 1 style guide] (https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md).
 
 ##OncoKB Public Website
-In order to build a OncoKB public website instance, please clone [oncokb-public](https://github.com/knowledgesystems/oncokb-public) to web/public folder. And in the pom file, please choose public as profile.
+In order to build a OncoKB public website instance, please clone [oncokb-public](https://github.com/oncokb/oncokb-public) to web/public folder. And in the pom file, please choose public as profile.
 
 License
 --------------------
@@ -99,4 +99,4 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 A public instance of OncoKB (http://oncokb.org) is hosted and maintained by Memorial Sloan Kettering Cancer Center. It provides access to all curators in MSKCC knowledgebase team.
 
-If you are interested in coordinating the development of new features, please contact oncokb@cbio.mskcc.org.
+If you are interested in coordinating the development of new features, please contact team@oncokb.org.
