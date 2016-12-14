@@ -228,7 +228,7 @@ public class SummaryUtils {
 
     public static String unknownOncogenicSummary(Gene gene) {
         String str = gene == null ? "variant" : (gene.getHugoSymbol() + " alteration");
-        return "The oncogenic activity of this " + str + " is unknown and it has not been specifically investigated by the OncoKB team.";
+        return "The oncogenic activity of this " + str + " is unknown as it has not been specifically investigated by the OncoKB team.";
     }
 
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
@@ -265,7 +265,7 @@ public class SummaryUtils {
                         sb.append(unknownOncogenicSummary(gene));
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-                        sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this variant was available.");
+                        sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.");
                     }
                 } else {
                     sb.append(unknownOncogenicSummary(gene));
@@ -860,7 +860,7 @@ public class SummaryUtils {
     private static String getTumorTypeSummaryFromEvidences(List<Evidence> evidences) {
         String summary = null;
         if (evidences != null && evidences.size() > 0) {
-            // Sort all tumor type summaries, the more specific tumor type summary will be picked. 
+            // Sort all tumor type summaries, the more specific tumor type summary will be picked.
             Collections.sort(evidences, new Comparator<Evidence>() {
                 public int compare(Evidence x, Evidence y) {
                     if (x.getAlterations() == null) {
