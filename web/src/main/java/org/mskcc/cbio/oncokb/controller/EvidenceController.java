@@ -4,9 +4,12 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import io.swagger.annotations.ApiParam;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.EvidenceUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +20,8 @@ import java.util.*;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/legacy-api/evidence.json")
 public class EvidenceController {
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.GET)
     public
     @ResponseBody
     List<List<Evidence>> getEvidence(
@@ -60,7 +62,7 @@ public class EvidenceController {
         return evidences;
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.POST)
     public
     @ResponseBody
     List<EvidenceQueryRes> getEvidence(
@@ -91,5 +93,145 @@ public class EvidenceController {
         return result;
     }
 
+    @RequestMapping(value = "/legacy-api/evidences/update/{uuid}", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    String updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
+                          @RequestBody(required = true) Evidence queryEvidence) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
+        EvidenceType evidenceType = queryEvidence.getEvidenceType();
+        String subType = queryEvidence.getSubtype();
+        String cancerType = queryEvidence.getCancerType();
+        String knownEffect = queryEvidence.getKnownEffect();
+        LevelOfEvidence level = queryEvidence.getLevelOfEvidence();
+        String description = queryEvidence.getDescription();
+        String additionalInfo = queryEvidence.getAdditionalInfo();
+        Date lastEdit = queryEvidence.getLastEdit();
+        Set<Treatment> treatments = queryEvidence.getTreatments();
+        Set<Article> articles = queryEvidence.getArticles();
+        Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
+        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
+        //List<Evidence> evidences = EvidenceUtils.getEvidenceByUUID(uuid);
+        List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
+        if (evidences.isEmpty()) {
+            Evidence evidence = new Evidence();
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            Gene gene = geneBo.findGeneByHugoSymbol(queryEvidence.getGene().getHugoSymbol());
+
+            AlterationType type = AlterationType.MUTATION;
+            Set<Alteration> queryAlterations = queryEvidence.getAlterations();
+            Set<Alteration> alterations = new HashSet<Alteration>();
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            for (Alteration alt : queryAlterations) {
+                String proteinChange = alt.getAlteration();
+                String displayName = alt.getName();
+                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                if (alteration == null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(type);
+                    alteration.setAlteration(proteinChange);
+                    alteration.setName(displayName);
+                    AlterationUtils.annotateAlteration(alteration, proteinChange);
+                    alterationBo.save(alteration);
+                }
+                alterations.add(alteration);
+            }
+            evidence.setAlterations(alterations);
+            evidence.setUuid(uuid);
+            evidence.setGene(gene);
+            evidence.setEvidenceType(evidenceType);
+            evidence.setSubtype(subType);
+            evidence.setCancerType(cancerType);
+            evidence.setKnownEffect(knownEffect);
+            evidence.setLevelOfEvidence(level);
+            evidence.setDescription(description);
+            evidence.setAdditionalInfo(additionalInfo);
+            evidence.setLastEdit(lastEdit);
+            evidence.setTreatments(treatments);
+            evidence.setArticles(articles);
+            evidence.setNccnGuidelines(nccnGuidelines);
+            evidence.setClinicalTrials(clinicalTrials);
+            
+            evidenceBo.save(evidence);
+            evidences.add(evidence);
+        } else {
+            for (Evidence evidence : evidences) {
+                evidence.setEvidenceType(evidenceType);
+                evidence.setSubtype(subType);
+                evidence.setCancerType(cancerType);
+                evidence.setKnownEffect(knownEffect);
+                evidence.setLevelOfEvidence(level);
+                evidence.setDescription(description);
+                evidence.setAdditionalInfo(additionalInfo);
+                evidence.setLastEdit(lastEdit);
+                evidence.setTreatments(treatments);
+                evidence.setArticles(articles);
+                evidence.setNccnGuidelines(nccnGuidelines);
+                evidence.setClinicalTrials(clinicalTrials);
+                evidenceBo.update(evidence);
+            }
+        }
+
+        // The sample solution for now is updating all gene related evidences.
+        Set<Gene> genes = new HashSet<>();
+        for (Evidence evidence : evidences) {
+            genes.add(evidence.getGene());
+        }
+        for (Gene gene : genes) {
+            CacheUtils.updateGene(gene.getEntrezGeneId());
+        }
+        return "success";
+    }
+
+    @RequestMapping(value = "/legacy-api/evidences/delete", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    String deleteEvidences(@RequestBody(required = true) List<String> uuids) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        if (uuids != null) {
+            List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(uuids);
+            deleteEvidencesAndAlts(evidences);
+        }
+        return "";
+    }
+
+    @RequestMapping(value = "/legacy-api/evidences/delete/{uuid}", method = RequestMethod.DELETE)
+    public
+    @ResponseBody
+    String deleteEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
+
+        deleteEvidencesAndAlts(evidences);
+        return "";
+    }
+
+    private void deleteEvidencesAndAlts(List<Evidence> evidences) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Alteration> alts = new ArrayList<>();
+        List<Alteration> removedAlts = new ArrayList<>();
+
+        // The sample solution for now is updating all gene related evidences and alterations.
+        Set<Gene> genes = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            alts.addAll(evidence.getAlterations());
+            genes.add(evidence.getGene());
+        }
+        evidenceBo.deleteAll(evidences);
+
+        for (Alteration alt : alts) {
+            List<Evidence> altEvidences = evidenceBo.findEvidencesByAlteration(Collections.singletonList(alt));
+            if (altEvidences == null && altEvidences.isEmpty()) {
+                removedAlts.add(alt);
+            }
+        }
+        ApplicationContextSingleton.getAlterationBo().deleteAll(removedAlts);
+
+        for (Gene gene : genes) {
+            CacheUtils.updateGene(gene.getEntrezGeneId());
+        }
+    }
 }

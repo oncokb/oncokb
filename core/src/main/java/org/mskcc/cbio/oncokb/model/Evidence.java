@@ -211,11 +211,10 @@ public class Evidence implements java.io.Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 67 * hash + Objects.hashCode(this.id == null ? this : this.id);
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.id);
         return hash;
     }
-
 
     @Override
     public boolean equals(Object obj) {

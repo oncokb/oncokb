@@ -7,21 +7,23 @@ package org.mskcc.cbio.oncokb.bo;
 import java.util.List;
 
 /**
- * 
+ *
  * @author jgao
- * @param <T> 
+ * @param <T>
  */
 public interface GenericBo<T> {
-    
+
     void save(T t);
-    
+
     void update(T t);
-    
+
     void saveOrUpdate(T t);
-    
+
     void delete(T t);
-    
+
+    void deleteAll(List<T> ts);
+
     List<T> findAll();
-    
+
     Integer countAll();
 }
