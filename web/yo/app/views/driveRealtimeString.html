@@ -1,15 +1,18 @@
 <div class="drive-realtime-string">
     <div ng-if="t === 'p'">
-        <p class="doubleH"
+        <h4 ng-if="reviewMode && !rs.get('action')">New Content:</h4>
+        <p class="doubleH" ng-if="!reviewMode || !rs.get('action')"
            ng-class="{editableBox:fe, unEditableBox:!fe}"
-           contenteditable="{{fe}}"
+           contenteditable="{{!reviewMode ? fe : true}}"
            placeholder="{{ph}}"
            ng-model="content.stringO">
+        </p>
+        <h4 ng-if="reviewMode && !rs.get('action')">Old Content:</h4>
+        <p ng-if="reviewMode">{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}
         </p>
         <pub-iframe
             ng-model="content.stringO"
             ng-if="io">
-
         </pub-iframe>
     </div>
     <div ng-if="t === 'input'">
@@ -17,16 +20,18 @@
                ng-model="content.stringO"/>
     </div>
     <div ng-if="t === 'short'">
-        <p ng-class="{editableBox:fe, unEditableBox:!fe}"
-           contenteditable="{{fe}}"
+        <p ng-class="{editableBox:fe, unEditableBox:!fe}" ng-if="!reviewMode || !rs.get('action')"
+           contenteditable="{{!reviewMode ? fe : true}}"
            placeholder="{{ph}}"
            ng-model="content.stringO">
         </p>
+        <p ng-if="reviewMode">{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}
     </div>
     <div ng-if="t === 'select'">
-        <select ng-model="content.stringO"
+        <select ng-model="content.stringO" ng-if="!reviewMode || !rs.get('action')"
                 ng-options="opt.value as opt.label for opt in o">
         </select>
+        <p ng-if="reviewMode">{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}
     </div>
     <div ng-if="t === 'treatment-select'" class="treatment-select">
         <div>
@@ -48,17 +53,39 @@
         </select>
     </div>
     <div ng-if="t === 'checkbox'">
-        <span ng-repeat="checkbox in checkboxes">
-          <input
-              id="{{checkboxid}}-{{$index}}"
-              type="radio"
-              ng-model="content.stringO"
-              ng-value="checkbox"
-              ng-disabled="!fe"
-              ng-click="uncheck($event)"
-          >
-          <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
-        </span>
+        <div>
+            <br/>
+            <h4 ng-if="reviewMode && !objecttype && !rs.get('action')">New Content:</h4>
+            <div>
+                    <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || !rs.get('action')">
+                      <input
+                          id="{{checkboxid}}-{{$index}}"
+                          type="radio"
+                          ng-model="content.stringO"
+                          ng-value="checkbox"
+                          ng-disabled="!reviewMode ? !fe : false"
+                          ng-click="uncheck($event)"
+                          >
+                      <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
+                    </span>
+            </div>
+        </div>
+
+        <div ng-class="{'left-float': rs.get('mutation_effect')}">
+            <h4 ng-if="reviewMode && !objecttype && !rs.get('action')">Old Content:</h4>
+            <div>
+                <span ng-if="reviewMode && !objecttype" ng-repeat="checkbox in checkboxes" class="reviewedBG">
+                  <input
+                      id="{{checkboxid}}-{{$index}}-review"
+                      type="radio"
+                      ng-checked="(!rs.get('action') ? rs.get('lastReviewed') : content.stringO) === checkbox ? true : false"
+                      ng-disabled="true"
+                      >
+                  <label for="{{checkboxid}}-{{$index}}-review">{{checkbox}}</label>
+                </span>
+            </div>
+
+        </div>
     </div>
     <div ng-if="t === 's-checkbox'">
         <span ng-repeat="checkbox in checkboxes">

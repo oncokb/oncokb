@@ -354,6 +354,8 @@ angular.module('oncokbApp')
                     _.each(value, function(item, _key) {
                         model[key].set(_key, item);
                     });
+                } else if (key.indexOf('_review') !== -1) {
+                    model[key] = createMap(rootModel, value);
                 } else if (key.indexOf('_timeStamp') === -1) {
                     _.each(value, function(item, _key) {
                         _datum = setValue(rootModel, _datum, item, _key);
@@ -371,6 +373,18 @@ angular.module('oncokbApp')
                 console.log('Error value type.');
             }
             return model;
+        }
+
+        function createMap(rootModel, value) {
+            var _datum = rootModel.createMap();
+            _.each(value, function(item, _key) {
+                if (_.isObject(item)) {
+                    _datum.set(_key, createMap(rootModel, item));
+                } else {
+                    _datum.set(_key, item);
+                }
+            });
+            return _datum;
         }
 
         function createModel(model) {

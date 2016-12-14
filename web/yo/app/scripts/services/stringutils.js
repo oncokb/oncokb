@@ -864,26 +864,27 @@ angular.module('oncokbApp')
             return vusData;
         }
 
-        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands) {
+        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands, onlyReviewedContent) {
             var gene = {};
             var geneData = realtime;
 
             excludeObsolete = _.isBoolean(excludeObsolete) ? excludeObsolete : false;
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
-            excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : true;
+            excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : false;
+            onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
 
-            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments);
+            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments, onlyReviewedContent);
             gene.mutations = [];
             gene.curators = [];
             gene.transcripts = [];
             geneData.curators.asArray().forEach(function(e) {
                 var _curator = {};
-                _curator = combineData(_curator, e, ['name', 'email'], excludeObsolete, excludeComments);
+                _curator = combineData(_curator, e, ['name', 'email'], excludeObsolete, excludeComments, onlyReviewedContent);
                 gene.curators.push(_curator);
             });
             geneData.transcripts.asArray().forEach(function(e) {
                 var _transcript = {};
-                _transcript = combineData(_transcript, e, ['isoform_override', 'gene_name', 'dmp_refseq_id', 'ccds_id'], excludeComments);
+                _transcript = combineData(_transcript, e, ['isoform_override', 'gene_name', 'dmp_refseq_id', 'ccds_id'], excludeObsolete, excludeComments, onlyReviewedContent);
                 gene.transcripts.push(_transcript);
             });
             geneData.mutations.asArray().forEach(function(e) {
@@ -891,16 +892,16 @@ angular.module('oncokbApp')
                     var _mutation = {};
                     _mutation.tumors = [];
                     _mutation.effect = {};
-                    _mutation = combineData(_mutation, e, ['name', 'summary'], excludeObsolete, excludeComments);
+                    _mutation = combineData(_mutation, e, ['name', 'summary'], excludeObsolete, excludeComments, onlyReviewedContent);
                     // This is a weird way to do, but due to time constraint, this has to be implemented in this way.
                     // I assigned shortSummary estatus for oncogenic and oncogenic estatus to mutation effect,
                     // so there is no need to check excludeObsolete since I did outside of combinedata.
                     if (!(excludeObsolete && e.shortSummary_eStatus && e.shortSummary_eStatus.has('obsolete') && e.shortSummary_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false, excludeComments);
+                        _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false, excludeComments, onlyReviewedContent);
                     }
                     if (!(excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete);
-                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false, excludeComments);
+                        _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
+                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false, excludeComments, onlyReviewedContent);
                         _mutation.effect_uuid = e.effect_uuid ? e.effect_uuid.getText() : '';
                         _mutation.effect_review = getReview(e.effect_review);
                         // if(_mutation.effect && _mutation.effect.value) {
@@ -946,7 +947,7 @@ angular.module('oncokbApp')
                             if (!(excludeObsolete && e1.progImp_eStatus && e1.progImp_eStatus.has('obsolete') && e1.progImp_eStatus.get('obsolete') === 'true')) {
                                 selectedAttrs.push('progImp', 'shortProgImp');
                             }
-                            __tumor = combineData(__tumor, e1, selectedAttrs, excludeObsolete, excludeComments);
+                            __tumor = combineData(__tumor, e1, selectedAttrs, excludeObsolete, excludeComments, onlyReviewedContent);
 
                             // __tumor.cancerTypes =  __tumor.name.split(',').map(function(item) {
                             //     return {
@@ -962,7 +963,7 @@ angular.module('oncokbApp')
                             __tumor.interactAlts = {};
 
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
-                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments);
+                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
                                 __tumor.nccn_uuid = e1.nccn_uuid ? e1.nccn_uuid.getText() : '';
                                 __tumor.nccn_review = getReview(e1.nccn_review);
                             }
@@ -983,7 +984,7 @@ angular.module('oncokbApp')
                                 if (!(excludeObsolete && e2.name_eStatus && e2.name_eStatus.has('obsolete') && e2.name_eStatus.get('obsolete') === 'true')) {
                                     var ti = {};
 
-                                    ti = combineData(ti, e2, ['name', 'description', 'short'], excludeObsolete, excludeComments);
+                                    ti = combineData(ti, e2, ['name', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
                                     ti.status = getString(e2.types.get('status'));
                                     ti.type = getString(e2.types.get('type'));
                                     ti.treatments = [];
@@ -993,7 +994,7 @@ angular.module('oncokbApp')
                                         if (excludeObsolete && e3.name_eStatus && e3.name_eStatus.has('obsolete') && e3.name_eStatus.get('obsolete') === 'true') {
                                             return;
                                         }
-                                        treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeObsolete, excludeComments);
+                                        treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
                                         if (e3.name_eStatus.has('propagation')) {
                                             treatment.propagation = e3.name_eStatus.get('propagation');
                                         }
@@ -1005,15 +1006,15 @@ angular.module('oncokbApp')
 
                             e1.cancerTypes.asArray().forEach(function(e2) {
                                 var ct = {};
-                                ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeObsolete, excludeComments);
+                                ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeObsolete, excludeComments, onlyReviewedContent);
                                 __tumor.cancerTypes.push(ct);
                             });
 
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
-                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments);
+                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
                             }
 
-                            __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeObsolete, excludeComments);
+                            __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeObsolete, excludeComments, onlyReviewedContent);
                             _mutation.tumors.push(__tumor);
                         }
                     });
@@ -1024,8 +1025,9 @@ angular.module('oncokbApp')
             return gene;
         }
 
-        function combineData(object, model, keys, excludeObsolete, excludeComments) {
+        function combineData(object, model, keys, excludeObsolete, excludeComments, onlyReviewedContent) {
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
+            onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
 
             keys.forEach(function(e) {
                 if (!(excludeObsolete && model[e + '_eStatus'] && model[e + '_eStatus'].has('obsolete') && model[e + '_eStatus'].get('obsolete') === 'true')) {
@@ -1034,8 +1036,15 @@ angular.module('oncokbApp')
                         _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping) {
                             object[e][keyMapping] = model[e].get(keyMapping);
                         });
+                        if (model[e + '_uuid']) {
+                            object[e + '_uuid'] = model[e + '_uuid'].getText();
+                        }
                     } else {
-                        object[e] = getString(model[e].getText());
+                        if (onlyReviewedContent && model[e + '_review'].get('lastReviewed')) {
+                            object[e] = getString(model[e + '_review'].get('lastReviewed'));
+                        } else {
+                            object[e] = getString(model[e].getText());
+                        }
                         if (!excludeComments && model[e + '_comments']) {
                             object[e + '_comments'] = getComments(model[e + '_comments']);
                         }
@@ -1059,6 +1068,17 @@ angular.module('oncokbApp')
 
         function getReview(model) {
             var reviewObj = {};
+            var keys = model.keys();
+
+            keys.forEach(function(e) {
+                if (model.get(e)) {
+                    if (model.get(e).type === 'Map') {
+                        reviewObj[e] = getReview(model[e]);
+                    } else {
+                        reviewObj[e] = model.get(e);
+                    }
+                }
+            });
             return reviewObj;
         }
 
