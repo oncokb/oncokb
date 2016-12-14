@@ -139,7 +139,7 @@ public class SummaryUtils {
                     AlterationUtils.annotateAlteration(alteration, queryAlteration);
                 }
                 if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("missense_variant")) {
-                    List<Alteration> alternateAlleles = AlterationUtils.getAlleleAlterations(alteration);
+                    List<Alteration> alternateAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
 
                     // Special case for PDGFRA: don't match D842V as alternative allele
                     if (gene.getHugoSymbol().equals("PDGFRA") && alteration.getProteinStart() == 842) {
@@ -414,7 +414,7 @@ public class SummaryUtils {
         sb.append(geneStr + " " + altStr);
         sb.append(" has not been functionally or clinically validated.");
 
-        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAndRelevantAlterations(alteration));
 
         Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
         Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
@@ -1013,7 +1013,7 @@ public class SummaryUtils {
                 AlterationUtils.annotateAlteration(alteration, queryAlteration);
             }
             if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("missense_variant")) {
-                List<Alteration> alternateAlleles = AlterationUtils.getAlleleAlterations(alteration);
+                List<Alteration> alternateAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
 
                 // Send all allele tumor types treatment to pick up the unique one.
                 pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternateAlleles, MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));

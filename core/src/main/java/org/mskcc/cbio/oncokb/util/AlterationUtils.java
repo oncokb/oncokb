@@ -465,15 +465,28 @@ public final class AlterationUtils {
             alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
 
-        for (Alteration allele : alleles) {
-            if (isOncogenicAlteration(allele)) {
-                alleles.addAll(getOncogenicMutations(allele));
-                break;
-            }
-        }
         // Remove alteration itself
         alleles.remove(alteration);
         return filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
+    }
+
+    public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {
+        List<Alteration> alleles = getAlleleAlterations(alteration);
+        Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
+
+        if(oncogenicAllele!=null) {
+            alleles.addAll(AlterationUtils.getOncogenicMutations(oncogenicAllele));
+        }
+        return alleles;
+    }
+
+    public static Alteration findOncogenicAllele(List<Alteration> alleles) {
+        for (Alteration allele : alleles) {
+            if (isOncogenicAlteration(allele)) {
+                return allele;
+            }
+        }
+        return null;
     }
 
     public static List<Alteration> getRelevantAlterations(Alteration alteration) {

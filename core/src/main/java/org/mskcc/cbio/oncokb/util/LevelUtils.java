@@ -128,20 +128,21 @@ public class LevelUtils {
         List<LevelOfEvidence> convertLevels = Arrays.asList(LevelOfEvidence.LEVEL_0, LevelOfEvidence.LEVEL_1,
             LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A);
 
-        List<LevelOfEvidence> ignoreIndication = Arrays.asList(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_R2,
-            LevelOfEvidence.LEVEL_R3);
-
-        if (level == null || ignoreIndication.contains(level))
+        if (level == null)
             return null;
 
         if (convertLevels.contains(level)) {
             if (!sameIndication) {
-                if(level.equals(LevelOfEvidence.LEVEL_3A)) {
+                if (level.equals(LevelOfEvidence.LEVEL_3A)) {
                     return LevelOfEvidence.LEVEL_3B;
-                }else{
+                } else {
                     return LevelOfEvidence.LEVEL_2B;
                 }
             }
+        }
+
+        if (getResistanceLevels().contains(level) && !sameIndication) {
+            return null;
         }
 
         return level;
