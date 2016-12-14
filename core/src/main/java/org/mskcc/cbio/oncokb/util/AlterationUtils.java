@@ -338,9 +338,19 @@ public final class AlterationUtils {
     public static List<Alteration> excludeVUS(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
         Set<Alteration> VUS = new HashSet<>();
-        Set<Gene> allGenes = CacheUtils.getAllGenes();
+        Set<Gene> allGenes = new HashSet<>();
+        if(CacheUtils.isEnabled()) {
+            allGenes = CacheUtils.getAllGenes();
+        }else {
+            allGenes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
+        }
         for (Gene gene : allGenes) {
-            Set<Alteration> alts = CacheUtils.getVUS(gene.getEntrezGeneId());
+            Set<Alteration> alts = new HashSet<>();
+            if(CacheUtils.isEnabled()) {
+                alts = CacheUtils.getVUS(gene.getEntrezGeneId());
+            }else {
+                alts = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
+            }
             if (alts != null) {
                 VUS.addAll(alts);
             }
@@ -499,7 +509,7 @@ public final class AlterationUtils {
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {
         List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
-        
+
         alleles = AlterationUtils.excludeVUS(alleles);
         if (alleles.size() == 0) {
             return false;
@@ -559,7 +569,7 @@ public final class AlterationUtils {
 
         return inactivating || activating;
     }
-    
+
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {
         Set<Alteration> oncogenicMutations = new HashSet<>();
         Alteration alt = findAlteration(alteration.getGene(), "inactivating mutations");

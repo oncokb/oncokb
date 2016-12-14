@@ -455,7 +455,9 @@ public class EvidenceUtils {
         }
 
         for (Evidence evidence : evidences) {
-            result.get(evidence.getGene()).add(evidence);
+            if(result.containsKey(evidence.getGene())) {
+                result.get(evidence.getGene()).add(evidence);
+            }
         }
         return result;
     }
