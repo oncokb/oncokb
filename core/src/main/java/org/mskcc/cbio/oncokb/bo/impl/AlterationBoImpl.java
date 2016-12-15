@@ -37,7 +37,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     @Override
     public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, List<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
-        
+
         if(gene != null && consequence != null) {
             for(String cons: consequence.getTerm().split("\\s*,\\s*")) {
                 VariantConsequence tmpConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(cons);
@@ -55,7 +55,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         }
-        
+
         return new ArrayList<>(result);
     }
 
@@ -73,6 +73,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.add(matchedAlt);
         }
         if (alteration.getConsequence() != null) {
+            if(alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+                return new ArrayList<>();
+            }
             // we need to develop better way to match mutation
             if (alteration.getProteinStart() != null) {
                 List<Alteration> alts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
@@ -180,7 +183,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         }
-        
+
         if (inactivating) {
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "inactivating mutations");
             if (alt != null) {
@@ -194,7 +197,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 alterations.add(alt);
             }
         }
-        
+
         // Add all mutations
 //        Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "all mutations");
 //        if (alt != null) {
