@@ -420,15 +420,15 @@ public class SummaryUtils {
 
         if (highestOncogenicity != null && (highestOncogenicity.getOncogenic().equals("1") || highestOncogenicity.getOncogenic().equals("2"))) {
 
-            sb.append(" However, the ");
-            sb.append(getGeneMutationNameInVariantSummary(alteration.getGene(), allelesToStr(highestAlts)));
+            sb.append(" However, ");
+            sb.append(alteration.getGene().getHugoSymbol() + " " + allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is"));
             if (highestOncogenicity.getOncogenic().equals("1")) {
                 sb.append(" known to be " + highestOncogenicity.getDescription().toLowerCase());
             } else {
                 sb.append(" " + highestOncogenicity.getDescription().toLowerCase());
             }
-            sb.append(", and therefore " + altStr + " is considered likely oncogenic.");
+            sb.append(", and therefore " + alteration.getGene().getHugoSymbol() + " " + alteration.getAlteration() + " is considered likely oncogenic.");
         }
 
         return sb.toString();
