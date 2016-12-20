@@ -138,60 +138,65 @@ public class SummaryUtils {
                     alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
                     AlterationUtils.annotateAlteration(alteration, queryAlteration);
                 }
-                if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("missense_variant")) {
-                    List<Alteration> alternateAlleles = AlterationUtils.getAlleleAlterations(alteration);
+                if (alteration.getConsequence() != null) {
+                    if (alteration.getConsequence().getTerm().equals("missense_variant")) {
+                        List<Alteration> alternateAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
 
-                    // Special case for PDGFRA: don't match D842V as alternative allele
-                    if (gene.getHugoSymbol().equals("PDGFRA") && alteration.getProteinStart() == 842) {
-                        Alteration specialAllele = AlterationUtils.findAlteration(gene, "D842V");
-                        alternateAlleles.remove(specialAllele);
-                    }
-
-                    // Special case for AKT1 E17K alleles
-                    if (gene.getHugoSymbol().equals("AKT1") && alteration.getProteinStart().equals(17)) {
-                        OncoTreeType breastCancer = TumorTypeUtils.getOncoTreeCancerType("Breast Cancer");
-                        OncoTreeType ovarianCancer = TumorTypeUtils.getOncoTreeCancerType("Ovarian Cancer");
-
-                        if (relevantTumorTypes.contains(breastCancer)) {
-                            tumorTypeSummary = "There is compelling clinical data supporting the use of AKT-targeted inhibitors such as AZD-5363 in patients with AKT1 E17K mutant breast cancer. Therefore, [[gene]] [[mutation]] [[mutant]] breast cancer is considered likely sensitive to the same inhibitors.";
-                        } else if (relevantTumorTypes.contains(ovarianCancer)) {
-                            tumorTypeSummary = "There is compelling clinical data supporting the use of AKT-targeted inhibitors such as AZD-5363 in patients with AKT1 E17K mutant ovarian cancer. Therefore, [[gene]] [[mutation]] [[mutant]] ovarian cancer is considered likely sensitive to the same inhibitors.";
-                        } else {
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E17K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                        // Special case for PDGFRA: don't match D842V as alternative allele
+                        if (gene.getHugoSymbol().equals("PDGFRA") && alteration.getProteinStart() == 842) {
+                            Alteration specialAllele = AlterationUtils.findAlteration(gene, "D842V");
+                            alternateAlleles.remove(specialAllele);
                         }
-                    } else if (gene.getHugoSymbol().equals("ARAF") && alteration.getProteinStart().equals(214)) {
-                        // Special case for ARAF S214A/F
-                        OncoTreeType histiocytosis = TumorTypeUtils.getOncoTreeCancerType("Histiocytosis");
-                        OncoTreeType NSCLC = TumorTypeUtils.getOncoTreeCancerType("Non-Small Cell Lung Cancer");
 
-                        if (relevantTumorTypes.contains(histiocytosis)) {
-                            tumorTypeSummary = "There is compelling clinical data supporting the use of sorafenib in patients with ARAF S214A mutant non-Langherhans cell histiocytic disease. Therefore, [[gene]] [[mutation]] [[mutant]] non-Langherhans cell histiocytic disease is considered likely sensitive to this inhibitor.";
-                        } else if (relevantTumorTypes.contains(NSCLC)) {
-                            tumorTypeSummary = "There is compelling clinical data supporting the use of sorafenib in patients with ARAF S214F mutant lung cancer. Therefore, [[gene]] [[mutation]] [[mutant]] lung cancer is considered likely sensitive to this inhibitor.";
-                        } else {
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "S214A")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                        }
-                    } else if (gene.getHugoSymbol().equals("MTOR") && alteration.getProteinStart().equals(2014)) {
-                        // Special case for MTOR E2014K
-                        OncoTreeType bladderCancer = TumorTypeUtils.getOncoTreeCancerType("Bladder Cancer");
-                        if (relevantTumorTypes.contains(bladderCancer)) {
-                            tumorTypeSummary = "There is compelling clinical data supporting the use of everolimus in patients with MTOR E2014K mutant bladder cancer. Therefore, [[gene]] [[mutation]] [[mutant]] bladder cancer is considered likely sensitive to the same inhibitor.";
-                        } else {
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E2014K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                        }
-                    } else {
-                        for (Alteration allele : alternateAlleles) {
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
-                            if (tumorTypeSummary != null) {
-                                break;
+                        // Special case for AKT1 E17K alleles
+                        if (gene.getHugoSymbol().equals("AKT1") && alteration.getProteinStart().equals(17)) {
+                            OncoTreeType breastCancer = TumorTypeUtils.getOncoTreeCancerType("Breast Cancer");
+                            OncoTreeType ovarianCancer = TumorTypeUtils.getOncoTreeCancerType("Ovarian Cancer");
+
+                            if (relevantTumorTypes.contains(breastCancer)) {
+                                tumorTypeSummary = "There is compelling clinical data supporting the use of AKT-targeted inhibitors such as AZD-5363 in patients with AKT1 E17K mutant breast cancer. Therefore, [[gene]] [[mutation]] [[mutant]] breast cancer is considered likely sensitive to the same inhibitors.";
+                            } else if (relevantTumorTypes.contains(ovarianCancer)) {
+                                tumorTypeSummary = "There is compelling clinical data supporting the use of AKT-targeted inhibitors such as AZD-5363 in patients with AKT1 E17K mutant ovarian cancer. Therefore, [[gene]] [[mutation]] [[mutant]] ovarian cancer is considered likely sensitive to the same inhibitors.";
+                            } else {
+                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E17K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
                             }
+                        } else if (gene.getHugoSymbol().equals("ARAF") && alteration.getProteinStart().equals(214)) {
+                            // Special case for ARAF S214A/F
+                            OncoTreeType histiocytosis = TumorTypeUtils.getOncoTreeCancerType("Histiocytosis");
+                            OncoTreeType NSCLC = TumorTypeUtils.getOncoTreeCancerType("Non-Small Cell Lung Cancer");
 
-                            // Get Other Tumor Types summary
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                            if (tumorTypeSummary != null) {
-                                break;
+                            if (relevantTumorTypes.contains(histiocytosis)) {
+                                tumorTypeSummary = "There is compelling clinical data supporting the use of sorafenib in patients with ARAF S214A mutant non-Langherhans cell histiocytic disease. Therefore, [[gene]] [[mutation]] [[mutant]] non-Langherhans cell histiocytic disease is considered likely sensitive to this inhibitor.";
+                            } else if (relevantTumorTypes.contains(NSCLC)) {
+                                tumorTypeSummary = "There is compelling clinical data supporting the use of sorafenib in patients with ARAF S214F mutant lung cancer. Therefore, [[gene]] [[mutation]] [[mutant]] lung cancer is considered likely sensitive to this inhibitor.";
+                            } else {
+                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "S214A")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                            }
+                        } else if (gene.getHugoSymbol().equals("MTOR") && alteration.getProteinStart().equals(2014)) {
+                            // Special case for MTOR E2014K
+                            OncoTreeType bladderCancer = TumorTypeUtils.getOncoTreeCancerType("Bladder Cancer");
+                            if (relevantTumorTypes.contains(bladderCancer)) {
+                                tumorTypeSummary = "There is compelling clinical data supporting the use of everolimus in patients with MTOR E2014K mutant bladder cancer. Therefore, [[gene]] [[mutation]] [[mutant]] bladder cancer is considered likely sensitive to the same inhibitor.";
+                            } else {
+                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E2014K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                            }
+                        } else {
+                            for (Alteration allele : alternateAlleles) {
+                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+                                if (tumorTypeSummary != null) {
+                                    break;
+                                }
+
+                                // Get Other Tumor Types summary
+                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                                if (tumorTypeSummary != null) {
+                                    break;
+                                }
                             }
                         }
+                    } else if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+                        // No summary for synonymous variant
+                        return "";
                     }
                 }
             }
@@ -228,7 +233,11 @@ public class SummaryUtils {
 
     public static String unknownOncogenicSummary(Gene gene) {
         String str = gene == null ? "variant" : (gene.getHugoSymbol() + " alteration");
-        return "The oncogenic activity of this " + str + " is unknown and it has not been specifically investigated by the OncoKB team.";
+        return "The oncogenic activity of this " + str + " is unknown as it has not specifically been investigated by the OncoKB team.";
+    }
+
+    public static String synonymousSummary() {
+        return "This is a synonymous mutation and is not annotated by OncoKB.";
     }
 
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
@@ -246,8 +255,10 @@ public class SummaryUtils {
                     AlterationUtils.annotateAlteration(alteration, queryAlteration);
                 }
 
-                if (AlterationUtils.hasAlleleAlterations(alteration)) {
-                    sb.append(" " + alleleSummary(alteration));
+                if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+                    sb.append(synonymousSummary());
+                } else if (AlterationUtils.hasAlleleAlterations(alteration)) {
+                    sb.append(alleleSummary(alteration));
                 } else if (AlterationUtils.excludeVUS(alterations).size() == 0) {
                     List<Evidence> evidences = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.VUS), null);
                     Date lastEdit = null;
@@ -265,7 +276,7 @@ public class SummaryUtils {
                         sb.append(unknownOncogenicSummary(gene));
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-                        sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this variant was available.");
+                        sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.");
                     }
                 } else {
                     sb.append(unknownOncogenicSummary(gene));
@@ -408,13 +419,11 @@ public class SummaryUtils {
     public static String alleleSummary(Alteration alteration) {
         StringBuilder sb = new StringBuilder();
 
-        String geneStr = alteration.getGene().getHugoSymbol();
-        String altStr = alteration.getAlteration();
+        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration());
 
-        sb.append(geneStr + " " + altStr);
-        sb.append(" has not been functionally or clinically validated.");
+        sb.append("The " + altStr + " has not been functionally or clinically validated.");
 
-        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAndRelevantAlterations(alteration));
 
         Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
         Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
@@ -423,53 +432,15 @@ public class SummaryUtils {
         if (highestOncogenicity != null && (highestOncogenicity.getOncogenic().equals(Oncogenicity.YES) || highestOncogenicity.getOncogenic().equals(Oncogenicity.LIKELY))) {
 
             sb.append(" However, ");
-            sb.append(allelesToStr(highestAlts));
+            sb.append(alteration.getGene().getHugoSymbol() + " " + allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is"));
             if (highestOncogenicity.getOncogenic().equals(Oncogenicity.YES)) {
                 sb.append(" known to be " + highestOncogenicity.getOncogenic().toLowerCase());
             } else {
                 sb.append(" " + highestOncogenicity.getOncogenic().toLowerCase());
             }
-            sb.append(", and therefore " + geneStr + " " + altStr + " is considered likely oncogenic.");
+            sb.append(", and therefore " + alteration.getGene().getHugoSymbol() + " " + alteration.getAlteration() + " is considered likely oncogenic.");
         }
-
-        // Detemin whether allele alterations have treatments
-//        List<Evidence> treatmentsEvis = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), null);
-//        LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(treatmentsEvis));
-//        Set<Treatment> treatments = new HashSet<>();
-//        Set<Alteration> highestLevelTreatmentRelatedAlts = new HashSet<>();
-//
-//        // If there are no treatments for the alleles, try to find whether there are alleles are oncogenic or likely oncogenic
-//        if (treatmentsEvis != null && treatmentsEvis.size() > 0) {
-//            for (Evidence evidence : treatmentsEvis) {
-//                if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(highestLevel)) {
-//                    treatments.addAll(evidence.getTreatments());
-//                    for (Alteration alt : evidence.getAlterations()) {
-//                        if (alleles.contains(alt)) {
-//                            highestLevelTreatmentRelatedAlts.add(alt);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (treatments.size() > 0) {
-//            String treatmentStr = "";
-//            if (treatments.size() > 1) {
-//                treatmentStr = "multiple targeted therapies";
-//            } else {
-//                Set<String> drugs = new HashSet<>();
-//                for (Drug drug : treatments.iterator().next().getDrugs()) {
-//                    drugs.add(drug.getDrugName());
-//                }
-//                treatmentStr = StringUtils.join(drugs, " + ");
-//            }
-//
-//            sb.append(" " + geneStr + " " + allelesToStr(highestLevelTreatmentRelatedAlts) + " mutant tumors have demonstrated sensitivity to "
-//                + treatmentStr + ", therefore "
-//                + geneStr + " " + altStr + " is considered likely sensitive to"
-//                + (treatments.size() > 1 ? " these therapies." : " this therapy."));
-//        }
 
         return sb.toString();
     }
@@ -851,7 +822,7 @@ public class SummaryUtils {
 
         if (queryAlteration.toLowerCase().contains("deletion")
             || queryAlteration.toLowerCase().contains("amplification")
-            || queryAlteration.toLowerCase().contains("fusion")) {
+            || queryAlteration.toLowerCase().contains("fusions")) {
             appendThe = false;
         }
         return appendThe;
@@ -860,7 +831,7 @@ public class SummaryUtils {
     private static String getTumorTypeSummaryFromEvidences(List<Evidence> evidences) {
         String summary = null;
         if (evidences != null && evidences.size() > 0) {
-            // Sort all tumor type summaries, the more specific tumor type summary will be picked. 
+            // Sort all tumor type summaries, the more specific tumor type summary will be picked.
             Collections.sort(evidences, new Comparator<Evidence>() {
                 public int compare(Evidence x, Evidence y) {
                     if (x.getAlterations() == null) {
@@ -900,7 +871,8 @@ public class SummaryUtils {
             || alteration.getConsequence().getTerm().equals("inframe_insertion")))
             || StringUtils.containsIgnoreCase(queryAlteration, "indel")
             || StringUtils.containsIgnoreCase(queryAlteration, "dup")
-            || StringUtils.containsIgnoreCase(queryAlteration, "delins")
+            || StringUtils.containsIgnoreCase(queryAlteration, "del")
+            || StringUtils.containsIgnoreCase(queryAlteration, "ins")
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
         } else {
@@ -932,7 +904,8 @@ public class SummaryUtils {
                 || alteration.getConsequence().getTerm().equals("inframe_insertion")))
                 || StringUtils.containsIgnoreCase(queryAlteration, "indel")
                 || StringUtils.containsIgnoreCase(queryAlteration, "dup")
-                || StringUtils.containsIgnoreCase(queryAlteration, "delins")
+                || StringUtils.containsIgnoreCase(queryAlteration, "del")
+                || StringUtils.containsIgnoreCase(queryAlteration, "ins")
                 || StringUtils.containsIgnoreCase(queryAlteration, "splice")
                 ) {
                 sb.append(queryAlteration + " altered");
@@ -1012,27 +985,32 @@ public class SummaryUtils {
                 alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
                 AlterationUtils.annotateAlteration(alteration, queryAlteration);
             }
-            if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("missense_variant")) {
-                List<Alteration> alternateAlleles = AlterationUtils.getAlleleAlterations(alteration);
+            if (alteration.getConsequence() != null) {
+                if (alteration.getConsequence().getTerm().equals("missense_variant")) {
+                    List<Alteration> alternateAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
 
-                // Send all allele tumor types treatment to pick up the unique one.
-                pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternateAlleles, MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
-                if (pickedTreatment != null) {
-                    tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, (Alteration) CollectionUtils.intersection(alternateAlleles, new ArrayList<>(pickedTreatment.getAlterations())).iterator().next(), relevantTumorTypes);
-                    if (tumorTypeSummary != null) {
-                        // Only keep the first sentence for alternate allele
-                        tumorTypeSummary = tumorTypeSummary.split("\\.")[0] + ".";
-                    }
-                } else {
-                    // If all alternate alleles don't have any treatment, check whether they have tumor type summaries.
-                    for (Alteration allele : alternateAlleles) {
-                        tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, allele, relevantTumorTypes);
+                    // Send all allele tumor types treatment to pick up the unique one.
+                    pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternateAlleles, MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
+                    if (pickedTreatment != null) {
+                        tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, (Alteration) CollectionUtils.intersection(alternateAlleles, new ArrayList<>(pickedTreatment.getAlterations())).iterator().next(), relevantTumorTypes);
                         if (tumorTypeSummary != null) {
                             // Only keep the first sentence for alternate allele
                             tumorTypeSummary = tumorTypeSummary.split("\\.")[0] + ".";
-                            break;
+                        }
+                    } else {
+                        // If all alternate alleles don't have any treatment, check whether they have tumor type summaries.
+                        for (Alteration allele : alternateAlleles) {
+                            tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, allele, relevantTumorTypes);
+                            if (tumorTypeSummary != null) {
+                                // Only keep the first sentence for alternate allele
+                                tumorTypeSummary = tumorTypeSummary.split("\\.")[0] + ".";
+                                break;
+                            }
                         }
                     }
+                } else if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+                    // No summary for synonymous variant
+                    return "";
                 }
             }
         }

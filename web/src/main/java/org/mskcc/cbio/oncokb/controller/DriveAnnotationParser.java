@@ -299,8 +299,6 @@ public class DriveAnnotationParser {
                     alteration.setName(displayName);
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                } else {
-                    alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
                 setOncogenic(gene, alteration, oncogenic, doe, oncogenic_uuid);
@@ -404,17 +402,19 @@ public class DriveAnnotationParser {
             List<Evidence> evidences = new ArrayList<>();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
-            if (evidences.size() == 0) {
+            if (evidences.isEmpty()) {
                 Evidence evidence = new Evidence();
                 evidence.setGene(gene);
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                evidence.setKnownEffect(oncogenic.getOncogenic());
+                if(oncogenic != null){
+                    evidence.setKnownEffect(oncogenic.getOncogenic());
+                }
                 evidence.setDescription(doe);
                 evidence.setUuid(uuid);
                 setDocuments(doe, evidence);
                 evidenceBo.save(evidence);
-            } else if (oncogenic.equals(Oncogenicity.YES) || oncogenic.equals(Oncogenicity.LIKELY)) {
+            } else if (Oncogenicity.compare(oncogenic, Oncogenicity.getByLevel(evidences.get(0).getKnownEffect())) > 0) {
                 evidences.get(0).setKnownEffect(oncogenic.getOncogenic());
                 evidences.get(0).setDescription(doe);
                 setDocuments(doe, evidences.get(0));
