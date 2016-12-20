@@ -40,8 +40,8 @@ public class CacheUtils {
     // Cache data from database
     private static Set<Gene> genes = new HashSet<>();
     private static Set<Drug> drugs = new HashSet<>();
-    private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences 
-    private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations 
+    private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences
+    private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations
 
     private static Observer variantSummaryObserver = new Observer() {
         @Override
@@ -159,7 +159,7 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 relevantEvidences.remove(entrezGeneId);
-                //Remove gene irrelevant evidences 
+                //Remove gene irrelevant evidences
                 relevantEvidences.remove(-1);
             } else if (operation.get("cmd") == "reset") {
                 relevantEvidences.clear();
@@ -215,7 +215,7 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(VUSObserver);
             GeneObservable.getInstance().addObserver(numbersObserver);
             GeneObservable.getInstance().addObserver(drugsObserver);
-            
+
             if(status.equals("enabled")) {
                 System.out.println("Observer: " + MainUtils.getTimestampDiff(current));
                 current = MainUtils.getCurrentTimestamp();
@@ -253,20 +253,20 @@ public class CacheUtils {
                     setVUS(entry.getKey(), entry.getValue());
                 }
                 System.out.println("Cache all VUSs: " + MainUtils.getTimestampDiff(current));
-                current = MainUtils.getCurrentTimestamp();
-
-                allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-                allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
-
-                System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current));
-                current = MainUtils.getCurrentTimestamp();
-
-                HotspotUtils.getHotspots();
-                System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current));
-                current = MainUtils.getCurrentTimestamp();
             }else{
                 System.out.println("CacheUtil is disabled.");
             }
+            current = MainUtils.getCurrentTimestamp();
+
+            allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
+            allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
+
+            System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
+
+            HotspotUtils.getHotspots();
+            System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -432,7 +432,7 @@ public class CacheUtils {
             List<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
             List<Alteration> mappedAlts = new ArrayList<>();
             Set<Alteration> geneAlts = alterations.get(entrezGeneId);
-            
+
             // Need to keep the order of mappedAltsIds
             for(Integer mappedAlt : mappedAltsIds) {
                 for (Alteration alteration : geneAlts) {
@@ -441,7 +441,7 @@ public class CacheUtils {
                     }
                 }
             }
-            
+
             return mappedAlts;
         } else {
             return new ArrayList<>();
@@ -514,10 +514,10 @@ public class CacheUtils {
         }
         return genes;
     }
-    
+
     public static void setAllAlterations() {
         List<Alteration> allAlterations = ApplicationContextSingleton.getAlterationBo().findAll();
-        
+
         for(Alteration alteration : allAlterations) {
             Gene gene = alteration.getGene();
             if(!alterations.containsKey(gene.getEntrezGeneId())) {
@@ -526,7 +526,7 @@ public class CacheUtils {
             alterations.get(gene.getEntrezGeneId()).add(alteration);
         }
     }
-    
+
     public static Set<Drug> getAllDrugs() {
         if (drugs.size() == 0) {
             drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
@@ -608,7 +608,7 @@ public class CacheUtils {
             return false;
         }
     }
-    
+
     private static void cacheAllEvidencesByGenes() {
         Map<Gene, Set<Evidence>> mappedEvidence =
             EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(

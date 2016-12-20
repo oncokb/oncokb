@@ -394,6 +394,11 @@ module.exports = function(grunt) {
                     cwd: '<%= oncokb.app %>/components/bootstrap-chosen/',
                     src: ['chosen-sprite.png', 'chosen-sprite@2x.png'],
                     dest: '<%= oncokb.dist %>/styles'
+                }, {
+                    expand: true,
+                    cwd: '<%= oncokb.app %>/',
+                    src: 'data/config.json',
+                    dest: '<%= oncokb.dist %>'
                 }]
             },
             styles: {

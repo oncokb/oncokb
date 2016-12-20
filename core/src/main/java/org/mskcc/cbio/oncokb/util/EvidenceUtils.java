@@ -357,6 +357,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             Evidence tmpEvidence = new Evidence(evidence);
+            Boolean flag = true;
             if (CollectionUtils.intersection(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes).isEmpty()) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
                     if (tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
@@ -365,9 +366,17 @@ public class EvidenceUtils {
                     } else if (tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
                         tmpEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
                     }
+
+                    // Don't include any resistance evidence if tumor type is not matched.
+                    if (LevelUtils.getResistanceLevels().contains(tmpEvidence.getLevelOfEvidence())) {
+                        flag = false;
+                    }
                 }
             }
-            tmpEvidences.add(tmpEvidence);
+
+            if (flag) {
+                tmpEvidences.add(tmpEvidence);
+            }
         }
         return tmpEvidences;
     }
@@ -455,7 +464,9 @@ public class EvidenceUtils {
         }
 
         for (Evidence evidence : evidences) {
-            result.get(evidence.getGene()).add(evidence);
+            if (result.containsKey(evidence.getGene())) {
+                result.get(evidence.getGene()).add(evidence);
+            }
         }
         return result;
     }
@@ -763,8 +774,20 @@ public class EvidenceUtils {
             // Attach evidence if query doesn't contain any alteration and has alleles.
             if ((query.getAlterations() == null || query.getAlterations().isEmpty() || AlterationUtils.excludeVUS(query.getGene(), query.getAlterations()).size() == 0) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
                 // Get oncogenic and mutation effect evidences
-                Set<Alteration> alleles = new HashSet<>(query.getAlleles());
-                List<Evidence> oncogenics = EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null);
+                List<Alteration> alleles = query.getAlleles();
+                List<Alteration> allelesAndRelevantAlterations = new ArrayList<>();
+                Set<Alteration> oncogenicMutations = new HashSet<>();
+
+                allelesAndRelevantAlterations.addAll(alleles);
+
+                Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
+
+                if (oncogenicAllele != null) {
+                    oncogenicMutations = AlterationUtils.getOncogenicMutations(oncogenicAllele);
+                    allelesAndRelevantAlterations.addAll(oncogenicMutations);
+                }
+
+                List<Evidence> oncogenics = EvidenceUtils.getEvidence(allelesAndRelevantAlterations, Collections.singleton(EvidenceType.ONCOGENIC), null);
                 Oncogenicity highestOncogenic = MainUtils.findHighestOncogenicByEvidences(new HashSet<>(oncogenics));
                 if (highestOncogenic != null) {
                     Evidence recordMatchHighestOncogenicity = null;
@@ -794,7 +817,7 @@ public class EvidenceUtils {
 
                 for (Evidence evidence : EvidenceUtils.getEvidenceBasedOnHighestOncogenicity(new HashSet<Evidence>(oncogenics))) {
                     for (Alteration alt : evidence.getAlterations()) {
-                        if (alleles.contains(alt)) {
+                        if (allelesAndRelevantAlterations.contains(alt)) {
                             altsWithHighestOncogenicity.add(alt);
                         }
                     }
@@ -817,20 +840,24 @@ public class EvidenceUtils {
                     query.getEvidences().add(mutationEffect);
                 }
 
-                // Get treatment evidences
+                // Get alternate allele treatment evidences, only match sensitive treatments
                 List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+                if (oncogenicMutations != null) {
+                    alleleEvidences.addAll(EvidenceUtils.getEvidence(new ArrayList<>(oncogenicMutations), MainUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels()));
+                }
+
                 List<Evidence> alleleEvidencesCopy = new ArrayList<>();
                 if (alleleEvidences != null) {
-                    LevelOfEvidence highestLevelFromEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(alleleEvidences));
-                    if (highestLevelFromEvidence != null && LevelUtils.getPublicLevels().contains(highestLevelFromEvidence)) {
-                        alleleEvidences = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), Collections.singleton(highestLevelFromEvidence));
-                        for (Evidence evidence : alleleEvidences) {
-                            Evidence tmpEvidence = new Evidence(evidence);
-                            tmpEvidence.setLevelOfEvidence(LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0));
+                    for (Evidence evidence : alleleEvidences) {
+                        Evidence tmpEvidence = new Evidence(evidence);
+                        LevelOfEvidence levelOfEvidence = LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0);
+                        if (levelOfEvidence != null) {
+                            tmpEvidence.setLevelOfEvidence(levelOfEvidence);
                             alleleEvidencesCopy.add(tmpEvidence);
                         }
-                        query.getEvidences().addAll(alleleEvidencesCopy);
                     }
+
+                    query.getEvidences().addAll(alleleEvidencesCopy);
                 }
             }
 

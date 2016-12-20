@@ -1,10 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -24,10 +21,10 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String geneSummary;
     private String variantSummary;
     private String tumorTypeSummary;
-    private Set<IndicatorQueryTreatment> treatments = new HashSet<>();
+    private List<IndicatorQueryTreatment> treatments = new ArrayList<>();
     private String dataVersion;
     private String lastUpdate;
-    
+
     public IndicatorQueryResp() {
     }
 
@@ -127,11 +124,11 @@ public class IndicatorQueryResp implements java.io.Serializable {
         this.tumorTypeSummary = tumorTypeSummary;
     }
 
-    public Set<IndicatorQueryTreatment> getTreatments() {
+    public List<IndicatorQueryTreatment> getTreatments() {
         return treatments;
     }
 
-    public void setTreatments(Set<IndicatorQueryTreatment> treatments) {
+    public void setTreatments(List<IndicatorQueryTreatment> treatments) {
         this.treatments = treatments;
     }
 
