@@ -162,7 +162,7 @@ public class IndicatorUtils {
                 Set<Alteration> oncogenicMutations = null;
 
                 alleleAndRelevantAlterations.addAll(alleles);
-                if(oncogenicAllele!=null) {
+                if (oncogenicAllele != null) {
                     oncogenicMutations = AlterationUtils.getOncogenicMutations(oncogenicAllele);
                     alleleAndRelevantAlterations.addAll(oncogenicMutations);
                 }
@@ -170,13 +170,13 @@ public class IndicatorUtils {
                 Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleleAndRelevantAlterations), Collections.singleton(EvidenceType.ONCOGENIC), null))));
                 treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                     EvidenceUtils.convertEvidenceLevel(
-                    EvidenceUtils.getEvidence(new ArrayList<>(alleles),
-                        MainUtils.getSensitiveTreatmentEvidenceTypes(),
-                        (levels != null ?
-                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
+                        EvidenceUtils.getEvidence(new ArrayList<>(alleles),
+                            MainUtils.getSensitiveTreatmentEvidenceTypes(),
+                            (levels != null ?
+                                new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
+                                    LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
 
-                if(oncogenicMutations != null) {
+                if (oncogenicMutations != null) {
                     treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.convertEvidenceLevel(
                             EvidenceUtils.getEvidence(new ArrayList<>(oncogenicMutations),
@@ -189,7 +189,7 @@ public class IndicatorUtils {
                 indicatorQuery.setOncogenic(oncogenicity == null ? "" : oncogenicity.getDescription());
             }
 
-            if(treatmentEvidences != null) {
+            if (treatmentEvidences != null) {
                 if (highestLevelOnly) {
                     Set<Evidence> filteredEvis = new HashSet<>();
                     // Get highest sensitive evidences
@@ -203,26 +203,27 @@ public class IndicatorUtils {
                     treatmentEvidences = filteredEvis;
                 }
                 if (treatmentEvidences != null) {
-                    Set<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
+                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
 
                     indicatorQuery.setTreatments(treatments);
-                    highestLevels = findHighestLevel(treatments);
+                    highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
                 }
             }
 
             // This is special case for KRAS wildtype. May need to come up with a better plan for this.
-            if (gene != null && gene.getHugoSymbol().equals("KRAS") && query.getAlteration() != null
+            if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
+                && query.getAlteration() != null
                 && StringUtils.containsIgnoreCase(query.getAlteration(), "wildtype")) {
-                if(oncoTreeTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
+                if (oncoTreeTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
                     indicatorQuery.setGeneSummary("RAS (KRAS/NRAS) which is wildtype (not mutated) in this sample, encodes an upstream activator of the pro-oncogenic MAP- and PI3-kinase pathways and is mutated in approximately 40% of late stage colorectal cancers.");
                     indicatorQuery.setVariantSummary("The absence of a mutation in the RAS genes is clinically important because it expands approved treatments available to treat this tumor. RAS status in stage IV colorectal cancer influences patient responses to the anti-EGFR antibody therapies cetuximab and panitumumab.");
                     indicatorQuery.setTumorTypeSummary("These drugs are FDA-approved for the treatment of KRAS wildtype colorectal tumors together with chemotherapy or alone following progression through standard chemotherapy.");
-                }else {
+                } else {
                     indicatorQuery.setVariantSummary("");
                     indicatorQuery.setTumorTypeSummary("");
-                    indicatorQuery.setTreatments(new HashSet<IndicatorQueryTreatment>());
+                    indicatorQuery.setTreatments(new ArrayList<IndicatorQueryTreatment>());
                     indicatorQuery.setHighestResistanceLevel("");
                     indicatorQuery.setHighestSensitiveLevel("");
                 }
@@ -236,10 +237,22 @@ public class IndicatorUtils {
         return indicatorQuery;
     }
 
-    private static Set<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
-        Set<IndicatorQueryTreatment> treatments = new HashSet<>();
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
+        List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
-            for (Evidence evidence : evidences) {
+            List<Evidence> sortedEvidence = new ArrayList<>(evidences);
+
+            Collections.sort(sortedEvidence, new Comparator<Evidence>() {
+                public int compare(Evidence e1, Evidence e2) {
+                    if (e1.getId() == null)
+                        return 1;
+                    if (e2.getId() == null)
+                        return -1;
+                    return e1.getId() - e2.getId();
+                }
+            });
+
+            for (Evidence evidence : sortedEvidence) {
                 Set<String> pmids = new HashSet<>();
                 for (Article article : evidence.getArticles()) {
                     pmids.add(article.getPmid());
