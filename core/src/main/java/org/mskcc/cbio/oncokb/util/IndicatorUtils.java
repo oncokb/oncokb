@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
@@ -208,6 +209,22 @@ public class IndicatorUtils {
                     highestLevels = findHighestLevel(treatments);
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
+                }
+            }
+
+            // This is special case for KRAS wildtype. May need to come up with a better plan for this.
+            if (gene != null && gene.getHugoSymbol().equals("KRAS") && query.getAlteration() != null
+                && StringUtils.containsIgnoreCase(query.getAlteration(), "wildtype")) {
+                if(oncoTreeTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
+                    indicatorQuery.setGeneSummary("RAS (KRAS/NRAS) which is wildtype (not mutated) in this sample, encodes an upstream activator of the pro-oncogenic MAP- and PI3-kinase pathways and is mutated in approximately 40% of late stage colorectal cancers.");
+                    indicatorQuery.setVariantSummary("The absence of a mutation in the RAS genes is clinically important because it expands approved treatments available to treat this tumor. RAS status in stage IV colorectal cancer influences patient responses to the anti-EGFR antibody therapies cetuximab and panitumumab.");
+                    indicatorQuery.setTumorTypeSummary("These drugs are FDA-approved for the treatment of KRAS wildtype colorectal tumors together with chemotherapy or alone following progression through standard chemotherapy.");
+                }else {
+                    indicatorQuery.setVariantSummary("");
+                    indicatorQuery.setTumorTypeSummary("");
+                    indicatorQuery.setTreatments(new HashSet<IndicatorQueryTreatment>());
+                    indicatorQuery.setHighestResistanceLevel("");
+                    indicatorQuery.setHighestSensitiveLevel("");
                 }
             }
         } else {
