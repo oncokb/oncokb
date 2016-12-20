@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,10 +16,12 @@ public class BiologicalVariant {
     private Alteration variant = null;
     private String mutationEffect = null;
     private Set<String> mutationEffectPmids = new HashSet<>();
+    private Set<ArticleAbstract> mutationEffectAbstracts = new HashSet<>();
     private String oncogenic = null;
     private Set<String> oncogenicPmids = new HashSet<>();
+    private Set<ArticleAbstract> oncogenicAbstracts = new HashSet<>();
 
-    
+
     /**
      **/
     @ApiModelProperty(value = "")
@@ -85,39 +86,59 @@ public class BiologicalVariant {
         this.oncogenicPmids = oncogenicPmids;
     }
 
+    @ApiModelProperty(value = "")
+    @JsonProperty("mutationEffectAbstracts")
+    public Set<ArticleAbstract> getMutationEffectAbstracts() {
+        return mutationEffectAbstracts;
+    }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BiologicalVariant biologicalVariant = (BiologicalVariant) o;
-        return Objects.equals(variant, biologicalVariant.variant) &&
-            Objects.equals(mutationEffect, biologicalVariant.mutationEffect) &&
-            Objects.equals(mutationEffectPmids, biologicalVariant.mutationEffectPmids) &&
-            Objects.equals(oncogenic, biologicalVariant.oncogenic) &&
-            Objects.equals(oncogenicPmids, biologicalVariant.oncogenicPmids);
+    public void setMutationEffectAbstracts(Set<ArticleAbstract> mutationEffectAbstracts) {
+        this.mutationEffectAbstracts = mutationEffectAbstracts;
+    }
+
+    @ApiModelProperty(value = "")
+    @JsonProperty("oncogenicAbstracts")
+    public Set<ArticleAbstract> getOncogenicAbstracts() {
+        return oncogenicAbstracts;
+    }
+
+    public void setOncogenicAbstracts(Set<ArticleAbstract> oncogenicAbstracts) {
+        this.oncogenicAbstracts = oncogenicAbstracts;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(variant, mutationEffect, mutationEffectPmids, oncogenic, oncogenicPmids);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BiologicalVariant that = (BiologicalVariant) o;
+
+        if (variant != null ? !variant.equals(that.variant) : that.variant != null) return false;
+        if (mutationEffect != null ? !mutationEffect.equals(that.mutationEffect) : that.mutationEffect != null)
+            return false;
+        if (mutationEffectPmids != null ? !mutationEffectPmids.equals(that.mutationEffectPmids) : that.mutationEffectPmids != null)
+            return false;
+        if (mutationEffectAbstracts != null ? !mutationEffectAbstracts.equals(that.mutationEffectAbstracts) : that.mutationEffectAbstracts != null)
+            return false;
+        if (oncogenic != null ? !oncogenic.equals(that.oncogenic) : that.oncogenic != null) return false;
+        if (oncogenicPmids != null ? !oncogenicPmids.equals(that.oncogenicPmids) : that.oncogenicPmids != null)
+            return false;
+        if (oncogenicAbstracts != null ? !oncogenicAbstracts.equals(that.oncogenicAbstracts) : that.oncogenicAbstracts != null)
+            return false;
+
+        return true;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class BiologicalVariant {\n");
-
-        sb.append("  variant: ").append(variant).append("\n");
-        sb.append("  mutationEffect: ").append(mutationEffect).append("\n");
-        sb.append("  mutationEffectPmids: ").append(mutationEffectPmids).append("\n");
-        sb.append("  oncogenic: ").append(oncogenic).append("\n");
-        sb.append("  oncogenicPmids: ").append(oncogenicPmids).append("\n");
-        sb.append("}\n");
-        return sb.toString();
+        return "BiologicalVariant{" +
+            "variant=" + variant +
+            ", mutationEffect='" + mutationEffect + '\'' +
+            ", mutationEffectPmids=" + mutationEffectPmids +
+            ", mutationEffectAbstracts=" + mutationEffectAbstracts +
+            ", oncogenic='" + oncogenic + '\'' +
+            ", oncogenicPmids=" + oncogenicPmids +
+            ", oncogenicAbstracts=" + oncogenicAbstracts +
+            '}';
     }
 }

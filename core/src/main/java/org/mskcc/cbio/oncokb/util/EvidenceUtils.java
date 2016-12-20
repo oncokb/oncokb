@@ -514,6 +514,22 @@ public class EvidenceUtils {
         return result;
     }
 
+    public static Set<ArticleAbstract> getAbstracts(Set<Evidence> evidences) {
+        Set<ArticleAbstract> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            for (Article article : evidence.getArticles()) {
+                if(article.getAbstractContent() != null) {
+                    ArticleAbstract articleAbstract = new ArticleAbstract();
+                    articleAbstract.setAbstractContent(article.getAbstractContent());
+                    articleAbstract.setLink(article.getLink());
+                    result.add(articleAbstract);
+                }
+            }
+        }
+        return result;
+    }
+
     public static Set<String> getDrugs(Set<Evidence> evidences) {
         Set<String> result = new HashSet<>();
 

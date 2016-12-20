@@ -15,7 +15,7 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     private Boolean fdaApproved;
     private LevelOfEvidence level;
     private Set<String> pmids = new HashSet<String>(0);
-    private Set<String> abstracts = new HashSet<String>(0);
+    private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
 
     public IndicatorQueryTreatment() {
     }
@@ -60,11 +60,11 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
         this.pmids = pmids;
     }
 
-    public Set<String> getAbstracts() {
+    public Set<ArticleAbstract> getAbstracts() {
         return abstracts;
     }
 
-    public void setAbstracts(Set<String> abstracts) {
+    public void setAbstracts(Set<ArticleAbstract> abstracts) {
         this.abstracts = abstracts;
     }
 }

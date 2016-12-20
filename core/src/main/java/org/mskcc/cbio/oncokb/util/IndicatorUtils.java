@@ -254,8 +254,17 @@ public class IndicatorUtils {
 
             for (Evidence evidence : sortedEvidence) {
                 Set<String> pmids = new HashSet<>();
+                Set<ArticleAbstract> abstracts = new HashSet<>();
                 for (Article article : evidence.getArticles()) {
-                    pmids.add(article.getPmid());
+                    if(article.getPmid() != null) {
+                        pmids.add(article.getPmid());
+                    }
+                    if(article.getAbstractContent() != null) {
+                        ArticleAbstract articleAbstract = new ArticleAbstract();
+                        articleAbstract.setAbstractContent(article.getAbstractContent());
+                        articleAbstract.setLink(article.getLink());
+                        abstracts.add(articleAbstract);
+                    }
                 }
                 for (Treatment treatment : evidence.getTreatments()) {
                     IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
@@ -263,6 +272,7 @@ public class IndicatorUtils {
                     indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
                     indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
                     indicatorQueryTreatment.setPmids(pmids);
+                    indicatorQueryTreatment.setAbstracts(abstracts);
                     treatments.add(indicatorQueryTreatment);
                 }
             }
