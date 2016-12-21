@@ -848,9 +848,11 @@ public class DriveAnnotationParser {
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc == null) {
                     doc = NcbiEUtils.readPubmedArticle(pmid);
-                    articleBo.save(doc);
+                    if(doc != null) {
+                        articleBo.save(doc);
+                        docs.add(doc);
+                    }
                 }
-                docs.add(doc);
             }
             start = m.end();
         }
