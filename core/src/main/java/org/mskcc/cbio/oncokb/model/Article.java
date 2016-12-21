@@ -3,6 +3,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
@@ -26,6 +27,7 @@ public class Article implements java.io.Serializable {
     private String abstractContent;
     private String link;
 
+    @JsonProperty("abstract")
     public String getAbstractContent() {
         return abstractContent;
     }

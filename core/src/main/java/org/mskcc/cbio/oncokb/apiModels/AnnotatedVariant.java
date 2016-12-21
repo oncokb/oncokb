@@ -11,6 +11,7 @@ public class AnnotatedVariant {
     String oncogenicity;
     String mutationEffect;
     String mutationEffectPmids;
+    String mutationEffectAbstracts;
 
     public String getGene() {
         return gene;
@@ -52,11 +53,20 @@ public class AnnotatedVariant {
         this.mutationEffectPmids = mutationEffectPmids;
     }
 
-    public AnnotatedVariant(String gene, String variant, String oncogenicity, String mutationEffect, String mutationEffectPmids) {
+    public String getMutationEffectAbstracts() {
+        return mutationEffectAbstracts;
+    }
+
+    public void setMutationEffectAbstracts(String mutationEffectAbstracts) {
+        this.mutationEffectAbstracts = mutationEffectAbstracts;
+    }
+
+    public AnnotatedVariant(String gene, String variant, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts) {
         this.gene = gene;
         this.variant = variant;
         this.oncogenicity = oncogenicity;
         this.mutationEffect = mutationEffect;
         this.mutationEffectPmids = mutationEffectPmids;
+        this.mutationEffectAbstracts = mutationEffectAbstracts;
     }
 }
