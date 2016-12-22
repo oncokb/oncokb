@@ -7,6 +7,5 @@ public final class GeneralImporter {
 
     public static void main(String[] args) throws Exception {
         VariantConsequenceImporter.main(args);
-        PiHelperDrugImporter.main(args);
     }
 }
