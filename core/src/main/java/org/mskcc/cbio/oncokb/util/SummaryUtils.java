@@ -8,6 +8,8 @@ import org.mskcc.cbio.oncokb.model.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -84,7 +86,7 @@ public class SummaryUtils {
         Boolean ttSummaryNotGenerated = true;
         String tumorTypeSummary = null;
 
-        queryTumorType = queryTumorType != null ? StringUtils.isAllUpperCase(queryTumorType) ? queryTumorType : queryTumorType.toLowerCase() : null;
+        queryTumorType = convertTumorTypeNameInSummary(queryTumorType);
 
         if (queryAlteration != null) {
             queryAlteration = queryAlteration.trim();
@@ -1053,6 +1055,34 @@ public class SummaryUtils {
         }
 
         return pickedTreatment;
+    }
+
+    private static String convertTumorTypeNameInSummary(String summary) {
+        if(summary != null) {
+            String[] specialWords = {"Wilms"};
+            List<String> specialWordsList = Arrays.asList(specialWords);
+            String lowerCaseStr = summary.toLowerCase();
+
+            StringBuilder sb = new StringBuilder(lowerCaseStr);
+
+            for(String item : specialWordsList) {
+                Integer startIndex = summary.indexOf(item);
+                if(startIndex != -1) {
+                    sb.replace(startIndex, startIndex+item.length(), item);
+                }
+            }
+
+            // Find all uppercased string
+            Pattern p = Pattern.compile("(\\b[A-Z]+\\b)");
+            Matcher m = p.matcher(summary);
+
+            while (m.find()) {
+                sb.replace(m.start(), m.end(), m.group(1));
+            }
+
+            summary = sb.toString();
+        }
+        return summary;
     }
 
     public static boolean stringContainsItemFromList(String inputString, String[] items) {
