@@ -24,6 +24,9 @@ public class IndicatorUtils {
         if (query == null) {
             return indicatorQuery;
         }
+
+        source = source == null ? "oncokb" : source;
+
         // Deal with fusion without primary gene
         // TODO: support entrezGeneId fusion
         if (query.getHugoSymbol() != null

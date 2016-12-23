@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Hongxin on 12/5/16.
@@ -35,8 +34,8 @@ public class SummaryUtilsTest {
                 String variantSummary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), variantQuery.getQueryAlteration(), false);
                 String tumorTypeSummary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), variantQuery.getQueryAlteration(), variantQuery.getAlterations(), variantQuery.getQueryTumorType(), new HashSet<>(variantQuery.getTumorTypes()));
                 assertEquals("Gene summary on " + variantQuery.getGene() + " " + variantQuery.getQueryAlteration() + " " + variantQuery.getQueryTumorType(), query.get("geneSummary"), geneSummary);
-                assertTrue(variantSummary.equals(query.get("variantSummary")));
-                assertTrue(tumorTypeSummary.equals(query.get("tumorTypeSummary")));
+                assertEquals("Variant summary on " + variantQuery.getGene() + " " + variantQuery.getQueryAlteration() + " " + variantQuery.getQueryTumorType(), query.get("variantSummary"), variantSummary);
+                assertEquals("TumorType summary on " + variantQuery.getGene() + " " + variantQuery.getQueryAlteration() + " " + variantQuery.getQueryTumorType(), query.get("tumorTypeSummary"), tumorTypeSummary);
             }
         }
     }
