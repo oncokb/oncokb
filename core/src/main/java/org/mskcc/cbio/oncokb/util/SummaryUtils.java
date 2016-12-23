@@ -946,11 +946,13 @@ public class SummaryUtils {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
         Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
 
-        for (Evidence evidence : evidences) {
-            if (evidence.getAlterations().equals(pickedTreatment.getAlterations())) {
-                tumorTypeSummary = getTumorTypeSummaryFromEvidences(Collections.singletonList(evidence));
-                if (tumorTypeSummary != null) {
-                    break;
+        if (pickedTreatment != null && evidences != null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getAlterations().equals(pickedTreatment.getAlterations())) {
+                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(Collections.singletonList(evidence));
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
                 }
             }
         }
@@ -1058,17 +1060,17 @@ public class SummaryUtils {
     }
 
     private static String convertTumorTypeNameInSummary(String summary) {
-        if(summary != null) {
+        if (summary != null) {
             String[] specialWords = {"Wilms"};
             List<String> specialWordsList = Arrays.asList(specialWords);
             String lowerCaseStr = summary.toLowerCase();
 
             StringBuilder sb = new StringBuilder(lowerCaseStr);
 
-            for(String item : specialWordsList) {
+            for (String item : specialWordsList) {
                 Integer startIndex = summary.indexOf(item);
-                if(startIndex != -1) {
-                    sb.replace(startIndex, startIndex+item.length(), item);
+                if (startIndex != -1) {
+                    sb.replace(startIndex, startIndex + item.length(), item);
                 }
             }
 

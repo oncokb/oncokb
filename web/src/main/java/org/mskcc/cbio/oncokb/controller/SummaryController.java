@@ -84,6 +84,12 @@ public class SummaryController {
 
         if (query != null && query.getGene() != null) {
             switch (summaryType) {
+                case "gene":
+                    summary = SummaryUtils.geneSummary(query.getGene());
+                    break;
+                case "oncogenic":
+                    summary = SummaryUtils.oncogenicSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), false);
+                    break;
                 case "variant":
                     summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
