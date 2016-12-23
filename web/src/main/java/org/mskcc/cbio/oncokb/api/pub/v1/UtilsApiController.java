@@ -118,18 +118,19 @@ public class UtilsApiController implements UtilsApi {
         for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
             Gene gene = entry.getKey();
             for (ClinicalVariant clinicalVariant : entry.getValue()) {
-                actionableGenes.add(new ActionableGene(
-                    gene.getHugoSymbol(), clinicalVariant.getVariant().getName(),
-                    getCancerType(clinicalVariant.getOncoTreeType()),
-                    clinicalVariant.getLevel(),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ")));
                 Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
                 List<String> abstracts = new ArrayList<>();
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
                     abstracts.add(articleAbstract.getAbstractContent());
                 }
-                MainUtils.listToString(abstracts, "; ");
+
+                actionableGenes.add(new ActionableGene(
+                    gene.getHugoSymbol(), clinicalVariant.getVariant().getName(),
+                    getCancerType(clinicalVariant.getOncoTreeType()),
+                    clinicalVariant.getLevel(),
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "),
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", "),
+                    MainUtils.listToString(abstracts, "; ")));
             }
         }
 
