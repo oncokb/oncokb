@@ -146,9 +146,15 @@ public final class AlterationUtils {
                                     break;
                             }
                         } else {
-                            p = Pattern.compile("_splice");
+                            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?_splice");
                             m = p.matcher(proteinChange);
-                            if (m.find()) {
+                            if (m.matches()) {
+                                start = Integer.valueOf(m.group(1));
+                                if (m.group(3) != null) {
+                                    end = Integer.valueOf(m.group(3));
+                                } else {
+                                    end = start;
+                                }
                                 consequence = "splice_region_variant";
                             }
                         }

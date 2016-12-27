@@ -1,9 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.Oncogenicity;
 import org.mskcc.cbio.oncokb.model.Query;
-import org.testng.annotations.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

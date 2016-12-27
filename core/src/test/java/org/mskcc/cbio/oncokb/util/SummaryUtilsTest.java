@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.VariantQuery;
-import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
