@@ -482,8 +482,10 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestMutationEffect(result);
-        } else {
+        } else if(result.size() == 1){
             return result.iterator().next();
+        } else{
+            return null;
         }
     }
 
@@ -498,8 +500,10 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestOncogenic(result);
-        } else {
+        } else if(result.size() == 1){
             return result.iterator().next();
+        } else{
+            return null;
         }
     }
 
@@ -508,7 +512,25 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             for (Article article : evidence.getArticles()) {
-                result.add(article.getPmid());
+                if(article.getPmid() != null) {
+                    result.add(article.getPmid());
+                }
+            }
+        }
+        return result;
+    }
+
+    public static Set<ArticleAbstract> getAbstracts(Set<Evidence> evidences) {
+        Set<ArticleAbstract> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            for (Article article : evidence.getArticles()) {
+                if(article.getAbstractContent() != null) {
+                    ArticleAbstract articleAbstract = new ArticleAbstract();
+                    articleAbstract.setAbstractContent(article.getAbstractContent());
+                    articleAbstract.setLink(article.getLink());
+                    result.add(articleAbstract);
+                }
             }
         }
         return result;
@@ -521,7 +543,9 @@ public class EvidenceUtils {
             for (Treatment treatment : evidence.getTreatments()) {
                 Set<String> drugsInTreatment = new HashSet<>();
                 for (Drug drug : treatment.getDrugs()) {
-                    drugsInTreatment.add(drug.getDrugName());
+                    if(drug.getDrugName() != null) {
+                        drugsInTreatment.add(drug.getDrugName());
+                    }
                 }
                 result.add(StringUtils.join(drugsInTreatment, " + "));
             }

@@ -24,7 +24,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * @author jgao
- * 
+ *
  * 1. Additional Inforamtion is not parsed.
  */
 @Controller
@@ -50,7 +50,7 @@ public class DriveAnnotationParser {
             parseGene(jsonObj, jsonArray);
         }
     }
-   
+
     private static void parseVUS(Gene gene, JSONArray vus) {
         System.out.println("##    Variants of unknown significance");
         if (gene != null && vus != null) {
@@ -299,7 +299,7 @@ public class DriveAnnotationParser {
                     alteration.setName(displayName);
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                } 
+                }
                 alterations.add(alteration);
                 setOncogenic(gene, alteration, oncogenic, doe, oncogenic_uuid);
             }
@@ -371,7 +371,7 @@ public class DriveAnnotationParser {
                 : null)
             : null;
     }
-    
+
     private static Oncogenicity getOncogenicity(JSONObject mutationObj) {
         Oncogenicity oncogenic = null;
         if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
@@ -610,7 +610,7 @@ public class DriveAnnotationParser {
                 nctIds.add(nctId);
             }
         }
-        // Couldnot find out the reason why designed to remove all previous trials. 
+        // Couldnot find out the reason why designed to remove all previous trials.
 //        List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.CLINICAL_TRIAL), Collections.singleton(oncoTreeType));
 //
 //        for (Evidence eve : evidences) {
@@ -823,7 +823,7 @@ public class DriveAnnotationParser {
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         Pattern pmidPattern = Pattern.compile("PMIDs?:\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
-        Pattern abstractPattern = Pattern.compile("\\(\\s*Abstract\\s*:([^\\)]*);\\s*\\)", Pattern.CASE_INSENSITIVE);
+        Pattern abstractPattern = Pattern.compile("\\(\\s*Abstract\\s*:([^\\)]*);?\\s*\\)", Pattern.CASE_INSENSITIVE);
         Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(str);
         int start = 0;
@@ -848,9 +848,11 @@ public class DriveAnnotationParser {
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc == null) {
                     doc = NcbiEUtils.readPubmedArticle(pmid);
-                    articleBo.save(doc);
+                    if(doc != null) {
+                        articleBo.save(doc);
+                        docs.add(doc);
+                    }
                 }
-                docs.add(doc);
             }
             start = m.end();
         }

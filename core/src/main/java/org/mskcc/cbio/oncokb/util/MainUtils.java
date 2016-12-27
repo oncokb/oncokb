@@ -409,6 +409,8 @@ public class MainUtils {
                 variant.setMutationEffect(mutationEffect == null ? null : mutationEffect.getMutationEffect());
                 variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
                 variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
+                variant.setOncogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.ONCOGENIC)));
+                variant.setMutationEffectAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.MUTATION_EFFECT)));
                 variants.add(variant);
             }
 //                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Created biological annotations.");
@@ -471,6 +473,7 @@ public class MainUtils {
                         variant.setLevel(__entry.getKey().getLevel());
                         variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
                         variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
+                        variant.setDrugAbstracts(EvidenceUtils.getAbstracts(__entry.getValue()));
                         variants.add(variant);
                     }
                 }
