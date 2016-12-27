@@ -67,6 +67,35 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     public void setAbstracts(Set<String> abstracts) {
         this.abstracts = abstracts;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof IndicatorQueryTreatment)) return false;
+
+        IndicatorQueryTreatment treatment = (IndicatorQueryTreatment) o;
+
+        if (getDrugs() != null ? !getDrugs().equals(treatment.getDrugs()) : treatment.getDrugs() != null) return false;
+        if (getApprovedIndications() != null ? !getApprovedIndications().equals(treatment.getApprovedIndications()) : treatment.getApprovedIndications() != null)
+            return false;
+        if (getFdaApproved() != null ? !getFdaApproved().equals(treatment.getFdaApproved()) : treatment.getFdaApproved() != null)
+            return false;
+        if (getLevel() != treatment.getLevel()) return false;
+        if (getPmids() != null ? !getPmids().equals(treatment.getPmids()) : treatment.getPmids() != null) return false;
+        return getAbstracts() != null ? getAbstracts().equals(treatment.getAbstracts()) : treatment.getAbstracts() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getDrugs() != null ? getDrugs().hashCode() : 0;
+        result = 31 * result + (getApprovedIndications() != null ? getApprovedIndications().hashCode() : 0);
+        result = 31 * result + (getFdaApproved() != null ? getFdaApproved().hashCode() : 0);
+        result = 31 * result + (getLevel() != null ? getLevel().hashCode() : 0);
+        result = 31 * result + (getPmids() != null ? getPmids().hashCode() : 0);
+        result = 31 * result + (getAbstracts() != null ? getAbstracts().hashCode() : 0);
+        return result;
+    }
 }
 
 

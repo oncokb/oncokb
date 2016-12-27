@@ -62,8 +62,6 @@ public class IndicatorController {
             query.setProteinEnd(Integer.parseInt(proteinEnd));
         }
 
-        source = source == null ? "oncokb" : source;
-
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
         return IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
     }
