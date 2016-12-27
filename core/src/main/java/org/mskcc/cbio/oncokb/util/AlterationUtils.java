@@ -102,67 +102,67 @@ public final class AlterationUtils {
                     consequence = "inframe_deletion";
                 }
             } else {
-                p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
+                p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(_)?splice");
                 m = p.matcher(proteinChange);
                 if (m.matches()) {
                     start = Integer.valueOf(m.group(1));
-                    end = Integer.valueOf(m.group(2));
-                    String v = m.group(3);
-                    switch (v) {
-                        case "mis":
-                            consequence = "missense_variant";
-                            break;
-                        case "ins":
-                            consequence = "inframe_insertion";
-                            break;
-                        case "del":
-                            consequence = "inframe_deletion";
-                            break;
-                        case "fs":
-                            consequence = "frameshift_variant";
-                            break;
-                        case "trunc":
-                            consequence = "feature_truncation";
-                            break;
-                        case "mut":
-                            consequence = "any";
+                    if (m.group(3) != null) {
+                        end = Integer.valueOf(m.group(3));
+                    } else {
+                        end = start;
                     }
+                    consequence = "splice_region_variant";
                 } else {
-                    p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
+                    p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
                     m = p.matcher(proteinChange);
                     if (m.matches()) {
-                        ref = m.group(1);
-                        start = Integer.valueOf(m.group(2));
-                        end = start;
-
-                        consequence = "frameshift_variant";
+                        start = Integer.valueOf(m.group(1));
+                        end = Integer.valueOf(m.group(2));
+                        String v = m.group(3);
+                        switch (v) {
+                            case "mis":
+                                consequence = "missense_variant";
+                                break;
+                            case "ins":
+                                consequence = "inframe_insertion";
+                                break;
+                            case "del":
+                                consequence = "inframe_deletion";
+                                break;
+                            case "fs":
+                                consequence = "frameshift_variant";
+                                break;
+                            case "trunc":
+                                consequence = "feature_truncation";
+                                break;
+                            case "mut":
+                                consequence = "any";
+                        }
                     } else {
-                        p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
+                        p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
                         m = p.matcher(proteinChange);
                         if (m.matches()) {
                             ref = m.group(1);
                             start = Integer.valueOf(m.group(2));
                             end = start;
-                            String v = m.group(3);
-                            switch (v) {
-                                case "ins":
-                                    consequence = "inframe_insertion";
-                                    break;
-                                case "del":
-                                    consequence = "inframe_deletion";
-                                    break;
-                            }
+
+                            consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?_splice");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
-                                start = Integer.valueOf(m.group(1));
-                                if (m.group(3) != null) {
-                                    end = Integer.valueOf(m.group(3));
-                                } else {
-                                    end = start;
+                                ref = m.group(1);
+                                start = Integer.valueOf(m.group(2));
+                                end = start;
+                                String v = m.group(3);
+                                switch (v) {
+                                    case "ins":
+                                        consequence = "inframe_insertion";
+                                        break;
+                                    case "del":
+                                        consequence = "inframe_deletion";
+                                        break;
                                 }
-                                consequence = "splice_region_variant";
                             }
                         }
                     }
@@ -334,16 +334,16 @@ public final class AlterationUtils {
         List<Alteration> result = new ArrayList<>();
         Set<Alteration> VUS = new HashSet<>();
         Set<Gene> allGenes = new HashSet<>();
-        if(CacheUtils.isEnabled()) {
+        if (CacheUtils.isEnabled()) {
             allGenes = CacheUtils.getAllGenes();
-        }else {
+        } else {
             allGenes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         }
         for (Gene gene : allGenes) {
             Set<Alteration> alts = new HashSet<>();
-            if(CacheUtils.isEnabled()) {
+            if (CacheUtils.isEnabled()) {
                 alts = CacheUtils.getVUS(gene.getEntrezGeneId());
-            }else {
+            } else {
                 alts = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
             }
             if (alts != null) {
@@ -470,7 +470,7 @@ public final class AlterationUtils {
         List<Alteration> alleles = getAlleleAlterations(alteration);
         Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
 
-        if(oncogenicAllele!=null) {
+        if (oncogenicAllele != null) {
             alleles.addAll(AlterationUtils.getOncogenicMutations(oncogenicAllele));
         }
         return alleles;
