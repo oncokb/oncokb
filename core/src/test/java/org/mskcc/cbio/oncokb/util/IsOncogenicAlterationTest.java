@@ -10,7 +10,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.testng.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 /**
  * Created by Hongxin on 12/14/16.
@@ -39,6 +39,6 @@ public class IsOncogenicAlterationTest {
     public void test_is_oncogenic() {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         Alteration alteration = AlterationUtils.findAlteration(gene, alterationName);
-        assertEquals(AlterationUtils.isOncogenicAlteration(alteration), isOncogenic);
+        assertEquals(isOncogenic, AlterationUtils.isOncogenicAlteration(alteration));
     }
 }
