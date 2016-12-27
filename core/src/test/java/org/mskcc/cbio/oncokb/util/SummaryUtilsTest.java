@@ -1,7 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.VariantQuery;
 
 import java.io.BufferedReader;
@@ -9,38 +10,54 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Hongxin on 12/5/16.
  */
+@RunWith(Parameterized.class)
 public class SummaryUtilsTest {
-    private String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.txt";
+    private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.txt";
+
+    private String gene;
+    private String variant;
+    private String tumorType;
+    private String geneSummary;
+    private String variantSummary;
+    private String tumorTypeSummary;
+
+    public SummaryUtilsTest(String gene, String variant, String tumorType, String geneSummary, String variantSummary, String tumorTypeSummary) {
+        this.gene = gene;
+        this.variant = variant;
+        this.tumorType = tumorType;
+        this.geneSummary = geneSummary;
+        this.variantSummary = variantSummary;
+        this.tumorTypeSummary = tumorTypeSummary;
+    }
 
     @Test
     public void testSummary() throws Exception {
-        List<Map<String, String>> queries = importer();
-
-        if (queries != null) {
-            for (Map<String, String> query : queries) {
-                VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
-                    query.get("gene"), query.get("variant"), query.get("tumorType"), null,
-                    null, null, "cbioportal").get(0);
-                String geneSummary = SummaryUtils.geneSummary(variantQuery.getGene());
-                String variantSummary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), variantQuery.getQueryAlteration(), false);
-                String tumorTypeSummary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), variantQuery.getQueryAlteration(), variantQuery.getAlterations(), variantQuery.getQueryTumorType(), new HashSet<>(variantQuery.getTumorTypes()));
-                assertEquals("Gene summary on " + variantQuery.getGene() + " " + variantQuery.getQueryAlteration() + " " + variantQuery.getQueryTumorType(), query.get("geneSummary"), geneSummary);
-                assertEquals("Variant summary on " + variantQuery.getGene() + " " + variantQuery.getQueryAlteration() + " " + variantQuery.getQueryTumorType(), query.get("variantSummary"), variantSummary);
-                assertEquals("TumorType summary on " + variantQuery.getGene() + " " + variantQuery.getQueryAlteration() + " " + variantQuery.getQueryTumorType(), query.get("tumorTypeSummary"), tumorTypeSummary);
-            }
-        }
+        VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
+            gene, variant, tumorType, null,
+            null, null, "cbioportal").get(0);
+        String _geneSummary = SummaryUtils.geneSummary(variantQuery.getGene());
+        String _variantSummary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), variantQuery.getQueryAlteration(), false);
+        String _tumorTypeSummary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), variantQuery.getQueryAlteration(), variantQuery.getAlterations(), variantQuery.getQueryTumorType(), new HashSet<>(variantQuery.getTumorTypes()));
+        assertEquals(geneSummary, _geneSummary);
+        assertEquals(variantSummary, _variantSummary);
+        assertEquals(tumorTypeSummary, _tumorTypeSummary);
     }
 
-    private List<Map<String, String>> importer() throws IOException {
+    @Parameterized.Parameters
+    public static Collection<String[]> getParameters() throws IOException {
+        return importer();
+    }
+
+    private static List<String[]> importer() throws IOException {
         if (TUMOR_TYPE_SUMMARY_EXAMPLES_PATH == null) {
             System.out.println("Please specify the testing file path");
             return null;
@@ -51,7 +68,7 @@ public class SummaryUtilsTest {
         BufferedReader buf = new BufferedReader(reader);
         String line = buf.readLine();
 
-        List<Map<String, String>> queries = new ArrayList<>();
+        List<String[]> queries = new ArrayList<>();
         int count = 0;
         while (line != null) {
             if (!line.startsWith("#") && line.trim().length() > 0) {
@@ -66,13 +83,7 @@ public class SummaryUtilsTest {
                     String geneSummary = parts[3];
                     String variantSummary = parts[4];
                     String tumorTypeSummary = parts[5];
-                    Map<String, String> query = new HashedMap();
-                    query.put("gene", gene);
-                    query.put("variant", variant);
-                    query.put("tumorType", tumorType);
-                    query.put("geneSummary", geneSummary);
-                    query.put("variantSummary", variantSummary);
-                    query.put("tumorTypeSummary", tumorTypeSummary);
+                    String[] query = {gene, variant, tumorType, geneSummary, variantSummary, tumorTypeSummary};
                     queries.add(query);
                     count++;
                 } catch (Exception e) {

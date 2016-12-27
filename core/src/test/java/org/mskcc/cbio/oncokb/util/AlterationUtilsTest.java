@@ -33,7 +33,7 @@ public class AlterationUtilsTest {
     }
 
     @Parameterized.Parameters
-    public static Collection<String[]> addedNumbers() {
+    public static Collection<String[]> getParameters() {
         return Arrays.asList(
             new String[][]{
                 // any

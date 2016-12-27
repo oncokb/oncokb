@@ -425,12 +425,12 @@ public class SummaryUtils {
         Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
         Set<Alteration> highestAlts = (Set<Alteration>) map.get("alterations");
 
-        if (highestOncogenicity != null && (highestOncogenicity.getOncogenic().equals(Oncogenicity.YES) || highestOncogenicity.getOncogenic().equals(Oncogenicity.LIKELY))) {
+        if (highestOncogenicity != null && (highestOncogenicity.equals(Oncogenicity.YES) || highestOncogenicity.equals(Oncogenicity.LIKELY))) {
 
             sb.append(" However, ");
             sb.append(alteration.getGene().getHugoSymbol() + " " + allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is"));
-            if (highestOncogenicity.getOncogenic().equals(Oncogenicity.YES)) {
+            if (highestOncogenicity.equals(Oncogenicity.YES)) {
                 sb.append(" known to be " + highestOncogenicity.getOncogenic().toLowerCase());
             } else {
                 sb.append(" " + highestOncogenicity.getOncogenic().toLowerCase());
