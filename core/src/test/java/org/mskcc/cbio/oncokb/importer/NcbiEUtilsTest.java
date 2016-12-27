@@ -5,42 +5,22 @@
  */
 package org.mskcc.cbio.oncokb.importer;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mskcc.cbio.oncokb.util.NcbiEUtils;
-import static org.testng.Assert.*;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
- *
  * @author jgao
  */
 public class NcbiEUtilsTest {
-    
+
     public NcbiEUtilsTest() {
     }
 
-    @Test(groups = {"remote"})
+    @Test()
     public void testReadPmid() {
         String pmid = "2549426";
         NcbiEUtils.readPubmedArticle(pmid);
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @BeforeMethod
-    public void setUpMethod() throws Exception {
-    }
-
-    @AfterMethod
-    public void tearDownMethod() throws Exception {
     }
 }

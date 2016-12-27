@@ -14,7 +14,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
 		<spring.version>3.2.10.RELEASE</spring.version>
     </properties>
-    
+
     <dependencies>
         <!-- Spring core & mvc -->
 		<dependency>
@@ -43,7 +43,7 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-                
+
         <!-- jackson -->
         <dependency>
                 <groupId>org.codehaus.jackson</groupId>
@@ -56,7 +56,7 @@
                 <artifactId>dom4j</artifactId>
                 <version>1.6.1</version>
         </dependency>
-     
+
 	 <dependency>
 	  <groupId>javax.sql</groupId>
 	  <artifactId>jdbc-stdext</artifactId>
@@ -71,12 +71,6 @@
 	  <groupId>mysql</groupId>
 	  <artifactId>mysql-connector-java</artifactId>
 	  <version>5.1.6</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>org.testng</groupId>
-	  <artifactId>testng</artifactId>
-	  <version>6.5.2</version>
-	  <scope>test</scope>
 	 </dependency>
 	 <dependency>
           <groupId>org.apache.commons</groupId>
@@ -116,7 +110,7 @@
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-gmail</artifactId>
             <version>v1-rev25-1.19.1</version>
-        </dependency> 
+        </dependency>
          <dependency>
            <groupId>jaxen</groupId>
            <artifactId>jaxen</artifactId>
@@ -159,8 +153,14 @@
             <artifactId>gson</artifactId>
             <version>2.3</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
           <!-- any other plugins -->
@@ -182,7 +182,7 @@
           </plugin>
         </plugins>
     </build>
-    
+
     <repositories>
 		<repository>
 			<id>springsource-milestones</id>
