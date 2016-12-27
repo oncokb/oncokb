@@ -27,8 +27,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * @author jgao
- *
- * 1. Additional Inforamtion is not parsed.
  */
 @Controller
 public class DriveAnnotationParser {
@@ -851,10 +849,10 @@ public class DriveAnnotationParser {
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc == null) {
                     doc = NcbiEUtils.readPubmedArticle(pmid);
-                    if(doc != null) {
-                        articleBo.save(doc);
-                        docs.add(doc);
-                    }
+                }
+                if (doc != null) {
+                    articleBo.save(doc);
+                    docs.add(doc);
                 }
             }
             start = m.end();
