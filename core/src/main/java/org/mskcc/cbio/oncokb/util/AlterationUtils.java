@@ -380,9 +380,17 @@ public final class AlterationUtils {
     public static List<Alteration> excludeInferredAlterations(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
         for (Alteration alteration : alterations) {
-            String name = alteration.getAlteration().toLowerCase();
-            if (name != null && !inferredAlterations.contains(name)) {
-                result.add(alteration);
+            String name = alteration.getAlteration();
+            if (name != null) {
+                Boolean contain = false;
+                for (String inferredAlt : inferredAlterations) {
+                    if (inferredAlt.equalsIgnoreCase(name)) {
+                        contain = true;
+                    }
+                }
+                if (!contain) {
+                    result.add(alteration);
+                }
             }
         }
         return result;
