@@ -6,7 +6,7 @@ angular.module('oncokbApp')
             var self = {};
             self.id = null;
             self.document = null;
-
+            self.metaDoc = null;
             /**
              * Close the current document.
              */
@@ -196,7 +196,26 @@ angular.module('oncokbApp')
                 }
                 return self.load(id);
             };
+            /**
+             * Retrive meta file
+             * @param {string} id realtime document id
+             * */
+            self.getMetaRealtimeDocument = function(id) {
+                var deferred = $q.defer();
+                var initialize = function() {
+                };
+                var onLoad = function(document) {
+                    self.metaDoc = document;
+                    deferred.resolve(document);
+                    $rootScope.$digest();
+                };
+                var onError = function(error) {
+                    console.log('error', error);
+                };
+                gapi.drive.realtime.load(id, onLoad, initialize, onError);
+                return deferred.promise;
 
+            };
             /**
              * Retrieve a list of File resources.
              * @return {d.promise|promise|*|h.promise|f} Promise
@@ -230,7 +249,37 @@ angular.module('oncokbApp')
                 });
                 return deferred.promise;
             };
+            /**
+             *
+             * */
+            self.retrieveMeta = function() {
+                var deferred = $q.defer();
 
+                var retrievePageOfFiles = function(request, result) {
+                    request.execute(function(resp) {
+                        result = result.concat(resp.items);
+                        var nextPageToken = resp.nextPageToken;
+                        if (nextPageToken) {
+                            request = gapi.client.drive.files.list({
+                                q: '"' + config.metaFolderId + '" in parents',
+                                pageToken: nextPageToken
+                            });
+                            retrievePageOfFiles(request, result);
+                        } else {
+                            // console.log('get all files', result);
+                            deferred.resolve(result);
+                        }
+                    });
+                };
+
+                gapi.client.load('drive', 'v2', function() {
+                    var initialRequest = gapi.client.drive.files.list({
+                        q: '"' + config.metaFolderId + '" in parents'
+                    });
+                    retrievePageOfFiles(initialRequest, []);
+                });
+                return deferred.promise;
+            };
             /**
              *  Retrieve a list of File resources.
              * @return {d.promise|promise|*|h.promise|f} Promise
