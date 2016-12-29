@@ -5,6 +5,7 @@
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="resetPermission()">Reset files permission</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="giveFolderPermission()">Give folder permission</button>-->
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="create()">Create Doc</button>-->
+            <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="startFEUUIDImportingFE()">UUID</button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkError()">Check errors</button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="backup()"><span ng-show="!!!status.backup"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.backup">Backup</span></button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
@@ -26,7 +27,8 @@
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="showValidationResult()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Show Validation Result</span></button>-->
         </span>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
-            <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th ng-show="userRole === 8">Status</th><th>Edit</th></tr></thead>
+            <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th ng-show="userRole === 8">Status</th><th>Edit</th>
+                <th ng-show="userRole === 8">Needs to be reviewed</th></tr></thead>
             <tbody>
                 <tr data-ng-repeat="gene in documents">
                     <!-- <td>{{$index + 1}}</td> -->
@@ -40,6 +42,7 @@
                         <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">1</span></i>
                         <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">0</span></i>
                     </td>
+                    <td ng-show="userRole === 8">{{!metaFlags[gene.title] ? 'No' : 'Yes'}}</td>
                 </tr>
             </tbody>
         </table>
