@@ -482,9 +482,9 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestMutationEffect(result);
-        } else if(result.size() == 1){
+        } else if (result.size() == 1) {
             return result.iterator().next();
-        } else{
+        } else {
             return null;
         }
     }
@@ -500,9 +500,9 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestOncogenicity(result);
-        } else if(result.size() == 1){
+        } else if (result.size() == 1) {
             return result.iterator().next();
-        } else{
+        } else {
             return null;
         }
     }
@@ -512,7 +512,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             for (Article article : evidence.getArticles()) {
-                if(article.getPmid() != null) {
+                if (article.getPmid() != null) {
                     result.add(article.getPmid());
                 }
             }
@@ -525,7 +525,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             for (Article article : evidence.getArticles()) {
-                if(article.getAbstractContent() != null) {
+                if (article.getAbstractContent() != null) {
                     ArticleAbstract articleAbstract = new ArticleAbstract();
                     articleAbstract.setAbstractContent(article.getAbstractContent());
                     articleAbstract.setLink(article.getLink());
@@ -543,7 +543,7 @@ public class EvidenceUtils {
             for (Treatment treatment : evidence.getTreatments()) {
                 Set<String> drugsInTreatment = new HashSet<>();
                 for (Drug drug : treatment.getDrugs()) {
-                    if(drug.getDrugName() != null) {
+                    if (drug.getDrugName() != null) {
                         drugsInTreatment.add(drug.getDrugName());
                     }
                 }
@@ -586,6 +586,35 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences) {
+        Map<LevelOfEvidence, Set<Evidence>> levels = separateEvidencesByLevel(evidences);
+
+        Set<LevelOfEvidence> keys = levels.keySet();
+
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+        if (highestLevel != null) {
+            return levels.get(highestLevel);
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    public static Set<Evidence> getOnlySignificantLevelsEvidences(Set<Evidence> evidences) {
+        Map<LevelOfEvidence, Set<Evidence>> levels = separateEvidencesByLevel(evidences);
+        Set<LevelOfEvidence> keys = levels.keySet();
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+
+        Set<Evidence> result = new HashSet<>();
+
+        if (highestLevel != null) {
+            if (highestLevel.equals(LevelOfEvidence.LEVEL_2B) && levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
+                result.addAll(levels.get(LevelOfEvidence.LEVEL_3A));
+            }
+            result.addAll(levels.get(highestLevel));
+        }
+        return result;
+    }
+
+    public static Map<LevelOfEvidence, Set<Evidence>> separateEvidencesByLevel(Set<Evidence> evidences) {
         Map<LevelOfEvidence, Set<Evidence>> levels = new HashMap<>();
 
         for (Evidence evidence : evidences) {
@@ -596,15 +625,7 @@ public class EvidenceUtils {
                 levels.get(evidence.getLevelOfEvidence()).add(evidence);
             }
         }
-
-        Set<LevelOfEvidence> keys = levels.keySet();
-
-        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
-        if (highestLevel != null) {
-            return levels.get(highestLevel);
-        } else {
-            return new HashSet<>();
-        }
+        return levels;
     }
 
     public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {

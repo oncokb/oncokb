@@ -197,7 +197,7 @@ public class IndicatorUtils {
                     Set<Evidence> filteredEvis = new HashSet<>();
                     // Get highest sensitive evidences
                     Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(treatmentEvidences);
-                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences));
+                    filteredEvis.addAll(EvidenceUtils.getOnlySignificantLevelsEvidences(sensitiveEvidences));
 
                     // Get highest resistance evidences
                     Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
@@ -210,8 +210,10 @@ public class IndicatorUtils {
 
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
-                    indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive") == null ? "" : highestLevels.get("sensitive").name());
-                    indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant") == null ? "" : highestLevels.get("resistant").name());
+                    indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
+                    indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
+                    indicatorQuery.setOtherSignificantSensitiveLevels(getOtherSignificantLevels(indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences));
+                    indicatorQuery.setOtherSignificantResistanceLevels(getOtherSignificantLevels(indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences));
                 }
             }
 
@@ -227,8 +229,8 @@ public class IndicatorUtils {
                     indicatorQuery.setVariantSummary("");
                     indicatorQuery.setTumorTypeSummary("");
                     indicatorQuery.setTreatments(new ArrayList<IndicatorQueryTreatment>());
-                    indicatorQuery.setHighestResistanceLevel("");
-                    indicatorQuery.setHighestSensitiveLevel("");
+                    indicatorQuery.setHighestResistanceLevel(null);
+                    indicatorQuery.setHighestSensitiveLevel(null);
                 }
             }
         } else {
@@ -238,6 +240,23 @@ public class IndicatorUtils {
         indicatorQuery.setLastUpdate(MainUtils.getDataVersionDate());
 
         return indicatorQuery;
+    }
+
+    private static List<LevelOfEvidence> getOtherSignificantLevels(LevelOfEvidence highestLevel, String type, Set<Evidence> evidences) {
+        List<LevelOfEvidence> otherSignificantLevels = new ArrayList<>();
+        if (type != null && highestLevel != null && evidences != null) {
+            if (type.equals("sensitive")) {
+                if (highestLevel.equals(LevelOfEvidence.LEVEL_2B)) {
+                    Map<LevelOfEvidence, Set<Evidence>> levels = EvidenceUtils.separateEvidencesByLevel(evidences);
+                    if (levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
+                        otherSignificantLevels.add(LevelOfEvidence.LEVEL_3A);
+                    }
+                }
+            } else if (type.equals("resistance")) {
+
+            }
+        }
+        return otherSignificantLevels;
     }
 
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
@@ -259,10 +278,10 @@ public class IndicatorUtils {
                 Set<String> pmids = new HashSet<>();
                 Set<ArticleAbstract> abstracts = new HashSet<>();
                 for (Article article : evidence.getArticles()) {
-                    if(article.getPmid() != null) {
+                    if (article.getPmid() != null) {
                         pmids.add(article.getPmid());
                     }
-                    if(article.getAbstractContent() != null) {
+                    if (article.getAbstractContent() != null) {
                         ArticleAbstract articleAbstract = new ArticleAbstract();
                         articleAbstract.setAbstractContent(article.getAbstractContent());
                         articleAbstract.setLink(article.getLink());
