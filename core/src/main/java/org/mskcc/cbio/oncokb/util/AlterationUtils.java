@@ -21,11 +21,16 @@ public final class AlterationUtils {
     private static List<String> oncogenicList = Arrays.asList(new String[]{
         "", Oncogenicity.INCONCLUSIVE.getOncogenic(), Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
+
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-    private final static String[] generalAlts = {"activating mutations", "activating mutation", "inactivating mutations", "inactivating mutation", "all mutations", "all mutation", "wildtype", "wildtypes"};
-    private final static String[] singularGeneralAlt = {"activating mutation", "inactivating mutation", "all mutations"};
-    private final static Set<String> generalAlterations = new HashSet<>(Arrays.asList(generalAlts));
-    private final static Set<String> singularGeneralAlterations = new HashSet<>(Arrays.asList(singularGeneralAlt));
+
+    private final static String[] inferredAlts = {"Oncogenic Mutations", "Gain-of-function Mutations",
+        "Loss-of-function Mutations", "Switch-of-function Mutations"};
+    private final static List<String> inferredAlterations = Arrays.asList(inferredAlts);
+
+    private final static String[] structureAlts = {"Truncating Mutations", "Fusions", "Amplification", "Deletion"};
+    private final static List<String> structureAlterations = Arrays.asList(structureAlts);
+
     private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
@@ -97,67 +102,67 @@ public final class AlterationUtils {
                     consequence = "inframe_deletion";
                 }
             } else {
-                p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
+                p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(_)?splice");
                 m = p.matcher(proteinChange);
                 if (m.matches()) {
                     start = Integer.valueOf(m.group(1));
-                    end = Integer.valueOf(m.group(2));
-                    String v = m.group(3);
-                    switch (v) {
-                        case "mis":
-                            consequence = "missense_variant";
-                            break;
-                        case "ins":
-                            consequence = "inframe_insertion";
-                            break;
-                        case "del":
-                            consequence = "inframe_deletion";
-                            break;
-                        case "fs":
-                            consequence = "frameshift_variant";
-                            break;
-                        case "trunc":
-                            consequence = "feature_truncation";
-                            break;
-                        case "mut":
-                            consequence = "any";
+                    if (m.group(3) != null) {
+                        end = Integer.valueOf(m.group(3));
+                    } else {
+                        end = start;
                     }
+                    consequence = "splice_region_variant";
                 } else {
-                    p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
+                    p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
                     m = p.matcher(proteinChange);
                     if (m.matches()) {
-                        ref = m.group(1);
-                        start = Integer.valueOf(m.group(2));
-                        end = start;
-
-                        consequence = "frameshift_variant";
+                        start = Integer.valueOf(m.group(1));
+                        end = Integer.valueOf(m.group(2));
+                        String v = m.group(3);
+                        switch (v) {
+                            case "mis":
+                                consequence = "missense_variant";
+                                break;
+                            case "ins":
+                                consequence = "inframe_insertion";
+                                break;
+                            case "del":
+                                consequence = "inframe_deletion";
+                                break;
+                            case "fs":
+                                consequence = "frameshift_variant";
+                                break;
+                            case "trunc":
+                                consequence = "feature_truncation";
+                                break;
+                            case "mut":
+                                consequence = "any";
+                        }
                     } else {
-                        p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
+                        p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
                         m = p.matcher(proteinChange);
                         if (m.matches()) {
                             ref = m.group(1);
                             start = Integer.valueOf(m.group(2));
                             end = start;
-                            String v = m.group(3);
-                            switch (v) {
-                                case "ins":
-                                    consequence = "inframe_insertion";
-                                    break;
-                                case "del":
-                                    consequence = "inframe_deletion";
-                                    break;
-                            }
+
+                            consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?_splice");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
-                                start = Integer.valueOf(m.group(1));
-                                if (m.group(3) != null) {
-                                    end = Integer.valueOf(m.group(3));
-                                } else {
-                                    end = start;
+                                ref = m.group(1);
+                                start = Integer.valueOf(m.group(2));
+                                end = start;
+                                String v = m.group(3);
+                                switch (v) {
+                                    case "ins":
+                                        consequence = "inframe_insertion";
+                                        break;
+                                    case "del":
+                                        consequence = "inframe_deletion";
+                                        break;
                                 }
-                                consequence = "splice_region_variant";
                             }
                         }
                     }
@@ -195,24 +200,6 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         }
-
-        if (alteration.getAlteration() != null) {
-            if (isSingularGeneralAlteration(alteration.getAlteration())) {
-                alteration.setAlteration(alteration.getAlteration() + "s");
-            }
-        }
-    }
-
-    public static Boolean isSingularGeneralAlteration(String alteration) {
-        if (alteration == null) {
-            return false;
-        }
-        for (String name : singularGeneralAlterations) {
-            if (name.equalsIgnoreCase(alteration)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static Boolean isFusion(String variant) {
@@ -347,16 +334,16 @@ public final class AlterationUtils {
         List<Alteration> result = new ArrayList<>();
         Set<Alteration> VUS = new HashSet<>();
         Set<Gene> allGenes = new HashSet<>();
-        if(CacheUtils.isEnabled()) {
+        if (CacheUtils.isEnabled()) {
             allGenes = CacheUtils.getAllGenes();
-        }else {
+        } else {
             allGenes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         }
         for (Gene gene : allGenes) {
             Set<Alteration> alts = new HashSet<>();
-            if(CacheUtils.isEnabled()) {
+            if (CacheUtils.isEnabled()) {
                 alts = CacheUtils.getVUS(gene.getEntrezGeneId());
-            }else {
+            } else {
                 alts = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
             }
             if (alts != null) {
@@ -390,12 +377,20 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static List<Alteration> excludeGeneralAlterations(List<Alteration> alterations) {
+    public static List<Alteration> excludeInferredAlterations(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
         for (Alteration alteration : alterations) {
-            String name = alteration.getAlteration().toLowerCase();
-            if (name != null && !generalAlterations.contains(name)) {
-                result.add(alteration);
+            String name = alteration.getAlteration();
+            if (name != null) {
+                Boolean contain = false;
+                for (String inferredAlt : inferredAlterations) {
+                    if (inferredAlt.equalsIgnoreCase(name)) {
+                        contain = true;
+                    }
+                }
+                if (!contain) {
+                    result.add(alteration);
+                }
             }
         }
         return result;
@@ -472,17 +467,18 @@ public final class AlterationUtils {
         List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
+        alleles = filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
 
         // Remove alteration itself
         alleles.remove(alteration);
-        return filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
+        return alleles;
     }
 
     public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {
         List<Alteration> alleles = getAlleleAlterations(alteration);
         Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
 
-        if(oncogenicAllele!=null) {
+        if (oncogenicAllele != null) {
             alleles.addAll(AlterationUtils.getOncogenicMutations(oncogenicAllele));
         }
         return alleles;
@@ -563,9 +559,6 @@ public final class AlterationUtils {
                 && alteration.getProteinStart().equals(location)) {
 
                 result.add(alteration);
-            } else if (alteration.getAlteration() != null
-                && alteration.getAlteration().toLowerCase().contains("activating")) {
-                result.add(alteration);
             }
         }
         return result;
@@ -573,35 +566,61 @@ public final class AlterationUtils {
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.MUTATION_EFFECT));
-        boolean activating = false, inactivating = false;
-        for (Evidence evidence : mutationEffectEvs) {
-            String effect = evidence.getKnownEffect();
-            if (effect != null) {
-                effect = effect.toLowerCase();
-                if (effect.contains("inactivating") || effect.contains("loss-of-function")) {
-                    inactivating = true;
-                } else if (effect.contains("activating") || effect.contains("gain-of-function")
-                    || effect.contains("switch-of-function")) {
-                    activating = true;
-                }
+        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
+        boolean isOncogenic = false;
+        for (Evidence evidence : oncogenicEvs) {
+            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
+            if (oncogenicity != null
+                && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY))) {
+                isOncogenic = true;
+                break;
             }
         }
-
-        return inactivating || activating;
+        return isOncogenic;
     }
 
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {
         Set<Alteration> oncogenicMutations = new HashSet<>();
-        Alteration alt = findAlteration(alteration.getGene(), "inactivating mutations");
-        if (alt != null) {
-            oncogenicMutations.add(alt);
-        }
-
-        alt = findAlteration(alteration.getGene(), "activating mutations");
+        Alteration alt = findAlteration(alteration.getGene(), "oncogenic mutations");
         if (alt != null) {
             oncogenicMutations.add(alt);
         }
         return oncogenicMutations;
+    }
+
+    public static List<String> getGeneralAlterations() {
+        List<String> suggestedAlterations = new ArrayList<>();
+        suggestedAlterations.addAll(inferredAlterations);
+        suggestedAlterations.addAll(structureAlterations);
+        return suggestedAlterations;
+    }
+
+    public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {
+        exactMatch = exactMatch || false;
+        if (exactMatch) {
+            return AlterationUtils.getGeneralAlterations().contains(mutationStr);
+        } else if (stringContainsItemFromList(mutationStr, getGeneralAlterations())
+            && itemFromListAtEndString(mutationStr, getGeneralAlterations())) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean stringContainsItemFromList(String inputString, List<String> items) {
+        for (String item : items) {
+            if (inputString.contains(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean itemFromListAtEndString(String inputString, List<String> items) {
+        for (String item : items) {
+            if (inputString.endsWith(item)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

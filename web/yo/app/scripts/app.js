@@ -477,6 +477,7 @@ var oncokbApp = angular.module('oncokbApp', [
         email: 'N/A'
     })
     .value('OncoKB', OncoKB)
+    // This is used for typeahead
     .constant('SecretEmptyKey', '[$empty$]')
     .constant('gapi', window.gapi)
     .constant('loadingScreen', window.loadingScreen)
@@ -599,8 +600,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'driveOncokbInfo', 'dialogs', 'stringUtils',
-        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs, stringUtils) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils',
+        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils) {
             $rootScope.errors = [];
 
             // If data is loaded, the watch in nav controller should be triggered.
@@ -647,14 +648,6 @@ angular.module('oncokbApp').run(
                 if (oncokbInfo) {
                     if (oncokbInfo.users) {
                         Users.setUsers(oncokbInfo.users);
-                    }
-
-                    if (oncokbInfo.suggestions) {
-                        DriveOncokbInfo.setSuggestions(oncokbInfo.suggestions);
-                    }
-
-                    if (oncokbInfo.pubMed) {
-                        DriveOncokbInfo.setPubMed(oncokbInfo.pubMed);
                     }
 
                     if (Access.isLoggedIn()) {

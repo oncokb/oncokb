@@ -18,8 +18,6 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    private static String[] SpecialMutations = {"amplification", "deletion", "fusion", "fusions", "activating mutations", "inactivating mutations", "all mutations", "truncating mutations"};
-
     public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
         if (gene == null) {
             return "";
@@ -99,12 +97,8 @@ public class SummaryUtils {
             }
         }
 
-        if (isSpecialMutation(queryAlteration, true)) {
+        if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
             queryAlteration = queryAlteration.toLowerCase();
-        }
-
-        if (AlterationUtils.isSingularGeneralAlteration(queryAlteration)) {
-            queryAlteration = queryAlteration + "s";
         }
 
         Boolean appendThe = appendThe(queryAlteration);
@@ -287,8 +281,8 @@ public class SummaryUtils {
                 sb.append(unknownOncogenicSummary(gene));
             }
         } else {
-            if (isSpecialMutation(queryAlteration, false)) {
-                if (isSpecialMutation(queryAlteration, true)) {
+            if (AlterationUtils.isGeneralAlterations(queryAlteration, false)) {
+                if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
                     queryAlteration = queryAlteration.substring(0, 1).toUpperCase() + queryAlteration.substring(1);
                 }
             }
@@ -316,8 +310,8 @@ public class SummaryUtils {
                 List<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singletonList(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
                 if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
                     Evidence evidence = oncogenicEvidences.iterator().next();
-                    if (evidence != null && evidence.getKnownEffect() != null) {
-                        oncogenic = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                    if (evidence != null ) {
+                        oncogenic = Oncogenicity.getByEvidence(evidence);
                         break;
                     }
                 }
@@ -431,12 +425,12 @@ public class SummaryUtils {
         Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
         Set<Alteration> highestAlts = (Set<Alteration>) map.get("alterations");
 
-        if (highestOncogenicity != null && (highestOncogenicity.getOncogenic().equals(Oncogenicity.YES) || highestOncogenicity.getOncogenic().equals(Oncogenicity.LIKELY))) {
+        if (highestOncogenicity != null && (highestOncogenicity.equals(Oncogenicity.YES) || highestOncogenicity.equals(Oncogenicity.LIKELY))) {
 
             sb.append(" However, ");
             sb.append(alteration.getGene().getHugoSymbol() + " " + allelesToStr(highestAlts));
             sb.append((highestAlts.size() > 1 ? " are" : " is"));
-            if (highestOncogenicity.getOncogenic().equals(Oncogenicity.YES)) {
+            if (highestOncogenicity.equals(Oncogenicity.YES)) {
                 sb.append(" known to be " + highestOncogenicity.getOncogenic().toLowerCase());
             } else {
                 sb.append(" " + highestOncogenicity.getOncogenic().toLowerCase());
@@ -519,7 +513,7 @@ public class SummaryUtils {
                 if (oncoStr == null)
                     continue;
 
-                Oncogenicity oncogenicity = Oncogenicity.getByLevel(oncoStr);
+                Oncogenicity oncogenicity = Oncogenicity.getByEffect(oncoStr);
                 if (!oncoCate.containsKey(oncogenicity))
                     oncoCate.put(oncogenicity, new HashSet<Alteration>());
 
@@ -527,7 +521,7 @@ public class SummaryUtils {
             }
         }
 
-        Oncogenicity oncogenicity = MainUtils.findHighestOncogenic(oncoCate.keySet());
+        Oncogenicity oncogenicity = MainUtils.findHighestOncogenicity(oncoCate.keySet());
         Map<String, Object> result = new HashMap<>();
         result.put("oncogenicity", oncogenicity);
         result.put("alterations", oncoCate != null ? oncoCate.get(oncogenicity) : new HashSet<>());
@@ -807,18 +801,6 @@ public class SummaryUtils {
         return ret;
     }
 
-    private static Boolean isSpecialMutation(String mutationStr, Boolean exactMatch) {
-        exactMatch = exactMatch || false;
-        mutationStr = mutationStr.toString();
-        if (exactMatch) {
-            return stringIsFromList(mutationStr, SpecialMutations);
-        } else if (stringContainsItemFromList(mutationStr, SpecialMutations)
-            && itemFromListAtEndString(mutationStr, SpecialMutations)) {
-            return true;
-        }
-        return false;
-    }
-
     private static Boolean appendThe(String queryAlteration) {
         Boolean appendThe = true;
 
@@ -862,12 +844,12 @@ public class SummaryUtils {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
-        if (isSpecialMutation(queryAlteration, true)) {
+        if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
         } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
             queryAlteration = queryAlteration.replace("Fusion", "fusion");
             sb.append(queryAlteration);
-        } else if (isSpecialMutation(queryAlteration, false)
+        } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
             || (alteration.getConsequence() != null
             && (alteration.getConsequence().getTerm().equals("inframe_deletion")
             || alteration.getConsequence().getTerm().equals("inframe_insertion")))
@@ -898,9 +880,9 @@ public class SummaryUtils {
             sb.append(queryAlteration + " positive");
         } else {
             sb.append(gene.getHugoSymbol() + " ");
-            if (isSpecialMutation(queryAlteration, true)) {
+            if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
                 sb.append(queryAlteration.toLowerCase());
-            } else if (isSpecialMutation(queryAlteration, false)
+            } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
                 || (alteration.getConsequence() != null
                 && (alteration.getConsequence().getTerm().equals("inframe_deletion")
                 || alteration.getConsequence().getTerm().equals("inframe_insertion")))
@@ -1085,32 +1067,5 @@ public class SummaryUtils {
             summary = sb.toString();
         }
         return summary;
-    }
-
-    public static boolean stringContainsItemFromList(String inputString, String[] items) {
-        for (int i = 0; i < items.length; i++) {
-            if (inputString.contains(items[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean stringIsFromList(String inputString, String[] items) {
-        for (int i = 0; i < items.length; i++) {
-            if (inputString.equalsIgnoreCase(items[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean itemFromListAtEndString(String inputString, String[] items) {
-        for (int i = 0; i < items.length; i++) {
-            if (inputString.endsWith(items[i])) {
-                return true;
-            }
-        }
-        return false;
     }
 }

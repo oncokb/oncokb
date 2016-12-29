@@ -494,12 +494,12 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             if (evidence.getKnownEffect() != null) {
-                result.add(Oncogenicity.getByLevel(evidence.getKnownEffect()));
+                result.add(Oncogenicity.getByEvidence(evidence));
             }
         }
 
         if (result.size() > 1) {
-            return MainUtils.findHighestOncogenic(result);
+            return MainUtils.findHighestOncogenicity(result);
         } else if(result.size() == 1){
             return result.iterator().next();
         } else{
@@ -568,7 +568,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             if (evidence.getEvidenceType() != null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
 
                 if (oncogenicity != null) {
                     if (!map.containsKey(oncogenicity))
@@ -823,7 +823,7 @@ public class EvidenceUtils {
 
                     for (Evidence evidence : oncogenics) {
                         if (evidence.getKnownEffect() != null) {
-                            Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
                             if (oncogenicity != null && oncogenicity.equals(highestOncogenic)) {
                                 recordMatchHighestOncogenicity = evidence;
                                 break;

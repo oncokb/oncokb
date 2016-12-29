@@ -33,7 +33,7 @@ public class AlterationUtilsTest {
     }
 
     @Parameterized.Parameters
-    public static Collection<String[]> addedNumbers() {
+    public static Collection<String[]> getParameters() {
         return Arrays.asList(
             new String[][]{
                 // any
@@ -66,6 +66,12 @@ public class AlterationUtilsTest {
 
                 // Splice
                 {"X405_splice", "405", "405", null, null, "splice_region_variant"},
+                {"405_splice", "405", "405", null, null, "splice_region_variant"},
+                {"405splice", "405", "405", null, null, "splice_region_variant"},
+                {"X405_A500splice", "405", "500", null, null, "splice_region_variant"},
+                {"X405_A500_splice", "405", "500", null, null, "splice_region_variant"},
+                {"405_500_splice", "405", "500", null, null, "splice_region_variant"},
+                {"405_500splice", "405", "500", null, null, "splice_region_variant"},
 
                 // Stop gained
                 {"R2109*", "2109", "2109", "R", "*", "stop_gained"},

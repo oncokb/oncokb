@@ -124,26 +124,26 @@ public class MainUtils {
         return index == 100 ? null : list.get(index);
     }
 
-    public static Oncogenicity findHighestOncogenic(Set<Oncogenicity> oncogenic) {
-        String[] effects = {
-            Oncogenicity.INCONCLUSIVE.getOncogenic(),
-            Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
-            Oncogenicity.LIKELY.getOncogenic(),
-            Oncogenicity.YES.getOncogenic()
+    public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
+        Oncogenicity[] effects = {
+            Oncogenicity.INCONCLUSIVE,
+            Oncogenicity.LIKELY_NEUTRAL,
+            Oncogenicity.LIKELY,
+            Oncogenicity.YES
         };
-        List<String> list = Arrays.asList(effects);
-        Integer index = -2;
+        List<Oncogenicity> list = Arrays.asList(effects);
+        Integer index = -1;
 
-        for (Oncogenicity datum : oncogenic) {
+        for (Oncogenicity datum : oncogenicitySet) {
             if (datum != null) {
-                Integer oncogenicIndex = list.indexOf(datum.getOncogenic());
+                Integer oncogenicIndex = list.indexOf(datum);
                 if (index < oncogenicIndex) {
                     index = oncogenicIndex;
                 }
             }
         }
 
-        return index == -2 ? null : Oncogenicity.getByLevel(list.get(index));
+        return index == -1 ? null : list.get(index);
     }
 
     public static Oncogenicity idealOncogenicityByMutationEffect(MutationEffect mutationEffect) {
@@ -209,44 +209,28 @@ public class MainUtils {
     }
 
     public static Oncogenicity findHighestOncogenicByEvidences(Set<Evidence> evidences) {
-        List<Oncogenicity> oncogenicities = Arrays.asList(
-            Oncogenicity.INCONCLUSIVE,
-            Oncogenicity.LIKELY_NEUTRAL,
-            Oncogenicity.LIKELY,
-            Oncogenicity.YES
-        );
-
-        int index = -1;
+        Set<Oncogenicity> oncogenicitySet = new HashSet<>();
 
         if (evidences != null) {
             for (Evidence evidence : evidences) {
                 if (evidence.getKnownEffect() != null) {
-                    int _index = -1;
-                    _index = oncogenicities.indexOf(Oncogenicity.getByLevel(evidence.getKnownEffect()));
-                    if (_index > index) {
-                        index = _index;
-                    }
+                    oncogenicitySet.add(Oncogenicity.getByEffect(evidence.getKnownEffect()));
                 }
             }
         }
 
-        return index > -1 ? oncogenicities.get(index) : null;
+        return findHighestOncogenicity(oncogenicitySet);
     }
 
     public static Oncogenicity setToAlleleOncogenicity(Oncogenicity oncogenicity) {
-        Set<Oncogenicity> eligibleList = new HashSet<>();
-        eligibleList.add(Oncogenicity.getByLevel("1"));
-        eligibleList.add(Oncogenicity.getByLevel("2"));
-
         if (oncogenicity == null) {
             return null;
         }
-
-        if (eligibleList.contains(oncogenicity)) {
-            return Oncogenicity.getByLevel("2");
+        if (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY)) {
+            return Oncogenicity.LIKELY;
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     public static String getAlleleConflictsMutationEffect(Set<String> mutationEffects) {
@@ -363,7 +347,7 @@ public class MainUtils {
             List<Alteration> alterations;
 
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
-            alterations = AlterationUtils.excludeGeneralAlterations(alterations);
+            alterations = AlterationUtils.excludeInferredAlterations(alterations);
 
 //                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
 

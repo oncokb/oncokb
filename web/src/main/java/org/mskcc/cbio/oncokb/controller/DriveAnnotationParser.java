@@ -9,7 +9,10 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.NcbiEUtils;
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,8 +27,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * @author jgao
- *
- * 1. Additional Inforamtion is not parsed.
  */
 @Controller
 public class DriveAnnotationParser {
@@ -407,14 +408,14 @@ public class DriveAnnotationParser {
                 evidence.setGene(gene);
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                if(oncogenic != null){
+                if (oncogenic != null) {
                     evidence.setKnownEffect(oncogenic.getOncogenic());
                 }
                 evidence.setDescription(doe);
                 evidence.setUuid(uuid);
                 setDocuments(doe, evidence);
                 evidenceBo.save(evidence);
-            } else if (Oncogenicity.compare(oncogenic, Oncogenicity.getByLevel(evidences.get(0).getKnownEffect())) > 0) {
+            } else if (Oncogenicity.compare(oncogenic, Oncogenicity.getByEvidence(evidences.get(0))) > 0) {
                 evidences.get(0).setKnownEffect(oncogenic.getOncogenic());
                 evidences.get(0).setDescription(doe);
                 setDocuments(doe, evidences.get(0));
@@ -848,10 +849,10 @@ public class DriveAnnotationParser {
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc == null) {
                     doc = NcbiEUtils.readPubmedArticle(pmid);
-                    if(doc != null) {
-                        articleBo.save(doc);
-                        docs.add(doc);
-                    }
+                }
+                if (doc != null) {
+                    articleBo.save(doc);
+                    docs.add(doc);
                 }
             }
             start = m.end();
