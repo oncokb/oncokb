@@ -870,14 +870,14 @@ public class DriveAnnotationParser {
                     abLink = abItems.group(2).trim();
                 }
                 if (!abContent.isEmpty()) {
-                    Article doc = new Article();
-                    doc.setAbstractContent(abContent);
-                    doc.setLink(abLink);
-                    if (articleBo.findArticleByAbstract(abContent) == null) {
+                    Article doc = articleBo.findArticleByAbstract(abContent);
+                    if (doc == null) {
+                        doc = new Article();
+                        doc.setAbstractContent(abContent);
+                        doc.setLink(abLink);
                         articleBo.save(doc);
-                        docs.add(doc);
                     }
-
+                    docs.add(doc);
                 }
                 abContent = "";
                 abLink = "";
