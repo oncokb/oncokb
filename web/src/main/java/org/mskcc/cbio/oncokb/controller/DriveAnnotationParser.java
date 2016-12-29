@@ -872,6 +872,7 @@ public class DriveAnnotationParser {
                 if (!abContent.isEmpty()) {
                     Article doc = articleBo.findArticleByAbstract(abContent);
                     if (doc == null) {
+                        doc = new Article();
                         doc.setAbstractContent(abContent);
                         doc.setLink(abLink);
                         articleBo.save(doc);
