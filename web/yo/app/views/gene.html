@@ -183,7 +183,7 @@
                 <uib-accordion close-others="false" ng-if="geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen">
                   <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short tumor type summary" ng-model="tumor.shortSummary.text"></p></span>-->
                   <!--<pub-iframe ng-model="tumor.shortSummary.text"></pub-iframe>-->
-                  <h5><b>Summary: </b></h5>
+                  <h5><b>Tumor Type Summary (Optional): </b></h5>
                   <drive-realtime-string es="tumor.summary_eStatus" fe="fileEditable" t="'p'" object="tumor.summary"></drive-realtime-string>
                   <pub-iframe ng-model="tumor.summary.text"></pub-iframe>
                   <!-- Prevalence -->
@@ -268,7 +268,7 @@
                       </uib-accordion-heading>
                       <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short general summary" ng-model="ti.short.text"></p></span>-->
                       <!--<pub-iframe ng-model="ti.short.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></pub-iframe>-->
-                      <h5><b>Description: </b></h5>
+                      <h5><b>General Summary (Optional): </b></h5>
                       <drive-realtime-string es="ti.description_eStatus" fe="fileEditable" t="'p'" object="ti.description"></drive-realtime-string>
                       <pub-iframe ng-model="ti.description.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></pub-iframe>
                       <uib-accordion close-others="false">
