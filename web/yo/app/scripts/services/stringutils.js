@@ -976,7 +976,7 @@ angular.module('oncokbApp')
                                     __tumor.trials_comments = getComments(e1.trials_comments);
                                 }
                                 __tumor.trials_uuid = e1.trials_uuid ? e1.trials_uuid.getText() : '';
-                                __tumor.trials_uuid = getReview(e1.trials_review);
+                                __tumor.trials_review = getReview(e1.trials_review);
                             }
 
                             e1.TI.asArray().forEach(function(e2) {
