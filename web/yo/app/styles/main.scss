@@ -153,6 +153,15 @@ p.editableBox {
 p.editableBox.doubleH {
   min-height: 40px;
 }
+p.unEditableBox.review {
+    background-color: #E2F1EF;
+}
+.reviewed {
+    color: #82E452;
+}
+.reviewedBG {
+    background-color: #E2F1EF;
+}
 .curateTrialItem, .vusItem {
   float: left;
   height: 30px;
