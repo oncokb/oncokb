@@ -404,6 +404,7 @@ OncoKB.initialize = function() {
                         this[__key + '_timeStamp'] = model.createMap();
                         this[__key + '_eStatus'] = model.createMap();
                         this[__key + '_uuid'] = model.createString('');
+                        this[__key + '_review'] = model.createMap();
                     }
                     switch (OncoKB.curateInfo[id][__key].type) {
                     case 'string':
@@ -432,6 +433,7 @@ OncoKB.initialize = function() {
                 OncoKB[_key].prototype[_keys[j] + '_timeStamp'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_timeStamp');
                 OncoKB[_key].prototype[_keys[j] + '_eStatus'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_eStatus');
                 OncoKB[_key].prototype[_keys[j] + '_uuid'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_uuid');
+                OncoKB[_key].prototype[_keys[j] + '_review'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_review');
             }
         }
 
