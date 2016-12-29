@@ -92,14 +92,48 @@ angular.module('oncokbApp')
                             storage.retrieveAllFiles().then(function(result) {
                                 Documents.set(result);
                                 Documents.setStatus(OncoKB.global.genes);
-                                $scope.documents = Documents.get();
-                                $scope.status.rendering = false;
+                                if(users.getMe().role === 8) {
+                                    $scope.metaFlags = {};
+                                    storage.retrieveMeta().then(function(result) {
+                                        if(result && result.error) {
+                                            dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                                        }else{
+                                            storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
+                                                if(metaRealtime && metaRealtime.error) {
+                                                    dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                                                } else {
+                                                    var metaData = metaRealtime.getModel().getRoot().get('review');
+                                                    var genes = metaData.keys();
+                                                    for (var i = 0; i < genes.length; i++) {
+                                                        var geneMetaData = metaData.get(genes[i]);
+                                                        var uuids = geneMetaData.keys();
+                                                        var flag = true;
+                                                        for (var j = 0; j < uuids.length; j++) {
+                                                            if(geneMetaData.get(uuids[j]).type === 'Map' && geneMetaData.get(uuids[j]).get('review')) {
+                                                                $scope.metaFlags[genes[i]] = true;
+                                                                flag = false;
+                                                                break;
+                                                            }
+                                                        }
+                                                        if(flag) {
+                                                            $scope.metaFlags[genes[i]] = false;
+                                                        }
+                                                    }
+                                                }
+                                                $scope.documents = Documents.get();
+                                                $scope.status.rendering = false;
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    $scope.documents = Documents.get();
+                                    $scope.status.rendering = false;
+                                }
                             });
                         });
                     });
                 }
             };
-
             $scope.startFEUUIDImportingFE = function() {
                 importUUIDs($scope.documents, 0);
             };
@@ -189,6 +223,10 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(5),
                 DTColumnDefBuilder.newColumnDef(6)
             ];
+            if (users.getMe().role === 8) {
+                $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(7));
+            }
+
             $scope.status = {
                 backup: true,
                 saveAllGenes: true,
@@ -3069,6 +3107,25 @@ angular.module('oncokbApp')
                 })
                 .finally(getSuggestedMutations);
 
+            storage.retrieveMeta().then(function(result) {
+                if(result && result.error) {
+                    dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                } else {
+                    storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
+                        if(metaRealtime && metaRealtime.error) {
+                            dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                            $scope.fileEditable = false;
+                        } else {
+                            $scope.metaModel = metaRealtime.getModel();
+                            if(!$scope.metaModel.getRoot().get('review').get($scope.fileTitle)) {
+                                var tempMap = $scope.metaModel.createMap();
+                                $scope.metaModel.getRoot().get('review').set($scope.fileTitle, tempMap);
+                            }
+                            $scope.reviewMeta = $scope.metaModel.getRoot().get('review').get($scope.fileTitle);
+                        }
+                    });
+                }
+            });
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function() {
                 var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
