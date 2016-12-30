@@ -40,7 +40,7 @@ public class UtilsApiController implements UtilsApi {
                 Set<ArticleAbstract> articleAbstracts = biologicalVariant.getMutationEffectAbstracts();
                 List<String> abstracts = new ArrayList<>();
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent());
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
                 annotatedVariants.add(new AnnotatedVariant(
                     gene.getHugoSymbol(), biologicalVariant.getVariant().getName(), biologicalVariant.getOncogenic(),
@@ -91,7 +91,7 @@ public class UtilsApiController implements UtilsApi {
                 Set<ArticleAbstract> articleAbstracts = biologicalVariant.getMutationEffectAbstracts();
                 List<String> abstracts = new ArrayList<>();
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent());
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
                 row.add(MainUtils.listToString(abstracts, "; "));
                 sb.append(MainUtils.listToString(row, separator));
@@ -121,7 +121,7 @@ public class UtilsApiController implements UtilsApi {
                 Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
                 List<String> abstracts = new ArrayList<>();
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent());
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
 
                 actionableGenes.add(new ActionableGene(
@@ -175,7 +175,7 @@ public class UtilsApiController implements UtilsApi {
                 Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
                 List<String> abstracts = new ArrayList<>();
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent());
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
                 row.add(MainUtils.listToString(abstracts, "; "));
                 sb.append(MainUtils.listToString(row, separator));
