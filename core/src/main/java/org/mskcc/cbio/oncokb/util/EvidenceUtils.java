@@ -471,31 +471,40 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static String getKnownEffectFromEvidence(EvidenceType evidenceType, Set<Evidence> evidences) {
-        Set<String> result = new HashSet<>();
+    public static MutationEffect getMutationEffectFromEvidence(Set<Evidence> evidences) {
+        Set<MutationEffect> result = new HashSet<>();
 
         for (Evidence evidence : evidences) {
-            if (evidence.getEvidenceType().equals(evidenceType) && evidence.getKnownEffect() != null) {
-                result.add(evidence.getKnownEffect());
+            if (evidence.getKnownEffect() != null) {
+                result.add(MutationEffect.getByName(evidence.getKnownEffect()));
             }
         }
 
-        if (evidenceType.equals(EvidenceType.MUTATION_EFFECT) && result.size() > 1) {
-            String[] effects = {"Gain-of-function", "Likely Gain-of-function", "Inconclusive", "Likely Neutral", "Neutral", "Likely Switch-of-function", "Switch-of-function", "Likely Loss-of-function", "Loss-of-function"};
-            List<String> list = Arrays.asList(effects);
-            Integer index = 100;
-            for (String effect : result) {
-                if (list.indexOf(effect) < index) {
-                    index = list.indexOf(effect);
-                }
-            }
-            if (index == -1) {
-                return "Inconclusive";
-            } else {
-                return list.get(index);
+        if (result.size() > 1) {
+            return MainUtils.findHighestMutationEffect(result);
+        } else if (result.size() == 1) {
+            return result.iterator().next();
+        } else {
+            return null;
+        }
+    }
+
+    public static Oncogenicity getOncogenicityFromEvidence(Set<Evidence> evidences) {
+        Set<Oncogenicity> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect() != null) {
+                result.add(Oncogenicity.getByEvidence(evidence));
             }
         }
-        return StringUtils.join(result, ", ");
+
+        if (result.size() > 1) {
+            return MainUtils.findHighestOncogenicity(result);
+        } else if (result.size() == 1) {
+            return result.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     public static Set<String> getPmids(Set<Evidence> evidences) {
@@ -503,7 +512,25 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             for (Article article : evidence.getArticles()) {
-                result.add(article.getPmid());
+                if (article.getPmid() != null) {
+                    result.add(article.getPmid());
+                }
+            }
+        }
+        return result;
+    }
+
+    public static Set<ArticleAbstract> getAbstracts(Set<Evidence> evidences) {
+        Set<ArticleAbstract> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            for (Article article : evidence.getArticles()) {
+                if (article.getAbstractContent() != null) {
+                    ArticleAbstract articleAbstract = new ArticleAbstract();
+                    articleAbstract.setAbstractContent(article.getAbstractContent());
+                    articleAbstract.setLink(article.getLink());
+                    result.add(articleAbstract);
+                }
             }
         }
         return result;
@@ -516,7 +543,9 @@ public class EvidenceUtils {
             for (Treatment treatment : evidence.getTreatments()) {
                 Set<String> drugsInTreatment = new HashSet<>();
                 for (Drug drug : treatment.getDrugs()) {
-                    drugsInTreatment.add(drug.getDrugName());
+                    if (drug.getDrugName() != null) {
+                        drugsInTreatment.add(drug.getDrugName());
+                    }
                 }
                 result.add(StringUtils.join(drugsInTreatment, " + "));
             }
@@ -539,7 +568,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             if (evidence.getEvidenceType() != null && evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
 
                 if (oncogenicity != null) {
                     if (!map.containsKey(oncogenicity))
@@ -557,6 +586,35 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences) {
+        Map<LevelOfEvidence, Set<Evidence>> levels = separateEvidencesByLevel(evidences);
+
+        Set<LevelOfEvidence> keys = levels.keySet();
+
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+        if (highestLevel != null) {
+            return levels.get(highestLevel);
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    public static Set<Evidence> getOnlySignificantLevelsEvidences(Set<Evidence> evidences) {
+        Map<LevelOfEvidence, Set<Evidence>> levels = separateEvidencesByLevel(evidences);
+        Set<LevelOfEvidence> keys = levels.keySet();
+        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+
+        Set<Evidence> result = new HashSet<>();
+
+        if (highestLevel != null) {
+            if (highestLevel.equals(LevelOfEvidence.LEVEL_2B) && levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
+                result.addAll(levels.get(LevelOfEvidence.LEVEL_3A));
+            }
+            result.addAll(levels.get(highestLevel));
+        }
+        return result;
+    }
+
+    public static Map<LevelOfEvidence, Set<Evidence>> separateEvidencesByLevel(Set<Evidence> evidences) {
         Map<LevelOfEvidence, Set<Evidence>> levels = new HashMap<>();
 
         for (Evidence evidence : evidences) {
@@ -567,15 +625,7 @@ public class EvidenceUtils {
                 levels.get(evidence.getLevelOfEvidence()).add(evidence);
             }
         }
-
-        Set<LevelOfEvidence> keys = levels.keySet();
-
-        LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
-        if (highestLevel != null) {
-            return levels.get(highestLevel);
-        } else {
-            return new HashSet<>();
-        }
+        return levels;
     }
 
     public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {
@@ -794,7 +844,7 @@ public class EvidenceUtils {
 
                     for (Evidence evidence : oncogenics) {
                         if (evidence.getKnownEffect() != null) {
-                            Oncogenicity oncogenicity = Oncogenicity.getByLevel(evidence.getKnownEffect());
+                            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
                             if (oncogenicity != null && oncogenicity.equals(highestOncogenic)) {
                                 recordMatchHighestOncogenicity = evidence;
                                 break;
@@ -808,7 +858,7 @@ public class EvidenceUtils {
                         evidence.setId(recordMatchHighestOncogenicity.getId());
                         evidence.setGene(recordMatchHighestOncogenicity.getGene());
                         evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                        evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getDescription());
+                        evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getOncogenic());
                         query.getEvidences().add(evidence);
                     }
                 }

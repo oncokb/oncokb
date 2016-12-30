@@ -87,7 +87,7 @@ public class NumbersApi {
         }else {
             genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
         }
-        
+
 //        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
         apiNumbersGenes.setData(genes);
 
@@ -117,7 +117,7 @@ public class NumbersApi {
 
                 List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
                 alterations = AlterationUtils.excludeVUS(alterations);
-                alterations = AlterationUtils.excludeGeneralAlterations(alterations);
+                alterations = AlterationUtils.excludeInferredAlterations(alterations);
 
                 mainNumber.setAlteration(alterations.size());
                 mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
@@ -134,7 +134,7 @@ public class NumbersApi {
             mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
             mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
         }
-        
+
         apiNumbersMain.setData(mainNumber);
 
         RespMeta meta = new RespMeta();
@@ -152,7 +152,7 @@ public class NumbersApi {
         method = RequestMethod.GET)
     public ResponseEntity<ApiNumbersLeves> numbersLevelsGet()
         throws NotFoundException {
-        
+
         ApiNumbersLeves apiNumbersGenes = new ApiNumbersLeves();
         Set<LevelNumber> genes = new HashSet<>();
 
@@ -166,13 +166,13 @@ public class NumbersApi {
         }else {
             genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
         }
-        
+
         apiNumbersGenes.setData(genes);
 
         RespMeta meta = new RespMeta();
         meta.setCode(HttpStatus.OK.value());
         apiNumbersGenes.setRespMeta(meta);
-        
+
         return new ResponseEntity<ApiNumbersLeves>(apiNumbersGenes, HttpStatus.OK);
     }
 }

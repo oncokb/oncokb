@@ -95,7 +95,7 @@ public class validation {
         Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Integer count = 0;
-        ArrayList<String> specialAlterations = new ArrayList<>(Arrays.asList("Inactivating Mutations", "Activating Mutations", "Fusions", "Inactivating", "Wildtype", "Amplification", "Fusions"));
+        List<String> specialAlterations = AlterationUtils.getGeneralAlterations();
         for (Gene gene : genes) {
             Set<Evidence> evidences = allGeneBasedEvidences.get(gene);
             Set<Alteration> VUSAlterations = AlterationUtils.findVUSFromEvidences(evidences);
@@ -150,9 +150,9 @@ public class validation {
                         ListEntry row = new ListEntry();
                         row.getCustomElements().setValueLocal("Gene", alt.getGene().getHugoSymbol());
                         row.getCustomElements().setValueLocal("Alteration", alt.getAlteration());
-                        row.getCustomElements().setValueLocal("Oncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(alt)).getDescription());
+                        row.getCustomElements().setValueLocal("Oncogenicty", Oncogenicity.getByEffect(oncogenicityMapping.get(alt)).getOncogenic());
                         row.getCustomElements().setValueLocal("RelevantAlteration", relevantAlt.getAlteration());
-                        row.getCustomElements().setValueLocal("RelevantAlterationOncogenicty", Oncogenicity.getByLevel(oncogenicityMapping.get(relevantAlt)).getDescription());
+                        row.getCustomElements().setValueLocal("RelevantAlterationOncogenicty", Oncogenicity.getByEffect(oncogenicityMapping.get(relevantAlt)).getOncogenic());
                         service.insert(listFeedUrl1, row);
                         break;
                     }
@@ -176,13 +176,13 @@ public class validation {
                     && oncogenicityMapping.get(alt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
                     && mutationEffectMapping.containsKey(alt)
                     && mutationEffectMapping.get(alt) != null
-                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutation_effect())) {
+                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
                     Integer relevantsSize = relevantAlts.size();
                     Integer relevantCount = 0;
                     for (Alteration relevantAlt : relevantAlts) {
                         relevantCount++;
                         if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt) != null && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
-                            && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutation_effect())) {
+                            && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
                             ListEntry row = new ListEntry();
                             row.getCustomElements().setValueLocal("Gene", relevantAlt.getGene().getHugoSymbol());
                             row.getCustomElements().setValueLocal("Alteration", relevantAlt.getAlteration());

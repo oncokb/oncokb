@@ -200,4 +200,14 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_R3);
         }};
     }
+
+    public static Boolean areSameLevels(LevelOfEvidence l1, LevelOfEvidence l2) {
+        if (l1 == null && l2 == null) {
+            return true;
+        } else if (l1 != null && l2 != null) {
+            return l1.equals(l2);
+        } else {
+            return false;
+        }
+    }
 }

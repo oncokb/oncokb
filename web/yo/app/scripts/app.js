@@ -403,6 +403,8 @@ OncoKB.initialize = function() {
                         this[__key + '_comments'] = model.createList();
                         this[__key + '_timeStamp'] = model.createMap();
                         this[__key + '_eStatus'] = model.createMap();
+                        this[__key + '_uuid'] = model.createString('');
+                        this[__key + '_review'] = model.createMap();
                     }
                     switch (OncoKB.curateInfo[id][__key].type) {
                     case 'string':
@@ -430,6 +432,8 @@ OncoKB.initialize = function() {
                 OncoKB[_key].prototype[_keys[j] + '_comments'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_comments');
                 OncoKB[_key].prototype[_keys[j] + '_timeStamp'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_timeStamp');
                 OncoKB[_key].prototype[_keys[j] + '_eStatus'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_eStatus');
+                OncoKB[_key].prototype[_keys[j] + '_uuid'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_uuid');
+                OncoKB[_key].prototype[_keys[j] + '_review'] = gapi.drive.realtime.custom.collaborativeField(_key + '_' + _keys[j] + '_review');
             }
         }
 
@@ -473,6 +477,7 @@ var oncokbApp = angular.module('oncokbApp', [
         email: 'N/A'
     })
     .value('OncoKB', OncoKB)
+    // This is used for typeahead
     .constant('SecretEmptyKey', '[$empty$]')
     .constant('gapi', window.gapi)
     .constant('loadingScreen', window.loadingScreen)
@@ -483,6 +488,7 @@ var oncokbApp = angular.module('oncokbApp', [
     .constant('PDF', window.jsPDF)
     .constant('gapi', window.gapi)
     .constant('Tree', window.Tree)
+    .constant('UUIDjs', window.UUIDjs)
     .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
         var access = config.accessLevels;
 
@@ -594,8 +600,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'driveOncokbInfo', 'dialogs', 'stringUtils',
-        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, DriveOncokbInfo, dialogs, stringUtils) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils',
+        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils) {
             $rootScope.errors = [];
 
             // If data is loaded, the watch in nav controller should be triggered.
@@ -642,14 +648,6 @@ angular.module('oncokbApp').run(
                 if (oncokbInfo) {
                     if (oncokbInfo.users) {
                         Users.setUsers(oncokbInfo.users);
-                    }
-
-                    if (oncokbInfo.suggestions) {
-                        DriveOncokbInfo.setSuggestions(oncokbInfo.suggestions);
-                    }
-
-                    if (oncokbInfo.pubMed) {
-                        DriveOncokbInfo.setPubMed(oncokbInfo.pubMed);
                     }
 
                     if (Access.isLoggedIn()) {

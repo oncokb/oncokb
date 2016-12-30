@@ -19,7 +19,7 @@ angular.module('oncokbApp')
                 link: 'https://clinicaltrials.gov/show/'
             },
             abstract: {
-                regex: /\(\s*Abstract\s*:[^\)]*;\s*\)/ig
+                regex: /\(\s*Abstract\s*:([^\)]*\s*);?\s*\)/ig
             }
         };
 
@@ -121,23 +121,25 @@ angular.module('oncokbApp')
                                 uniqueResultA.push({type: 'nct', id: _datum});
                                 break;
                             case 2:
-                                var abstractPattern = /\(\s*Abstract\s*:\s*([^\)]*);\s*\)/gi;
+                                var abstractPattern = regex[2];
                                 _datum = abstractPattern.exec(_datum)[1];
                                 var abstracts = _datum.split(';');
-                                var text = '';
-                                var link = '';
                                 _.each(abstracts, function(item) {
                                     var myRegexp = /(.*?)\.\s*(http.*)/g;
                                     var match = myRegexp.exec(item);
-                                    if (match !== null) {
+                                    var text;
+                                    var link;
+                                    if (match === null) {
+                                        text = item;
+                                    } else {
                                         text = match[1];
                                         link = match[2];
-                                        uniqueResultA.push({
-                                            type: 'abstract',
-                                            id: text,
-                                            link: link
-                                        });
                                     }
+                                    uniqueResultA.push({
+                                        type: 'abstract',
+                                        id: text,
+                                        link: link
+                                    });
                                 });
                                 break;
                             default:

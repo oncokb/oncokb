@@ -15,11 +15,11 @@ angular.module('oncokbApp')
         'DriveAnnotation',
         'SendEmail',
         'DataSummary',
-        'ServerUtils',
         'Cache',
         'OncoTree',
         'InternalAccess',
         'ApiUtils',
+        'PrivateApiUtils',
         function($timeout,
                  $q,
                  config,
@@ -33,11 +33,11 @@ angular.module('oncokbApp')
                  DriveAnnotation,
                  SendEmail,
                  DataSummary,
-                 ServerUtils,
                  Cache,
                  OncoTree,
                  InternalAccess,
-                 ApiUtils) {
+                 ApiUtils,
+                 PrivateApiUtils) {
             var numOfLocks = {};
             var data = {};
 
@@ -278,6 +278,39 @@ angular.module('oncokbApp')
                 }
             }
 
+            function updateGeneType(hugoSymbol, data, success, fail) {
+                DriveAnnotation
+                    .updateGeneType(hugoSymbol, data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
+            function updateEvidence(uuid, data, success, fail) {
+                DriveAnnotation
+                    .updateEvidence(uuid, data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
+            function deleteEvidences(data, success, fail) {
+                DriveAnnotation
+                    .deleteEvidences(data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
@@ -322,46 +355,6 @@ angular.module('oncokbApp')
                         timeout(callback, timestamp);
                     }
                 }, 100);
-            }
-
-            function getHotspotList(callback) {
-                if (dataFromFile) {
-                    ServerUtils.hotspot.getFromFile()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                } else {
-                    ServerUtils.hotspot.getFromServer()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                }
-            }
-
-            function getAutoMutationList(callback) {
-                if (dataFromFile) {
-                    ServerUtils.autoMutation.getFromFile()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                } else {
-                    ServerUtils.autoMutation.hotspot.getFromServer()
-                        .success(function(data) {
-                            callback(data);
-                        })
-                        .error(function() {
-                            callback();
-                        });
-                }
             }
 
             function testAccess(successCallback, failCallback) {
@@ -529,6 +522,25 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
+            function getSuggestedVariants() {
+                var deferred = $q.defer();
+                if (dataFromFile) {
+                    deferred.resolve({
+                        meta: '',
+                        data: ['Fusion']
+                    });
+                } else {
+                    PrivateApiUtils.getSuggestedVariants()
+                        .success(function(data) {
+                            deferred.resolve(data);
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                }
+                return deferred.promise;
+            }
+
             // Public API here
             return {
                 getGeneAlterationTumorType: function(callback) {
@@ -573,9 +585,10 @@ angular.module('oncokbApp')
                 getOncokbInfo: getOncokbInfo,
                 getAllTumorType: getAllTumorType,
                 updateGene: updateGene,
+                updateGeneType: updateGeneType,
+                updateEvidence: updateEvidence,
+                deleteEvidences: deleteEvidences,
                 sendEmail: sendEmail,
-                getHotspotList: getHotspotList,
-                getAutoMutationList: getAutoMutationList,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {
                     return setCache('disable');
@@ -595,6 +608,7 @@ angular.module('oncokbApp')
                 getOncoTreeTumorTypeByName: getOncoTreeTumorTypeByName,
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,
-                getOncogeneTSG: getOncogeneTSG
+                getOncogeneTSG: getOncogeneTSG,
+                getSuggestedVariants: getSuggestedVariants
             };
         }]);

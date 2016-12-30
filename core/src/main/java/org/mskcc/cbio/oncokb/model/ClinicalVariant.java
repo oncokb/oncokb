@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 
@@ -19,8 +17,9 @@ public class ClinicalVariant {
     private String level = null;
     private Set<String> drug = new HashSet<String>();
     private Set<String> drugPmids = new HashSet<String>();
+    private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
 
-    
+
     /**
      **/
     @ApiModelProperty(value = "")
@@ -86,38 +85,57 @@ public class ClinicalVariant {
     }
 
 
+    /**
+     **/
+    @ApiModelProperty(value = "")
+    @JsonProperty("drugAbstracts")
+    public Set<ArticleAbstract> getDrugAbstracts() {
+        return drugAbstracts;
+    }
+
+    public void setDrugAbstracts(Set<ArticleAbstract> drugAbstracts) {
+        this.drugAbstracts = drugAbstracts;
+    }
+
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClinicalVariant that = (ClinicalVariant) o;
+
+        if (oncoTreeType != null ? !oncoTreeType.equals(that.oncoTreeType) : that.oncoTreeType != null) return false;
+        if (variant != null ? !variant.equals(that.variant) : that.variant != null) return false;
+        if (level != null ? !level.equals(that.level) : that.level != null) return false;
+        if (drug != null ? !drug.equals(that.drug) : that.drug != null) return false;
+        if (drugPmids != null ? !drugPmids.equals(that.drugPmids) : that.drugPmids != null) return false;
+        if (drugAbstracts != null ? !drugAbstracts.equals(that.drugAbstracts) : that.drugAbstracts != null)
             return false;
-        }
-        ClinicalVariant clinicalVariant = (ClinicalVariant) o;
-        return Objects.equals(variant, clinicalVariant.variant) &&
-            Objects.equals(oncoTreeType, clinicalVariant.oncoTreeType) &&
-            Objects.equals(level, clinicalVariant.level) &&
-            Objects.equals(drug, clinicalVariant.drug) &&
-            Objects.equals(drugPmids, clinicalVariant.drugPmids);
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(variant, oncoTreeType, level, drug, drugPmids);
+        int result = oncoTreeType != null ? oncoTreeType.hashCode() : 0;
+        result = 31 * result + (variant != null ? variant.hashCode() : 0);
+        result = 31 * result + (level != null ? level.hashCode() : 0);
+        result = 31 * result + (drug != null ? drug.hashCode() : 0);
+        result = 31 * result + (drugPmids != null ? drugPmids.hashCode() : 0);
+        result = 31 * result + (drugAbstracts != null ? drugAbstracts.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class ClinicalVariant {\n");
-
-        sb.append("  variant: ").append(variant).append("\n");
-        sb.append("  cancerType: ").append(oncoTreeType).append("\n");
-        sb.append("  level: ").append(level).append("\n");
-        sb.append("  drug: ").append(drug).append("\n");
-        sb.append("  drugPmids: ").append(drugPmids).append("\n");
-        sb.append("}\n");
-        return sb.toString();
+        return "ClinicalVariant{" +
+            "oncoTreeType=" + oncoTreeType +
+            ", variant=" + variant +
+            ", level='" + level + '\'' +
+            ", drug=" + drug +
+            ", drugPmids=" + drugPmids +
+            ", drugAbstracts=" + drugAbstracts +
+            '}';
     }
 }

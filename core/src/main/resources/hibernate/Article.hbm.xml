@@ -43,7 +43,7 @@
             <column name="abstract_content"/>
         </property>
         <property name="link" type="string">
-            <column name="link"/>
+            <column length="500" name="link"/>
         </property>
     </class>
     <query name="findArticleByPmid">

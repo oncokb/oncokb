@@ -4,10 +4,7 @@ import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
 import org.mskcc.cbio.oncokb.apiModels.Meta;
-import org.mskcc.cbio.oncokb.model.BiologicalVariant;
-import org.mskcc.cbio.oncokb.model.ClinicalVariant;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.OncoTreeType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.MetaUtils;
@@ -40,10 +37,16 @@ public class UtilsApiController implements UtilsApi {
         for (Map.Entry<Gene, Set<BiologicalVariant>> entry : map.entrySet()) {
             Gene gene = entry.getKey();
             for (BiologicalVariant biologicalVariant : entry.getValue()) {
+                Set<ArticleAbstract> articleAbstracts = biologicalVariant.getMutationEffectAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
                 annotatedVariants.add(new AnnotatedVariant(
                     gene.getHugoSymbol(), biologicalVariant.getVariant().getName(), biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
-                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ")));
+                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "),
+                    MainUtils.listToString(abstracts, "; ")));
             }
         }
 
@@ -72,6 +75,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Oncogenicity");
         header.add("Mutation Effect");
         header.add("PMIDs for Mutation Effect");
+        header.add("Abstracts for Mutation Effect");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
@@ -84,6 +88,12 @@ public class UtilsApiController implements UtilsApi {
                 row.add(biologicalVariant.getOncogenic());
                 row.add(biologicalVariant.getMutationEffect());
                 row.add(MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "));
+                Set<ArticleAbstract> articleAbstracts = biologicalVariant.getMutationEffectAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
+                row.add(MainUtils.listToString(abstracts, "; "));
                 sb.append(MainUtils.listToString(row, separator));
                 sb.append(newLine);
             }
@@ -108,12 +118,19 @@ public class UtilsApiController implements UtilsApi {
         for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
             Gene gene = entry.getKey();
             for (ClinicalVariant clinicalVariant : entry.getValue()) {
+                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
+
                 actionableGenes.add(new ActionableGene(
                     gene.getHugoSymbol(), clinicalVariant.getVariant().getName(),
                     getCancerType(clinicalVariant.getOncoTreeType()),
                     clinicalVariant.getLevel(),
                     MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ")));
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", "),
+                    MainUtils.listToString(abstracts, "; ")));
             }
         }
 
@@ -141,6 +158,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Level");
         header.add("Drugs(s)");
         header.add("PMIDs for drug");
+        header.add("Abstracts for drug");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
@@ -154,6 +172,12 @@ public class UtilsApiController implements UtilsApi {
                 row.add(clinicalVariant.getLevel());
                 row.add(MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "));
                 row.add(MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", "));
+                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
+                row.add(MainUtils.listToString(abstracts, "; "));
                 sb.append(MainUtils.listToString(row, separator));
                 sb.append(newLine);
             }

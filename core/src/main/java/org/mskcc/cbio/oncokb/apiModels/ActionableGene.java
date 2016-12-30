@@ -12,6 +12,7 @@ public class ActionableGene {
     String level;
     String drugs;
     String pmids;
+    String abstracts;
 
     public String getGene() {
         return gene;
@@ -61,12 +62,21 @@ public class ActionableGene {
         this.pmids = pmids;
     }
 
-    public ActionableGene(String gene, String variant, String cancerType, String level, String drugs, String pmids) {
+    public String getAbstracts() {
+        return abstracts;
+    }
+
+    public void setAbstracts(String abstracts) {
+        this.abstracts = abstracts;
+    }
+
+    public ActionableGene(String gene, String variant, String cancerType, String level, String drugs, String pmids, String abstracts) {
         this.gene = gene;
         this.variant = variant;
         this.cancerType = cancerType;
         this.level = level;
         this.drugs = drugs;
         this.pmids = pmids;
+        this.abstracts = abstracts;
     }
 }

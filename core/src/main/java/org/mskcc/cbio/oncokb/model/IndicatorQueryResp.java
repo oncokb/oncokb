@@ -1,7 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -13,9 +14,11 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Boolean geneExist;
     private Boolean variantExist;
     private Boolean alleleExist;
-    private String oncogenic; //1: Oncogenic; 2: Likely Oncogenic; 0: Likely Neutral -1: Inconclusive
-    private String highestSensitiveLevel;
-    private String highestResistanceLevel;
+    private String oncogenic;
+    private LevelOfEvidence highestSensitiveLevel;
+    private LevelOfEvidence highestResistanceLevel;
+    private List<LevelOfEvidence> otherSignificantSensitiveLevels;
+    private List<LevelOfEvidence> otherSignificantResistanceLevels;
     private Boolean VUS;
     private Boolean hotspot;
     private String geneSummary;
@@ -60,20 +63,36 @@ public class IndicatorQueryResp implements java.io.Serializable {
         this.oncogenic = oncogenic;
     }
 
-    public String getHighestSensitiveLevel() {
+    public LevelOfEvidence getHighestSensitiveLevel() {
         return highestSensitiveLevel;
     }
 
-    public void setHighestSensitiveLevel(String highestSensitiveLevel) {
+    public void setHighestSensitiveLevel(LevelOfEvidence highestSensitiveLevel) {
         this.highestSensitiveLevel = highestSensitiveLevel;
     }
 
-    public String getHighestResistanceLevel() {
+    public LevelOfEvidence getHighestResistanceLevel() {
         return highestResistanceLevel;
     }
 
-    public void setHighestResistanceLevel(String highestResistanceLevel) {
+    public void setHighestResistanceLevel(LevelOfEvidence highestResistanceLevel) {
         this.highestResistanceLevel = highestResistanceLevel;
+    }
+
+    public List<LevelOfEvidence> getOtherSignificantSensitiveLevels() {
+        return otherSignificantSensitiveLevels;
+    }
+
+    public void setOtherSignificantSensitiveLevels(List<LevelOfEvidence> otherSignificantSensitiveLevels) {
+        this.otherSignificantSensitiveLevels = otherSignificantSensitiveLevels;
+    }
+
+    public List<LevelOfEvidence> getOtherSignificantResistanceLevels() {
+        return otherSignificantResistanceLevels;
+    }
+
+    public void setOtherSignificantResistanceLevels(List<LevelOfEvidence> otherSignificantResistanceLevels) {
+        this.otherSignificantResistanceLevels = otherSignificantResistanceLevels;
     }
 
     public Boolean getVUS() {
