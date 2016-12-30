@@ -69,7 +69,7 @@ angular.module('oncokbApp')
                         delay: 500
                     }
                 };
-                if (attrs.number !== undefined && attrs.number.length > 0) {
+                if (attrs.type === 'vusItem' || (attrs.number !== undefined && attrs.number.length > 0)) {
                     $(element).qtip(options);
                 }
 
