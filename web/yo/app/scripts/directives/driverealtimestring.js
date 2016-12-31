@@ -30,7 +30,6 @@ angular.module('oncokbApp')
             link: function postLink(scope) {
                 scope.addOnTimeoutPromise = '';
                 scope.stringTimeoutPromise = '';
-                scope.content = {};
                 if (scope.objecttype === 'object' && scope.objectkey) {
                     if (scope.object.has(scope.objectkey)) {
                         scope.content.stringO = scope.object.get(scope.objectkey);
@@ -73,9 +72,73 @@ angular.module('oncokbApp')
                         }
                     }, 1000);
                 });
+
+                if (scope.t === 'treatment-select') {
+                    if (!_.isUndefined(scope.es) && scope.es.get('propagation')) {
+                        scope.content.propagation = scope.es.get('propagation');
+                    }
+                    scope.changePropagation(true);
+                    scope.$watch('content.propagation', function(n) {
+                        if (!_.isUndefined(scope.es)) {
+                            if (_.isUndefined(scope.es.get('propagation')) ||
+                                scope.es.get('propagation') !== n) {
+                                scope.es.set('propagation', n);
+                            }
+                        }
+                    });
+                }
             },
             controller: function($scope) {
+                $scope.content = {};
+                $scope.content.propagationOpts = [];
+                $scope.propagationOpts = {
+                    'no': {
+                        name: 'No level',
+                        value: 'no'
+                    },
+                    '2B': {
+                        name: 'Level 2B',
+                        value: '2B'
+                    },
+                    '3B': {
+                        name: 'Level 3B',
+                        value: '3B'
+                    },
+                    '4': {
+                        name: 'Level 4',
+                        value: '4'
+                    }
+                };
+                $scope.changePropagation = function(initialize) {
+                    var _propagationOpts = [];
+                    if ($scope.content.stringO === '1' || $scope.content.stringO === '2A') {
+                        _propagationOpts = [
+                            $scope.propagationOpts.no,
+                            $scope.propagationOpts['2B'],
+                            $scope.propagationOpts['4']
+                        ];
+                        if (!($scope.content.propagation && initialize)) {
+                            $scope.content.propagation = '2B';
+                        }
+                    } else if ($scope.content.stringO === '3A') {
+                        _propagationOpts = [
+                            $scope.propagationOpts.no,
+                            $scope.propagationOpts['3B'],
+                            $scope.propagationOpts['4']
+                        ];
+                        if (!($scope.content.propagation && initialize)) {
+                            $scope.content.propagation = '3B';
+                        }
+                    } else {
+                        $scope.content.propagation = null;
+                    }
+                    $scope.content.propagationOpts = _propagationOpts;
+                };
+
                 $scope.valueChanged = function() {
+                    if ($scope.t === 'treatment-select') {
+                        $scope.changePropagation();
+                    }
                     if (!_.isUndefined($scope.es)) {
                         $scope.es.set('vetted', 'uv');
                     }
@@ -90,8 +153,8 @@ angular.module('oncokbApp')
                         $scope.content.stringO = '';
                     }
                     $scope.content.preStringO = $scope.content.stringO;
-                    // console.log(event, $scope.content.stringO);
                 };
             }
         };
-    });
+    })
+;

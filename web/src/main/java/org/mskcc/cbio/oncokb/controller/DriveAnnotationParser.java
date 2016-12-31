@@ -738,6 +738,34 @@ public class DriveAnnotationParser {
                     //throw new RuntimeException("wrong level of evidence: "+level);
                 }
                 evidence.setLevelOfEvidence(levelOfEvidence);
+
+                List<LevelOfEvidence> acceptablePropagationList = new ArrayList<>();
+                acceptablePropagationList.add(LevelOfEvidence.LEVEL_2B);
+                acceptablePropagationList.add(LevelOfEvidence.LEVEL_3B);
+                acceptablePropagationList.add(LevelOfEvidence.LEVEL_4);
+
+                if (drugObj.has("propagation")) {
+                    String definedPropagation = drugObj.getString("propagation");
+                    if (definedPropagation.equals("no")) {
+                        evidence.setPropagation("NO");
+                    }
+                    LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
+
+                    // Validate level
+                    if (definedLevel != null && acceptablePropagationList.contains(definedLevel)) {
+                        evidence.setPropagation(definedLevel.name());
+                    }
+                }
+
+                // If there is no propagation info predefined, use the default settings.
+                if (evidence.getPropagation() == null && evidence.getLevelOfEvidence() != null) {
+                    if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
+                        evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+                        evidence.setPropagation(LevelOfEvidence.LEVEL_2B.name());
+                    } else if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
+                        evidence.setPropagation(LevelOfEvidence.LEVEL_3B.name());
+                    }
+                }
             }
 
             // description
