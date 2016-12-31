@@ -360,11 +360,11 @@ public class EvidenceUtils {
             Boolean flag = true;
             if (CollectionUtils.intersection(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes).isEmpty()) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
-                    if (tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
-                        tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
-                        tmpEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                    } else if (tmpEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-                        tmpEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+                    if (tmpEvidence.getPropagation() != null) {
+                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tmpEvidence.getPropagation());
+                        if (propagationLevel != null) {
+                            tmpEvidence.setLevelOfEvidence(propagationLevel);
+                        }
                     }
 
                     // Don't include any resistance evidence if tumor type is not matched.
@@ -412,20 +412,14 @@ public class EvidenceUtils {
                                 if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType)) {
                                     filtered.add(tempEvidence);
                                 } else {
-                                    if (tempEvidence.getLevelOfEvidence() != null) {
-                                        if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
-                                            tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+                                    if (tempEvidence.getLevelOfEvidence() != null && tempEvidence.getPropagation() != null) {
+                                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tempEvidence.getPropagation());
+
+                                        if (propagationLevel != null) {
                                             if (evidenceQuery.getLevelOfEvidences() == null
                                                 || evidenceQuery.getLevelOfEvidences().size() == 0
-                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_2B)) {
-                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_2B);
-                                                filtered.add(tempEvidence);
-                                            }
-                                        } else if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-                                            if (evidenceQuery.getLevelOfEvidences() == null
-                                                || evidenceQuery.getLevelOfEvidences().size() == 0
-                                                || evidenceQuery.getLevelOfEvidences().contains(LevelOfEvidence.LEVEL_3B)) {
-                                                tempEvidence.setLevelOfEvidence(LevelOfEvidence.LEVEL_3B);
+                                                || evidenceQuery.getLevelOfEvidences().contains(propagationLevel)) {
+                                                tempEvidence.setLevelOfEvidence(propagationLevel);
                                                 filtered.add(tempEvidence);
                                             }
                                         }

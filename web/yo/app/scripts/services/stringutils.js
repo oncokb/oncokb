@@ -994,6 +994,9 @@ angular.module('oncokbApp')
                                             return;
                                         }
                                         treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeObsolete, excludeComments);
+                                        if (e3.name_eStatus.has('propagation')) {
+                                            treatment.propagation = e3.name_eStatus.get('propagation');
+                                        }
                                         ti.treatments.push(treatment);
                                     });
                                     __tumor.TI.push(ti);
