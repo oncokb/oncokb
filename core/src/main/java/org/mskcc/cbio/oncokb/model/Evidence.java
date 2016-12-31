@@ -31,6 +31,8 @@ public class Evidence implements java.io.Serializable {
     private String knownEffect;
     private Date lastEdit;
     private LevelOfEvidence levelOfEvidence;
+    @JsonIgnore
+    private String propagation;
     private Set<Article> articles;
     private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
     private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
@@ -161,6 +163,14 @@ public class Evidence implements java.io.Serializable {
         this.levelOfEvidence = levelOfEvidence;
     }
 
+    public String getPropagation() {
+        return propagation;
+    }
+
+    public void setPropagation(String propagation) {
+        this.propagation = propagation;
+    }
+
     public Set<Article> getArticles() {
         return articles;
     }
@@ -247,6 +257,7 @@ public class Evidence implements java.io.Serializable {
         knownEffect = e.knownEffect;
         lastEdit = e.lastEdit;
         levelOfEvidence = e.levelOfEvidence;
+        propagation = e.propagation;
         articles = e.articles;
         nccnGuidelines = e.nccnGuidelines;
         clinicalTrials = e.clinicalTrials;

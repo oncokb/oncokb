@@ -54,6 +54,9 @@
                 <param name="useNamed">true</param>
             </type>
         </property>
+        <property name="propagation" type="string">
+            <column length="10" name="propagation"/>
+        </property>
         <property name="description" type="string">
             <column length="65535" name="description"/>
         </property>
