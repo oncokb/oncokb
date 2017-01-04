@@ -902,7 +902,7 @@ angular.module('oncokbApp')
                         _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete);
                         _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false, excludeComments);
                         _mutation.effect_uuid = e.effect_uuid ? e.effect_uuid.getText() : '';
-                        _mutation.effect_review = getReview(e.effect_review);
+                        //_mutation.effect_review = getReview(e.effect_review);
                         // if(_mutation.effect && _mutation.effect.value) {
                         //     var effect = _mutation.effect.value;
                         //
@@ -964,7 +964,7 @@ angular.module('oncokbApp')
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
                                 __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments);
                                 __tumor.nccn_uuid = e1.nccn_uuid ? e1.nccn_uuid.getText() : '';
-                                __tumor.nccn_review = getReview(e1.nccn_review);
+                                //__tumor.nccn_review = getReview(e1.nccn_review);
                             }
 
                             if (!(excludeObsolete && e1.trials_eStatus && e1.trials_eStatus.has('obsolete') && e1.trials_eStatus.get('obsolete') === 'true')) {
@@ -976,7 +976,7 @@ angular.module('oncokbApp')
                                     __tumor.trials_comments = getComments(e1.trials_comments);
                                 }
                                 __tumor.trials_uuid = e1.trials_uuid ? e1.trials_uuid.getText() : '';
-                                __tumor.trials_review = getReview(e1.trials_review);
+                                //__tumor.trials_review = getReview(e1.trials_review);
                             }
 
                             e1.TI.asArray().forEach(function(e2) {
@@ -1031,6 +1031,9 @@ angular.module('oncokbApp')
                         _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping) {
                             object[e][keyMapping] = model[e].get(keyMapping);
                         });
+                        if (model[e + '_uuid']) {
+                            object[e + '_uuid'] = model[e + '_uuid'].getText();
+                        }
                     } else {
                         object[e] = getString(model[e].getText());
                         if (!excludeComments && model[e + '_comments']) {
@@ -1045,9 +1048,9 @@ angular.module('oncokbApp')
                         if (model[e + '_uuid']) {
                             object[e + '_uuid'] = model[e + '_uuid'].getText();
                         }
-                        if (model[e + '_review']) {
-                            object[e + '_review'] = getReview(model[e + '_review']);
-                        }
+                        //if (model[e + '_review']) {
+                        //    object[e + '_review'] = getReview(model[e + '_review']);
+                        //}
                     }
                 }
             });
