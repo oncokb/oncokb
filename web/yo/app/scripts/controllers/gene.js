@@ -147,8 +147,10 @@ angular.module('oncokbApp')
 
             $scope.backup = function() {
                 $scope.status.backup = false;
+                OncoKB.backingUp = true;
                 importer.backup(function() {
                     $scope.status.backup = true;
+                    OncoKB.backingUp = false;
                 });
             };
 
