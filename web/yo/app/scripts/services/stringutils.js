@@ -870,7 +870,7 @@ angular.module('oncokbApp')
 
             excludeObsolete = _.isBoolean(excludeObsolete) ? excludeObsolete : false;
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
-            excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : true;
+            excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : false;
 
             gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments);
             gene.mutations = [];
