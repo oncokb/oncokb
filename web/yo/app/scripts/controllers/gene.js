@@ -1649,7 +1649,7 @@ angular.module('oncokbApp')
 
             $scope.getData = function() {
                 //var gene = stringUtils.getGeneData(this.gene);
-                var test = $scope.geneStatus;
+                var test = $rootScope.reviewMeta;
                 console.log(test);
             };
             function parseMutationString(mutationStr) {
@@ -1707,9 +1707,11 @@ angular.module('oncokbApp')
                 else if(uuid !== null && checkReview(uuid)) return true;
                 else return reviewObj.get('review') || reviewObj.get('action') || reviewObj.get('rollback');
             };
-            $scope.removedCheck = function(mutationReview, tumorReview, treatmentReview) {
-                if(mutationReview && mutationReview.get('removed') || tumorReview && tumorReview.get('removed') || treatmentReview && treatmentReview.get('removed'))return true;
-                else return false;
+            $scope.signatureCheck = function(reviewObj, mutationReview, tumorReview, treatmentReview) {
+                if(!$rootScope.reviewMode) return false;
+                else if(mutationReview && mutationReview.get('removed') || tumorReview && tumorReview.get('removed') || treatmentReview && treatmentReview.get('removed'))return false;
+                else if(reviewObj.get('action')) return false;
+                else return true;
             }
             $scope.iconClass = function (type, reviewObj) {
                 if(!reviewObj.get('action')) {
@@ -1795,12 +1797,15 @@ angular.module('oncokbApp')
                 }
             }
             function mostRecentItem(reviewObjs) {
-                var mostRecent = 1;
+                var mostRecent = -1;
                 for(var i = 0; i < reviewObjs.length; i++) {
-                    if(Date.parse(reviewObjs[mostRecent].get('updateTime') > Date.parse(reviewObjs[i].get('updateTime')))) {
+                    if(mostRecent < 0) {
+                        if(reviewObjs[i].get('updateTime')) mostRecent = i;
+                    }else if(Date.parse(reviewObjs[mostRecent].get('updateTime') > Date.parse(reviewObjs[i].get('updateTime')))) {
                         mostRecent = i;
                     }
                 }
+                if(mostRecent < 0)return 0;
                 return mostRecent;
             }
             function setUpdatedSignature(tempArr, reviewObj) {
@@ -1987,16 +1992,16 @@ angular.module('oncokbApp')
                     dataUUID = tumor.nccn_uuid.getText();
                     data.description = tumor.nccn.description.getText();
                     data.additionalInfo = tumor.nccn.short.getText();
-                    data.nccnGuidelines = [
-                        {
-                            "additionalInfo": "test",
-                            "category": "test",
-                            "description": "test",
-                            "disease": "test",
-                            "pages": "test",
-                            "version": "test"
-                        }
-                    ];
+                    //data.nccnGuidelines = [
+                    //    {
+                    //        "additionalInfo": "test",
+                    //        "category": "test",
+                    //        "description": "test",
+                    //        "disease": "test",
+                    //        "pages": "test",
+                    //        "version": "test"
+                    //    }
+                    //];
                     break;
                 case 'Standard implications for sensitivity to therapy':
                     data.evidenceType = "STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY";
@@ -2016,11 +2021,11 @@ angular.module('oncokbApp')
                     break;
                 case 'CLINICAL_TRIAL':
                     dataUUID = tumor.trials_uuid.getText();
-                    data.clinicalTrials = [
-                        {
-                            "nctId": "NCT1234567"
-                        }
-                    ];
+                    //data.clinicalTrials = [
+                    //    {
+                    //        "nctId": "NCT1234567"
+                    //    }
+                    //];
                     break;
                 default:
                     break;
@@ -2042,18 +2047,18 @@ angular.module('oncokbApp')
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
                         data.description = treatment.description.getText();
                         data.additionalInfo = treatment.short.getText();
-                        data.treatments = [
-                            {
-                                "approvedIndications": [
-                                    "test"
-                                ],
-                                "drugs": [
-                                    {
-                                        "drugName": "test"
-                                    }
-                                ]
-                            }
-                        ];
+                        //data.treatments = [
+                        //    {
+                        //        "approvedIndications": [
+                        //            "test"
+                        //        ],
+                        //        "drugs": [
+                        //            {
+                        //                "drugName": "test"
+                        //            }
+                        //        ]
+                        //    }
+                        //];
                     }
                 }
 
@@ -2094,6 +2099,8 @@ angular.module('oncokbApp')
                 reviewObj.set('action', 'accepted');
                 setReview(uuid, false);
                 reviewObj.delete('lastReviewed');
+                reviewObj.delete('updatedBy');
+                reviewObj.delete('updateTime');
                 reviewObjsRemove.push(reviewObj);
             }
 
@@ -2175,6 +2182,8 @@ angular.module('oncokbApp')
                     obj.set('OCG', lastReviewedContent['OCG']);
                 }
                 reviewObj.delete('lastReviewed');
+                reviewObj.delete('updatedBy');
+                reviewObj.delete('updateTime');
                 reviewObjsRemove.push(reviewObj);
             }
 
@@ -2784,15 +2793,6 @@ angular.module('oncokbApp')
                 $scope.stopCollopse(event);
             };
 
-            $scope.redo = function() {
-                $scope.model.redo();
-                regenerateGeneStatus();
-            };
-
-            $scope.undo = function() {
-                $scope.model.undo();
-                regenerateGeneStatus();
-            };
             function fetchResults(data) {
                 var PMIDs = [];
                 var abstracts = [];
@@ -3315,7 +3315,6 @@ angular.module('oncokbApp')
                 $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveStateChangedEvent);
                 $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
                 $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
-
                 $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveMetaChangedEvent);
             }
 

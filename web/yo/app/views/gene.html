@@ -1,5 +1,5 @@
 <div ng-hide="status.rendering" ng-if="gene" class="geneMainDiv">
-  <div id="gene">
+  <div id="gene" style="margin-bottom:50px">
     <h2>
       <!-- Gene: <span>{{gene.name.text}}</span> -->
       Gene: <span contenteditable="false" ng-model="gene.name.text"></span><comments-dict gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
@@ -11,8 +11,6 @@
       <span class="btn-group btn-group-sm pull-right" role="group">
         <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-disabled="disableReview || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Done Review' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-click="getData()">Gene</button>
-        <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
-        <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
         <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true">
           <i class="fa fa-eye-slash"></i>Hide all empty
@@ -54,7 +52,7 @@
         <h3>{{::gene.summary.display}}:
           <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{::gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'"></e-status>
-          <p ng-if="reviewMode" style="float:right;font-size:15px;">Updated by {{gene.summary_review.get('updatedBy')}} at {{gene.summary_review.get('updateTime')}}</p>
+          <p ng-show="signatureCheck(gene.summary_review)" style="float:right;font-size:15px;">Updated by {{gene.summary_review.get('updatedBy')}} at {{gene.summary_review.get('updateTime')}}</p>
           <i class="fa fa-check" ng-class="iconClass('accept', gene.summary_review)" ng-if="iconExist('accept', gene.summary_review)"  ng-click="accept(null, 'GENE_SUMMARY', null, null, null, null, gene.summary_review)"></i>
           <i class="fa fa-times" ng-class="iconClass('reject', gene.summary_review)" ng-if="iconExist('reject', gene.summary_review)"  ng-click="reject(null, 'GENE_SUMMARY', null, null, null, null, gene.summary_review)"></i>
         </h3>
@@ -83,7 +81,7 @@
         <h3>{{::gene.background.display}}:
             <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'"></e-status>
-            <p ng-if="reviewMode" style="float:right;font-size:15px;">Updated by {{gene.background_review.get('updatedBy')}} at {{gene.background_review.get('updateTime')}}</p>
+            <p ng-show="signatureCheck(gene.background_review)" style="float:right;font-size:15px;">Updated by {{gene.background_review.get('updatedBy')}} at {{gene.background_review.get('updateTime')}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept', gene.background_review)" ng-if="iconExist('accept', gene.background_review)"  ng-click="accept(null, 'GENE_BACKGROUND', null, null, null, null, gene.background_review)"></i>
             <i class="fa fa-times" ng-class="iconClass('reject', gene.background_review)" ng-if="iconExist('reject', gene.background_review)"  ng-click="reject(null, 'GENE_BACKGROUND', null, null, null, null, gene.background_review)"></i>
         </h3>
@@ -125,7 +123,7 @@
               <i ng-click="remove($event, $index)" class="fa fa-trash-o"></i>
             </span>
               <span class="pull-right" ng-if="mutation.name_review.get('removed')">
-                    <p ng-if="reviewMode" style="float:left;font-size:15px;color:red">Deleted by {{mutation.name_review.get('updatedBy')}} at {{mutation.name_review.get('updateTime')}}</p>
+                    <p style="float:left;font-size:15px;color:red">Deleted by {{mutation.name_review.get('updatedBy')}} at {{mutation.name_review.get('updateTime')}}</p>
                     <i class="fa fa-check fa-margin" ng-class="iconClass('accept', mutation.name_review)"  ng-click="confirmDelete($event, 'mutation', mutation, $index)"></i>
                     <i class="fa fa-times fa-margin" ng-class="iconClass('reject', mutation.name_review)"  ng-click="cancelDelete($event, $index)"></i>
               </span>
@@ -140,26 +138,28 @@
                    <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.shortSummary_eStatus" id="mutation.name.text  + '-shortSummary'"></e-status>
                 </span>
                 <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                    <p ng-hide="removedCheck(mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.oncogenic_review.get('updatedBy')}} at {{mutation.oncogenic_review.get('updateTime')}}</p>
+                    <p ng-show="signatureCheck(mutation.oncogenic_review, mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.oncogenic_review.get('updatedBy')}} at {{mutation.oncogenic_review.get('updateTime')}}</p>
                     <i class="fa fa-check fa-margin" ng-class="iconClass('accept', mutation.oncogenic_review)" ng-if="iconExist('accept', mutation.oncogenic_review, mutation.name_review)"  ng-click="accept($event, 'Clinical effect', mutation, null, null, null, mutation.oncogenic_review)"></i>
                     <i class="fa fa-times fa-margin" ng-class="iconClass('reject', mutation.oncogenic_review)" ng-if="iconExist('reject', mutation.oncogenic_review, mutation.name_review)"  ng-click="reject($event, 'Clinical effect', mutation, null, null, null, mutation.oncogenic_review)"></i>
                 </span>
               </uib-accordion-heading>
-              <p>
-                <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
-                <drive-realtime-string rs="mutation.oncogenic_review" uuid="mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
-              </p>
+                <p>
+                    <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
+                    <drive-realtime-string rs="mutation.oncogenic_review" uuid="mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
+                </p>
                 <!-- Migrate from mutation summary -->
-                <span ng-if="userRole === 8">
-                <strong>Summary statement:</strong>
-                <br/>
-                <drive-realtime-string rs="mutation.shortSummary_review" uuid="mutation.shortSummary_uuid" fe="fileEditable" t="'p'" object="mutation.shortSummary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
-              </span>
-                <span>
-                <strong>Description of Evidence:</strong>
-                <br/>
-                <drive-realtime-string rs="mutation.summary_review" uuid="mutation.summary_uuid" fe="fileEditable" t="'p'" object="mutation.summary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
-              </span>
+                <div>
+                    <span ng-if="userRole === 8">
+                    <strong>Summary statement:</strong>
+                    <br/>
+                    <drive-realtime-string rs="mutation.shortSummary_review" uuid="mutation.shortSummary_uuid" fe="fileEditable" t="'p'" object="mutation.shortSummary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
+                  </span>
+                    <span>
+                    <strong>Description of Evidence:</strong>
+                    <br/>
+                    <drive-realtime-string rs="mutation.summary_review" uuid="mutation.summary_uuid" fe="fileEditable" t="'p'" object="mutation.summary" io="geneStatus[$index].shortSummary.isOpen"></drive-realtime-string>
+                  </span>
+                </div>
             </uib-accordion-group>
 
             <!-- Mutation Effect -->
@@ -171,7 +171,7 @@
                    <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'"></e-status>
                 </span>
                 <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                    <p ng-hide="removedCheck(mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.effect_review.get('updatedBy')}} at {{mutation.effect_review.get('updateTime')}}</p>
+                    <p ng-show="signatureCheck(mutation.effect_review, mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.effect_review.get('updatedBy')}} at {{mutation.effect_review.get('updateTime')}}</p>
                     <i class="fa fa-check fa-margin" ng-class="iconClass('accept', mutation.effect_review)" ng-if="iconExist('accept', mutation.effect_review, mutation.name_review)"  ng-click="accept($event, 'MUTATION_EFFECT', mutation, null, null, null, mutation.effect_review)"></i>
                     <i class="fa fa-times fa-margin" ng-class="iconClass('reject', mutation.effect_review)" ng-if="iconExist('reject', mutation.effect_review, mutation.name_review)"  ng-click="reject($event, 'MUTATION_EFFECT', mutation, null, null, null, mutation.effect_review)"></i>
                 </span>
@@ -228,7 +228,7 @@
                 <div ng-if="displayCheck(tumor.summary_uuid, tumor.summary_review, mutation.name_review, tumor.name_review)">
                     <h5><b>Tumor Type Summary (Optional): </b>
                     <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                        <p ng-hide="removedCheck(mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.summary_review.get('updatedBy')}} at {{tumor.summary_review.get('updateTime')}}</p>
+                        <p ng-show="signatureCheck(tumor.summary_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.summary_review.get('updatedBy')}} at {{tumor.summary_review.get('updateTime')}}</p>
                         <i class="fa fa-check fa-margin" ng-class="iconClass('accept', tumor.summary_review)" ng-if="iconExist('accept', tumor.summary_review, tumor.name_review)"  ng-click="accept($event, 'TUMOR_TYPE_SUMMARY', mutation, tumor, null, null, tumor.summary_review)"></i>
                         <i class="fa fa-times fa-margin" ng-class="iconClass('reject', tumor.summary_review)" ng-if="iconExist('reject', tumor.summary_review, tumor.name_review)"  ng-click="reject($event, 'TUMOR_TYPE_SUMMARY', mutation, tumor, null, null, tumor.summary_review)"></i>
                     </span>
@@ -246,7 +246,7 @@
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'"></e-status>
                       </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                            <p ng-hide="removedCheck(mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.prevalence_review.get('updatedBy')}} at {{tumor.prevalence_review.get('updateTime')}}</p>
+                            <p ng-show="signatureCheck(tumor.prevalence_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.prevalence_review.get('updatedBy')}} at {{tumor.prevalence_review.get('updateTime')}}</p>
                             <i class="fa fa-check fa-margin" ng-class="iconClass('accept', tumor.prevalence_review)" ng-if="iconExist('accept', tumor.prevalence_review, tumor.name_review)"  ng-click="accept($event, 'PREVALENCE', mutation, tumor, null, null, tumor.prevalence_review)"></i>
                             <i class="fa fa-times fa-margin" ng-class="iconClass('reject', tumor.prevalence_review)" ng-if="iconExist('reject', tumor.prevalence_review, tumor.name_review)"  ng-click="reject($event, 'PREVALENCE', mutation, tumor, null, null, tumor.prevalence_review)"></i>
                         </span>
@@ -265,7 +265,7 @@
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'"></e-status>
                       </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                            <p ng-hide="removedCheck(mutation.name_review, tumor.name_review)" ng-if="reviewMode" style="float:left;font-size:15px;">Updated by {{tumor.progImp_review.get('updatedBy')}} at {{tumor.progImp_review.get('updateTime')}}</p>
+                            <p ng-show="signatureCheck(tumor.progImp_review, mutation.name_review, tumor.name_review)" ng-if="reviewMode" style="float:left;font-size:15px;">Updated by {{tumor.progImp_review.get('updatedBy')}} at {{tumor.progImp_review.get('updateTime')}}</p>
                             <i class="fa fa-check fa-margin" ng-class="iconClass('accept', tumor.progImp_review)" ng-if="iconExist('accept', tumor.progImp_review, tumor.name_review)"  ng-click="accept($event, 'PROGNOSTIC_IMPLICATION', mutation, tumor, null, null, tumor.progImp_review)"></i>
                             <i class="fa fa-times fa-margin" ng-class="iconClass('reject', tumor.progImp_review)" ng-if="iconExist('reject', tumor.progImp_review, tumor.name_review)"  ng-click="reject($event, 'PROGNOSTIC_IMPLICATION', mutation, tumor, null, null, tumor.progImp_review)"></i>
                         </span>
@@ -284,7 +284,7 @@
                          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'"></e-status>
                       </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                            <p ng-hide="removedCheck(mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.nccn_review.get('updatedBy')}} at {{tumor.nccn_review.get('updateTime')}}</p>
+                            <p ng-show="signatureCheck(tumor.nccn_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.nccn_review.get('updatedBy')}} at {{tumor.nccn_review.get('updateTime')}}</p>
                             <i class="fa fa-check fa-margin" ng-class="iconClass('accept', tumor.nccn_review)" ng-if="iconExist('accept', tumor.nccn_review, tumor.name_review)"  ng-click="accept($event, 'NCCN_GUIDELINES', mutation, tumor, null, null, tumor.nccn_review)"></i>
                             <i class="fa fa-times fa-margin" ng-class="iconClass('reject', tumor.nccn_review)" ng-if="iconExist('reject', tumor.nccn_review, tumor.name_review)"  ng-click="reject($event, 'NCCN_GUIDELINES', mutation, tumor, null, null, tumor.nccn_review)"></i>
                         </span>
@@ -336,7 +336,7 @@
                         <div ng-if="displayCheck(ti.description_uuid, ti.description_review, mutation.name_review, tumor.name_review)">
                             <h5><b>General Summary (Optional): </b>
                                 <span style="margin-right:10px;float:right" ng-show="reviewMode">
-                                    <p ng-hide="removedCheck(mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{ti.description_review.get('updatedBy')}} at {{ti.description_review.get('updateTime')}}</p>
+                                    <p ng-show="signatureCheck(ti.description_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{ti.description_review.get('updatedBy')}} at {{ti.description_review.get('updateTime')}}</p>
                                     <i class="fa fa-check fa-margin" ng-class="iconClass('accept', ti.description_review)" ng-if="iconExist('accept', ti.description_review, tumor.name_review)"  ng-click="accept($event, ti.name.getText(), mutation, tumor, ti, null, ti.description_review)"></i>
                                     <i class="fa fa-times fa-margin" ng-class="iconClass('reject', ti.description_review)" ng-if="iconExist('reject', ti.description_review, tumor.name_review)"  ng-click="reject($event, ti.name.getText(), mutation, tumor, ti, null, ti.description_review)"></i>
                                 </span>
@@ -364,7 +364,7 @@
                                 <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$index, $index)" class="fa fa-trash-o"></i>
                               </span>
                             <span style="margin-right:10px;float:right" ng-show="reviewMode && !tumor.name_review.get('removed') && !treatment.name_review.get('removed')">
-                                <p ng-hide="removedCheck(mutation.name_review, tumor.name_review, treatment.name_review)" style="float:left;font-size:15px;">Updated by {{treatment.name_review.get('updatedBy')}} at {{treatment.name_review.get('updateTime')}}</p>
+                                <p ng-show="signatureCheck(treatment.name_review, mutation.name_review, tumor.name_review, treatment.name_review)" style="float:left;font-size:15px;">Updated by {{treatment.name_review.get('updatedBy')}} at {{treatment.name_review.get('updateTime')}}</p>
                                 <i class="fa fa-check fa-margin" ng-class="iconClass('accept', treatment.name_review)" ng-if="iconExist('accept', treatment.name_review, treatment.name_review)"  ng-click="accept($event, ti.name.getText(), mutation, tumor, ti, treatment, treatment.name_review)"></i>
                                 <i class="fa fa-times fa-margin" ng-class="iconClass('reject', treatment.name_review)" ng-if="iconExist('reject', treatment.name_review, treatment.name_review)"  ng-click="reject($event, ti.name.getText(), mutation, tumor, ti, treatment, treatment.name_review)"></i>
                             </span>
@@ -434,7 +434,7 @@
                             <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.trials_eStatus" id="ti.name.text  + '-trials'"></e-status>
                         </span>
                         <span style="margin-right:10px;float:right" ng-if="reviewMode">
-                            <p ng-hide="removedCheck(mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.trials_review.get('updatedBy')}} at {{tumor.trials_review.get('updateTime')}}</p>
+                            <p ng-show="signatureCheck(tumor.trials_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.trials_review.get('updatedBy')}} at {{tumor.trials_review.get('updateTime')}}</p>
                             <i class="fa fa-check fa-margin" ng-class="iconClass('accept', tumor.trials_review)" ng-if="iconExist('accept', tumor.trials_review, tumor.name_review)"  ng-click="accept($event, 'CLINICAL_TRIAL', mutation, tumor, null, null, tumor.trials_review)"></i>
                             <i class="fa fa-times fa-margin" ng-class="iconClass('reject', tumor.trials_review)" ng-if="iconExist('reject', tumor.trials_review, tumor.name_review)"  ng-click="reject($event, 'CLINICAL_TRIAL', mutation, tumor, null, null, tumor.trials_review)"></i>
                         </span>
@@ -542,8 +542,6 @@
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
   <span class="btn btn-default" style="opacity: 1" disabled>{{::gene.name.text}}</span>
-  <button type="button" class="btn btn-default" ng-disabled="!canUndo" ng-click="undo()">Undo</button>
-  <button type="button" class="btn btn-default" ng-disabled="!canRedo" ng-click="redo()">Redo</button>
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
   <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true">
     <i class="fa fa-eye-slash"></i>Hide all empty
@@ -574,7 +572,7 @@
     <!--<span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty-->
   <!--</button>-->
   <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>-->
-  <button ng-style="{color: updateGeneColor()}" type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
+  <!--<button ng-style="{color: updateGeneColor()}" type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>-->
   <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>-->
     <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>-->
   <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>

@@ -43,29 +43,38 @@
         </select>
     </div>
     <div ng-if="t === 'checkbox'">
-        <h4 ng-if="reviewMode && !objecttype && !rs.get('action')">New Content:</h4>
-        <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || !rs.get('action')">
-          <input
-                  id="{{checkboxid}}-{{$index}}"
-                  type="radio"
-                  ng-model="content.stringO"
-                  ng-value="checkbox"
-                  ng-disabled="{{!reviewMode ? !fe : false}}"
-                  ng-click="uncheck($event)"
-                  >
-          <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
-        </span>
         <div>
+            <br/>
+            <h4 ng-if="reviewMode && !objecttype && !rs.get('action')">New Content:</h4>
+            <div>
+                    <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || !rs.get('action')">
+                      <input
+                          id="{{checkboxid}}-{{$index}}"
+                          type="radio"
+                          ng-model="content.stringO"
+                          ng-value="checkbox"
+                          ng-disabled="{{!reviewMode ? !fe : false}}"
+                          ng-click="uncheck($event)"
+                          >
+                      <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
+                    </span>
+            </div>
+        </div>
+
+        <div style="float:left">
             <h4 ng-if="reviewMode && !objecttype && !rs.get('action')">Old Content:</h4>
-            <span ng-if="reviewMode && !objecttype" ng-repeat="checkbox in checkboxes" class="reviewedBG">
-              <input
-                  id="{{checkboxid}}-{{$index}}-review"
-                  type="radio"
-                  ng-checked="(!rs.get('action') ? rs.get('lastReviewed') : content.stringO) === checkbox ? true : false"
-                  ng-disabled="true"
-                  >
-              <label for="{{checkboxid}}-{{$index}}-review">{{checkbox}}</label>
-            </span>
+            <div>
+                <span ng-if="reviewMode && !objecttype" ng-repeat="checkbox in checkboxes" class="reviewedBG">
+                  <input
+                      id="{{checkboxid}}-{{$index}}-review"
+                      type="radio"
+                      ng-checked="(!rs.get('action') ? rs.get('lastReviewed') : content.stringO) === checkbox ? true : false"
+                      ng-disabled="true"
+                      >
+                  <label for="{{checkboxid}}-{{$index}}-review">{{checkbox}}</label>
+                </span>
+            </div>
+
         </div>
     </div>
     <div ng-if="t === 's-checkbox'">
