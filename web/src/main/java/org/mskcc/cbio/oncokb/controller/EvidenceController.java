@@ -11,6 +11,8 @@ import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -96,99 +98,41 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/update/{uuid}", method = RequestMethod.POST)
     public
     @ResponseBody
-    String updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
-                          @RequestBody(required = true) Evidence queryEvidence) {
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+    ResponseEntity updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
+                                  @RequestBody Evidence queryEvidence) {
 
-        EvidenceType evidenceType = queryEvidence.getEvidenceType();
-        String subType = queryEvidence.getSubtype();
-        String cancerType = queryEvidence.getCancerType();
-        String knownEffect = queryEvidence.getKnownEffect();
-        LevelOfEvidence level = queryEvidence.getLevelOfEvidence();
-        String description = queryEvidence.getDescription();
-        String additionalInfo = queryEvidence.getAdditionalInfo();
-        Date lastEdit = queryEvidence.getLastEdit();
-        Set<Treatment> treatments = queryEvidence.getTreatments();
-        Set<Article> articles = queryEvidence.getArticles();
-        Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
-        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
-        //List<Evidence> evidences = EvidenceUtils.getEvidenceByUUID(uuid);
-        List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
-        if (evidences.isEmpty()) {
-            Evidence evidence = new Evidence();
-            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-            Gene gene = geneBo.findGeneByHugoSymbol(queryEvidence.getGene().getHugoSymbol());
+        List<Evidence> updatedEvidences = updateEvidenceBasedOnUuid(uuid, queryEvidence);
 
-            AlterationType type = AlterationType.MUTATION;
-            Set<Alteration> queryAlterations = queryEvidence.getAlterations();
-            Set<Alteration> alterations = new HashSet<Alteration>();
-            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            for (Alteration alt : queryAlterations) {
-                String proteinChange = alt.getAlteration();
-                String displayName = alt.getName();
-                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
-                if (alteration == null) {
-                    alteration = new Alteration();
-                    alteration.setGene(gene);
-                    alteration.setAlterationType(type);
-                    alteration.setAlteration(proteinChange);
-                    alteration.setName(displayName);
-                    AlterationUtils.annotateAlteration(alteration, proteinChange);
-                    alterationBo.save(alteration);
-                }
-                alterations.add(alteration);
-            }
-            evidence.setAlterations(alterations);
-            evidence.setUuid(uuid);
-            evidence.setGene(gene);
-            evidence.setEvidenceType(evidenceType);
-            evidence.setSubtype(subType);
-            evidence.setCancerType(cancerType);
-            evidence.setKnownEffect(knownEffect);
-            evidence.setLevelOfEvidence(level);
-            evidence.setDescription(description);
-            evidence.setAdditionalInfo(additionalInfo);
-            evidence.setLastEdit(lastEdit);
-            evidence.setTreatments(treatments);
-            evidence.setArticles(articles);
-            evidence.setNccnGuidelines(nccnGuidelines);
-            evidence.setClinicalTrials(clinicalTrials);
-            
-            evidenceBo.save(evidence);
-            evidences.add(evidence);
-        } else {
-            for (Evidence evidence : evidences) {
-                evidence.setEvidenceType(evidenceType);
-                evidence.setSubtype(subType);
-                evidence.setCancerType(cancerType);
-                evidence.setKnownEffect(knownEffect);
-                evidence.setLevelOfEvidence(level);
-                evidence.setDescription(description);
-                evidence.setAdditionalInfo(additionalInfo);
-                evidence.setLastEdit(lastEdit);
-                evidence.setTreatments(treatments);
-                evidence.setArticles(articles);
-                evidence.setNccnGuidelines(nccnGuidelines);
-                evidence.setClinicalTrials(clinicalTrials);
-                evidenceBo.update(evidence);
+        if (updatedEvidences != null) {
+            updateCacheBasedOnEvidences(new HashSet<>(updatedEvidences));
+        }
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/legacy-api/evidences/update", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) {
+        Set<Evidence> updatedEvidenceSet = new HashSet<>();
+
+        for (Map.Entry<String, Evidence> entry : queryEvidences.entrySet()) {
+
+            List<Evidence> updatedEvidences = updateEvidenceBasedOnUuid(entry.getKey(), entry.getValue());
+
+            if (updatedEvidences != null) {
+                updatedEvidenceSet.addAll(updatedEvidences);
             }
         }
+        updateCacheBasedOnEvidences(updatedEvidenceSet);
 
-        // The sample solution for now is updating all gene related evidences.
-        Set<Gene> genes = new HashSet<>();
-        for (Evidence evidence : evidences) {
-            genes.add(evidence.getGene());
-        }
-        for (Gene gene : genes) {
-            CacheUtils.updateGene(gene.getEntrezGeneId());
-        }
-        return "success";
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @RequestMapping(value = "/legacy-api/evidences/delete", method = RequestMethod.POST)
     public
     @ResponseBody
-    String deleteEvidences(@RequestBody(required = true) List<String> uuids) {
+    String deleteEvidences(@RequestBody List<String> uuids) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         if (uuids != null) {
             List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(uuids);
@@ -230,6 +174,97 @@ public class EvidenceController {
         }
         ApplicationContextSingleton.getAlterationBo().deleteAll(removedAlts);
 
+        for (Gene gene : genes) {
+            CacheUtils.updateGene(gene.getEntrezGeneId());
+        }
+    }
+
+    private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+
+        EvidenceType evidenceType = queryEvidence.getEvidenceType();
+        String subType = queryEvidence.getSubtype();
+        String cancerType = queryEvidence.getCancerType();
+        String knownEffect = queryEvidence.getKnownEffect();
+        LevelOfEvidence level = queryEvidence.getLevelOfEvidence();
+        String description = queryEvidence.getDescription();
+        String additionalInfo = queryEvidence.getAdditionalInfo();
+        Date lastEdit = queryEvidence.getLastEdit();
+        Set<Treatment> treatments = queryEvidence.getTreatments();
+        Set<Article> articles = queryEvidence.getArticles();
+        Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
+        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
+
+        List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
+        if (evidences.isEmpty()) {
+            Evidence evidence = new Evidence();
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            Gene gene = geneBo.findGeneByHugoSymbol(queryEvidence.getGene().getHugoSymbol());
+
+            AlterationType type = AlterationType.MUTATION;
+            Set<Alteration> queryAlterations = queryEvidence.getAlterations();
+            Set<Alteration> alterations = new HashSet<Alteration>();
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            for (Alteration alt : queryAlterations) {
+                String proteinChange = alt.getAlteration();
+                String displayName = alt.getName();
+                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                if (alteration == null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(type);
+                    alteration.setAlteration(proteinChange);
+                    alteration.setName(displayName);
+                    AlterationUtils.annotateAlteration(alteration, proteinChange);
+                    alterationBo.save(alteration);
+                }
+                alterations.add(alteration);
+            }
+            evidence.setAlterations(alterations);
+            evidence.setUuid(uuid);
+            evidence.setGene(gene);
+            evidence.setEvidenceType(evidenceType);
+            evidence.setSubtype(subType);
+            evidence.setCancerType(cancerType);
+            evidence.setKnownEffect(knownEffect);
+            evidence.setLevelOfEvidence(level);
+            evidence.setDescription(description);
+            evidence.setAdditionalInfo(additionalInfo);
+            evidence.setLastEdit(lastEdit);
+            evidence.setTreatments(treatments);
+            evidence.setArticles(articles);
+            evidence.setNccnGuidelines(nccnGuidelines);
+            evidence.setClinicalTrials(clinicalTrials);
+
+            evidenceBo.save(evidence);
+            evidences.add(evidence);
+        } else {
+            for (Evidence evidence : evidences) {
+                evidence.setEvidenceType(evidenceType);
+                evidence.setSubtype(subType);
+                evidence.setCancerType(cancerType);
+                evidence.setKnownEffect(knownEffect);
+                evidence.setLevelOfEvidence(level);
+                evidence.setDescription(description);
+                evidence.setAdditionalInfo(additionalInfo);
+                evidence.setLastEdit(lastEdit);
+                evidence.setTreatments(treatments);
+                evidence.setArticles(articles);
+                evidence.setNccnGuidelines(nccnGuidelines);
+                evidence.setClinicalTrials(clinicalTrials);
+                evidenceBo.update(evidence);
+            }
+        }
+
+        return evidences;
+    }
+
+    private void updateCacheBasedOnEvidences(Set<Evidence> evidences) {
+        // The sample solution for now is updating all gene related evidences.
+        Set<Gene> genes = new HashSet<>();
+        for (Evidence evidence : evidences) {
+            genes.add(evidence.getGene());
+        }
         for (Gene gene : genes) {
             CacheUtils.updateGene(gene.getEntrezGeneId());
         }

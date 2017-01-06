@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true);
+                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, true);
                                 var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
@@ -2262,7 +2262,7 @@ angular.module('oncokbApp')
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
 
-                var gene = stringUtils.getGeneData(this.gene, true, true);
+                var gene = stringUtils.getGeneData(this.gene, true, true, true, true);
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
 
@@ -2810,7 +2810,7 @@ angular.module('oncokbApp')
 
             $scope.getAllCitations = function() {
                 var results = [];
-                var geneData = JSON.stringify(stringUtils.getGeneData(this.gene, true));
+                var geneData = JSON.stringify(stringUtils.getGeneData(this.gene, true, true, true));
                 results = fetchResults(FindRegex.result(geneData));
                 var annotationPMIDs = results.PMIDs;
                 var annotationAbstracts = results.abstracts;
@@ -2981,7 +2981,7 @@ angular.module('oncokbApp')
             };
 
             $scope.generatePDF = function() {
-                jspdf.create(stringUtils.getGeneData(this.gene, true, true));
+                jspdf.create(stringUtils.getGeneData(this.gene, true, true, true));
             };
 
             $scope.isOpenFunc = function(type) {
