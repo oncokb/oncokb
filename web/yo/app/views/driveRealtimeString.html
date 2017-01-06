@@ -53,7 +53,7 @@
                           type="radio"
                           ng-model="content.stringO"
                           ng-value="checkbox"
-                          ng-disabled="{{!reviewMode ? !fe : false}}"
+                          ng-disabled="!reviewMode ? !fe : false"
                           ng-click="uncheck($event)"
                           >
                       <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
