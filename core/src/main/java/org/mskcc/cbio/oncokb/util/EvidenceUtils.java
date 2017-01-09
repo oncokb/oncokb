@@ -7,6 +7,7 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
+import org.json.JSONObject;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -300,6 +301,21 @@ public class EvidenceUtils {
             evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<Evidence>(ApplicationContextSingleton.getEvidenceBo().findAll()));
         }
         return evidences;
+    }
+
+    public static List<Evidence> getEvidenceByUUID(String uuid) {
+        if (uuid != null) {
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            if (CacheUtils.isEnabled()) {
+                if (CacheUtils.getEvidenceByUUID(uuid) == null) {
+                    CacheUtils.setEvidenceByUUID(evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid)));
+                }
+                return CacheUtils.getEvidenceByUUID(uuid);
+            } else {
+                return evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
+            }
+        }
+        return null;
     }
 
     public static Map<Gene, Set<Evidence>> getEvidenceByGenesAndEvidenceTypes(Set<Gene> genes, Set<EvidenceType> evidenceTypes) {
@@ -674,6 +690,7 @@ public class EvidenceUtils {
         }
         return filtered;
     }
+
 
     public static Evidence getEvidenceByEvidenceId(Integer id) {
         if (id == null) {

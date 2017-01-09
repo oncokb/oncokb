@@ -16,28 +16,28 @@ import java.util.List;
 public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
 
     private DAO dao;
-    
+
     public void setDao(DAO dao) {
         this.dao = dao;
         this.dao.setCacheQueries(true);
     }
-    
+
     protected DAO getDao() {
         return dao;
     }
-    
+
     public void save(T t) {
         dao.save(t);
     }
-    
+
     public void update(T t) {
         dao.update(t);
     }
-    
+
     public void saveOrUpdate(T t) {
         dao.saveOrUpdate(t);
     }
-    
+
     public List<T> findAll() {
         return dao.findAll();
     }
@@ -48,5 +48,10 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
     @Override
     public void delete(T t) {
         dao.delete(t);
+    }
+
+    @Override
+    public void deleteAll(List<T> ts) {
+        dao.deleteAll(ts);
     }
 }
