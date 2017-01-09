@@ -541,6 +541,25 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
+            function isHotspot(hugoSymbol, variant) {
+                var deferred = $q.defer();
+                if (dataFromFile) {
+                    deferred.resolve({
+                        meta: '',
+                        data: false
+                    });
+                } else {
+                    PrivateApiUtils.isHotspot(hugoSymbol, variant)
+                        .success(function(data) {
+                            deferred.resolve(data);
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                }
+                return deferred.promise;
+            }
+
             // Public API here
             return {
                 getGeneAlterationTumorType: function(callback) {
@@ -609,6 +628,7 @@ angular.module('oncokbApp')
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,
                 getOncogeneTSG: getOncogeneTSG,
-                getSuggestedVariants: getSuggestedVariants
+                getSuggestedVariants: getSuggestedVariants,
+                isHotspot: isHotspot
             };
         }]);

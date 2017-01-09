@@ -188,27 +188,29 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 transformRequest: transform
             });
     }
-    function updateGeneType(hugoSymbol, data){
+
+    function updateGeneType(hugoSymbol, data) {
         return $http.post(
             OncoKB.config.curationLink + 'genes/update/' + hugoSymbol,
             data,
             {
-                transformResponse: function(result){
+                transformResponse: function(result) {
                     return {status: result};
                 }
             });
     }
 
-    function updateEvidence(uuid, data){
+    function updateEvidence(uuid, data) {
         return $http.post(
             OncoKB.config.curationLink + 'evidences/update/' + uuid,
             data,
             {
-                transformResponse: function(result){
+                transformResponse: function(result) {
                     return {status: result};
                 }
             });
     }
+
     function deleteEvidences(data) {
         return $http.post(
             OncoKB.config.curationLink + 'evidences/delete',
@@ -354,7 +356,17 @@ angular.module('oncokbApp')
                 'utils/suggestedVariants');
         }
 
+        function isHotspot(hugoSymbol, variant) {
+            if (!hugoSymbol || !variant) {
+                return null;
+            }
+            return $http.get(OncoKB.config.privateApiLink +
+                'utils/isHotspot?hugoSymbol=' +
+                hugoSymbol + '&variant=' + variant);
+        }
+
         return {
-            getSuggestedVariants: getSuggestedVariants
+            getSuggestedVariants: getSuggestedVariants,
+            isHotspot: isHotspot
         };
     }]);
