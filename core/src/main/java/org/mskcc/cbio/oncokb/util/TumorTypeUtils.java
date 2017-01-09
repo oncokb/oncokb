@@ -15,7 +15,7 @@ import java.util.*;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
-    private static final String ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
+    private static String ONCO_TREE_API_URL = null;
     private static List<OncoTreeType> allOncoTreeCancerTypes = new ArrayList<OncoTreeType>() {{
         addAll(getOncoTreeCancerTypesFromSource());
         addAll(getAllSpecialTumorOncoTreeTypes());
@@ -443,7 +443,7 @@ public class TumorTypeUtils {
     }
 
     private static List<OncoTreeType> getOncoTreeCancerTypesFromSource() {
-        String url = ONCO_TREE_API_URL + "mainTypes?version=oncokb";
+        String url = getOncoTreeApiUrl() + "mainTypes?version=oncokb";
         List<OncoTreeType> cancerTypes = new ArrayList<>();
 
         try {
@@ -466,7 +466,7 @@ public class TumorTypeUtils {
     private static List<OncoTreeType> getOncoTreeSubtypesByCancerTypesFromSource(List<OncoTreeType> cancerTypes) {
         List<OncoTreeType> subtypes = new ArrayList<>();
         try {
-            String url = ONCO_TREE_API_URL + "tumorTypes/search";
+            String url = getOncoTreeApiUrl() + "tumorTypes/search";
             JSONObject postData = new JSONObject();
             postData.put("version", "oncokb");
 
@@ -481,7 +481,7 @@ public class TumorTypeUtils {
             postData.put("queries", queries);
 
             String response = HttpUtils.postRequest(url, postData.toString());
-            if(response != null && !response.equals("TIMEOUT")) {
+            if (response != null && !response.equals("TIMEOUT")) {
                 Map map = JsonUtils.jsonToMap(response);
 
                 if (map.get("data") != null) {
@@ -500,7 +500,7 @@ public class TumorTypeUtils {
                         }
                     }
                 }
-            }else {
+            } else {
                 System.out.println("Error access OncoTree Service.");
             }
         } catch (Exception e) {
@@ -516,5 +516,19 @@ public class TumorTypeUtils {
             types.add(new OncoTreeType(null, null, specialTumorType.getTumorType(), null, null));
         }
         return types;
+    }
+
+    private static String getOncoTreeApiUrl() {
+        if (ONCO_TREE_API_URL == null) {
+            try {
+                ONCO_TREE_API_URL = PropertiesUtils.getProperties("oncotree.api");
+            } catch (IOException e) {
+                System.out.print("No oncotree.api specified, will use default setting.");
+            }
+            if (ONCO_TREE_API_URL == null || ONCO_TREE_API_URL.isEmpty()) {
+                ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
+            }
+        }
+        return ONCO_TREE_API_URL;
     }
 }
