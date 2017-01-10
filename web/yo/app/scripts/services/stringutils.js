@@ -1040,8 +1040,15 @@ angular.module('oncokbApp')
                             object[e + '_uuid'] = model[e + '_uuid'].getText();
                         }
                     } else {
-                        if (onlyReviewedContent && model[e + '_review'].get('lastReviewed')) {
-                            object[e] = getString(model[e + '_review'].get('lastReviewed'));
+                        if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].get('lastReviewed')) {
+                            if (model[e + '_review'].get('lastReviewed').type && model[e + '_review'].get('lastReviewed').type === 'Map') {
+                                object[e] = {};
+                                _.each(model[e + '_review'].get('lastReviewed').keys, function(keyMapping) {
+                                    object[e][keyMapping] = getString(model[e].get(keyMapping));
+                                });
+                            } else {
+                                object[e] = getString(model[e + '_review'].get('lastReviewed'));
+                            }
                         } else {
                             object[e] = getString(model[e].getText());
                         }
@@ -1068,6 +1075,9 @@ angular.module('oncokbApp')
 
         function getReview(model) {
             var reviewObj = {};
+            if (!model) {
+                return reviewObj;
+            }
             var keys = model.keys();
 
             keys.forEach(function(e) {
@@ -1075,7 +1085,7 @@ angular.module('oncokbApp')
                     if (model.get(e).type === 'Map') {
                         reviewObj[e] = getReview(model[e]);
                     } else {
-                        reviewObj[e] = model.get(e);
+                        reviewObj[e] = getString(model.get(e));
                     }
                 }
             });
