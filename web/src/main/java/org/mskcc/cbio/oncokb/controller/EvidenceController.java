@@ -5,6 +5,8 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import io.swagger.annotations.ApiParam;
+import org.json.JSONArray;
+import org.mortbay.util.ajax.JSON;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
@@ -134,7 +136,8 @@ public class EvidenceController {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         if (uuids != null) {
             List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(uuids);
-            deleteEvidencesAndAlts(evidences);
+            Set<Gene> genes = deleteEvidencesAndAlts(evidences);
+            updateCacheBasedOnGenes(genes);
         }
         return "";
     }
@@ -146,11 +149,35 @@ public class EvidenceController {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
-        deleteEvidencesAndAlts(evidences);
+        Set<Gene> genes = deleteEvidencesAndAlts(evidences);
+        updateCacheBasedOnGenes(genes);
         return "";
     }
 
-    private void deleteEvidencesAndAlts(List<Evidence> evidences) {
+    @RequestMapping(value = "/legacy-api/vus/update/{hugoSymbol}", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
+                             @RequestBody String vus) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        if (hugoSymbol != null && vus != null) {
+            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+            if (gene != null) {
+                List<Evidence> evidences = EvidenceUtils.getEvidence(
+                    new ArrayList<>(AlterationUtils.getAllAlterations(gene)),
+                    Collections.singleton(EvidenceType.VUS), null);
+                deleteEvidencesAndAlts(evidences);
+                DriveAnnotationParser.parseVUS(gene, new JSONArray(vus));
+                updateCacheBasedOnGenes(Collections.singleton(gene));
+                status = HttpStatus.OK;
+            }
+        }
+
+        return new ResponseEntity(status);
+    }
+
+    private Set<Gene> deleteEvidencesAndAlts(List<Evidence> evidences) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Alteration> alts = new ArrayList<>();
         List<Alteration> removedAlts = new ArrayList<>();
@@ -172,9 +199,7 @@ public class EvidenceController {
         }
         ApplicationContextSingleton.getAlterationBo().deleteAll(removedAlts);
 
-        for (Gene gene : genes) {
-            CacheUtils.updateGene(gene.getEntrezGeneId());
-        }
+        return genes;
     }
 
     private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) {
@@ -198,29 +223,29 @@ public class EvidenceController {
         Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
 
-        if(treatments != null && !treatments.isEmpty()){
-            for(Treatment treatment : treatments) {
+        if (treatments != null && !treatments.isEmpty()) {
+            for (Treatment treatment : treatments) {
                 Set<Drug> drugs = treatment.getDrugs();
-                if(drugs != null && !drugs.isEmpty()) {
-                    for(Drug drug : drugs){
-                          drugBo.saveOrUpdate(drug);
+                if (drugs != null && !drugs.isEmpty()) {
+                    for (Drug drug : drugs) {
+                        drugBo.saveOrUpdate(drug);
                     }
                 }
                 treatmentBo.saveOrUpdate(treatment);
             }
         }
-        if(articles != null && !articles.isEmpty()){
-            for(Article article : articles) {
+        if (articles != null && !articles.isEmpty()) {
+            for (Article article : articles) {
                 articleBo.saveOrUpdate(article);
             }
         }
-        if(nccnGuidelines != null && !nccnGuidelines.isEmpty()){
-            for(NccnGuideline nccnGuideline : nccnGuidelines) {
+        if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
+            for (NccnGuideline nccnGuideline : nccnGuidelines) {
                 nccnGuidelineBo.saveOrUpdate(nccnGuideline);
             }
         }
-        if(clinicalTrials != null && !clinicalTrials.isEmpty()){
-            for(ClinicalTrial clinicalTrial : clinicalTrials) {
+        if (clinicalTrials != null && !clinicalTrials.isEmpty()) {
+            for (ClinicalTrial clinicalTrial : clinicalTrials) {
                 clinicalTrialBo.saveOrUpdate(clinicalTrial);
             }
         }
@@ -299,6 +324,13 @@ public class EvidenceController {
         for (Evidence evidence : evidences) {
             genes.add(evidence.getGene());
         }
+        for (Gene gene : genes) {
+            CacheUtils.updateGene(gene.getEntrezGeneId());
+        }
+    }
+
+    private void updateCacheBasedOnGenes(Set<Gene> genes) {
+        // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
             CacheUtils.updateGene(gene.getEntrezGeneId());
         }

@@ -311,6 +311,17 @@ angular.module('oncokbApp')
                     });
             }
 
+            function updateVUS(hugoSymbol, data, success, fail) {
+                DriveAnnotation
+                    .updateVUS(hugoSymbol, data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function(error) {
+                        fail(error);
+                    });
+            }
+
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
@@ -607,6 +618,7 @@ angular.module('oncokbApp')
                 updateGeneType: updateGeneType,
                 updateEvidence: updateEvidence,
                 deleteEvidences: deleteEvidences,
+                updateVUS: updateVUS,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {

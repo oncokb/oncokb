@@ -52,7 +52,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseVUS(Gene gene, JSONArray vus) {
+    public static void parseVUS(Gene gene, JSONArray vus) {
         System.out.println("##    Variants of unknown significance");
         if (gene != null && vus != null) {
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
