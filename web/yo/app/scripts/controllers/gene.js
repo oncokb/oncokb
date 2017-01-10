@@ -1600,7 +1600,7 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function() {
-                var test = validHugoSymbols;
+                var test = [];
             };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
@@ -2072,9 +2072,7 @@ angular.module('oncokbApp')
                         oncogene: $scope.gene.type.get('OCG').trim().length > 0,
                         tsg: $scope.gene.type.get('TSG').trim().length > 0
                     };
-                    if(validHugoSymbols.indexOf($scope.gene.name.getText()) === -1) {
-                        geneModelUpdate(type, mutation, tumor, TI, treatment);
-                    } else {
+                    if ($scope.status.isDesiredGene) {
                         $scope.$emit('startSaveDataToDatabase');
                         DatabaseConnector.updateGeneType($scope.gene.name.getText(), params, function(result) {
                             geneModelUpdate(type, mutation, tumor, TI, treatment);
@@ -2084,14 +2082,11 @@ angular.module('oncokbApp')
                             dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                             $scope.$emit('doneSaveDataToDatabase');
                         });
+                    } else {
+                        geneModelUpdate(type, mutation, tumor, TI, treatment);
                     }
                 } else if (dataUUID.length > 0) {
-                    if(validHugoSymbols.indexOf($scope.gene.name.getText()) === -1) {
-                        geneModelUpdate(type, mutation, tumor, TI, treatment);
-                        if (extraDataUUID.length > 0) {
-                            geneModelUpdate(secondType, mutation, tumor, TI, treatment);
-                        }
-                    } else {
+                    if ($scope.status.isDesiredGene) {
                         $scope.$emit('startSaveDataToDatabase');
                         DatabaseConnector.updateEvidence(dataUUID, data, function(result) {
                             geneModelUpdate(type, mutation, tumor, TI, treatment);
@@ -2112,6 +2107,11 @@ angular.module('oncokbApp')
                             dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                             $scope.$emit('doneSaveDataToDatabase');
                         });
+                    } else {
+                        geneModelUpdate(type, mutation, tumor, TI, treatment);
+                        if (extraDataUUID.length > 0) {
+                            geneModelUpdate(secondType, mutation, tumor, TI, treatment);
+                        }
                     }
                 }
             };
@@ -3103,6 +3103,19 @@ angular.module('oncokbApp')
                     $scope.suggestedMutations.indexOf(mutationName) !== -1);
             };
 
+            $scope.updateVUS = function() {
+                var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
+                var vusData = stringUtils.getVUSFullData(vus, true);
+                $scope.$emit('startSaveDataToDatabase');
+                DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
+                    $scope.$emit('doneSaveDataToDatabase');
+                }, function(error) {
+                    console.log(error);
+                    dialogs.error('Error', 'An error has occurred while saving VUS to database, please contact the developer. Thanks.');
+                    $scope.$emit('doneSaveDataToDatabase');
+                });
+            };
+
             // Calculate number of 'number' elements within the object
             function getNoNKeys(object) {
                 var count = 0;
@@ -3700,6 +3713,16 @@ angular.module('oncokbApp')
                 $scope.vus = vus;
             }
 
+            function checkWhetherIsDesiredGene() {
+                var _geneName = $scope.gene.name.getText();
+                for (var i = 0; i < OncoKB.global.genes.length; i++) {
+                    if (OncoKB.global.genes[i].hugoSymbol === _geneName) {
+                        $scope.status.isDesiredGene = true;
+                        break;
+                    }
+                }
+            }
+
             $scope.fileTitle = $routeParams.geneName;
             $scope.gene = '';
             $scope.vus = '';
@@ -3805,6 +3828,13 @@ angular.module('oncokbApp')
                     oncoTreeTumorTypes: []
                 }]
             };
+            $scope.status = {
+                expandAll: false,
+                hideAllEmpty: false,
+                rendering: true,
+                numAccordion: 0,
+                isDesiredGene: false
+            };
 
             $scope.$watch('meta.newCancerTypes', function(n) {
                 if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
@@ -3888,13 +3918,6 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.status = {
-                expandAll: false,
-                hideAllEmpty: false,
-                rendering: true,
-                numAccordion: 0
-            };
-
             if ($scope.userRole === 8) {
                 $scope.status.hideAllObsolete = false;
             } else {
@@ -3963,19 +3986,6 @@ angular.module('oncokbApp')
                 });
             }, 600000);
 
-            var validHugoSymbols = [];
-            if (!_.isArray(OncoKB.global.genes)) {
-                DatabaseConnector.getAllGene(function(data) {
-                    for(var i = 0;i < data.length;i++) {
-                        validHugoSymbols.push(data[i].hugoSymbol);
-                    }
-                });
-            } else {
-                for(var i = 0;i < OncoKB.global.genes.length;i++) {
-                    validHugoSymbols.push(OncoKB.global.genes[i].hugoSymbol);
-                }
-            }
-
             loadFile()
                 .then(function(file) {
                     $scope.realtimeDocument = file;
@@ -4015,7 +4025,17 @@ angular.module('oncokbApp')
                     }
                     $scope.gene.name_review.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
                 })
-                .finally(getSuggestedMutations);
+                .finally(function() {
+                    getSuggestedMutations();
+                    if (_.isArray(OncoKB.global.genes)) {
+                        checkWhetherIsDesiredGene();
+                    } else {
+                        DatabaseConnector.getAllGene(function(data) {
+                            OncoKB.global.genes = data;
+                            checkWhetherIsDesiredGene();
+                        });
+                    }
+                });
 
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function() {

@@ -217,11 +217,23 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
             data);
     }
 
+    function updateVUS(hugoSymbol, data) {
+        return $http.post(
+            OncoKB.config.apiLink + 'vus/update/' + hugoSymbol,
+            data,
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
+
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
         updateEvidence: updateEvidence,
-        deleteEvidences: deleteEvidences
+        deleteEvidences: deleteEvidences,
+        updateVUS: updateVUS
     };
 }]);
 
