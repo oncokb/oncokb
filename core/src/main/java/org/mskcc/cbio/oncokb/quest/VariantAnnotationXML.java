@@ -9,7 +9,6 @@ package org.mskcc.cbio.oncokb.quest;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
@@ -36,7 +35,7 @@ public final class VariantAnnotationXML {
 //        if (gene.getEntrezGeneId() > 0) {
 //            genes.add(gene);
 //        } else {
-            // fake gene... could be a fusion gene
+        // fake gene... could be a fusion gene
 //            Set<String> aliases = gene.getGeneAliases();
 //            for (String alias : aliases) {
 //                Gene g = geneBo.findGeneByHugoSymbol(alias);
@@ -61,7 +60,7 @@ public final class VariantAnnotationXML {
         // find tumor types
         Set<String> tumorTypes = new HashSet<>();
 
-        if(alterations != null && alterations.size() > 0) {
+        if (alterations != null && alterations.size() > 0) {
             List<Object> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlterations(alterations);
             for (Object evidence : tumorTypesEvidence) {
                 if (evidence != null) {
@@ -106,9 +105,11 @@ public final class VariantAnnotationXML {
                 sb.append(ev.getKnownEffect());
             }
             sb.append("</effect>\n");
-            sb.append("    <description>");
-            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
-            sb.append("</description>\n");
+            if (ev.getDescription() != null) {
+                sb.append("    <description>");
+                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+                sb.append("</description>\n");
+            }
             if (ev != null) {
                 exportRefereces(ev, sb, "    ");
             }
@@ -377,16 +378,16 @@ public final class VariantAnnotationXML {
 //        if (!clinicalTrial.isInUSA()) {
 //            return false;
 //        }
-//        
+//
 //        if (!clinicalTrial.isOpen()) {
 //            return false;
 //        }
-//        
+//
 //        String phase = clinicalTrial.getPhase().toLowerCase();
-//        return phase.contains("phase 1") || 
-//                phase.contains("phase 2") || 
-//                phase.contains("phase 3") || 
-//                phase.contains("phase 4") || 
+//        return phase.contains("phase 1") ||
+//                phase.contains("phase 2") ||
+//                phase.contains("phase 3") ||
+//                phase.contains("phase 4") ||
 //                phase.contains("phase 5");
 
         return true;
