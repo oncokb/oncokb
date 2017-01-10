@@ -568,16 +568,6 @@ angular.module('oncokbApp')
                 });
             }
 
-            function getString(string) {
-                var tmp = window.document.createElement('DIV');
-                tmp.innerHTML = string;
-
-                /* eslint new-cap: 0*/
-                var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
-                string = S(_string).collapseWhitespace().s;
-                return string;
-            }
-
             function isExist(array, string) {
                 var mark = false;
                 _.each(array, function(item) {
@@ -1924,8 +1914,8 @@ angular.module('oncokbApp')
                     lastEdit: new Date().getTime().toString(),
                     levelOfEvidence: null,
                     subtype: null,
-                    articles: null,
-                    clinicalTrials: null,
+                    articles: [],
+                    clinicalTrials: [],
                     nccnGuidelines: null,
                     treatments: null
                 };
@@ -1971,7 +1961,6 @@ angular.module('oncokbApp')
                     dataUUID = mutation.effect_uuid.getText();
                     data.knownEffect = mutation.effect.value.getText();
                     data.description = mutation.description.getText();
-                    data.additionalInfo = mutation.short.getText();
                     break;
                 case 'TUMOR_TYPE_SUMMARY':
                     dataUUID = tumor.summary_uuid.getText();
@@ -1980,20 +1969,16 @@ angular.module('oncokbApp')
                 case 'PREVALENCE':
                     dataUUID = tumor.prevalence_uuid.getText();
                     data.description = tumor.prevalence.getText();
-                    data.additionalInfo = tumor.shortPrevalence.getText();
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
                     dataUUID = tumor.progImp_uuid.getText();
                     data.description = tumor.progImp.getText();
-                    data.additionalInfo = tumor.shortProgImp.getText();
                     break;
                 case 'NCCN_GUIDELINES':
                     dataUUID = tumor.nccn_uuid.getText();
                     data.description = tumor.nccn.description.getText();
-                    data.additionalInfo = tumor.nccn.short.getText();
                     data.nccnGuidelines = [
                         {
-                            additionalInfo: tumor.nccn.short.getText(),
                             category: '',
                             description: tumor.nccn.description.getText(),
                             disease: tumor.nccn.disease.getText(),
@@ -2020,13 +2005,11 @@ angular.module('oncokbApp')
                     break;
                 case 'CLINICAL_TRIAL':
                     dataUUID = tumor.trials_uuid.getText();
-                    var clinicalTrials = [];
                     for (i = 0; i < tumor.trials.length; i++) {
-                        clinicalTrials.push({
+                        data.clinicalTrials.push({
                             nctId: tumor.trials.get(i)
                         });
                     }
-                    data.clinicalTrials = clinicalTrials;
                     break;
                 default:
                     break;
@@ -2047,7 +2030,6 @@ angular.module('oncokbApp')
                         dataUUID = treatment.name_uuid.getText();
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
                         data.description = treatment.description.getText();
-                        data.additionalInfo = treatment.short.getText();
                         data.treatments = [];
                         var treatments = treatment.name.getText().split('+');
                         for (i = 0; i < treatments.length; i++) {
@@ -2063,6 +2045,30 @@ angular.module('oncokbApp')
                                 drugs: drugList
                             });
                         }
+                    }
+                }
+                data.description = stringUtils.getString(data.description);
+                var abstractResults = FindRegex.result(data.description);
+                var tempAbstract;
+                for(var i = 0; i < abstractResults.length; i++) {
+                    tempAbstract = abstractResults[i];
+                    switch(tempAbstract.type) {
+                    case 'pmid':
+                        data.articles.push({
+                            pmid: tempAbstract.id
+                        });
+                        break;
+                    case 'abstract':
+                        data.articles.push({
+                            abstract: tempAbstract.id,
+                            link: tempAbstract.link
+                        });
+                        break;
+                    case 'nct':
+                        data.clinicalTrials.push({
+                            nctId: tempAbstract.id
+                        });
+                        break;
                     }
                 }
 

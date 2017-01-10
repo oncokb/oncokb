@@ -7,7 +7,13 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
-import org.json.JSONObject;
+import javax.xml.parsers.ParserConfigurationException;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
+import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
+import org.mskcc.cbio.oncokb.bo.DrugBo;
+import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
+import org.mskcc.cbio.oncokb.bo.TreatmentBo;
+import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -938,5 +944,87 @@ public class EvidenceUtils {
             }
         }
         return evidenceQueries;
+    }
+    
+    public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
+        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
+        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
+        NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
+        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
+        TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
+        Set<ClinicalTrial> trials = evidence.getClinicalTrials();
+        Set<Article> articles = evidence.getArticles();
+        Set<Treatment> treatments = evidence.getTreatments();
+        Set<NccnGuideline> nccnGuidelines = evidence.getNccnGuidelines();
+             
+        if(trials != null && !trials.isEmpty()){
+            Set<ClinicalTrial> annotatedTrials = new HashSet<>();
+            Set<String> nctIds = new HashSet<String>();
+            String tempNctID;
+            ClinicalTrial tempCT;
+            for(ClinicalTrial trial: trials){
+                tempNctID = trial.getNctId();
+                tempCT = clinicalTrialBo.findClinicalTrialByNctId(tempNctID);
+                if(tempCT == null){
+                    nctIds.add(tempNctID);
+                }else{
+                    annotatedTrials.add(tempCT);
+                }
+            }
+            annotatedTrials.addAll(ClinicalTrialsImporter.importTrials(nctIds));
+            evidence.setClinicalTrials(annotatedTrials);
+        }
+        if(articles != null && !articles.isEmpty()){
+            Article tempAT, newArticle;
+            Set<Article> annotatedArticles = new HashSet<>();
+            String tempPMID;
+            for(Article article : articles){
+                tempPMID = article.getPmid();
+                if(tempPMID == null){
+                    tempAT = articleBo.findArticleByAbstract(article.getAbstractContent());
+                    if(tempAT == null){
+                        articleBo.save(article);
+                        annotatedArticles.add(article);
+                    }else{
+                        annotatedArticles.add(tempAT);
+                    }
+                }else{
+                    tempAT = articleBo.findArticleByPmid(tempPMID);
+                    if(tempAT == null){
+                        newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
+                        articleBo.save(newArticle);
+                        annotatedArticles.add(newArticle);
+                    }else{
+                        annotatedArticles.add(tempAT);
+                    }
+                }
+            }
+            evidence.setArticles(annotatedArticles);
+        }
+        
+        Drug tempDrug;
+        NccnGuideline tempNccnGuideline;
+        if(treatments != null && !treatments.isEmpty()){
+            for(Treatment treatment : treatments) {
+                Set<Drug> drugs = treatment.getDrugs();
+                if(drugs != null && !drugs.isEmpty()) {
+                    for(Drug drug : drugs){
+                          tempDrug = drugBo.findDrugByName(drug.getDrugName());
+                          if(tempDrug == null){
+                              drugBo.save(drug);
+                          }
+                    }
+                }
+                treatmentBo.saveOrUpdate(treatment);
+            }
+        }
+        if(nccnGuidelines != null && !nccnGuidelines.isEmpty()){
+            for(NccnGuideline nccnGuideline : nccnGuidelines) {
+                tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
+                if(tempNccnGuideline == null){
+                    nccnGuidelineBo.saveOrUpdate(nccnGuideline);
+                }
+            }
+        }       
     }
 }

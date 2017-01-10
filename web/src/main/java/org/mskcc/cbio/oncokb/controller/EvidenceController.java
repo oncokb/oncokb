@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * @author jgao
@@ -99,7 +100,7 @@ public class EvidenceController {
     public
     @ResponseBody
     ResponseEntity updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
-                                  @RequestBody Evidence queryEvidence) {
+                                  @RequestBody Evidence queryEvidence) throws ParserConfigurationException {
 
         List<Evidence> updatedEvidences = updateEvidenceBasedOnUuid(uuid, queryEvidence);
 
@@ -113,7 +114,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/update", method = RequestMethod.POST)
     public
     @ResponseBody
-    ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) {
+    ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) throws ParserConfigurationException {
         Set<Evidence> updatedEvidenceSet = new HashSet<>();
 
         for (Map.Entry<String, Evidence> entry : queryEvidences.entrySet()) {
@@ -202,13 +203,9 @@ public class EvidenceController {
         return genes;
     }
 
-    private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) {
+    private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) throws ParserConfigurationException {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
-        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
-        NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
+        EvidenceUtils.annotateEvidence(queryEvidence);
 
         EvidenceType evidenceType = queryEvidence.getEvidenceType();
         String subType = queryEvidence.getSubtype();
@@ -223,32 +220,6 @@ public class EvidenceController {
         Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
 
-        if (treatments != null && !treatments.isEmpty()) {
-            for (Treatment treatment : treatments) {
-                Set<Drug> drugs = treatment.getDrugs();
-                if (drugs != null && !drugs.isEmpty()) {
-                    for (Drug drug : drugs) {
-                        drugBo.saveOrUpdate(drug);
-                    }
-                }
-                treatmentBo.saveOrUpdate(treatment);
-            }
-        }
-        if (articles != null && !articles.isEmpty()) {
-            for (Article article : articles) {
-                articleBo.saveOrUpdate(article);
-            }
-        }
-        if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
-            for (NccnGuideline nccnGuideline : nccnGuidelines) {
-                nccnGuidelineBo.saveOrUpdate(nccnGuideline);
-            }
-        }
-        if (clinicalTrials != null && !clinicalTrials.isEmpty()) {
-            for (ClinicalTrial clinicalTrial : clinicalTrials) {
-                clinicalTrialBo.saveOrUpdate(clinicalTrial);
-            }
-        }
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
         if (evidences.isEmpty()) {
             Evidence evidence = new Evidence();
