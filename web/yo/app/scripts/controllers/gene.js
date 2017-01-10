@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, true);
+                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, false);
                                 var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
@@ -2292,7 +2292,7 @@ angular.module('oncokbApp')
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
 
-                var gene = stringUtils.getGeneData(this.gene, true, true, true, true);
+                var gene = stringUtils.getGeneData(this.gene, true, true, true, false);
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
 
