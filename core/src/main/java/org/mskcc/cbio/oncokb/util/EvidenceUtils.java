@@ -946,7 +946,7 @@ public class EvidenceUtils {
         return evidenceQueries;
     }
     
-    public static Evidence annotateEvidence(Evidence evidence) throws ParserConfigurationException {
+    public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
@@ -957,8 +957,8 @@ public class EvidenceUtils {
         Set<Treatment> treatments = evidence.getTreatments();
         Set<NccnGuideline> nccnGuidelines = evidence.getNccnGuidelines();
              
-        if(!trials.isEmpty()){
-            List<ClinicalTrial> annotatedTrials = new ArrayList<>();
+        if(trials != null && !trials.isEmpty()){
+            Set<ClinicalTrial> annotatedTrials = new HashSet<>();
             Set<String> nctIds = new HashSet<String>();
             String tempNctID;
             ClinicalTrial tempCT;
@@ -971,11 +971,10 @@ public class EvidenceUtils {
                     annotatedTrials.add(tempCT);
                 }
             }
-            List<ClinicalTrial> newTrials = ClinicalTrialsImporter.importTrials(nctIds);
-            annotatedTrials.addAll(newTrials);
-            evidence.setClinicalTrials(new HashSet<ClinicalTrial>(annotatedTrials));
+            annotatedTrials.addAll(ClinicalTrialsImporter.importTrials(nctIds));
+            evidence.setClinicalTrials(annotatedTrials);
         }
-        if(!articles.isEmpty()){
+        if(articles != null && !articles.isEmpty()){
             Article tempAT, newArticle;
             Set<Article> annotatedArticles = new HashSet<>();
             String tempPMID;
@@ -1026,8 +1025,6 @@ public class EvidenceUtils {
                     nccnGuidelineBo.saveOrUpdate(nccnGuideline);
                 }
             }
-        }
-        
-        return evidence;        
+        }       
     }
 }

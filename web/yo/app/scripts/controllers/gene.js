@@ -568,16 +568,6 @@ angular.module('oncokbApp')
                 });
             }
 
-            function getString(string) {
-                var tmp = window.document.createElement('DIV');
-                tmp.innerHTML = string;
-
-                /* eslint new-cap: 0*/
-                var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
-                string = S(_string).collapseWhitespace().s;
-                return string;
-            }
-
             function isExist(array, string) {
                 var mark = false;
                 _.each(array, function(item) {
@@ -2057,6 +2047,7 @@ angular.module('oncokbApp')
                         }
                     }
                 }
+                data.description = stringUtils.getString(data.description);
                 var abstractResults = FindRegex.result(data.description);
                 var tempAbstract;
                 for(var i = 0; i < abstractResults.length; i++) {
