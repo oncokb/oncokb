@@ -702,11 +702,11 @@ angular.module('oncokbApp').run(
                 });
             });
 
-            $rootScope.$watch('internal', function(n) {
-                if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
-                    dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
-                }
-            });
+            //$rootScope.$watch('internal', function(n) {
+            //    if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
+            //        dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
+            //    }
+            //});
         }]);
 
 /**
