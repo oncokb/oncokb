@@ -52,7 +52,6 @@
       <div ng-if="reviewMode">
           <br/><br/>
           <p style="color:red;font-size:20px;"><b>You are currently in the review mode. Make sure click Done Review button to exit!</b></p>
-          <loading ng-model="status.saveDataToDatabase" content="Please wait, we are saving the data into database." class="loading-save-to-database"></loading>
       </div>
 
     <div ng-if="displayCheck(gene.summary_uuid, gene.summary_review)">
@@ -603,4 +602,5 @@
   <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>
 </div>
 
+<loading ng-model="status.saveDataToDatabase" content="Please wait, we are saving the data into database." class="loading-save-to-database"></loading>
 <loading ng-model="status.rendering" content="Please wait, we are loading gene information."></loading>
