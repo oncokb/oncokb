@@ -34,6 +34,8 @@ public class CacheUtils {
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
     private static Map<String, List<OncoTreeType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Object> numbers = new HashMap<>();
+    
+    private static Map<String, List<Evidence>> uuidToEvidence = new HashMap<>();
 
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
@@ -297,6 +299,16 @@ public class CacheUtils {
             return null;
 
         return genesByEntrezId.get(entrezGeneId);
+    }
+    
+    public static void setEvidenceByUUID(List<Evidence> evidences) {
+        if (!evidences.isEmpty()) {
+            uuidToEvidence.put(evidences.get(0).getUuid(), evidences);
+        }
+    }
+
+    public static List<Evidence> getEvidenceByUUID(String uuid) {
+        return uuidToEvidence.get(uuid);
     }
 
     public static Boolean containGeneByHugoSymbol(String hugoSymbol) {

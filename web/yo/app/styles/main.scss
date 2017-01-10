@@ -153,6 +153,12 @@ p.editableBox {
 p.editableBox.doubleH {
   min-height: 40px;
 }
+.reviewed {
+    color: #82E452;
+}
+.reviewedBG {
+    background-color: #EEEEEE;
+}
 .curateTrialItem, .vusItem {
   float: left;
   height: 30px;
@@ -377,9 +383,20 @@ i.fa-angle-up, i.fa-angle-double-down, i.fa-angle-double-up{
 }
 .fa-comments-red {
   color: red;
+  cursor:pointer;
 }
 .fa-comments-green {
   color: #70b500;
+}
+.fa-comments-grey {
+    color: grey;
+    cursor:pointer;
+}
+.fa-margin {
+    margin-left: 10px;
+}
+.left-float {
+    float:left;
 }
 rect {
   fill: none;

@@ -593,9 +593,9 @@ var oncokbApp = angular.module('oncokbApp', [
                     case: cause
                 });
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                if (config.testing) {
+                //if (config.testing) {
                     $delegate(exception, cause);
-                }
+                //}
             };
         });
 
@@ -702,11 +702,11 @@ angular.module('oncokbApp').run(
                 });
             });
 
-            $rootScope.$watch('internal', function(n) {
-                if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
-                    dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
-                }
-            });
+            //$rootScope.$watch('internal', function(n) {
+            //    if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
+            //        dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
+            //    }
+            //});
         }]);
 
 /**

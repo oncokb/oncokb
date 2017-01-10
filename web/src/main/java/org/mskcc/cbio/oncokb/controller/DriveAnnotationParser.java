@@ -640,7 +640,7 @@ public class DriveAnnotationParser {
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-        if ((implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) || (implicationObj.has("short") && !implicationObj.getString("short").trim().isEmpty())) {
+        if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
             // general description
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
@@ -649,12 +649,10 @@ public class DriveAnnotationParser {
             evidence.setCancerType(oncoTreeType.getCancerType());
             evidence.setSubtype(oncoTreeType.getCode());
             evidence.setKnownEffect(knownEffectOfEvidence);
-            evidence.setUuid(implicationObj.has("name_uuid") ? implicationObj.getString("name_uuid") : "");
-            if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
-                String desc = implicationObj.getString("description");
-                evidence.setDescription(desc);
-                setDocuments(desc, evidence);
-            }
+            evidence.setUuid(implicationObj.has("description_uuid") ? implicationObj.getString("description_uuid") : "");
+            String desc = implicationObj.getString("description");
+            evidence.setDescription(desc);
+            setDocuments(desc, evidence);
             evidenceBo.save(evidence);
         }
 

@@ -208,4 +208,7 @@
     <query name="findAllSubtypes">
         <![CDATA[select distinct e.subtype from Evidence e where e.subtype is not null]]>
     </query>
+    <query name="findEvidenceByUUIDs">
+        <![CDATA[select e from Evidence e where e.uuid in (:uuids)]]>
+    </query>
 </hibernate-mapping>

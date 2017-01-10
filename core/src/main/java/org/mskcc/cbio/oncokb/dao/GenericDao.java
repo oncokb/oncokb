@@ -13,68 +13,68 @@ import java.util.Map;
  * & https://community.jboss.org/wiki/GenericDataAccessObjects#jive_content_id_Preparing_DAOs_with_factories
  * @author jgao
  * @param <T>
- * @param <ID> 
+ * @param <ID>
  */
 public interface GenericDao<T, ID extends Serializable> {
-    
+
     /**
-     * 
+     *
      * @param id
-     * @return 
+     * @return
      */
     T findById(ID id);
-    
+
     /**
-     * 
+     *
      * @param queryString
-     * @return 
+     * @return
      */
     List<T> find(String queryString);
-    
+
     /**
-     * 
+     *
      * @param queryString
      * @param values
-     * @return 
+     * @return
      */
     List<T> find(String queryString, Object... values);
-    
+
     /**
-     * 
+     *
      * @param param
      * @param value
-     * @return 
+     * @return
      */
     List<T> findByParamValue(String param, Object value);
-    
+
     /**
-     * 
+     *
      * @param params
      * @param values values must be the same number as params
-     * @return 
+     * @return
      */
     List<T> findByParamValues(String[] params, Object[] values);
-    
+
     /**
-     * 
+     *
      * @param queryName
-     * @return 
+     * @return
      */
     List<T> findByNamedQuery(String queryName);
-    
+
     /**
-     * 
+     *
      * @param queryName
      * @param value
-     * @return 
+     * @return
      */
     List<T> findByNamedQuery(String queryName, Object value);
-    
+
     /**
-     * 
+     *
      * @param queryName
      * @param values
-     * @return 
+     * @return
      */
     List<T> findByNamedQuery(String queryName, Object... values);
 
@@ -86,55 +86,57 @@ public interface GenericDao<T, ID extends Serializable> {
      * @return
      */
     List<T> findByNamedQueryAndNamedParam(String queryName, String[] params, List[] values);
-    
+
     /**
-     * 
+     *
      * @param <C>
      * @param queryName
      * @param values
-     * @return 
+     * @return
      */
     <C> List<C> findByNamedQueryOfAnyType(String queryName, Object... values);
-    
+
     /**
-     * 
-     * @param t 
+     *
+     * @param t
      */
     void save(T t);
-    
+
     /**
-     * 
-     * @param t 
+     *
+     * @param t
      */
     void update(T t);
-    
+
     /**
-     * 
-     * @param t 
+     *
+     * @param t
      */
     void saveOrUpdate(T t);
-    
+
     /**
-     * 
-     * @return 
+     *
+     * @return
      */
     List<T> findAll();
-    
+
     /**
-     * 
-     * @return 
+     *
+     * @return
      */
     int countAll();
-    
+
     /**
-     * 
-     * @param t 
+     *
+     * @param t
      */
     void delete(T t);
-    
+
+    void deleteAll(List<T> ts);
+
     /**
-     * 
-     * @param cacheQueries 
+     *
+     * @param cacheQueries
      */
     void setCacheQueries(boolean cacheQueries);
 }
