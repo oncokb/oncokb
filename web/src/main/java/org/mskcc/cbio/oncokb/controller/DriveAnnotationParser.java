@@ -373,11 +373,10 @@ public class DriveAnnotationParser {
             : null;
     }
 
-    private static Oncogenicity getOncogenicity(JSONObject mutationObj) {
+    public static Oncogenicity getOncogenicityByString(String oncogenicStr) {
         Oncogenicity oncogenic = null;
-        if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
-            String oncogenicStr = mutationObj.getString("oncogenic").toLowerCase();
-
+        if (oncogenicStr != null) {
+            oncogenicStr = oncogenicStr.toLowerCase();
             switch (oncogenicStr) {
                 case "yes":
                     oncogenic = Oncogenicity.YES;
@@ -394,6 +393,14 @@ public class DriveAnnotationParser {
                 default:
                     break;
             }
+        }
+        return oncogenic;
+    }
+
+    private static Oncogenicity getOncogenicity(JSONObject mutationObj) {
+        Oncogenicity oncogenic = null;
+        if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
+            oncogenic = getOncogenicityByString(mutationObj.getString("oncogenic"));
         }
         return oncogenic;
     }

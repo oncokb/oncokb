@@ -300,8 +300,7 @@ public final class AlterationUtils {
     public static Set<Alteration> getAllAlterations(Gene gene) {
         if (CacheUtils.isEnabled()) {
             if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
-                CacheUtils.setAlterations(gene.getEntrezGeneId(),
-                    new HashSet<>(alterationBo.findAlterationsByGene(Collections.singleton(gene))));
+                CacheUtils.setAlterations(gene);
             }
             return CacheUtils.getAlterations(gene.getEntrezGeneId());
         } else {

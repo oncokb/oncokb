@@ -2696,7 +2696,7 @@ angular.module('oncokbApp')
                             collectUUIDs('treatment', treatment, uuids);
                         });
                     });
-                    uuids.push(obj.trialsUuid.getText());
+                    uuids.push(obj.trials_uuid.getText());
                 }
                 if (type === 'treatment') {
                     uuids.push(obj.name_uuid.getText());
