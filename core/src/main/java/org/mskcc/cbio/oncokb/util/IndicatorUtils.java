@@ -25,6 +25,10 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        if (query.getAlteration() != null && query.getAlteration().toLowerCase().matches("gain")) {
+            query.setAlteration("Amplification");
+        }
+
         source = source == null ? "oncokb" : source;
 
         // Deal with fusion without primary gene
