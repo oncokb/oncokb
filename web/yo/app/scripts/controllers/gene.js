@@ -2047,7 +2047,7 @@ angular.module('oncokbApp')
                         }
                     }
                 }
-                data.description = stringUtils.getString(data.description);
+                data.description = stringUtils.getTextString(data.description);
                 var abstractResults = FindRegex.result(data.description);
                 var tempAbstract;
                 for(var i = 0; i < abstractResults.length; i++) {
