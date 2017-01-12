@@ -322,6 +322,17 @@ angular.module('oncokbApp')
                     });
             }
 
+            function updateEvidenceBatch(data, success, fail) {
+                DriveAnnotation
+                    .updateEvidenceBatch(data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
@@ -619,6 +630,7 @@ angular.module('oncokbApp')
                 updateEvidence: updateEvidence,
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
+                updateEvidenceBatch: updateEvidenceBatch,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {
