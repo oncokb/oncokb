@@ -154,9 +154,9 @@ public class SearchApi {
     @ApiOperation(value = "", notes = "Search to find treatments.", response = ApiGenes.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/treatments",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/treatments",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     public ResponseEntity<ApiTreatments> searchTreatmentsGet(
         @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.", required = true) @RequestParam(value = "gene", required = false) String queryGene,
         @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel
