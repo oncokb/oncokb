@@ -23,9 +23,6 @@ public class GeneUtils {
         if (hugoSymbol != null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
-                if (CacheUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
-                    CacheUtils.setGeneByHugoSymbol(geneBo.findGeneByHugoSymbol(hugoSymbol));
-                }
                 return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
             } else {
                 return geneBo.findGeneByHugoSymbol(hugoSymbol);

@@ -6,8 +6,9 @@ package org.mskcc.cbio.oncokb.controller;
 
 import io.swagger.annotations.ApiParam;
 import org.json.JSONArray;
-import org.mortbay.util.ajax.JSON;
-import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpMethod;
@@ -16,8 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
+import java.util.*;
 
 /**
  * @author jgao
@@ -221,6 +222,15 @@ public class EvidenceController {
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
 
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
+
+        // Use controlled vocabulary to update oncogenic knowneffect
+        if(evidenceType != null && evidenceType.equals(EvidenceType.ONCOGENIC)) {
+            Oncogenicity oncogenicity = DriveAnnotationParser.getOncogenicityByString(knownEffect);
+            if (oncogenicity != null) {
+                knownEffect = oncogenicity.getOncogenic();
+            }
+        }
+
         if (evidences.isEmpty()) {
             Evidence evidence = new Evidence();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();

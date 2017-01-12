@@ -309,21 +309,6 @@ public class EvidenceUtils {
         return evidences;
     }
 
-    public static List<Evidence> getEvidenceByUUID(String uuid) {
-        if (uuid != null) {
-            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-            if (CacheUtils.isEnabled()) {
-                if (CacheUtils.getEvidenceByUUID(uuid) == null) {
-                    CacheUtils.setEvidenceByUUID(evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid)));
-                }
-                return CacheUtils.getEvidenceByUUID(uuid);
-            } else {
-                return evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
-            }
-        }
-        return null;
-    }
-
     public static Map<Gene, Set<Evidence>> getEvidenceByGenesAndEvidenceTypes(Set<Gene> genes, Set<EvidenceType> evidenceTypes) {
         Map<Gene, Set<Evidence>> result = new HashMap<>();
         if (CacheUtils.isEnabled()) {
@@ -945,7 +930,7 @@ public class EvidenceUtils {
         }
         return evidenceQueries;
     }
-    
+
     public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
         ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
@@ -956,7 +941,7 @@ public class EvidenceUtils {
         Set<Article> articles = evidence.getArticles();
         Set<Treatment> treatments = evidence.getTreatments();
         Set<NccnGuideline> nccnGuidelines = evidence.getNccnGuidelines();
-             
+
         if(trials != null && !trials.isEmpty()){
             Set<ClinicalTrial> annotatedTrials = new HashSet<>();
             Set<String> nctIds = new HashSet<String>();
@@ -1001,7 +986,7 @@ public class EvidenceUtils {
             }
             evidence.setArticles(annotatedArticles);
         }
-        
+
         Drug tempDrug;
         NccnGuideline tempNccnGuideline;
         if(treatments != null && !treatments.isEmpty()){
@@ -1025,6 +1010,6 @@ public class EvidenceUtils {
                     nccnGuidelineBo.saveOrUpdate(nccnGuideline);
                 }
             }
-        }       
+        }
     }
 }
