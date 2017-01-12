@@ -945,11 +945,9 @@ public class EvidenceUtils {
         if(trials != null && !trials.isEmpty()){
             Set<ClinicalTrial> annotatedTrials = new HashSet<>();
             Set<String> nctIds = new HashSet<String>();
-            String tempNctID;
-            ClinicalTrial tempCT;
             for(ClinicalTrial trial: trials){
-                tempNctID = trial.getNctId();
-                tempCT = clinicalTrialBo.findClinicalTrialByNctId(tempNctID);
+                String tempNctID = trial.getNctId();
+                ClinicalTrial tempCT = clinicalTrialBo.findClinicalTrialByNctId(tempNctID);
                 if(tempCT == null){
                     nctIds.add(tempNctID);
                 }else{
@@ -960,13 +958,11 @@ public class EvidenceUtils {
             evidence.setClinicalTrials(annotatedTrials);
         }
         if(articles != null && !articles.isEmpty()){
-            Article tempAT, newArticle;
             Set<Article> annotatedArticles = new HashSet<>();
-            String tempPMID;
             for(Article article : articles){
-                tempPMID = article.getPmid();
+                String tempPMID = article.getPmid();
                 if(tempPMID == null){
-                    tempAT = articleBo.findArticleByAbstract(article.getAbstractContent());
+                    Article tempAT = articleBo.findArticleByAbstract(article.getAbstractContent());
                     if(tempAT == null){
                         articleBo.save(article);
                         annotatedArticles.add(article);
@@ -974,9 +970,9 @@ public class EvidenceUtils {
                         annotatedArticles.add(tempAT);
                     }
                 }else{
-                    tempAT = articleBo.findArticleByPmid(tempPMID);
+                    Article tempAT = articleBo.findArticleByPmid(tempPMID);
                     if(tempAT == null){
-                        newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
+                        Article newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
                         articleBo.save(newArticle);
                         annotatedArticles.add(newArticle);
                     }else{
@@ -987,29 +983,37 @@ public class EvidenceUtils {
             evidence.setArticles(annotatedArticles);
         }
 
-        Drug tempDrug;
-        NccnGuideline tempNccnGuideline;
         if(treatments != null && !treatments.isEmpty()){
             for(Treatment treatment : treatments) {
                 Set<Drug> drugs = treatment.getDrugs();
                 if(drugs != null && !drugs.isEmpty()) {
+                    Set<Drug> drugsFromDB = new HashSet<>();
                     for(Drug drug : drugs){
-                          tempDrug = drugBo.findDrugByName(drug.getDrugName());
+                          Drug tempDrug = drugBo.findDrugByName(drug.getDrugName());
                           if(tempDrug == null){
                               drugBo.save(drug);
+                              drugsFromDB.add(drug);
+                          } else{
+                              drugsFromDB.add(tempDrug);
                           }
                     }
+                    treatment.setDrugs(drugsFromDB);
                 }
                 treatmentBo.saveOrUpdate(treatment);
             }
         }
         if(nccnGuidelines != null && !nccnGuidelines.isEmpty()){
+            Set<NccnGuideline> nccnFromDB = new HashSet<>();
             for(NccnGuideline nccnGuideline : nccnGuidelines) {
-                tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
+                NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
                 if(tempNccnGuideline == null){
                     nccnGuidelineBo.saveOrUpdate(nccnGuideline);
+                    nccnFromDB.add(nccnGuideline);
+                }else {
+                    nccnFromDB.add(tempNccnGuideline);
                 }
             }
+            evidence.setNccnGuidelines(nccnFromDB);
         }
     }
 }

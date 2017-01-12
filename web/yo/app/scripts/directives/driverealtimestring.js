@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('driveRealtimeString', function(gapi, $timeout, _, storage, $rootScope) {
+    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user) {
         return {
             templateUrl: 'views/driveRealtimeString.html',
             restrict: 'AE',
@@ -67,14 +67,13 @@ angular.module('oncokbApp')
                         scope.content.stringO = scope.object.text;
                     }
                 });
-
                 scope.$watch('content.stringO', function(n, o) {
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
                             // for the case of reject action changing real time doc
                             if(scope.rs && scope.rs.get('action') !== 'rejected') {
-                                scope.rs.set('updatedBy', $rootScope.myName);
+                                scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
                                 var uuid = scope.uuid.getText();
                                 var tempMapping = $rootScope.reviewMeta.get(uuid);
