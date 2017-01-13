@@ -557,7 +557,6 @@ public class CacheUtils {
                 }
             }
         }
-        System.out.println("Synchronize all evidences: " + MainUtils.getTimestampDiff(current));
     }
 
     private static void synAlterations() {
@@ -573,7 +572,6 @@ public class CacheUtils {
                 }
             }
         }
-        System.out.println("Synchronize all alterations: " + MainUtils.getTimestampDiff(current));
     }
 
     public static void updateGene(Integer entrezGeneId) {

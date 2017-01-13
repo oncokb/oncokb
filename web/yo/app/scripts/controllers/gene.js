@@ -1921,9 +1921,7 @@ angular.module('oncokbApp')
                                     treatmentChanged = true;
                                 }
                             }
-
-                            setOriginalStatus([ti.description_review]);
-                            ti.name_review.set('review', false);
+                            setOriginalStatus([ti.name_review, ti.description_review]);
                             if (checkReview(ti.description_uuid) || treatmentChanged) {
                                 ti.name_review.set('review', true);
                                 if(ti.description_review.get('updatedBy') === User.name) {
@@ -1933,8 +1931,7 @@ angular.module('oncokbApp')
                             }
                             treatmentChanged = false;
                         }
-                        tumor.name_review.set('review', false);
-                        setOriginalStatus([tumor.summary_review, tumor.trials_review]);
+                        setOriginalStatus([tumor.name_review, tumor.summary_review, tumor.trials_review]);
                         if (tumorChanged || checkReview(tumor.summary_uuid) || checkReview(tumor.trials_uuid)) {
                             tumor.name_review.set('review', true);
                             if(tumor.trials_review.get('updatedBy') === User.name) {
@@ -1947,7 +1944,7 @@ angular.module('oncokbApp')
                         }
                         tumorChanged = false;
                     }
-                    mutation.name_review.set('review', false);
+                    setOriginalStatus([mutation.name_review]);
                     if (mutationChanged) {
                         mutation.name_review.set('review', true);
                     }
@@ -2211,28 +2208,30 @@ angular.module('oncokbApp')
                         }
                     }
                 }
-                data.description = stringUtils.getTextString(data.description);
-                var abstractResults = FindRegex.result(data.description);
-                var tempAbstract;
-                for(var i = 0; i < abstractResults.length; i++) {
-                    tempAbstract = abstractResults[i];
-                    switch(tempAbstract.type) {
-                    case 'pmid':
-                        data.articles.push({
-                            pmid: tempAbstract.id
-                        });
-                        break;
-                    case 'abstract':
-                        data.articles.push({
-                            abstract: tempAbstract.id,
-                            link: tempAbstract.link
-                        });
-                        break;
-                    case 'nct':
-                        data.clinicalTrials.push({
-                            nctId: tempAbstract.id
-                        });
-                        break;
+                if(!_.isNull(data.description)) {
+                    data.description = stringUtils.getTextString(data.description);
+                    var abstractResults = FindRegex.result(data.description);
+                    var tempAbstract;
+                    for(var i = 0; i < abstractResults.length; i++) {
+                        tempAbstract = abstractResults[i];
+                        switch(tempAbstract.type) {
+                        case 'pmid':
+                            data.articles.push({
+                                pmid: tempAbstract.id
+                            });
+                            break;
+                        case 'abstract':
+                            data.articles.push({
+                                abstract: tempAbstract.id,
+                                link: tempAbstract.link
+                            });
+                            break;
+                        case 'nct':
+                            data.clinicalTrials.push({
+                                nctId: tempAbstract.id
+                            });
+                            break;
+                        }
                     }
                 }
                 return [dataUUID, data, extraDataUUID, extraData];
