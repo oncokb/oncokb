@@ -163,7 +163,7 @@ angular.module('oncokbApp')
 
             var sorting = [[5, 'desc'], [1, 'asc'], [0, 'asc']];
             if (users.getMe().role === 8) {
-                sorting = [[4, 'desc'], [1, 'asc'], [0, 'asc']];
+                sorting = [[7, 'desc'], [4, 'desc'], [1, 'asc'], [0, 'asc']];
             }
 
             $scope.dtOptions = DTOptionsBuilder
