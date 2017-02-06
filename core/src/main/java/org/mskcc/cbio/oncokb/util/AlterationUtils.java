@@ -538,9 +538,11 @@ public final class AlterationUtils {
     public static Alteration findAlteration(Gene gene, String alteration) {
         if (CacheUtils.isEnabled()) {
             Set<Alteration> alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
-            for (Alteration al : alterations) {
-                if (al.getAlteration().equalsIgnoreCase(alteration)) {
-                    return al;
+            if(alterations != null){
+                for (Alteration al : alterations) {
+                    if (al.getAlteration().equalsIgnoreCase(alteration)) {
+                        return al;
+                    }
                 }
             }
             return null;
