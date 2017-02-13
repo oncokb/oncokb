@@ -119,12 +119,24 @@ angular.module('oncokbApp')
                         scope.content.propagation = scope.es.get('propagation');
                     }
                     scope.changePropagation(true);
-                    scope.$watch('content.propagation', function(n) {
+                    scope.$watch('content.propagation', function(n, o) {
                         if (!_.isUndefined(scope.es)) {
                             if (_.isUndefined(scope.es.get('propagation')) ||
                                 scope.es.get('propagation') !== n) {
                                 scope.es.set('propagation', n);
                             }
+                        }
+                        if(o && n !== o) {
+                            scope.rs.set('lastReviewedPropagation', o);
+                            var uuid = scope.uuid.getText();
+                            var tempMapping = $rootScope.reviewMeta.get(uuid);
+                            if(!tempMapping) {
+                                tempMapping = $rootScope.metaModel.createMap();
+                            }
+                            tempMapping.set('review', true);
+                            $rootScope.reviewMeta.set(uuid, tempMapping);
+                            scope.rs.set('updatedBy', user.name);
+                            scope.rs.set('updateTime', new Date().toLocaleString());
                         }
                     });
                 }

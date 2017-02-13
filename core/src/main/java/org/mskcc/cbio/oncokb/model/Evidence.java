@@ -31,7 +31,6 @@ public class Evidence implements java.io.Serializable {
     private String knownEffect;
     private Date lastEdit;
     private LevelOfEvidence levelOfEvidence;
-    @JsonIgnore
     private String propagation;
     private Set<Article> articles;
     private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);

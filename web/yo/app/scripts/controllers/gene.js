@@ -2078,7 +2078,8 @@ angular.module('oncokbApp')
                     articles: [],
                     clinicalTrials: [],
                     nccnGuidelines: null,
-                    treatments: null
+                    treatments: null,
+                    propagation: null
                 };
                 var levelMapping = {
                     '0': 'LEVEL_0',
@@ -2191,6 +2192,7 @@ angular.module('oncokbApp')
                         dataUUID = treatment.name_uuid.getText();
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
                         data.description = treatment.description.getText();
+                        data.propagation = levelMapping[treatment.name_eStatus.get('propagation')];
                         data.treatments = [];
                         var treatments = treatment.name.getText().split('+');
                         for (i = 0; i < treatments.length; i++) {
@@ -2369,6 +2371,7 @@ angular.module('oncokbApp')
                     } else {
                         acceptItem(treatment.name_uuid, treatment.name_review);
                         acceptItem(treatment.level_uuid, treatment.level_review);
+                        treatment.level_review.delete('lastReviewedPropagation');
                         acceptItem(treatment.indication_uuid, treatment.indication_review);
                         acceptItem(treatment.description_uuid, treatment.description_review);
                         acceptItem(treatment.short_uuid, treatment.short_review);
