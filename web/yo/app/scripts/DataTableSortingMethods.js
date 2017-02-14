@@ -15,7 +15,7 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
     'num-html-desc': function(a, b) {
         return b - a;
     },
-
+    // There is date sorting plug-in for datatable, but not worth to include it for this simple purpose
     'date-pre': function(a) {
         return Date.parse(a);
     },
