@@ -14,5 +14,17 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
 
     'num-html-desc': function(a, b) {
         return b - a;
+    },
+
+    'date-pre': function(a) {
+        return Date.parse(a);
+    },
+
+    'date-asc': function(a, b) {
+        return a - b;
+    },
+
+    'date-desc': function(a, b) {
+        return b - a;
     }
 });

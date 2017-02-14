@@ -171,13 +171,13 @@ angular.module('oncokbApp')
                 .withDOM('ifrtlp')
                 .withOption('order', sorting)
                 .withBootstrap();
-
+            
             $scope.dtColumns = [
                 DTColumnDefBuilder.newColumnDef(0),
                 DTColumnDefBuilder.newColumnDef(1),
                 DTColumnDefBuilder.newColumnDef(2).notSortable(),
                 DTColumnDefBuilder.newColumnDef(3).notSortable(),
-                DTColumnDefBuilder.newColumnDef(4),
+                DTColumnDefBuilder.newColumnDef(4).withOption('sType', 'date'),
                 DTColumnDefBuilder.newColumnDef(5),
                 DTColumnDefBuilder.newColumnDef(6)
             ];
