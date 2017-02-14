@@ -525,6 +525,9 @@ public class TumorTypeUtils {
             } catch (IOException e) {
                 System.out.print("No oncotree.api specified, will use default setting.");
             }
+            if (ONCO_TREE_API_URL != null) {
+                ONCO_TREE_API_URL = ONCO_TREE_API_URL.trim();
+            }
             if (ONCO_TREE_API_URL == null || ONCO_TREE_API_URL.isEmpty()) {
                 ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
             }
