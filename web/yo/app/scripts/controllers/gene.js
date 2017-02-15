@@ -1947,6 +1947,7 @@ angular.module('oncokbApp')
                     setOriginalStatus([mutation.name_review]);
                     if (mutationChanged) {
                         mutation.name_review.set('review', true);
+                        $scope.geneStatus[i].isOpen = true;
                     }
                     mutationChanged = false;
                 }
