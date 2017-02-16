@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -22,7 +23,7 @@ public class Evidence implements java.io.Serializable {
 
     private String cancerType;
     private String subtype;
-    private OncoTreeType oncoTreeType;
+    private TumorType oncoTreeType;
     private Gene gene;
     private Set<Alteration> alterations;
     private String description;
@@ -79,15 +80,15 @@ public class Evidence implements java.io.Serializable {
         this.subtype = subtype;
     }
 
-    public void setOncoTreeType(OncoTreeType oncoTreeType) {
+    public void setOncoTreeType(TumorType oncoTreeType) {
         this.oncoTreeType = oncoTreeType;
     }
 
-    public OncoTreeType getOncoTreeType() {
+    public TumorType getOncoTreeType() {
         if (this.oncoTreeType != null)
             return this.oncoTreeType;
 
-        OncoTreeType oncoTreeType = null;
+        TumorType oncoTreeType = null;
 
         if (this.subtype != null) {
             oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);

@@ -8,6 +8,13 @@ import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
 
 import javax.xml.parsers.ParserConfigurationException;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
+import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
+import org.mskcc.cbio.oncokb.bo.DrugBo;
+import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
+import org.mskcc.cbio.oncokb.bo.TreatmentBo;
+import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
+import org.mskcc.oncotree.model.TumorType;
 import java.util.*;
 
 /**
@@ -66,7 +73,7 @@ public class EvidenceUtils {
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
 
             Set<Evidence> relevantEvidences;
-            List<OncoTreeType> relevantTumorTypes = new ArrayList<>();
+            List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
                 relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
@@ -171,7 +178,7 @@ public class EvidenceUtils {
         }
     }
 
-    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<OncoTreeType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
+    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
@@ -195,7 +202,7 @@ public class EvidenceUtils {
         Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
         Map<Integer, Alteration> alterations = new HashMap<>();
         Map<Integer, Alteration> alterationsME = new HashMap<>(); //Mutation effect only
-        Set<OncoTreeType> tumorTypes = new HashSet<>();
+        Set<TumorType> tumorTypes = new HashSet<>();
 
         for (EvidenceQueryRes query : queries) {
             if (query.getGene() != null) {
@@ -214,7 +221,7 @@ public class EvidenceUtils {
                 }
 
                 if (query.getOncoTreeTypes() != null) {
-                    for (OncoTreeType tumorType : query.getOncoTreeTypes()) {
+                    for (TumorType tumorType : query.getOncoTreeTypes()) {
                         if (!tumorTypes.contains(tumorType)) {
                             tumorTypes.add(tumorType);
                         }
@@ -354,7 +361,7 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static Set<Evidence> convertEvidenceLevel(List<Evidence> evidences, Set<OncoTreeType> tumorTypes) {
+    public static Set<Evidence> convertEvidenceLevel(List<Evidence> evidences, Set<TumorType> tumorTypes) {
         Set<Evidence> tmpEvidences = new HashSet<>();
 
         for (Evidence evidence : evidences) {
@@ -407,7 +414,7 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(tempEvidence);
                             } else {
-                                List<OncoTreeType> tumorType = new ArrayList<>();
+                                List<TumorType> tumorType = new ArrayList<>();
 
                                 if (tempEvidence.getOncoTreeType() != null) {
                                     tumorType.add(tempEvidence.getOncoTreeType());

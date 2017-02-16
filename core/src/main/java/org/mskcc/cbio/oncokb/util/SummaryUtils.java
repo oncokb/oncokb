@@ -5,6 +5,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -18,7 +19,7 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
+    public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         if (gene == null) {
             return "";
         }
@@ -63,7 +64,7 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
+    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
 
@@ -79,7 +80,7 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String tumorTypeSummary(Gene gene, String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<OncoTreeType> relevantTumorTypes) {
+    public static String tumorTypeSummary(Gene gene, String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<TumorType> relevantTumorTypes) {
         //Tumor type summary
         Boolean ttSummaryNotGenerated = true;
         String tumorTypeSummary = null;
@@ -380,7 +381,7 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String fullSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<OncoTreeType> relevantTumorTypes, String queryTumorType) {
+    public static String fullSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
         StringBuilder sb = new StringBuilder();
 
         sb.append(geneSummary(gene));
@@ -923,7 +924,7 @@ public class SummaryUtils {
         return summary;
     }
 
-    private static String getTumorTypeSummaryFromPickedTreatment(Gene gene, Alteration alteration, Set<OncoTreeType> relevantTumorTypes) {
+    private static String getTumorTypeSummaryFromPickedTreatment(Gene gene, Alteration alteration, Set<TumorType> relevantTumorTypes) {
         String tumorTypeSummary = null;
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
         Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
@@ -951,7 +952,7 @@ public class SummaryUtils {
         return tumorTypeSummary;
     }
 
-    private static String getKITtumorTypeSummaries(String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<OncoTreeType> relevantTumorTypes) {
+    private static String getKITtumorTypeSummaries(String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<TumorType> relevantTumorTypes) {
         Gene gene = GeneUtils.getGeneByHugoSymbol("KIT");
         String tumorTypeSummary = null;
         Evidence pickedTreatment = null;

@@ -80,9 +80,9 @@ public interface VariantsApi {
 //    );
 //
 //
-//    @ApiOperation(value = "", notes = "Get list of annotated tumor types for specific variant.", response = OncoTreeType.class, responseContainer = "List", tags = {"TumorType",})
+//    @ApiOperation(value = "", notes = "Get list of annotated tumor types for specific variant.", response = TumorType.class, responseContainer = "List", tags = {"TumorType",})
 //    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = OncoTreeType.class, responseContainer = "List"),
+//        @ApiResponse(code = 200, message = "OK", response = TumorType.class, responseContainer = "List"),
 //        @ApiResponse(code = 400, message = "variant is not available.", response = ApiErrorResp.class)})
 //    @RequestMapping(value = "/variants/{variantId}/tumorTypes",
 //        produces = {"application/json"},

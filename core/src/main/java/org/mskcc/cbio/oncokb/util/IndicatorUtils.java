@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.util.*;
 
@@ -103,7 +104,7 @@ public class IndicatorUtils {
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
             List<Alteration> alleles = new ArrayList<>();
-            List<OncoTreeType> oncoTreeTypes = new ArrayList<>();
+            List<TumorType> oncoTreeTypes = new ArrayList<>();
 
             if (relevantAlterations == null || relevantAlterations.size() == 0) {
                 indicatorQuery.setVariantExist(false);
