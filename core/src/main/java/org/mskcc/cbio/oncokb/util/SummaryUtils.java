@@ -111,10 +111,10 @@ public class SummaryUtils {
             return CacheUtils.getVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType);
         }
 
-        if (gene.getHugoSymbol().equals("KIT")) {
-            tumorTypeSummary = getKITtumorTypeSummaries(queryAlteration, alterations, queryTumorType, relevantTumorTypes);
-        } else {
-            // Get all tumor type summary evidences specifically for the alteration
+//        if (gene.getHugoSymbol().equals("KIT")) {
+//            tumorTypeSummary = getKITtumorTypeSummaries(queryAlteration, alterations, queryTumorType, relevantTumorTypes);
+//        } else {
+        // Get all tumor type summary evidences specifically for the alteration
             if (tumorTypeSummary == null) {
                 Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
                 if (alteration != null) {
@@ -213,7 +213,7 @@ public class SummaryUtils {
                     }
                 }
             }
-        }
+//        }
 
         if (tumorTypeSummary == null) {
             tumorTypeSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].";
@@ -310,7 +310,7 @@ public class SummaryUtils {
                 List<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singletonList(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
                 if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
                     Evidence evidence = oncogenicEvidences.iterator().next();
-                    if (evidence != null ) {
+                    if (evidence != null) {
                         oncogenic = Oncogenicity.getByEvidence(evidence);
                         break;
                     }
@@ -910,6 +910,20 @@ public class SummaryUtils {
         summary = summary.replace("[[gene]] [[mutation]] [[mutation]]", alterationName);
         summary = summary.replace("[[gene]] [[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[gene]]", gene.getHugoSymbol());
+
+        // Improve false tolerance. Curators often use hugoSymbol directly instead of [[gene]]
+        String specialLocationAlt = gene.getHugoSymbol() + " [[mutation]] [[[mutation]]]";
+        if (summary.contains(specialLocationAlt)) {
+            summary = summary.replace(specialLocationAlt, alterationName);
+        }
+        specialLocationAlt = gene.getHugoSymbol() + " [[mutation]] [[mutation]]";
+        if (summary.contains(specialLocationAlt)) {
+            summary = summary.replace(specialLocationAlt, alterationName);
+        }
+        specialLocationAlt = gene.getHugoSymbol() + " [[mutation]] [[mutant]]";
+        if (summary.contains(specialLocationAlt)) {
+            summary = summary.replace(specialLocationAlt, altName);
+        }
 
         summary = summary.replace("[[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[mutation]] [[[mutation]]]", alterationName);
