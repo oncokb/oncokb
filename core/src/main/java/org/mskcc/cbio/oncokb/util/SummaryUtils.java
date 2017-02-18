@@ -144,50 +144,16 @@ public class SummaryUtils {
                             alternateAlleles.remove(specialAllele);
                         }
 
-                        // Special case for AKT1 E17K alleles
-                        if (gene.getHugoSymbol().equals("AKT1") && alteration.getProteinStart().equals(17)) {
-                            OncoTreeType breastCancer = TumorTypeUtils.getOncoTreeCancerType("Breast Cancer");
-                            OncoTreeType ovarianCancer = TumorTypeUtils.getOncoTreeCancerType("Ovarian Cancer");
-
-                            if (relevantTumorTypes.contains(breastCancer)) {
-                                tumorTypeSummary = "There is compelling clinical data supporting the use of AKT-targeted inhibitors such as AZD-5363 in patients with AKT1 E17K mutant breast cancer. Therefore, [[gene]] [[mutation]] [[mutant]] breast cancer is considered likely sensitive to the same inhibitors.";
-                            } else if (relevantTumorTypes.contains(ovarianCancer)) {
-                                tumorTypeSummary = "There is compelling clinical data supporting the use of AKT-targeted inhibitors such as AZD-5363 in patients with AKT1 E17K mutant ovarian cancer. Therefore, [[gene]] [[mutation]] [[mutant]] ovarian cancer is considered likely sensitive to the same inhibitors.";
-                            } else {
-                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E17K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                        for (Alteration allele : alternateAlleles) {
+                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+                            if (tumorTypeSummary != null) {
+                                break;
                             }
-                        } else if (gene.getHugoSymbol().equals("ARAF") && alteration.getProteinStart().equals(214)) {
-                            // Special case for ARAF S214A/F
-                            OncoTreeType histiocytosis = TumorTypeUtils.getOncoTreeCancerType("Histiocytosis");
-                            OncoTreeType NSCLC = TumorTypeUtils.getOncoTreeCancerType("Non-Small Cell Lung Cancer");
 
-                            if (relevantTumorTypes.contains(histiocytosis)) {
-                                tumorTypeSummary = "There is compelling clinical data supporting the use of sorafenib in patients with ARAF S214A mutant non-Langherhans cell histiocytic disease. Therefore, [[gene]] [[mutation]] [[mutant]] non-Langherhans cell histiocytic disease is considered likely sensitive to this inhibitor.";
-                            } else if (relevantTumorTypes.contains(NSCLC)) {
-                                tumorTypeSummary = "There is compelling clinical data supporting the use of sorafenib in patients with ARAF S214F mutant lung cancer. Therefore, [[gene]] [[mutation]] [[mutant]] lung cancer is considered likely sensitive to this inhibitor.";
-                            } else {
-                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "S214A")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                            }
-                        } else if (gene.getHugoSymbol().equals("MTOR") && alteration.getProteinStart().equals(2014)) {
-                            // Special case for MTOR E2014K
-                            OncoTreeType bladderCancer = TumorTypeUtils.getOncoTreeCancerType("Bladder Cancer");
-                            if (relevantTumorTypes.contains(bladderCancer)) {
-                                tumorTypeSummary = "There is compelling clinical data supporting the use of everolimus in patients with MTOR E2014K mutant bladder cancer. Therefore, [[gene]] [[mutation]] [[mutant]] bladder cancer is considered likely sensitive to the same inhibitor.";
-                            } else {
-                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(AlterationUtils.findAlteration(gene, "E2014K")), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                            }
-                        } else {
-                            for (Alteration allele : alternateAlleles) {
-                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
-                                if (tumorTypeSummary != null) {
-                                    break;
-                                }
-
-                                // Get Other Tumor Types summary
-                                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                                if (tumorTypeSummary != null) {
-                                    break;
-                                }
+                            // Get Other Tumor Types summary
+                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                            if (tumorTypeSummary != null) {
+                                break;
                             }
                         }
                     } else if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
