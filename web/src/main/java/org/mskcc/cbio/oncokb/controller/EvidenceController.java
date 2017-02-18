@@ -220,7 +220,8 @@ public class EvidenceController {
         Set<Article> articles = queryEvidence.getArticles();
         Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
-
+        String propagation = queryEvidence.getPropagation();
+        
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
         // Use controlled vocabulary to update oncogenic knowneffect
@@ -275,7 +276,7 @@ public class EvidenceController {
             evidence.setArticles(articles);
             evidence.setNccnGuidelines(nccnGuidelines);
             evidence.setClinicalTrials(clinicalTrials);
-
+            evidence.setPropagation(propagation);
             evidenceBo.save(evidence);
             evidences.add(evidence);
         } else {
@@ -292,6 +293,7 @@ public class EvidenceController {
                 evidence.setArticles(articles);
                 evidence.setNccnGuidelines(nccnGuidelines);
                 evidence.setClinicalTrials(clinicalTrials);
+                evidence.setPropagation(propagation);
                 evidenceBo.update(evidence);
             }
         }
