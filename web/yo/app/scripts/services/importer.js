@@ -279,6 +279,8 @@ angular.module('oncokbApp')
                     model[key].setText(value);
                 } else if (model.type === 'Map') {
                     model.set(key, value);
+                } else if(key === 'propagation') {
+                    model.name_eStatus.set('propagation', value);
                 } else {
                     console.log('Unknown key', key);
                 }
