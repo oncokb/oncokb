@@ -171,7 +171,7 @@ angular.module('oncokbApp')
                 .withDOM('ifrtlp')
                 .withOption('order', sorting)
                 .withBootstrap();
-            
+
             $scope.dtColumns = [
                 DTColumnDefBuilder.newColumnDef(0),
                 DTColumnDefBuilder.newColumnDef(1),
@@ -1719,6 +1719,9 @@ angular.module('oncokbApp')
                 $scope.fileEditable = true;
                 myUpdatedEvidenceModels = [];
                 $interval.cancel($scope.reviewMoeInterval);
+                _.each($scope.geneStatus, function(item) {
+                    item.isOpen = false;
+                });
             };
             $scope.developerCheck = function() {
                 var developers = ['Hongxin Zhang', 'Jianjiong Gao', 'Jiaojiao Wang'];
@@ -1947,6 +1950,7 @@ angular.module('oncokbApp')
                     setOriginalStatus([mutation.name_review]);
                     if (mutationChanged) {
                         mutation.name_review.set('review', true);
+                        $scope.geneStatus[i].isOpen = true;
                     }
                     mutationChanged = false;
                 }
