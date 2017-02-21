@@ -3607,7 +3607,7 @@ angular.module('oncokbApp')
                 $timeout(function() {
                     if (underOthersReview()) {
                         $scope.$emit('interruptedDueToOtherReview');
-                    } else {
+                    } else if(underReview()) {
                         // if no other is reviewing the current document,
                         // need to reset the document to initial state.
                         $scope.exitReview();
