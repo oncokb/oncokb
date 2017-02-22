@@ -406,7 +406,11 @@ OncoKB.initialize = function() {
                         this[__key + '_uuid'] = model.createString('');
                         this[__key + '_review'] = model.createMap();
                         if(!OncoKB.backingUp) {
-                            this[__key + '_uuid'].setText(UUIDjs.create(4).toString());
+                            var tempString = '';
+                            while(!tempString) {
+                                tempString = UUIDjs.create(4).toString();
+                            }
+                            this[__key + '_uuid'].setText(tempString);
                         }
                     }
                     switch (OncoKB.curateInfo[id][__key].type) {
