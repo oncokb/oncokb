@@ -19,10 +19,7 @@ OncoKB front-end is built with lots of great open source JS libraries. AngularJS
 1. Copy data-EXAMPLE to data under web/yo/app/
 2. Prepare properties files  
     ```
-    cd core/src/main/resources/properties/
-    cp config-EXAMPLE.properties config.properties
-    cp database-EXAMPLE.properties database.properties
-    cp log4j-EXAMPLE.properties log4j.properties
+    cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/properties
     ```
 
 3. Set configuration 'testing' to true in config.json
