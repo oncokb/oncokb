@@ -371,6 +371,8 @@ public class EvidenceUtils {
                         LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tmpEvidence.getPropagation());
                         if (propagationLevel != null) {
                             tmpEvidence.setLevelOfEvidence(propagationLevel);
+                        }else {
+                            flag = false;
                         }
                     }
 
