@@ -14,6 +14,7 @@ public class NccnGuideline implements java.io.Serializable {
     private Integer id;
     @JsonIgnore
     private String uuid;
+    private String therapy;
     private String disease;
     private String version;
     private String pages;
@@ -26,6 +27,14 @@ public class NccnGuideline implements java.io.Serializable {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getTherapy() {
+        return therapy;
+    }
+
+    public void setTherapy(String therapy) {
+        this.therapy = therapy;
     }
 
     public void setId(Integer id) {

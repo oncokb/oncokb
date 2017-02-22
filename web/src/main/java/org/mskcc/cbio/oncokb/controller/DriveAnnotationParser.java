@@ -790,6 +790,12 @@ public class DriveAnnotationParser {
 
     private static void parseNCCN(Gene gene, Set<Alteration> alterations, OncoTreeType oncoTreeType, JSONObject nccnObj, String uuid) {
         // disease
+        String therapy = null;
+        if (nccnObj.has("therapy") && !nccnObj.getString("therapy").trim().isEmpty()) {
+            therapy = nccnObj.getString("therapy").trim();
+        }
+        
+        // disease
         String disease = null;
         if (nccnObj.has("disease") && !nccnObj.getString("disease").trim().isEmpty()) {
             disease = nccnObj.getString("disease").trim();
@@ -830,6 +836,7 @@ public class DriveAnnotationParser {
         NccnGuidelineBo nccnGuideLineBo = ApplicationContextSingleton.getNccnGuidelineBo();
 
         NccnGuideline nccnGuideline = new NccnGuideline();
+        nccnGuideline.setTherapy(therapy);
         nccnGuideline.setDisease(disease);
         nccnGuideline.setVersion(version);
         nccnGuideline.setPages(pages);

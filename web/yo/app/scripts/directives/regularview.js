@@ -52,7 +52,7 @@ angular.module('oncokbApp')
             };
             $scope.generateNCCN = function(nccn) {
                 var str = '<i>';
-
+                str += (nccn.hasOwnProperty('therapy') && angular.isString(nccn.therapy)) ? ('Therapy: ' + nccn.therapy) : '';
                 str += (nccn.hasOwnProperty('disease') && angular.isString(nccn.disease)) ? ('Disease: ' + nccn.disease) : '';
                 str += (nccn.hasOwnProperty('version') && angular.isString(nccn.version)) ? (' Version: ' + nccn.version) : '';
                 str += (nccn.hasOwnProperty('pages') && angular.isString(nccn.pages)) ? (' Pages: ' + nccn.pages) : '';

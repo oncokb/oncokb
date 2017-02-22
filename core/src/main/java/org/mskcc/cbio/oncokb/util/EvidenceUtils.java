@@ -1005,7 +1005,7 @@ public class EvidenceUtils {
         if(nccnGuidelines != null && !nccnGuidelines.isEmpty()){
             Set<NccnGuideline> nccnFromDB = new HashSet<>();
             for(NccnGuideline nccnGuideline : nccnGuidelines) {
-                NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
+                NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getTherapy(), nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
                 if(tempNccnGuideline == null){
                     nccnGuidelineBo.saveOrUpdate(nccnGuideline);
                     nccnFromDB.add(nccnGuideline);
