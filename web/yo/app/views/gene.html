@@ -221,7 +221,7 @@
               </uib-accordion-group>
 
             <!-- tumor types -->
-            <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="geneStatus[$parent.$index][$index] = {isOpen: (reviewMode ? true : false)};" class="accordionMarginTop" ng-hide="status.hideAllObsolete && tumor.name_eStatus.get('obsolete') === 'true'">
+            <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="geneStatus[$parent.$index][$index] = {isOpen: (reviewMode && !tumor.name_review.get('removed') ? true : false)};" class="accordionMarginTop" ng-hide="status.hideAllObsolete && tumor.name_eStatus.get('obsolete') === 'true'">
               <uib-accordion-group ng-if="displayCheck(null, tumor.name_review, mutation.name_review, tumor.name_review)" is-open="geneStatus[$parent.$parent.$index][$index].isOpen" class="levelTwoHeader">
                 <uib-accordion-heading >
                   <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$index][$index].isOpen}"></i>
@@ -373,7 +373,7 @@
                             <pub-iframe ng-model="ti.description.text" ng-if="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$index][$index].isOpen"></pub-iframe>
                         </div>
                       <uib-accordion close-others="false">
-                        <div ng-repeat="treatment in ti.treatments.asArray()" ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index]={isOpen: (reviewMode ? true : false)};" class="accordionMarginTop">
+                        <div ng-repeat="treatment in ti.treatments.asArray()" ng-init="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$index][$index]={isOpen: (reviewMode && !treatment.name_review.get('removed') ? true : false)};" class="accordionMarginTop">
                             <uib-accordion-group ng-if="displayCheck(null, treatment.name_review, mutation.name_review, tumor.name_review, treatment.name_review) && showEntry(treatment.name_eStatus)" is-open="geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$index][$index].isOpen" class="levelFourHeader">
                             <uib-accordion-heading>
                               <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].isOpen, 'fa-chevron-right': !geneStatusgeneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index][$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].isOpen}"></i>
