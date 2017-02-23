@@ -204,19 +204,22 @@ public class SummaryUtils {
 
     public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
         StringBuilder sb = new StringBuilder();
-
+        Alteration alteration = null;
+        Boolean isHotspot = false;
+        if (gene != null && queryAlteration != null) {
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), null, null, null);
+            if (alteration == null) {
+                alteration = new Alteration();
+                alteration.setGene(gene);
+                alteration.setAlterationType(AlterationType.MUTATION);
+                alteration.setAlteration(queryAlteration);
+                alteration.setName(queryAlteration);
+                AlterationUtils.annotateAlteration(alteration, queryAlteration);
+            }
+            isHotspot = HotspotUtils.isHotspot(gene.getHugoSymbol(), alteration.getProteinStart(), alteration.getProteinEnd());
+        }
         if (gene == null || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(alterations).size() == 0) {
             if (gene != null && queryAlteration != null) {
-                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), null, null, null);
-                if (alteration == null) {
-                    alteration = new Alteration();
-                    alteration.setGene(gene);
-                    alteration.setAlterationType(AlterationType.MUTATION);
-                    alteration.setAlteration(queryAlteration);
-                    alteration.setName(queryAlteration);
-                    AlterationUtils.annotateAlteration(alteration, queryAlteration);
-                }
-
                 if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("synonymous_variant")) {
                     sb.append(synonymousSummary());
                 } else if (AlterationUtils.hasAlleleAlterations(alteration)) {
@@ -235,11 +238,21 @@ public class SummaryUtils {
                         }
                     }
                     if (lastEdit == null) {
-                        sb.append(unknownOncogenicSummary(gene));
+                        if (isHotspot) {
+                            sb.append(hotspotSummary());
+                        } else {
+                            sb.append(unknownOncogenicSummary(gene));
+                        }
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
                         sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.");
+
+                        if (isHotspot) {
+                            sb.append(" " + hotspotSummary());
+                        }
                     }
+                } else if (isHotspot) {
+                    sb.append(hotspotSummary());
                 } else {
                     sb.append(unknownOncogenicSummary(gene));
                 }
@@ -305,6 +318,8 @@ public class SummaryUtils {
 
                     sb.append(" oncogenic.");
                 }
+            } else if (isHotspot) {
+                sb.append(hotspotSummary());
             } else {
                 sb.append("It is unknown whether ");
                 if (appendThe) {
@@ -405,6 +420,11 @@ public class SummaryUtils {
         }
 
         return sb.toString();
+    }
+
+    public static String hotspotSummary() {
+        return "This mutation is predicted to be oncogenic as it was identified " +
+            "as a statistically significant hotspot (Chang et al. 2016).";
     }
 
     private static String alleleNamesStr(Set<Alteration> alterations) {

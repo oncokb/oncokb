@@ -3,17 +3,12 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
-import org.mskcc.cbio.oncokb.bo.ArticleBo;
-import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
-import org.mskcc.cbio.oncokb.bo.DrugBo;
-import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
-import org.mskcc.cbio.oncokb.bo.TreatmentBo;
-import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
+import java.util.*;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -780,6 +775,15 @@ public class EvidenceUtils {
                             requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                             requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
+
+                        // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
+                        if (relevantAlts.isEmpty()
+                            && HotspotUtils.isHotspot(alt.getGene().getHugoSymbol(), alt.getProteinStart(), alt.getProteinEnd())) {
+                            Alteration oncogenicMutations = AlterationUtils.findAlteration(alt.getGene(), "Oncogenic Mutations");
+                            if (oncogenicMutations != null) {
+                                relevantAlts.add(oncogenicMutations);
+                            }
+                        }
                         query.setAlterations(relevantAlts);
 
                         Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
@@ -911,7 +915,7 @@ public class EvidenceUtils {
                         }
                     }
 
-                    query.getEvidences().addAll(alleleEvidencesCopy);
+                    query.getEvidences().addAll(convertEvidenceLevel(alleleEvidencesCopy, new HashSet<>(query.getOncoTreeTypes())));
                 }
             }
 
