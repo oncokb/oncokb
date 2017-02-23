@@ -56,7 +56,7 @@
           </b></p>
       </div>
 
-    <div ng-if="displayCheck(gene.summary_uuid, gene.summary_review)">
+    <div ng-if="displayCheck(gene.summary_uuid, gene.summary_review, null, null, null, true)">
         <h3>{{::gene.summary.display}}:
           <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{::gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'"></e-status>
@@ -66,7 +66,7 @@
         </h3>
         <drive-realtime-string rs="gene.summary_review" uuid="gene.summary_uuid" es="gene.summary_eStatus" fe="fileEditable" t="'p'" object="gene.summary"></drive-realtime-string>
     </div>
-    <div ng-if="displayCheck(gene.type_uuid, gene.type_review)">
+    <div ng-if="displayCheck(gene.type_uuid, gene.type_review, null, null, null, true)">
         <h3 ng-if="reviewMode">Gene Type:
             <p ng-show="signatureCheck(gene.type_review)" style="float:right;font-size:15px;">Updated by {{gene.type_review.get('updatedBy')}} at {{gene.type_review.get('updateTime')}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept', gene.type_review)" ng-if="iconExist('accept', gene.type_review)"  ng-click="accept(null, 'GENE_TYPE', null, null, null, null, gene.type_review)"></i>
@@ -102,7 +102,7 @@
             </div>
         </div>
     </div>
-    <div ng-if="displayCheck(gene.background_uuid, gene.background_review)">
+    <div ng-if="displayCheck(gene.background_uuid, gene.background_review, null, null, null, true)">
         <br/><br/>
         <h3>{{::gene.background.display}}:
             <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
@@ -165,8 +165,8 @@
                 </span>
                 <span style="margin-right:10px;float:right" ng-show="reviewMode">
                     <p ng-show="signatureCheck(mutation.oncogenic_review, mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.oncogenic_review.get('updatedBy')}} at {{mutation.oncogenic_review.get('updateTime')}}</p>
-                    <i class="fa fa-check fa-margin" ng-class="iconClass('accept', mutation.oncogenic_review)" ng-if="iconExist('accept', mutation.oncogenic_review, mutation.name_review)"  ng-click="accept($event, 'Clinical effect', mutation, null, null, null, mutation.oncogenic_review)"></i>
-                    <i class="fa fa-times fa-margin" ng-class="iconClass('reject', mutation.oncogenic_review)" ng-if="iconExist('reject', mutation.oncogenic_review, mutation.name_review)"  ng-click="reject($event, 'Clinical effect', mutation, null, null, null, mutation.oncogenic_review)"></i>
+                    <i class="fa fa-check fa-margin" ng-class="iconClass('accept', mutation.oncogenic_review)" ng-if="iconExist('accept', mutation.oncogenic_review, mutation.name_review)"  ng-click="accept($event, 'ONCOGENIC', mutation, null, null, null, mutation.oncogenic_review)"></i>
+                    <i class="fa fa-times fa-margin" ng-class="iconClass('reject', mutation.oncogenic_review)" ng-if="iconExist('reject', mutation.oncogenic_review, mutation.name_review)"  ng-click="reject($event, 'ONCOGENIC', mutation, null, null, null, mutation.oncogenic_review)"></i>
                 </span>
               </uib-accordion-heading>
                 <p ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review, null, null, true)">
@@ -452,7 +452,7 @@
                   </div>
 
                   <!-- Trials -->
-                  <div class="accordionMarginTop" ng-if="displayCheck(tumor.trials_uuid, tumor.trials_review, mutation.name_review, tumor.name_review)">
+                  <div class="accordionMarginTop" ng-if="displayCheck(tumor.trials_uuid, tumor.trials_review, mutation.name_review, tumor.name_review, null, true)">
                     <uib-accordion-group ng-init="geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials={isOpen: (reviewMode ? true : false)};" is-open="geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.isOpen" class="levelThreeHeader" ng-hide="((!!geneStatus[$parent.$parent.$parent.$parent.$index][$index].trials.hideEmpty) && tumor.trials.length === 0) || status.hideAllObsolete && tumor.trials_eStatus.get('obsolete') === 'true'">
                       <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].trials.isOpen, 'fa-chevron-right': !geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].trials.isOpen}" ng-click="changeIsOpen(geneStatus[$parent.$parent.$parent.$parent.$parent.$parent.$index][$index].trials.isOpen)"></i>

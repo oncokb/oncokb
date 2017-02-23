@@ -1657,10 +1657,12 @@ angular.module('oncokbApp')
                         reviewObj.set('removedItem', true);
                     }
                     return true;
+                } else if(reviewObj && reviewObj.get('removedItem')) {
+                    reviewObj.delete('removedItem');
                 }
                 // precisely check for this element
-                if(_.isBoolean(precise) && precise) {
-                    return uuid !== null && checkReview(uuid);
+                if(_.isBoolean(precise) && precise && uuid !== null && checkReview(uuid)) {
+                    return true;
                 }
                 // check elements in a section
                 return reviewObj.get('review') || reviewObj.get('action') || reviewObj.get('rollback');
@@ -1817,10 +1819,10 @@ angular.module('oncokbApp')
                 var data = evidenceResult[1];
                 var extraDataUUID = evidenceResult[2];
                 var extraData = evidenceResult[3];
-                if (type === 'Clinical effect') {
+                if (type === 'ONCOGENIC') {
                     if (dataUUID.length > 0) {
                         myUpdatedEvidences[dataUUID] = data;
-                        myUpdatedEvidenceModels.push(['ONCOGENIC', mutation, tumor, TI, treatment]);
+                        myUpdatedEvidenceModels.push([type, mutation, tumor, TI, treatment]);
                     }
                     if (extraDataUUID.length > 0) {
                         myUpdatedEvidences[extraDataUUID] = extraData;
@@ -1857,6 +1859,7 @@ angular.module('oncokbApp')
                         tsg: $scope.gene.type.get('TSG').trim().length > 0
                     };
                 }
+
                 var mutationChanged = false;
                 var tumorChanged = false;
                 var treatmentChanged = false;
@@ -1872,7 +1875,7 @@ angular.module('oncokbApp')
                     if (checkReview(mutation.shortSummary_uuid) || checkReview(mutation.summary_uuid) || checkReview(mutation.oncogenic_uuid)) {
                         mutation.oncogenic_review.set('review', true);
                         if (setUpdatedSignature(tempArr, mutation.oncogenic_review)) {
-                            formMyEvidences('Clinical effect', mutation, null, null, null);
+                            formMyEvidences('ONCOGENIC', mutation, null, null, null);
                         }
                         mutationChanged = true;
                     }
@@ -1950,14 +1953,20 @@ angular.module('oncokbApp')
                             treatmentChanged = false;
                         }
                         setOriginalStatus([tumor.name_review, tumor.summary_review, tumor.trials_review]);
-                        if (tumorChanged || checkReview(tumor.summary_uuid) || checkReview(tumor.trials_uuid)) {
-                            tumor.name_review.set('review', true);
-                            if (tumor.trials_review.get('updatedBy') === User.name) {
-                                formMyEvidences('CLINICAL_TRIAL', mutation, tumor, null, null);
-                            }
+                        if(checkReview(tumor.summary_uuid)) {
                             if (tumor.summary_review.get('updatedBy') === User.name) {
                                 formMyEvidences('TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
                             }
+                            tumorChanged = true;
+                        }
+                        if(checkReview(tumor.trials_uuid)) {
+                            if (tumor.trials_review.get('updatedBy') === User.name) {
+                                formMyEvidences('CLINICAL_TRIAL', mutation, tumor, null, null);
+                            }
+                            tumorChanged = true;
+                        }
+                        if (tumorChanged) {
+                            tumor.name_review.set('review', true);
                             mutationChanged = true;
                         }
                         tumorChanged = false;
@@ -2118,7 +2127,6 @@ angular.module('oncokbApp')
                     'R2': 'LEVEL_R2',
                     'R3': 'LEVEL_R3'
                 };
-                var secondType = '';
                 var extraData = _.clone(data);
                 var i = 0;
 
@@ -2131,17 +2139,15 @@ angular.module('oncokbApp')
                     dataUUID = $scope.gene.background_uuid.getText();
                     data.description = $scope.gene.background.getText();
                     break;
-                case 'Clinical effect':
+                case 'ONCOGENIC':
                     dataUUID = mutation.oncogenic_uuid.getText();
                     data.knownEffect = mutation.oncogenic.getText();
                     data.description = mutation.summary.getText();
-                    data.evidenceType = 'ONCOGENIC';
                     if (checkReview(mutation.shortSummary_uuid)) {
                         extraDataUUID = mutation.shortSummary_uuid.getText();
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
                         extraData.alterations = parseMutationString(mutation.name.getText());
-                        secondType = 'MUTATION_SUMMARY';
                     }
                     break;
                 case 'MUTATION_EFFECT':
@@ -2303,7 +2309,7 @@ angular.module('oncokbApp')
                             geneModelUpdate(type, mutation, tumor, TI, treatment);
                             if (extraDataUUID.length > 0) {
                                 DatabaseConnector.updateEvidence(extraDataUUID, extraData, function(result) {
-                                    geneModelUpdate(secondType, mutation, tumor, TI, treatment);
+                                    geneModelUpdate('MUTATION_SUMMARY', mutation, tumor, TI, treatment);
                                     $scope.$emit('doneSaveDataToDatabase');
                                 }, function(error) {
                                     console.log('fail to update to database', error);
@@ -2321,7 +2327,7 @@ angular.module('oncokbApp')
                     } else {
                         geneModelUpdate(type, mutation, tumor, TI, treatment);
                         if (extraDataUUID.length > 0) {
-                            geneModelUpdate(secondType, mutation, tumor, TI, treatment);
+                            geneModelUpdate('MUTATION_SUMMARY', mutation, tumor, TI, treatment);
                         }
                     }
                 }
@@ -2451,7 +2457,7 @@ angular.module('oncokbApp')
                     case 'GENE_TYPE':
                         rejectItem($scope.gene.type_uuid, $scope.gene.type_review, $scope.gene.type, 'type');
                         break;
-                    case 'Clinical effect':
+                    case 'ONCOGENIC':
                         rejectItem(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.oncogenic);
                         rejectItem(mutation.summary_uuid, mutation.summary_review, mutation.summary);
                         rejectItem(mutation.shortSummary_uuid, mutation.shortSummary_review, mutation.shortSummary);
