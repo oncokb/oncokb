@@ -257,9 +257,11 @@ public class IndicatorUtils {
             }
 
             // Tumor type summary
-            indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query.getAlteration(),
-                new ArrayList<>(relevantAlterations), query.getTumorType(),
-                new HashSet<>(oncoTreeTypes)));
+            if (query.getTumorType() != null) {
+                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query.getAlteration(),
+                    new ArrayList<>(relevantAlterations), query.getTumorType(),
+                    new HashSet<>(oncoTreeTypes)));
+            }
 
             // Mutation summary
             indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
