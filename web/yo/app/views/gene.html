@@ -59,7 +59,7 @@
     <div ng-if="displayCheck(gene.summary_uuid, gene.summary_review, null, null, null, true)">
         <h3>{{::gene.summary.display}}:
           <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{::gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'"></e-status>
+          <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'" apply-obsolete="applyObsolete(gene.summary_eStatus, 'GENE_SUMMARY')"></e-status>
           <p ng-show="signatureCheck(gene.summary_review)" style="float:right;font-size:15px;">Updated by {{gene.summary_review.get('updatedBy')}} at {{gene.summary_review.get('updateTime')}}</p>
           <i class="fa fa-check" ng-class="iconClass('accept', gene.summary_review)" ng-if="iconExist('accept', gene.summary_review)"  ng-click="accept(null, 'GENE_SUMMARY', null, null, null, null, gene.summary_review)"></i>
           <i class="fa fa-times" ng-class="iconClass('reject', gene.summary_review)" ng-if="iconExist('reject', gene.summary_review)"  ng-click="reject(null, 'GENE_SUMMARY', null, null, null, null, gene.summary_review)"></i>
@@ -106,7 +106,7 @@
         <br/><br/>
         <h3>{{::gene.background.display}}:
             <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'"></e-status>
+            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'" apply-obsolete="applyObsolete(gene.background_eStatus, 'GENE_BACKGROUND')"></e-status>
             <p ng-show="signatureCheck(gene.background_review)" style="float:right;font-size:15px;">Updated by {{gene.background_review.get('updatedBy')}} at {{gene.background_review.get('updateTime')}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept', gene.background_review)" ng-if="iconExist('accept', gene.background_review)"  ng-click="accept(null, 'GENE_BACKGROUND', null, null, null, null, gene.background_review)"></i>
             <i class="fa fa-times" ng-class="iconClass('reject', gene.background_review)" ng-if="iconExist('reject', gene.background_review)"  ng-click="reject(null, 'GENE_BACKGROUND', null, null, null, null, gene.background_review)"></i>
@@ -139,7 +139,7 @@
             <comments-dict mutation="{{mutation.name.text}}" gene-name="{{::gene.name.text}}" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             <i class="fa fa-hand-o-left" uib-tooltip-placement="top" uib-tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===false || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===false}"></i>
             <span class="pull-right" ng-show="!reviewMode && fileEditable">
-                <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.name_eStatus" id="mutation.name.text  + '-name'"></e-status>
+                <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.name_eStatus" id="mutation.name.text  + '-name'" apply-obsolete="applyObsolete(mutation.name_eStatus, 'mutation', mutation)"></e-status>
               <span style="margin-right: 20px">
                 <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(gene.mutations, $index, $index, $event)"></i>
                 <i class="fa fa-angle-down" ng-if="$index !== gene.mutations.length-1" ng-click="move(gene.mutations, $index, $index+2, $event)"></i>
@@ -161,7 +161,7 @@
                 <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].shortSummary.isOpen, 'fa-chevron-right': !geneStatus[$index].shortSummary.isOpen}" ng-click="changeIsOpen(geneStatus[$index].shortSummary.isOpen)"></i>
                 <span> Summary of clinical effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                 <span class="pull-right" ng-show="fileEditable">
-                   <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.shortSummary_eStatus" id="mutation.name.text  + '-shortSummary'"></e-status>
+                   <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.shortSummary_eStatus" id="mutation.name.text  + '-shortSummary'"  apply-obsolete="applyObsolete(mutation.shortSummary_eStatus, 'ONCOGENIC', mutation)"></e-status>
                 </span>
                 <span style="margin-right:10px;float:right" ng-show="reviewMode">
                     <p ng-show="signatureCheck(mutation.oncogenic_review, mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.oncogenic_review.get('updatedBy')}} at {{mutation.oncogenic_review.get('updateTime')}}</p>
@@ -194,7 +194,7 @@
                       <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].oncogenic.isOpen, 'fa-chevron-right': !geneStatus[$index].oncogenic.isOpen}" ng-click="changeIsOpen(geneStatus[$index].oncogenic.isOpen)"></i>
                       <span> Summary of biological effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'mutationEffect')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
-                        <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'"></e-status>
+                        <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.oncogenic_eStatus" id="mutation.name.text  + '-oncogenic'" apply-obsolete="applyObsolete(mutation.oncogenic_eStatus, 'MUTATION_EFFECT', mutation)"></e-status>
                         </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
                             <p ng-show="signatureCheck(mutation.effect_review, mutation.name_review)" style="float:left;font-size:15px;">Updated by {{mutation.effect_review.get('updatedBy')}} at {{mutation.effect_review.get('updateTime')}}</p>
@@ -234,7 +234,7 @@
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="!reviewMode && fileEditable">
                     <span style="margin-right: 20px">
-                        <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.name_eStatus" id="tumor.name.text  + '-name'"></e-status>
+                        <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.name_eStatus" id="tumor.name.text  + '-name'" apply-obsolete="applyObsolete(tumor.name_eStatus, 'tumor', mutation, tumor)"></e-status>
                         <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(mutation.tumors, $index, $index, $event)"></i>
                       <i class="fa fa-angle-down" ng-if="$index !== mutation.tumors.length-1" ng-click="move(mutation.tumors, $index, $index+2, $event)"></i>
                       <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(mutation.tumors, $index, 0, $event)"></i>
@@ -269,7 +269,7 @@
                       <span>{{::tumor.prevalence.display}}: </span>
                       <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === '' && tumor.shortPrevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
-                         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'"></e-status>
+                         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'" apply-obsolete="applyObsolete(tumor.prevalence_eStatus, 'PREVALENCE', mutation, tumor)"></e-status>
                       </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
                             <p ng-show="signatureCheck(tumor.prevalence_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.prevalence_review.get('updatedBy')}} at {{tumor.prevalence_review.get('updateTime')}}</p>
@@ -288,7 +288,7 @@
                       <span>{{::tumor.progImp.display}}: </span>
                       <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === '' && tumor.shortProgImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
-                         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'"></e-status>
+                         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'" apply-obsolete="applyObsolete(tumor.progImp_eStatus, 'PROGNOSTIC_IMPLICATION', mutation, tumor)"></e-status>
                       </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
                             <p ng-show="signatureCheck(tumor.progImp_review, mutation.name_review, tumor.name_review)" ng-if="reviewMode" style="float:left;font-size:15px;">Updated by {{tumor.progImp_review.get('updatedBy')}} at {{tumor.progImp_review.get('updateTime')}}</p>
@@ -307,7 +307,7 @@
                       <span>NCCN guidelines: </span>
                       <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict display-name="NCCN guidelines" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
-                         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'"></e-status>
+                         <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'" apply-obsolete="applyObsolete(tumor.nccn_eStatus, 'NCCN_GUIDELINES', mutation, tumor)"></e-status>
                       </span>
                         <span style="margin-right:10px;float:right" ng-show="reviewMode">
                             <p ng-show="signatureCheck(tumor.nccn_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.nccn_review.get('updatedBy')}} at {{tumor.nccn_review.get('updateTime')}}</p>
@@ -356,7 +356,7 @@
                         <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.short.text && !ti.description.text && ti.treatments.length === 0">No Entry</span>
                         <comments-dict display-name="{{::ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                         <span class="pull-right" ng-show="fileEditable">
-                            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="ti.name_eStatus" id="ti.name.text  + '-name'"></e-status>
+                            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="ti.name_eStatus" id="ti.name.text  + '-name'" apply-obsolete="applyObsolete(ti.name_eStatus, 'TI', mutation, tumor, TI)"></e-status>
                         </span>
                       </uib-accordion-heading>
                       <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short general summary" ng-model="ti.short.text"></p></span>-->
@@ -388,7 +388,7 @@
                                   <i class="fa fa-angle-double-up" ng-if="$parent.$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
                                   <i ng-if="$parent.$index < ti.treatments.length-2" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
                                 </span>
-                                 <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text"></e-status>
+                                 <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text" apply-obsolete="applyObsolete(treatment.name_eStatus, 'treatment', mutation, tumor, TI, treatment)"></e-status>
                                 <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$index, $index)" class="fa fa-trash-o"></i>
                               </span>
                             <span style="margin-right:10px;float:right" ng-show="reviewMode && !tumor.name_review.get('removed') && !treatment.name_review.get('removed')">
@@ -459,7 +459,7 @@
                         <span>Ongoing clinical trials: </span>
                         <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict display-name="Ongoing clinical trials" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                         <span class="pull-right" ng-show="fileEditable">
-                            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.trials_eStatus" id="ti.name.text  + '-trials'"></e-status>
+                            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.trials_eStatus" id="ti.name.text  + '-trials'" apply-obsolete="applyObsolete(tumor.trials_eStatus, 'CLINICAL_TRIAL', mutation, tumor)"></e-status>
                         </span>
                         <span style="margin-right:10px;float:right" ng-if="reviewMode">
                             <p ng-show="signatureCheck(tumor.trials_review, mutation.name_review, tumor.name_review)" style="float:left;font-size:15px;">Updated by {{tumor.trials_review.get('updatedBy')}} at {{tumor.trials_review.get('updateTime')}}</p>

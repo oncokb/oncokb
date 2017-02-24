@@ -13,7 +13,8 @@ angular.module('oncokbApp')
             restrict: 'AE',
             scope: {
                 object: '=',
-                id: '='
+                id: '=',
+                applyObsolete: '&applyObsolete' // reference to the external function "addComment" in the gene controller
             },
             replace: true,
             link: function postLink(scope, element) {
@@ -70,6 +71,11 @@ angular.module('oncokbApp')
                         element.find('statusBody').hide();
                     }, 500);
                 });
+                scope.$watch("object.get('obsolete')", function(n, o) {
+                    if(n !== o) {
+                        scope.obsolete = n;
+                    }
+                });
             },
             controller: function($scope) {
                 $scope.getStatusByValue = function(status) {
@@ -83,15 +89,9 @@ angular.module('oncokbApp')
                         value: 'na'
                     };
                 };
-
                 $scope.click = function(newStatus) {
                     if (newStatus === 'o') {
-                        if ($scope.obsolete === 'false') {
-                            $scope.obsolete = 'true';
-                        } else {
-                            $scope.obsolete = 'false';
-                        }
-                        $scope.object.set('obsolete', $scope.obsolete);
+                        $scope.applyObsolete();
                     } else {
                         $scope.vetted = $scope.getStatusByValue(newStatus);
                         $scope.object.set('vetted', $scope.vetted.value);

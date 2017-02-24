@@ -986,8 +986,10 @@ public class EvidenceUtils {
                     Article tempAT = articleBo.findArticleByPmid(tempPMID);
                     if(tempAT == null){
                         Article newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
-                        articleBo.save(newArticle);
-                        annotatedArticles.add(newArticle);
+                        if(newArticle != null) {
+                            articleBo.save(newArticle);
+                            annotatedArticles.add(newArticle);
+                        }
                     }else{
                         annotatedArticles.add(tempAT);
                     }

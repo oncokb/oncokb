@@ -71,8 +71,14 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
-                            // for the case of reject action changing real time doc
-                            if(scope.rs && scope.rs.get('action') !== 'rejected') {
+                            if(scope.es && scope.es.get('obsolete') === 'true') {
+                                if (scope.objecttype === 'object' && scope.objectkey) {
+                                    scope.object.set(scope.objectkey, n);
+                                } else {
+                                    scope.object.text = n;
+                                }
+                            } else if(scope.rs && scope.rs.get('action') !== 'rejected') {
+                                // for the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
                                 var uuid = scope.uuid.getText();
@@ -126,7 +132,7 @@ angular.module('oncokbApp')
                                 scope.es.set('propagation', n);
                             }
                         }
-                        if(o && n !== o) {
+                        if(o && n !== o && scope.es && scope.es.get('obsolete') === 'true') {
                             scope.rs.set('lastReviewedPropagation', o);
                             var uuid = scope.uuid.getText();
                             var tempMapping = $rootScope.reviewMeta.get(uuid);
