@@ -321,6 +321,12 @@ public class IndicatorUtils {
 
             Collections.sort(sortedEvidence, new Comparator<Evidence>() {
                 public int compare(Evidence e1, Evidence e2) {
+                    Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence());
+
+                    if (comparison != 0) {
+                        return comparison;
+                    }
+
                     if (e1.getId() == null)
                         return 1;
                     if (e2.getId() == null)
