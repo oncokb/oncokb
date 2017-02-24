@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import org.mskcc.oncotree.model.TumorType;
+
 import java.util.List;
 
 
@@ -13,7 +15,7 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private Gene gene;
     private List<Alteration> alterations;
     private List<Alteration> alleles;
-    private List<OncoTreeType> tumorTypes;
+    private List<TumorType> tumorTypes;
     private List<Evidence> evidences;
     private List<LevelOfEvidence> levelOfEvidences;
 
@@ -60,11 +62,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
         this.alleles = alleles;
     }
 
-    public List<OncoTreeType> getOncoTreeTypes() {
+    public List<TumorType> getOncoTreeTypes() {
         return tumorTypes;
     }
 
-    public void setOncoTreeTypes(List<OncoTreeType> cancerTypes) {
+    public void setOncoTreeTypes(List<TumorType> cancerTypes) {
         this.tumorTypes = cancerTypes;
     }
 

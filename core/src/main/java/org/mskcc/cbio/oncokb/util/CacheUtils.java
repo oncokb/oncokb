@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.util.*;
 
@@ -30,8 +31,8 @@ public class CacheUtils {
     // The key would be entrezGeneId, variant name and evidence ID. -1 will be used to store gene irrelevant evidences.
     private static Map<Integer, Map<String, Set<Integer>>> relevantEvidences = new HashMap<>();
 
-    private static Map<String, List<OncoTreeType>> mappedTumorTypes = new HashMap<>();
-    private static Map<String, List<OncoTreeType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
+    private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
+    private static Map<String, List<TumorType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Object> numbers = new HashMap<>();
 
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
@@ -453,7 +454,7 @@ public class CacheUtils {
         }
     }
 
-    public static List<OncoTreeType> getMappedTumorTypes(String queryTumorType, String source) {
+    public static List<TumorType> getMappedTumorTypes(String queryTumorType, String source) {
         return mappedTumorTypes.get(queryTumorType + "&" + source);
     }
 
@@ -461,11 +462,11 @@ public class CacheUtils {
         return mappedTumorTypes.containsKey(queryTumorType + "&" + source) ? true : false;
     }
 
-    public static void setMappedTumorTypes(String queryTumorType, String source, List<OncoTreeType> tumorTypes) {
+    public static void setMappedTumorTypes(String queryTumorType, String source, List<TumorType> tumorTypes) {
         mappedTumorTypes.put(queryTumorType + "&" + source, tumorTypes);
     }
 
-    public static List<OncoTreeType> getAllCancerTypes() {
+    public static List<TumorType> getAllCancerTypes() {
         if (isEnabled()) {
             return allOncoTreeTypes.get("main");
         } else {
@@ -473,7 +474,7 @@ public class CacheUtils {
         }
     }
 
-    public static List<OncoTreeType> getAllSubtypes() {
+    public static List<TumorType> getAllSubtypes() {
         if (isEnabled()) {
             return allOncoTreeTypes.get("subtype");
         } else {

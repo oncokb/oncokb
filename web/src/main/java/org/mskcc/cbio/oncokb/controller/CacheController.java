@@ -11,6 +11,7 @@ import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,7 +61,7 @@ public class CacheController {
             result.put("allVars", AlterationUtils.getAllAlterations(gene));
             result.put("excludedVars", AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene))));
 
-            Map<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
+            Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                 add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
                 add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
@@ -68,7 +69,7 @@ public class CacheController {
             }};
 
             for (Alteration alteration : AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)))) {
-                evidences.put(alteration, new HashMap<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>());
+                evidences.put(alteration, new HashMap<TumorType, Map<LevelOfEvidence, Set<Evidence>>>());
             }
 
             Map<Gene, Set<Evidence>> geneEvidences =

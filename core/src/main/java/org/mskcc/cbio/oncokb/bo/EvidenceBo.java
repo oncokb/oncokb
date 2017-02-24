@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 /**
  *
@@ -46,7 +47,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes);
 
 
     /**
@@ -57,7 +58,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param levelOfEvidences
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
 
     /**
      * Find Evidences by Entrez Gene ID
@@ -81,7 +82,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
+    List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes);
 
     /**
      *

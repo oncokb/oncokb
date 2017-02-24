@@ -10,6 +10,7 @@ import com.google.gdata.util.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.io.IOException;
 import java.net.URL;
@@ -42,7 +43,7 @@ public class AlterationLevel {
 
                 for (Evidence evidence : relevantEvidences) {
                     LevelOfEvidence level = evidence.getLevelOfEvidence();
-                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
+                    TumorType oncoTreeType = evidence.getOncoTreeType();
                     String levelStr = "";
 
                     if (level != null && level.getLevel() != null) {
@@ -50,8 +51,8 @@ public class AlterationLevel {
                     }
 
                     if (oncoTreeType != null && (levelStr.equals("1") || levelStr.equals("2A") || levelStr.equals("3A"))) {
-                        String cancerTypeStr = oncoTreeType.getCancerType();
-                        String subtypeStr = oncoTreeType.getSubtype();
+                        String cancerTypeStr = oncoTreeType.getMainType() == null ? null : oncoTreeType.getMainType().getName();
+                        String subtypeStr = oncoTreeType.getName();
                         Set<Treatment> treatments = evidence.getTreatments();
                         List<String> treatmentNames = new ArrayList<>();
                         Set<String> pmids = new HashSet<>();
@@ -69,7 +70,7 @@ public class AlterationLevel {
 
                             treatmentNames.add(drugStr);
                         }
-                        
+
                         for(Article article : evidence.getArticles()) {
                             pmids.add(article.getPmid());
                         }
@@ -93,7 +94,7 @@ public class AlterationLevel {
         }
 
         System.out.println("Comparing with old list to identify anything not in the new list");
-        
+
         //Don't compare pmids
         for(Map<String, Object> query : newList) {
             query.remove("pmids");
@@ -109,7 +110,7 @@ public class AlterationLevel {
     public static Boolean hasMatch(List<Map<String, Object>> records, Map<String, Object> query) {
         Boolean hasMatch = false;
 
-        
+
         for(Map<String, Object> record : records) {
             if(sameRecord(record, query)){
                 hasMatch = true;
@@ -177,7 +178,7 @@ public class AlterationLevel {
         }
         return null;
     }
-    
+
     private static Set<String> convertToSetPmids(String pmids) {
         Set<String> pmidList = new HashSet<>();
         String[] list = StringUtils.split(pmids,", ");
@@ -189,10 +190,10 @@ public class AlterationLevel {
     }
     private static String sortPMIDs(String pmids) {
         Set<String> pmidList = convertToSetPmids(pmids);
-        
+
         String[] newList = pmidList.toArray(new String[pmidList.size()]);
         Arrays.sort(newList);
-        
+
         return StringUtils.join(newList, ", ");
     }
 }

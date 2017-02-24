@@ -4,6 +4,7 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -91,19 +92,19 @@ public class SummaryController {
                     summary = SummaryUtils.oncogenicSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), false);
                     break;
                 case "variant":
-                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "full":
-                    summary = SummaryUtils.fullSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.fullSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "variantCustomized":
-                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
                 case "tumorType":
-                    summary = SummaryUtils.tumorTypeSummary(query.getGene(), query.getQueryAlteration(), query.getAlterations(), query.getQueryTumorType(), new HashSet<OncoTreeType>(query.getTumorTypes()));
+                    summary = SummaryUtils.tumorTypeSummary(query.getGene(), query.getQueryAlteration(), query.getAlterations(), query.getQueryTumorType(), new HashSet<TumorType>(query.getTumorTypes()));
                     break;
                 default:
-                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<TumorType>(query.getTumorTypes()), query.getQueryTumorType());
                     break;
             }
         }

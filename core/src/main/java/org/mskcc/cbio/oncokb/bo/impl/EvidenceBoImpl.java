@@ -4,18 +4,12 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.oncotree.model.TumorType;
+
+import java.util.*;
 
 /**
  * @author jgao
@@ -59,7 +53,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         if (tumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
@@ -75,12 +69,16 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         alts.addAll(alterations);
         ets.addAll(evidenceTypes);
 
-        for (OncoTreeType oncoTreeType : tumorTypes) {
-            if (oncoTreeType.getSubtype() == null) {
-                cancerTypes.add(oncoTreeType.getCancerType());
+        for (TumorType oncoTreeType : tumorTypes) {
+            if (oncoTreeType.getCode() == null) {
+                if (oncoTreeType.getMainType() != null) {
+                    cancerTypes.add(oncoTreeType.getMainType().getName());
+                }
             } else {
                 subTypes.add(oncoTreeType.getCode());
-                cancerTypesOfSubtypes.add(oncoTreeType.getCancerType());
+                if (oncoTreeType.getMainType() != null) {
+                    cancerTypesOfSubtypes.add(oncoTreeType.getMainType().getName());
+                }
             }
         }
 
@@ -102,7 +100,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
         if (tumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
@@ -120,12 +118,16 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         ets.addAll(evidenceTypes);
         les.addAll(levelOfEvidences);
 
-        for (OncoTreeType oncoTreeType : tumorTypes) {
-            if (oncoTreeType.getSubtype() == null) {
-                cancerTypes.add(oncoTreeType.getCancerType());
+        for (TumorType oncoTreeType : tumorTypes) {
+            if (oncoTreeType.getCode() == null) {
+                if (oncoTreeType.getMainType() != null) {
+                    cancerTypes.add(oncoTreeType.getMainType().getName());
+                }
             } else {
                 subTypes.add(oncoTreeType.getCode());
-                cancerTypesOfSubtypes.add(oncoTreeType.getCancerType());
+                if (oncoTreeType.getMainType() != null) {
+                    cancerTypesOfSubtypes.add(oncoTreeType.getMainType().getName());
+                }
             }
         }
 
@@ -168,16 +170,18 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes) {
+    public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
             for (EvidenceType evidenceType : evidenceTypes) {
-                for (OncoTreeType oncoTreeType : tumorTypes) {
-                    if (oncoTreeType.getSubtype() != null) {
+                for (TumorType oncoTreeType : tumorTypes) {
+                    if (oncoTreeType.getCode() != null) {
                         set.addAll(getDao().findEvidencesByGeneAndSubtype(gene, evidenceType, oncoTreeType.getCode()));
-                        set.addAll(getDao().findEvidencesByGeneAndCancerTypeNoSubtype(gene, evidenceType, oncoTreeType.getCancerType()));
-                    } else if (oncoTreeType.getCancerType() != null) {
-                        set.addAll(getDao().findEvidencesByGeneAndCancerType(gene, evidenceType, oncoTreeType.getCancerType()));
+                        if (oncoTreeType.getMainType() != null) {
+                            set.addAll(getDao().findEvidencesByGeneAndCancerTypeNoSubtype(gene, evidenceType, oncoTreeType.getMainType().getName()));
+                        }
+                    } else if (oncoTreeType.getMainType() != null) {
+                        set.addAll(getDao().findEvidencesByGeneAndCancerType(gene, evidenceType, oncoTreeType.getMainType().getName()));
                     }
                 }
             }
@@ -232,7 +236,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidenceByUUIDs(List<String> uuids){
+    public List<Evidence> findEvidenceByUUIDs(List<String> uuids) {
         return getDao().findEvidenceByUUIDs(uuids);
     }
 }

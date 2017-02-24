@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.MetaUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -185,10 +186,10 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private String getCancerType(OncoTreeType oncoTreeType) {
+    private String getCancerType(TumorType oncoTreeType) {
         return oncoTreeType == null ? null : (
-            oncoTreeType.getSubtype() == null ?
-                oncoTreeType.getCancerType() :
-                oncoTreeType.getSubtype());
+            oncoTreeType.getName() == null ?
+                (oncoTreeType.getMainType() == null ? null : oncoTreeType.getMainType().getName()) :
+                oncoTreeType.getName());
     }
 }

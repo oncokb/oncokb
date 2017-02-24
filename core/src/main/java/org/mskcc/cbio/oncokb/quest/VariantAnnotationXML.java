@@ -14,6 +14,7 @@ import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.stereotype.Controller;
 
 import java.util.*;
@@ -45,7 +46,7 @@ public final class VariantAnnotationXML {
 //            }
 //        }
 
-        Set<OncoTreeType> relevantTumorTypes = new HashSet<OncoTreeType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
+        Set<TumorType> relevantTumorTypes = new HashSet<TumorType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
 
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -118,7 +119,7 @@ public final class VariantAnnotationXML {
         }
 
         for (String tt : tumorTypes) {
-            OncoTreeType oncoTreeType = TumorTypeUtils.getMappedOncoTreeTypesBySource(tt, "quest").get(0);
+            TumorType oncoTreeType = TumorTypeUtils.getMappedOncoTreeTypesBySource(tt, "quest").get(0);
             boolean isRelevant = relevantTumorTypes.contains(oncoTreeType);
 
             StringBuilder sbTumorType = new StringBuilder();
@@ -290,7 +291,7 @@ public final class VariantAnnotationXML {
         return resistanceEvidences;
     }
 
-    private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -441,7 +442,7 @@ public final class VariantAnnotationXML {
         sb.append(indent).append("</clinical_trial>");
     }
 
-    private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
 
         for (Treatment treatment : evidence.getTreatments()) {
@@ -595,7 +596,7 @@ public final class VariantAnnotationXML {
      * @return the number of relevant tumor types
      */
 //    private static void sortTumorType(List<String> tumorTypes, String patientTumorType) {
-//        List<OncoTreeType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(patientTumorType, "quest");
+//        List<TumorType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(patientTumorType, "quest");
 ////        relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
 //        tumorTypes.removeAll(relevantTumorTypes); // other tumor types
 //        tumorTypes.addAll(0, relevantTumorTypes);

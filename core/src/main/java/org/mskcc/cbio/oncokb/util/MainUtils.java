@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.util.*;
 
@@ -412,18 +413,18 @@ public class MainUtils {
                 add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
                 add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
             }};
-            Map<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
+            Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
             for (Alteration alteration : alterations) {
-                evidences.put(alteration, new HashMap<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>());
+                evidences.put(alteration, new HashMap<TumorType, Map<LevelOfEvidence, Set<Evidence>>>());
             }
 
             Map<Gene, Set<Evidence>> geneEvidences =
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                OncoTreeType oncoTreeType = evidence.getOncoTreeType();
+                TumorType oncoTreeType = evidence.getOncoTreeType();
 
                 if (oncoTreeType != null) {
                     for (Alteration alteration : evidence.getAlterations()) {
@@ -443,12 +444,12 @@ public class MainUtils {
                 }
             }
 
-            for (Map.Entry<Alteration, Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
+            for (Map.Entry<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
                 Alteration alteration = entry.getKey();
-                Map<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
+                Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
 
-                for (Map.Entry<OncoTreeType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
-                    OncoTreeType oncoTreeType = _entry.getKey();
+                for (Map.Entry<TumorType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
+                    TumorType oncoTreeType = _entry.getKey();
 
                     for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : _entry.getValue().entrySet()) {
                         ClinicalVariant variant = new ClinicalVariant();

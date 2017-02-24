@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
+import org.mskcc.oncotree.model.TumorType;
+
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ public class VariantQuery implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private List<Alteration> alterations;
-    private List<OncoTreeType> tumorTypes;
+    private List<TumorType> tumorTypes;
 
     public VariantQuery() {
     }
@@ -70,11 +72,11 @@ public class VariantQuery implements java.io.Serializable {
         this.queryTumorType = queryTumorType;
     }
 
-    public List<OncoTreeType> getTumorTypes() {
+    public List<TumorType> getTumorTypes() {
         return tumorTypes;
     }
 
-    public void setTumorTypes(List<OncoTreeType> tumorTypes) {
+    public void setTumorTypes(List<TumorType> tumorTypes) {
         this.tumorTypes = tumorTypes;
     }
 

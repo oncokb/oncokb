@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -107,6 +108,7 @@ public class Query implements java.io.Serializable {
         this.proteinEnd = proteinEnd;
     }
 
+    @JsonIgnore
     public String getQueryId() {
         List<String> content = new ArrayList<>();
         if (entrezGeneId != null) {
