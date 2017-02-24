@@ -303,6 +303,19 @@ public class TumorTypeUtils {
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByCode);
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
 
+        // Filter out tumor types no in same main type (GIST under soft tissue)
+        List<TumorType> oncoTreeTumorTypes = TumorTypesUtil.findTumorType(
+            allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+            new ArrayList<TumorType>(), "code", tumorType, true, false);
+        if (oncoTreeTumorTypes == null || oncoTreeTumorTypes.size() == 0) {
+            oncoTreeTumorTypes = TumorTypesUtil.findTumorType(
+                allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+                new ArrayList<TumorType>(), "name", tumorType, true, false);
+        }
+        if (oncoTreeTumorTypes != null && oncoTreeTumorTypes.size() > 0) {
+            mappedTumorTypesFromSource = filterOutDiffMainType(mappedTumorTypesFromSource, oncoTreeTumorTypes.get(0));
+        }
+
         // Include all tumors
         TumorType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
         if (allTumor != null) {
@@ -310,6 +323,19 @@ public class TumorTypeUtils {
         }
 
         return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypesFromSource));
+    }
+
+    private static List<TumorType> filterOutDiffMainType(List<TumorType> tumorTypes, TumorType searchedTumorType) {
+        List<TumorType> filteredResult = new ArrayList<>();
+        if (searchedTumorType == null || searchedTumorType.getMainType() == null) {
+            return filteredResult;
+        }
+        for (TumorType tumorType : tumorTypes) {
+            if (tumorType.getMainType() != null && tumorType.getMainType().equals(searchedTumorType.getMainType())) {
+                filteredResult.add(tumorType);
+            }
+        }
+        return filteredResult;
     }
 
     private static Set<TumorType> fromQuestTumorType(String questTumorType) {
