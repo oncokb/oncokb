@@ -303,7 +303,7 @@ public class TumorTypeUtils {
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByCode);
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
 
-        // Filter out tumor types no in same main type (GIST under soft tissue)
+        // Filter out tumor types that not with same main type (Example, GIST under soft tissue)
         List<TumorType> oncoTreeTumorTypes = TumorTypesUtil.findTumorType(
             allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
             new ArrayList<TumorType>(), "code", tumorType, true, false);
