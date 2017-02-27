@@ -81,16 +81,16 @@ public class IndicatorUtilsTest {
         query2 = new Query("PTEN", "Amplification", null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, false);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, false);
-        assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
-        assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("The oncogenicities are not the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same.", resp1.getTreatments().equals(resp2.getTreatments()));
 
         // Match Loss with Deletion
         query1 = new Query("PTEN", "Loss", null);
         query2 = new Query("PTEN", "Deletion", null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, false);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, false);
-        assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
-        assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("The oncogenicities are not the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same.", resp1.getTreatments().equals(resp2.getTreatments()));
 
         // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
         // In this test case, MAP3K1 does not have Deletion beening curated yet, but this may be changed due to
@@ -99,18 +99,18 @@ public class IndicatorUtilsTest {
         query2 = new Query("MAP3K1", "Deletion", null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, false);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, false);
-        assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
-        assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("The oncogenicities are not the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same.", resp1.getTreatments().equals(resp2.getTreatments()));
 
         // Check unknown denominator fusion, it should return same data as querying specific fusion.
         query1 = new Query("BRAF", null, "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null);
         query2 = new Query("CUL1-BRAF", null, null, "fusion", "Ovarian Cancer", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
-        assertTrue("Oncogenic should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
-        assertTrue("Treatments should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
-        assertTrue("Highest sensitive level should be the same", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
-        assertTrue("Highest resistance level should be the same", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+        assertTrue("Oncogenicities are not the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {
