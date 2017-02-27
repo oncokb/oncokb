@@ -2588,27 +2588,34 @@ angular.module('oncokbApp')
                 return evidences;
             }
             function formEvidences(type, mutation, tumor, ti, treatment, evidences) {
+                var typeArr = [];
+                var dataArr = [];
+                var tempType = '';
                 if (type === 'mutation') {
-                    unObsoletedEvidences(['ONCOGENIC', 'MUTATION_EFFECT'], mutation, tumor, ti, treatment, evidences);
-                    _.each(mutation.tumors.asArray(), function(tumor) {
-                        formEvidences('tumor', mutation, tumor, ti, treatment, evidences);
-                    });
+                    typeArr = ['ONCOGENIC', 'MUTATION_EFFECT'];
+                    dataArr = mutation.tumors.asArray();
+                    tempType = 'tumor';
                 }
                 if (type === 'tumor') {
-                    unObsoletedEvidences(['TUMOR_TYPE_SUMMARY', 'PREVALENCE', 'PROGNOSTIC_IMPLICATION', 'NCCN_GUIDELINES', 'CLINICAL_TRIAL'], mutation, tumor, ti, treatment, evidences);
-                    _.each(tumor.TI.asArray(), function(ti) {
-                        formEvidences('TI', mutation, tumor, ti, treatment, evidences);
-                    });
+                    typeArr = ['TUMOR_TYPE_SUMMARY', 'PREVALENCE', 'PROGNOSTIC_IMPLICATION', 'NCCN_GUIDELINES', 'CLINICAL_TRIAL'];
+                    dataArr = tumor.TI.asArray();
+                    tempType = 'TI';
                 }
                 if(type === 'TI') {
-                    unObsoletedEvidences([ti.name.getText()], mutation, tumor, ti, null, evidences);
-                    _.each(ti.treatments.asArray(), function(treatment) {
-                        formEvidences('treatment', mutation, tumor, ti, treatment, evidences);
-                    });
+                    typeArr = [ti.name.getText()];
+                    dataArr = ti.treatments.asArray();
+                    tempType = 'treatment';
                 }
                 if (type === 'treatment') {
-                    unObsoletedEvidences([ti.name.getText()], mutation, tumor, ti, treatment, evidences);
+                    typeArr = [ti.name.getText()];
                 }
+                unObsoletedEvidences(typeArr, mutation, tumor, ti, (type === 'TI' ? treatment : null), evidences);
+                _.each(dataArr, function(item) {
+                    if(type === 'mutation')tumor = item;
+                    if(type === 'tumor')ti = item;
+                    if(type === 'TI')treatment = item;
+                    formEvidences(tempType, mutation, tumor, ti, treatment, evidences);
+                });
                 return evidences;
             };
             function unObsoletedEvidences(types, mutation, tumor, TI, treatment, evidences) {
