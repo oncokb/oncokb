@@ -244,24 +244,26 @@ public class EvidenceController {
 
             AlterationType type = AlterationType.MUTATION;
             Set<Alteration> queryAlterations = queryEvidence.getAlterations();
-            Set<Alteration> alterations = new HashSet<Alteration>();
-            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            for (Alteration alt : queryAlterations) {
-                String proteinChange = alt.getAlteration();
-                String displayName = alt.getName();
-                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
-                if (alteration == null) {
-                    alteration = new Alteration();
-                    alteration.setGene(gene);
-                    alteration.setAlterationType(type);
-                    alteration.setAlteration(proteinChange);
-                    alteration.setName(displayName);
-                    AlterationUtils.annotateAlteration(alteration, proteinChange);
-                    alterationBo.save(alteration);
+            if(queryAlterations != null){
+                Set<Alteration> alterations = new HashSet<Alteration>();
+                AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+                for (Alteration alt : queryAlterations) {
+                    String proteinChange = alt.getAlteration();
+                    String displayName = alt.getName();
+                    Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                    if (alteration == null) {
+                        alteration = new Alteration();
+                        alteration.setGene(gene);
+                        alteration.setAlterationType(type);
+                        alteration.setAlteration(proteinChange);
+                        alteration.setName(displayName);
+                        AlterationUtils.annotateAlteration(alteration, proteinChange);
+                        alterationBo.save(alteration);
+                    }
+                    alterations.add(alteration);
                 }
-                alterations.add(alteration);
+                evidence.setAlterations(alterations);
             }
-            evidence.setAlterations(alterations);
             evidence.setUuid(uuid);
             evidence.setGene(gene);
             evidence.setEvidenceType(evidenceType);
