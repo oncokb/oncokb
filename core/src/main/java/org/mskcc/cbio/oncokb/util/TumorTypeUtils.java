@@ -488,6 +488,7 @@ public class TumorTypeUtils {
                 for (Map<String, Object> datum : data) {
                     TumorType cancerType = new TumorType();
                     MainType mainType = new MainType();
+                    mainType.setId((Integer) datum.get("id"));
                     mainType.setName((String) datum.get("name"));
                     cancerType.setMainType(mainType);
                     cancerTypes.add(cancerType);
