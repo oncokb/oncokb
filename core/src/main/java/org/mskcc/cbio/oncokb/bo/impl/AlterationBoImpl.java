@@ -199,6 +199,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
+        Alteration truncAlt = AlterationUtils.findAlteration(alteration.getGene(), "Truncating Mutations");
+        if (truncAlt != null && !alterations.contains(truncAlt)) {
+            Alteration deletion = AlterationUtils.findAlteration(alteration.getGene(), "Deletion");
+            if (deletion == null && alteration.getAlteration().toLowerCase().matches("deletion")) {
+                alterations.add(truncAlt);
+            }
+        }
         return alterations;
     }
 }
