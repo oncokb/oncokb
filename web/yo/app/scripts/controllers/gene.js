@@ -1594,7 +1594,7 @@ angular.module('oncokbApp')
                 if (eStatus) {
                     // hideAllObsolete will be changed to true if current
                     // user permission is 4
-                    return !($scope.status.hideAllObsolete && eStatus.get('obsolete') === 'true');
+                    return !($scope.status.hideAllObsolete && checkObsolete(eStatus));
                 }
                 return true;
             };
@@ -1865,7 +1865,7 @@ angular.module('oncokbApp')
                 var tempArr = [];
                 for (var i = 0; i < $scope.gene.mutations.length; i++) {
                     var mutation = $scope.gene.mutations.get(i);
-                    if(mutation.name_eStatus.get('obsolete') === 'true') {
+                    if(checkObsolete(mutation.name_eStatus)) {
                         continue;
                     }
                     if (mutation.name_review.get('removed')) {
@@ -1893,7 +1893,7 @@ angular.module('oncokbApp')
                     }
                     for (var j = 0; j < mutation.tumors.length; j++) {
                         var tumor = mutation.tumors.get(j);
-                        if(tumor.name_eStatus.get('obsolete') === 'true') {
+                        if(checkObsolete(tumor.name_eStatus)) {
                             continue;
                         }
                         if (tumor.name_review.get('removed')) {
@@ -1930,12 +1930,12 @@ angular.module('oncokbApp')
                         }
                         for (var k = 0; k < tumor.TI.length; k++) {
                             var ti = tumor.TI.get(k);
-                            if(ti.name_eStatus.get('obsolete') === 'true') {
+                            if(checkObsolete(ti.name_eStatus)) {
                                 continue;
                             }
                             for (var m = 0; m < ti.treatments.length; m++) {
                                 var treatment = ti.treatments.get(m);
-                                if(treatment.name_eStatus.get('obsolete') === 'true') {
+                                if(checkObsolete(treatment.name_eStatus)) {
                                     continue;
                                 }
                                 if (treatment.name_review.get('removed')) {
@@ -2519,7 +2519,10 @@ angular.module('oncokbApp')
                     }
                 });
             };
-            function obsoletedUUIDs(type, mutation, tumor, TI, treatment) {
+            /*
+            * This function is used to collect uuids for obsoleted section.
+            * */
+            function getObsoletedUUIDs(type, mutation, tumor, TI, treatment) {
                 switch (type) {
                 case 'mutation':
                     return collectUUIDs(type, mutation, []);
@@ -2547,6 +2550,10 @@ angular.module('oncokbApp')
                     return [tumor.trials_uuid.getText()];
                 }
             };
+            /*
+            * When curators unobsoleted items, that would make api call to insert evidences to database
+            * This function is used to form evidence models, which would be used for api call
+            * */
             function prepareInsertion(type, mutation, tumor, TI, treatment) {
                 var evidences = {};
                 switch (type) {
@@ -2554,15 +2561,15 @@ angular.module('oncokbApp')
                     formEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'tumor':
-                    if(mutation.name_eStatus.get('obsolete') === 'true') return {};
+                    if(checkObsolete(mutation.name_eStatus)) return {};
                     formEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'TI':
-                    if(mutation.name_eStatus.get('obsolete') === 'true' || tumor.name_eStatus.get('obsolete') === 'true' ) return {};
+                    if(checkObsolete(mutation.name_eStatus) || checkObsolete(tumor.name_eStatus)) return {};
                     formEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'treatment':
-                    if(mutation.name_eStatus.get('obsolete') === 'true' || tumor.name_eStatus.get('obsolete') === 'true' || TI.name_eStatus.get('obsolete') === 'true' ) return {};
+                    if(checkObsolete(mutation.name_eStatus) || checkObsolete(tumor.name_eStatus) || checkObsolete(TI.name_eStatus)) return {};
                     formEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'GENE_SUMMARY':
@@ -2619,8 +2626,11 @@ angular.module('oncokbApp')
                     }
                 });
             };
+            function checkObsolete(eStatus) {
+                return eStatus.get('obsolete') === 'true';
+            }
             $scope.applyObsolete = function(eStatus, type, mutation, tumor, TI, treatment) {
-                if(eStatus.get('obsolete') === 'true') {
+                if(checkObsolete(eStatus)) {
                     if (!$scope.status.isDesiredGene) {
                         eStatus.set('obsolete', 'false');
                         return true;
@@ -2645,14 +2655,14 @@ angular.module('oncokbApp')
                         return true;
                     }
                     // if the whole section is deleted from database, there is no need to make api call any more.
-                    if(mutation && mutation.name_eStatus.get('obsolete') === 'true'
-                        || tumor && tumor.name_eStatus.get('obsolete') === 'true'
-                        || TI && TI.name_eStatus.get('obsolete') === 'true' ) {
+                    if(mutation && checkObsolete(mutation.name_eStatus)
+                        || tumor && checkObsolete(tumor.name_eStatus)
+                        || TI && checkObsolete(TI.name_eStatus)) {
                         dialogs.error('Warning', 'Current item is located in an obsoleted section');
                         return true;
                     }
                     console.log('deleting from database');
-                    var uuids = obsoletedUUIDs(type, mutation, tumor, TI, treatment);
+                    var uuids = getObsoletedUUIDs(type, mutation, tumor, TI, treatment);
                     // make the api call to delete evidences
                     $scope.$emit('startSaveDataToDatabase');
                     DatabaseConnector.deleteEvidences(uuids, function(result) {
@@ -3109,7 +3119,7 @@ angular.module('oncokbApp')
             $scope.confirmDelete = function(event, type, obj, mutationIndex, tumorTypeIndex, therapyCategoryIndex, therapyIndex) {
                 $scope.stopCollopse(event);
                 var uuids = collectUUIDs(type, obj, []);
-                if ($scope.status.isDesiredGene && obj.name_eStatus.get('obsolete') !== 'true') {
+                if ($scope.status.isDesiredGene && checkObsolete(obj.name_eStatus)) {
                     // make the api call to delete evidences
                     $scope.$emit('startSaveDataToDatabase');
                     DatabaseConnector.deleteEvidences(uuids, function(result) {
@@ -4095,15 +4105,14 @@ angular.module('oncokbApp')
                 $scope.vus = vus;
             }
 
-            function checkWhetherIsDesiredGene() {
-                //var _geneName = $scope.gene.name.getText();
-                //for (var i = 0; i < OncoKB.global.genes.length; i++) {
-                //    if (OncoKB.global.genes[i].hugoSymbol === _geneName) {
-                //        $scope.status.isDesiredGene = true;
-                //        break;
-                //    }
-                //}
-                $scope.status.isDesiredGene = true;
+            function isDesiredGene() {
+                var _geneName = $scope.gene.name.getText();
+                for (var i = 0; i < OncoKB.global.genes.length; i++) {
+                    if (OncoKB.global.genes[i].hugoSymbol === _geneName) {
+                        $scope.status.isDesiredGene = true;
+                        break;
+                    }
+                }
             }
 
             $scope.fileTitle = $routeParams.geneName;
@@ -4411,11 +4420,11 @@ angular.module('oncokbApp')
                 .finally(function() {
                     getSuggestedMutations();
                     if (_.isArray(OncoKB.global.genes)) {
-                        checkWhetherIsDesiredGene();
+                        isDesiredGene();
                     } else {
                         DatabaseConnector.getAllGene(function(data) {
                             OncoKB.global.genes = data;
-                            checkWhetherIsDesiredGene();
+                            isDesiredGene();
                         });
                     }
                 });
