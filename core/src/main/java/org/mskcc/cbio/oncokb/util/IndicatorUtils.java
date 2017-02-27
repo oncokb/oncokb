@@ -39,7 +39,7 @@ public class IndicatorUtils {
             query.setAlteration("splice mutation");
         }
 
-        if (query.getAlteration() != null && query.getAlteration().toLowerCase().matches("gain")) {
+        if (query.getAlteration().toLowerCase().matches("gain")) {
             query.setAlteration("Amplification");
         }
 
@@ -337,8 +337,13 @@ public class IndicatorUtils {
                         return comparison;
                     }
 
-                    if (e1.getId() == null)
-                        return 1;
+                    if (e1.getId() == null) {
+                        if (e2.getId() == null) {
+                            return 0;
+                        } else {
+                            return 1;
+                        }
+                    }
                     if (e2.getId() == null)
                         return -1;
                     return e1.getId() - e2.getId();
