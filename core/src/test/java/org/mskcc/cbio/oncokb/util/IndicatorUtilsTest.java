@@ -92,6 +92,16 @@ public class IndicatorUtilsTest {
         assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
 
+        // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
+        // In this test case, MAP3K1 does not have Deletion beening curated yet, but this may be changed due to
+        // continue annotating process.
+        query1 = new Query("MAP3K1", "T779*", null);
+        query2 = new Query("MAP3K1", "Deletion", null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false);
+        assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+
         // Check unknown denominator fusion, it should return same data as querying specific fusion.
         query1 = new Query("BRAF", null, "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null);
         query2 = new Query("CUL1-BRAF", null, null, "fusion", "Ovarian Cancer", null, null, null);
