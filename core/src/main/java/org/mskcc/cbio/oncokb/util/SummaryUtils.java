@@ -793,6 +793,8 @@ public class SummaryUtils {
 
         if (queryAlteration.toLowerCase().contains("deletion")
             || queryAlteration.toLowerCase().contains("amplification")
+            || queryAlteration.toLowerCase().matches("gain")
+            || queryAlteration.toLowerCase().matches("loss")
             || queryAlteration.toLowerCase().contains("fusions")) {
             appendThe = false;
         }
