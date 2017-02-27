@@ -34,15 +34,6 @@ public class IndicatorUtils {
             query.setAlteration("");
         }
 
-        // Need to find a better way to map the alteration name with the variant consequence
-        if (query.getAlteration().isEmpty() && query.getConsequence().equals("splice_region_variant")) {
-            query.setAlteration("splice mutation");
-        }
-
-        if (query.getAlteration().toLowerCase().matches("gain")) {
-            query.setAlteration("Amplification");
-        }
-
         source = source == null ? "oncokb" : source;
 
         // Deal with fusion without primary gene

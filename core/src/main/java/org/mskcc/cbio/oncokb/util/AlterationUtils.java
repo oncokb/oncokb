@@ -200,6 +200,24 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         }
+
+        // Annotate alteration based on consequence and special rules
+        if (alteration.getAlteration() == null || alteration.getAlteration().isEmpty()) {
+            alteration.setAlteration(proteinChange);
+        }
+        if (alteration.getAlteration().isEmpty()) {
+            if (variantConsequence != null) {
+                if (variantConsequence.getTerm().equals("splice_region_variant")) {
+                    alteration.setAlteration("splice mutation");
+                }
+            }
+        } else {
+            if (alteration.getAlteration().toLowerCase().matches("gain")) {
+                alteration.setAlteration("Amplification");
+            } else if (alteration.getAlteration().toLowerCase().matches("loss")) {
+                alteration.setAlteration("Deletion");
+            }
+        }
     }
 
     public static Boolean isFusion(String variant) {

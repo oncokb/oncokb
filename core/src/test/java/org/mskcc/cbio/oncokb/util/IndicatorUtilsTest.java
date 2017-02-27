@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 public class IndicatorUtilsTest {
     @Test
     public void testProcessQuery() throws Exception {
-        // We dont check gene/variant/tumor type summaries here. The test will be done in SummaryUtilsTest.
+        // We do not check gene/variant/tumor type summaries here. The test will be done in SummaryUtilsTest.
 
         // Gene not exists
         Query query = new Query("FGF6", null, "V123M", null, "Pancreatic Adenocarcinoma", null, null, null);
@@ -36,14 +36,6 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The highest sensitive level of CUL1-BRAF fusion should be Level 3A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The oncogenicity of CUL1-BRAF fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
-
-        // Check unknown denominator fusion, it should return same data as querying specific fusion.
-        Query query1 = new Query("CUL1-BRAF", null, null, "fusion", "Ovarian Cancer", null, null, null);
-        IndicatorQueryResp indicatorQueryResp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
-        assertTrue("Oncogenic should be the same", indicatorQueryResp.getOncogenic().equals(indicatorQueryResp1.getOncogenic()));
-        assertTrue("Treatments should be the same", indicatorQueryResp.getTreatments().equals(indicatorQueryResp1.getTreatments()));
-        assertTrue("Highest sensitive level should be the same", LevelUtils.areSameLevels(indicatorQueryResp.getHighestSensitiveLevel(), indicatorQueryResp1.getHighestSensitiveLevel()));
-        assertTrue("Highest resistance level should be the same", LevelUtils.areSameLevels(indicatorQueryResp.getHighestResistanceLevel(), indicatorQueryResp1.getHighestResistanceLevel()));
 
         // Check other significant level
         query = new Query("BRAF", null, "V600E", null, "Colorectal Cancer", null, null, null);
@@ -77,6 +69,38 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R1, indicatorQueryResp.getHighestResistanceLevel());
 
+
+        /**
+         * Comparing between two queries
+         */
+        Query query1, query2;
+        IndicatorQueryResp resp1, resp2;
+
+        // Match Gain with Amplification
+        query1 = new Query("PTEN", "Gain", null);
+        query2 = new Query("PTEN", "Amplification", null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false);
+        assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+
+        // Match Loss with Deletion
+        query1 = new Query("PTEN", "Loss", null);
+        query2 = new Query("PTEN", "Deletion", null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false);
+        assertTrue("The oncogenicity should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatment should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+
+        // Check unknown denominator fusion, it should return same data as querying specific fusion.
+        query1 = new Query("BRAF", null, "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null);
+        query2 = new Query("CUL1-BRAF", null, null, "fusion", "Ovarian Cancer", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
+        assertTrue("Oncogenic should be the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments should be the same", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive level should be the same", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance level should be the same", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {
