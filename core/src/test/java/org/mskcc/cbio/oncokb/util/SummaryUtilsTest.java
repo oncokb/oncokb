@@ -44,12 +44,13 @@ public class SummaryUtilsTest {
         VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
             gene, variant, tumorType, null,
             null, null, "cbioportal").get(0);
+        String _query = gene + " " + variant + " " + tumorType;
         String _geneSummary = SummaryUtils.geneSummary(variantQuery.getGene());
         String _variantSummary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), variantQuery.getQueryAlteration(), false);
         String _tumorTypeSummary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), variantQuery.getQueryAlteration(), variantQuery.getAlterations(), variantQuery.getQueryTumorType(), new HashSet<>(variantQuery.getTumorTypes()));
-        assertEquals(geneSummary, _geneSummary);
-        assertEquals(variantSummary, _variantSummary);
-        assertEquals(tumorTypeSummary, _tumorTypeSummary);
+        assertEquals("Gene summary, Query: " + _query, geneSummary, _geneSummary);
+        assertEquals("Variant summary, Query: " + _query, variantSummary, _variantSummary);
+        assertEquals("Tumor Type summary, Query: " + _query, tumorTypeSummary, _tumorTypeSummary);
     }
 
     @Parameterized.Parameters

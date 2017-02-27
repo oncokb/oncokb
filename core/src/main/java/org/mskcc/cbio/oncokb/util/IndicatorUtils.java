@@ -29,6 +29,16 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        // Set the alteration to empty string in order to get relevant variants.
+        if (query.getAlteration() == null) {
+            query.setAlteration("");
+        }
+
+        // Need to find a better way to map the alteration name with the variant consequence
+        if (query.getAlteration().isEmpty() && query.getConsequence().equals("splice_region_variant")) {
+            query.setAlteration("splice mutation");
+        }
+
         if (query.getAlteration() != null && query.getAlteration().toLowerCase().matches("gain")) {
             query.setAlteration("Amplification");
         }
@@ -165,7 +175,7 @@ public class IndicatorUtils {
                 }
 
                 // Only set oncogenicity if no previous data assigned.
-                if(indicatorQuery.getOncogenic() == null && oncogenicity != null) {
+                if (indicatorQuery.getOncogenic() == null && oncogenicity != null) {
                     indicatorQuery.setOncogenic(oncogenicity.getOncogenic());
                 }
 
@@ -208,7 +218,7 @@ public class IndicatorUtils {
                 }
 
                 // Only set oncogenicity if no previous data assigned.
-                if(indicatorQuery.getOncogenic() == null && oncogenicity != null) {
+                if (indicatorQuery.getOncogenic() == null && oncogenicity != null) {
                     indicatorQuery.setOncogenic(oncogenicity.getOncogenic());
                 }
             }
@@ -321,6 +331,12 @@ public class IndicatorUtils {
 
             Collections.sort(sortedEvidence, new Comparator<Evidence>() {
                 public int compare(Evidence e1, Evidence e2) {
+                    Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence());
+
+                    if (comparison != 0) {
+                        return comparison;
+                    }
+
                     if (e1.getId() == null)
                         return 1;
                     if (e2.getId() == null)

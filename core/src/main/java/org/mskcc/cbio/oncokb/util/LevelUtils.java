@@ -32,6 +32,19 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3B)
     );
 
+    public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b) {
+        if (!LEVELS.contains(a)) {
+            if (!LEVELS.contains(b)) {
+                return 0;
+            }
+            return 1;
+        }
+        if (!LEVELS.contains(b)) {
+            return -1;
+        }
+
+        return LEVELS.indexOf(b) - LEVELS.indexOf(a);
+    }
 
     public static LevelOfEvidence getHighestLevelFromEvidence(Set<Evidence> evidences) {
         if (evidences != null) {
