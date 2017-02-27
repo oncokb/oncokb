@@ -682,7 +682,7 @@ public class DriveAnnotationParser {
         for (int i = 0; i < drugsArray.length(); i++) {
             JSONObject drugObj = drugsArray.getJSONObject(i);
             if (!drugObj.has("name") || drugObj.getString("name").trim().isEmpty()) {
-                System.out.println("##        drug dpes not have name, skip... ");
+                System.out.println("##        drug does not have name, skip... ");
                 continue;
             }
 
@@ -751,7 +751,7 @@ public class DriveAnnotationParser {
 
                 LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level);
                 if (levelOfEvidence == null) {
-                    System.err.println("Errow: wrong level of evidence: " + level);
+                    System.err.println("Error: wrong level of evidence: " + level);
                     // TODO:
                     //throw new RuntimeException("wrong level of evidence: "+level);
                 }
