@@ -1661,7 +1661,7 @@ angular.module('oncokbApp')
                 }
                 // precisely check for this element
                 if(_.isBoolean(precise) && precise) {
-                    return checkReview(uuid) || reviewObj.get('review') === false || reviewObj.get('rollback');
+                    return needReview(uuid) || reviewObj.get('review') === false || reviewObj.get('rollback');
                 } else {
                     // check elements in a section
                     return reviewObj.get('review') || reviewObj.get('action');
@@ -1747,7 +1747,7 @@ angular.module('oncokbApp')
             $scope.geneMainDivStyle = {
                 opacity: '1'
             };
-            function checkReview(uuid) {
+            function needReview(uuid) {
                 if(uuid) {
                     uuid = uuid.getText();
                     if ($rootScope.reviewMeta.get(uuid) && $rootScope.reviewMeta.get(uuid).get('review')) {
@@ -1877,7 +1877,7 @@ angular.module('oncokbApp')
                     }
                     tempArr = [mutation.oncogenic_review, mutation.shortSummary_review, mutation.summary_review];
                     setOriginalStatus(tempArr);
-                    if (checkReview(mutation.shortSummary_uuid) || checkReview(mutation.summary_uuid) || checkReview(mutation.oncogenic_uuid)) {
+                    if (needReview(mutation.shortSummary_uuid) || needReview(mutation.summary_uuid) || needReview(mutation.oncogenic_uuid)) {
                         mutation.oncogenic_review.set('review', true);
                         if (setUpdatedSignature(tempArr, mutation.oncogenic_review)) {
                             formMyEvidences('ONCOGENIC', mutation, null, null, null);
@@ -1886,7 +1886,7 @@ angular.module('oncokbApp')
                     }
                     tempArr = [mutation.effect_review, mutation.short_review, mutation.description_review];
                     setOriginalStatus(tempArr);
-                    if (checkReview(mutation.short_uuid) || checkReview(mutation.description_uuid) || checkReview(mutation.effect_uuid)) {
+                    if (needReview(mutation.short_uuid) || needReview(mutation.description_uuid) || needReview(mutation.effect_uuid)) {
                         mutation.effect_review.set('review', true);
                         mutation.effect_review.set('mutation_effect', true);
                         if (setUpdatedSignature(tempArr, mutation.effect_review)) {
@@ -1906,7 +1906,7 @@ angular.module('oncokbApp')
                         }
                         tempArr = [tumor.shortPrevalence_review, tumor.prevalence_review];
                         setOriginalStatus(tempArr);
-                        if (checkReview(tumor.shortPrevalence_uuid) || checkReview(tumor.prevalence_uuid)) {
+                        if (needReview(tumor.shortPrevalence_uuid) || needReview(tumor.prevalence_uuid)) {
                             tumor.prevalence_review.set('review', true);
                             if (setUpdatedSignature(tempArr, tumor.prevalence_review)) {
                                 formMyEvidences('PREVALENCE', mutation, tumor, null, null);
@@ -1915,7 +1915,7 @@ angular.module('oncokbApp')
                         }
                         tempArr = [tumor.shortProgImp_review, tumor.progImp_review];
                         setOriginalStatus(tempArr);
-                        if (checkReview(tumor.shortProgImp_uuid) || checkReview(tumor.progImp_uuid)) {
+                        if (needReview(tumor.shortProgImp_uuid) || needReview(tumor.progImp_uuid)) {
                             tumor.progImp_review.set('review', true);
                             if (setUpdatedSignature(tempArr, tumor.progImp_review)) {
                                 formMyEvidences('PROGNOSTIC_IMPLICATION', mutation, tumor, null, null);
@@ -1924,7 +1924,7 @@ angular.module('oncokbApp')
                         }
                         tempArr = [tumor.nccn_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review, tumor.nccn.short_review];
                         setOriginalStatus(tempArr);
-                        if (checkReview(tumor.nccn.therapy_uuid) || checkReview(tumor.nccn.disease_uuid) || checkReview(tumor.nccn.version_uuid) || checkReview(tumor.nccn.description_uuid) || checkReview(tumor.nccn.short_uuid)) {
+                        if (needReview(tumor.nccn.therapy_uuid) || needReview(tumor.nccn.disease_uuid) || needReview(tumor.nccn.version_uuid) || needReview(tumor.nccn.description_uuid) || needReview(tumor.nccn.short_uuid)) {
                             tumor.nccn_review.set('review', true);
                             if (setUpdatedSignature(tempArr, tumor.nccn_review)) {
                                 formMyEvidences('NCCN_GUIDELINES', mutation, tumor, null, null);
@@ -1948,7 +1948,7 @@ angular.module('oncokbApp')
                                 }
                                 tempArr = [treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review, treatment.short_review];
                                 setOriginalStatus(tempArr);
-                                if (checkReview(treatment.name_uuid) || checkReview(treatment.level_uuid) || checkReview(treatment.indication_uuid) || checkReview(treatment.description_uuid) || checkReview(treatment.short_uuid)) {
+                                if (needReview(treatment.name_uuid) || needReview(treatment.level_uuid) || needReview(treatment.indication_uuid) || needReview(treatment.description_uuid) || needReview(treatment.short_uuid)) {
                                     treatment.name_review.set('review', true);
                                     if (setUpdatedSignature(tempArr, treatment.name_review)) {
                                         formMyEvidences(ti.name.getText(), mutation, tumor, ti, treatment);
@@ -1957,7 +1957,7 @@ angular.module('oncokbApp')
                                 }
                             }
                             setOriginalStatus([ti.name_review, ti.description_review]);
-                            if (checkReview(ti.description_uuid) || treatmentChanged) {
+                            if (needReview(ti.description_uuid) || treatmentChanged) {
                                 ti.name_review.set('review', true);
                                 if (ti.description_review.get('updatedBy') === User.name) {
                                     formMyEvidences(ti.name.getText(), mutation, tumor, ti, null);
@@ -1967,13 +1967,13 @@ angular.module('oncokbApp')
                             treatmentChanged = false;
                         }
                         setOriginalStatus([tumor.name_review, tumor.summary_review, tumor.trials_review]);
-                        if(checkReview(tumor.summary_uuid)) {
+                        if(needReview(tumor.summary_uuid)) {
                             if (tumor.summary_review.get('updatedBy') === User.name) {
                                 formMyEvidences('TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
                             }
                             tumorChanged = true;
                         }
-                        if(checkReview(tumor.trials_uuid)) {
+                        if(needReview(tumor.trials_uuid)) {
                             if (tumor.trials_review.get('updatedBy') === User.name) {
                                 formMyEvidences('CLINICAL_TRIAL', mutation, tumor, null, null);
                             }
@@ -2157,7 +2157,7 @@ angular.module('oncokbApp')
                     dataUUID = mutation.oncogenic_uuid.getText();
                     data.knownEffect = mutation.oncogenic.getText();
                     data.description = mutation.summary.getText();
-                    if (checkReview(mutation.shortSummary_uuid)) {
+                    if (needReview(mutation.shortSummary_uuid)) {
                         extraDataUUID = mutation.shortSummary_uuid.getText();
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
@@ -2359,7 +2359,7 @@ angular.module('oncokbApp')
 
             function acceptItem(uuid, reviewObj) {
                 reviewObj.set('action', 'accepted');
-                if(checkReview(uuid)) {
+                if(needReview(uuid)) {
                     reviewObj.set('review', false);
                     setReview(uuid, false);
                     delete myUpdatedEvidences[uuid.getText()];
@@ -2437,7 +2437,7 @@ angular.module('oncokbApp')
 
             function rejectItem(uuid, reviewObj, obj, content) {
                 reviewObj.set('action', 'rejected');
-                if(checkReview(uuid)) {
+                if(needReview(uuid)) {
                     reviewObj.set('review', false);
                     setReview(uuid, false);
                     delete myUpdatedEvidences[uuid.getText()];
