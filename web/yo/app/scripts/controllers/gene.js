@@ -1661,10 +1661,11 @@ angular.module('oncokbApp')
                 }
                 // precisely check for this element
                 if(_.isBoolean(precise) && precise) {
-                    return uuid !== null && checkReview(uuid);
+                    return checkReview(uuid) || reviewObj.get('review') === false || reviewObj.get('rollback');
+                } else {
+                    // check elements in a section
+                    return reviewObj.get('review') || reviewObj.get('action');
                 }
-                // check elements in a section
-                return reviewObj.get('review') || reviewObj.get('action') || reviewObj.get('rollback');
             };
             $scope.signatureCheck = function(reviewObj, mutationReview, tumorReview, treatmentReview) {
                 if (!$rootScope.reviewMode) {
@@ -1747,9 +1748,11 @@ angular.module('oncokbApp')
                 opacity: '1'
             };
             function checkReview(uuid) {
-                uuid = uuid.getText();
-                if ($rootScope.reviewMeta.get(uuid) && $rootScope.reviewMeta.get(uuid).get('review')) {
-                    return true;
+                if(uuid) {
+                    uuid = uuid.getText();
+                    if ($rootScope.reviewMeta.get(uuid) && $rootScope.reviewMeta.get(uuid).get('review')) {
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -2356,12 +2359,15 @@ angular.module('oncokbApp')
 
             function acceptItem(uuid, reviewObj) {
                 reviewObj.set('action', 'accepted');
-                setReview(uuid, false);
-                delete myUpdatedEvidences[uuid];
-                reviewObj.delete('lastReviewed');
-                reviewObj.delete('removedItem');
-                reviewObj.delete('updatedBy');
-                reviewObj.delete('updateTime');
+                if(checkReview(uuid)) {
+                    reviewObj.set('review', false);
+                    setReview(uuid, false);
+                    delete myUpdatedEvidences[uuid.getText()];
+                    reviewObj.delete('lastReviewed');
+                    reviewObj.delete('removedItem');
+                    reviewObj.delete('updatedBy');
+                    reviewObj.delete('updateTime');
+                }
             }
 
             function geneModelUpdate(type, mutation, tumor, TI, treatment) {
@@ -2431,22 +2437,25 @@ angular.module('oncokbApp')
 
             function rejectItem(uuid, reviewObj, obj, content) {
                 reviewObj.set('action', 'rejected');
-                setReview(uuid, false);
-                delete myUpdatedEvidences[uuid];
-                if (!content && reviewObj.has('lastReviewed')) {
-                    obj.setText(reviewObj.get('lastReviewed'));
-                } else if (content === 'trials') {
-                    obj.clear();
-                    obj.pushAll(reviewObj.get('lastReviewed'));
-                } else if (content === 'type') {
-                    var lastReviewedContent = reviewObj.get('lastReviewed');
-                    obj.set('TSG', lastReviewedContent.TSG);
-                    obj.set('OCG', lastReviewedContent.OCG);
+                if(checkReview(uuid)) {
+                    reviewObj.set('review', false);
+                    setReview(uuid, false);
+                    delete myUpdatedEvidences[uuid.getText()];
+                    if (!content && reviewObj.has('lastReviewed')) {
+                        obj.setText(reviewObj.get('lastReviewed'));
+                    } else if (content === 'trials') {
+                        obj.clear();
+                        obj.pushAll(reviewObj.get('lastReviewed'));
+                    } else if (content === 'type') {
+                        var lastReviewedContent = reviewObj.get('lastReviewed');
+                        obj.set('TSG', lastReviewedContent.TSG);
+                        obj.set('OCG', lastReviewedContent.OCG);
+                    }
+                    reviewObj.delete('lastReviewed');
+                    reviewObj.delete('removedItem');
+                    reviewObj.delete('updatedBy');
+                    reviewObj.delete('updateTime');
                 }
-                reviewObj.delete('lastReviewed');
-                reviewObj.delete('removedItem');
-                reviewObj.delete('updatedBy');
-                reviewObj.delete('updateTime');
             }
 
             $scope.reject = function(event, type, mutation, tumor, TI, treatment, reviewObj) {
