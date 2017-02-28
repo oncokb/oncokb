@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, false);
+                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, false, true);
                                 var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
