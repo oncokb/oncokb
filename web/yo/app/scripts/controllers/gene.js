@@ -2215,7 +2215,6 @@ angular.module('oncokbApp')
                     data.knownEffect = 'Resistant';
                     break;
                 case 'CLINICAL_TRIAL':
-                    dataUUID = '';
                     for (i = 0; i < tumor.trials.length; i++) {
                         data.clinicalTrials.push({
                             nctId: tumor.trials.get(i)
