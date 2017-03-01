@@ -356,7 +356,7 @@
                         <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.short.text && !ti.description.text && ti.treatments.length === 0">No Entry</span>
                         <comments-dict display-name="{{::ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                         <span class="pull-right" ng-show="fileEditable">
-                            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="ti.name_eStatus" id="ti.name.text  + '-name'" apply-obsolete="applyObsolete(ti.name_eStatus, 'TI', mutation, tumor, TI)"></e-status>
+                            <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="ti.name_eStatus" id="ti.name.text  + '-name'" apply-obsolete="applyObsolete(ti.name_eStatus, 'TI', mutation, tumor, ti)"></e-status>
                         </span>
                       </uib-accordion-heading>
                       <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short general summary" ng-model="ti.short.text"></p></span>-->
@@ -388,7 +388,7 @@
                                   <i class="fa fa-angle-double-up" ng-if="$parent.$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
                                   <i ng-if="$parent.$index < ti.treatments.length-2" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
                                 </span>
-                                 <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text" apply-obsolete="applyObsolete(treatment.name_eStatus, 'treatment', mutation, tumor, TI, treatment)"></e-status>
+                                 <e-status ng-if="userRole === 8"  ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="treatment.name_eStatus" id="mutation.name.text + tumor.name.text + ti.name.text + treatment.text" apply-obsolete="applyObsolete(treatment.name_eStatus, 'treatment', mutation, tumor, ti, treatment)"></e-status>
                                 <i ng-click="remove($event, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$parent.$index, $parent.$parent.$parent.$parent.$parent.$index, $index)" class="fa fa-trash-o"></i>
                               </span>
                             <span style="margin-right:10px;float:right" ng-show="reviewMode && !tumor.name_review.get('removed') && !treatment.name_review.get('removed')">
