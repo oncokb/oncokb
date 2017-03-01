@@ -2106,10 +2106,13 @@ angular.module('oncokbApp')
                     }
                 }
             }
-
+            function getValidUUID(uuid, content) {
+                return content ? uuid.getText() : '';
+            }
             function formEvidenceItem(type, mutation, tumor, TI, treatment) {
                 var dataUUID = '';
                 var extraDataUUID = '';
+                var tempStr = '';
                 var data = {
                     additionalInfo: null,
                     alterations: null,
@@ -2146,43 +2149,42 @@ angular.module('oncokbApp')
 
                 switch (type) {
                 case 'GENE_SUMMARY':
-                    dataUUID = $scope.gene.summary_uuid.getText();
                     data.description = $scope.gene.summary.getText();
+                    dataUUID = getValidUUID($scope.gene.summary_uuid, data.description);
                     break;
                 case 'GENE_BACKGROUND':
-                    dataUUID = $scope.gene.background_uuid.getText();
                     data.description = $scope.gene.background.getText();
+                    dataUUID = getValidUUID($scope.gene.background_uuid, data.description);
                     break;
                 case 'ONCOGENIC':
-                    dataUUID = mutation.oncogenic_uuid.getText();
                     data.knownEffect = mutation.oncogenic.getText();
                     data.description = mutation.summary.getText();
+                    dataUUID = getValidUUID(mutation.oncogenic_uuid, data.knownEffect + data.description);
                     if (needReview(mutation.shortSummary_uuid)) {
-                        extraDataUUID = mutation.shortSummary_uuid.getText();
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
                         extraData.alterations = parseMutationString(mutation.name.getText());
+                        extraDataUUID = getValidUUID(mutation.shortSummary_uuid, extraData.description);
                     }
                     break;
                 case 'MUTATION_EFFECT':
-                    dataUUID = mutation.effect_uuid.getText();
                     data.knownEffect = mutation.effect.value.getText();
                     data.description = mutation.description.getText();
+                    dataUUID = getValidUUID(mutation.effect_uuid, data.knownEffect + data.description);
                     break;
                 case 'TUMOR_TYPE_SUMMARY':
-                    dataUUID = tumor.summary_uuid.getText();
                     data.description = tumor.summary.getText();
+                    dataUUID = getValidUUID(tumor.summary_uuid, data.description);
                     break;
                 case 'PREVALENCE':
-                    dataUUID = tumor.prevalence_uuid.getText();
                     data.description = tumor.prevalence.getText();
+                    dataUUID = getValidUUID(tumor.prevalence_uuid, data.description);
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
-                    dataUUID = tumor.progImp_uuid.getText();
                     data.description = tumor.progImp.getText();
+                    dataUUID = getValidUUID(tumor.progImp_uuid, data.description);
                     break;
                 case 'NCCN_GUIDELINES':
-                    dataUUID = tumor.nccn_uuid.getText();
                     data.description = tumor.nccn.description.getText();
                     data.nccnGuidelines = [
                         {
@@ -2193,6 +2195,8 @@ angular.module('oncokbApp')
                             version: tumor.nccn.version.getText()
                         }
                     ];
+                    tempStr = tumor.nccn.description.getText() + tumor.nccn.disease.getText() + tumor.nccn.version.getText();
+                    dataUUID = getValidUUID(tumor.nccn_uuid, tempStr);
                     break;
                 case 'Standard implications for sensitivity to therapy':
                     data.evidenceType = 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY';
@@ -2211,11 +2215,14 @@ angular.module('oncokbApp')
                     data.knownEffect = 'Resistant';
                     break;
                 case 'CLINICAL_TRIAL':
-                    dataUUID = tumor.trials_uuid.getText();
+                    dataUUID = '';
                     for (i = 0; i < tumor.trials.length; i++) {
                         data.clinicalTrials.push({
                             nctId: tumor.trials.get(i)
                         });
+                    }
+                    if(tumor.trials.length > 0) {
+                        dataUUID = tumor.trials_uuid.getText();
                     }
                     break;
                 default:
@@ -2231,8 +2238,8 @@ angular.module('oncokbApp')
                 }
                 if (TI) {
                     if (!treatment) {
-                        dataUUID = TI.description_uuid.getText();
                         data.description = TI.description.getText();
+                        dataUUID = getValidUUID(TI.description_uuid, data.description);
                     } else {
                         dataUUID = treatment.name_uuid.getText();
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
@@ -2614,11 +2621,12 @@ angular.module('oncokbApp')
                     typeArr = [ti.name.getText()];
                     dataArr = ti.treatments.asArray();
                     tempType = 'treatment';
+                    unObsoletedEvidences(typeArr, mutation, tumor, ti, null, evidences);
                 }
                 if (type === 'treatment') {
                     typeArr = [ti.name.getText()];
                 }
-                unObsoletedEvidences(typeArr, mutation, tumor, ti, (type === 'TI' ? treatment : null), evidences);
+                unObsoletedEvidences(typeArr, mutation, tumor, ti, treatment, evidences);
                 _.each(dataArr, function(item) {
                     if(type === 'mutation')tumor = item;
                     if(type === 'tumor')ti = item;
@@ -2656,6 +2664,7 @@ angular.module('oncokbApp')
                     console.log('inserting to database');
                     var evidences = prepareInsertion(type, mutation, tumor, TI, treatment);
                     if(_.isEmpty(evidences)) {
+                        eStatus.set('obsolete', 'false');
                         return false;
                     }
                     $scope.$emit('startSaveDataToDatabase');
