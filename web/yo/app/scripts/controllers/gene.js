@@ -2106,7 +2106,7 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            function getValidUUID(uuid, content) {
+            function getUUIDBbyContent(uuid, content) {
                 return content ? uuid.getText() : '';
             }
             function formEvidenceItem(type, mutation, tumor, TI, treatment) {
@@ -2150,39 +2150,39 @@ angular.module('oncokbApp')
                 switch (type) {
                 case 'GENE_SUMMARY':
                     data.description = $scope.gene.summary.getText();
-                    dataUUID = getValidUUID($scope.gene.summary_uuid, data.description);
+                    dataUUID = getUUIDBbyContent($scope.gene.summary_uuid, data.description);
                     break;
                 case 'GENE_BACKGROUND':
                     data.description = $scope.gene.background.getText();
-                    dataUUID = getValidUUID($scope.gene.background_uuid, data.description);
+                    dataUUID = getUUIDBbyContent($scope.gene.background_uuid, data.description);
                     break;
                 case 'ONCOGENIC':
                     data.knownEffect = mutation.oncogenic.getText();
                     data.description = mutation.summary.getText();
-                    dataUUID = getValidUUID(mutation.oncogenic_uuid, data.knownEffect + data.description);
+                    dataUUID = getUUIDBbyContent(mutation.oncogenic_uuid, data.knownEffect + data.description);
                     if (needReview(mutation.shortSummary_uuid)) {
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
                         extraData.alterations = parseMutationString(mutation.name.getText());
-                        extraDataUUID = getValidUUID(mutation.shortSummary_uuid, extraData.description);
+                        extraDataUUID = getUUIDBbyContent(mutation.shortSummary_uuid, extraData.description);
                     }
                     break;
                 case 'MUTATION_EFFECT':
                     data.knownEffect = mutation.effect.value.getText();
                     data.description = mutation.description.getText();
-                    dataUUID = getValidUUID(mutation.effect_uuid, data.knownEffect + data.description);
+                    dataUUID = getUUIDBbyContent(mutation.effect_uuid, data.knownEffect + data.description);
                     break;
                 case 'TUMOR_TYPE_SUMMARY':
                     data.description = tumor.summary.getText();
-                    dataUUID = getValidUUID(tumor.summary_uuid, data.description);
+                    dataUUID = getUUIDBbyContent(tumor.summary_uuid, data.description);
                     break;
                 case 'PREVALENCE':
                     data.description = tumor.prevalence.getText();
-                    dataUUID = getValidUUID(tumor.prevalence_uuid, data.description);
+                    dataUUID = getUUIDBbyContent(tumor.prevalence_uuid, data.description);
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
                     data.description = tumor.progImp.getText();
-                    dataUUID = getValidUUID(tumor.progImp_uuid, data.description);
+                    dataUUID = getUUIDBbyContent(tumor.progImp_uuid, data.description);
                     break;
                 case 'NCCN_GUIDELINES':
                     data.description = tumor.nccn.description.getText();
@@ -2196,7 +2196,7 @@ angular.module('oncokbApp')
                         }
                     ];
                     tempStr = tumor.nccn.description.getText() + tumor.nccn.disease.getText() + tumor.nccn.version.getText();
-                    dataUUID = getValidUUID(tumor.nccn_uuid, tempStr);
+                    dataUUID = getUUIDBbyContent(tumor.nccn_uuid, tempStr);
                     break;
                 case 'Standard implications for sensitivity to therapy':
                     data.evidenceType = 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY';
@@ -2239,7 +2239,7 @@ angular.module('oncokbApp')
                 if (TI) {
                     if (!treatment) {
                         data.description = TI.description.getText();
-                        dataUUID = getValidUUID(TI.description_uuid, data.description);
+                        dataUUID = getUUIDBbyContent(TI.description_uuid, data.description);
                     } else {
                         dataUUID = treatment.name_uuid.getText();
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
@@ -2574,23 +2574,23 @@ angular.module('oncokbApp')
                 var evidences = {};
                 switch (type) {
                 case 'mutation':
-                    formEvidences(type, mutation, tumor, TI, treatment, evidences);
+                    formSectionEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'tumor':
                     if(checkObsolete(mutation)) return {};
-                    formEvidences(type, mutation, tumor, TI, treatment, evidences);
+                    formSectionEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'TI':
                     if(checkObsolete(mutation) || checkObsolete(tumor)) return {};
-                    formEvidences(type, mutation, tumor, TI, treatment, evidences);
+                    formSectionEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'treatment':
                     if(checkObsolete(mutation) || checkObsolete(tumor) || checkObsolete(TI)) return {};
-                    formEvidences(type, mutation, tumor, TI, treatment, evidences);
+                    formSectionEvidences(type, mutation, tumor, TI, treatment, evidences);
                     break;
                 case 'GENE_SUMMARY':
                 case 'GENE_BACKGROUND':
-                    unObsoletedEvidences([type], null, null, null, null, evidences);
+                    formEvidencesByType([type], null, null, null, null, evidences);
                     break;
                 case 'ONCOGENIC':
                 case 'MUTATION_EFFECT':
@@ -2598,12 +2598,12 @@ angular.module('oncokbApp')
                 case 'PROGNOSTIC_IMPLICATION':
                 case 'NCCN_GUIDELINES':
                 case 'CLINICAL_TRIAL':
-                    unObsoletedEvidences([type], mutation, tumor, TI, treatment, evidences);
+                    formEvidencesByType([type], mutation, tumor, TI, treatment, evidences);
                     break;
                 }
                 return evidences;
             }
-            function formEvidences(type, mutation, tumor, ti, treatment, evidences) {
+            function formSectionEvidences(type, mutation, tumor, ti, treatment, evidences) {
                 var typeArr = [];
                 var dataArr = [];
                 var tempType = '';
@@ -2621,21 +2621,21 @@ angular.module('oncokbApp')
                     typeArr = [ti.name.getText()];
                     dataArr = ti.treatments.asArray();
                     tempType = 'treatment';
-                    unObsoletedEvidences(typeArr, mutation, tumor, ti, null, evidences);
+                    formEvidencesByType(typeArr, mutation, tumor, ti, null, evidences);
                 }
                 if (type === 'treatment') {
                     typeArr = [ti.name.getText()];
                 }
-                unObsoletedEvidences(typeArr, mutation, tumor, ti, treatment, evidences);
+                formEvidencesByType(typeArr, mutation, tumor, ti, treatment, evidences);
                 _.each(dataArr, function(item) {
                     if(type === 'mutation')tumor = item;
                     if(type === 'tumor')ti = item;
                     if(type === 'TI')treatment = item;
-                    formEvidences(tempType, mutation, tumor, ti, treatment, evidences);
+                    formSectionEvidences(tempType, mutation, tumor, ti, treatment, evidences);
                 });
                 return evidences;
             };
-            function unObsoletedEvidences(types, mutation, tumor, TI, treatment, evidences) {
+            function formEvidencesByType(types, mutation, tumor, TI, treatment, evidences) {
                 _.each(types, function(type) {
                     var evidenceResult = formEvidenceItem(type, mutation, tumor, TI, treatment);
                     var dataUUID = evidenceResult[0];
