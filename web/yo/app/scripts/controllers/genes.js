@@ -1517,7 +1517,6 @@ angular.module('oncokbApp')
                                     var _gene = genes[i];
                                     if (_gene.gene === hugoSymbol &&
                                         _gene.type) {
-                                        $scope.mappedGene++;
                                         result.push(_gene.type);
                                         hasNewData = true;
                                         break;
