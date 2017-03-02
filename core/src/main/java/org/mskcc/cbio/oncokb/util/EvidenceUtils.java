@@ -6,15 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import javax.xml.parsers.ParserConfigurationException;
-import org.mskcc.cbio.oncokb.bo.ArticleBo;
-import org.mskcc.cbio.oncokb.bo.ClinicalTrialBo;
-import org.mskcc.cbio.oncokb.bo.DrugBo;
-import org.mskcc.cbio.oncokb.bo.NccnGuidelineBo;
-import org.mskcc.cbio.oncokb.bo.TreatmentBo;
-import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
-import org.mskcc.oncotree.model.TumorType;
 import java.util.*;
 
 /**
@@ -725,7 +719,8 @@ public class EvidenceUtils {
         }
         Set<Evidence> result = new HashSet<>();
         for (Evidence evidence : evidences) {
-            if (evidence.getKnownEffect().equalsIgnoreCase(knownEffect)) {
+            if (evidence.getKnownEffect() != null
+                && evidence.getKnownEffect().equalsIgnoreCase(knownEffect)) {
                 result.add(evidence);
             }
         }
@@ -813,17 +808,23 @@ public class EvidenceUtils {
     }
 
     private static Gene getGene(Integer entrezGeneId, String hugoSymbol) {
-        Gene gene = null;
-        if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            return gene;
-        } else {
-            if (entrezGeneId != null) {
-                gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-            } else if (hugoSymbol != null) {
-                gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        Gene entrezGene = null;
+        Gene hugoGene = null;
+
+        if (entrezGeneId != null) {
+            entrezGene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+        }
+        if (hugoSymbol != null) {
+            hugoGene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        }
+        if (entrezGene != null) {
+            if (hugoGene != null && !entrezGene.equals(hugoGene)) {
+                return null;
+            } else {
+                return entrezGene;
             }
         }
-        return gene;
+        return hugoGene;
     }
 
 
