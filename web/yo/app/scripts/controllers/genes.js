@@ -1482,5 +1482,98 @@ angular.module('oncokbApp')
                     console.log('finished');
                 }
             }
+
+            /**
+             * Update gene type
+             * @param {Array} genes List of genes which need to be updated
+             * @param {number} index The current index of genes
+             * @param {Function} callback The function to be called after all genes have been updated
+             */
+            function setGeneType(genes, index, callback) {
+                if (index < $scope.documents.length) {
+                    var document = $scope.documents[index];
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('Did not get realtime document.');
+                        } else {
+                            // console.log(document.title, '\t\t', index + 1);
+                            var model = realtime.getModel();
+                            var gene = model.getRoot().get('gene');
+                            if (gene) {
+                                var hugoSymbol = gene.name.getText();
+                                // model.beginCompoundOperation();
+                                // console.log('TSG: ' + gene.type.get('TSG') +
+                                //     ' OCG: ' + gene.type.get('OCG'));
+                                var result = [index + 1, hugoSymbol];
+
+                                if (gene.type.get('TSG') && gene.type.get('OCG')) {
+                                    result.push('Both');
+                                } else {
+                                    result.push(gene.type.get('TSG') || gene.type.get('OCG'));
+                                }
+
+                                var hasNewData = false;
+                                for (var i = 0; i < genes.length; i++) {
+                                    var _gene = genes[i];
+                                    if (_gene.gene === hugoSymbol &&
+                                        _gene.type) {
+                                        result.push(_gene.type);
+                                        hasNewData = true;
+                                        break;
+                                    }
+                                }
+                                if (!hasNewData) {
+                                    result.push('');
+                                }
+
+                                var hasTruncating = false;
+                                gene.mutations.asArray().forEach(function(mutation, index) {
+                                    var mutationName = mutation.name.getText();
+                                    if (mutationName && mutationName === 'Truncating Mutations') {
+                                        hasTruncating = true;
+                                    }
+                                });
+
+                                if (result[3] !== result[2]) {
+                                    if (result[3] === 'Both') {
+                                        gene.type.set('TSG', 'Tumor Suppressor');
+                                        gene.type.set('OCG', 'Oncogene');
+                                    } else if (result[3] === 'Oncogene') {
+                                        gene.type.set('TSG', '');
+                                        gene.type.set('OCG', 'Oncogene');
+                                    } else if (result[3] === 'Tumor Suppressor') {
+                                        gene.type.set('TSG', 'Tumor Suppressor');
+                                        gene.type.set('OCG', '');
+                                    } else {
+                                        gene.type.set('TSG', '');
+                                        gene.type.set('OCG', '');
+                                    }
+                                    result.push('Changed');
+                                }
+
+                                if (hasTruncating) {
+                                    result.push('YES');
+                                } else {
+                                    result.push('');
+                                }
+                                console.log(result.join('&'));
+                                // model.endCompoundOperation();
+
+                                // Google has limitation for number of requests within one second
+                                $timeout(function() {
+                                    setGeneType(genes, ++index, callback);
+                                }, 300, false);
+                            } else {
+                                // console.log('\t\tNo gene model.');
+                                $timeout(function() {
+                                    setGeneType(genes, ++index, callback);
+                                }, 300, false);
+                            }
+                        }
+                    });
+                } else if (_.isFunction(callback)) {
+                    callback();
+                }
+            }
         }]
 );
