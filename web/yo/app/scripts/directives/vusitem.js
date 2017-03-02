@@ -16,7 +16,8 @@ angular.module('oncokbApp')
                 index: '=',
                 fileEditable: '=',
                 dModel: '=', // drive realtime document model
-                addCommentInGene: '&addComment' // reference to the external function "addComment" in the gene controller
+                addCommentInGene: '&addComment', // reference to the external function "addComment" in the gene controller
+                vusUpdate: '&vusUpdate'
             },
             link: function postLink(scope) {
                 scope.variant = scope.vus.get(scope.index);
@@ -39,6 +40,7 @@ angular.module('oncokbApp')
                         timeStamp.by.email.setText(user.email);
                         scope.variant.time.push(timeStamp);
                         scope.dtBy = user.name;
+                        scope.vusUpdate();
                     }
                 });
             },
@@ -47,6 +49,7 @@ angular.module('oncokbApp')
                     var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
                     dlg.result.then(function() {
                         $scope.vus.remove($scope.index);
+                        $scope.vusUpdate();
                     }, function() {
                     });
                 };
