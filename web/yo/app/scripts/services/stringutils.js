@@ -1101,7 +1101,9 @@ angular.module('oncokbApp')
 
         function getString(string) {
             var tmp = window.document.createElement('DIV');
-            tmp.innerHTML = string;
+            var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
+            var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
+            tmp.innerHTML = processdStr;
             /* eslint new-cap: 0*/
             var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
             string = S(_string).collapseWhitespace().s;
