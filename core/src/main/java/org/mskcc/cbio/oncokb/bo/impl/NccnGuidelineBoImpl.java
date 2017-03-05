@@ -13,7 +13,7 @@ import org.mskcc.cbio.oncokb.model.NccnGuideline;
 public class NccnGuidelineBoImpl extends GenericBoImpl<NccnGuideline, NccnGuidelineDao> implements NccnGuidelineBo {
 
     @Override
-    public NccnGuideline findNccnGuideline(String disease, String version, String pages) {
-        return getDao().findNccnGuideline(disease, version, pages);
+    public NccnGuideline findNccnGuideline(String therapy, String disease, String version, String pages) {
+        return getDao().findNccnGuideline(therapy, disease, version, pages);
     }
 }

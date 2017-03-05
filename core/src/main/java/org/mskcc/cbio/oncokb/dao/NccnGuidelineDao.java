@@ -16,5 +16,5 @@ public interface NccnGuidelineDao extends GenericDao<NccnGuideline, Integer> {
      * @param pages
      * @return 
      */
-    NccnGuideline findNccnGuideline(String disease, String version, String pages);
+    NccnGuideline findNccnGuideline(String therapy, String disease, String version, String pages);
 }

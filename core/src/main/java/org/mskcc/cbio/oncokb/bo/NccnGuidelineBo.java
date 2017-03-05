@@ -9,5 +9,5 @@ import org.mskcc.cbio.oncokb.model.NccnGuideline;
  */
 public interface NccnGuidelineBo extends GenericBo<NccnGuideline> {
     
-    NccnGuideline findNccnGuideline(String disease, String version, String pages);
+    NccnGuideline findNccnGuideline(String therapy, String disease, String version, String pages);
 }

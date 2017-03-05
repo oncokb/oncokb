@@ -12,6 +12,9 @@
         <property name="uuid" type="string">
             <column length="40" name="uuid"/>
         </property>
+        <property name="therapy" type="string">
+            <column name="therapy"/>
+        </property>
         <property name="disease" type="string">
             <column name="disease"/>
         </property>
@@ -33,6 +36,6 @@
     </class>
 
     <query name="findNccnGuideline">
-        <![CDATA[from NccnGuideline n where n.disease=? and n.version=? and n.pages=?]]>
+        <![CDATA[from NccnGuideline n where n.therapy=? and n.disease=? and n.version=? and n.pages=?]]>
     </query>
 </hibernate-mapping>

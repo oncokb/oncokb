@@ -14,8 +14,8 @@ public class NccnGuidelineDaoImpl
             extends GenericDaoImpl<NccnGuideline, Integer>
             implements NccnGuidelineDao  {
     
-    public NccnGuideline findNccnGuideline(String disease, String version, String pages) {
-        List<NccnGuideline> list = findByNamedQuery("findNccnGuideline", disease, version, pages);
+    public NccnGuideline findNccnGuideline(String therapy, String disease, String version, String pages) {
+        List<NccnGuideline> list = findByNamedQuery("findNccnGuideline", therapy, disease, version, pages);
         return list.isEmpty() ? null : list.get(0);
     }
 }
