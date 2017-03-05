@@ -73,6 +73,24 @@ public class IndicatorUtils {
                         gene = tmpGenes.get(0);
                     }
                 }
+            } else {
+                String geneStr = geneStrsSet.iterator().next();
+                if(geneStr != null) {
+                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
+                    if (tmpGene != null) {
+                        gene = tmpGene;
+                        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                            null, null, null, null);
+                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+
+                        // Map Truncating Mutations to single gene fusion event
+                        Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
+                        if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
+                            relevantAlterations.add(truncatingMutations);
+                        }
+                    }
+                }
             }
         } else {
             gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :

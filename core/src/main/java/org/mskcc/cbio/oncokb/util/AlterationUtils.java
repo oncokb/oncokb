@@ -341,6 +341,10 @@ public final class AlterationUtils {
         return alterations;
     }
 
+    public static Alteration getTruncatingMutations(Gene gene) {
+        return findAlteration(gene, "Truncating Mutations");
+    }
+
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
         Set<Alteration> alterations = new HashSet<>();
 
