@@ -38,8 +38,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, List<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
-        if(gene != null && consequence != null) {
-            for(String cons: consequence.getTerm().split("\\s*,\\s*")) {
+        if (gene != null && consequence != null) {
+            for (String cons : consequence.getTerm().split("\\s*,\\s*")) {
                 VariantConsequence tmpConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(cons);
                 if (alterations != null && alterations.size() > 0) {
                     for (Alteration alteration : alterations) {
@@ -49,7 +49,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     }
                 } else {
                     List<Alteration> queryResult = getDao().findMutationsByConsequenceAndPosition(gene, tmpConsequence, start, end);
-                    if(queryResult != null) {
+                    if (queryResult != null) {
                         result.addAll(queryResult);
                     }
                 }
@@ -61,6 +61,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     /**
      * Find all relevant alterations. The order is important. The list should be generated based on priority.
+     *
      * @param alteration
      * @param fullAlterations
      * @return
@@ -73,7 +74,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.add(matchedAlt);
         }
         if (alteration.getConsequence() != null) {
-            if(alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+            if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
                 return new ArrayList<>();
             }
             // we need to develop better way to match mutation
@@ -162,6 +163,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
             if (alt != null) {
                 alterations.add(alt);
+            } else {
+                // If no fusions curated, check the Truncating Mutations.
+                alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Truncating Mutations");
+                if (alt != null) {
+                    alterations.add(alt);
+                }
             }
         }
 
@@ -181,7 +188,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        for(String effect : effects) {
+        for (String effect : effects) {
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), effect + " mutations");
             if (alt != null) {
                 alterations.add(alt);
@@ -189,8 +196,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Looking for oncogenic mutations
-        for(Alteration alt : alterations) {
-            if(AlterationUtils.isOncogenicAlteration(alt)) {
+        for (Alteration alt : alterations) {
+            if (AlterationUtils.isOncogenicAlteration(alt)) {
                 Alteration oncogenicMutations = findAlteration(alt.getGene(), alt.getAlterationType(), "oncogenic mutations");
                 if (oncogenicMutations != null) {
                     alterations.add(oncogenicMutations);
