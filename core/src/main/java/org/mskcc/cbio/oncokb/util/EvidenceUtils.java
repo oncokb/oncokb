@@ -939,6 +939,14 @@ public class EvidenceUtils {
                 Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(allEvidences);
                 filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
 
+
+                // Also include all non-treatment evidences
+                for (Evidence evidence : allEvidences) {
+                    if (!sensitiveEvidences.contains(evidence) && !resistanceEvidences.contains(evidence)) {
+                        filteredEvidences.add(evidence);
+                    }
+                }
+
                 query.setEvidences(filteredEvidences);
             }
         }

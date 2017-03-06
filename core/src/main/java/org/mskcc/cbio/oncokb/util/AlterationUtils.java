@@ -135,6 +135,9 @@ public final class AlterationUtils {
                             case "trunc":
                                 consequence = "feature_truncation";
                                 break;
+                            case "dup":
+                                consequence = "inframe_insertion";
+                                break;
                             case "mut":
                                 consequence = "any";
                         }
@@ -148,7 +151,7 @@ public final class AlterationUtils {
 
                             consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup))");
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
                                 ref = m.group(1);
@@ -157,6 +160,9 @@ public final class AlterationUtils {
                                 String v = m.group(3);
                                 switch (v) {
                                     case "ins":
+                                        consequence = "inframe_insertion";
+                                        break;
+                                    case "dup":
                                         consequence = "inframe_insertion";
                                         break;
                                     case "del":
@@ -333,6 +339,10 @@ public final class AlterationUtils {
             alterations.addAll(getAllAlterations(gene));
         }
         return alterations;
+    }
+
+    public static Alteration getTruncatingMutations(Gene gene) {
+        return findAlteration(gene, "Truncating Mutations");
     }
 
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
