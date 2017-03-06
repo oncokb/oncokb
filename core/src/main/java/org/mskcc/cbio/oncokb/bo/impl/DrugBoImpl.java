@@ -19,8 +19,10 @@ import java.util.List;
 public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     private String correctDrugName(String drugName) {
         // Always uppercase first letter
-        if (drugName == null || drugName.length() < 2) {
+        if (drugName == null || drugName.isEmpty()) {
             return drugName;
+        } else if (drugName.length() == 1) {
+            return drugName.toUpperCase();
         }
         return drugName.substring(0, 1).toUpperCase() + drugName.substring(1);
     }
