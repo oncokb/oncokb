@@ -1046,6 +1046,12 @@ angular.module('oncokbApp')
                         if (model[e + '_uuid']) {
                             object[e + '_uuid'] = validUUID(model[e + '_uuid']);
                         }
+                        if (model[e + '_review']) {
+                            object[e + '_review'] = getReview(model[e + '_review']);
+                            if(e === 'type' && model[e + '_review'].has('lastReviewed')) {
+                                object[e + '_review'].lastReviewed = model[e + '_review'].get('lastReviewed');
+                            }
+                        }
                     } else {
                         if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].get('lastReviewed')) {
                             if (model[e + '_review'].get('lastReviewed').type && model[e + '_review'].get('lastReviewed').type === 'Map') {

@@ -20,6 +20,9 @@ angular.module('oncokbApp')
         };
 
         function backup(callback) {
+            backupMeta(callback);
+        }
+        function backupGene(callback) {
             if (self.parentFolder) {
                 if (!angular.isFunction(callback)) {
                     callback = undefined;
@@ -42,6 +45,57 @@ angular.module('oncokbApp')
                 console.log('Backup folder ID needed.');
             }
         }
+        function backupMeta(callback) {
+            storage.requireAuth(true).then(function() {
+                // create Meta folder
+                storage.createFolder(self.parentFolder, 'Meta ' + (new Date()).toString()).then(function(folderResult) {
+                    // create Meta document inside the new Meta folder
+                    storage.createDocument('Meta Status', folderResult.id).then(function(file) {
+                        console.log('Created meta file');
+                        storage.getMetaRealtimeDocument(file.id).then(function(metaRealtime) {
+                            if (metaRealtime && metaRealtime.error) {
+                                dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                            } else {
+                                var newMetaModel = metaRealtime.getModel();
+                                var newReview = newMetaModel.createMap();
+                                // get the original meta file that we want to copy from
+                                storage.retrieveMeta().then(function(result) {
+                                    if (result && result.error) {
+                                        dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                                    } else {
+                                        storage.getMetaRealtimeDocument(result[0].id).then(function(originalMetaRealtime) {
+                                            if (originalMetaRealtime && originalMetaRealtime.error) {
+                                                dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                                            } else {
+                                                var originalMeta = originalMetaRealtime.getModel().getRoot().get('review');
+                                                var hugoSymbols = originalMeta.keys();
+                                                _.each(hugoSymbols, function(hugoSymbol) {
+                                                    var uuidMapping = newMetaModel.createMap();
+                                                    var uuids = originalMeta.get(hugoSymbol).keys();
+                                                    _.each(uuids, function(uuid) {
+                                                        // currentReviewer is a collaborative string, which shouldn't be in the meta file. And also no need to import
+                                                        if(originalMeta.get(hugoSymbol).get(uuid).type === 'Map') {
+                                                            var record = newMetaModel.createMap();
+                                                            record.set('review', originalMeta.get(hugoSymbol).get(uuid).get('review'));
+                                                            uuidMapping.set(uuid, record);
+                                                        }
+                                                    });
+                                                    newReview.set(hugoSymbol, uuidMapping);
+                                                });
+                                                newMetaModel.getRoot().set('review', newReview);
+                                            }
+                                            console.log('Completed back up meta file');
+                                            backupGene(callback);
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+
+            });
+        };
 
         function createFolder() {
             var deferred = $q.defer();
@@ -358,6 +412,10 @@ angular.module('oncokbApp')
                     });
                 } else if (key.indexOf('_review') !== -1) {
                     model[key] = createMap(rootModel, value);
+                    // lastReviewed data was create as collaborative map for gene type. need to overwite it with object
+                    if(key === 'type_review' && model[key].has('lastReviewed')) {
+                        model[key].set('lastReviewed', value.lastReviewed);
+                    }
                 } else if (key.indexOf('_timeStamp') === -1) {
                     _.each(value, function(item, _key) {
                         _datum = setValue(rootModel, _datum, item, _key);
