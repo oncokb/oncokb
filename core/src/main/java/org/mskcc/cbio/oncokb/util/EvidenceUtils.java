@@ -964,6 +964,14 @@ public class EvidenceUtils {
         Set<Treatment> treatments = evidence.getTreatments();
         Set<NccnGuideline> nccnGuidelines = evidence.getNccnGuidelines();
 
+        if (evidence.getSubtype() != null && evidence.getSubtype().isEmpty()) {
+            evidence.setSubtype(null);
+        }
+
+        if (evidence.getCancerType() != null && evidence.getCancerType().isEmpty()) {
+            evidence.setCancerType(null);
+        }
+
         if(trials != null && !trials.isEmpty()){
             Set<ClinicalTrial> annotatedTrials = new HashSet<>();
             Set<String> nctIds = new HashSet<String>();
