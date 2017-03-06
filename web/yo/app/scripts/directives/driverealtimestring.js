@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user) {
+    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils) {
         return {
             templateUrl: 'views/driveRealtimeString.html',
             restrict: 'AE',
@@ -64,7 +64,7 @@ angular.module('oncokbApp')
                         if(scope.rs && _.isNull(scope.rs.get('lastReviewed')) && scope.rs.get('action') !== 'rejected') {
                             scope.rs.set('lastReviewed', o);
                         }
-                        scope.content.stringO = scope.object.text;
+                        scope.content.stringO = stringUtils.getTextString(scope.object.text);
                     }
                 });
                 scope.$watch('content.stringO', function(n, o) {
