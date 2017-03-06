@@ -1354,9 +1354,9 @@ angular.module('oncokbApp')
                     size: 'lg'
                 });
                 dlg.result.then(function(name) {
-                    $scope.name = name;
+                    console.log('successfully updated tumor type');
                 }, function() {
-                    $scope.name = 'You decided not to enter in your name, that makes me sad.';
+                    console.log('failed to updated tumor type');
                 });
             };
 
@@ -3080,12 +3080,6 @@ angular.module('oncokbApp')
 
             $modalInstance.close();
         }; // end save
-
-        $scope.hitEnter = function(evt) {
-            if (angular.equals(evt.keyCode, 13) && !(angular.equals($scope.name, null) || angular.equals($scope.name, ''))) {
-                $scope.save();
-            }
-        };
 
         $scope.$watch('meta.newCancerTypes', function(n) {
             // console.log('meta.newcancertypes watch has been called.',n, o);
