@@ -249,7 +249,13 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
 
 angular.module('oncokbApp').factory('InternalAccess', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
-    return $http.get(OncoKB.config.apiLink + 'access');
+    function hasAccess() {
+        return $http.get(OncoKB.config.apiLink + 'access');
+    }
+
+    return {
+        hasAccess: hasAccess
+    };
 }]);
 
 angular.module('oncokbApp').factory('Cache', ['$http', 'OncoKB', function($http, OncoKB) {

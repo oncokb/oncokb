@@ -380,17 +380,24 @@ angular.module('oncokbApp')
             }
 
             function testAccess(successCallback, failCallback) {
-                InternalAccess
-                    .success(function(data, status, headers, config) {
-                        if (angular.isFunction(successCallback)) {
-                            successCallback(data, status, headers, config);
-                        }
-                    })
-                    .error(function(data, status, headers, config) {
-                        if (angular.isFunction(failCallback)) {
-                            failCallback(data, status, headers, config);
-                        }
-                    });
+                if (dataFromFile) {
+                    if (angular.isFunction(successCallback)) {
+                        successCallback();
+                    }
+                } else {
+                    InternalAccess
+                        .hasAccess()
+                        .success(function(data, status, headers, config) {
+                            if (angular.isFunction(successCallback)) {
+                                successCallback(data, status, headers, config);
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            if (angular.isFunction(failCallback)) {
+                                failCallback(data, status, headers, config);
+                            }
+                        });
+                }
             }
 
             function getCacheStatus() {
