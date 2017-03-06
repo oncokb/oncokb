@@ -1,0 +1,43 @@
+<div class="modify-tumor-type">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            Modify Cancer Types</h4></div>
+    <div class="modal-body">
+        <div class="input-group input-group-sm" style="width: 100%">
+            <div ng-repeat="cancerType in meta.newCancerTypes" style="width: 100%;">
+                <div class="row">
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xm-2">
+                        <span>Cancer Type: </span></div>
+                    <div class="col-lg-4 col-md-4 col-sm-10 col-xm-10">
+                        <select chosen
+                                allow-single-deselect="true"
+                                data-placeholder="Choose a main tumor type"
+                                no-results-text="'Could not find any'"
+                                ng-model="cancerType.mainType"
+                                ng-options="tt.name for tt in meta.oncoTree.mainTypes | orderBy: 'name' track by tt.name">
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-2 col-xm-2">
+                        <span>Subtype: </span></div>
+                    <div class="col-lg-5 col-md-5 col-sm-10 col-xm-10">
+                        <select style="width: 100%;"
+                                chosen
+                                allow-single-deselect="true"
+                                data-placeholder="Choose a tumor type"
+                                no-results-text="'Could not find any'"
+                                ng-model="cancerType.subtype"
+                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
+                            <option value=""></option>
+                        </select>
+                    </div>
+                </div>
+                <hr ng-hide="$last"/>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+        <button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+    </div>
+</div>
