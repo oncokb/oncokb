@@ -1100,6 +1100,9 @@ angular.module('oncokbApp')
         }
 
         function getString(string) {
+            if(!string || !_.isString(string)) {
+                return '';
+            }
             var tmp = window.document.createElement('DIV');
             var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
             var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
