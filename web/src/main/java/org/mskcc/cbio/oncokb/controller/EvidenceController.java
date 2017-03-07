@@ -222,6 +222,27 @@ public class EvidenceController {
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
         String propagation = queryEvidence.getPropagation();
         
+        List<String> cancerTypes = new ArrayList<>();
+        List<String> subTypes = new ArrayList<>();     
+        Boolean cancerEvidence = true;
+        if(cancerType == null) {
+            cancerEvidence = false;
+        } else {
+            cancerTypes = Arrays.asList(cancerType.split(","));
+            if(subType != null) {
+                subTypes = Arrays.asList(subType.split(","));
+                for(int i = 0;i < subTypes.size();i++) {
+                    if(subTypes.get(i).equals("null")) {
+                        subTypes.set(i, null);
+                    }
+                }
+            } else {
+                for(int i = 0;i < cancerTypes.size();i++) {
+                    subTypes.add(null);
+                }
+            }
+        }
+        
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
         // Use controlled vocabulary to update oncogenic knowneffect
@@ -231,7 +252,7 @@ public class EvidenceController {
                 knownEffect = oncogenicity.getOncogenic();
             }
         }
-
+        // save newly added evidence    
         if (evidences.isEmpty()) {
             Evidence evidence = new Evidence();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
@@ -267,8 +288,6 @@ public class EvidenceController {
             evidence.setUuid(uuid);
             evidence.setGene(gene);
             evidence.setEvidenceType(evidenceType);
-            evidence.setSubtype(subType);
-            evidence.setCancerType(cancerType);
             evidence.setKnownEffect(knownEffect);
             evidence.setLevelOfEvidence(level);
             evidence.setDescription(description);
@@ -279,9 +298,14 @@ public class EvidenceController {
             evidence.setNccnGuidelines(nccnGuidelines);
             evidence.setClinicalTrials(clinicalTrials);
             evidence.setPropagation(propagation);
-            evidenceBo.save(evidence);
-            evidences.add(evidence);
-        } else {
+            for(int i = 0;i < cancerTypes.size();i++) {
+                evidence.setCancerType(cancerTypes.get(i));
+                evidence.setSubtype(subTypes.get(i));
+                evidenceBo.save(evidence);
+                evidences.add(evidence);
+            }
+        } else if(!cancerEvidence){
+            // This is for the evidences which tumor type infomation is not involved
             for (Evidence evidence : evidences) {
                 evidence.setEvidenceType(evidenceType);
                 evidence.setSubtype(subType);
@@ -298,8 +322,64 @@ public class EvidenceController {
                 evidence.setPropagation(propagation);
                 evidenceBo.update(evidence);
             }
-        }
-
+        } else {
+            List<Integer> foundIndices = new ArrayList<>(); 
+            int tumorIndex = 0;
+            Evidence newEvidence = new Evidence(evidences.get(0));
+            newEvidence.setKnownEffect(knownEffect);
+            newEvidence.setLevelOfEvidence(level);
+            newEvidence.setDescription(description);
+            newEvidence.setAdditionalInfo(additionalInfo);
+            newEvidence.setLastEdit(lastEdit);
+            newEvidence.setTreatments(treatments);
+            newEvidence.setArticles(articles);
+            newEvidence.setNccnGuidelines(nccnGuidelines);
+            newEvidence.setClinicalTrials(clinicalTrials);
+            newEvidence.setPropagation(propagation);
+            List<Evidence> toRemoveEvidences = new ArrayList<>();
+            for(Evidence evidence : evidences) {
+                Boolean validTumor = false;
+                for(int i = 0;i < cancerTypes.size();i++) {
+                    if(evidence.getCancerType().equals(cancerTypes.get(i)) && (evidence.getSubtype() == null ? subTypes.get(i) == null : evidence.getSubtype().equals(subTypes.get(i)))) {
+                        foundIndices.add(i);
+                        tumorIndex = i;
+                        validTumor = true;
+                        break;
+                    }
+                }
+                // if tumor type info of current evidence is in the cancer type list passed in from front end, we update this evidence
+                // otherwise, we delete it and insert new ones 
+                if(validTumor) {
+                    evidence.setEvidenceType(evidenceType);
+                    evidence.setCancerType(cancerTypes.get(tumorIndex));
+                    evidence.setSubtype(subTypes.get(tumorIndex));
+                    evidence.setKnownEffect(knownEffect);
+                    evidence.setLevelOfEvidence(level);
+                    evidence.setDescription(description);
+                    evidence.setAdditionalInfo(additionalInfo);
+                    evidence.setLastEdit(lastEdit);
+                    evidence.setTreatments(treatments);
+                    evidence.setArticles(articles);
+                    evidence.setNccnGuidelines(nccnGuidelines);
+                    evidence.setClinicalTrials(clinicalTrials);
+                    evidence.setPropagation(propagation);
+                    evidenceBo.update(evidence);
+                }  else {
+                    evidenceBo.delete(evidence);
+                    toRemoveEvidences.add(evidence);
+                }  
+            }
+            evidences.removeAll(toRemoveEvidences);
+            // insert newly added tumor types
+            for(int i = 0;i < cancerTypes.size();i++) {
+                if(!foundIndices.contains(i)) {
+                    newEvidence.setSubtype(subTypes.get(i));
+                    newEvidence.setCancerType(cancerTypes.get(i));
+                    evidenceBo.save(newEvidence);
+                    evidences.add(newEvidence);
+                }
+            }
+        }   
         return evidences;
     }
 
