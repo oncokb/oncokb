@@ -168,7 +168,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 } else {
                     // If no fusions curated, check the Truncating Mutations.
                     if (truncatingMutation != null) {
-                        alterations.add(alt);
+                        alterations.add(truncatingMutation);
                     }
                 }
             }
