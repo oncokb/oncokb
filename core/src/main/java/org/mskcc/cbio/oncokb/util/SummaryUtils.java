@@ -160,6 +160,33 @@ public class SummaryUtils {
 
             // Get all tumor type summary evidence for relevant alterations
             if (tumorTypeSummary == null) {
+                // Sort all tumor type summaries, the more specific tumor type summary will be picked.
+                // Deal with KIT, give Exon annotation highers priority
+                if (gene.getHugoSymbol().equals("KIT")) {
+                    Collections.sort(alterations, new Comparator<Alteration>() {
+                        public int compare(Alteration x, Alteration y) {
+                            Integer result = 0;
+                            // TODO: need more comprehensive method to determine the order.
+                            String nameX = (x.getName() != null ? x.getName() : x.getAlteration()).toLowerCase();
+                            String nameY = (y.getName() != null ? y.getName() : y.getAlteration()).toLowerCase();
+                            if (nameX.contains("exon")) {
+                                if (nameY.contains("exon")) {
+                                    result = 0;
+                                } else {
+                                    result = -1;
+                                }
+                            } else {
+                                if (nameY.contains("exon")) {
+                                    result = 1;
+                                } else {
+                                    result = 0;
+                                }
+                            }
+                            return result;
+                        }
+                    });
+                }
+
                 // Base on the priority of relevant alterations
                 for (Alteration alteration : alterations) {
                     tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
@@ -798,18 +825,7 @@ public class SummaryUtils {
     private static String getTumorTypeSummaryFromEvidences(List<Evidence> evidences) {
         String summary = null;
         if (evidences != null && evidences.size() > 0) {
-            // Sort all tumor type summaries, the more specific tumor type summary will be picked.
-            Collections.sort(evidences, new Comparator<Evidence>() {
-                public int compare(Evidence x, Evidence y) {
-                    if (x.getAlterations() == null) {
-                        return 1;
-                    }
-                    if (y.getAlterations() == null) {
-                        return -1;
-                    }
-                    return x.getAlterations().size() - y.getAlterations().size();
-                }
-            });
+            evidences = EvidenceUtils.sortTumorTypeEvidenceBasedNumOfAlts(evidences, false);
 
             Evidence ev = evidences.get(0);
             String tumorTypeSummary = ev.getDescription();

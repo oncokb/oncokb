@@ -367,7 +367,7 @@ public class EvidenceUtils {
                         LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tmpEvidence.getPropagation());
                         if (propagationLevel != null) {
                             tmpEvidence.setLevelOfEvidence(propagationLevel);
-                        }else {
+                        } else {
                             flag = false;
                         }
                     }
@@ -972,42 +972,42 @@ public class EvidenceUtils {
             evidence.setCancerType(null);
         }
 
-        if(trials != null && !trials.isEmpty()){
+        if (trials != null && !trials.isEmpty()) {
             Set<ClinicalTrial> annotatedTrials = new HashSet<>();
             Set<String> nctIds = new HashSet<String>();
-            for(ClinicalTrial trial: trials){
+            for (ClinicalTrial trial : trials) {
                 String tempNctID = trial.getNctId();
                 ClinicalTrial tempCT = clinicalTrialBo.findClinicalTrialByNctId(tempNctID);
-                if(tempCT == null){
+                if (tempCT == null) {
                     nctIds.add(tempNctID);
-                }else{
+                } else {
                     annotatedTrials.add(tempCT);
                 }
             }
             annotatedTrials.addAll(ClinicalTrialsImporter.importTrials(nctIds));
             evidence.setClinicalTrials(annotatedTrials);
         }
-        if(articles != null && !articles.isEmpty()){
+        if (articles != null && !articles.isEmpty()) {
             Set<Article> annotatedArticles = new HashSet<>();
-            for(Article article : articles){
+            for (Article article : articles) {
                 String tempPMID = article.getPmid();
-                if(tempPMID == null){
+                if (tempPMID == null) {
                     Article tempAT = articleBo.findArticleByAbstract(article.getAbstractContent());
-                    if(tempAT == null){
+                    if (tempAT == null) {
                         articleBo.save(article);
                         annotatedArticles.add(article);
-                    }else{
+                    } else {
                         annotatedArticles.add(tempAT);
                     }
-                }else{
+                } else {
                     Article tempAT = articleBo.findArticleByPmid(tempPMID);
-                    if(tempAT == null){
+                    if (tempAT == null) {
                         Article newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
-                        if(newArticle != null) {
+                        if (newArticle != null) {
                             articleBo.save(newArticle);
                             annotatedArticles.add(newArticle);
                         }
-                    }else{
+                    } else {
                         annotatedArticles.add(tempAT);
                     }
                 }
@@ -1015,37 +1015,66 @@ public class EvidenceUtils {
             evidence.setArticles(annotatedArticles);
         }
 
-        if(treatments != null && !treatments.isEmpty()){
-            for(Treatment treatment : treatments) {
+        if (treatments != null && !treatments.isEmpty()) {
+            for (Treatment treatment : treatments) {
                 Set<Drug> drugs = treatment.getDrugs();
-                if(drugs != null && !drugs.isEmpty()) {
+                if (drugs != null && !drugs.isEmpty()) {
                     Set<Drug> drugsFromDB = new HashSet<>();
-                    for(Drug drug : drugs){
-                          Drug tempDrug = drugBo.findDrugByName(drug.getDrugName());
-                          if(tempDrug == null){
-                              drugBo.save(drug);
-                              drugsFromDB.add(drug);
-                          } else{
-                              drugsFromDB.add(tempDrug);
-                          }
+                    for (Drug drug : drugs) {
+                        Drug tempDrug = drugBo.findDrugByName(drug.getDrugName());
+                        if (tempDrug == null) {
+                            drugBo.save(drug);
+                            drugsFromDB.add(drug);
+                        } else {
+                            drugsFromDB.add(tempDrug);
+                        }
                     }
                     treatment.setDrugs(drugsFromDB);
                 }
                 treatmentBo.saveOrUpdate(treatment);
             }
         }
-        if(nccnGuidelines != null && !nccnGuidelines.isEmpty()){
+        if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
             Set<NccnGuideline> nccnFromDB = new HashSet<>();
-            for(NccnGuideline nccnGuideline : nccnGuidelines) {
+            for (NccnGuideline nccnGuideline : nccnGuidelines) {
                 NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getTherapy(), nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
-                if(tempNccnGuideline == null){
+                if (tempNccnGuideline == null) {
                     nccnGuidelineBo.saveOrUpdate(nccnGuideline);
                     nccnFromDB.add(nccnGuideline);
-                }else {
+                } else {
                     nccnFromDB.add(tempNccnGuideline);
                 }
             }
             evidence.setNccnGuidelines(nccnFromDB);
         }
+    }
+
+    public static List<Evidence> sortTumorTypeEvidenceBasedNumOfAlts(List<Evidence> evidences, Boolean isDesc) {
+
+        if (evidences == null) {
+            return new ArrayList<>();
+        }
+        if (isDesc == null) {
+            isDesc = false;
+        }
+
+        // Sort all tumor type summaries, the more specific tumor type summary will be picked.
+        Collections.sort(evidences, new Comparator<Evidence>() {
+            public int compare(Evidence x, Evidence y) {
+                if (x.getAlterations() == null) {
+                    return 1;
+                }
+                if (y.getAlterations() == null) {
+                    return -1;
+                }
+                Integer result = x.getAlterations().size() - y.getAlterations().size();
+                return result;
+            }
+        });
+
+        if (isDesc) {
+            Collections.reverse(evidences);
+        }
+        return evidences;
     }
 }
