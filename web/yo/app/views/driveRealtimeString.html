@@ -1,29 +1,19 @@
 <div class="drive-realtime-string">
-    <div ng-if="t === 'p'">
+    <div ng-if="t === 'p' || t === 'short'">
         <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
-        <p class="doubleH" ng-if="!reviewMode || !rs.get('action')"
-           ng-class="{editableBox:fe, unEditableBox:!fe}"
-           contenteditable="{{!reviewMode ? fe : true}}"
+        <p contenteditable="{{reviewMode ? (!rs.get('action') ? true : false) : fe}}"
+           ng-class="inputClass()"
            placeholder="{{ph}}"
            ng-model="content.stringO">
         </p>
-        <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">Old Content:</h4>
-        <p ng-if="reviewMode && !rs.get('removedItem')">{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}
-        </p>
+        <div ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">
+            <h4>Old Content:</h4>
+            <p ng-class="unEditableBox" contenteditable="false" ng-model="lastReviewed"></p>
+        </div>
         <pub-iframe
             ng-model="content.stringO"
-            ng-if="io">
+            ng-if="io && t === 'p'">
         </pub-iframe>
-    </div>
-    <div ng-if="t === 'short'">
-        <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
-        <p ng-class="{editableBox:fe, unEditableBox:!fe}" ng-if="!reviewMode || !rs.get('action')"
-           contenteditable="{{!reviewMode ? fe : true}}"
-           placeholder="{{ph}}"
-           ng-model="content.stringO">
-        </p>
-        <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">Old Content:</h4>
-        <p ng-if="reviewMode && !rs.get('removedItem')">{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}
     </div>
     <div ng-if="t === 'treatment-select'" class="treatment-select">
         <div>
