@@ -1091,7 +1091,7 @@ angular.module('oncokbApp')
                 if (model.get(e)) {
                     if (model.get(e).type === 'Map') {
                         reviewObj[e] = getReview(model[e]);
-                    } else {
+                    } else if(_.isString(model.get(e))) {
                         reviewObj[e] = getString(model.get(e));
                     }
                 }
@@ -1101,6 +1101,7 @@ angular.module('oncokbApp')
 
         function getString(string) {
             if(!string || !_.isString(string)) {
+                console.log('Value passed in is not a string, please double check');
                 return '';
             }
             var tmp = window.document.createElement('DIV');
