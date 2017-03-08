@@ -1,12 +1,12 @@
 <div class="drive-realtime-string">
     <div ng-if="t === 'p' || t === 'short'">
-        <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
-        <p contenteditable="{{reviewMode ? (!rs.get('action') ? true : false) : fe}}"
+        <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+        <p contenteditable="{{reviewMode ? (rs.get('review') !== false ? true : false) : fe}}"
            ng-class="getInputClass()"
            placeholder="{{ph}}"
            ng-model="content.stringO">
         </p>
-        <div ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">
+        <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
             <h4>Old Content:</h4>
             <p ng-class="unEditableBox" contenteditable="false" ng-model="lastReviewed"></p>
         </div>

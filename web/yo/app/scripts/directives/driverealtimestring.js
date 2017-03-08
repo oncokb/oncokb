@@ -61,7 +61,7 @@ angular.module('oncokbApp')
                 });
                 scope.$watch('object.text', function(n, o) {
                     if (n !== o) {
-                        if(scope.rs && _.isNull(scope.rs.get('lastReviewed')) && scope.rs.get('action') !== 'rejected') {
+                        if(scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
                             scope.rs.set('lastReviewed', o);
                         }
                         scope.content.stringO = scope.object.text;
@@ -77,7 +77,7 @@ angular.module('oncokbApp')
                                 } else {
                                     scope.object.text = n;
                                 }
-                            } else if(scope.rs && scope.rs.get('action') !== 'rejected') {
+                            } else if(scope.rs && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
                                 // for the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
@@ -132,7 +132,7 @@ angular.module('oncokbApp')
                                 scope.es.set('propagation', n);
                             }
                         }
-                        if(o && n !== o && scope.es && scope.es.get('obsolete') === 'true') {
+                        if(o && n !== o && scope.es && scope.es.get('obsolete') !== 'true') {
                             scope.rs.set('lastReviewedPropagation', o);
                             var uuid = scope.uuid.getText();
                             var tempMapping = $rootScope.reviewMeta.get(uuid);
