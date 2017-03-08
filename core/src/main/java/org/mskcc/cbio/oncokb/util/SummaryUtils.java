@@ -98,12 +98,6 @@ public class SummaryUtils {
             }
         }
 
-        if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
-            queryAlteration = queryAlteration.toLowerCase();
-        }
-
-        Boolean appendThe = appendThe(queryAlteration);
-
         if (gene == null || alterations == null || relevantTumorTypes == null) {
             return "";
         }
@@ -826,8 +820,13 @@ public class SummaryUtils {
         return summary;
     }
 
-    private static String getGeneMutationNameInVariantSummary(Gene gene, String queryAlteration) {
+    public static String getGeneMutationNameInVariantSummary(Gene gene, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
+        if (queryAlteration == null) {
+            return "";
+        } else {
+            queryAlteration = queryAlteration.trim();
+        }
         Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
         if (alteration == null) {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
@@ -835,6 +834,12 @@ public class SummaryUtils {
         }
         if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")) {
+            queryAlteration = "amplification (gain)";
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
+            queryAlteration = "deletion (loss)";
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
         } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
             queryAlteration = queryAlteration.replace("Fusion", "fusion");
             sb.append(queryAlteration);
@@ -854,8 +859,13 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String getGeneMutationNameInTumorTypeSummary(Gene gene, String queryAlteration) {
+    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
+        if (queryAlteration == null) {
+            return "";
+        } else {
+            queryAlteration = queryAlteration.trim();
+        }
         Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
         if (alteration == null) {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
@@ -867,10 +877,17 @@ public class SummaryUtils {
             }
             queryAlteration = queryAlteration.replace("Fusion", "fusion");
             sb.append(queryAlteration + " positive");
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")
+            ||StringUtils.equalsIgnoreCase(queryAlteration, "amplification")) {
+            queryAlteration = gene.getHugoSymbol() + "-amplified";
+            sb.append(queryAlteration);
         } else {
             sb.append(gene.getHugoSymbol() + " ");
             if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
                 sb.append(queryAlteration.toLowerCase());
+            } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
+                queryAlteration = "deletion";
+                sb.append(queryAlteration);
             } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
                 || (alteration.getConsequence() != null
                 && (alteration.getConsequence().getTerm().equals("inframe_deletion")

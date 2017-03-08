@@ -1,101 +1,78 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.mskcc.cbio.oncokb.model.VariantQuery;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Hongxin on 12/5/16.
  */
-@RunWith(Parameterized.class)
 public class SummaryUtilsTest {
-    private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.txt";
+    @Test
+    public void testGetGeneMutationNameInVariantSummary() throws Exception {
+        Gene gene = GeneUtils.getGene("ERBB2");
+        assertEquals("ERBB2 amplification", SummaryUtils.getGeneMutationNameInVariantSummary(gene, "Amplification"));
+        assertEquals("ERBB2 amplification (gain)", SummaryUtils.getGeneMutationNameInVariantSummary(gene, "gain"));
+        assertEquals(SummaryUtils.getGeneMutationNameInVariantSummary(gene, "Amplification"), SummaryUtils.getGeneMutationNameInVariantSummary(gene, "amplification"));
+        assertEquals(SummaryUtils.getGeneMutationNameInVariantSummary(gene, "Amplification"), SummaryUtils.getGeneMutationNameInVariantSummary(gene, " amplification"));
 
-    private String gene;
-    private String variant;
-    private String tumorType;
-    private String geneSummary;
-    private String variantSummary;
-    private String tumorTypeSummary;
-
-    public SummaryUtilsTest(String gene, String variant, String tumorType, String geneSummary, String variantSummary, String tumorTypeSummary) {
-        this.gene = gene;
-        this.variant = variant;
-        this.tumorType = tumorType;
-        this.geneSummary = geneSummary;
-        this.variantSummary = variantSummary;
-        this.tumorTypeSummary = tumorTypeSummary;
+        assertEquals("ERBB2 deletion", SummaryUtils.getGeneMutationNameInVariantSummary(gene, "Deletion"));
+        assertEquals("ERBB2 deletion (loss)", SummaryUtils.getGeneMutationNameInVariantSummary(gene, "loss"));
+        assertEquals(SummaryUtils.getGeneMutationNameInVariantSummary(gene, "Deletion"), SummaryUtils.getGeneMutationNameInVariantSummary(gene, "deLetion"));
     }
 
     @Test
-    public void testSummary() throws Exception {
-        VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
-            gene, variant, tumorType, null,
-            null, null, "cbioportal").get(0);
-        String _query = gene + " " + variant + " " + tumorType;
-        String _geneSummary = SummaryUtils.geneSummary(variantQuery.getGene());
-        String _variantSummary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), variantQuery.getQueryAlteration(), false);
-        String _tumorTypeSummary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), variantQuery.getQueryAlteration(), variantQuery.getAlterations(), variantQuery.getQueryTumorType(), new HashSet<>(variantQuery.getTumorTypes()));
-        assertEquals("Gene summary, Query: " + _query, geneSummary, _geneSummary);
-        assertEquals("Variant summary, Query: " + _query, variantSummary, _variantSummary);
-        assertEquals("Tumor Type summary, Query: " + _query, tumorTypeSummary, _tumorTypeSummary);
+    public void testGetGeneMutationNameInTumorTypeSummary() throws Exception {
+        Gene gene = GeneUtils.getGene("ERBB2");
+        assertEquals("ERBB2-amplified", SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Amplification"));
+        assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Amplification"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "amplification"));
+        assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Amplification"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, " amplification"));
+        assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Amplification"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "gain"));
+
+        assertEquals("ERBB2 deletion", SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Deletion"));
+        assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Deletion"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "loss"));
+        assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Deletion"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, " loss"));
+        assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "Deletion"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, "deLetion"));
     }
 
-    @Parameterized.Parameters
-    public static Collection<String[]> getParameters() throws IOException {
-        return importer();
+    public void testVariantTumorTypeSummary() throws Exception {
+
     }
 
-    private static List<String[]> importer() throws IOException {
-        if (TUMOR_TYPE_SUMMARY_EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
-            return null;
-        }
+    public void testVariantCustomizedSummary() throws Exception {
 
-        File file = new File(TUMOR_TYPE_SUMMARY_EXAMPLES_PATH);
-        FileReader reader = new FileReader(file);
-        BufferedReader buf = new BufferedReader(reader);
-        String line = buf.readLine();
+    }
 
-        List<String[]> queries = new ArrayList<>();
-        int count = 0;
-        while (line != null) {
-            if (!line.startsWith("#") && line.trim().length() > 0) {
-                try {
-                    String parts[] = line.split("\t");
-                    if (parts.length != 6) {
-                        throw new IllegalArgumentException("Missing a tumor type summary query attribute, parts: " + parts.length);
-                    }
-                    String gene = parts[0];
-                    String variant = parts[1];
-                    String tumorType = parts[2];
-                    String geneSummary = parts[3];
-                    String variantSummary = parts[4];
-                    String tumorTypeSummary = parts[5];
-                    String[] query = {gene, variant, tumorType, geneSummary, variantSummary, tumorTypeSummary};
-                    queries.add(query);
-                    count++;
-                } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
-                }
-            }
-            line = buf.readLine();
-        }
-        System.err.println("Contains " + count + " tumor type summary queries.");
-        System.err.println("Done.");
+    public void testTumorTypeSummary() throws Exception {
 
-        return queries;
+    }
+
+    public void testUnknownOncogenicSummary() throws Exception {
+
+    }
+
+    public void testSynonymousSummary() throws Exception {
+
+    }
+
+    public void testOncogenicSummary() throws Exception {
+
+    }
+
+    public void testGeneSummary() throws Exception {
+
+    }
+
+    public void testFullSummary() throws Exception {
+
+    }
+
+    public void testAlleleSummary() throws Exception {
+
+    }
+
+    public void testHotspotSummary() throws Exception {
+
     }
 }

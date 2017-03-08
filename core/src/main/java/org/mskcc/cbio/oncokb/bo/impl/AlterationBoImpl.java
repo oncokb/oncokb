@@ -189,7 +189,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 if (alt != null) {
                     alterations.add(alt);
                 } else if (truncatingMutation != null) {
-                    alterations.add(alt);
+                    alterations.add(truncatingMutation);
                 }
             }
         }

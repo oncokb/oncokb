@@ -6,6 +6,7 @@
 
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -485,6 +486,10 @@ public final class AlterationUtils {
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<>();
 
+        if (alteration.getConsequence() == null
+            || !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+            return alterations;
+        }
         if (CacheUtils.isEnabled()) {
             alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
         } else {
@@ -492,7 +497,7 @@ public final class AlterationUtils {
         }
 
         List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
-            alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
+            alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
         alleles = filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
 
@@ -625,7 +630,7 @@ public final class AlterationUtils {
     public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {
         exactMatch = exactMatch || false;
         if (exactMatch) {
-            return AlterationUtils.getGeneralAlterations().contains(mutationStr);
+            return MainUtils.containsCaseInsensitive(mutationStr, AlterationUtils.getGeneralAlterations());
         } else if (stringContainsItemFromList(mutationStr, getGeneralAlterations())
             && itemFromListAtEndString(mutationStr, getGeneralAlterations())) {
             return true;
@@ -635,7 +640,7 @@ public final class AlterationUtils {
 
     private static boolean stringContainsItemFromList(String inputString, List<String> items) {
         for (String item : items) {
-            if (inputString.contains(item)) {
+            if (StringUtils.containsIgnoreCase(inputString, item)) {
                 return true;
             }
         }
@@ -644,7 +649,7 @@ public final class AlterationUtils {
 
     private static boolean itemFromListAtEndString(String inputString, List<String> items) {
         for (String item : items) {
-            if (inputString.endsWith(item)) {
+            if (StringUtils.endsWithIgnoreCase(inputString, item)) {
                 return true;
             }
         }
