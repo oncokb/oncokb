@@ -189,7 +189,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 if (alt != null) {
                     alterations.add(alt);
                 } else if (truncatingMutation != null) {
-                    alterations.add(alt);
+                    alterations.add(truncatingMutation);
                 }
             }
         }
@@ -219,13 +219,15 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Looking for oncogenic mutations
-        for (Alteration alt : alterations) {
-            if (AlterationUtils.isOncogenicAlteration(alt)) {
-                Alteration oncogenicMutations = findAlteration(alt.getGene(), alt.getAlterationType(), "oncogenic mutations");
-                if (oncogenicMutations != null) {
-                    alterations.add(oncogenicMutations);
+        if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
+            for (Alteration alt : alterations) {
+                if (AlterationUtils.isOncogenicAlteration(alt)) {
+                    Alteration oncogenicMutations = findAlteration(alt.getGene(), alt.getAlterationType(), "oncogenic mutations");
+                    if (oncogenicMutations != null) {
+                        alterations.add(oncogenicMutations);
+                    }
+                    break;
                 }
-                break;
             }
         }
 

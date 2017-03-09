@@ -58,8 +58,8 @@ public class IndicatorUtilsTest {
         query = new Query("KRAS", null, "\tQ61Kfs*7", null, "Pancreatic Adenocarcinoma", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 4, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
-            LevelOfEvidence.LEVEL_4, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be null, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query("KRAS", null, "\tQ61Kfs*7", null, "Colorectal Cancer", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
