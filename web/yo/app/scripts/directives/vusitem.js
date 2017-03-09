@@ -16,7 +16,8 @@ angular.module('oncokbApp')
                 index: '=',
                 fileEditable: '=',
                 dModel: '=', // drive realtime document model
-                addCommentInGene: '&addComment' // reference to the external function "addComment" in the gene controller
+                addCommentInGene: '&addComment', // reference to the external function "addComment" in the gene controller
+                vusUpdateInGene: '&vusUpdate'
             },
             link: function postLink(scope) {
                 scope.variant = scope.vus.get(scope.index);
@@ -39,14 +40,18 @@ angular.module('oncokbApp')
                         timeStamp.by.email.setText(user.email);
                         scope.variant.time.push(timeStamp);
                         scope.dtBy = user.name;
-                    }
+                        var tempMessage = user.name + ' tried to refresh ' + scope.variant.name.text + ' at ' + new Date().toLocaleString();
+                        scope.vusUpdate(tempMessage);
+                }
                 });
             },
             controller: function($scope) {
                 $scope.remove = function() {
                     var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
                     dlg.result.then(function() {
+                        var tempMessage = user.name + ' tried to delete ' + $scope.vus.get($scope.index).name.text + ' at ' + new Date().toLocaleString();
                         $scope.vus.remove($scope.index);
+                        $scope.vusUpdate(tempMessage);
                     }, function() {
                     });
                 };
@@ -76,6 +81,12 @@ angular.module('oncokbApp')
                         arg1: arg1,
                         arg2: arg2,
                         arg3: arg3
+                    });
+                };
+                $scope.vusUpdate = function(message) {
+                    // pass parameters in value pair mapping format
+                    $scope.vusUpdateInGene({
+                        message: message
                     });
                 };
             }

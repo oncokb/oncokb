@@ -105,6 +105,21 @@ angular.module('oncokbApp')
                     console.log('Unable to add comment.');
                 }
             };
+            $scope.vusUpdate = function(message) {
+                if ($scope.status.isDesiredGene) {
+                    var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
+                    var vusData = stringUtils.getVUSFullData(vus, true);
+                    DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
+                        console.log('success saving vus to database');
+                    }, function(error) {
+                        console.log('error happened when saving VUS to DB', error);
+                        var subject = 'VUS update Error for ' + $scope.gene.name.getText();
+                        var content = 'Error happened when ' + message + '. The system error returned is ' + error;
+                        sendEmail('jiaojiaowanghere@gmail.com', subject, content);
+                    });
+                }
+            };
+
             $scope.getData = function() {
             };
             $scope.showEntry = function(obj) {
@@ -234,7 +249,7 @@ angular.module('oncokbApp')
                         }
                     });
                     if (Object.keys(otherCollaborators).length > 0) {
-                        var dlg = dialogs.confirm('Reminder', Object.keys(otherCollaborators).join(', ') + ' are currently working on this gene document. Enter review mode will disable them from editing.');
+                        var dlg = dialogs.confirm('Reminder', Object.keys(otherCollaborators).join(', ') + ((Object.keys(otherCollaborators).length > 1 ) ? ' are' : ' is') + ' currently working on this gene document. Entering review mode will disable them from editing.');
                         dlg.result.then(function() {
                             prepareReviewItems();
                         });
@@ -1457,6 +1472,8 @@ angular.module('oncokbApp')
                         vus.time.push(timeStamp);
                         $scope.vus.push(vus);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
+                        var tempMessage = User.name + ' tried to add ' + newVUSName + ' at ' + new Date().toLocaleString();
+                        $scope.vusUpdate(tempMessage);
                     } else {
                         dialogs.notify('Warning', 'Variant exists.');
                     }
@@ -2036,19 +2053,6 @@ angular.module('oncokbApp')
                     $scope.suggestedMutations.indexOf(mutationName) !== -1);
             };
 
-            $scope.updateVUS = function() {
-                var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
-                var vusData = stringUtils.getVUSFullData(vus, true);
-                $scope.$emit('startSaveDataToDatabase');
-                DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
-                    $scope.$emit('doneSaveDataToDatabase');
-                }, function(error) {
-                    console.log(error);
-                    dialogs.error('Error', 'An error has occurred while saving VUS to database, please contact the developer. Thanks.');
-                    $scope.$emit('doneSaveDataToDatabase');
-                });
-            };
-
             // Calculate number of 'number' elements within the object
             function getNoNKeys(object) {
                 var count = 0;
@@ -2171,20 +2175,18 @@ angular.module('oncokbApp')
                 return watchersWithoutDuplicates.length;
             }
 
-            function sendEmail(subject, content) {
-                if ($scope.userRole < 8) {
-                    var param = {subject: subject, content: content};
+            function sendEmail(sendTo, subject, content) {
+                var param = {sendTo: sendTo, subject: subject, content: content};
 
-                    DatabaseConnector.sendEmail(
-                        param,
-                        function(result) {
-                            console.log('success', result);
-                        },
-                        function(result) {
-                            console.log('failed', result);
-                        }
-                    );
-                }
+                DatabaseConnector.sendEmail(
+                    param,
+                    function(result) {
+                        console.log('success', result);
+                    },
+                    function(result) {
+                        console.log('failed', result);
+                    }
+                );
             }
 
             function getSuggestedMutations() {

@@ -352,9 +352,6 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                // Disable send email service
-                success(true);
-
                 if (dataFromFile) {
                     success(true);
                 } else {
