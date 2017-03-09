@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils) {
+    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user) {
         return {
             templateUrl: 'views/driveRealtimeString.html',
             restrict: 'AE',
@@ -64,7 +64,7 @@ angular.module('oncokbApp')
                         if(scope.rs && _.isNull(scope.rs.get('lastReviewed')) && scope.rs.get('action') !== 'rejected') {
                             scope.rs.set('lastReviewed', o);
                         }
-                        scope.content.stringO = stringUtils.getTextString(scope.object.text);
+                        scope.content.stringO = scope.object.text;
                     }
                 });
                 scope.$watch('content.stringO', function(n, o) {
@@ -212,6 +212,15 @@ angular.module('oncokbApp')
                         $scope.content.stringO = '';
                     }
                     $scope.content.preStringO = $scope.content.stringO;
+                };
+                $scope.getInputClass = function() {
+                    if($scope.reviewMode) {
+                        $scope.lastReviewed = $scope.rs.get('lastReviewed');
+                    }
+                    var contentEditable = $scope.reviewMode ? (!$scope.rs.get('action') ? true : false) : $scope.fe;
+                    var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
+                    if($scope.t === 'p') classResult += ' doubleH';
+                    return classResult;
                 };
             }
         };
