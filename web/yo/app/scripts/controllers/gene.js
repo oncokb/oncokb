@@ -105,7 +105,7 @@ angular.module('oncokbApp')
                     console.log('Unable to add comment.');
                 }
             };
-            $scope.vusUpdate = function() {
+            $scope.vusUpdate = function(message) {
                 if ($scope.status.isDesiredGene) {
                     var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
                     var vusData = stringUtils.getVUSFullData(vus, true);
@@ -113,7 +113,9 @@ angular.module('oncokbApp')
                         console.log('success saving vus to database');
                     }, function(error) {
                         console.log('error happened when saving VUS to DB', error);
-                        sendEmail('jiaojiaowanghere@gmail.com', 'Error happened when saving VUS for ' + $scope.gene.name.getText(), error);
+                        var subject = 'VUS update Error for ' + $scope.gene.name.getText();
+                        var content = 'Error happened when ' + message + '. The system error returned is ' + error;
+                        sendEmail('jiaojiaowanghere@gmail.com', subject, content);
                     });
                 }
             };
@@ -1470,7 +1472,8 @@ angular.module('oncokbApp')
                         vus.time.push(timeStamp);
                         $scope.vus.push(vus);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.vusUpdate();
+                        var tempMessage = User.name + ' tried to add ' + newVUSName + ' at ' + new Date().toLocaleString();
+                        $scope.vusUpdate(tempMessage);
                     } else {
                         dialogs.notify('Warning', 'Variant exists.');
                     }
