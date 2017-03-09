@@ -2,7 +2,7 @@
     <div ng-if="t === 'p' || t === 'short'">
         <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
         <p contenteditable="{{reviewMode ? (!rs.get('action') ? true : false) : fe}}"
-           ng-class="inputClass()"
+           ng-class="getInputClass()"
            placeholder="{{ph}}"
            ng-model="content.stringO">
         </p>

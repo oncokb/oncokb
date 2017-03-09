@@ -213,7 +213,7 @@ angular.module('oncokbApp')
                     }
                     $scope.content.preStringO = $scope.content.stringO;
                 };
-                $scope.inputClass = function() {
+                $scope.getInputClass = function() {
                     if($scope.reviewMode) {
                         $scope.lastReviewed = $scope.rs.get('lastReviewed');
                     }
