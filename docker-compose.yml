@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  app:
+    image: cbioportal/oncokb
+    ports:
+      - "8080:8080"
+    environment:
+      - "JAVA_OPTS=-Djdbc.driverClassName=com.mysql.jdbc.Driver -Djdbc.url='jdbc:mysql://db:3306/oncokb?useUnicode=yes&characterEncoding=UTF-8' -Djdbc.username=root -Djdbc.password='test'"
+    depends_on:
+      - db
+  db:
+    image: mysql:5
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+      - MYSQL_DATABASE=oncokb
+    volumes:
+      - ./core/src/main/resources/spring/database/oncokb.sql:/docker-entrypoint-initdb.d/oncokb.sql
