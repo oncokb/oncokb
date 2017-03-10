@@ -43,9 +43,18 @@ public class IndicatorUtils {
             query.getAlterationType().equalsIgnoreCase("fusion")) {
             List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
             Set<String> geneStrsSet = new HashSet<>();
+
+            // If the query only indicates this is a fusion event with associated genes but no alteration specified,
+            // need to attach Fusions to the query.
+            if (query.getAlteration() == null || query.getAlteration().isEmpty()) {
+                query.setAlteration("Fusions");
+            }
+
             if (geneStrsList != null) {
                 geneStrsSet = new HashSet<>(geneStrsList);
             }
+
+            // Deal with two different genes fusion event.
             if (geneStrsSet.size() == 2) {
                 List<Gene> tmpGenes = new ArrayList<>();
                 for (String geneStr : geneStrsSet) {
