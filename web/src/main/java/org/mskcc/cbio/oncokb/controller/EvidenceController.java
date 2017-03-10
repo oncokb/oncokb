@@ -203,7 +203,7 @@ public class EvidenceController {
 
         return genes;
     }
-
+    
     private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) throws ParserConfigurationException {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         EvidenceUtils.annotateEvidence(queryEvidence);
@@ -222,6 +222,31 @@ public class EvidenceController {
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
         String propagation = queryEvidence.getPropagation();
         
+        List<String> cancerTypes = new ArrayList<>();
+        List<String> subTypes = new ArrayList<>();     
+        Boolean isCancerEvidence = true;
+        if(cancerType == null) {
+            isCancerEvidence = false;
+        } else {
+            cancerTypes = Arrays.asList(cancerType.split(","));
+            if(subType != null) {
+                subTypes = Arrays.asList(subType.split(","));
+                for(int i = 0;i < subTypes.size();i++) {
+                    if(subTypes.get(i).equals("null")) {
+                        subTypes.set(i, null);
+                    }
+                }
+            } else {
+                for(int i = 0;i < cancerTypes.size();i++) {
+                    subTypes.add(null);
+                }
+            }
+        }
+        // cancerTypes and subTypes are required to be the same length
+        if(cancerTypes.size() != subTypes.size()) {
+            return null;
+        }
+        
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
         // Use controlled vocabulary to update oncogenic knowneffect
@@ -231,21 +256,20 @@ public class EvidenceController {
                 knownEffect = oncogenicity.getOncogenic();
             }
         }
-
+        // save newly added evidence    
         if (evidences.isEmpty()) {
-            Evidence evidence = new Evidence();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             Gene gene = geneBo.findGeneByHugoSymbol(queryEvidence.getGene().getHugoSymbol());
 
-            // if the gene is not exist, return empty list
+            // if the gene does not exist, return empty list
             if (gene == null) {
                 return new ArrayList<>();
             }
 
             AlterationType type = AlterationType.MUTATION;
+            Set<Alteration> alterations = new HashSet<Alteration>();
             Set<Alteration> queryAlterations = queryEvidence.getAlterations();
-            if(queryAlterations != null){
-                Set<Alteration> alterations = new HashSet<Alteration>();
+            if(queryAlterations != null){                
                 AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
                 for (Alteration alt : queryAlterations) {
                     String proteinChange = alt.getAlteration();
@@ -262,26 +286,29 @@ public class EvidenceController {
                     }
                     alterations.add(alteration);
                 }
-                evidence.setAlterations(alterations);
             }
-            evidence.setUuid(uuid);
-            evidence.setGene(gene);
-            evidence.setEvidenceType(evidenceType);
-            evidence.setSubtype(subType);
-            evidence.setCancerType(cancerType);
-            evidence.setKnownEffect(knownEffect);
-            evidence.setLevelOfEvidence(level);
-            evidence.setDescription(description);
-            evidence.setAdditionalInfo(additionalInfo);
-            evidence.setLastEdit(lastEdit);
-            evidence.setTreatments(treatments);
-            evidence.setArticles(articles);
-            evidence.setNccnGuidelines(nccnGuidelines);
-            evidence.setClinicalTrials(clinicalTrials);
-            evidence.setPropagation(propagation);
-            evidenceBo.save(evidence);
-            evidences.add(evidence);
-        } else {
+            Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, null, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles, nccnGuidelines, clinicalTrials);
+            if(evidenceType.equals(EvidenceType.ONCOGENIC) && alterations.size() > 1) {
+                // save duplicated evidence record for string alteration oncogenic
+                for(Alteration alteration : alterations) {
+                    evidence.setAlterations(Collections.singleton(alteration));
+                    evidenceBo.save(evidence);
+                    evidences.add(evidence);
+                }
+            } else if(!isCancerEvidence) {
+                evidence.setAlterations(alterations);
+                evidenceBo.save(evidence);
+                evidences.add(evidence);
+            } else {
+                for(int i = 0;i < cancerTypes.size();i++) {
+                    evidence.setCancerType(cancerTypes.get(i));
+                    evidence.setSubtype(subTypes.get(i));
+                    evidenceBo.save(evidence);
+                    evidences.add(evidence);
+                }
+            }
+        } else if(!isCancerEvidence){
+            // For the evidences which tumor type infomation is not involved, update it directly
             for (Evidence evidence : evidences) {
                 evidence.setEvidenceType(evidenceType);
                 evidence.setSubtype(subType);
@@ -298,8 +325,20 @@ public class EvidenceController {
                 evidence.setPropagation(propagation);
                 evidenceBo.update(evidence);
             }
-        }
-
+        } else {
+            // create a new evidence based on input passed in, and gene and alterations information from the current evidences 
+            Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, evidences.get(0).getGene(), evidences.get(0).getAlterations(), description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles, nccnGuidelines, clinicalTrials);
+            // remove all old evidences
+            evidenceBo.deleteAll(evidences);
+            evidences.removeAll(evidences);
+            // insert cancer type information and save it
+            for(int i = 0;i < cancerTypes.size();i++) {
+                    evidence.setCancerType(cancerTypes.get(i));
+                    evidence.setSubtype(subTypes.get(i));
+                    evidenceBo.save(evidence);
+                    evidences.add(evidence);
+            }
+        }   
         return evidences;
     }
 

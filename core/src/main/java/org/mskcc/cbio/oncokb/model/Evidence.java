@@ -261,6 +261,26 @@ public class Evidence implements java.io.Serializable {
         nccnGuidelines = e.nccnGuidelines;
         clinicalTrials = e.clinicalTrials;
     }
+    
+    public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, Set<Treatment> treatments,
+     String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles, Set<NccnGuideline> nccnGuidelines, Set<ClinicalTrial> clinicalTrials) {
+        this.uuid = uuid;
+        this.evidenceType = evidenceType;
+        this.cancerType = cancerType;
+        this.subtype = subtype;
+        this.gene = gene;
+        this.alterations = alterations;
+        this.description = description;
+        this.additionalInfo = additionalInfo;
+        this.treatments = treatments;
+        this.knownEffect = knownEffect;
+        this.lastEdit = lastEdit;
+        this.levelOfEvidence = levelOfEvidence;
+        this.propagation = propagation;
+        this.articles = articles;
+        this.nccnGuidelines = nccnGuidelines;
+        this.clinicalTrials = clinicalTrials;
+    }
 }
 
 

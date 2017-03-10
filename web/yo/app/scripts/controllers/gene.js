@@ -764,8 +764,16 @@ angular.module('oncokbApp')
                     data.alterations = parseMutationString(mutation.name.getText());
                 }
                 if (tumor) {
-                    data.subtype = tumor.cancerTypes.asArray()[0].oncoTreeCode.getText();
-                    data.cancerType = tumor.cancerTypes.asArray()[0].cancerType.getText();
+                    var tempArr1 = [];
+                    var tempArr2 = [];
+                    _.each(tumor.cancerTypes.asArray(), function(item) {
+                        tempArr1.push(item.cancerType.getText());
+                        tempArr2.push(item.oncoTreeCode.getText() ? item.oncoTreeCode.getText() : 'null');
+                    });
+                    if(tempArr1.length > 0) {
+                        data.cancerType = tempArr1.join(',');
+                        data.subtype = tempArr2.join(',');
+                    }
                 }
                 if (TI) {
                     if (!treatment) {
