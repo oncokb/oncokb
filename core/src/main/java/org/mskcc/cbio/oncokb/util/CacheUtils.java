@@ -1,9 +1,13 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.map.HashedMap;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Drug;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -43,6 +47,12 @@ public class CacheUtils {
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences
     private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
+
+    // Other services which will be defined in the property cache.update separated by comma
+    // Every time the observer is triggered, all other services will be triggered as well
+    private static List<String> otherServices = new ArrayList<>();
+
+    private static String source = null;
 
     private static Observer variantSummaryObserver = new Observer() {
         @Override
@@ -168,9 +178,35 @@ public class CacheUtils {
         }
     };
 
+    private static Observer otherServicesObserver = new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+            Map<String, String> operation = (Map<String, String>) arg;
+            if (operation.get("cmd") == "update") {
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+                if (gene != null) {
+                    for (String service : otherServices) {
+                        HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
+                            gene.getHugoSymbol() + "&source=" + source, "");
+                    }
+                }
+            } else if (operation.get("cmd") == "reset") {
+                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
+                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+                if (gene != null) {
+                    for (String service : otherServices) {
+                        HttpUtils.postRequest(service + "?cmd=reset", "");
+                    }
+                }
+            }
+        }
+    };
+
     static {
         try {
             Long current = MainUtils.getCurrentTimestamp();
+            GeneObservable.getInstance().addObserver(otherServicesObserver);
             GeneObservable.getInstance().addObserver(variantSummaryObserver);
             GeneObservable.getInstance().addObserver(variantTumorTypeSummaryObserver);
             GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
@@ -230,8 +266,19 @@ public class CacheUtils {
             HotspotUtils.getHotspots();
             System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current));
             current = MainUtils.getCurrentTimestamp();
+
+            registerOtherServices();
+            System.out.println("Register other services: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+    private static void registerOtherServices() throws IOException {
+        String services = PropertiesUtils.getProperties("cache.update");
+        if (services != null) {
+            otherServices = Arrays.asList(services.split(","));
         }
     }
 
@@ -260,11 +307,12 @@ public class CacheUtils {
         genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         genesByEntrezId = new HashedMap();
         hugoSymbolToEntrez = new HashedMap();
-        for(Gene gene : genes) {
+        for (Gene gene : genes) {
             genesByEntrezId.put(gene.getEntrezGeneId(), gene);
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
 
+        System.out.println(source);
         System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current));
     }
 
