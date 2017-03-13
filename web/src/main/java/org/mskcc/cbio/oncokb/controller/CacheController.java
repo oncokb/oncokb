@@ -90,13 +90,14 @@ public class CacheController {
     Map<String, String> postAlteration(
         HttpMethod method,
         @RequestParam(value = "cmd", required = false) String cmd,
-        @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
+        @RequestParam(value = "propagation", required = false, defaultValue = "false") Boolean propagation
     ) {
         Map<String, String> result = new HashMap<>();
         if (cmd != null) {
             switch (cmd) {
                 case "reset":
-                    resetCache();
+                    resetCache(propagation);
                     break;
                 case "enable":
                     disableCache(false);
@@ -107,7 +108,7 @@ public class CacheController {
                 case "updateGene":
                     Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
                     if (gene != null) {
-                        CacheUtils.updateGene(gene.getEntrezGeneId());
+                        CacheUtils.updateGene(gene.getEntrezGeneId(), propagation);
                     }
                     break;
                 default:
@@ -122,10 +123,10 @@ public class CacheController {
         return CacheUtils.getCacheUtilsStatus();
     }
 
-    private Boolean resetCache() {
+    private Boolean resetCache(Boolean propagation) {
         Boolean operation = true;
         try {
-            CacheUtils.resetAll();
+            CacheUtils.resetAll(propagation);
         } catch (Exception e) {
             operation = false;
         }

@@ -178,35 +178,29 @@ public class CacheUtils {
         }
     };
 
-    private static Observer otherServicesObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-                if (gene != null) {
-                    for (String service : otherServices) {
-                        HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
-                            gene.getHugoSymbol() + "&source=" + source, "");
-                    }
-                }
-            } else if (operation.get("cmd") == "reset") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-                if (gene != null) {
-                    for (String service : otherServices) {
-                        HttpUtils.postRequest(service + "?cmd=reset", "");
-                    }
+    private static void notifyOtherServices(String cmd, Integer entrezGeneId) {
+        if (cmd == null) {
+            cmd = "";
+        }
+        System.out.println("Notify other services...");
+        if (cmd == "update" && entrezGeneId != null) {
+            Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+            if (gene != null) {
+                for (String service : otherServices) {
+                    HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
+                        gene.getHugoSymbol() + "&source=" + source, "");
                 }
             }
+        } else if (cmd == "reset") {
+            for (String service : otherServices) {
+                HttpUtils.postRequest(service + "?cmd=reset", "");
+            }
         }
-    };
+    }
 
     static {
         try {
             Long current = MainUtils.getCurrentTimestamp();
-            GeneObservable.getInstance().addObserver(otherServicesObserver);
             GeneObservable.getInstance().addObserver(variantSummaryObserver);
             GeneObservable.getInstance().addObserver(variantTumorTypeSummaryObserver);
             GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
@@ -624,11 +618,39 @@ public class CacheUtils {
     }
 
     public static void updateGene(Integer entrezGeneId) {
+        try {
+            System.out.println("Update gene..." + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         GeneObservable.getInstance().update("update", entrezGeneId.toString());
+        notifyOtherServices("update", entrezGeneId);
+    }
+
+    public static void updateGene(Integer entrezGeneId, Boolean propagate) {
+        try {
+            System.out.println("Update gene..." + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        GeneObservable.getInstance().update("update", entrezGeneId.toString());
+        if(propagate) {
+            notifyOtherServices("update", entrezGeneId);
+        }
     }
 
     public static void resetAll() {
+        System.out.println("Reset all...");
         GeneObservable.getInstance().update("reset", null);
+        notifyOtherServices("reset", null);
+    }
+
+    public static void resetAll(Boolean propagate) {
+        System.out.println("Reset all...");
+        GeneObservable.getInstance().update("reset", null);
+        if (propagate) {
+            notifyOtherServices("reset", null);
+        }
     }
 
     public static void enableCacheUtils() {

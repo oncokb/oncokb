@@ -18,7 +18,7 @@
     <!--2nd level caching-->
     <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
     <property name="net.sf.ehcache.configurationResourceName">/hibernate/ehcache.conf.xml</property>
-    <property name="hibernate.cache.use_second_level_cache">true</property>
+    <property name="hibernate.cache.use_second_level_cache">false</property>
     <property name="hibernate.cache.use_query_cache">true</property>
     <mapping resource="hibernate/Drug.hbm.xml"/>
     <mapping resource="hibernate/Alteration.hbm.xml"/>
