@@ -367,10 +367,17 @@ public class CacheUtils {
     }
 
     public static Set<Alteration> getVUS(Integer entrezGeneId) {
+        if (entrezGeneId == null) {
+            return new HashSet<>();
+        }
         if (VUS.containsKey(entrezGeneId)) {
             return VUS.get(entrezGeneId);
         } else {
-            return new HashSet<>();
+            Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+            if (gene != null) {
+                synEvidences();
+            }
+            return VUS.get(entrezGeneId);
         }
     }
 
@@ -597,6 +604,7 @@ public class CacheUtils {
             for (Gene gene : genes) {
                 if (!evidences.containsKey(gene.getEntrezGeneId())) {
                     setEvidences(gene);
+                    setVUS(gene.getEntrezGeneId(), getEvidences(gene));
                 }
             }
         }
@@ -634,7 +642,7 @@ public class CacheUtils {
             e.printStackTrace();
         }
         GeneObservable.getInstance().update("update", entrezGeneId.toString());
-        if(propagate) {
+        if (propagate) {
             notifyOtherServices("update", entrezGeneId);
         }
     }
