@@ -434,7 +434,7 @@ angular.module('oncokbApp')
                             $scope.view.selectedSubtype = '';
                         }
                     } else {
-                        $scope.view.filteredSubtypes = findSubtypesByCancerType(n.mainTypeName);
+                        $scope.view.filteredSubtypes = findSubtypesByCancerType(n.mainType.name);
                     }
                 } else {
                     $scope.view.filteredSubtypes = angular.copy($scope.subtypes);
