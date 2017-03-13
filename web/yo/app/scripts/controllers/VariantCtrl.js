@@ -46,7 +46,7 @@ angular.module('oncokbApp')
                             $scope.alteration = stringUtils.trimMutationName(urlVars.alteration);
                         }
                         if (urlVars.hasOwnProperty('cancerType')) {
-                            $scope.view.selectedCancerType = $scope.view.filteredCancerTypes[$filter('getCancerTypeByMainType')($scope.view.filteredCancerTypes, urlVars.cancerType, 'cancerType')];
+                            $scope.view.selectedCancerType = $filter('getCancerTypeByMainType')($scope.view.filteredCancerTypes, urlVars.cancerType);
                         }
                         if (urlVars.hasOwnProperty('subtype')) {
                             $scope.view.selectedSubtype = $scope.view.filteredCancerTypes[$filter('getIndexByObjectNameInArray')($scope.view.filteredSubtypes, urlVars.subtype, 'name')];
@@ -411,7 +411,7 @@ angular.module('oncokbApp')
             $scope.useExample = function() {
                 $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, 'BRAF')];
                 $scope.alteration = 'V600E';
-                $scope.view.selectedCancerType = $scope.view.filteredCancerTypes[$filter('getCancerTypeByMainType')($scope.view.filteredCancerTypes, 'Melanoma')];
+                $scope.view.selectedCancerType = $filter('getCancerTypeByMainType')($scope.view.filteredCancerTypes, 'Melanoma');
                 $scope.view.selectedSubtype = '';
                 $scope.selectedConsequence = '';
                 $scope.search();
