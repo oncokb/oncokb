@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
@@ -86,8 +87,6 @@ public class MainUtils {
                     levelOfEvidences.add(level);
                 }
             }
-        } else {
-            levelOfEvidences = new ArrayList<>(LevelUtils.getPublicLevels());
         }
 
         requestQueries.put("queries", queries);

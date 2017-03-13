@@ -749,10 +749,6 @@ public class EvidenceUtils {
             evidenceTypes = new HashSet<>(MainUtils.getAllEvidenceTypes());
         }
 
-        if (levelOfEvidences == null) {
-            levelOfEvidences = LevelUtils.getPublicLevels();
-        }
-
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();
             if ((evidenceTypes != null && evidenceTypes.size() > 0) ||
@@ -763,6 +759,9 @@ public class EvidenceUtils {
             query.setEvidences(new ArrayList<>(evidences));
             return Collections.singletonList(query);
         } else {
+            if (levelOfEvidences == null) {
+                levelOfEvidences = LevelUtils.getPublicLevels();
+            }
             for (Query requestQuery : requestQueries) {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
