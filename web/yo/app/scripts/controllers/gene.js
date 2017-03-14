@@ -324,25 +324,8 @@ angular.module('oncokbApp')
 
             function formMyEvidences(type, mutation, tumor, TI, treatment) {
                 var evidenceResult = $scope.getEvidence(type, mutation, tumor, TI, treatment);
-                var dataUUID = evidenceResult[0];
-                var data = evidenceResult[1];
-                var extraDataUUID = evidenceResult[2];
-                var extraData = evidenceResult[3];
-                if (type === 'ONCOGENIC') {
-                    if (dataUUID.length > 0) {
-                        myUpdatedEvidences[dataUUID] = data;
-                        myUpdatedEvidenceModels.push([type, mutation, tumor, TI, treatment]);
-                    }
-                    if (extraDataUUID.length > 0) {
-                        myUpdatedEvidences[extraDataUUID] = extraData;
-                        myUpdatedEvidenceModels.push(['MUTATION_SUMMARY', mutation, tumor, TI, treatment]);
-                    }
-                } else {
-                    if (dataUUID.length > 0) {
-                        myUpdatedEvidences[dataUUID] = data;
-                        myUpdatedEvidenceModels.push([type, mutation, tumor, TI, treatment]);
-                    }
-                }
+                myUpdatedEvidences = _.extend(myUpdatedEvidences, evidenceResult);
+                myUpdatedEvidenceModels.push([type, mutation, tumor, TI, treatment]);
             }
 
             function prepareReviewItems() {
@@ -424,7 +407,7 @@ angular.module('oncokbApp')
                                     treatmentChanged = true;
                                     continue;
                                 }
-                                tempArr = [treatment.level_review, treatment.indication_review, treatment.description_review];
+                                tempArr = [treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review];
                                 setOriginalStatus(tempArr);
                                 if (needReview(treatment.level_uuid) || needReview(treatment.indication_uuid) || needReview(treatment.description_uuid)) {
                                     treatment.name_review.set('review', true);
@@ -695,6 +678,7 @@ angular.module('oncokbApp')
                 return content ? uuid.getText() : '';
             }
             $scope.getEvidence = function(type, mutation, tumor, TI, treatment) {
+                var evidences = {};
                 var dataUUID = '';
                 var extraDataUUID = '';
                 var data = {
@@ -890,15 +874,18 @@ angular.module('oncokbApp')
                         }
                     }
                 }
+                if(dataUUID) {
+                    evidences[dataUUID] = data;
+                }
+                if(extraDataUUID) {
+                    evidences[extraDataUUID] = extraData;
+                }
                 if(['MUTATION_NAME_CHANGE', 'TUMOR_NAME_CHANGE', 'TREATMENT_NAME_CHANGE'].indexOf(type) !== -1) {
-                    var evidences = {};
                     _.each(uuids, function(uuid) {
                         evidences[uuid] = data;
                     });
-                    return evidences;
-                } else {
-                    return [dataUUID, data, extraDataUUID, extraData];
                 }
+                return evidences;
             }
 
             function setReviewModeInterval() {
@@ -1097,16 +1084,7 @@ angular.module('oncokbApp')
             function formEvidencesByType(types, mutation, tumor, TI, treatment, evidences) {
                 _.each(types, function(type) {
                     var evidenceResult = $scope.getEvidence(type, mutation, tumor, TI, treatment);
-                    var dataUUID = evidenceResult[0];
-                    var data = evidenceResult[1];
-                    var extraDataUUID = evidenceResult[2];
-                    var extraData = evidenceResult[3];
-                    if (dataUUID.length > 0) {
-                        evidences[dataUUID] = data;
-                    }
-                    if (extraDataUUID.length > 0) {
-                        evidences[extraDataUUID] = extraData;
-                    }
+                    evidences = _.extend(evidences, evidenceResult);
                 });
             };
             function isObsoleted(object, key) {
@@ -2697,6 +2675,7 @@ angular.module('oncokbApp')
             };
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = Users.getMe().role;
+            $rootScope.userRole = Users.getMe().role;
             $scope.levelExps = {
                 SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> ' + $rootScope.meta.levelsDescHtml.R1 + '.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
                 IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> ' + $rootScope.meta.levelsDescHtml.R2 + '.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> ' + $rootScope.meta.levelsDescHtml.R3 + '.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
