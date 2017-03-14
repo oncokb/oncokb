@@ -655,39 +655,39 @@ angular.module('oncokbApp')
                 switch (type) {
                 case 'GENE_SUMMARY':
                     data.description = $scope.gene.summary.getText();
-                    dataUUID = getUUIDBbyContent($scope.gene.summary_uuid, data.description);
+                    dataUUID = $scope.gene.summary_uuid.getText();
                     break;
                 case 'GENE_BACKGROUND':
                     data.description = $scope.gene.background.getText();
-                    dataUUID = getUUIDBbyContent($scope.gene.background_uuid, data.description);
+                    dataUUID = $scope.gene.background_uuid.getText();
                     break;
                 case 'ONCOGENIC':
                     data.knownEffect = mutation.oncogenic.getText();
                     data.description = mutation.summary.getText();
-                    dataUUID = getUUIDBbyContent(mutation.oncogenic_uuid, data.knownEffect + data.description);
+                    dataUUID = mutation.oncogenic_uuid.getText();
                     if (needReview(mutation.shortSummary_uuid)) {
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
                         extraData.alterations = parseMutationString(mutation.name.getText());
-                        extraDataUUID = getUUIDBbyContent(mutation.shortSummary_uuid, extraData.description);
+                        extraDataUUID = mutation.shortSummary_uuid.getText();
                     }
                     break;
                 case 'MUTATION_EFFECT':
                     data.knownEffect = mutation.effect.value.getText();
                     data.description = mutation.description.getText();
-                    dataUUID = getUUIDBbyContent(mutation.effect_uuid, data.knownEffect + data.description);
+                    dataUUID = mutation.effect_uuid.getText();
                     break;
                 case 'TUMOR_TYPE_SUMMARY':
                     data.description = tumor.summary.getText();
-                    dataUUID = getUUIDBbyContent(tumor.summary_uuid, data.description);
+                    dataUUID = tumor.summary_uuid.getText();
                     break;
                 case 'PREVALENCE':
                     data.description = tumor.prevalence.getText();
-                    dataUUID = getUUIDBbyContent(tumor.prevalence_uuid, data.description);
+                    dataUUID = tumor.prevalence_uuid.getText();
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
                     data.description = tumor.progImp.getText();
-                    dataUUID = getUUIDBbyContent(tumor.progImp_uuid, data.description);
+                    dataUUID = tumor.progImp_uuid.getText();
                     break;
                 case 'NCCN_GUIDELINES':
                     data.description = tumor.nccn.description.getText();
@@ -702,7 +702,7 @@ angular.module('oncokbApp')
                         }
                     ];
                     tempStr = tumor.nccn.description.getText() + tumor.nccn.disease.getText() + tumor.nccn.version.getText();
-                    dataUUID = getUUIDBbyContent(tumor.nccn_uuid, tempStr);
+                    dataUUID = tumor.nccn_uuid.getText();
                     break;
                 case 'Standard implications for sensitivity to therapy':
                     data.evidenceType = 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY';
@@ -752,7 +752,7 @@ angular.module('oncokbApp')
                 if (TI) {
                     if (!treatment) {
                         data.description = TI.description.getText();
-                        dataUUID = getUUIDBbyContent(TI.description_uuid, data.description);
+                        dataUUID = TI.description_uuid.getText();
                     } else {
                         dataUUID = treatment.name_uuid.getText();
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
@@ -1506,7 +1506,7 @@ angular.module('oncokbApp')
                 });
                 myDeletedEvidences = _.difference(myDeletedEvidences, uuids);
             }
-            $scope.cancelDelete = function(event, type, mutation, tumor, treament) {
+            $scope.cancelDelete = function(event, type, mutation, tumor, treatment) {
                 $scope.stopCollopse(event);
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function() {
@@ -1529,6 +1529,13 @@ angular.module('oncokbApp')
                     obj.name_review.set('updateTime', null);
                     obj.name_review.set('action', 'rejected');
                     setReview(obj.name_uuid, false);
+                    for(var i = 0; i < myDeletedEvidenceModels.length; i++) {
+                        var item = myDeletedEvidenceModels[i];
+                        if(type === item[0] && mutation === item[1] && tumor === item[2] && ti === item[3] && treatment === item[4]) {
+                            myDeletedEvidenceModels.splice(i, 1);
+                            break;
+                        }
+                    }
                 });
             };
 
