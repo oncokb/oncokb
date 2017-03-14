@@ -227,6 +227,26 @@ angular.module('oncokbApp')
         }
 
         /**
+         * Output last reviewed cancer type name, either subtype or cancerType
+         * @param {array} cancerTypes array of cancer types
+         * @return {string} TumorType name
+         */
+        function getLastReviewedCancerTypesName(cancerTypes) {
+            var list = [];
+            if(_.isArray(cancerTypes)) {
+                cancerTypes.forEach(function(cancerType) {
+                    if (cancerType.subtype) {
+                        var str = cancerType.subtype;
+                        list.push(str);
+                    } else if (cancerType.cancerType) {
+                        list.push(cancerType.cancerType);
+                    }
+                });
+            }
+            return list.join(', ');
+        }
+
+        /**
          * Util to find isoform info by giving hugo symbol
          * @param {string} hugoSymbol Gene Hugo Symbol
          * @return {*|h.promise|promise|r.promise|d.promise} Promise
@@ -290,6 +310,7 @@ angular.module('oncokbApp')
             createCancerType: createCancerType,
             createTreatment: createTreatment,
             getIsoform: getIsoform,
-            getOncogeneTSG: getOncogeneTSG
+            getOncogeneTSG: getOncogeneTSG,
+            getLastReviewedCancerTypesName: getLastReviewedCancerTypesName
         };
     });
