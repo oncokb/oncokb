@@ -6,6 +6,6 @@ COPY . $ONCOKB_HOME
 RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get install -y --no-install-recommends -t jessie-backports maven openjdk-8-jdk && \
     cd $ONCOKB_HOME && mvn -Pbackend -DskipTests clean install && \
-    cp $ONCOKB_HOME/web/target/oncokb.war /usr/local/tomcat/webapps/ROOT.war
+    cp $ONCOKB_HOME/web/target/oncokb.war /usr/local/tomcat/webapps/
 EXPOSE 8080
 ENTRYPOINT ["catalina.sh", "run"]
