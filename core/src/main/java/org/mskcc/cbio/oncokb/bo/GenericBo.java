@@ -19,6 +19,8 @@ public interface GenericBo<T> {
 
     void saveOrUpdate(T t);
 
+    void saveOrUpdateAll(List<T> ts);
+
     void delete(T t);
 
     void deleteAll(List<T> ts);

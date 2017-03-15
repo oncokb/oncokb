@@ -38,6 +38,11 @@ public class GenericBoImpl<T, DAO extends GenericDao> implements GenericBo<T> {
         dao.saveOrUpdate(t);
     }
 
+    @Override
+    public void saveOrUpdateAll(List<T> ts) {
+        dao.saveOrUpdateAll(ts);
+    }
+
     public List<T> findAll() {
         return dao.findAll();
     }
