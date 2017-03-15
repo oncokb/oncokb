@@ -114,6 +114,8 @@ public interface GenericDao<T, ID extends Serializable> {
      */
     void saveOrUpdate(T t);
 
+    void saveOrUpdateAll(List<T> ts);
+
     /**
      *
      * @return

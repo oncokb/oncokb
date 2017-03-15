@@ -4,15 +4,15 @@
  */
 package org.mskcc.cbio.oncokb.dao.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.dao.GenericDao;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-
-import org.mskcc.cbio.oncokb.dao.GenericDao;
-import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
  * Adapted from http://wordgraphs.com/post/604/Generic-DAO-design-pattern-with-Java---Hibernate
@@ -114,6 +114,13 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     public void saveOrUpdate(T t) {
         if (t!=null) {
             getHibernateTemplate().saveOrUpdate(t);
+        }
+    }
+
+    @Override
+    public void saveOrUpdateAll(List<T> ts) {
+        if (ts != null) {
+            getHibernateTemplate().saveOrUpdateAll(ts);
         }
     }
 
