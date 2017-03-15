@@ -104,6 +104,7 @@ angular.module('oncokbApp')
                                     scope.object.set(scope.objectkey, n);
                                 } else {
                                     scope.object.text = n;
+                                    scope.content.stringO = n;
                                     if(scope.rs.get('lastReviewed') !== n) {
                                         tempMapping.set('review', true);
                                     }else{

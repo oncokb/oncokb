@@ -142,15 +142,14 @@ angular.module('oncokbApp')
                 };
                 function rejectItem(arr) {
                     _.each(arr, function(item) {
-                        if(!_.isNull(item.reviewObj.get('lastReviewed'))) {
+                        if($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
                             if(item.obj) {
                                 item.obj.setText(item.reviewObj.get('lastReviewed'));
                             }
                             item.reviewObj.clear();
                             item.reviewObj.set('review', false);
-                            if ($rootScope.reviewMeta.get(item.uuid.getText())) {
-                                $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
-                            }
+                            item.reviewObj.set('action', 'rejected');
+                            $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
                         }
                     });
                 }
@@ -171,9 +170,9 @@ angular.module('oncokbApp')
                             rejectItem([{obj: $scope.obj.background, reviewObj: $scope.obj.background_review, uuid: $scope.obj.background_uuid}]);
                             break;
                         case 'GENE_TYPE':
-                            $scope.obj.type.set('TSG', $scope.obj.type_review.TSG);
-                            $scope.obj.type.set('OCG', $scope.obj.type_review.OCG);
-                            rejectItem([{reviewObj: $scope.obj.type_review, uuid: $scope.type_uuid}]);
+                            $scope.obj.type.set('TSG', $scope.obj.type_review.get('lastReviewed').TSG);
+                            $scope.obj.type.set('OCG', $scope.obj.type_review.get('lastReviewed').OCG);
+                            rejectItem([{reviewObj: $scope.obj.type_review, uuid: $scope.obj.type_uuid}]);
                             break;
                         case 'ONCOGENIC':
                             rejectItem([{obj: $scope.mt.oncogenic, reviewObj: $scope.mt.oncogenic_review, uuid: $scope.mt.oncogenic_uuid},
@@ -181,9 +180,9 @@ angular.module('oncokbApp')
                                 {obj: $scope.mt.shortSummary, reviewObj: $scope.mt.shortSummary_review, uuid: $scope.mt.shortSummary_uuid}]);
                             break;
                         case 'MUTATION_EFFECT':
-                            rejectItem($scope.mt.effect_uuid, $scope.mt.effect_review, $scope.mt.effect.value);
-                            rejectItem($scope.mt.description_uuid, $scope.mt.description_review, $scope.mt.description);
-                            rejectItem($scope.mt.short_uuid, $scope.mt.short_review, $scope.mt.short);
+                            rejectItem([{obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
+                                {obj: $scope.mt.description, reviewObj: $scope.mt.description_review, uuid: $scope.mt.description_uuid},
+                                {obj: $scope.mt.short, reviewObj: $scope.mt.short_review, uuid: $scope.mt.short_uuid}]);
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
                             rejectItem([{obj: $scope.tm.summary, reviewObj: $scope.tm.summary_review, uuid: $scope.tm.summary_uuid}]);
@@ -197,12 +196,12 @@ angular.module('oncokbApp')
                                 {obj: $scope.tm.shortProgImp, reviewObj: $scope.tm.shortProgImp_review, uuid: $scope.tm.shortProgImp_uuid}]);
                             break;
                         case 'NCCN_GUIDELINES':
-                            rejectItem([{obj: $scope.tm.nccn, reviewObj: $scope.tm.nccn_review, uuid: $scope.tm.nccn_uuid},
+                            rejectItem([{reviewObj: $scope.tm.nccn_review, uuid: $scope.tm.nccn_uuid},
                                 {obj: $scope.tm.nccn.therapy, reviewObj: $scope.tm.nccn.therapy_review, uuid: $scope.tm.nccn.therapy_uuid},
                                 {obj: $scope.tm.nccn.disease, reviewObj: $scope.tm.nccn.disease_review, uuid: $scope.tm.nccn.disease_uuid},
                                 {obj: $scope.tm.nccn.version, reviewObj: $scope.tm.nccn.version_review, uuid: $scope.tm.nccn.version_uuid},
-                                {obj: $scope.tm.description, reviewObj: $scope.tm.description_review, uuid: $scope.tm.description_uuid},
-                                {obj: $scope.tm.short, reviewObj: $scope.tm.short_review, uuid: $scope.tm.short_uuid}]);
+                                {obj: $scope.tm.nccn.description, reviewObj: $scope.tm.nccn.description_review, uuid: $scope.tm.nccn.description_uuid},
+                                {obj: $scope.tm.nccn.short, reviewObj: $scope.tm.nccn.short_review, uuid: $scope.tm.nccn.short_uuid}]);
                             break;
                         case 'Standard implications for sensitivity to therapy':
                         case 'Standard implications for resistance to therapy':
@@ -211,11 +210,20 @@ angular.module('oncokbApp')
                             if ($scope.tt === null) {
                                 rejectItem([{obj: $scope.ti.description, reviewObj: $scope.ti.description_review, uuid: $scope.ti.description_uuid}]);
                             } else {
+                                var lastReviewedPropagation = $scope.tt.level_review.get('lastReviewedPropagation');
                                 rejectItem([{obj: $scope.tt.name, reviewObj: $scope.tt.name_review, uuid: $scope.tt.name_uuid},
                                     {obj: $scope.tt.level, reviewObj: $scope.tt.level_review, uuid: $scope.tt.level_uuid},
                                     {obj: $scope.tt.indication, reviewObj: $scope.tt.indication_review, uuid: $scope.tt.indication_uuid},
                                     {obj: $scope.tt.description, reviewObj: $scope.tt.description_review, uuid: $scope.tt.description_uuid},
                                     {obj: $scope.tt.short, reviewObj: $scope.tt.short_review, uuid: $scope.tt.short_uuid}]);
+                                if(!lastReviewedPropagation) {
+                                    $scope.tt.level_review.clear();
+                                    $scope.tt.level_review.set('review', false);
+                                    if ($rootScope.reviewMeta.get($scope.tt.level_uuid.getText())) {
+                                        $rootScope.reviewMeta.get($scope.tt.level_uuid.getText()).set('review', false);
+                                    }
+                                    $scope.tt.name_eStatus.set('propagation', lastReviewedPropagation);
+                                }
                             }
                             break;
                         case 'CLINICAL_TRIAL':
@@ -234,9 +242,9 @@ angular.module('oncokbApp')
                         event: event, type: type, mutation: mutation, tumor: tumor, ti: ti, treatment: treatment
                     });
                 };
-                $scope.cancelDelete = function(event, type, mutation, tumor, treatment) {
+                $scope.cancelDelete = function(event, type, mutation, tumor, ti, treatment) {
                     $scope.cancelDeleteInGene({
-                        event: event, type: type, mutation: mutation, tumor: tumor, treatment: treatment
+                        event: event, type: type, mutation: mutation, tumor: tumor, ti: ti, treatment: treatment
                     });
                 };
                 $scope.modelUpdate = function(type, mutation, tumor, ti, treatment) {

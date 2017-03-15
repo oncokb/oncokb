@@ -121,7 +121,6 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function() {
-                var gene = this.gene;
             };
             $scope.showEntry = function(obj) {
                 if (obj) {
@@ -299,11 +298,11 @@ angular.module('oncokbApp')
                 return mostRecent;
             }
 
-            function setUpdatedSignature(tempArr, reviewObj) {
+            function setUpdatedSignature(tempArr, reviewObj, userName) {
                 var mostRecent = mostRecentItem(tempArr);
                 reviewObj.set('updatedBy', tempArr[mostRecent].get('updatedBy'));
                 reviewObj.set('updateTime', tempArr[mostRecent].get('updateTime'));
-                if (reviewObj.get('updatedBy') === User.name) {
+                if (reviewObj.get('updatedBy') === userName) {
                     return true;
                 } else {
                     return false;
@@ -342,49 +341,26 @@ angular.module('oncokbApp')
             function prepareReviewItems() {
                 var currentReviewer = $scope.realtimeDocument.getModel().createString(User.name);
                 $scope.gene.name_review.set('currentReviewer', currentReviewer);
-                $scope.status.savingAll = false;
                 $scope.status.noChanges = false;
-                myUpdatedEvidences = {};
-                myDeletedEvidences = [];
-                myGeneTypeEvidence = {};
-                myUpdatedEvidenceModels = [];
                 setOriginalStatus([$scope.gene.summary_review, $scope.gene.type_review, $scope.gene.background_review]);
-                if ($scope.gene.summary_review.get('updatedBy') === User.name) {
-                    formMyEvidences('GENE_SUMMARY', null, null, null, null);
-                }
-                if ($scope.gene.background_review.get('updatedBy') === User.name) {
-                    formMyEvidences('GENE_BACKGROUND', null, null, null, null);
-                }
-                if ($scope.gene.type_review.get('updatedBy') === User.name) {
-                    myGeneTypeEvidence = {
-                        hugoSymbol: $scope.gene.name.getText(),
-                        oncogene: $scope.gene.type.get('OCG').trim().length > 0,
-                        tsg: $scope.gene.type.get('TSG').trim().length > 0
-                    };
-                }
-
                 var mutationChanged = false;
                 var tumorChanged = false;
                 var treatmentChanged = false;
                 var tempArr = [];
                 for (var i = 0; i < $scope.gene.mutations.length; i++) {
+                    $scope.geneStatus[i].isOpen = false;
                     var mutation = $scope.gene.mutations.get(i);
                     if(isObsoleted(mutation)) {
                         continue;
                     }
                     setOriginalStatus([mutation.name_review]);
                     if (mutation.name_review.get('removed')) {
-                        myDeletedEvidences = collectUUIDs('mutation', mutation, myDeletedEvidences);
-                        myDeletedEvidenceModels.push(['mutation', mutation]);
                         continue;
                     }
                     tempArr = [mutation.oncogenic_review, mutation.shortSummary_review, mutation.summary_review];
                     setOriginalStatus(tempArr);
                     if (needReview(mutation.shortSummary_uuid) || needReview(mutation.summary_uuid) || needReview(mutation.oncogenic_uuid)) {
                         mutation.oncogenic_review.set('review', true);
-                        if (setUpdatedSignature(tempArr, mutation.oncogenic_review)) {
-                            formMyEvidences('ONCOGENIC', mutation, null, null, null);
-                        }
                         mutationChanged = true;
                     }
                     tempArr = [mutation.effect_review, mutation.short_review, mutation.description_review];
@@ -392,9 +368,6 @@ angular.module('oncokbApp')
                     if (needReview(mutation.short_uuid) || needReview(mutation.description_uuid) || needReview(mutation.effect_uuid)) {
                         mutation.effect_review.set('review', true);
                         mutation.effect_review.set('mutation_effect', true);
-                        if (setUpdatedSignature(tempArr, mutation.effect_review)) {
-                            formMyEvidences('MUTATION_EFFECT', mutation, null, null, null);
-                        }
                         mutationChanged = true;
                     }
                     for (var j = 0; j < mutation.tumors.length; j++) {
@@ -405,35 +378,24 @@ angular.module('oncokbApp')
                         setOriginalStatus([tumor.name_review]);
                         if (tumor.name_review.get('removed')) {
                             mutationChanged = true;
-                            myDeletedEvidences = collectUUIDs('tumor', tumor, myDeletedEvidences);
-                            myDeletedEvidenceModels.push(['tumor', mutation, tumor]);
                             continue;
                         }
                         tempArr = [tumor.shortPrevalence_review, tumor.prevalence_review];
                         setOriginalStatus(tempArr);
                         if (needReview(tumor.shortPrevalence_uuid) || needReview(tumor.prevalence_uuid)) {
                             tumor.prevalence_review.set('review', true);
-                            if (setUpdatedSignature(tempArr, tumor.prevalence_review)) {
-                                formMyEvidences('PREVALENCE', mutation, tumor, null, null);
-                            }
                             tumorChanged = true;
                         }
                         tempArr = [tumor.shortProgImp_review, tumor.progImp_review];
                         setOriginalStatus(tempArr);
                         if (needReview(tumor.shortProgImp_uuid) || needReview(tumor.progImp_uuid)) {
                             tumor.progImp_review.set('review', true);
-                            if (setUpdatedSignature(tempArr, tumor.progImp_review)) {
-                                formMyEvidences('PROGNOSTIC_IMPLICATION', mutation, tumor, null, null);
-                            }
                             tumorChanged = true;
                         }
                         tempArr = [tumor.nccn_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review, tumor.nccn.short_review];
                         setOriginalStatus(tempArr);
                         if (needReview(tumor.nccn.therapy_uuid) || needReview(tumor.nccn.disease_uuid) || needReview(tumor.nccn.version_uuid) || needReview(tumor.nccn.description_uuid) || needReview(tumor.nccn.short_uuid)) {
                             tumor.nccn_review.set('review', true);
-                            if (setUpdatedSignature(tempArr, tumor.nccn_review)) {
-                                formMyEvidences('NCCN_GUIDELINES', mutation, tumor, null, null);
-                            }
                             tumorChanged = true;
                         }
                         for (var k = 0; k < tumor.TI.length; k++) {
@@ -449,41 +411,27 @@ angular.module('oncokbApp')
                                 setOriginalStatus([treatment.name_review]);
                                 if (treatment.name_review.get('removed')) {
                                     treatmentChanged = true;
-                                    myDeletedEvidences = collectUUIDs('treatment', treatment, myDeletedEvidences);
-                                    myDeletedEvidenceModels.push(['treatment', mutation, tumor, ti, treatment]);
                                     continue;
                                 }
                                 tempArr = [treatment.level_review, treatment.indication_review, treatment.description_review, treatment.short_review];
                                 setOriginalStatus(tempArr);
                                 if (needReview(treatment.name_uuid) || needReview(treatment.level_uuid) || needReview(treatment.indication_uuid) || needReview(treatment.description_uuid) || needReview(treatment.short_uuid)) {
                                     treatment.name_review.set('review', true);
-                                    if (setUpdatedSignature(tempArr, treatment.name_review)) {
-                                        formMyEvidences(ti.name.getText(), mutation, tumor, ti, treatment);
-                                    }
                                     treatmentChanged = true;
                                 }
                             }
                             setOriginalStatus([ti.name_review, ti.description_review]);
                             if (needReview(ti.description_uuid) || treatmentChanged) {
                                 ti.name_review.set('review', true);
-                                if (ti.description_review.get('updatedBy') === User.name) {
-                                    formMyEvidences(ti.name.getText(), mutation, tumor, ti, null);
-                                }
                                 tumorChanged = true;
                             }
                             treatmentChanged = false;
                         }
                         setOriginalStatus([tumor.name_review, tumor.summary_review, tumor.trials_review]);
                         if(needReview(tumor.summary_uuid)) {
-                            if (tumor.summary_review.get('updatedBy') === User.name) {
-                                formMyEvidences('TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
-                            }
                             tumorChanged = true;
                         }
                         if(needReview(tumor.trials_uuid)) {
-                            if (tumor.trials_review.get('updatedBy') === User.name) {
-                                formMyEvidences('CLINICAL_TRIAL', mutation, tumor, null, null);
-                            }
                             tumorChanged = true;
                         }
                         if (tumorChanged) {
@@ -499,10 +447,126 @@ angular.module('oncokbApp')
                     }
                     mutationChanged = false;
                 }
+                $rootScope.reviewMode = true;
+            }
+
+
+            function collectChangesByPerson(userName) {
+                $scope.status.savingAll = false;
+                $scope.status.noChanges = false;
+                myUpdatedEvidences = {};
+                myDeletedEvidences = [];
+                myGeneTypeEvidence = {};
+                myUpdatedEvidenceModels = [];
+
+                if ($scope.gene.summary_review.get('updatedBy') === userName) {
+                    formMyEvidences('GENE_SUMMARY', null, null, null, null);
+                }
+                if ($scope.gene.background_review.get('updatedBy') === userName) {
+                    formMyEvidences('GENE_BACKGROUND', null, null, null, null);
+                }
+                if ($scope.gene.type_review.get('updatedBy') === userName) {
+                    myGeneTypeEvidence = {
+                        hugoSymbol: $scope.gene.name.getText(),
+                        oncogene: $scope.gene.type.get('OCG') ? true : false,
+                        tsg: $scope.gene.type.get('TSG') ? true : false
+                    };
+                }
+                var tempArr = [];
+                for (var i = 0; i < $scope.gene.mutations.length; i++) {
+                    var mutation = $scope.gene.mutations.get(i);
+                    if(isObsoleted(mutation)) {
+                        continue;
+                    }
+                    if (mutation.name_review.get('removed')) {
+                        myDeletedEvidences = collectUUIDs('mutation', mutation, myDeletedEvidences);
+                        myDeletedEvidenceModels.push(['mutation', mutation]);
+                        continue;
+                    }
+                    tempArr = [mutation.oncogenic_review, mutation.shortSummary_review, mutation.summary_review];
+                    if (needReview(mutation.shortSummary_uuid) || needReview(mutation.summary_uuid) || needReview(mutation.oncogenic_uuid)) {
+                        if (setUpdatedSignature(tempArr, mutation.oncogenic_review, userName)) {
+                            formMyEvidences('ONCOGENIC', mutation, null, null, null);
+                        }
+                    }
+                    tempArr = [mutation.effect_review, mutation.short_review, mutation.description_review];
+                    if (needReview(mutation.short_uuid) || needReview(mutation.description_uuid) || needReview(mutation.effect_uuid)) {
+                        if (setUpdatedSignature(tempArr, mutation.effect_review, userName)) {
+                            formMyEvidences('MUTATION_EFFECT', mutation, null, null, null);
+                        }
+                    }
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors.get(j);
+                        if(isObsoleted(tumor)) {
+                            continue;
+                        }
+                        if (tumor.name_review.get('removed')) {
+                            myDeletedEvidences = collectUUIDs('tumor', tumor, myDeletedEvidences);
+                            myDeletedEvidenceModels.push(['tumor', mutation, tumor]);
+                            continue;
+                        }
+                        tempArr = [tumor.shortPrevalence_review, tumor.prevalence_review];
+                        if (needReview(tumor.shortPrevalence_uuid) || needReview(tumor.prevalence_uuid)) {
+                            if (setUpdatedSignature(tempArr, tumor.prevalence_review, userName)) {
+                                formMyEvidences('PREVALENCE', mutation, tumor, null, null);
+                            }
+                        }
+                        tempArr = [tumor.shortProgImp_review, tumor.progImp_review];
+                        if (needReview(tumor.shortProgImp_uuid) || needReview(tumor.progImp_uuid)) {
+                            if (setUpdatedSignature(tempArr, tumor.progImp_review, userName)) {
+                                formMyEvidences('PROGNOSTIC_IMPLICATION', mutation, tumor, null, null);
+                            }
+                        }
+                        tempArr = [tumor.nccn_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review, tumor.nccn.short_review];
+                        if (needReview(tumor.nccn.therapy_uuid) || needReview(tumor.nccn.disease_uuid) || needReview(tumor.nccn.version_uuid) || needReview(tumor.nccn.description_uuid) || needReview(tumor.nccn.short_uuid)) {
+                            if (setUpdatedSignature(tempArr, tumor.nccn_review, userName)) {
+                                formMyEvidences('NCCN_GUIDELINES', mutation, tumor, null, null);
+                            }
+                        }
+                        for (var k = 0; k < tumor.TI.length; k++) {
+                            var ti = tumor.TI.get(k);
+                            if(isObsoleted(ti)) {
+                                continue;
+                            }
+                            for (var m = 0; m < ti.treatments.length; m++) {
+                                var treatment = ti.treatments.get(m);
+                                if(isObsoleted(treatment)) {
+                                    continue;
+                                }
+                                if (treatment.name_review.get('removed')) {
+                                    myDeletedEvidences = collectUUIDs('treatment', treatment, myDeletedEvidences);
+                                    myDeletedEvidenceModels.push(['treatment', mutation, tumor, ti, treatment]);
+                                    continue;
+                                }
+                                tempArr = [treatment.level_review, treatment.indication_review, treatment.description_review, treatment.short_review];
+                                if (needReview(treatment.name_uuid) || needReview(treatment.level_uuid) || needReview(treatment.indication_uuid) || needReview(treatment.description_uuid) || needReview(treatment.short_uuid)) {
+                                    if (setUpdatedSignature(tempArr, treatment.name_review, userName)) {
+                                        formMyEvidences(ti.name.getText(), mutation, tumor, ti, treatment);
+                                    }
+                                }
+                            }
+                            if (needReview(ti.description_uuid)) {
+                                if (ti.description_review.get('updatedBy') === userName) {
+                                    formMyEvidences(ti.name.getText(), mutation, tumor, ti, null);
+                                }
+                            }
+                        }
+                        if(needReview(tumor.summary_uuid)) {
+                            if (tumor.summary_review.get('updatedBy') === userName) {
+                                formMyEvidences('TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
+                            }
+                        }
+                        if(needReview(tumor.trials_uuid)) {
+                            if (tumor.trials_review.get('updatedBy') === userName) {
+                                formMyEvidences('CLINICAL_TRIAL', mutation, tumor, null, null);
+                            }
+                        }
+                    }
+                }
                 if (_.isEmpty(myGeneTypeEvidence) && _.isEmpty(myUpdatedEvidences) && _.isEmpty(myDeletedEvidences)) {
                     $scope.status.noChanges = true;
+                    dialogs.notify('Warning', 'You have no changes need to be solved');
                 }
-                $rootScope.reviewMode = true;
             }
 
             var apiCallCount = 0;
@@ -522,7 +586,8 @@ angular.module('oncokbApp')
             }
 
             $scope.acceptAllMyChanges = function() {
-                if ($scope.status.isDesiredGene) {
+                collectChangesByPerson(User.name);
+                if ($scope.status.isDesiredGene && !$scope.status.noChanges) {
                     $scope.status.savingAll = true;
                 }
                 if (_.isEmpty(myGeneTypeEvidence) && _.isEmpty(myUpdatedEvidences) && !_.isEmpty(myDeletedEvidences)) {
@@ -617,7 +682,6 @@ angular.module('oncokbApp')
             $scope.getEvidence = function(type, mutation, tumor, TI, treatment) {
                 var dataUUID = '';
                 var extraDataUUID = '';
-                var tempStr = '';
                 var data = {
                     additionalInfo: null,
                     alterations: null,
@@ -647,7 +711,8 @@ angular.module('oncokbApp')
                     '4': 'LEVEL_4',
                     'R1': 'LEVEL_R1',
                     'R2': 'LEVEL_R2',
-                    'R3': 'LEVEL_R3'
+                    'R3': 'LEVEL_R3',
+                    'no': 'NO'
                 };
                 var extraData = _.clone(data);
                 var i = 0;
@@ -701,7 +766,6 @@ angular.module('oncokbApp')
                             version: tumor.nccn.version.getText()
                         }
                     ];
-                    tempStr = tumor.nccn.description.getText() + tumor.nccn.disease.getText() + tumor.nccn.version.getText();
                     dataUUID = tumor.nccn_uuid.getText();
                     break;
                 case 'Standard implications for sensitivity to therapy':
@@ -816,12 +880,10 @@ angular.module('oncokbApp')
             function acceptItem(arr, reviewObj) {
                 _.each(arr, function(item) {
                     // This condition check is to remove review mapping precisely
-                    if(!_.isNull(item.reviewObj.get('lastReviewed'))) {
+                    if($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
-                        if ($rootScope.reviewMeta.get(item.uuid.getText())) {
-                            $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
-                        }
+                        $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
                     }
                 });
                 reviewObj.set('action', 'accepted');
@@ -878,7 +940,14 @@ angular.module('oncokbApp')
                             {reviewObj: treatment.indication_review, uuid: treatment.indication_uuid},
                             {reviewObj: treatment.description_review, uuid: treatment.description_uuid},
                             {reviewObj: treatment.short_review, uuid: treatment.short_uuid}], treatment.name_review);
-                        treatment.level_review.delete('lastReviewedPropagation');
+                        // this is for case where only propagation is changed
+                        if(treatment.level_review.has('lastReviewedPropagation')) {
+                            treatment.level_review.clear();
+                            treatment.level_review.set('review', false);
+                            if ($rootScope.reviewMeta.get(treatment.level_uuid.getText())) {
+                                $rootScope.reviewMeta.get(treatment.level_uuid.getText()).set('review', false);
+                            }
+                        }
                     }
                     break;
                 case 'CLINICAL_TRIAL':
@@ -1504,9 +1573,8 @@ angular.module('oncokbApp')
                 _.each(uuids, function(uuid) {
                     $rootScope.reviewMeta.delete(uuid);
                 });
-                myDeletedEvidences = _.difference(myDeletedEvidences, uuids);
             }
-            $scope.cancelDelete = function(event, type, mutation, tumor, treatment) {
+            $scope.cancelDelete = function(event, type, mutation, tumor, ti, treatment) {
                 $scope.stopCollopse(event);
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function() {
@@ -1522,20 +1590,11 @@ angular.module('oncokbApp')
                         obj = treatment;
                         break;
                     }
-                    var uuids = collectUUIDs(type, obj, []);
-                    myDeletedEvidences = _.difference(myDeletedEvidences, uuids);
                     obj.name_review.set('removed', false);
                     obj.name_review.set('updatedBy', null);
                     obj.name_review.set('updateTime', null);
                     obj.name_review.set('action', 'rejected');
                     setReview(obj.name_uuid, false);
-                    for(var i = 0; i < myDeletedEvidenceModels.length; i++) {
-                        var item = myDeletedEvidenceModels[i];
-                        if(type === item[0] && mutation === item[1] && tumor === item[2] && ti === item[3] && treatment === item[4]) {
-                            myDeletedEvidenceModels.splice(i, 1);
-                            break;
-                        }
-                    }
                 });
             };
 
@@ -2459,7 +2518,6 @@ angular.module('oncokbApp')
                     }
                 }
                 $rootScope.isDesiredGene = $scope.status.isDesiredGene;
-                $scope.status.isDesiredGene = true;
             }
 
             $scope.fileTitle = $routeParams.geneName;

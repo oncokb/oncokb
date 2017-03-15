@@ -118,6 +118,12 @@ public class NccnGuideline implements java.io.Serializable {
         }
         return true;
     }
+    
+    public boolean isEmpty() {
+        if(this.getTherapy().isEmpty() && this.getDisease().isEmpty() && this.getVersion().isEmpty() && this.getPages().isEmpty() &&  this.getCategory().isEmpty() && this.getDescription().isEmpty())
+            return true;
+        else return false;
+    }
 
 
 }

@@ -17,37 +17,42 @@
     </div>
     <div ng-if="t === 'treatment-select'" class="treatment-select">
         <div>
-            <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
-            <div ng-if="!reviewMode || !rs.get('action')">
-                <select ng-model="content.stringO"
+            <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+            <div>
+                <select ng-disabled="reviewMode ? (rs.get('review') === false ? true : false) : !fe"
+                        ng-model="content.stringO"
                         ng-options="opt.value as opt.label for opt in o">
                 </select>
                 <div class="propagation" ng-if="content.propagationOpts.length > 0">
                     <span>Level of Evidence in other tumor types: </span>
-                    <select ng-model="content.propagation"
+                    <select ng-disabled="reviewMode ? (rs.get('review') === false ? true : false) : !fe"
+                            ng-model="content.propagation"
                             ng-options="opt.value as opt.name for opt in content.propagationOpts">
                     </select>
                 </div>
             </div>
-            <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">Old Content:</h4>
-            <div ng-if="reviewMode && !rs.get('removedItem')">
-                <p>{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}</p>
-                <div class="propagation" ng-if="content.propagationOpts.length > 0">
+            <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
+                <h4>Old Content:</h4>
+                <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewed') ? rs.get('lastReviewed') : content.stringO}}</p>
+                <div class="propagation">
                     <span>Level of Evidence in other tumor types: </span>
-                    <p>{{!rs.get('action') ? rs.get('lastReviewedPropagation') : content.propagation}}</p>
+                    <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewedPropagation') ? rs.get('lastReviewedPropagation') : content.propagation}}</p>
                 </div>
             </div>
         </div>
 
     </div>
     <div ng-if="t === 'select-chosen'" class="chosen-full-width">
-        <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
-        <select chosen ng-attr-id="{{chosenid}}" allow-single-deselect="true" ng-model="content.stringO"
+        <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+        <select ng-disabled="reviewMode ? (rs.get('review') === false ? true : false) : !fe"
+            chosen ng-attr-id="{{chosenid}}" allow-single-deselect="true" ng-model="content.stringO"
                 ng-options="opt for opt in o">
             <option value="NA"></option>
         </select>
-        <h4 ng-if="reviewMode && !rs.get('action') && !rs.get('removedItem')">Old Content:</h4>
-        <p ng-if="reviewMode && !rs.get('removedItem')">{{!rs.get('action') ? rs.get('lastReviewed') : content.stringO}}
+        <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
+            <h4>Old Content:</h4>
+            <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewed')}}</p>
+        </div>
     </div>
     <div ng-if="t === 'checkbox'">
         <div>

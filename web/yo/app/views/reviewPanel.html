@@ -8,7 +8,7 @@
     <div ng-if="rt === 'delete' && rs.get('removed')">
         <p style="font-size:15px;float:left;margin-top:5px;margin-right:10px" ng-if="!rs.get('loading')">Deleted by {{rs.get('updatedBy')}} at {{rs.get('updateTime')}}</p>
         <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="!rs.get('loading')" ng-click="confirmDelete($event, tp, mt, tm, ti, tt)"></i>
-        <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="!rs.get('loading') || rs.get('action') === 'rejected'" ng-click="cancelDelete($event, tp, mt, tm, tt)"></i>
+        <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="!rs.get('loading') || rs.get('action') === 'rejected'" ng-click="cancelDelete($event, tp, mt, tm, ti, tt)"></i>
         <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>
     </div>
 </div>
