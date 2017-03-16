@@ -63,7 +63,7 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*]?)");
+        Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*\\?]?)");
         Matcher m = p.matcher(proteinChange);
         if (m.matches()) {
             ref = m.group(1);
@@ -79,6 +79,8 @@ public final class AlterationUtils {
                 consequence = "stop_gained";
             } else if (start == 1) {
                 consequence = "initiator_codon_variant";
+            } else if (var.equals("?")) {
+                consequence = "any";
             } else {
                 consequence = "missense_variant";
             }
