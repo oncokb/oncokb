@@ -870,7 +870,10 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
         } else {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " mutation");
+            if (!queryAlteration.contains(gene.getHugoSymbol())) {
+                sb.append(gene.getHugoSymbol() + " ");
+            }
+            sb.append(queryAlteration + " mutation");
         }
         return sb.toString();
     }
@@ -898,7 +901,9 @@ public class SummaryUtils {
             queryAlteration = gene.getHugoSymbol() + "-amplified";
             sb.append(queryAlteration);
         } else {
-            sb.append(gene.getHugoSymbol() + " ");
+            if (!queryAlteration.contains(gene.getHugoSymbol())) {
+                sb.append(gene.getHugoSymbol() + " ");
+            }
             if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
                 sb.append(queryAlteration.toLowerCase());
             } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
