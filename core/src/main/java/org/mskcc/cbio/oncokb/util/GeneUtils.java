@@ -21,6 +21,7 @@ public class GeneUtils {
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
         if (hugoSymbol != null) {
+            hugoSymbol = hugoSymbol.toUpperCase();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
                 return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
