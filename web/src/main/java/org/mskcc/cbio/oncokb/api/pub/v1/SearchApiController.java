@@ -1,9 +1,6 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
-import org.mskcc.cbio.oncokb.apiModels.ApiObjectResp;
-import org.mskcc.cbio.oncokb.apiModels.Meta;
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
@@ -11,7 +8,6 @@ import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
-import org.mskcc.cbio.oncokb.util.MetaUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,7 +24,7 @@ import java.util.Set;
 @Controller
 public class SearchApiController implements SearchApi {
 
-    public ResponseEntity<ApiObjectResp> searchGet(
+    public ResponseEntity<IndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
@@ -41,13 +37,11 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "Level of evidences.") @RequestParam(value = "levels", required = false) String levels
         , @ApiParam(value = "Only show treatments of highest level") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
     ) {
-
-        ApiObjectResp apiObjectResp = new ApiObjectResp();
         HttpStatus status = HttpStatus.OK;
-        Meta meta = MetaUtils.getOKMeta();
+        IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            meta = MetaUtils.getBadRequestMeta("Entrez Gene ID and Hugo Symbol are not pointing to same gene.");
+            status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query();
             query.setId(id);
@@ -69,21 +63,17 @@ public class SearchApiController implements SearchApi {
             source = source == null ? "oncokb" : source;
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
-            apiObjectResp.setData(IndicatorUtils.processQuery(query, null, levelOfEvidences, source, highestLevelOnly));
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, source, highestLevelOnly);
         }
-        apiObjectResp.setMeta(meta);
-        return new ResponseEntity<ApiObjectResp>(apiObjectResp, status);
+        return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
-    public ResponseEntity<ApiListResp> searchPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body) {
-        ApiListResp apiListResp = new ApiListResp();
+    public ResponseEntity<List<IndicatorQueryResp>> searchPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body) {
         HttpStatus status = HttpStatus.OK;
-        Meta meta = MetaUtils.getOKMeta();
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null || body.getQueries() == null || body.getQueries().size() == 0) {
-            meta = MetaUtils.getBadRequestMeta("Error on request body format");
             status = HttpStatus.BAD_REQUEST;
         } else {
 
@@ -94,9 +84,7 @@ public class SearchApiController implements SearchApi {
                     body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
                     source, body.getHighestLevelOnly()));
             }
-            apiListResp.setData(result);
         }
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<ApiListResp>(apiListResp, status);
+        return new ResponseEntity<>(result, status);
     }
 }

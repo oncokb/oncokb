@@ -1,13 +1,9 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
-import org.mskcc.cbio.oncokb.apiModels.ApiObjectResp;
-import org.mskcc.cbio.oncokb.apiModels.Meta;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.HotspotUtils;
-import org.mskcc.cbio.oncokb.util.MetaUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,25 +18,19 @@ import java.util.List;
 public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
-    public ResponseEntity<ApiListResp> utilsSuggestedVariantsGet() {
-        ApiListResp apiListResp = new ApiListResp();
-        Meta meta = MetaUtils.getOKMeta();
+    public ResponseEntity<List<String>> utilsSuggestedVariantsGet() {
         HttpStatus status = HttpStatus.OK;
 
         List<String> variants = AlterationUtils.getGeneralAlterations();
 
-        apiListResp.setData(variants);
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<>(apiListResp, status);
+        return new ResponseEntity<>(variants, status);
     }
 
     @Override
-    public ResponseEntity<ApiObjectResp> utilsHotspotMutationGet(
+    public ResponseEntity<Boolean> utilsHotspotMutationGet(
         @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol") String hugoSymbol
         , @ApiParam(value = "Variant name") @RequestParam(value = "variant") String variant
     ) {
-        ApiObjectResp apiObjectResp = new ApiObjectResp();
-        Meta meta = MetaUtils.getOKMeta();
         HttpStatus status = HttpStatus.OK;
 
         Boolean isHotspot = false;
@@ -51,8 +41,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             isHotspot = HotspotUtils.isHotspot(alteration);
         }
 
-        apiObjectResp.setData(isHotspot);
-        apiObjectResp.setMeta(meta);
-        return new ResponseEntity<>(apiObjectResp, status);
+        return new ResponseEntity<>(isHotspot, status);
     }
 }
