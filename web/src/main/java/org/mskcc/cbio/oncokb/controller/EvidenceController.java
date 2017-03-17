@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 import org.json.JSONArray;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -206,17 +207,14 @@ public class EvidenceController {
     private Boolean isEmptyEvidence(Evidence queryEvidence) {
         EvidenceType evidenceType = queryEvidence.getEvidenceType();
         String knownEffect = queryEvidence.getKnownEffect();
-        LevelOfEvidence level = queryEvidence.getLevelOfEvidence();
         String description = queryEvidence.getDescription().trim();
         Set<Treatment> treatments = queryEvidence.getTreatments();
         Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
-        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();        
-        List<EvidenceType> therapyEvidenceTypes = Arrays.asList(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,
-                EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
         
         Boolean isEmpty = false;
         if(evidenceType.equals(EvidenceType.ONCOGENIC) || evidenceType.equals(EvidenceType.MUTATION_EFFECT)) {
-            if(knownEffect.isEmpty() && description.isEmpty()) isEmpty = true;
+            if(StringUtils.isNullOrEmpty(knownEffect) && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if(evidenceType.equals(EvidenceType.NCCN_GUIDELINES)) {
             Boolean validNccn = false;
             for(NccnGuideline nccn : nccnGuidelines) {
@@ -226,10 +224,10 @@ public class EvidenceController {
             }
             isEmpty = !validNccn;
         } else if(evidenceType.equals(EvidenceType.CLINICAL_TRIAL)) {
-           if(clinicalTrials.isEmpty()) isEmpty = true;
-        } else if(therapyEvidenceTypes.contains(evidenceType)) {
-            if(treatments == null && description.isEmpty()) isEmpty = true;
-        } else if(description.isEmpty()) {
+           if(clinicalTrials == null || clinicalTrials.isEmpty()) isEmpty = true;
+        } else if(MainUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
+            if(treatments == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
+        } else if(StringUtils.isNullOrEmpty(description)) {
             isEmpty = true;
         }
         return isEmpty;

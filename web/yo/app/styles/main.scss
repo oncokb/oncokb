@@ -742,3 +742,10 @@ input[type=radio] + label:hover, input[type=checkbox] + label:hover {
 input[type=radio] + label:before, input[type=checkbox] + label:before { content: "\f096"; letter-spacing: 5px;} /* unchecked icon */
 
 input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:before { content: "\f046"; letter-spacing: 5px;} /* checked icon */
+
+.changeInfoText {
+    font-size:15px;
+    float:left;
+    margin-top:5px;
+    margin-right:10px
+}

@@ -2,9 +2,10 @@
 
 /**
  * @ngdoc directive
- * @name oncokbApp.directive:eStatus
+ * @name oncokbApp.directive:reviewpanel
  * @description
- * # eStatus
+ * # reviewpanel
+ * This directive is designed specifically for review mode, which cotains change info text, accept icon, reject icon and loading bar
  */
 angular.module('oncokbApp')
     .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs) {
@@ -56,7 +57,7 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.iconExist = function(type) {
-                    if(!$scope.reviewMode) {
+                    if (!$scope.reviewMode) {
                         return false;
                     }
                     if ($scope.mt && $scope.mt.name_review.get('removed') || $scope.tm && $scope.tm.name_review.get('removed') || $scope.tt && $scope.tt.name_review.get('removed')) {

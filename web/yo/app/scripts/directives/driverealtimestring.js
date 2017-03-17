@@ -61,7 +61,7 @@ angular.module('oncokbApp')
                 });
                 scope.$watch('object.text', function(n, o) {
                     if (n !== o) {
-                        if(scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
+                        if (scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
                             scope.rs.set('lastReviewed', o);
                         }
                         scope.content.stringO = scope.object.text;
@@ -71,31 +71,34 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
-                            if(scope.es && scope.es.get('obsolete') === 'true') {
+                            if (scope.es && scope.es.get('obsolete') === 'true') {
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
                                 } else {
                                     scope.object.text = n;
                                 }
-                            } else if(scope.rs && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
+                            } else if (scope.rs && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
                                 // for the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
                                 var uuid = scope.uuid.getText();
                                 var tempMapping = $rootScope.reviewMeta.get(uuid);
-                                if(!tempMapping) {
+                                if (!tempMapping) {
                                     tempMapping = $rootScope.metaModel.createMap();
                                 }
-                                if(scope.rs && scope.rs.get('rollback')) {
+                                if (scope.rs && scope.rs.get('rollback')) {
                                     scope.rs.set('rollback', null);
                                 }
                                 if (scope.objecttype === 'object' && scope.objectkey) {
-                                    if(!scope.rs.get('lastReviewed')) {
-                                        scope.rs.set('lastReviewed', _.clone({TSG: scope.object.get('TSG'), OCG: scope.object.get('OCG')}));
+                                    if (!scope.rs.get('lastReviewed')) {
+                                        scope.rs.set('lastReviewed', _.clone({
+                                            TSG: scope.object.get('TSG'),
+                                            OCG: scope.object.get('OCG')
+                                        }));
                                     }
-                                    if(scope.rs.get('lastReviewed')[scope.objectkey] !== n) {
+                                    if (scope.rs.get('lastReviewed')[scope.objectkey] !== n) {
                                         tempMapping.set('review', true);
-                                    }else{
+                                    } else {
                                         tempMapping.set('review', false);
                                         if (scope.reviewMode) {
                                             scope.rs.set('rollback', true);
@@ -105,9 +108,9 @@ angular.module('oncokbApp')
                                 } else {
                                     scope.object.text = n;
                                     scope.content.stringO = n;
-                                    if(scope.rs.get('lastReviewed') !== n) {
+                                    if (scope.rs.get('lastReviewed') !== n) {
                                         tempMapping.set('review', true);
-                                    }else{
+                                    } else {
                                         tempMapping.set('review', false);
                                         if (scope.reviewMode) {
                                             scope.rs.set('rollback', true);
@@ -133,11 +136,11 @@ angular.module('oncokbApp')
                                 scope.es.set('propagation', n);
                             }
                         }
-                        if(o && n !== o && scope.es && scope.es.get('obsolete') !== 'true') {
+                        if (o && n !== o && scope.es && scope.es.get('obsolete') !== 'true') {
                             scope.rs.set('lastReviewedPropagation', o);
                             var uuid = scope.uuid.getText();
                             var tempMapping = $rootScope.reviewMeta.get(uuid);
-                            if(!tempMapping) {
+                            if (!tempMapping) {
                                 tempMapping = $rootScope.metaModel.createMap();
                             }
                             tempMapping.set('review', true);
@@ -215,12 +218,14 @@ angular.module('oncokbApp')
                     $scope.content.preStringO = $scope.content.stringO;
                 };
                 $scope.getInputClass = function() {
-                    if($scope.reviewMode) {
+                    if ($scope.reviewMode) {
                         $scope.lastReviewed = $scope.rs.get('lastReviewed');
                     }
                     var contentEditable = $scope.reviewMode ? (!$scope.rs.get('action') ? true : false) : $scope.fe;
                     var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
-                    if($scope.t === 'p') classResult += ' doubleH';
+                    if ($scope.t === 'p') {
+                        classResult += ' doubleH';
+                    }
                     return classResult;
                 };
             }

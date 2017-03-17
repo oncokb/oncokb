@@ -3,6 +3,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mysql.jdbc.StringUtils;
 
 import java.util.Objects;
 
@@ -120,7 +121,8 @@ public class NccnGuideline implements java.io.Serializable {
     }
     
     public boolean isEmpty() {
-        if(this.getTherapy().isEmpty() && this.getDisease().isEmpty() && this.getVersion().isEmpty() && this.getPages().isEmpty() &&  this.getCategory().isEmpty() && this.getDescription().isEmpty())
+        if (StringUtils.isNullOrEmpty(this.therapy) && StringUtils.isNullOrEmpty(this.disease) && StringUtils.isNullOrEmpty(this.version) 
+                && StringUtils.isNullOrEmpty(this.pages) && StringUtils.isNullOrEmpty(this.category) && StringUtils.isNullOrEmpty(this.description))
             return true;
         else return false;
     }

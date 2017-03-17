@@ -57,9 +57,9 @@
     <div ng-if="t === 'checkbox'">
         <div>
             <br/>
-            <h4 ng-if="reviewMode && !objecttype && !rs.get('action') && !rs.get('removedItem')">New Content:</h4>
+            <h4 ng-if="reviewMode && !objecttype && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
             <div>
-                    <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || !rs.get('action')">
+                    <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || rs.get('review') !== false">
                       <input
                           id="{{checkboxid}}-{{$index}}"
                           type="radio"
@@ -74,13 +74,13 @@
         </div>
 
         <div ng-class="{'left-float': rs.get('mutation_effect')}" ng-if="reviewMode && !rs.get('removedItem')">
-            <h4 ng-if="!objecttype && !rs.get('action')">Old Content:</h4>
+            <h4 ng-if="!objecttype && rs.get('review') !== false">Old Content:</h4>
             <div>
                 <span ng-if="!objecttype" ng-repeat="checkbox in checkboxes" class="reviewedBG">
                   <input
                       id="{{checkboxid}}-{{$index}}-review"
                       type="radio"
-                      ng-checked="(!rs.get('action') ? rs.get('lastReviewed') : content.stringO) === checkbox ? true : false"
+                      ng-checked="(rs.get('review') !== false ? rs.get('lastReviewed') : content.stringO) === checkbox ? true : false"
                       ng-disabled="true"
                       >
                   <label for="{{checkboxid}}-{{$index}}-review">{{checkbox}}</label>
