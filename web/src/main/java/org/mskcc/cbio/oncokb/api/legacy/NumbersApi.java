@@ -3,12 +3,10 @@ package org.mskcc.cbio.oncokb.api.legacy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.api.legacy.NotFoundException;
-import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.response.ApiNumbersGene;
-import org.mskcc.cbio.oncokb.response.ApiNumbersGenes;
-import org.mskcc.cbio.oncokb.response.ApiNumbersLeves;
-import org.mskcc.cbio.oncokb.response.ApiNumbersMain;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.GeneNumber;
+import org.mskcc.cbio.oncokb.model.LevelNumber;
+import org.mskcc.cbio.oncokb.model.MainNumber;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +15,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
@@ -29,86 +29,63 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class NumbersApi {
 
 
-    @ApiOperation(value = "", notes = "Get gene related numbers", response = ApiNumbersGene.class)
+    @ApiOperation(value = "", notes = "Get gene related numbers", response = GeneNumber.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK"),
         @io.swagger.annotations.ApiResponse(code = 204, message = "")})
     @RequestMapping(value = "/gene/{hugoSymbol}",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<ApiNumbersGene> numbersGeneGet(
+    public ResponseEntity<GeneNumber> numbersGeneGet(
         @ApiParam(value = "The gene symbol used in Human Genome Organisation.", required = true) @PathVariable("hugoSymbol") String hugoSymbol
     )
         throws NotFoundException {
-
-        ApiNumbersGene apiNumbersGene = new ApiNumbersGene();
-        RespMeta meta = new RespMeta();
         HttpStatus status = HttpStatus.OK;
-
         Set<GeneNumber> geneNumbers = NumberUtils.getGeneNumberListWithLevels(Collections.singleton(GeneUtils.getGeneByHugoSymbol(hugoSymbol)), LevelUtils.getPublicLevels());
+        GeneNumber geneNumber = null;
+
         if (geneNumbers.size() == 1) {
-            apiNumbersGene.setData(geneNumbers.iterator().next());
+            geneNumber = geneNumbers.iterator().next();
         } else {
             status = HttpStatus.NO_CONTENT;
-            if(geneNumbers.size() > 1) {
-                meta.setError_message("Found duplicate genes.");
-            }else {
-                meta.setError_message("No gene found.");
-            }
         }
-        meta.setCode(status.value());
-        apiNumbersGene.setRespMeta(meta);
 
-        return new ResponseEntity<ApiNumbersGene>(apiNumbersGene, status);
+        return new ResponseEntity<>(geneNumber, status);
     }
 
-    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = ApiNumbersGenes.class)
+    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = GeneNumber.class, responseContainer = "Set")
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/genes/",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<ApiNumbersGenes> numbersGenesGet()
+    public ResponseEntity<Set<GeneNumber>> numbersGenesGet()
         throws NotFoundException {
-        Long oldTime = new Date().getTime();
-//        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Start the servlet");
-
-        ApiNumbersGenes apiNumbersGenes = new ApiNumbersGenes();
-
         Set<GeneNumber> genes = new HashSet<>();
 
-        if(CacheUtils.isEnabled()) {
+        if (CacheUtils.isEnabled()) {
             if (CacheUtils.getNumbers("genes") == null) {
                 genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
                 CacheUtils.setNumbers("genes", genes);
             } else {
                 genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
             }
-        }else {
+        } else {
             genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
         }
 
-//        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all genes");
-        apiNumbersGenes.setData(genes);
-
-        RespMeta meta = new RespMeta();
-        meta.setCode(HttpStatus.OK.value());
-        apiNumbersGenes.setRespMeta(meta);
-
-//        oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "End the servlet");
-        return new ResponseEntity<ApiNumbersGenes>(apiNumbersGenes, HttpStatus.OK);
+        return new ResponseEntity<>(genes, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "", notes = "Get numbers served for the main page dashboard.", response = ApiNumbersMain.class)
+    @ApiOperation(value = "", notes = "Get numbers served for the main page dashboard.", response = MainNumber.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/main/",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<ApiNumbersMain> numbersMainGet()
+    public ResponseEntity<MainNumber> numbersMainGet()
         throws NotFoundException {
 
-        ApiNumbersMain apiNumbersMain = new ApiNumbersMain();
         MainNumber mainNumber = new MainNumber();
 
         if (CacheUtils.isEnabled()) {
@@ -126,7 +103,7 @@ public class NumbersApi {
             } else {
                 mainNumber = (MainNumber) CacheUtils.getNumbers("main");
             }
-        }else {
+        } else {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(alterations);
 
@@ -135,44 +112,32 @@ public class NumbersApi {
             mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
         }
 
-        apiNumbersMain.setData(mainNumber);
-
-        RespMeta meta = new RespMeta();
-        meta.setCode(HttpStatus.OK.value());
-        apiNumbersMain.setRespMeta(meta);
-
-        return new ResponseEntity<ApiNumbersMain>(apiNumbersMain, HttpStatus.OK);
+        return new ResponseEntity<>(mainNumber, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = ApiNumbersGenes.class)
+    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = LevelNumber.class, responseContainer = "Set")
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/levels/",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<ApiNumbersLeves> numbersLevelsGet()
+    public ResponseEntity<Set<LevelNumber>> numbersLevelsGet()
         throws NotFoundException {
 
-        ApiNumbersLeves apiNumbersGenes = new ApiNumbersLeves();
         Set<LevelNumber> genes = new HashSet<>();
 
-        if(CacheUtils.isEnabled()) {
+        if (CacheUtils.isEnabled()) {
             if (CacheUtils.getNumbers("levels") == null) {
                 genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
                 CacheUtils.setNumbers("levels", genes);
             } else {
                 genes = (Set<LevelNumber>) CacheUtils.getNumbers("levels");
             }
-        }else {
+        } else {
             genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
         }
 
-        apiNumbersGenes.setData(genes);
 
-        RespMeta meta = new RespMeta();
-        meta.setCode(HttpStatus.OK.value());
-        apiNumbersGenes.setRespMeta(meta);
-
-        return new ResponseEntity<ApiNumbersLeves>(apiNumbersGenes, HttpStatus.OK);
+        return new ResponseEntity<>(genes, HttpStatus.OK);
     }
 }
