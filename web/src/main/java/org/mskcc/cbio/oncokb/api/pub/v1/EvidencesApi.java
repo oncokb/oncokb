@@ -1,18 +1,16 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
-import org.mskcc.cbio.oncokb.apiModels.ApiErrorResp;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
-import org.mskcc.cbio.oncokb.apiModels.ApiObjectResp;
-import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.EvidenceUtils;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceQueries;
+import org.mskcc.cbio.oncokb.model.EvidenceQueryRes;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
@@ -33,12 +31,11 @@ public interface EvidencesApi {
 
     @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List", tags = {"Evidences", "Search",})
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
+        @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List")})
     @RequestMapping(value = "/evidences/lookup",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<ApiListResp> evidencesLookupGet(
+    ResponseEntity<List<Evidence>> evidencesLookupGet(
         @ApiParam(value = "The entrez gene ID. Use comma to seperate multi-queries.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Use comma to seperate multi-queries.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "Variant name. Use comma to seperate multi-queries.") @RequestParam(value = "variant", required = false) String variant
@@ -54,13 +51,12 @@ public interface EvidencesApi {
 
     @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List", tags = {"Evidences", "Search",})
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
+        @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List")})
     @RequestMapping(value = "/evidences/lookup",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    ResponseEntity<ApiListResp> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body
+    ResponseEntity<List<EvidenceQueryRes>> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body
     );
 
 //    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, responseContainer = "List", tags = {"Evidences",})
