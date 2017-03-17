@@ -4,9 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.RespMeta;
-import org.mskcc.cbio.oncokb.response.ApiGene;
-import org.mskcc.cbio.oncokb.response.ApiGenes;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,50 +24,33 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class GenesApi {
 
 
-    @ApiOperation(value = "", notes = "Get list of current existed genes.", response = ApiGenes.class)
+    @ApiOperation(value = "", notes = "Get list of current existed genes.", response = Gene.class, responseContainer = "Set")
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<ApiGenes> genesGet(@ApiParam(value = "The highest level of gene") @RequestParam(value = "level", required = false) String level
+    public ResponseEntity<Set<Gene>> genesGet(@ApiParam(value = "The highest level of gene") @RequestParam(value = "level", required = false) String level
 
 
     ) throws NotFoundException {
-
-        ApiGenes instance = new ApiGenes();
-
         Set<Gene> genes = GeneUtils.getAllGenes();
-        instance.setData(genes);
-
-        RespMeta meta = new RespMeta();
-        meta.setCode(HttpStatus.OK.value());
-        instance.setRespMeta(meta);
-
-        return new ResponseEntity<ApiGenes>(instance, HttpStatus.OK);
+        return new ResponseEntity<>(genes, HttpStatus.OK);
     }
 
 
-    @ApiOperation(value = "", notes = "Get gene info.", response = ApiGenes.class)
+    @ApiOperation(value = "", notes = "Get gene info.", response = Gene.class)
     @io.swagger.annotations.ApiResponses(value = {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/{entrezGeneId}",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<ApiGene> genesHugoSymbolGet(
+    public ResponseEntity<Gene> genesHugoSymbolGet(
         @ApiParam(value = "The gene symbol used in Human Genome Organisation.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
 
     ) throws NotFoundException {
-        ApiGene apiGene = new ApiGene();
-
         Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-        apiGene.setData(gene);
-
-        RespMeta meta = new RespMeta();
-        meta.setCode(HttpStatus.OK.value());
-        apiGene.setRespMeta(meta);
-
-        return new ResponseEntity<ApiGene>(apiGene, HttpStatus.OK);
+        return new ResponseEntity<>(gene, HttpStatus.OK);
     }
 
 }
