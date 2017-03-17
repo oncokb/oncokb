@@ -48,8 +48,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null);
 
         if (alteration != null) {
-            isHotspot = HotspotUtils.isHotspot(
-                alteration.getGene().getHugoSymbol(), alteration.getProteinStart(), alteration.getProteinEnd());
+            isHotspot = HotspotUtils.isHotspot(alteration);
         }
 
         apiObjectResp.setData(isHotspot);

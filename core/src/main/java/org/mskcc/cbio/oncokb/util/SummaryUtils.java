@@ -238,7 +238,7 @@ public class SummaryUtils {
                 alteration.setName(queryAlteration);
                 AlterationUtils.annotateAlteration(alteration, queryAlteration);
             }
-            isHotspot = HotspotUtils.isHotspot(gene.getHugoSymbol(), alteration.getProteinStart(), alteration.getProteinEnd());
+            isHotspot = HotspotUtils.isHotspot(alteration);
         }
         if (gene == null || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(alterations).size() == 0) {
             if (gene != null && queryAlteration != null) {

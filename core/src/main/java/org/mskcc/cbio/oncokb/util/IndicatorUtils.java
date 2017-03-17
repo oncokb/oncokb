@@ -151,9 +151,9 @@ public class IndicatorUtils {
 
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), alteration.getProteinStart(), alteration.getProteinEnd()));
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(alteration));
             } else {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(gene.getHugoSymbol(), query.getProteinStart(), query.getProteinEnd()));
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(alteration));
             }
 
             if (query.getTumorType() != null) {

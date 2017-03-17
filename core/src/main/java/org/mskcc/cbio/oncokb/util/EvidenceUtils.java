@@ -779,7 +779,7 @@ public class EvidenceUtils {
 
                         // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
                         if (relevantAlts.isEmpty()
-                            && HotspotUtils.isHotspot(alt.getGene().getHugoSymbol(), alt.getProteinStart(), alt.getProteinEnd())) {
+                            && HotspotUtils.isHotspot(alt)) {
                             Alteration oncogenicMutations = AlterationUtils.findAlteration(alt.getGene(), "Oncogenic Mutations");
                             if (oncogenicMutations != null) {
                                 relevantAlts.add(oncogenicMutations);

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.HotspotMutation;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,17 +67,29 @@ public class HotspotUtils {
         return hotspotMutations;
     }
 
-    public static Boolean isHotspot(String hugoSymbol, Integer proteinStart, Integer proteinEnd) {
+    public static Boolean isHotspot(Alteration alteration) {
         Boolean isHotspot = false;
-        if (hugoSymbol != null && proteinStart != null && proteinEnd != null
-            && proteinEnd >= proteinStart && proteinStart > 0) {
-            for (HotspotMutation hotspotMutation : hotspotMutations) {
-                if (hotspotMutation.getHugoSymbol().equals(hugoSymbol)
-                    && hotspotMutation.getAminoAcidPosition() != null
-                    && proteinStart >= hotspotMutation.getAminoAcidPosition().getStart()
-                    && proteinEnd <= hotspotMutation.getAminoAcidPosition().getEnd()) {
-                    isHotspot = true;
-                    break;
+        if (alteration != null && alteration.getGene() != null) {
+            if (alteration.getConsequence() == null) {
+                AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+            }
+
+            Integer proteinStart = alteration.getProteinStart();
+            Integer proteinEnd = alteration.getProteinEnd();
+            VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
+
+            if (proteinStart != null && alteration.getConsequence().equals(missense)) {
+                if (proteinEnd == null) {
+                    proteinEnd = proteinStart;
+                }
+                for (HotspotMutation hotspotMutation : hotspotMutations) {
+                    if (hotspotMutation.getHugoSymbol().equals(alteration.getGene().getHugoSymbol())
+                        && hotspotMutation.getAminoAcidPosition() != null
+                        && proteinStart >= hotspotMutation.getAminoAcidPosition().getStart()
+                        && proteinEnd <= hotspotMutation.getAminoAcidPosition().getEnd()) {
+                        isHotspot = true;
+                        break;
+                    }
                 }
             }
         }
