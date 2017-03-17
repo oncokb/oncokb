@@ -221,7 +221,7 @@ angular.module('oncokbApp')
                     if ($scope.reviewMode) {
                         $scope.lastReviewed = $scope.rs.get('lastReviewed');
                     }
-                    var contentEditable = $scope.reviewMode ? (!$scope.rs.get('action') ? true : false) : $scope.fe;
+                    var contentEditable = $scope.reviewMode ? ($scope.rs.get('review') !== false ? true : false) : $scope.fe;
                     var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
                     if ($scope.t === 'p') {
                         classResult += ' doubleH';
