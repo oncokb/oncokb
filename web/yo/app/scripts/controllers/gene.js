@@ -2060,7 +2060,7 @@ angular.module('oncokbApp')
                 var defaultPlaceHolder = 'No suggestion found. Please curate according to literature.';
                 DatabaseConnector.getSuggestedVariants()
                     .then(function(resp) {
-                        if (resp && _.isArray(resp.data) && resp.data.length > 0) {
+                        if (_.isArray(resp) && resp.length > 0) {
                             $scope.suggestedMutations = resp.data;
                         } else {
                             $scope.suggestedMutations = [];
