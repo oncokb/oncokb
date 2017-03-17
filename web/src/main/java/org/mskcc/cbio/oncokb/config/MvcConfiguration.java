@@ -54,12 +54,7 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
     protected ApiInfo apiInfo() {
         ApiInfo apiInfo = new ApiInfo(
             "OncoKB APIs",
-            "Every response is contained by an envelope. " +
-                "The meta key is used to communicate extra information about the response to the developer. " +
-                "\n" +
-                "In order to expose the data structure, we return object model in the Swagger response class " +
-                "directly instead of envelope structure. So you may not be able to reproduce data structure through" +
-                " swagger.json directly.",
+            "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
             "v1.0.0",
             "http://oncokb.org/#/terms",
             new Contact("OncoKB", "http://www.oncokb.org", "team@oncokb.org"),
