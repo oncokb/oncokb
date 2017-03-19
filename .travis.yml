@@ -1,0 +1,32 @@
+language: java
+jdk: oraclejdk8
+services:
+    - docker
+cache:
+    directories:
+        - $HOME/.m2
+        - $HOME/maven
+env:
+  global:
+        - MAVEN_VERSION=3.3.9
+        - secure: "enwFCLCFWnYpfMwaaQT7EXnda6VHZxhHBKHHnFF4bO0TrVUZj2DmkMJAzumCstSo3li9Q0CNIUyTj6+9HnEleOn6zYb0opzS5rsjXXoUKPi8sOGgbTLqIb3cKjGy4244eb9jBsmmlFrRk1u6QDBSx+3KbQ132m8cbGj7BuCfvj9htlVW3gYk0vZ5S8uklfTqyjDY8kmfSty/K3ONeyEROH1Psz/FE9GS4tjT4BmFN0WDVLrFu8zYxTH3hFXOir2tRYbSeHPinpnEDD6EkcnaA/tiGJRGQ5Y/c2iAKKohntTHjo7hCh79YamChGfazQztjHetdv1iGpXFv2YbqLw4ti2sFPltJescSo1kIH78WJZlbX4E57VT17LS0yqC7XlfPaobDe0rh5K9gWL+bIT8ryaKa9T0EsYzPowndtOfsV8c7Po/B2PAQJn1/Y6jGtBlrKu5EStXd+QjIdR5WIulOMZq1IwfudRsGv77hdFC2+UR/MXIl3RElukspnhJUG8H/YzYnKpCZXL6CTte2zJbTiZAXg0VpGc0ODH7iFH+WFJqSHyeXiyfB7ElXmjRgjITG26wxjMQKaXsfT9Qc4l9kmDKAuSBTmLX/URF41KLMWzSjnOCS7ySerUOKc6YaiwFGtoPC2rO4R/NqOQOZMn/OZ2/uvO8BRrFTW8T5+HOAjk="
+        - secure: "kLmDVmj68iqZQ/RfqwY8HU7IjPZFuXR4l19UNZYCavtocso/MuJYIOoJmg6D3uQE7M4A08kUgcsp+RhkVHqwBQqD1FnftXnm59fXHlrHzy6JIoNctQDoBKFuanNeIURAY7siLs0upugaFz44gp2NJETOoWW2X7n4M6rBCrKhw1DDC1H1abeSXrTGd0/bd7utT530YW88jGK1XbySq3Scspu88gEBxMnT1oEYABa/atVY+2DfBLRNku+9aXoNY5iLh/bPLpVAfB3gVVRxGY7F8V6R2BNBCy9tv0jmc9XxpEbuUz9szZeFzbmBdsXpMhdaagWqdzLtu1j2x41JUdeTcV/gotwnKRght06LZxIiIeVjStjIjxlEo7Qm4i6OKdqpBy5Nk8xoAQtWXt9Rcg9dK8wpkyN0CWNUevkQMFTGb+xngo2CImuYOBmuwQfkNxtU0vyc94FlNFmwumpg+Z1gG1YPwjl1h98LoGs1s+gpGyaYaMQe5vSlu8iDOBD5cOPds/nP5LA6e7/jZkfyvGwBNZjrDYofNEAwioT9L0NtOpO/c1RNKdgLgUbYUsIK/HqG+TFcnGurRszxiFbxY0gxvNwpOfyqNDHrquoQg5LsHkJbvhPHSNkBICEAjU5m3LrC/sMAVzyisBQsphM16Pu3XleXYt4Ix3+gkp8DXz85gdc="
+        - secure: "eR334xAoCijtiBlcv7zn+fGauEY86N2qG6p0LM8NzcM6L4/yfEx5pTMtwQ8lEOx4lszJJ70y6e0yY2VsTzJdfAvjpgKpqSly1TibWQu4PC7w2zs/yPUwRTshhZVTi1K600jQZ3OhT/OFVu38btPAnMVN8tnLjJl0KTyChU2nH2LIekRLC1GYTkM6xjnqhxnZiOVVokddpihy4+uZDvxc7ZFgdY+WvToQSKB2e7DjYEB4fPU8krhMrWJczOUpEmQbbeaFja+HrLGDpNnWeMBff2rABnB8ssPf25bVNRr20RuefCEwjM1DpaBL2xyjybg/zspXpIowqsyG6pr9nVmyG7GSD6Imwra9AI7luuojTjo7p4awaCvzeKrcWhtr1GAOCwvS3YgCj5xS/IbuvloBy8G8b2l06LA5YGGAi+igrJhgFKn73s+VRgfAWKCZN2T3JHMPd3ykQKdqprGshQoEZR2Ivye9eb/kZl0CeRh3Q81lHsPKWLsoimddJoPVGD3ILAFMSxvkE2iimsRR6MtoY9DiBZpxzUEIyw0yqLs6T74HVv4FPS9qkjeMtMb3UvBcH4w1IbSfUZ76YKXoePO4NQBM3DofILrdUtuMDG1fmmNim1joC3MEsCldInnNzthjss7tciYvC9zzI4v3Nb11G6psKZoYVPIMKCla6RRKhWQ="
+install:
+    # install maven
+    - |
+        mkdir -p ~/maven
+        test -d ~/maven/$MAVEN_VERSION/bin || { \
+            find ~/maven -mindepth 1 -delete && \
+            mkdir -p ~/maven/$MAVEN_VERSION && \
+            wget -O - http://www-us.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz | \
+                tar -C ~/maven/$MAVEN_VERSION --strip-components=1 -xzf -; }
+script:
+    - mvn -Pbackend,docker -DskipTests clean install
+after_success:
+    - |
+        if [[ "$TRAVIS_TAG" ]]
+        then
+            docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && \
+            docker push cbioportal/oncokb
+        fi
