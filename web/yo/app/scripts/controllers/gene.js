@@ -2267,7 +2267,7 @@ angular.module('oncokbApp')
                 DatabaseConnector.getSuggestedVariants()
                     .then(function(resp) {
                         if (_.isArray(resp) && resp.length > 0) {
-                            $scope.suggestedMutations = resp.data;
+                            $scope.suggestedMutations = resp;
                         } else {
                             $scope.suggestedMutations = [];
                         }
