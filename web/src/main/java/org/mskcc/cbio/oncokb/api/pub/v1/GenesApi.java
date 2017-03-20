@@ -2,7 +2,6 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.GeneEvidence;
 import org.springframework.http.ResponseEntity;
@@ -67,8 +66,10 @@ public interface GenesApi {
     @RequestMapping(value = "/genes/lookup",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<Gene>> genesLookupGet(@ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+    ResponseEntity<List<Gene>> genesLookupGet(
+        @ApiParam(value = "The gene symbol used in Human Genome Organisation. (Deprecated, use query instead)") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "The entrez gene ID. (Deprecated, use query instead)") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
     );
 
 }
