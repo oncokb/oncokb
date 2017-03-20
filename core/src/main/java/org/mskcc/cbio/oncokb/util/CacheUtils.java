@@ -52,8 +52,6 @@ public class CacheUtils {
     // Every time the observer is triggered, all other services will be triggered as well
     private static List<String> otherServices = new ArrayList<>();
 
-    private static String source = null;
-
     private static Observer variantSummaryObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
@@ -188,7 +186,7 @@ public class CacheUtils {
             if (gene != null) {
                 for (String service : otherServices) {
                     HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
-                        gene.getHugoSymbol() + "&source=" + source, "");
+                        gene.getHugoSymbol(), "");
                 }
             }
         } else if (cmd == "reset") {
@@ -306,7 +304,6 @@ public class CacheUtils {
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
 
-        System.out.println(source);
         System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current));
     }
 
@@ -627,7 +624,7 @@ public class CacheUtils {
 
     public static void updateGene(Integer entrezGeneId) {
         try {
-            System.out.println("Update gene..." + PropertiesUtils.getProperties("app.name"));
+            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -637,9 +634,12 @@ public class CacheUtils {
 
     public static void updateGene(Integer entrezGeneId, Boolean propagate) {
         try {
-            System.out.println("Update gene..." + PropertiesUtils.getProperties("app.name"));
+            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name"));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (propagate == null) {
+            propagate = false;
         }
         GeneObservable.getInstance().update("update", entrezGeneId.toString());
         if (propagate) {
@@ -648,14 +648,25 @@ public class CacheUtils {
     }
 
     public static void resetAll() {
-        System.out.println("Reset all...");
+        try {
+            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         GeneObservable.getInstance().update("reset", null);
         notifyOtherServices("reset", null);
     }
 
     public static void resetAll(Boolean propagate) {
-        System.out.println("Reset all...");
+        try {
+            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         GeneObservable.getInstance().update("reset", null);
+        if (propagate == null) {
+            propagate = false;
+        }
         if (propagate) {
             notifyOtherServices("reset", null);
         }
