@@ -112,31 +112,13 @@ public class GenesApiController implements GenesApi {
         return new ResponseEntity<>(geneList, HttpStatus.OK);
     }
 
-    public ResponseEntity genesLookupGet(@ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+    public ResponseEntity genesLookupGet(
+        @ApiParam(value = "The gene symbol used in Human Genome Organisation. (Deprecated, use query instead)") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "The entrez gene ID. (Deprecated, use query instead)") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
     ) {
-        Set<Gene> genes = new HashSet<>();
+        Set<Gene> genes = GeneUtils.searchGene(query);
         HttpStatus status = HttpStatus.OK;
-
-        if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            if (hugoSymbol != null) {
-                Set<Gene> blurGenes = GeneUtils.searchGene(hugoSymbol);
-                if (blurGenes != null) {
-                    genes.addAll(blurGenes);
-                }
-            }
-
-            if (entrezGeneId != null) {
-                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-                if (gene != null) {
-                    if (!genes.contains(gene)) {
-                        genes = new HashSet<>();
-                    }
-                }
-            }
-        }
 
         List<Gene> geneList = new ArrayList<>(genes);
         return new ResponseEntity<>(geneList, status);

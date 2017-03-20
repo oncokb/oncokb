@@ -36,13 +36,13 @@ public interface EvidencesApi {
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<List<Evidence>> evidencesLookupGet(
-        @ApiParam(value = "The entrez gene ID. Use comma to seperate multi-queries.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
-        , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Use comma to seperate multi-queries.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "Variant name. Use comma to seperate multi-queries.") @RequestParam(value = "variant", required = false) String variant
-        , @ApiParam(value = "Tumor type name. OncoTree code is supported. Use comma to seperate multi-queries.") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Consequence. Use comma to seperate multi-queries. Possible value: feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, initiator_codon_variant, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
-        , @ApiParam(value = "Protein Start. Use comma to seperate multi-queries.") @RequestParam(value = "proteinStart", required = false) String proteinStart
-        , @ApiParam(value = "Protein End. Use comma to seperate multi-queries.") @RequestParam(value = "proteinEnd", required = false) String proteinEnd
+        @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant
+        , @ApiParam(value = "Tumor type name. OncoTree code is supported.") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = "Consequence. Possible value: feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, initiator_codon_variant, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
+        , @ApiParam(value = "Protein Start.") @RequestParam(value = "proteinStart", required = false) String proteinStart
+        , @ApiParam(value = "Protein End.") @RequestParam(value = "proteinEnd", required = false) String proteinEnd
         , @ApiParam(value = "Tumor type source. OncoTree tumor types are the default setting. We may have customized version, like Quest.", defaultValue = "oncotree") @RequestParam(value = "source", required = false, defaultValue = "oncotree") String source
         , @ApiParam(value = "Only show highest level evidences") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Separate by comma. LEVEL_1, LEVEL_2A, LEVEL_2B, LEVEL_3A, LEVEL_3B, LEVEL_4, LEVEL_R1, LEVEL_R2, LEVEL_R3") @RequestParam(value = "levelOfEvidence", required = false) String levels
