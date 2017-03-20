@@ -1145,23 +1145,6 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.updateGene(params, function(result) {
                     $scope.docStatus.savedGene = true;
-                    DatabaseConnector
-                        .updateGeneCache($scope.gene.name.getText(),
-                            function() {
-                                console.log('success', result);
-                            },
-                            function() {
-                                console.log('error', result);
-                                var errorMessage = 'An error has occurred ' +
-                                    'when updating gene cache: ' +
-                                    $scope.gene.name.getText();
-
-                                $rootScope.$emit('oncokbError',
-                                    {
-                                        message: errorMessage,
-                                        reason: JSON.stringify(result)
-                                    });
-                            });
                     changeLastUpdate();
                 }, function(result) {
                     $scope.docStatus.savedGene = true;
