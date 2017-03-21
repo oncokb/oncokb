@@ -1,9 +1,13 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.map.HashedMap;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Drug;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -43,6 +47,10 @@ public class CacheUtils {
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences
     private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
+
+    // Other services which will be defined in the property cache.update separated by comma
+    // Every time the observer is triggered, all other services will be triggered as well
+    private static List<String> otherServices = new ArrayList<>();
 
     private static Observer variantSummaryObserver = new Observer() {
         @Override
@@ -168,6 +176,26 @@ public class CacheUtils {
         }
     };
 
+    private static void notifyOtherServices(String cmd, Integer entrezGeneId) {
+        if (cmd == null) {
+            cmd = "";
+        }
+        System.out.println("Notify other services...");
+        if (cmd == "update" && entrezGeneId != null) {
+            Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+            if (gene != null) {
+                for (String service : otherServices) {
+                    HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
+                        gene.getHugoSymbol(), "");
+                }
+            }
+        } else if (cmd == "reset") {
+            for (String service : otherServices) {
+                HttpUtils.postRequest(service + "?cmd=reset", "");
+            }
+        }
+    }
+
     static {
         try {
             Long current = MainUtils.getCurrentTimestamp();
@@ -230,8 +258,19 @@ public class CacheUtils {
             HotspotUtils.getHotspots();
             System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current));
             current = MainUtils.getCurrentTimestamp();
+
+            registerOtherServices();
+            System.out.println("Register other services: " + MainUtils.getTimestampDiff(current));
+            current = MainUtils.getCurrentTimestamp();
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+    private static void registerOtherServices() throws IOException {
+        String services = PropertiesUtils.getProperties("cache.update");
+        if (services != null) {
+            otherServices = Arrays.asList(services.split(","));
         }
     }
 
@@ -260,7 +299,7 @@ public class CacheUtils {
         genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
         genesByEntrezId = new HashedMap();
         hugoSymbolToEntrez = new HashedMap();
-        for(Gene gene : genes) {
+        for (Gene gene : genes) {
             genesByEntrezId.put(gene.getEntrezGeneId(), gene);
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
@@ -325,10 +364,17 @@ public class CacheUtils {
     }
 
     public static Set<Alteration> getVUS(Integer entrezGeneId) {
+        if (entrezGeneId == null) {
+            return new HashSet<>();
+        }
         if (VUS.containsKey(entrezGeneId)) {
             return VUS.get(entrezGeneId);
         } else {
-            return new HashSet<>();
+            Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+            if (gene != null) {
+                synEvidences();
+            }
+            return VUS.get(entrezGeneId);
         }
     }
 
@@ -555,6 +601,7 @@ public class CacheUtils {
             for (Gene gene : genes) {
                 if (!evidences.containsKey(gene.getEntrezGeneId())) {
                     setEvidences(gene);
+                    setVUS(gene.getEntrezGeneId(), getEvidences(gene));
                 }
             }
         }
@@ -576,11 +623,53 @@ public class CacheUtils {
     }
 
     public static void updateGene(Integer entrezGeneId) {
+        try {
+            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         GeneObservable.getInstance().update("update", entrezGeneId.toString());
+        notifyOtherServices("update", entrezGeneId);
+    }
+
+    public static void updateGene(Integer entrezGeneId, Boolean propagate) {
+        try {
+            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (propagate == null) {
+            propagate = false;
+        }
+        GeneObservable.getInstance().update("update", entrezGeneId.toString());
+        if (propagate) {
+            notifyOtherServices("update", entrezGeneId);
+        }
     }
 
     public static void resetAll() {
+        try {
+            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         GeneObservable.getInstance().update("reset", null);
+        notifyOtherServices("reset", null);
+    }
+
+    public static void resetAll(Boolean propagate) {
+        try {
+            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        GeneObservable.getInstance().update("reset", null);
+        if (propagate == null) {
+            propagate = false;
+        }
+        if (propagate) {
+            notifyOtherServices("reset", null);
+        }
     }
 
     public static void enableCacheUtils() {
