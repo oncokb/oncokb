@@ -106,6 +106,10 @@ angular.module('oncokbApp')
                 }
             };
             $scope.vusUpdate = function(message) {
+                $scope.message = message;
+                $timeout.cancel($scope.vusAPICall);
+            };
+            $scope.vusAPICall = $timeout(function() {
                 if ($scope.status.isDesiredGene) {
                     var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
                     var vusData = stringUtils.getVUSFullData(vus, true);
@@ -114,11 +118,11 @@ angular.module('oncokbApp')
                     }, function(error) {
                         console.log('error happened when saving VUS to DB', error);
                         var subject = 'VUS update Error for ' + $scope.gene.name.getText();
-                        var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                        sendEmail('jiaojiaowanghere@gmail.com', subject, content);
+                        var content = 'Error happened when ' + $scope.message + '. The system error returned is ' + error;
+                        sendEmail('dev.oncokb@gmail.com', subject, content);
                     });
                 }
-            };
+            }, 2000);
 
             $scope.getData = function() {
             };
