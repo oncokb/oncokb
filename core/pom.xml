@@ -159,8 +159,8 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.cbioportal</groupId>
-            <artifactId>cancerhotspots</artifactId>
+            <groupId>org.cmo.cancerhotspots</groupId>
+            <artifactId>model</artifactId>
             <version>0.1.0</version>
         </dependency>
     </dependencies>
