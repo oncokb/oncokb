@@ -801,9 +801,7 @@ angular.module('oncokbApp')
                             nctId: tumor.trials.get(i)
                         });
                     }
-                    if(tumor.trials.length > 0) {
-                        dataUUID = tumor.trials_uuid.getText();
-                    }
+                    dataUUID = tumor.trials_uuid.getText();
                     break;
                 default:
                     break;
