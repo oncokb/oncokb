@@ -181,7 +181,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
 
     function updateGene(data) {
         return $http.post(
-            OncoKB.config.curationLink + 'driveAnnotation',
+            OncoKB.config.apiLink + 'driveAnnotation',
             data,
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},

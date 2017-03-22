@@ -9,10 +9,7 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.NcbiEUtils;
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.mskcc.oncotree.model.TumorType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -198,7 +195,7 @@ public class DriveAnnotationParser {
                     // Variants of unknown significance
                     parseVUS(gene, vus);
 
-//                    CacheUtils.updateGene(gene.getEntrezGeneId());
+                    CacheUtils.updateGene(gene.getEntrezGeneId());
                 } else {
                     System.out.print("No gene name available");
                 }
@@ -807,7 +804,7 @@ public class DriveAnnotationParser {
         if (nccnObj.has("therapy") && !nccnObj.getString("therapy").trim().isEmpty()) {
             therapy = nccnObj.getString("therapy").trim();
         }
-        
+
         // disease
         String disease = null;
         if (nccnObj.has("disease") && !nccnObj.getString("disease").trim().isEmpty()) {

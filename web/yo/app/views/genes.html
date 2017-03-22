@@ -8,23 +8,23 @@
             <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="startFEUUIDImportingFE()">UUID</button>-->
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkError()">Check errors</button>
             <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="backup()"><span ng-show="!!!status.backup"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.backup">Backup</span></button>
-            <button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="resetCache()"><span>Reset Cache</span></button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="changeData()"><span>Change Data</span></button>-->
-            <!--<button ng-if="status.hasOwnProperty('cache') && (status.cache === 'enabled' || status.cache === 'disabled') && $root.internal"  type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="changeCacheStatus()">-->
+            <button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="resetCache()"><span>Reset Cache</span></button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="changeData()"><span>Change Data</span></button>-->
+            <!--<button ng-if="status.hasOwnProperty('cache') && (status.cache === 'enabled' || status.cache === 'disabled') && $rootScope.internal"  type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="changeCacheStatus()">-->
                 <!--<span ng-show="status.cache === 'enabled'">Disable Cache</span>-->
                 <!--<span ng-show="status.cache === 'disabled'">Enable Cache</span>-->
             <!--</button>-->
-            <!--<button ng-if="status.hasOwnProperty('cache') && status.cache==='unknown' && $root.internal" type="button"-->
-                    <!--class="btn btn-default" ng-if="userRole === 8 && $root.internal" disabled>Unknown Cache status-->
+            <!--<button ng-if="status.hasOwnProperty('cache') && status.cache==='unknown' && $rootScope.internal" type="button"-->
+                    <!--class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" disabled>Unknown Cache status-->
             <!--</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="initialStatus()">Initial status</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="showDocs()">Get docs info</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="convertTumorTypes()">Convert tumor types</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="convertMutationEffect()">Convert mutation effect and oncogenic</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="findRelevantVariants()">Find relevant variants</button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="migrate()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Migrate</span></button>-->
-            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $root.internal" ng-click="showValidationResult()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Show Validation Result</span></button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="initialStatus()">Initial status</button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="showDocs()">Get docs info</button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="convertTumorTypes()">Convert tumor types</button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="convertMutationEffect()">Convert mutation effect and oncogenic</button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="findRelevantVariants()">Find relevant variants</button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="migrate()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Migrate</span></button>-->
+            <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && $rootScope.internal" ng-click="showValidationResult()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Show Validation Result</span></button>-->
         </span>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
             <thead><tr class="dashedHeader"><!-- <th>ID</th> --><th>Gene</th><th>Phase</th><th>Curators</th><th>Emails</th><th>Last modified</th><th ng-show="userRole === 8">Status</th><th>Edit</th>

@@ -54,28 +54,23 @@ angular.module('oncokbApp')
                 // whole object.
                 scope.commentsCopy = [];
 
-                scope.$watch('comments.length', function() {
-                    if (scope.fileEditable || scope.comments.length > 0) {
-                        element.find('i').off('mouseenter');
-                        element.find('i').bind('mouseenter', function() {
-                            if (scope.mouseLeaveTimeout) {
-                                $timeout.cancel(scope.mouseLeaveTimeout);
-                                scope.mouseLeaveTimeout = '';
-                            }
-                            element.find('commentsBody').show();
-                        });
-
-                        element.find('i').off('mouseleave');
-                        element.find('i').bind('mouseleave', function() {
-                            scope.mouseLeaveTimeout = $timeout(function() {
-                                element.find('commentsBody').hide();
-                            }, 500);
-                        });
-                    } else {
-                        element.find('i').off('mouseenter');
-                        element.find('i').off('mouseleave');
+                element.find('i').off('mouseenter');
+                element.find('i').bind('mouseenter', function() {
+                    if (scope.mouseLeaveTimeout) {
+                        $timeout.cancel(scope.mouseLeaveTimeout);
+                        scope.mouseLeaveTimeout = '';
                     }
+                    element.find('commentsBody').show();
+                });
 
+                element.find('i').off('mouseleave');
+                element.find('i').bind('mouseleave', function() {
+                    scope.mouseLeaveTimeout = $timeout(function() {
+                        element.find('commentsBody').hide();
+                    }, 500);
+                });
+
+                scope.$watch('comments.length', function() {
                     var commentsCopy = {
                         resolved: [],
                         content: []

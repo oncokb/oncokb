@@ -107,16 +107,21 @@ angular.module('oncokbApp')
             };
             $scope.vusUpdate = function(message) {
                 if ($scope.status.isDesiredGene) {
-                    var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
-                    var vusData = stringUtils.getVUSFullData(vus, true);
-                    DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
-                        console.log('success saving vus to database');
-                    }, function(error) {
-                        console.log('error happened when saving VUS to DB', error);
-                        var subject = 'VUS update Error for ' + $scope.gene.name.getText();
-                        var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                        sendEmail('jiaojiaowanghere@gmail.com', subject, content);
-                    });
+                    if ($scope.status.vusUpdateTimeout) {
+                        $timeout.cancel($scope.status.vusUpdateTimeout);
+                    }
+                    $scope.status.vusUpdateTimeout = $timeout(function() {
+                        var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
+                        var vusData = stringUtils.getVUSData(vus);
+                        DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
+                            console.log('success saving vus to database');
+                        }, function(error) {
+                            console.log('error happened when saving VUS to DB', error);
+                            var subject = 'VUS update Error for ' + $scope.gene.name.getText();
+                            var content = 'Error happened when ' + message + '. The system error returned is ' + error;
+                            sendEmail('jiaojiaowanghere@gmail.com', subject, content);
+                        });
+                    }, 2000);
                 }
             };
 
@@ -1145,23 +1150,6 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.updateGene(params, function(result) {
                     $scope.docStatus.savedGene = true;
-                    DatabaseConnector
-                        .updateGeneCache($scope.gene.name.getText(),
-                            function() {
-                                console.log('success', result);
-                            },
-                            function() {
-                                console.log('error', result);
-                                var errorMessage = 'An error has occurred ' +
-                                    'when updating gene cache: ' +
-                                    $scope.gene.name.getText();
-
-                                $rootScope.$emit('oncokbError',
-                                    {
-                                        message: errorMessage,
-                                        reason: JSON.stringify(result)
-                                    });
-                            });
                     changeLastUpdate();
                 }, function(result) {
                     $scope.docStatus.savedGene = true;
