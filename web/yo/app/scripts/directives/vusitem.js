@@ -42,7 +42,7 @@ angular.module('oncokbApp')
                         scope.dtBy = user.name;
                         var tempMessage = user.name + ' tried to refresh ' + scope.variant.name.text + ' at ' + new Date().toLocaleString();
                         scope.vusUpdate(tempMessage);
-                }
+                    }
                 });
             },
             controller: function($scope) {

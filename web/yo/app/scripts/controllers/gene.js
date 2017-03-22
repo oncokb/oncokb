@@ -107,16 +107,21 @@ angular.module('oncokbApp')
             };
             $scope.vusUpdate = function(message) {
                 if ($scope.status.isDesiredGene) {
-                    var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
-                    var vusData = stringUtils.getVUSFullData(vus, true);
-                    DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
-                        console.log('success saving vus to database');
-                    }, function(error) {
-                        console.log('error happened when saving VUS to DB', error);
-                        var subject = 'VUS update Error for ' + $scope.gene.name.getText();
-                        var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                        sendEmail('jiaojiaowanghere@gmail.com', subject, content);
-                    });
+                    if ($scope.status.vusUpdateTimeout) {
+                        $timeout.cancel($scope.status.vusUpdateTimeout);
+                    }
+                    $scope.status.vusUpdateTimeout = $timeout(function() {
+                        var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
+                        var vusData = stringUtils.getVUSData(vus);
+                        DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
+                            console.log('success saving vus to database');
+                        }, function(error) {
+                            console.log('error happened when saving VUS to DB', error);
+                            var subject = 'VUS update Error for ' + $scope.gene.name.getText();
+                            var content = 'Error happened when ' + message + '. The system error returned is ' + error;
+                            sendEmail('jiaojiaowanghere@gmail.com', subject, content);
+                        });
+                    }, 2000);
                 }
             };
 
