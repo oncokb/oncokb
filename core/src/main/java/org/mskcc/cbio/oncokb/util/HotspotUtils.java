@@ -77,6 +77,8 @@ public class HotspotUtils {
             Integer proteinStart = alteration.getProteinStart();
             Integer proteinEnd = alteration.getProteinEnd();
             VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
+            VariantConsequence insertion = VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_insertion");
+            VariantConsequence deletion = VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_deletion");
 
             if (proteinStart != null && alteration.getConsequence().equals(missense)) {
                 if (proteinEnd == null) {
@@ -88,6 +90,17 @@ public class HotspotUtils {
                         && hotspotMutation.getAminoAcidPosition() != null
                         && proteinStart >= hotspotMutation.getAminoAcidPosition().getStart()
                         && proteinEnd <= hotspotMutation.getAminoAcidPosition().getEnd()) {
+                        isHotspot = true;
+                        break;
+                    }
+                }
+            } else if (alteration.getConsequence().equals(insertion) || alteration.getConsequence().equals(deletion)) {
+                for (SingleResidueHotspotMutation hotspotMutation : hotspotMutations) {
+                    if (hotspotMutation.getType().equals("in-frame indel")
+                        && hotspotMutation.getHugoSymbol().equals(alteration.getGene().getHugoSymbol())
+                        && hotspotMutation.getAminoAcidPosition() != null
+                        && proteinEnd >= hotspotMutation.getAminoAcidPosition().getStart()
+                        && proteinStart <= hotspotMutation.getAminoAcidPosition().getEnd()) {
                         isHotspot = true;
                         break;
                     }
