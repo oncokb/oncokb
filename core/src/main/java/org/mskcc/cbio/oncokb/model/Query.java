@@ -25,6 +25,33 @@ public class Query implements java.io.Serializable {
     public Query() {
     }
 
+    public Query(Alteration alt) {
+        if (alt != null) {
+            if (alt.getGene() != null) {
+                this.hugoSymbol = alt.getGene().getHugoSymbol();
+                this.entrezGeneId = alt.getGene().getEntrezGeneId();
+            }
+            this.alteration = alt.getAlteration();
+            this.alterationType = alt.getAlterationType() == null ? "MUTATION" : alt.getAlterationType().name();
+            this.consequence = alt.getConsequence() == null ? null : alt.getConsequence().getTerm();
+            this.proteinStart = alt.getProteinStart();
+            this.proteinEnd = alt.getProteinEnd();
+        }
+    }
+
+    public Query(VariantQuery variantQuery) {
+        if (variantQuery != null) {
+            if (variantQuery.getGene() != null) {
+                this.hugoSymbol = variantQuery.getGene().getHugoSymbol();
+                this.entrezGeneId = variantQuery.getGene().getEntrezGeneId();
+            }
+            this.alteration = variantQuery.getQueryAlteration();
+            this.consequence = variantQuery.getConsequence();
+            this.proteinStart = variantQuery.getProteinStart();
+            this.proteinEnd = variantQuery.getProteinEnd();
+        }
+    }
+
     public Query(String hugoSymbol, String alteration, String tumorType) {
         this.hugoSymbol = hugoSymbol;
         this.alteration = alteration;

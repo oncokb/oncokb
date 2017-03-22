@@ -19,12 +19,12 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
         if (gene == null) {
             return "";
         }
         String geneId = Integer.toString(gene.getEntrezGeneId());
-        String key = geneId + "&&" + queryAlteration + "&&" + queryTumorType;
+        String key = geneId + "&&" + query.getQueryId();
         if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
             return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
         }
@@ -48,12 +48,12 @@ public class SummaryUtils {
 //            } else {
 //            }
 
-        String os = oncogenicSummary(gene, alterations, queryAlteration, false);
+        String os = oncogenicSummary(gene, alterations, query, false);
         if (os != null && !os.equals("")) {
             sb.append(" " + os);
         }
 
-        String ts = tumorTypeSummary(gene, queryAlteration, alterations, queryTumorType, relevantTumorTypes);
+        String ts = tumorTypeSummary(gene, query, alterations, relevantTumorTypes);
         if (ts != null && !ts.equals("")) {
             sb.append(" " + ts);
         }
@@ -64,7 +64,7 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
 
@@ -72,7 +72,7 @@ public class SummaryUtils {
 
         sb.append(geneSummary(genes.iterator().next()));
 
-        String os = oncogenicSummary(gene, alterations, queryAlteration, false);
+        String os = oncogenicSummary(gene, alterations, query, false);
         if (os != null && !os.equals("")) {
             sb.append(" " + os);
         }
@@ -80,11 +80,12 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static String tumorTypeSummary(Gene gene, String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<TumorType> relevantTumorTypes) {
+    public static String tumorTypeSummary(Gene gene, Query query, List<Alteration> alterations, Set<TumorType> relevantTumorTypes) {
         //Tumor type summary
         Boolean ttSummaryNotGenerated = true;
         String tumorTypeSummary = null;
-
+        String queryTumorType = query.getTumorType();
+        String queryAlteration = query.getAlteration();
         queryTumorType = convertTumorTypeNameInSummary(queryTumorType);
 
         if (queryAlteration != null) {
@@ -224,12 +225,13 @@ public class SummaryUtils {
         return "This is a synonymous mutation and is not annotated by OncoKB.";
     }
 
-    public static String oncogenicSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Boolean addition) {
+    public static String oncogenicSummary(Gene gene, List<Alteration> alterations, Query query, Boolean addition) {
         StringBuilder sb = new StringBuilder();
         Alteration alteration = null;
         Boolean isHotspot = false;
+        String queryAlteration = query.getAlteration();
         if (gene != null && queryAlteration != null) {
-            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), null, null, null);
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             if (alteration == null) {
                 alteration = new Alteration();
                 alteration.setGene(gene);
@@ -402,12 +404,12 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String fullSummary(Gene gene, List<Alteration> alterations, String queryAlteration, Set<TumorType> relevantTumorTypes, String queryTumorType) {
+    public static String fullSummary(Gene gene, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
         StringBuilder sb = new StringBuilder();
 
         sb.append(geneSummary(gene));
 
-        String vts = SummaryUtils.variantTumorTypeSummary(gene, alterations, queryAlteration, relevantTumorTypes, queryTumorType);
+        String vts = SummaryUtils.variantTumorTypeSummary(gene, alterations, query, relevantTumorTypes);
         if (vts != null && !vts.equals("")) {
             sb.append(" " + vts);
         }

@@ -287,14 +287,14 @@ public class IndicatorUtils {
 
             // Tumor type summary
             if (query.getTumorType() != null) {
-                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query.getAlteration(),
-                    new ArrayList<>(relevantAlterations), query.getTumorType(),
+                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query,
+                    new ArrayList<>(relevantAlterations),
                     new HashSet<>(oncoTreeTypes)));
             }
 
             // Mutation summary
             indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
-                new ArrayList<>(relevantAlterations), query.getAlteration(), false));
+                new ArrayList<>(relevantAlterations), query, false));
 
             // This is special case for KRAS wildtype. May need to come up with a better plan for this.
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
