@@ -698,7 +698,7 @@ angular.module('oncokbApp').run(
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
                 DatabaseConnector.sendEmail({
-                    sendTo: 'bugs.pro.exterminator@gmail.com',
+                    sendTo: 'dev.oncokb@gmail.com',
                     subject: 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason,
                     content: 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message
                 }, function() {
