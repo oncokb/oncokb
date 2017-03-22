@@ -207,11 +207,13 @@ public class EvidenceController {
     private Boolean isEmptyEvidence(Evidence queryEvidence) {
         EvidenceType evidenceType = queryEvidence.getEvidenceType();
         String knownEffect = queryEvidence.getKnownEffect();
-        String description = queryEvidence.getDescription().trim();
+        String description = queryEvidence.getDescription();
         Set<Treatment> treatments = queryEvidence.getTreatments();
         Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
-        
+        if(description != null) {
+            description = description.trim();
+        }
         Boolean isEmpty = false;
         if(evidenceType.equals(EvidenceType.ONCOGENIC) || evidenceType.equals(EvidenceType.MUTATION_EFFECT)) {
             if(StringUtils.isNullOrEmpty(knownEffect) && StringUtils.isNullOrEmpty(description)) isEmpty = true;
