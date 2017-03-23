@@ -41,6 +41,7 @@ public class IndicatorController {
         @RequestParam(value = "geneStatus", required = false) String geneStatus,
         @RequestParam(value = "source", required = false) String source,
         @RequestParam(value = "levels", required = false) String levels,
+        @RequestParam(value = "queryType", required = false) String queryType,
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly
     ) {
 
@@ -55,6 +56,7 @@ public class IndicatorController {
         query.setAlterationType(alterationType);
         query.setTumorType(tumorType);
         query.setConsequence(consequence);
+        query.setType(queryType);
         if (proteinStart != null) {
             query.setProteinStart(Integer.parseInt(proteinStart));
         }

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -263,7 +264,7 @@ public class SummaryUtils {
                     }
                     if (lastEdit == null) {
                         if (isHotspot) {
-                            sb.append(hotspotSummary());
+                            sb.append(hotspotSummary(query));
                         } else {
                             sb.append(unknownOncogenicSummary(gene));
                         }
@@ -272,11 +273,11 @@ public class SummaryUtils {
                         sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.");
 
                         if (isHotspot) {
-                            sb.append(" " + hotspotSummary());
+                            sb.append(" " + hotspotSummary(query));
                         }
                     }
                 } else if (isHotspot) {
-                    sb.append(hotspotSummary());
+                    sb.append(hotspotSummary(query));
                 } else {
                     sb.append(unknownOncogenicSummary(gene));
                 }
@@ -296,7 +297,7 @@ public class SummaryUtils {
                 return null;
             }
             String geneId = Integer.toString(gene.getEntrezGeneId());
-            String key = geneId + "&&" + queryAlteration + "&&" + addition.toString();
+            String key = geneId + "&&" + query.getQueryId() + "&&" + addition.toString();
             if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
                 return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
             }
@@ -343,7 +344,7 @@ public class SummaryUtils {
                     sb.append(" oncogenic.");
                 }
             } else if (isHotspot) {
-                sb.append(hotspotSummary());
+                sb.append(hotspotSummary(query));
             } else {
                 sb.append("It is unknown whether ");
                 if (appendThe) {
@@ -446,9 +447,26 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String hotspotSummary() {
-        return "This mutation is predicted to be oncogenic as it was identified " +
-            "as a statistically significant hotspot (Chang et al. 2016).";
+    public static String hotspotSummary(Query query) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("This mutation is predicted to be oncogenic as it was identified " +
+            "as a statistically significant hotspot");
+        if (query.getType() != null && query.getType().equals("web")) {
+            String cancerHotspotsLink = "";
+            try {
+                cancerHotspotsLink = PropertiesUtils.getProperties("cancerhotspots.website.link");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            cancerHotspotsLink = cancerHotspotsLink.trim();
+            if (!cancerHotspotsLink.isEmpty()) {
+                sb.append(" (");
+                sb.append(cancerHotspotsLink);
+                sb.append(")");
+            }
+        }
+        sb.append(".");
+        return sb.toString();
     }
 
     private static String alleleNamesStr(Set<Alteration> alterations) {
@@ -899,7 +917,7 @@ public class SummaryUtils {
             queryAlteration = queryAlteration.replace("Fusion", "fusion");
             sb.append(queryAlteration + " positive");
         } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")
-            ||StringUtils.equalsIgnoreCase(queryAlteration, "amplification")) {
+            || StringUtils.equalsIgnoreCase(queryAlteration, "amplification")) {
             queryAlteration = gene.getHugoSymbol() + "-amplified";
             sb.append(queryAlteration);
         } else {
