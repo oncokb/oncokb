@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class Query implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
+    private String type; // Query type. Different type may return different result.
     private String hugoSymbol;
     private Integer entrezGeneId;
     private String alteration;
@@ -23,6 +24,33 @@ public class Query implements java.io.Serializable {
     private Integer proteinEnd;
 
     public Query() {
+    }
+
+    public Query(Alteration alt) {
+        if (alt != null) {
+            if (alt.getGene() != null) {
+                this.hugoSymbol = alt.getGene().getHugoSymbol();
+                this.entrezGeneId = alt.getGene().getEntrezGeneId();
+            }
+            this.alteration = alt.getAlteration();
+            this.alterationType = alt.getAlterationType() == null ? "MUTATION" : alt.getAlterationType().name();
+            this.consequence = alt.getConsequence() == null ? null : alt.getConsequence().getTerm();
+            this.proteinStart = alt.getProteinStart();
+            this.proteinEnd = alt.getProteinEnd();
+        }
+    }
+
+    public Query(VariantQuery variantQuery) {
+        if (variantQuery != null) {
+            if (variantQuery.getGene() != null) {
+                this.hugoSymbol = variantQuery.getGene().getHugoSymbol();
+                this.entrezGeneId = variantQuery.getGene().getEntrezGeneId();
+            }
+            this.alteration = variantQuery.getQueryAlteration();
+            this.consequence = variantQuery.getConsequence();
+            this.proteinStart = variantQuery.getProteinStart();
+            this.proteinEnd = variantQuery.getProteinEnd();
+        }
     }
 
     public Query(String hugoSymbol, String alteration, String tumorType) {
@@ -48,6 +76,14 @@ public class Query implements java.io.Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getHugoSymbol() {
@@ -116,28 +152,51 @@ public class Query implements java.io.Serializable {
 
     @JsonIgnore
     public String getQueryId() {
+
         List<String> content = new ArrayList<>();
-        if (entrezGeneId != null) {
-            content.add(Integer.toString(entrezGeneId));
+        if (this.entrezGeneId != null) {
+            content.add(Integer.toString(this.entrezGeneId));
         } else {
-            if (hugoSymbol != null) {
-                content.add(hugoSymbol);
+            if (this.hugoSymbol != null) {
+                content.add(this.hugoSymbol);
+            } else {
+                content.add("");
             }
         }
-        if (alteration != null) {
-            content.add(alteration);
+        if (this.alteration != null) {
+            content.add(this.alteration);
+        } else {
+            content.add("");
         }
-        if (tumorType != null) {
-            content.add(tumorType);
+        if (this.alterationType != null) {
+            content.add(this.alterationType);
+        } else {
+            content.add("");
+        }
+        if (this.type != null) {
+            content.add(this.type);
+        } else {
+            content.add("");
+        }
+        if (this.tumorType != null) {
+            content.add(this.tumorType);
+        } else {
+            content.add("");
         }
         if (consequence != null) {
-            content.add(consequence);
+            content.add(this.consequence);
+        } else {
+            content.add("");
         }
-        if (proteinStart != null) {
-            content.add(Integer.toString(proteinStart));
+        if (this.proteinStart != null) {
+            content.add(Integer.toString(this.proteinStart));
+        } else {
+            content.add("");
         }
-        if (proteinEnd != null) {
-            content.add(Integer.toString(proteinEnd));
+        if (this.proteinEnd != null) {
+            content.add(Integer.toString(this.proteinEnd));
+        } else {
+            content.add("");
         }
 
         return StringUtils.join(content.toArray(), "&");

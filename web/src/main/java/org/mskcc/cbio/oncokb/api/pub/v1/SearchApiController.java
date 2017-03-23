@@ -40,6 +40,7 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "Tumor type source. OncoTree tumor types are the default setting. We may have customized version, like Quest.", defaultValue = "oncotree") @RequestParam(value = "source", required = false, defaultValue = "oncotree") String source
         , @ApiParam(value = "Level of evidences.") @RequestParam(value = "levels", required = false) String levels
         , @ApiParam(value = "Only show treatments of highest level") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
+        , @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.") @RequestParam(value = "queryType", required = false, defaultValue = "regular") String queryType
     ) {
 
         ApiObjectResp apiObjectResp = new ApiObjectResp();
@@ -59,6 +60,7 @@ public class SearchApiController implements SearchApi {
             query.setAlteration(variant);
             query.setTumorType(tumorType);
             query.setConsequence(consequence);
+            query.setType(queryType);
             if (proteinStart != null) {
                 query.setProteinStart(proteinStart);
             }

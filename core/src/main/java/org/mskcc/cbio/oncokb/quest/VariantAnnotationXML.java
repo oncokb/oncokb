@@ -75,10 +75,11 @@ public final class VariantAnnotationXML {
 
 //        sortTumorType(tumorTypes, tumorType);
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
-
+        Query query = new Query(alt);
+        query.setTumorType(tumorType);
         // summary
         sb.append("<annotation_summary>");
-        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, alt.getAlteration(), relevantTumorTypes, tumorType));
+        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, query, relevantTumorTypes));
         sb.append("</annotation_summary>\n");
 
         // gene background

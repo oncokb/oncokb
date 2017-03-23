@@ -85,7 +85,7 @@ public final class AlterationUtils {
                 consequence = "missense_variant";
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?delins([A-Z]+)");
+            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
@@ -94,15 +94,20 @@ public final class AlterationUtils {
                 } else {
                     end = start;
                 }
-                Integer deletion = end - start + 1;
-                Integer insertion = m.group(4).length();
-
-                if (insertion - deletion > 0) {
+                String type = m.group(4);
+                if(type == "ins") {
                     consequence = "inframe_insertion";
-                } else if (insertion - deletion == 0) {
-                    consequence = "missense_variant";
                 } else {
-                    consequence = "inframe_deletion";
+                    Integer deletion = end - start + 1;
+                    Integer insertion = m.group(5).length();
+
+                    if (insertion - deletion > 0) {
+                        consequence = "inframe_insertion";
+                    } else if (insertion - deletion == 0) {
+                        consequence = "missense_variant";
+                    } else {
+                        consequence = "inframe_deletion";
+                    }
                 }
             } else {
                 p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(_)?splice");
