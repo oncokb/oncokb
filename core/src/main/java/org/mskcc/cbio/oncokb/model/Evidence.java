@@ -243,23 +243,33 @@ public class Evidence implements java.io.Serializable {
     }
 
     public Evidence(Evidence e) {
-        id = e.id;
-        uuid = e.uuid;
-        evidenceType = e.evidenceType;
-        cancerType = e.cancerType;
-        subtype = e.subtype;
-        gene = e.gene;
-        alterations = e.alterations;
-        description = e.description;
-        additionalInfo = e.additionalInfo;
-        treatments = e.treatments;
-        knownEffect = e.knownEffect;
-        lastEdit = e.lastEdit;
-        levelOfEvidence = e.levelOfEvidence;
-        propagation = e.propagation;
-        articles = e.articles;
-        nccnGuidelines = e.nccnGuidelines;
-        clinicalTrials = e.clinicalTrials;
+        this.uuid = e.uuid;
+        this.evidenceType = e.evidenceType;
+        this.cancerType = e.cancerType;
+        this.subtype = e.subtype;
+        this.gene = e.gene;
+        this.description = e.description;
+        this.additionalInfo = e.additionalInfo;
+        this.knownEffect = e.knownEffect;
+        this.lastEdit = e.lastEdit;
+        this.levelOfEvidence = e.levelOfEvidence;
+        this.propagation = e.propagation;
+        // make deep copy of sets 
+        Set<Alteration> alterationsTemp = new HashSet<>();
+        Set<Treatment> treatmentsTemp = new HashSet<>();
+        Set<Article> articlesTemp = new HashSet<>();
+        Set<NccnGuideline> nccnGuidelinesTemp = new HashSet<>();
+        Set<ClinicalTrial> clinicalTrialsTemp = new HashSet<>();
+        alterationsTemp.addAll(e.alterations);
+        treatmentsTemp.addAll(e.treatments);
+        articlesTemp.addAll(e.articles);
+        nccnGuidelinesTemp.addAll(e.nccnGuidelines);
+        clinicalTrialsTemp.addAll(e.clinicalTrials);
+        this.alterations = alterationsTemp;
+        this.treatments = treatmentsTemp;
+        this.articles = articlesTemp;
+        this.nccnGuidelines = nccnGuidelinesTemp;
+        this.clinicalTrials = clinicalTrialsTemp;
     }
     
     public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, Set<Treatment> treatments,

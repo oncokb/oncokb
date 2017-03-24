@@ -5,6 +5,12 @@
         <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="iconExist('reject')"  ng-click="reject($event)"></i>
         <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>
     </div>
+    <div ng-if="rt === 'name'">
+        <p style="font-size:15px;float:left;margin-top:5px;margin-right:10px" ng-if="signatureCheck()">Name updated by {{rs.get('updatedBy')}} at {{rs.get('updateTime')}}</p>
+        <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="iconExist('accept')"  ng-click="accept($event)"></i>
+        <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="iconExist('reject')"  ng-click="reject($event)"></i>
+        <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>
+    </div>
     <div ng-if="rt === 'delete' && rs.get('removed')">
         <p class="changeInfoText" ng-if="!rs.get('loading')">Deleted by {{rs.get('updatedBy')}} at {{rs.get('updateTime')}}</p>
         <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="!rs.get('loading')" ng-click="confirmDelete($event, tp, mt, tm, ti, tt)"></i>

@@ -15,6 +15,18 @@
             ng-if="io && t === 'p'">
         </pub-iframe>
     </div>
+    <div ng-if="t === 'name'">
+        <h4 ng-if="reviewMode && rs.get('lastReviewed') && !rs.get('removedItem')">New Content:</h4>
+        <span contenteditable="{{reviewMode ? (rs.get('lastReviewed') ? true : false) : fe}}"
+              ng-class="editableBox"
+           ng-model="content.stringO">
+        </span>
+        <br/>
+        <div ng-if="reviewMode && rs.get('lastReviewed') && !rs.get('removedItem')">
+            <h4>Old Content:</h4>
+            <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewed')}}</p>
+        </div>
+    </div>
     <div ng-if="t === 'treatment-select'" class="treatment-select">
         <div>
             <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>

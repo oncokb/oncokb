@@ -953,11 +953,35 @@ public class EvidenceUtils {
     }
 
     public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
-        ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
-        NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
-        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-        TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
+        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+        Gene gene = geneBo.findGeneByHugoSymbol(evidence.getGene().getHugoSymbol());
+        evidence.setGene(gene);
+        if(gene == null) {
+            return;
+        }   
+        Set<Alteration> queryAlterations = evidence.getAlterations();
+        if(queryAlterations != null && !queryAlterations.isEmpty()) {
+            AlterationType type = AlterationType.MUTATION;
+            Set<Alteration> alterations = new HashSet<Alteration>();
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            for (Alteration alt : queryAlterations) {
+                String proteinChange = alt.getAlteration();
+                String displayName = alt.getName();
+                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                if (alteration == null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(type);
+                    alteration.setAlteration(proteinChange);
+                    alteration.setName(displayName);
+                    AlterationUtils.annotateAlteration(alteration, proteinChange);
+                    alterationBo.save(alteration);
+                }
+                alterations.add(alteration);
+            }
+            evidence.setAlterations(alterations);
+        }
+        
         Set<ClinicalTrial> trials = evidence.getClinicalTrials();
         Set<Article> articles = evidence.getArticles();
         Set<Treatment> treatments = evidence.getTreatments();
@@ -966,12 +990,11 @@ public class EvidenceUtils {
         if (evidence.getSubtype() != null && evidence.getSubtype().isEmpty()) {
             evidence.setSubtype(null);
         }
-
         if (evidence.getCancerType() != null && evidence.getCancerType().isEmpty()) {
             evidence.setCancerType(null);
         }
-
         if (trials != null && !trials.isEmpty()) {
+            ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
             Set<ClinicalTrial> annotatedTrials = new HashSet<>();
             Set<String> nctIds = new HashSet<String>();
             for (ClinicalTrial trial : trials) {
@@ -987,6 +1010,7 @@ public class EvidenceUtils {
             evidence.setClinicalTrials(annotatedTrials);
         }
         if (articles != null && !articles.isEmpty()) {
+            ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
             Set<Article> annotatedArticles = new HashSet<>();
             for (Article article : articles) {
                 String tempPMID = article.getPmid();
@@ -1015,6 +1039,8 @@ public class EvidenceUtils {
         }
 
         if (treatments != null && !treatments.isEmpty()) {
+            DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
+            TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
             for (Treatment treatment : treatments) {
                 Set<Drug> drugs = treatment.getDrugs();
                 if (drugs != null && !drugs.isEmpty()) {
@@ -1034,6 +1060,7 @@ public class EvidenceUtils {
             }
         }
         if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
+            NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
             Set<NccnGuideline> nccnFromDB = new HashSet<>();
             for (NccnGuideline nccnGuideline : nccnGuidelines) {
                 NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getTherapy(), nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
