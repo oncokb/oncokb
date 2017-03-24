@@ -7,7 +7,7 @@
  * # eStatus
  */
 angular.module('oncokbApp')
-    .directive('eStatus', function(gapi, $timeout) {
+    .directive('eStatus', function(gapi, $timeout, $rootScope) {
         return {
             templateUrl: 'views/eStatus.html',
             restrict: 'AE',
@@ -18,6 +18,12 @@ angular.module('oncokbApp')
             },
             replace: true,
             link: function postLink(scope, element) {
+                scope.display = ($rootScope.userRole === 8 && !$rootScope.reviewMode);
+                $rootScope.$watch('reviewMode', function(n, o) {
+                    if(n !== o) {
+                        scope.display = ($rootScope.userRole === 8 && !n);
+                    }
+                });
                 scope.mouseLeaveTimeout = '';
                 scope.checkboxes = [{
                     display: 'Unvetted',
