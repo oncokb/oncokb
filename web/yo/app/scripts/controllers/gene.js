@@ -539,6 +539,9 @@ angular.module('oncokbApp')
                                     myDeletedEvidenceModels.push(['treatment', mutation, tumor, ti, treatment]);
                                     continue;
                                 }
+                                if(needReview(treatment.name_uuid)) {
+                                    formMyEvidences('TREATMENT_NAME_CHANGE', mutation, tumor, ti, treatment);
+                                }
                                 tempArr = [treatment.level_review, treatment.indication_review, treatment.description_review];
                                 if (needReview(treatment.name_uuid) || needReview(treatment.level_uuid) || needReview(treatment.indication_uuid) || needReview(treatment.description_uuid)) {
                                     if (isChangedBy(treatment.name_review, userName)) {
@@ -552,6 +555,9 @@ angular.module('oncokbApp')
                                 }
                             }
                         }
+                        if(needReview(tumor.name_uuid)) {
+                            formMyEvidences('TUMOR_NAME_CHANGE', mutation, tumor, null, null);
+                        }
                         if(needReview(tumor.summary_uuid)) {
                             if (tumor.summary_review.get('updatedBy') === userName) {
                                 formMyEvidences('TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
@@ -562,6 +568,9 @@ angular.module('oncokbApp')
                                 formMyEvidences('CLINICAL_TRIAL', mutation, tumor, null, null);
                             }
                         }
+                    }
+                    if(needReview(mutation.name_uuid)) {
+                        formMyEvidences('MUTATION_NAME_CHANGE', mutation, null, null, null);
                     }
                 }
                 if (_.isEmpty(myGeneTypeEvidence) && _.isEmpty(myUpdatedEvidences) && _.isEmpty(myDeletedEvidences)) {

@@ -160,7 +160,7 @@ angular.module('oncokbApp').factory('SendEmail', ['$http', 'OncoKB', function($h
 
     function init(params) {
         return $http.post(
-            OncoKB.config.apiLink + 'sendEmail',
+            OncoKB.config.curationLink + 'sendEmail',
             params,
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
