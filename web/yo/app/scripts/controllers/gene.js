@@ -1538,27 +1538,21 @@ angular.module('oncokbApp')
                 }
             };
             function removeModel(type, mutation, tumor, ti, treatment, uuids) {
+                var indices = getIndex(mutation, tumor, ti, treatment);
                 switch(type) {
                 case 'mutation':
-                    var mutationIndex = $scope.gene.mutations.indexOf(mutation);
-                    delete $scope.geneStatus[mutationIndex];
-                    $scope.geneStatus = migrateGeneStatusPosition($scope.geneStatus, mutationIndex);
+                    delete $scope.geneStatus[indices[0]];
+                    $scope.geneStatus = migrateGeneStatusPosition($scope.geneStatus, indices[0]);
                     $scope.gene.mutations.removeValue(mutation);
                     break;
                 case 'tumor':
-                    var mutationIndex = $scope.gene.mutations.indexOf(mutation);
-                    var tumorIndex = mutation.tumors.indexOf(tumor);
-                    delete $scope.geneStatus[mutationIndex][tumorIndex];
-                    $scope.geneStatus[mutationIndex] = migrateGeneStatusPosition($scope.geneStatus[mutationIndex], tumorIndex);
+                    delete $scope.geneStatus[indices[0]][indices[1]];
+                    $scope.geneStatus[indices[0]] = migrateGeneStatusPosition($scope.geneStatus[indices[0]], indices[1]);
                     mutation.tumors.removeValue(tumor);
                     break;
                 case 'treatment':
-                    var mutationIndex = $scope.gene.mutations.indexOf(mutation);
-                    var tumorIndex = mutation.tumors.indexOf(tumor);
-                    var therapyCategoryIndex = tumor.TI.indexOf(ti);
-                    var treatmentIndex = ti.treatments.indexOf(treatment);
-                    delete $scope.geneStatus[mutationIndex][tumorIndex][therapyCategoryIndex][treatmentIndex];
-                    $scope.geneStatus[mutationIndex][tumorIndex][therapyCategoryIndex] = migrateGeneStatusPosition($scope.geneStatus[mutationIndex][tumorIndex][therapyCategoryIndex], treatmentIndex);
+                    delete $scope.geneStatus[indices[0]][indices[1]][indices[2]][indices[3]];
+                    $scope.geneStatus[indices[0]][indices[1]][indices[2]] = migrateGeneStatusPosition($scope.geneStatus[indices[0]][indices[1]][indices[2]], indices[3]);
                     ti.treatments.removeValue(treatment);
                     break;
                 }
@@ -1566,12 +1560,102 @@ angular.module('oncokbApp')
                     $rootScope.reviewMeta.delete(uuid);
                 });
             }
+
+            function getIndex(mutation, tumor, ti, treatment) {
+                var result = [-1, -1, -1, -1]; // Always return four elements array, standing for mutationIndex, tumorIndex, therapyCategoryIndex and treatmentIndex
+                if (mutation) {
+                    result[0] = $scope.gene.mutations.indexOf(mutation);
+                    if (tumor) {
+                        result[1] = mutation.tumors.indexOf(tumor);
+                        if (ti) {
+                            result[2] = tumor.TI.indexOf(ti);
+                            if (treatment) {
+                                result[3] = ti.treatments.indexOf(treatment);
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            $scope.initGeneStatus = function(mutation, tumor, ti, treatment) {
+                var objects = [mutation, tumor, ti, treatment];
+                var indices = getIndex(mutation, tumor, ti, treatment);
+                $scope.geneStatus = loopInitGeneStatus(objects, $scope.geneStatus, indices, 0);
+            };
+
+            $scope.checkGeneStatus = function(mutation, tumor, ti, treatment, key, statusType) {
+                if (!_.isString(statusType)) {
+                    statusType = 'isOpen';
+                }
+                var indices = getIndex(mutation, tumor, ti, treatment);
+                var result = loopCheckGeneStatus(false, $scope.geneStatus, indices, 0, key, statusType);
+                return result;
+            };
+
+            $scope.getGeneStatusItem = function(mutation, tumor, ti, treatment, key) {
+                var indices = getIndex(mutation, tumor, ti, treatment);
+                var result = loopGetGeneStatusItem(null, $scope.geneStatus, indices, 0, key);
+                return result;
+            };
+
+            function loopCheckGeneStatus(status, geneStatus, indices, index, key, statusType) {
+                var strIndex = indices[index].toString();
+                if (geneStatus.hasOwnProperty(strIndex)) {
+                    var nextIndex = index + 1;
+                    if (!_.isNumber(indices[nextIndex]) || indices[nextIndex] === -1) {
+                        if (key) {
+                            return geneStatus[strIndex][key] ? geneStatus[strIndex][key][statusType] : false;
+                        }
+                        return geneStatus[strIndex][statusType];
+                    }
+                    status = loopCheckGeneStatus(status, geneStatus[strIndex], indices, ++index, key, statusType);
+                }
+                return status;
+            }
+
+            function loopGetGeneStatusItem(ref, geneStatus, indices, index, key) {
+                var strIndex = indices[index].toString();
+                if (geneStatus.hasOwnProperty(strIndex)) {
+                    var nextIndex = index + 1;
+                    if (!_.isNumber(indices[nextIndex]) || indices[nextIndex] === -1) {
+                        if (key) {
+                            return geneStatus[strIndex][key] ? geneStatus[strIndex][key] : null;
+                        }
+                        return geneStatus[strIndex];
+                    }
+                    ref = loopGetGeneStatusItem(ref, geneStatus[strIndex], indices, ++index, key);
+                }
+                return ref;
+            }
+
+            function loopInitGeneStatus(objects, geneStatus, indices, index) {
+                var defaultIsOpen = false;
+                if (index < indices.length && indices[index] !== -1) {
+                    var strIndex = indices[index].toString();
+                    if (!geneStatus.hasOwnProperty(strIndex)) {
+                        geneStatus[strIndex] = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                        if (index === 0) {
+                            geneStatus[strIndex].oncogenic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].mutationEffect = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                        } else if (index === 1) {
+                            geneStatus[strIndex].prevalence = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].progImp = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].nccn = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].trials = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                        }
+                    }
+                    geneStatus[strIndex] = loopInitGeneStatus(objects, geneStatus[strIndex], indices, ++index);
+                }
+                return geneStatus;
+            }
+
             $scope.cancelDelete = function(event, type, mutation, tumor, ti, treatment) {
                 $scope.stopCollopse(event);
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function() {
                     var obj;
-                    switch(type) {
+                    switch (type) {
                     case 'mutation':
                         obj = mutation;
                         break;
@@ -2472,9 +2556,15 @@ angular.module('oncokbApp')
                 return levels;
             }
 
-            function GeneStatusSingleton() {
-                this.isOpen = false;
-                this.hideEmpty = false;
+            function GeneStatusSingleton(isOpen, hideEmpty) {
+                if (!_.isBoolean(isOpen)) {
+                    isOpen = false;
+                }
+                if (!_.isBoolean(hideEmpty)) {
+                    hideEmpty = false;
+                }
+                this.isOpen = isOpen;
+                this.hideEmpty = hideEmpty;
             }
 
             function containVariantInVUS(variantName) {
