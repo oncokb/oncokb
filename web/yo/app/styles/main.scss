@@ -113,6 +113,17 @@ table.colorHeader thead tr{
   margin-left: 5px;
 }
 
+.genes {
+    .header-buttons {
+        .group {
+            margin: 0 10px 0 0;
+        }
+        .backup {
+            width: 200px;
+        }
+    }
+}
+
 /* */
 
 div[contenteditable=true] {

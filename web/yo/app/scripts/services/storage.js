@@ -61,7 +61,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            self.createFolder = function(parentID) {
+            self.createFolder = function(parentID, title) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log(result);
@@ -74,7 +74,7 @@ angular.module('oncokbApp')
                 };
                 var date = new Date();
                 var body = {
-                    title: date.toString(),
+                    title: title ? title : date.toString(),
                     parents: [{id: parentID}],
                     mimeType: 'application/vnd.google-apps.folder'
                 };
