@@ -1637,7 +1637,7 @@ angular.module('oncokbApp')
                         geneStatus[strIndex] = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                         if (index === 0) {
                             geneStatus[strIndex].oncogenic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
-                            geneStatus[strIndex].shortSummary = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].mutationEffect = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                         } else if (index === 1) {
                             geneStatus[strIndex].prevalence = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                             geneStatus[strIndex].progImp = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);

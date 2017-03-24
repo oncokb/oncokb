@@ -148,7 +148,7 @@
           </uib-accordion-heading>
           <uib-accordion ng-if="tmpGeneStatus.isOpen" close-others="false">
             <!-- Oncogenicity -->
-            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'shortSummary')" ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
+            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic')" ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
               <uib-accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="tmpGeneStatus.isOpen"></i>
                 <span> Summary of clinical effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
@@ -177,7 +177,7 @@
             </uib-accordion-group>
 
             <!-- Mutation Effect -->
-            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic')" ng-if="displayCheck(mutation.effect_uuid, mutation.effect_review, mutation.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
+            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'mutationEffect')" ng-if="displayCheck(mutation.effect_uuid, mutation.effect_review, mutation.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'mutationEffect')) || (status.hideAllObsolete && mutation.oncogenic_eStatus.get('obsolete') === 'true')">
                   <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span> Summary of biological effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'mutationEffect')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.oncogenic_comments" object="mutation" key="oncogenic" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
