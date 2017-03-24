@@ -1563,21 +1563,17 @@ angular.module('oncokbApp')
 
             function getIndex(mutation, tumor, ti, treatment) {
                 var result = [-1, -1, -1, -1]; // Always return four elements array, standing for mutationIndex, tumorIndex, therapyCategoryIndex and treatmentIndex
-
-                if (mutation && tumor && ti && treatment) {
+                if (mutation) {
                     result[0] = $scope.gene.mutations.indexOf(mutation);
-                    result[1] = mutation.tumors.indexOf(tumor);
-                    result[2] = tumor.TI.indexOf(ti);
-                    result[3] = ti.treatments.indexOf(treatment);
-                } else if (mutation && tumor && ti) {
-                    result[0] = $scope.gene.mutations.indexOf(mutation);
-                    result[1] = mutation.tumors.indexOf(tumor);
-                    result[2] = tumor.TI.indexOf(ti);
-                } else if (mutation && tumor) {
-                    result[0] = $scope.gene.mutations.indexOf(mutation);
-                    result[1] = mutation.tumors.indexOf(tumor);
-                } else if (mutation) {
-                    result[0] = $scope.gene.mutations.indexOf(mutation);
+                    if (tumor) {
+                        result[1] = mutation.tumors.indexOf(tumor);
+                        if (ti) {
+                            result[2] = tumor.TI.indexOf(ti);
+                            if (treatment) {
+                                result[3] = ti.treatments.indexOf(treatment);
+                            }
+                        }
+                    }
                 }
                 return result;
             }
@@ -1634,35 +1630,19 @@ angular.module('oncokbApp')
             }
 
             function loopInitGeneStatus(objects, geneStatus, indices, index) {
-                var defaultIsOpen = Boolean($scope.reviewMode);
+                var defaultIsOpen = false;
                 if (index < indices.length && indices[index] !== -1) {
                     var strIndex = indices[index].toString();
                     if (!geneStatus.hasOwnProperty(strIndex)) {
+                        geneStatus[strIndex] = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                         if (index === 0) {
-                            geneStatus[strIndex] = {
-                                isOpen: defaultIsOpen,
-                                oncogenic: new GeneStatusSingleton(defaultIsOpen),
-                                shortSummary: new GeneStatusSingleton(defaultIsOpen)
-                            };
+                            geneStatus[strIndex].oncogenic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].shortSummary = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                         } else if (index === 1) {
-                            defaultIsOpen = $scope.reviewMode && Boolean(!objects[1].name_review.get('removed'));
-                            geneStatus[strIndex] = {
-                                isOpen: defaultIsOpen,
-                                prevalence: new GeneStatusSingleton(defaultIsOpen),
-                                progImp: new GeneStatusSingleton(defaultIsOpen),
-                                nccn: new GeneStatusSingleton(defaultIsOpen),
-                                trials: new GeneStatusSingleton(defaultIsOpen)
-                            };
-                        } else if (index === 3) {
-                            defaultIsOpen = $scope.reviewMode && Boolean(!objects[3].name_review.get('removed'));
-                            geneStatus[strIndex] = {
-                                isOpen: defaultIsOpen,
-                                prevalence: new GeneStatusSingleton(defaultIsOpen),
-                                progImp: new GeneStatusSingleton(defaultIsOpen),
-                                nccn: new GeneStatusSingleton(defaultIsOpen)
-                            };
-                        } else {
-                            geneStatus[strIndex] = new GeneStatusSingleton(defaultIsOpen);
+                            geneStatus[strIndex].prevalence = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].progImp = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].nccn = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].trials = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                         }
                     }
                     geneStatus[strIndex] = loopInitGeneStatus(objects, geneStatus[strIndex], indices, ++index);
