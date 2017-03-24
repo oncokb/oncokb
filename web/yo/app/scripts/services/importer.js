@@ -8,7 +8,9 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('importer', function importer($timeout, documents, S, storage, OncoKB, $q, _, stringUtils) {
+    .service('importer', function importer($timeout, documents, S,
+                                           storage, OncoKB, $q, _,
+                                           stringUtils, dialogs) {
         var self = {};
         self.docs = [];
         self.docsL = 0;
@@ -18,17 +20,42 @@ angular.module('oncokbApp')
             backupIndex: -1,
             migrateIndex: -1
         };
+        self.backupFolderName = '';
 
-        function backup(callback) {
-            backupMeta(callback);
+        function backup(backupFolderName, callback) {
+            if (backupFolderName) {
+                self.backupFolderName = backupFolderName;
+            }
+            createFolder(null, getBackupFolderName())
+                .then(function(result) {
+                    if (result && result.error) {
+                        console.error('Create folder failed.', result);
+                        if (callback) {
+                            callback();
+                        }
+                    } else {
+                        backupMeta(result.id, callback);
+                    }
+                });
         }
-        function backupGene(callback) {
-            if (self.parentFolder) {
+
+        function getBackupFolderName() {
+            if (!self.backupFolderName) {
+                self.backupFolderName = (new Date()).toString();
+            }
+            return self.backupFolderName;
+        }
+
+        function backupGene(parentFolderId, callback) {
+            if (!parentFolderId) {
+                parentFolderId = self.parentFolder;
+            }
+            if (parentFolderId) {
                 if (!angular.isFunction(callback)) {
                     callback = undefined;
                 }
 
-                createFolder().then(function(result) {
+                createFolder(parentFolderId, 'Genes').then(function(result) {
                     if (result && result.error) {
                         console.error('Create folder failed.', result);
                         if (callback) {
@@ -45,10 +72,14 @@ angular.module('oncokbApp')
                 console.log('Backup folder ID needed.');
             }
         }
-        function backupMeta(callback) {
+
+        function backupMeta(parentFolderId, callback) {
+            if (!parentFolderId) {
+                parentFolderId = self.parentFolder;
+            }
             storage.requireAuth(true).then(function() {
                 // create Meta folder
-                storage.createFolder(self.parentFolder, 'Meta ' + (new Date()).toString()).then(function(folderResult) {
+                storage.createFolder(parentFolderId, 'Meta').then(function(folderResult) {
                     // create Meta document inside the new Meta folder
                     storage.createDocument('Meta Status', folderResult.id).then(function(file) {
                         console.log('Created meta file');
@@ -74,7 +105,7 @@ angular.module('oncokbApp')
                                                     var uuids = originalMeta.get(hugoSymbol).keys();
                                                     _.each(uuids, function(uuid) {
                                                         // currentReviewer is a collaborative string, which shouldn't be in the meta file. And also no need to import
-                                                        if(originalMeta.get(hugoSymbol).get(uuid).type === 'Map') {
+                                                        if (originalMeta.get(hugoSymbol).get(uuid).type === 'Map') {
                                                             var record = newMetaModel.createMap();
                                                             record.set('review', originalMeta.get(hugoSymbol).get(uuid).get('review'));
                                                             uuidMapping.set(uuid, record);
@@ -85,7 +116,7 @@ angular.module('oncokbApp')
                                                 newMetaModel.getRoot().set('review', newReview);
                                             }
                                             console.log('Completed back up meta file');
-                                            backupGene(callback);
+                                            backupGene(parentFolderId, callback);
                                         });
                                     }
                                 });
@@ -97,12 +128,15 @@ angular.module('oncokbApp')
             });
         };
 
-        function createFolder() {
+        function createFolder(parentFolderId, folderName) {
             var deferred = $q.defer();
 
+            if (!parentFolderId) {
+                parentFolderId = self.parentFolder;
+            }
             storage.requireAuth(true).then(function(result) {
                 if (result && !result.error) {
-                    storage.createFolder(self.parentFolder).then(function(result) {
+                    storage.createFolder(parentFolderId, folderName).then(function(result) {
                         if (result.id) {
                             self.newFolder = result.id;
                             deferred.resolve(result);
@@ -333,7 +367,7 @@ angular.module('oncokbApp')
                     model[key].setText(value);
                 } else if (model.type === 'Map') {
                     model.set(key, value);
-                } else if(key === 'propagation') {
+                } else if (key === 'propagation') {
                     model.name_eStatus.set('propagation', value);
                 } else {
                     console.log('Unknown key', key);
@@ -413,7 +447,7 @@ angular.module('oncokbApp')
                 } else if (key.indexOf('_review') !== -1) {
                     model[key] = createMap(rootModel, value);
                     // lastReviewed data was create as collaborative map for gene type. need to overwite it with object
-                    if(key === 'type_review' && model[key].has('lastReviewed')) {
+                    if (key === 'type_review' && model[key].has('lastReviewed')) {
                         model[key].set('lastReviewed', value.lastReviewed);
                     }
                 } else if (key.indexOf('_timeStamp') === -1) {
