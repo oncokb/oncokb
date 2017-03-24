@@ -86,7 +86,9 @@ angular.module('oncokbApp')
                         storage.getMetaRealtimeDocument(file.id).then(function(metaRealtime) {
                             if (metaRealtime && metaRealtime.error) {
                                 console.log('Failed to get new meta realtime document');
-                                callback();
+                                if (angular.isFunction(callback)) {
+                                    callback();
+                                }
                             } else {
                                 var newMetaModel = metaRealtime.getModel();
                                 var newReview = newMetaModel.createMap();
@@ -94,12 +96,16 @@ angular.module('oncokbApp')
                                 storage.retrieveMeta().then(function(result) {
                                     if (result && result.error) {
                                         console.log('Failed to get original meta file');
-                                        callback();
+                                        if (angular.isFunction(callback)) {
+                                            callback();
+                                        }
                                     } else {
                                         storage.getMetaRealtimeDocument(result[0].id).then(function(originalMetaRealtime) {
                                             if (originalMetaRealtime && originalMetaRealtime.error) {
                                                 console.log('Failed to get original meta realtime document');
-                                                callback();
+                                                if (angular.isFunction(callback)) {
+                                                    callback();
+                                                }
                                             } else {
                                                 var originalMeta = originalMetaRealtime.getModel().getRoot().get('review');
                                                 var hugoSymbols = originalMeta.keys();
