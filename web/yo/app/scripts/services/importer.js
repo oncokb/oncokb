@@ -10,7 +10,7 @@
 angular.module('oncokbApp')
     .service('importer', function importer($timeout, documents, S,
                                            storage, OncoKB, $q, _,
-                                           stringUtils, dialogs) {
+                                           stringUtils) {
         var self = {};
         self.docs = [];
         self.docsL = 0;
@@ -85,18 +85,21 @@ angular.module('oncokbApp')
                         console.log('Created meta file');
                         storage.getMetaRealtimeDocument(file.id).then(function(metaRealtime) {
                             if (metaRealtime && metaRealtime.error) {
-                                dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                                console.log('Failed to get new meta realtime document');
+                                callback();
                             } else {
                                 var newMetaModel = metaRealtime.getModel();
                                 var newReview = newMetaModel.createMap();
                                 // get the original meta file that we want to copy from
                                 storage.retrieveMeta().then(function(result) {
                                     if (result && result.error) {
-                                        dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                                        console.log('Failed to get original meta file');
+                                        callback();
                                     } else {
                                         storage.getMetaRealtimeDocument(result[0].id).then(function(originalMetaRealtime) {
                                             if (originalMetaRealtime && originalMetaRealtime.error) {
-                                                dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                                                console.log('Failed to get original meta realtime document');
+                                                callback();
                                             } else {
                                                 var originalMeta = originalMetaRealtime.getModel().getRoot().get('review');
                                                 var hugoSymbols = originalMeta.keys();
@@ -114,9 +117,9 @@ angular.module('oncokbApp')
                                                     newReview.set(hugoSymbol, uuidMapping);
                                                 });
                                                 newMetaModel.getRoot().set('review', newReview);
+                                                console.log('Completed back up meta file');
+                                                backupGene(parentFolderId, callback);
                                             }
-                                            console.log('Completed back up meta file');
-                                            backupGene(parentFolderId, callback);
                                         });
                                     }
                                 });
