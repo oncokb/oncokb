@@ -69,7 +69,7 @@ angular.module('oncokbApp')
 
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.geneStatus[this.gene.mutations.length - 1] = new GeneStatusSingleton();
+                        $scope.initGeneStatus(_mutation);
                     }
                 }
             };
@@ -409,6 +409,7 @@ angular.module('oncokbApp')
                                 }
                                 tempArr = [treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review];
                                 setOriginalStatus(tempArr);
+                                // we set review to TREATMENT_NAME_CHANGE to indicate the case where only treatment name get changed
                                 if (needReview(treatment.level_uuid) || needReview(treatment.indication_uuid) || needReview(treatment.description_uuid)) {
                                     treatment.name_review.set('review', true);
                                     treatmentChanged = true;
@@ -449,8 +450,68 @@ angular.module('oncokbApp')
                     mutationChanged = false;
                 }
                 $rootScope.reviewMode = true;
+                openChangedSections();
             }
-
+            function openChangedSections() {
+                for (var i = 0; i < $scope.gene.mutations.length; i++) {
+                    var mutation = $scope.gene.mutations.get(i);
+                    if(!mutation.name_review.get('review')) {
+                        continue;
+                    }
+                    if(!$scope.geneStatus[i]) {
+                        $scope.initGeneStatus(mutation);
+                    }
+                    $scope.geneStatus[i].isOpen = true;
+                    if(mutation.oncogenic_review.get('review')) {
+                        $scope.geneStatus[i].oncogenic.isOpen = true;
+                    }
+                    if(mutation.effect_review.get('review')) {
+                        $scope.geneStatus[i].mutationEffect.isOpen = true;
+                    }
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors.get(j);
+                        if(!tumor.name_review.get('review')) {
+                            continue;
+                        }
+                        if(!$scope.geneStatus[i][j]) {
+                            $scope.initGeneStatus(mutation, tumor);
+                        }
+                        $scope.geneStatus[i][j].isOpen = true;
+                        if(tumor.prevalence_review.get('review')) {
+                            $scope.geneStatus[i][j].prevalence.isOpen = true;
+                        }
+                        if(tumor.progImp_review.get('review')) {
+                            $scope.geneStatus[i][j].progImp.isOpen = true;
+                        }
+                        if(tumor.nccn_review.get('review')) {
+                            $scope.geneStatus[i][j].nccn.isOpen = true;
+                        }
+                        if(tumor.trials_review.get('review')) {
+                            $scope.geneStatus[i][j].trials.isOpen = true;
+                        }
+                        for (var k = 0; k < tumor.TI.length; k++) {
+                            var ti = tumor.TI.get(k);
+                            if(!ti.name_review.get('review')) {
+                                continue;
+                            }
+                            if(!$scope.geneStatus[i][j][k]) {
+                                $scope.initGeneStatus(mutation, tumor, ti);
+                            }
+                            $scope.geneStatus[i][j][k].isOpen = true;
+                            for (var m = 0; m < ti.treatments.length; m++) {
+                                var treatment = ti.treatments.get(m);
+                                if(!treatment.name_review.get('review')) {
+                                    continue;
+                                }
+                                if(!$scope.geneStatus[i][j][k][m]) {
+                                    $scope.initGeneStatus(mutation, tumor, ti, treatment);
+                                }
+                                $scope.geneStatus[i][j][k][m].isOpen = true;
+                            }
+                        }
+                    }
+                }
+            }
 
             function collectChangesByPerson(userName) {
                 $scope.status.savingAll = false;
@@ -766,12 +827,12 @@ angular.module('oncokbApp')
                     data.description = tumor.nccn.description.getText();
                     data.nccnGuidelines = [
                         {
-                            therapy: tumor.nccn.therapy.getText(),
+                            therapy: stringUtils.getTextString(tumor.nccn.therapy.getText()),
                             category: '',
-                            description: tumor.nccn.description.getText(),
-                            disease: tumor.nccn.disease.getText(),
+                            description: stringUtils.getTextString(tumor.nccn.description.getText()),
+                            disease: stringUtils.getTextString(tumor.nccn.disease.getText()),
                             pages: '',
-                            version: tumor.nccn.version.getText()
+                            version: stringUtils.getTextString(tumor.nccn.version.getText())
                         }
                     ];
                     dataUUID = tumor.nccn_uuid.getText();
@@ -817,7 +878,7 @@ angular.module('oncokbApp')
                 }
 
                 if (mutation) {
-                    data.alterations = parseMutationString(mutation.name.getText());
+                    data.alterations = parseMutationString(stringUtils.getTextString(mutation.name.getText()));
                 }
                 if (tumor) {
                     var tempArr1 = [];
@@ -851,7 +912,7 @@ angular.module('oncokbApp')
                                 });
                             }
                             data.treatments.push({
-                                approvedIndications: [treatment.indication.getText()],
+                                approvedIndications: [stringUtils.getTextString(treatment.indication.getText())],
                                 drugs: drugList
                             });
                         }
@@ -961,16 +1022,14 @@ angular.module('oncokbApp')
                         acceptItem([{reviewObj: ti.description_review, uuid: ti.description_uuid}], ti.description_review);
                     } else {
                         acceptItem([{reviewObj: treatment.name_review, uuid: treatment.name_uuid},
-                            {reviewObj: treatment.level_review, uuid: treatment.level_uuid},
                             {reviewObj: treatment.indication_review, uuid: treatment.indication_uuid},
                             {reviewObj: treatment.description_review, uuid: treatment.description_uuid}], treatment.name_review);
-                        // this is for case where only propagation is changed
-                        if(treatment.level_review.has('lastReviewedPropagation')) {
+                        // handle level specifically because level and propagation share the same uuid and review object
+                        var levelChanged = $rootScope.reviewMeta.get(treatment.level_uuid.getText()) && $rootScope.reviewMeta.get(treatment.level_uuid.getText()).get('review');
+                        if(levelChanged) {
                             treatment.level_review.clear();
                             treatment.level_review.set('review', false);
-                            if ($rootScope.reviewMeta.get(treatment.level_uuid.getText())) {
-                                $rootScope.reviewMeta.get(treatment.level_uuid.getText()).set('review', false);
-                            }
+                            $rootScope.reviewMeta.get(treatment.level_uuid.getText()).set('review', false);
                         }
                     }
                     break;
@@ -1250,7 +1309,7 @@ angular.module('oncokbApp')
                             oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
                         }];
                         var mutationIndex = this.gene.mutations.indexOf(mutation);
-                        $scope.geneStatus[mutationIndex][mutation.tumors.length - 1] = new GeneStatusSingleton();
+                        $scope.initGeneStatus(mutation, _tumorType);
                     }
                 }
             };
@@ -1307,7 +1366,7 @@ angular.module('oncokbApp')
                         var mutationIndex = this.gene.mutations.indexOf(mutation);
                         var tumorIndex = mutation.tumors.indexOf(tumor);
                         var tiIndex = tumor.TI.indexOf(ti);
-                        $scope.geneStatus[mutationIndex][tumorIndex][tiIndex][ti.treatments.length - 1] = new GeneStatusSingleton();
+                        $scope.initGeneStatus(mutation, tumor, ti, _treatment);
                     }
                 }
             };

@@ -760,3 +760,12 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     margin-top:5px;
     margin-right:10px
 }
+
+.reviewPanel {
+    float:right;
+    margin-top:-20px
+}
+
+.reviewDeletionPanel {
+    margin-top:10px;
+}
