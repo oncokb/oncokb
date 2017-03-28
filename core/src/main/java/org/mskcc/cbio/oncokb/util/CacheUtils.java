@@ -185,13 +185,17 @@ public class CacheUtils {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 for (String service : otherServices) {
-                    HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
-                        gene.getHugoSymbol(), "");
+                    if(service != null && !service.isEmpty()) {
+                        HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
+                            gene.getHugoSymbol(), "");
+                    }
                 }
             }
         } else if (cmd == "reset") {
             for (String service : otherServices) {
-                HttpUtils.postRequest(service + "?cmd=reset", "");
+                if (service != null && !service.isEmpty()) {
+                    HttpUtils.postRequest(service + "?cmd=reset", "");
+                }
             }
         }
     }
