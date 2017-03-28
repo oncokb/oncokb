@@ -243,10 +243,12 @@ public class Evidence implements java.io.Serializable {
     }
 
     public Evidence(Evidence e) {
+        this.id = e.id;
         this.uuid = e.uuid;
         this.evidenceType = e.evidenceType;
         this.cancerType = e.cancerType;
         this.subtype = e.subtype;
+        this.oncoTreeType = e.oncoTreeType;
         this.gene = e.gene;
         this.description = e.description;
         this.additionalInfo = e.additionalInfo;
@@ -254,26 +256,16 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = e.lastEdit;
         this.levelOfEvidence = e.levelOfEvidence;
         this.propagation = e.propagation;
-        // make deep copy of sets 
-        Set<Alteration> alterationsTemp = new HashSet<>();
-        Set<Treatment> treatmentsTemp = new HashSet<>();
-        Set<Article> articlesTemp = new HashSet<>();
-        Set<NccnGuideline> nccnGuidelinesTemp = new HashSet<>();
-        Set<ClinicalTrial> clinicalTrialsTemp = new HashSet<>();
-        alterationsTemp.addAll(e.alterations);
-        treatmentsTemp.addAll(e.treatments);
-        articlesTemp.addAll(e.articles);
-        nccnGuidelinesTemp.addAll(e.nccnGuidelines);
-        clinicalTrialsTemp.addAll(e.clinicalTrials);
-        this.alterations = alterationsTemp;
-        this.treatments = treatmentsTemp;
-        this.articles = articlesTemp;
-        this.nccnGuidelines = nccnGuidelinesTemp;
-        this.clinicalTrials = clinicalTrialsTemp;
+        // make deep copy of sets
+        this.alterations = new HashSet<>(e.alterations);
+        this.treatments = new HashSet<>(e.treatments);
+        this.articles = new HashSet<>(e.articles);
+        this.nccnGuidelines = new HashSet<>(e.nccnGuidelines);
+        this.clinicalTrials = new HashSet<>(e.clinicalTrials);
     }
-    
+
     public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, Set<Treatment> treatments,
-     String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles, Set<NccnGuideline> nccnGuidelines, Set<ClinicalTrial> clinicalTrials) {
+                    String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles, Set<NccnGuideline> nccnGuidelines, Set<ClinicalTrial> clinicalTrials) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerType = cancerType;
