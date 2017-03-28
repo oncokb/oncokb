@@ -35,20 +35,28 @@
                         ng-model="content.stringO"
                         ng-options="opt.value as opt.label for opt in o">
                 </select>
-                <div class="propagation" ng-if="content.propagationOpts.length > 0">
+                <div class="propagation" ng-if="content.propagationOpts.length > 0 && (!reviewMode || rs.has('lastReviewedPropagation'))">
                     <span>Level of Evidence in other tumor types: </span>
                     <select ng-disabled="reviewMode ? (rs.get('review') === false ? true : false) : !fe"
                             ng-model="content.propagation"
                             ng-options="opt.value as opt.name for opt in content.propagationOpts">
                     </select>
                 </div>
+                <!--
+                    when level change is rejected, last reviewed propagation(if exist), will be set to treatment.name_eStatus. And it won't be updated to content.propagation before refresh page.
+                    Since we want to avoid adding more watcher, we will print out propagation from eStatus directly
+                -->
+                <div ng-if="reviewMode && rs.get('review') === false && es.get('propagation')">
+                    <span>Level of Evidence in other tumor types: </span>
+                    <p>{{es.get('propagation')}}</p>
+                </div>
             </div>
             <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
                 <h4>Old Content:</h4>
                 <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewed') ? rs.get('lastReviewed') : content.stringO}}</p>
-                <div class="propagation">
+                <div class="propagation" ng-if="rs.has('lastReviewedPropagation')">
                     <span>Level of Evidence in other tumor types: </span>
-                    <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewedPropagation') ? rs.get('lastReviewedPropagation') : content.propagation}}</p>
+                    <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewedPropagation')}}</p>
                 </div>
             </div>
         </div>

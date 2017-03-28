@@ -61,7 +61,7 @@ angular.module('oncokbApp')
                 });
                 scope.$watch('object.text', function(n, o) {
                     if (n !== o) {
-                        if (scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
+                        if (scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('review') !== false)) {
                             scope.rs.set('lastReviewed', o);
                         }
                         scope.content.stringO = scope.object.text;
@@ -77,8 +77,8 @@ angular.module('oncokbApp')
                                 } else {
                                     scope.object.text = n;
                                 }
-                            } else if (scope.rs && (!scope.reviewMode || scope.rs.get('action') !== 'rejected')) {
-                                // for the case of reject action changing real time doc
+                            } else if (scope.rs && (!scope.reviewMode || scope.rs.get('review') !== false)) {
+                                // exclude the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
                                 var uuid = scope.uuid.getText();
@@ -199,7 +199,7 @@ angular.module('oncokbApp')
                 };
 
                 $scope.valueChanged = function() {
-                    if ($scope.t === 'treatment-select') {
+                    if ($scope.t === 'treatment-select' && (!$scope.reviewMode || $scope.rs.get('review') !== false)) {
                         $scope.changePropagation();
                     }
                     if (!_.isUndefined($scope.es)) {
