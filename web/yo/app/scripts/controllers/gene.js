@@ -976,7 +976,9 @@ angular.module('oncokbApp')
                         $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
                     }
                 });
-                reviewObj.set('action', 'accepted');
+                if(reviewObj) {
+                    reviewObj.set('action', 'accepted');
+                }
             }
             $scope.modelUpdate = function(type, mutation, tumor, ti, treatment) {
                 switch (type) {
@@ -1008,8 +1010,9 @@ angular.module('oncokbApp')
                     acceptItem([{reviewObj: tumor.progImp_review, uuid: tumor.progImp_uuid}], tumor.progImp_review);
                     break;
                 case 'NCCN_GUIDELINES':
-                    acceptItem([{reviewObj: tumor.nccn_review, uuid: tumor.nccn_uuid},
-                        {reviewObj: tumor.nccn.therapy_review, uuid: tumor.nccn.therapy_uuid},
+                    tumor.nccn_review.clear();
+                    tumor.nccn_review.set('review', false);
+                    acceptItem([{reviewObj: tumor.nccn.therapy_review, uuid: tumor.nccn.therapy_uuid},
                         {reviewObj: tumor.nccn.disease_review, uuid: tumor.nccn.disease_uuid},
                         {reviewObj: tumor.nccn.version_review, uuid: tumor.nccn.version_uuid},
                         {reviewObj: tumor.nccn.description_review, uuid: tumor.nccn.description_uuid}], tumor.nccn_review);

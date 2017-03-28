@@ -175,8 +175,9 @@ angular.module('oncokbApp')
                             rejectItem([{obj: $scope.tm.progImp, reviewObj: $scope.tm.progImp_review, uuid: $scope.tm.progImp_uuid}], $scope.tm.progImp_review);
                             break;
                         case 'NCCN_GUIDELINES':
-                            rejectItem([{reviewObj: $scope.tm.nccn_review, uuid: $scope.tm.nccn_uuid},
-                                {obj: $scope.tm.nccn.therapy, reviewObj: $scope.tm.nccn.therapy_review, uuid: $scope.tm.nccn.therapy_uuid},
+                            $scope.tm.nccn_review.clear();
+                            $scope.tm.nccn_review.set('review', false);
+                            rejectItem([{obj: $scope.tm.nccn.therapy, reviewObj: $scope.tm.nccn.therapy_review, uuid: $scope.tm.nccn.therapy_uuid},
                                 {obj: $scope.tm.nccn.disease, reviewObj: $scope.tm.nccn.disease_review, uuid: $scope.tm.nccn.disease_uuid},
                                 {obj: $scope.tm.nccn.version, reviewObj: $scope.tm.nccn.version_review, uuid: $scope.tm.nccn.version_uuid},
                                 {obj: $scope.tm.nccn.description, reviewObj: $scope.tm.nccn.description_review, uuid: $scope.tm.nccn.description_uuid}], $scope.tm.nccn_review);
