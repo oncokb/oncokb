@@ -776,7 +776,7 @@ angular.module('oncokbApp')
                         hugoSymbol: $scope.gene.name.getText()
                     },
                     knownEffect: null,
-                    lastEdit: new Date().getTime().toString(),
+                    lastEdit: null,
                     levelOfEvidence: null,
                     subtype: null,
                     articles: [],
@@ -805,38 +805,46 @@ angular.module('oncokbApp')
                 case 'GENE_SUMMARY':
                     data.description = $scope.gene.summary.getText();
                     dataUUID = $scope.gene.summary_uuid.getText();
+                    data.lastEdit = $scope.gene.summary_review.get('updateTime');
                     break;
                 case 'GENE_BACKGROUND':
                     data.description = $scope.gene.background.getText();
                     dataUUID = $scope.gene.background_uuid.getText();
+                    data.lastEdit = $scope.gene.background_review.get('updateTime');
                     break;
                 case 'ONCOGENIC':
                     data.knownEffect = mutation.oncogenic.getText();
                     data.description = mutation.summary.getText();
                     dataUUID = mutation.oncogenic_uuid.getText();
+                    data.lastEdit = mutation.oncogenic_review.get('updateTime');
                     if (needReview(mutation.shortSummary_uuid)) {
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
                         extraData.alterations = parseMutationString(mutation.name.getText());
                         extraDataUUID = mutation.shortSummary_uuid.getText();
+                        extraData.lastEdit = mutation.shortSummary_review.get('updateTime');
                     }
                     break;
                 case 'MUTATION_EFFECT':
                     data.knownEffect = mutation.effect.value.getText();
                     data.description = mutation.description.getText();
                     dataUUID = mutation.effect_uuid.getText();
+                    data.lastEdit = mutation.effect_review.get('updateTime');
                     break;
                 case 'TUMOR_TYPE_SUMMARY':
                     data.description = tumor.summary.getText();
                     dataUUID = tumor.summary_uuid.getText();
+                    data.lastEdit = tumor.summary_review.get('updateTime');
                     break;
                 case 'PREVALENCE':
                     data.description = tumor.prevalence.getText();
                     dataUUID = tumor.prevalence_uuid.getText();
+                    data.lastEdit = tumor.prevalence_review.get('updateTime');
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
                     data.description = tumor.progImp.getText();
                     dataUUID = tumor.progImp_uuid.getText();
+                    data.lastEdit = tumor.progImp_review.get('updateTime');
                     break;
                 case 'NCCN_GUIDELINES':
                     data.description = tumor.nccn.description.getText();
@@ -851,6 +859,7 @@ angular.module('oncokbApp')
                         }
                     ];
                     dataUUID = tumor.nccn_uuid.getText();
+                    data.lastEdit = tumor.nccn_review.get('updateTime');
                     break;
                 case 'Standard implications for sensitivity to therapy':
                     data.evidenceType = 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY';
@@ -875,6 +884,7 @@ angular.module('oncokbApp')
                         });
                     }
                     dataUUID = tumor.trials_uuid.getText();
+                    data.lastEdit = tumor.trials_review.get('updateTime');
                     break;
                 case 'MUTATION_NAME_CHANGE':
                     uuids = collectUUIDs('mutation', mutation, []);
@@ -911,8 +921,10 @@ angular.module('oncokbApp')
                     if (!treatment) {
                         data.description = TI.description.getText();
                         dataUUID = TI.description_uuid.getText();
+                        data.lastEdit = TI.description_review.get('updateTime');
                     } else {
                         dataUUID = treatment.name_uuid.getText();
+                        data.lastEdit = treatment.name_review.get('updateTime');
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
                         data.description = treatment.description.getText();
                         data.propagation = levelMapping[treatment.name_eStatus.get('propagation')];
@@ -959,6 +971,9 @@ angular.module('oncokbApp')
                         }
                     }
                 }
+                if(data.lastEdit) {
+                    data.lastEdit = new Date(data.lastEdit).getTime().toString();
+                }
                 if(dataUUID) {
                     evidences[dataUUID] = data;
                 }
@@ -986,9 +1001,11 @@ angular.module('oncokbApp')
                 _.each(arr, function(item) {
                     // This condition check is to remove review mapping precisely
                     if ( $rootScope.geneMetaData.get(item.uuid.getText()) &&  $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
+                        var tempTime = item.reviewObj.get('updateTime');
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
-                         $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
+                        item.reviewObj.set('updateTime', tempTime);
+                        $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
                     }
                 });
                 if (reviewObj) {

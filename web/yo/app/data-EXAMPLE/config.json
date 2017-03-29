@@ -17,6 +17,7 @@
     "apiLink": "legacy-api/",
     "curationLink": "legacy-api/",
     "privateApiLink": "api/private/",
+    "publicApiLink": "http://localhost:8080/oncokb/",
     "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
     "accessLevels": {},
     "testing": false

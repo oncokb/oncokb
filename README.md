@@ -47,6 +47,7 @@ File is located under web/yo/app/data
     curationLink: 'legacy-api/', // Your endpoints URL specifically designed for curation platform.
     apiLink: "legacy-api/",  // Your endpoints URL.
     privateApiLink: "api/private/", // Endpints are specifically designed to use internally.
+    publicApiLink: "http://localhost:8080/oncokb/",
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     testing: false // If the testing is set to ture, all endpoints will be disabled and will use the files from web/yo/app/data folder
 };

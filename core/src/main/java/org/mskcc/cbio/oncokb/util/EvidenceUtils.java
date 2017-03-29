@@ -680,6 +680,16 @@ public class EvidenceUtils {
         return filtered;
     }
 
+    public static Set<Evidence> getEvidenceByUUIDs(Set<String> uuids) {
+        if (uuids == null) {
+            return new HashSet<>();
+        }
+        if (CacheUtils.isEnabled()) {
+            return CacheUtils.getEvidencesByUUIDs(uuids);
+        } else {
+            return new HashSet<>(evidenceBo.findEvidenceByUUIDs(new ArrayList<String>(uuids)));
+        }
+    }
 
     public static Evidence getEvidenceByEvidenceId(Integer id) {
         if (id == null) {
