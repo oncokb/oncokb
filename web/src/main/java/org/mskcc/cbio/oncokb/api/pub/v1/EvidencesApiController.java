@@ -1,13 +1,9 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
-import org.mskcc.cbio.oncokb.apiModels.ApiObjectResp;
-import org.mskcc.cbio.oncokb.apiModels.Meta;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.MetaUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,45 +19,40 @@ import java.util.*;
 @Controller
 public class EvidencesApiController implements EvidencesApi {
 
-    public ResponseEntity<ApiObjectResp> evidencesIdGet(
+    public ResponseEntity<Evidence> evidencesIdGet(
         @ApiParam(value = "Unique identifier.", required = true) @PathVariable("id") Integer id
     ) {
-        ApiObjectResp apiObjectResp = new ApiObjectResp();
         HttpStatus status = HttpStatus.OK;
-        Meta meta = MetaUtils.getOKMeta();
+        Evidence evidence = null;
         if (id == null) {
-            meta = MetaUtils.getBadRequestMeta("Please specify evidence id.");
             status = HttpStatus.BAD_REQUEST;
-        } else {
-            apiObjectResp.setData(EvidenceUtils.getEvidenceByEvidenceId(id));
+        }else{
+            evidence = EvidenceUtils.getEvidenceByEvidenceId(id);
         }
-        apiObjectResp.setMeta(meta);
-        return new ResponseEntity<ApiObjectResp>(apiObjectResp, status);
+        return new ResponseEntity<>(evidence, status);
     }
 
-    public ResponseEntity<ApiListResp> evidencesLookupGet(
-        @ApiParam(value = "The entrez gene ID. Use comma to seperate multi-queries.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
-        , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Use comma to seperate multi-queries.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "Variant name. Use comma to seperate multi-queries.") @RequestParam(value = "variant", required = false) String variant
-        , @ApiParam(value = "Tumor type name. OncoTree code is supported. Use comma to seperate multi-queries.") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Consequence. Use comma to seperate multi-queries. Possible value: feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, initiator_codon_variant, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
-        , @ApiParam(value = "Protein Start. Use comma to seperate multi-queries.") @RequestParam(value = "proteinStart", required = false) String proteinStart
-        , @ApiParam(value = "Protein End. Use comma to seperate multi-queries.") @RequestParam(value = "proteinEnd", required = false) String proteinEnd
+    public ResponseEntity<List<Evidence>> evidencesLookupGet(
+        @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant
+        , @ApiParam(value = "Tumor type name. OncoTree code is supported.") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = "Consequence. Possible value: feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, initiator_codon_variant, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
+        , @ApiParam(value = "Protein Start.") @RequestParam(value = "proteinStart", required = false) String proteinStart
+        , @ApiParam(value = "Protein End.") @RequestParam(value = "proteinEnd", required = false) String proteinEnd
         , @ApiParam(value = "Tumor type source. OncoTree tumor types are the default setting. We may have customized version, like Quest.", defaultValue = "oncotree") @RequestParam(value = "source", required = false, defaultValue = "oncotree") String source
         , @ApiParam(value = "Only show highest level evidences") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Separate by comma. LEVEL_1, LEVEL_2A, LEVEL_2B, LEVEL_3A, LEVEL_3B, LEVEL_4, LEVEL_R1, LEVEL_R2, LEVEL_R3") @RequestParam(value = "levelOfEvidence", required = false) String levels
         , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND, MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS, PREVALENCE, PROGNOSTIC_IMPLICATION, TUMOR_TYPE_SUMMARY, NCCN_GUIDELINES, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, CLINICAL_TRIAL") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
     ) {
-        ApiListResp apiListResp = new ApiListResp();
         HttpStatus status = HttpStatus.OK;
-        Meta meta = MetaUtils.getOKMeta();
-        List<List<Evidence>> evidences = new ArrayList<>();
+        List<Evidence> evidences = new ArrayList<>();
 
         Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId == null ? null : Integer.toString(entrezGeneId), hugoSymbol, variant,
             tumorType, evidenceTypes, consequence, proteinStart, proteinEnd, null, source, levels);
 
         if (requestQueries == null) {
-            apiListResp.setData(new ArrayList());
+            return new ResponseEntity<>(evidences, HttpStatus.OK);
         }
 
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
@@ -71,19 +62,15 @@ public class EvidencesApiController implements EvidencesApi {
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {
-                evidences.add(query.getEvidences());
+                evidences.addAll(query.getEvidences());
             }
         }
 
-        apiListResp.setData(evidences);
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
+        return new ResponseEntity<>(evidences, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiListResp> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body) {
-        ApiListResp apiListResp = new ApiListResp();
+    public ResponseEntity<List<EvidenceQueryRes>> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body) {
         HttpStatus status = HttpStatus.OK;
-        Meta meta = MetaUtils.getOKMeta();
         List<EvidenceQueryRes> result = new ArrayList<>();
         if (body.getQueries().size() > 0) {
             List<Query> requestQueries = body.getQueries();
@@ -103,30 +90,24 @@ public class EvidencesApiController implements EvidencesApi {
                 body.getLevels(), body.getHighestLevelOnly());
         }
 
-        apiListResp.setData(result);
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiListResp> evidencesPost(@ApiParam(value = "List of unique identifier for each model. Separated by comma.", required = true) @RequestParam(value = "ids", required = true) String ids
+    public ResponseEntity<List<Evidence>> evidencesPost(@ApiParam(value = "List of unique identifier for each model. Separated by comma.", required = true) @RequestParam(value = "ids", required = true) String ids
     ) {
-        ApiListResp apiListResp = new ApiListResp();
         HttpStatus status = HttpStatus.OK;
-        Meta meta = MetaUtils.getOKMeta();
-
+        List<Evidence> evidenceList = new ArrayList<>();
         if (ids == null) {
-            meta = MetaUtils.getBadRequestMeta("Please specify evidence ids.");
             status = HttpStatus.BAD_REQUEST;
         } else {
             List<Integer> matchIds = MainUtils.stringToIntegers(ids);
             if (matchIds != null) {
                 Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceIds(new HashSet<Integer>(matchIds));
                 if (evidences != null) {
-                    apiListResp.setData(new ArrayList(evidences));
+                    evidenceList = new ArrayList<>(evidences);
                 }
             }
         }
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<ApiListResp>(apiListResp, status);
+        return new ResponseEntity<>(evidenceList, status);
     }
 }

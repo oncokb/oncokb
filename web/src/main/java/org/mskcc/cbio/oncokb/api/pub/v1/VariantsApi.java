@@ -1,13 +1,13 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
-import org.mskcc.cbio.oncokb.apiModels.ApiErrorResp;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
@@ -16,22 +16,20 @@ public interface VariantsApi {
 
     @ApiOperation(value = "", notes = "Get all annotated variants.", response = Alteration.class, responseContainer = "List", tags = {"Variants",})
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
+        @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
     @RequestMapping(value = "/variants",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<ApiListResp> variantsGet();
+    ResponseEntity<List<Alteration>> variantsGet();
 
 
     @ApiOperation(value = "", notes = "Search for variants.", response = Alteration.class, responseContainer = "List", tags = {"Variants", "Search",})
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
+        @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
     @RequestMapping(value = "/variants/lookup",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<ApiListResp> variantsLookupGet(
+    ResponseEntity<List<Alteration>> variantsLookupGet(
         @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "variant name.") @RequestParam(value = "variant", required = false) String variant

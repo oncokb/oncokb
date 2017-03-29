@@ -769,7 +769,10 @@ public class EvidenceUtils {
                 query.setGene(getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
                 if (query.getGene() != null) {
-                    query.setOncoTreeTypes(TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
+                    if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
+                        query.setOncoTreeTypes(
+                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
+                    }
 
                     if (requestQuery.getAlteration() != null) {
                         Alteration alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),

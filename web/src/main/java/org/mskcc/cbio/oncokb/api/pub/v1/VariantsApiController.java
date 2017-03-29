@@ -1,15 +1,12 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
-import org.mskcc.cbio.oncokb.apiModels.Meta;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.MetaUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,17 +22,13 @@ import java.util.Set;
 @Controller
 public class VariantsApiController implements VariantsApi {
 
-    public ResponseEntity<ApiListResp> variantsGet() {
-        ApiListResp apiListResp = new ApiListResp();
-        Meta meta = MetaUtils.getOKMeta();
+    public ResponseEntity<List<Alteration>> variantsGet() {
+        List<Alteration> alterations = new ArrayList(AlterationUtils.getAllAlterations());
 
-        apiListResp.setData(new ArrayList(AlterationUtils.getAllAlterations()));
-        apiListResp.setMeta(meta);
-
-        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
+        return new ResponseEntity<>(alterations, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiListResp> variantsLookupGet(
+    public ResponseEntity<List<Alteration>> variantsLookupGet(
         @ApiParam(value = "The entrez gene ID. entrezGeneId is prioritize than hugoSymbol if both parameters have been defined") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "variant name.") @RequestParam(value = "variant", required = false) String variant
@@ -46,13 +39,12 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
 //        , @ApiParam(value = "") @RequestParam(value = "variantResidues", required = false) String variantResidues
     ) {
-        ApiListResp apiListResp = new ApiListResp();
-        Meta meta = MetaUtils.getOKMeta();
-
+        HttpStatus httpStatus = HttpStatus.OK;
+        List<Alteration> alterationList = new ArrayList<>();
         if (hugoSymbol != null || entrezGeneId != null) {
             Gene gene = null;
             if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-                meta = MetaUtils.getBadRequestMeta("Entrez Gene ID and Hugo Symbol are not pointing to same gene.");
+                httpStatus = HttpStatus.BAD_REQUEST;
             } else {
                 if (entrezGeneId != null) {
                     gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
@@ -63,7 +55,7 @@ public class VariantsApiController implements VariantsApi {
                 }
 
                 if (gene != null) {
-                    List<Alteration> alterationList = new ArrayList<>();
+
                     Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
                     if (variant == null && proteinStart == null && proteinEnd == null) {
                         alterationList.addAll(allAlterations);
@@ -72,15 +64,13 @@ public class VariantsApiController implements VariantsApi {
                         Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), variant, variantType, consequence, proteinStart, proteinEnd);
                         alterationList = alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(AlterationUtils.getAllAlterations(gene)));
                     }
-                    apiListResp.setData(alterationList);
                 }
             }
         } else {
-            meta = MetaUtils.getBadRequestMeta("Please specify entrezGeneId or hugoSymbol");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
 
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
+        return new ResponseEntity<>(alterationList, HttpStatus.OK);
     }
 
 //    public ResponseEntity<ApiListResp> variantsVariantIdEvidencesGet(
