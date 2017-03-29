@@ -19,16 +19,16 @@ import java.util.Set;
 @Api(value = "evidences", description = "The evidences API")
 public interface EvidencesApi {
 
-//    @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class, tags = {"Evidences",})
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Evidence.class),
-//        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
-//    @RequestMapping(value = "/evidences/{id}",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
-//    ResponseEntity<ApiObjectResp> evidencesIdGet(
-//        @ApiParam(value = "Unique identifier.", required = true) @PathVariable("id") Integer id
-//    );
+    @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class, tags = {"Evidences",})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = Evidence.class),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
+    @RequestMapping(value = "/evidences/{uuids}",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<ApiObjectResp> evidencesUUIDsGet(
+        @ApiParam(value = "Universally Unique identifier list.", required = true) @PathVariable("uuids") Set<String> uuids
+    );
 
 
     @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List", tags = {"Evidences", "Search",})
@@ -62,7 +62,7 @@ public interface EvidencesApi {
         method = RequestMethod.POST)
     ResponseEntity<ApiListResp> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body
     );
-    
+
 //    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, responseContainer = "List", tags = {"Evidences",})
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List"),

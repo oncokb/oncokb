@@ -237,13 +237,23 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 }
             });
     }
+    function getEvidencesByUUIDs(uuids) {
+        return $http.get(
+            OncoKB.config.publicApiLink + 'evidences/' + uuids.join(','),
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
         updateEvidence: updateEvidence,
         deleteEvidences: deleteEvidences,
         updateVUS: updateVUS,
-        updateEvidenceBatch: updateEvidenceBatch
+        updateEvidenceBatch: updateEvidenceBatch,
+        getEvidencesByUUIDs: getEvidencesByUUIDs
     };
 }]);
 
