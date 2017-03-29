@@ -359,7 +359,7 @@ public class EvidenceUtils {
         Set<Evidence> tmpEvidences = new HashSet<>();
 
         for (Evidence evidence : evidences) {
-            Evidence tmpEvidence = new Evidence(evidence);
+            Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
             Boolean flag = true;
             if (CollectionUtils.intersection(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes).isEmpty()) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
@@ -386,12 +386,12 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
+    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery){
         Set<Evidence> filtered = new HashSet<>();
 
         if (evidenceQuery.getGene() != null) {
             for (Evidence evidence : evidences) {
-                Evidence tempEvidence = new Evidence(evidence);
+                Evidence tempEvidence = new Evidence(evidence, evidence.getId());
                 if (tempEvidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
                     if (tempEvidence.getAlterations().isEmpty()) {
@@ -914,7 +914,7 @@ public class EvidenceUtils {
                 List<Evidence> alleleEvidencesCopy = new ArrayList<>();
                 if (alleleEvidences != null) {
                     for (Evidence evidence : alleleEvidences) {
-                        Evidence tmpEvidence = new Evidence(evidence);
+                        Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
                         LevelOfEvidence levelOfEvidence = LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0);
                         if (levelOfEvidence != null) {
                             tmpEvidence.setLevelOfEvidence(levelOfEvidence);
@@ -958,7 +958,7 @@ public class EvidenceUtils {
         evidence.setGene(gene);
         if(gene == null) {
             return;
-        }   
+        }
         Set<Alteration> queryAlterations = evidence.getAlterations();
         if(queryAlterations != null && !queryAlterations.isEmpty()) {
             AlterationType type = AlterationType.MUTATION;
@@ -981,7 +981,7 @@ public class EvidenceUtils {
             }
             evidence.setAlterations(alterations);
         }
-        
+
         Set<ClinicalTrial> trials = evidence.getClinicalTrials();
         Set<Article> articles = evidence.getArticles();
         Set<Treatment> treatments = evidence.getTreatments();

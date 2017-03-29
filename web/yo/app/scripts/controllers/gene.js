@@ -970,13 +970,13 @@ angular.module('oncokbApp')
             function acceptItem(arr, reviewObj) {
                 _.each(arr, function(item) {
                     // This condition check is to remove review mapping precisely
-                    if($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
+                    if ($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
                         $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
                     }
                 });
-                if(reviewObj) {
+                if (reviewObj) {
                     reviewObj.set('action', 'accepted');
                 }
             }

@@ -242,8 +242,10 @@ public class Evidence implements java.io.Serializable {
         return true;
     }
 
-    public Evidence(Evidence e) {
-        this.id = e.id;
+    public Evidence(Evidence e, Integer id) {
+        if (id != null) {
+            this.id = id;
+        }
         this.uuid = e.uuid;
         this.evidenceType = e.evidenceType;
         this.cancerType = e.cancerType;

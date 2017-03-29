@@ -9,6 +9,7 @@ import org.mskcc.oncotree.model.TumorType;
 
 import java.io.IOException;
 import java.util.*;
+import com.mysql.jdbc.StringUtils;
 
 
 /**
@@ -185,7 +186,7 @@ public class CacheUtils {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 for (String service : otherServices) {
-                    if(service != null && !service.isEmpty()) {
+                    if(!StringUtils.isNullOrEmpty(service)) {
                         HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
                             gene.getHugoSymbol(), "");
                     }
@@ -193,7 +194,7 @@ public class CacheUtils {
             }
         } else if (cmd == "reset") {
             for (String service : otherServices) {
-                if (service != null && !service.isEmpty()) {
+                if (!StringUtils.isNullOrEmpty(service)) {
                     HttpUtils.postRequest(service + "?cmd=reset", "");
                 }
             }
