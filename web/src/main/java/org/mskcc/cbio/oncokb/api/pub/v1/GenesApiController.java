@@ -1,10 +1,14 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
+import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
+import org.mskcc.cbio.oncokb.apiModels.ApiObjectResp;
+import org.mskcc.cbio.oncokb.apiModels.Meta;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.MetaUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,20 +23,25 @@ import java.util.*;
 @Controller
 public class GenesApiController implements GenesApi {
 
-    public ResponseEntity<List<GeneEvidence>> genesEntrezGeneIdEvidencesGet(
+    public ResponseEntity<ApiListResp> genesEntrezGeneIdEvidencesGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
         , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
     ) {
+        ApiListResp apiListResp = new ApiListResp();
+        Meta meta = MetaUtils.getOKMeta();
 
-        List<GeneEvidence> evidenceList = new ArrayList<>();
         if (entrezGeneId == null) {
-            return new ResponseEntity<>(evidenceList, HttpStatus.BAD_REQUEST);
+            meta = MetaUtils.getBadRequestMeta("Please specific entrezGeneId.");
+            apiListResp.setMeta(meta);
+            return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.BAD_REQUEST);
         }
 
         Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
 
         if (gene == null) {
-            return new ResponseEntity<>(evidenceList, HttpStatus.BAD_REQUEST);
+            meta = MetaUtils.getBadRequestMeta("Gene is not available.");
+            apiListResp.setMeta(meta);
+            return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.BAD_REQUEST);
         }
 
         Set<EvidenceType> evidenceTypeSet = new HashSet<>();
@@ -59,39 +68,54 @@ public class GenesApiController implements GenesApi {
             geneEvidences.add(new GeneEvidence(evidence));
         }
 
-        evidenceList.addAll(geneEvidences);
-        return new ResponseEntity<>(evidenceList, HttpStatus.OK);
+        apiListResp.setMeta(meta);
+        apiListResp.setData(new ArrayList(geneEvidences));
+        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
     }
 
-    public ResponseEntity<Gene> genesEntrezGeneIdGet(
+    public ResponseEntity<ApiObjectResp> genesEntrezGeneIdGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
     ) {
-        Gene gene = null;
+        ApiObjectResp apiObjectResp = new ApiObjectResp();
+        Meta meta = MetaUtils.getOKMeta();
+
         if (entrezGeneId == null) {
-            return new ResponseEntity<>(gene, HttpStatus.BAD_REQUEST);
-        }
-
-        gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-
-        if (gene == null) {
-            return new ResponseEntity<>(gene, HttpStatus.BAD_REQUEST);
-        }
-
-        return new ResponseEntity<>(gene, HttpStatus.OK);
-    }
-
-    public ResponseEntity<List<Alteration>> genesEntrezGeneIdVariantsGet(
-        @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
-    ) {
-        List<Alteration> alterationList = new ArrayList<>();
-        if (entrezGeneId == null) {
-            return new ResponseEntity<>(alterationList, HttpStatus.BAD_REQUEST);
+            meta = MetaUtils.getBadRequestMeta("Please specific entrezGeneId.");
+            apiObjectResp.setMeta(meta);
+            return new ResponseEntity<ApiObjectResp>(apiObjectResp, HttpStatus.BAD_REQUEST);
         }
 
         Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
 
         if (gene == null) {
-            return new ResponseEntity<>(alterationList, HttpStatus.BAD_REQUEST);
+            meta = MetaUtils.getBadRequestMeta("Gene is not available.");
+            apiObjectResp.setMeta(meta);
+            return new ResponseEntity<ApiObjectResp>(apiObjectResp, HttpStatus.BAD_REQUEST);
+        }
+
+        apiObjectResp.setData(gene);
+        apiObjectResp.setMeta(meta);
+        return new ResponseEntity<ApiObjectResp>(apiObjectResp, HttpStatus.OK);
+    }
+
+    public ResponseEntity<ApiListResp> genesEntrezGeneIdVariantsGet(
+        @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
+    ) {
+        ApiListResp apiListResp = new ApiListResp();
+        Meta meta = MetaUtils.getOKMeta();
+
+        if (entrezGeneId == null) {
+            meta = MetaUtils.getBadRequestMeta("Please specific entrezGeneId.");
+            apiListResp.setMeta(meta);
+            return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.BAD_REQUEST);
+        }
+
+        Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+
+        if (gene == null) {
+            meta = MetaUtils.getBadRequestMeta("Gene is not available.");
+            apiListResp.setMeta(meta);
+            return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.BAD_REQUEST);
         }
 
         Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
@@ -99,29 +123,53 @@ public class GenesApiController implements GenesApi {
         if (alterations == null) {
             alterations = new HashSet<>();
         }
-        alterationList.addAll(alterations);
-        return new ResponseEntity<>(alterationList, HttpStatus.OK);
+        apiListResp.setData(new ArrayList(alterations));
+        apiListResp.setMeta(meta);
+        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<Gene>> genesGet() {
+    public ResponseEntity<ApiListResp> genesGet() {
         Set<Gene> genes = GeneUtils.getAllGenes();
         if (genes == null) {
             genes = new HashSet<>();
         }
-        List<Gene> geneList = new ArrayList<>(genes);
-        return new ResponseEntity<>(geneList, HttpStatus.OK);
+
+        ApiListResp apiListResp = new ApiListResp();
+        Meta meta = MetaUtils.getOKMeta();
+        apiListResp.setData(new ArrayList(genes));
+        apiListResp.setMeta(meta);
+        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
     }
 
-    public ResponseEntity genesLookupGet(
-        @ApiParam(value = "The gene symbol used in Human Genome Organisation. (Deprecated, use query instead)") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "The entrez gene ID. (Deprecated, use query instead)") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
-        , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
+    public ResponseEntity<ApiListResp> genesLookupGet(@ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
     ) {
-        Set<Gene> genes = GeneUtils.searchGene(query);
-        HttpStatus status = HttpStatus.OK;
+        Meta meta = MetaUtils.getOKMeta();
+        ApiListResp apiListResp = new ApiListResp();
+        Set<Gene> genes = new HashSet<>();
+        if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
+            meta = MetaUtils.getBadRequestMeta("Entrez Gene ID and Hugo Symbol are not pointing to same gene.");
+        } else {
+            if (hugoSymbol != null) {
+                Set<Gene> blurGenes = GeneUtils.searchGene(hugoSymbol);
+                if (blurGenes != null) {
+                    genes.addAll(blurGenes);
+                }
+            }
 
-        List<Gene> geneList = new ArrayList<>(genes);
-        return new ResponseEntity<>(geneList, status);
+            if (entrezGeneId != null) {
+                Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+                if (gene != null) {
+                    if (!genes.contains(gene)) {
+                        genes = new HashSet<>();
+                    }
+                }
+            }
+        }
+
+        apiListResp.setMeta(meta);
+        apiListResp.setData(new ArrayList(genes));
+        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
     }
 
 }

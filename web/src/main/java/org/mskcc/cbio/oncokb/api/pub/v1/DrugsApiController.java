@@ -2,10 +2,13 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
+import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
+import org.mskcc.cbio.oncokb.apiModels.Meta;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.DrugUtils;
+import org.mskcc.cbio.oncokb.util.MetaUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,14 +22,18 @@ import java.util.*;
 @Controller
 public class DrugsApiController implements DrugsApi {
 
-    public ResponseEntity<List<Drug>> drugsGet() {
+    public ResponseEntity<ApiListResp> drugsGet() {
+        ApiListResp resp = new ApiListResp();
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         List<Drug> drugs = new ArrayList<>(DrugUtils.getAllDrugs());
+        resp.setData(drugs);
 
-        return new ResponseEntity<>(drugs, HttpStatus.OK);
+        Meta meta = MetaUtils.getOKMeta();
+
+        return new ResponseEntity<ApiListResp>(resp, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<Drug>> drugsLookupGet(
+    public ResponseEntity<ApiListResp> drugsLookupGet(
         @ApiParam(value = "Drug Name") @RequestParam(value = "name", required = false) String name
 //        , @ApiParam(value = "") @RequestParam(value = "fdaApproved", required = false) String fdaApproved
         , @ApiParam(value = "ATC Code") @RequestParam(value = "atcCode", required = false) String atcCode
@@ -34,12 +41,14 @@ public class DrugsApiController implements DrugsApi {
         , @ApiParam(value = "Exactly Match", required = true) @RequestParam(value = "exactMatch", required = true, defaultValue = "true") Boolean exactMatch
     ) {
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
+        ApiListResp apiListResp = new ApiListResp();
+        Meta meta = MetaUtils.getOKMeta();
         Set<Drug> drugs = null;
 
         if (exactMatch == null) {
             exactMatch = true;
         }
-
+        
         if (name != null) {
             drugs = DrugUtils.getDrugsByNames(Collections.singleton(name), !exactMatch);
         }
@@ -66,11 +75,13 @@ public class DrugsApiController implements DrugsApi {
             }
         }
 
-        List<Drug> drugList = new ArrayList();
-        if (drugs != null) {
-            drugList.addAll(drugs);
+        if (drugs == null) {
+            meta = MetaUtils.getBadRequestMeta("No parameter speficied.");
+        } else {
+            apiListResp.setData(new ArrayList(drugs));
         }
-        return new ResponseEntity<>(drugList, HttpStatus.OK);
+        apiListResp.setMeta(meta);
+        return new ResponseEntity<ApiListResp>(apiListResp, HttpStatus.OK);
     }
 
 }
