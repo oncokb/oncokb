@@ -2522,7 +2522,7 @@ angular.module('oncokbApp')
             }
 
             function documentSaved(type) {
-                if (!$scope.docStatus.updateGene) {
+                if (!$scope.docStatus.updateGene && type !== 'meta') {
                     $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
                     $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
                 }
