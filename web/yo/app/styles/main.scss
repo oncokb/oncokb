@@ -812,3 +812,6 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
         margin-top:15px;
     }
 }
+.seperationLine {
+    border-bottom: 2px solid lightgrey;
+}
