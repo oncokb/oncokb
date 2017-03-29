@@ -210,7 +210,7 @@
                   <span ng-if="!reviewMode">
                     <strong>Additional Information (Optional):</strong>
                     <br/>
-                    <drive-realtime-string rs="mutation.short_review" uuid="mutation.short_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                    <drive-realtime-string es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                   </span>
               </uib-accordion-group>
 
@@ -274,7 +274,7 @@
                       <review-panel rt="'update'" rs="tumor.prevalence_review" tp="'PREVALENCE'" mt="mutation" tm="tumor" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                     </uib-accordion-heading>
                     <drive-realtime-string ng-if="displayCheck(tumor.prevalence_uuid, tumor.prevalence_review, mutation.name_review, tumor.name_review, null, true)" rs="tumor.prevalence_review" uuid="tumor.prevalence_uuid" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
-                    <drive-realtime-string ng-if="!reviewMode" rs="tumor.shortPrevalence_review" uuid="tumor.shortPrevalence_uuid" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
+                    <drive-realtime-string ng-if="!reviewMode" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                 </uib-accordion-group>
 
                   <!-- Prognostic implications -->
@@ -289,7 +289,7 @@
                       <review-panel rt="'update'" rs="tumor.progImp_review" tp="'PROGNOSTIC_IMPLICATION'" mt="mutation" tm="tumor" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                     </uib-accordion-heading>
                     <drive-realtime-string ng-if="displayCheck(tumor.progImp_uuid, tumor.progImp_review, mutation.name_review, tumor.name_review, null, true)" rs="tumor.progImp_review" uuid="tumor.progImp_uuid" es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
-                    <drive-realtime-string ng-if="!reviewMode" rs="tumor.shortProgImp_review" uuid="tumor.shortProgImp_uuid" es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
+                    <drive-realtime-string ng-if="!reviewMode" es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                   </uib-accordion-group>
 
                   <!-- NCCN guidelines -->
@@ -331,7 +331,7 @@
                     <span ng-if="!reviewMode">
                         <strong>Additional Information (Optional):</strong>
                         <br/>
-                        <drive-realtime-string rs="tumor.nccn.short_review" uuid="tumor.nccn.short_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                        <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                     </span>
                   </uib-accordion-group>
 
@@ -421,7 +421,7 @@
                             <span ng-if="!reviewMode">
                               <strong>Additional Information (Optional):</strong>
                               <br/>
-                              <drive-realtime-string rs="treatment.short_review" uuid="treatment.short_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                              <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                             </span>
                           </uib-accordion-group>
                         </div>

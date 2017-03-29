@@ -77,7 +77,11 @@ angular.module('oncokbApp')
                                 } else {
                                     scope.object.text = n;
                                 }
-                            } else if (scope.rs && (!scope.reviewMode || scope.rs.get('review') !== false)) {
+                            } else if(!scope.uuid || !scope.uuid.getText() || !scope.rs) {
+                                // for the additional info items, since we don't need to track them in the review mode
+                                scope.object.text = n;
+                                scope.content.stringO = n;
+                            } else if(!scope.reviewMode || scope.rs.get('review') !== false) {
                                 // exclude the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
