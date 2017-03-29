@@ -161,9 +161,9 @@ angular.module('oncokbApp')
 
             $scope.userRole = users.getMe().role;
 
-            var sorting = [[5, 'desc'], [1, 'asc'], [0, 'asc']];
+            var sorting = [[2, 'asc'], [1, 'desc'], [0, 'asc']];
             if (users.getMe().role === 8) {
-                sorting = [[7, 'desc'], [4, 'desc'], [1, 'asc'], [0, 'asc']];
+                sorting = [[4, 'desc'], [1, 'desc'], [0, 'asc']];
             }
 
             $scope.dtOptions = DTOptionsBuilder
@@ -174,15 +174,12 @@ angular.module('oncokbApp')
 
             $scope.dtColumns = [
                 DTColumnDefBuilder.newColumnDef(0),
-                DTColumnDefBuilder.newColumnDef(1),
-                DTColumnDefBuilder.newColumnDef(2).notSortable(),
-                DTColumnDefBuilder.newColumnDef(3).notSortable(),
-                DTColumnDefBuilder.newColumnDef(4).withOption('sType', 'date'),
-                DTColumnDefBuilder.newColumnDef(5),
-                DTColumnDefBuilder.newColumnDef(6)
+                DTColumnDefBuilder.newColumnDef(1).withOption('sType', 'date'),
+                DTColumnDefBuilder.newColumnDef(2),
+                DTColumnDefBuilder.newColumnDef(3)
             ];
             if (users.getMe().role === 8) {
-                $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(7));
+                $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(4));
             }
 
             $scope.status = {

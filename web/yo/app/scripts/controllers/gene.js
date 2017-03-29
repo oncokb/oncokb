@@ -970,13 +970,13 @@ angular.module('oncokbApp')
             function acceptItem(arr, reviewObj) {
                 _.each(arr, function(item) {
                     // This condition check is to remove review mapping precisely
-                    if($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
+                    if ($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
                         $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
                     }
                 });
-                if(reviewObj) {
+                if (reviewObj) {
                     reviewObj.set('action', 'accepted');
                 }
             }
@@ -2331,14 +2331,14 @@ angular.module('oncokbApp')
                 var file = Documents.get({title: $scope.fileTitle});
                 var timeStamp;
                 file = file[0];
-                // if (!$scope.gene.status_timeStamp.has('lastEdit')) {
-                //     $scope.realtimeDocument.getModel().beginCompoundOperation();
-                //     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                //     timeStamp.value.setText(new Date().getTime().toString());
-                //     timeStamp.by.setText(Users.getMe().name);
-                //     $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
-                //     $scope.realtimeDocument.getModel().endCompoundOperation();
-                // }
+                if (!$scope.gene.status_timeStamp.has('lastEdit')) {
+                    $scope.realtimeDocument.getModel().beginCompoundOperation();
+                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                    timeStamp.value.setText(new Date().getTime().toString());
+                    timeStamp.by.setText(Users.getMe().name);
+                    $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
+                    $scope.realtimeDocument.getModel().endCompoundOperation();
+                }
                 if (!$scope.gene.status_timeStamp.has('lastUpdate')) {
                     $scope.realtimeDocument.getModel().beginCompoundOperation();
                     timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
@@ -2522,10 +2522,10 @@ angular.module('oncokbApp')
             }
 
             function documentSaved(type) {
-                // if (!$scope.docStatus.updateGene) {
-                //     $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
-                //     $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
-                // }
+                if (!$scope.docStatus.updateGene) {
+                    $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
+                    $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
+                }
                 $scope.docStatus.saving = false;
                 $scope.docStatus.saved = true;
                 $scope.docStatus.closed = false;
