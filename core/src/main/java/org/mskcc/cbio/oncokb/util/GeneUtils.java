@@ -68,7 +68,7 @@ public class GeneUtils {
                 if (matches.isEmpty() || matches.size() > 1) {
                     return null;
                 } else {
-                    matches.iterator().next();
+                    return matches.iterator().next();
                 }
             } else {
                 return geneBo.findGeneByAlias(geneAlias);

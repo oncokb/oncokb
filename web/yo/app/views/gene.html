@@ -8,51 +8,60 @@
       </span>
       <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
       <span ng-if="document && userRole === 8" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
-      <span class="btn-group btn-group-sm pull-right" role="group">
+      <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
         <button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-disabled="!fileEditable || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
         <!--<button type="button" class="btn btn-default" ng-click="getData()">Gene</button>-->
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
-        <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true">
-          <i class="fa fa-eye-slash"></i>Hide all empty
+        <button type="button" class="btn btn-default" uib-dropdown-toggle ng-if="userRole === 8">
+          More tools
+          <span class="caret"></span>
         </button>
-        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body" ng-if="userRole === 8">
+          <li ng-click="generatePDF()"><a><i class="fa fa-download"></i>Download PDF</a></li>
+          <li ng-click="status.hideAllEmpty=true"><a><i class="fa fa-eye-slash"></i>Hide all empty</a></li>
+          <li ng-click="status.hideAllEmpty=false"><a><i class="fa fa-eye"></i>Show all empty</a></li>
+          <li ng-click="status.hideAllObsolete=true"><a><i class="fa fa-eye-slash"></i>Hide all obsolete</a></li>
+          <li ng-click="status.hideAllObsolete=false"><a><i class="fa fa-eye"></i>Show all obsolete</a></li>
+          <li ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" ng-click="status.expandAll=true"><a><i class="fa fa-expand"></i>Expand all</a></li>
+          <li ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" ng-click="status.expandAll=false"><a><i class="fa fa-compress"></i>Collapse all</a></li>
+        </ul>
+
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true" ng-if="userRole === 4">
+          <i class="fa fa-eye"></i>Hide all empty
+        </button>
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false" ng-if="userRole === 4">
           <i class="fa fa-eye"></i>Show all empty
         </button>
-        <button ng-if="userRole === 8" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=true">
-          <i class="fa fa-eye-slash"></i>Hide all obsolete
-        </button>
-        <button ng-if="userRole === 8" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=false">
-          <i class="fa fa-eye-slash"></i>Show all obsolete
-        </button>
         <button type="button" class="btn btn-default"  ng-click="status.expandAll=true"
-                ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
+                ng-if="userRole === 4 && ((status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6))">
           <i class="fa fa-expand"></i>Expand all
         </button>
         <button type="button" class="btn btn-default"  ng-click="status.expandAll=false"
-                ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
+                ng-if="userRole === 4 && ((status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6))">
           <i class="fa fa-compress"></i>Collapse all
         </button>
-        <!--<button type="button" class="btn btn-default"  ng-click="status.expandAll=!status.expandAll">-->
-          <!--<i class="fa " ng-class="{'fa-compress':status.expandAll, 'fa-expand':!status.expandAll}"></i>-->
-          <!--<span ng-if="!status.expandAll">Expand</span><span ng-if="status.expandAll">Collapse</span> all-->
-        <!--</button>-->
-
-        <!--<button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=!status.hideAllEmpty">-->
-          <!--<i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>-->
-          <!--<span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty-->
-        <!--</button>-->
-        <!--<button type="button" class="btn btn-default" ng-click="isOpenFunc('hideEmpty')">Hide all empty</button>-->
-
       </span>
 
     </h2>
-    <p ng-if="!reviewMode && gene.transcripts.asArray().length > 0">Transcript: {{gene.transcripts.asArray()[0].isoform_override.text}}, {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</p>
+      <div ng-if="meta.gene" class="subtitle subtitle-1">
+          <span class="entrezGene">Entrez Gene: {{meta.gene.entrezGeneId}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/gene/?term={{meta.gene.entrezGeneId}}"><i class="fa fa-external-link"></i></a></span>
+          <div ng-if="meta.gene.geneAliases">
+              <span class="header">Also known as</span>
+              <span ng-repeat="alias in meta.gene.geneAliases" class="alias-item">{{alias}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/pubmed/?term={{alias}}"><i class="fa fa-external-link"></i></a><span ng-if="!$last" class="comma">,</span>
+              </span>
+          </div>
+      </div>
+      <div ng-if="!reviewMode && gene.transcripts.asArray().length > 0" class="subtitle subtitle-2">Transcript:
+          {{gene.transcripts.asArray()[0].isoform_override.text}},
+          {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</div>
       <div ng-if="reviewMode">
           <br/><br/>
-          <p style="color:red;font-size:20px;"><b>You are currently in "Review" mode. Click the "Review Complete" button to exit.
-              <button type="button" class="btn btn-default" ng-click="acceptAllMyChanges()" ng-disabled="status.noChanges || status.savingAll">{{status.savingAll ? 'Saving ' : 'Accept All My Changes'}}<i ng-if="status.savingAll" class="fa fa-spinner fa-spin"></i></button>
+          <p style="color:red;font-size:20px;"><b>You are currently in "Review" mode. Click the "Review Complete" button
+              to exit.
+              <button type="button" class="btn btn-default" ng-click="acceptAllMyChanges()"
+                      ng-disabled="status.noChanges || status.savingAll">{{status.savingAll ? 'Saving ' : 'Accept All My
+                  Changes'}}<i ng-if="status.savingAll" class="fa fa-spinner fa-spin"></i></button>
           </b></p>
       </div>
 

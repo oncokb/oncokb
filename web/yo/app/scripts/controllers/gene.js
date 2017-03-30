@@ -2689,6 +2689,7 @@ angular.module('oncokbApp')
                 for (var i = 0; i < OncoKB.global.genes.length; i++) {
                     if (OncoKB.global.genes[i].hugoSymbol === _geneName) {
                         $scope.status.isDesiredGene = true;
+                        $scope.meta.gene = OncoKB.global.genes[i];
                         break;
                     }
                 }
@@ -2795,6 +2796,7 @@ angular.module('oncokbApp')
             };
             $scope.suggestedMutations = [];
             $scope.meta = {
+                gene: {}, // Gene meta info from database
                 newCancerTypes: [{
                     mainType: '',
                     subtype: '',
