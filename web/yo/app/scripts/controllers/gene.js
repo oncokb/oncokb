@@ -332,6 +332,11 @@ angular.module('oncokbApp')
                 var currentReviewer = $scope.realtimeDocument.getModel().createString(User.name);
                 $scope.gene.name_review.set('currentReviewer', currentReviewer);
                 $scope.status.noChanges = false;
+                $scope.status.hasReviewContent = false;
+                $scope.status.mutationChanged = false;
+                if(needReview($scope.gene.summary_uuid) || needReview($scope.gene.type_uuid) || needReview($scope.gene.background_uuid)) {
+                    $scope.status.hasReviewContent = true;
+                }
                 setOriginalStatus([$scope.gene.summary_review, $scope.gene.type_review, $scope.gene.background_review]);
                 var mutationChanged = false;
                 var tumorChanged = false;
@@ -446,11 +451,21 @@ angular.module('oncokbApp')
                     if (mutationChanged) {
                         mutation.name_review.set('review', true);
                         $scope.geneStatus[i].isOpen = true;
+                        $scope.status.hasReviewContent = true;
+                        $scope.status.mutationChanged = true;
                     }
                     mutationChanged = false;
                 }
-                $rootScope.reviewMode = true;
-                openChangedSections();
+
+                if($scope.status.hasReviewContent === false) {
+                    $rootScope.reviewMeta.clear();
+                    dialogs.notify('Warning', 'No changes need to be reviewed');
+                } else {
+                    $rootScope.reviewMode = true;
+                    if($scope.status.mutationChanged) {
+                        openChangedSections();
+                    }
+                }
             }
             function openChangedSections() {
                 for (var i = 0; i < $scope.gene.mutations.length; i++) {
@@ -2808,7 +2823,9 @@ angular.module('oncokbApp')
                 numAccordion: 0,
                 isDesiredGene: false,
                 savingAll: false,
-                noChanges: false
+                noChanges: false,
+                hasReviewContent: false, // indicate if any changes need to be reviewed
+                mutationChanged: false // indicate there are changes in mutation section
             };
 
             $scope.$watch('meta.newCancerTypes', function(n) {
