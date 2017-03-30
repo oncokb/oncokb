@@ -110,7 +110,45 @@ table.colorHeader thead tr{
   content: attr(placeholder);
   display: block; /* For Firefox */
   color: grey;
-  margin-left: 5px;
+    margin-left: 5px;
+}
+
+#gene {
+    .subtitle {
+        width: 60%;
+        display: inline-block;
+        .fa.fa-external-link {
+            margin-left: 3px;
+        }
+    }
+    .subtitle.subtitle-1 {
+        font-weight: bold;
+        .entrezGene {
+            float: left;
+            margin-right: 10px
+        }
+        .header {
+            float: left;
+            color: grey;
+            margin-right: 10px
+        }
+        .alias-item {
+            float: left;
+            .comma {
+                margin-right: 5px
+            }
+        }
+    }
+    .top-tools-menu {
+        .dropdown-menu {
+            li > a:hover {
+                cursor: pointer;
+            }
+            .fa {
+                margin-right: 5px;
+            }
+        }
+    }
 }
 
 .genes {
