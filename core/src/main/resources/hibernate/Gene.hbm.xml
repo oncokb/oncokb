@@ -38,4 +38,8 @@
     <query name="findGeneByHugoSymbol">
         <![CDATA[from Gene g where g.hugoSymbol=?]]>
     </query>
+
+    <query name="findGenesByAlias">
+        <![CDATA[from Gene g join g.geneAliases ga where ga=?]]>
+    </query>
 </hibernate-mapping>
