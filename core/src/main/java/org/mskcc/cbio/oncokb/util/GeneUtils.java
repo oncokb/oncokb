@@ -26,7 +26,7 @@ public class GeneUtils {
             if (CacheUtils.isEnabled()) {
                 Gene gene = CacheUtils.getGeneByHugoSymbol(hugoSymbol);
                 if (gene == null) {
-                    gene = geneBo.findGeneByAlias(hugoSymbol);
+                    gene = getGeneByAlias(hugoSymbol);
                 }
                 return gene;
             } else {
@@ -46,6 +46,32 @@ public class GeneUtils {
                 return CacheUtils.getGeneByEntrezId(entrezId);
             } else {
                 return geneBo.findGeneByEntrezGeneId(entrezId);
+            }
+        }
+        return null;
+    }
+
+    public static Gene getGeneByAlias(String geneAlias) {
+        if (geneAlias != null) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            if (CacheUtils.isEnabled()) {
+                Set<Gene> genes = getAllGenes();
+                Set<Gene> matches = new HashSet<>();
+                for (Gene gene : genes) {
+                    for (String alias : gene.getGeneAliases()) {
+                        if (alias.equals(geneAlias)) {
+                            matches.add(gene);
+                            break;
+                        }
+                    }
+                }
+                if (matches.isEmpty() || matches.size() > 1) {
+                    return null;
+                } else {
+                    matches.iterator().next();
+                }
+            } else {
+                return geneBo.findGeneByAlias(geneAlias);
             }
         }
         return null;
