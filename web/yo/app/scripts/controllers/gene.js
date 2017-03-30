@@ -2254,27 +2254,12 @@ angular.module('oncokbApp')
             }
 
             function loadMetaFile(callback) {
-                storage.retrieveMeta().then(function(result) {
-                    if (result && result.error) {
-                        dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
-                    } else {
-                        storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
-                            if (metaRealtime && metaRealtime.error) {
-                                dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
-                                $scope.fileEditable = false;
-                            } else {
-                                $rootScope.metaRealtime = metaRealtime;
-                                $rootScope.metaModel = metaRealtime.getModel();
-                                if (!$rootScope.metaModel.getRoot().get('review').get($scope.fileTitle)) {
-                                    var tempMap = $rootScope.metaModel.createMap();
-                                    $rootScope.metaModel.getRoot().get('review').set($scope.fileTitle, tempMap);
-                                }
-                                $rootScope.reviewMeta = $rootScope.metaModel.getRoot().get('review').get($scope.fileTitle);
-                            }
-                            callback();
-                        });
-                    }
-                });
+                if (!$rootScope.metaData.get($scope.fileTitle)) {
+                    var tempMap = $rootScope.metaModel.createMap();
+                    $rootScope.metaData.set($scope.fileTitle, tempMap);
+                }
+                $rootScope.reviewMeta = $rootScope.metaData.get($scope.fileTitle);
+                callback();
             }
 
             function bindDocEvents() {
@@ -2284,7 +2269,6 @@ angular.module('oncokbApp')
                 $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
                 $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
                 $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveMetaChangedEvent);
-                $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, metaValueChanged);
             }
 
             function saveStateChangedEvent(evt) {
@@ -2326,10 +2310,6 @@ angular.module('oncokbApp')
                         updateMetaDocStatus(evt);
                     });
                 }
-            }
-
-            function metaValueChanged(evt) {
-                console.log('Here you go!');
             }
 
             function updateMetaDocStatus(evt) {
