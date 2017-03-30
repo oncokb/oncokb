@@ -36,4 +36,15 @@ public class GeneDaoImpl extends GenericDaoImpl<Gene, Integer> implements GeneDa
     public Gene findGeneByEntrezGeneId(int entrezGeneId) {
         return findById(entrezGeneId);
     }
+
+    @Override
+    public Gene findGeneByAlias(String geneAlias) {
+        // Only support one gene at this time
+        List<Gene> genes = findByNamedQuery("findGenesByAlias", geneAlias);
+        if (genes.isEmpty() || genes.size() > 1) {
+            return null;
+        } else {
+            return genes.get(0);
+        }
+    }
 }

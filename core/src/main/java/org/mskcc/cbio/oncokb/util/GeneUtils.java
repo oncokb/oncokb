@@ -24,7 +24,11 @@ public class GeneUtils {
             hugoSymbol = hugoSymbol.toUpperCase();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
-                return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
+                Gene gene = CacheUtils.getGeneByHugoSymbol(hugoSymbol);
+                if (gene == null) {
+                    gene = geneBo.findGeneByAlias(hugoSymbol);
+                }
+                return gene;
             } else {
                 return geneBo.findGeneByHugoSymbol(hugoSymbol);
             }
@@ -63,6 +67,13 @@ public class GeneUtils {
                     String hugoSymbol = gene.getHugoSymbol();
                     if (StringUtils.containsIgnoreCase(hugoSymbol, keywords)) {
                         genes.add(gene);
+                    } else {
+                        for (String alias : gene.getGeneAliases()) {
+                            if (StringUtils.containsIgnoreCase(alias, keywords)) {
+                                genes.add(gene);
+                                break;
+                            }
+                        }
                     }
                 }
             }

@@ -4,12 +4,13 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.dao.GeneDao;
 import org.mskcc.cbio.oncokb.model.Gene;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -20,7 +21,7 @@ public class GeneBoImpl extends GenericBoImpl<Gene, GeneDao> implements GeneBo {
     public Gene findGeneByHugoSymbol(String symbol) {
         return getDao().findGeneByHugoSymbol(symbol);
     }
-    
+
     @Override
     public List<Gene> findGenesByHugoSymbol(Collection<String> symbols) {
         List<Gene> genes = new ArrayList<Gene>();
@@ -32,7 +33,7 @@ public class GeneBoImpl extends GenericBoImpl<Gene, GeneDao> implements GeneBo {
         }
         return genes;
     }
-    
+
     @Override
     public Gene findGeneByEntrezGeneId(int entrezGeneId) {
         return getDao().findGeneByEntrezGeneId(entrezGeneId);
@@ -48,5 +49,10 @@ public class GeneBoImpl extends GenericBoImpl<Gene, GeneDao> implements GeneBo {
             }
         }
         return genes;
+    }
+
+    @Override
+    public Gene findGeneByAlias(String geneAlias) {
+        return getDao().findGeneByAlias(geneAlias);
     }
 }
