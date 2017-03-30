@@ -122,25 +122,28 @@ angular.module('oncokbApp')
                                 break;
                             case 2:
                                 var abstractPattern = regex[2];
-                                _datum = abstractPattern.exec(_datum)[1];
-                                var abstracts = _datum.split(';');
-                                _.each(abstracts, function(item) {
-                                    var myRegexp = /(.*?)\.\s*(http.*)/g;
-                                    var match = myRegexp.exec(item);
-                                    var text;
-                                    var link;
-                                    if (match === null) {
-                                        text = item;
-                                    } else {
-                                        text = match[1];
-                                        link = match[2];
-                                    }
-                                    uniqueResultA.push({
-                                        type: 'abstract',
-                                        id: text,
-                                        link: link
+                                var match = abstractPattern.exec(_datum);
+                                if (_.isArray(match) && match.length > 1) {
+                                    _datum = match[1];
+                                    var abstracts = _datum.split(';');
+                                    _.each(abstracts, function(item) {
+                                        var myRegexp = /(.*?)\.\s*(http.*)/g;
+                                        var match = myRegexp.exec(item);
+                                        var text;
+                                        var link;
+                                        if (match === null) {
+                                            text = item;
+                                        } else {
+                                            text = match[1];
+                                            link = match[2];
+                                        }
+                                        uniqueResultA.push({
+                                            type: 'abstract',
+                                            id: text,
+                                            link: link
+                                        });
                                     });
-                                });
+                                }
                                 break;
                             default:
                                 break;
