@@ -96,8 +96,17 @@ angular.module('oncokbApp')
                                 Documents.setStatus(OncoKB.global.genes);
                                 if (users.getMe().role === 8) {
                                     storage.retrieveMeta().then(function(result) {
-                                        if (result && result.error) {
+                                        if (result && (result.error || !_.isArray(result) || result.length === 0)) {
                                             dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                                            var sendTo = 'dev.oncokb@gmail.com';
+                                            var subject = 'Fail to retrieve meta file';
+                                            var content;
+                                            if(_.isArray(result) && result.length === 0) {
+                                                content = 'There is no meta file inside the Meta folder';
+                                            } else {
+                                                content = 'System error is ' + JSON.stringify(result.error);
+                                            }
+                                            MainUtils.sendEmail(sendTo, subject, content);
                                         } else {
                                             storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
                                                 if (metaRealtime && metaRealtime.error) {

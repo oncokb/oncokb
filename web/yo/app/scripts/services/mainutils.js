@@ -301,6 +301,24 @@ angular.module('oncokbApp')
             }
             return deferred.promise;
         }
+        /**
+         * Util to send email systematically
+         * @param {string} sendTo The receipent
+         * @param {string} subject The email subject
+         * @param {string} content The email content
+        * */
+        function sendEmail(sendTo, subject, content) {
+            var param = {sendTo: sendTo, subject: subject, content: content};
+            DatabaseConnector.sendEmail(
+                param,
+                function(result) {
+                    console.log('success', result);
+                },
+                function(result) {
+                    console.log('failed', result);
+                }
+            );
+        }
 
         return {
             getCancerTypesName: getCancerTypesName,
@@ -311,6 +329,7 @@ angular.module('oncokbApp')
             createTreatment: createTreatment,
             getIsoform: getIsoform,
             getOncogeneTSG: getOncogeneTSG,
-            getLastReviewedCancerTypesName: getLastReviewedCancerTypesName
+            getLastReviewedCancerTypesName: getLastReviewedCancerTypesName,
+            sendEmail: sendEmail
         };
     });

@@ -119,7 +119,7 @@ angular.module('oncokbApp')
                             console.log('error happened when saving VUS to DB', error);
                             var subject = 'VUS update Error for ' + $scope.gene.name.getText();
                             var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                            sendEmail('dev.oncokb@gmail.com', subject, content);
+                            mainUtils.sendEmail('dev.oncokb@gmail.com', subject, content);
                         });
                     }, 2000);
                 }
@@ -2220,19 +2220,7 @@ angular.module('oncokbApp')
                 return watchersWithoutDuplicates.length;
             }
 
-            function sendEmail(sendTo, subject, content) {
-                var param = {sendTo: sendTo, subject: subject, content: content};
 
-                DatabaseConnector.sendEmail(
-                    param,
-                    function(result) {
-                        console.log('success', result);
-                    },
-                    function(result) {
-                        console.log('failed', result);
-                    }
-                );
-            }
 
             function getSuggestedMutations() {
                 var defaultPlaceHolder = 'No suggestion found. Please curate according to literature.';
@@ -2255,8 +2243,17 @@ angular.module('oncokbApp')
             function loadMetaFile(callback) {
                 if(!$rootScope.metaData) {
                     storage.retrieveMeta().then(function(result) {
-                        if (result && result.error) {
+                        if (result && (result.error || !_.isArray(result) || result.length === 0)) {
                             dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                            var sendTo = 'dev.oncokb@gmail.com';
+                            var subject = 'Fail to retrieve meta file';
+                            var content;
+                            if(_.isArray(result) && result.length === 0) {
+                                content = 'There is no meta file inside the Meta folder';
+                            } else {
+                                content = 'System error is ' + JSON.stringify(result.error);
+                            }
+                            mainUtils.sendEmail(sendTo, subject, content);
                             callback();
                         } else {
                             storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
