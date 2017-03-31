@@ -100,9 +100,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
-        //If alteration contains 'fusion'
         if (alteration.getAlteration() != null) {
             Alteration truncatingMutation = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Truncating Mutations");
+            Alteration deletion = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Deletion");
+            //If alteration contains 'fusion'
             if (alteration.getAlteration().toLowerCase().contains("fusion")) {
                 boolean matchFusionForBothPatnerGenes = false;
                 if (matchFusionForBothPatnerGenes) {
@@ -167,7 +168,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     alterations.add(alt);
                 } else {
                     // If no fusions curated, check the Truncating Mutations.
-                    if (truncatingMutation != null) {
+                    if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
                         alterations.add(truncatingMutation);
                     }
                 }
@@ -178,17 +179,20 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             if (alteration.getAlteration().toLowerCase().equals("translocation")
                 || alteration.getAlteration().toLowerCase().equals("inversion")) {
                 // If no fusions curated, check the Truncating Mutations.
-                if (truncatingMutation != null) {
+                if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
                     alterations.add(truncatingMutation);
                 }
             }
 
+            // Map intragenic to Deletion or Truncating Mutation
             // If no Deletion curated, attach Truncating Mutations
-            if (alteration.getAlteration().toLowerCase().equals("deletion")) {
-                Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Deletion");
-                if (alt != null) {
-                    alterations.add(alt);
-                } else if (truncatingMutation != null) {
+            if (alteration.getAlteration().toLowerCase().contains("intragenic") ||
+                alteration.getAlteration().toLowerCase().equals("deletion")) {
+                if (deletion != null) {
+                    if (!alterations.contains(deletion)) {
+                        alterations.add(deletion);
+                    }
+                } else if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
                     alterations.add(truncatingMutation);
                 }
             }
