@@ -131,6 +131,86 @@ angular.module('oncokbApp')
                     });
                 }
             };
+            $scope.setUpdateTime = function () {
+                fetchGeneDoc(0);
+            };
+            function fetchGeneDoc(index) {
+                if(index < $scope.documents.length) {
+                    var fileId = $scope.documents[index].id;
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                            $timeout(function() {
+                                fetchGeneDoc(++index);
+                            },    2000, false);
+                        } else {
+                            $scope.docUpdateTime = new Date($scope.documents[index].modifiedDate).getTime();
+                            $scope.geneRealtimeModel = realtime.getModel();
+                            $scope.geneRealtimeModel.beginCompoundOperation();
+                            // add queue model
+                            var queueModel = $scope.geneRealtimeModel.createList();
+                            $scope.geneRealtimeModel.getRoot().set('queue', queueModel);
+                            // add history model
+                            var historyModel = $scope.geneRealtimeModel.createMap();
+                            historyModel.set('api', $scope.geneRealtimeModel.createMap());
+                            $scope.geneRealtimeModel.getRoot().set('history', historyModel);
+                            $scope.geneDoc = realtime.getModel().getRoot().get('gene');
+                            if($scope.geneDoc) {
+                              console.log(index, $scope.geneDoc.name.getText());
+                              setUpdateTimeGene();
+                            }
+                            $timeout(function() {
+                                fetchGeneDoc(++index);
+                            },    2000, false);
+                        }
+                    });
+                } else {
+                    console.log('It is finished.');
+                }
+            }
+            function checkAndSet(reviewObj) {
+                if(!reviewObj) {
+                    reviewObj = $scope.geneRealtimeModel.createMap();
+                    console.log($scope.geneDoc.name.getText(), 'new map assigned');
+                }
+                if(!reviewObj.get('updateTime')) {
+                    reviewObj.set('updateTime', $scope.docUpdateTime);
+                } else if(_.isString(reviewObj.get('updateTime'))) {
+                      var tempTime = new Date(reviewObj.get('updateTime'));
+                      if (tempTime instanceof Date && !isNaN(tempTime.getTime())) {
+                        reviewObj.set('updateTime', tempTime.getTime());
+                      } else {
+                        reviewObj.set('updateTime', $scope.docUpdateTime);
+                      }
+                }
+            }
+            function setUpdateTimeGene() {
+                checkAndSet($scope.geneDoc.summary_review);
+                checkAndSet($scope.geneDoc.background_review);
+                for (var i = 0; i < $scope.geneDoc.mutations.length; i++) {
+                    var mutation = $scope.geneDoc.mutations.get(i);
+                    checkAndSet(mutation.oncogenic_review);
+                    checkAndSet(mutation.effect_review);
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors.get(j);
+                        checkAndSet(tumor.summary_review);
+                        checkAndSet(tumor.trials_review);
+                        checkAndSet(tumor.prevalence_review);
+                        checkAndSet(tumor.progImp_review);
+                        checkAndSet(tumor.nccn_review);
+                        for (var k = 0; k < tumor.TI.length; k++) {
+                            var ti = tumor.TI.get(k);
+                            checkAndSet(ti.description_review);
+                            for (var m = 0; m < ti.treatments.length; m++) {
+                                var treatment = ti.treatments.get(m);
+                                checkAndSet(treatment.name_review);
+                            }
+                        }
+                    }
+                }
+                $scope.geneRealtimeModel.endCompoundOperation();
+            }
+
             function assignReviewColumn() {
                 var genes = $rootScope.metaData.keys();
                 for (var i = 0; i < genes.length; i++) {
@@ -150,10 +230,10 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.backup = function() {
+            $scope.backup = function(backupFolderName) {
                 $scope.status.backup = false;
                 OncoKB.backingUp = true;
-                importer.backup($scope.backupFolderName, function() {
+                importer.backup(backupFolderName, function() {
                     $scope.status.backup = true;
                     OncoKB.backingUp = false;
                 });

@@ -7,6 +7,7 @@
                 <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="giveFolderPermission()">Give folder permission</button>-->
                 <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="create()">Create Doc</button>-->
                 <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="startFEUUIDImportingFE()">UUID</button>-->
+                <button type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="setUpdateTime()">Set Update time</button>
                 <button type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="checkError()">Check errors</button>
                 <button type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
                 <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="resetCache()"><span>Reset Cache</span></button>-->
