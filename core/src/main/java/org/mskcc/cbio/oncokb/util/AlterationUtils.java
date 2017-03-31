@@ -95,7 +95,7 @@ public final class AlterationUtils {
                     end = start;
                 }
                 String type = m.group(4);
-                if(type == "ins") {
+                if (type == "ins") {
                     consequence = "inframe_insertion";
                 } else {
                     Integer deletion = end - start + 1;
@@ -212,6 +212,12 @@ public final class AlterationUtils {
         }
 
         if (alteration.getConsequence() == null && variantConsequence != null) {
+            alteration.setConsequence(variantConsequence);
+        } else if (alteration.getConsequence() != null && variantConsequence != null &&
+            !alteration.getConsequence().equals(variantConsequence) &&
+            alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
+            // For the query which already contains consequence but different with OncoKB algorithm,
+            // we should keep query consequence unless it is `any`
             alteration.setConsequence(variantConsequence);
         }
 
