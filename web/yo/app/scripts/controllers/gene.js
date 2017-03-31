@@ -119,7 +119,7 @@ angular.module('oncokbApp')
                             console.log('error happened when saving VUS to DB', error);
                             var subject = 'VUS update Error for ' + $scope.gene.name.getText();
                             var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                            sendEmail('dev.oncokb@gmail.com', subject, content);
+                            mainUtils.sendEmail('dev.oncokb@gmail.com', subject, content);
                         });
                     }, 2000);
                 }
@@ -255,7 +255,7 @@ angular.module('oncokbApp')
             function needReview(uuid) {
                 if(uuid) {
                     uuid = uuid.getText();
-                    if ($rootScope.reviewMeta.get(uuid) && $rootScope.reviewMeta.get(uuid).get('review')) {
+                    if ( $rootScope.geneMetaData.get(uuid) &&  $rootScope.geneMetaData.get(uuid).get('review')) {
                         return true;
                     }
                 }
@@ -265,16 +265,16 @@ angular.module('oncokbApp')
             function setReview(uuid, flag) {
                 uuid = uuid.getText();
                 if (flag) {
-                    if ($rootScope.reviewMeta.get(uuid)) {
-                        $rootScope.reviewMeta.get(uuid).set('review', true);
+                    if ( $rootScope.geneMetaData.get(uuid)) {
+                         $rootScope.geneMetaData.get(uuid).set('review', true);
                     } else {
                         var temp = $rootScope.metaModel.createMap();
                         temp.set('review', true);
-                        $rootScope.reviewMeta.set(uuid, temp);
+                         $rootScope.geneMetaData.set(uuid, temp);
                     }
                 } else if (!flag) {
-                    if ($rootScope.reviewMeta.get(uuid)) {
-                        $rootScope.reviewMeta.get(uuid).set('review', false);
+                    if ( $rootScope.geneMetaData.get(uuid)) {
+                         $rootScope.geneMetaData.get(uuid).set('review', false);
                     }
                 }
             }
@@ -458,7 +458,7 @@ angular.module('oncokbApp')
                 }
 
                 if($scope.status.hasReviewContent === false) {
-                    $rootScope.reviewMeta.clear();
+                     $rootScope.geneMetaData.clear();
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
                     $rootScope.reviewMode = true;
@@ -721,7 +721,7 @@ angular.module('oncokbApp')
             function evidenceBatchUpdate(callback) {
                 if ($scope.status.isDesiredGene) {
                     _.each(_.keys(myUpdatedEvidences), function(uuid) {
-                        if ($rootScope.reviewMeta.get(uuid) && !$rootScope.reviewMeta.get(uuid).get('review')) {
+                        if ( $rootScope.geneMetaData.get(uuid) && ! $rootScope.geneMetaData.get(uuid).get('review')) {
                             delete myUpdatedEvidences[uuid];
                         }
                     });
@@ -985,10 +985,10 @@ angular.module('oncokbApp')
             function acceptItem(arr, reviewObj) {
                 _.each(arr, function(item) {
                     // This condition check is to remove review mapping precisely
-                    if ($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
+                    if ( $rootScope.geneMetaData.get(item.uuid.getText()) &&  $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
-                        $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
+                         $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
                     }
                 });
                 if (reviewObj) {
@@ -1043,11 +1043,11 @@ angular.module('oncokbApp')
                             {reviewObj: treatment.indication_review, uuid: treatment.indication_uuid},
                             {reviewObj: treatment.description_review, uuid: treatment.description_uuid}], treatment.name_review);
                         // handle level specifically because level and propagation share the same uuid and review object
-                        var levelChanged = $rootScope.reviewMeta.get(treatment.level_uuid.getText()) && $rootScope.reviewMeta.get(treatment.level_uuid.getText()).get('review');
+                        var levelChanged =  $rootScope.geneMetaData.get(treatment.level_uuid.getText()) &&  $rootScope.geneMetaData.get(treatment.level_uuid.getText()).get('review');
                         if(levelChanged) {
                             treatment.level_review.clear();
                             treatment.level_review.set('review', false);
-                            $rootScope.reviewMeta.get(treatment.level_uuid.getText()).set('review', false);
+                             $rootScope.geneMetaData.get(treatment.level_uuid.getText()).set('review', false);
                         }
                     }
                     break;
@@ -1665,7 +1665,7 @@ angular.module('oncokbApp')
                     break;
                 }
                 _.each(uuids, function(uuid) {
-                    $rootScope.reviewMeta.delete(uuid);
+                     $rootScope.geneMetaData.delete(uuid);
                 });
             }
 
@@ -2220,19 +2220,7 @@ angular.module('oncokbApp')
                 return watchersWithoutDuplicates.length;
             }
 
-            function sendEmail(sendTo, subject, content) {
-                var param = {sendTo: sendTo, subject: subject, content: content};
 
-                DatabaseConnector.sendEmail(
-                    param,
-                    function(result) {
-                        console.log('success', result);
-                    },
-                    function(result) {
-                        console.log('failed', result);
-                    }
-                );
-            }
 
             function getSuggestedMutations() {
                 var defaultPlaceHolder = 'No suggestion found. Please curate according to literature.';
@@ -2252,29 +2240,48 @@ angular.module('oncokbApp')
                         }
                     });
             }
-
             function loadMetaFile(callback) {
-                storage.retrieveMeta().then(function(result) {
-                    if (result && result.error) {
-                        dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
-                    } else {
-                        storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
-                            if (metaRealtime && metaRealtime.error) {
-                                dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
-                                $scope.fileEditable = false;
+                if(!$rootScope.metaData) {
+                    storage.retrieveMeta().then(function(result) {
+                        if (result && (result.error || !_.isArray(result) || result.length === 0)) {
+                            dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
+                            var sendTo = 'dev.oncokb@gmail.com';
+                            var subject = 'Fail to retrieve meta file';
+                            var content;
+                            if(_.isArray(result) && result.length === 0) {
+                                content = 'There is no meta file inside the Meta folder';
                             } else {
-                                $rootScope.metaRealtime = metaRealtime;
-                                $rootScope.metaModel = metaRealtime.getModel();
-                                if (!$rootScope.metaModel.getRoot().get('review').get($scope.fileTitle)) {
-                                    var tempMap = $rootScope.metaModel.createMap();
-                                    $rootScope.metaModel.getRoot().get('review').set($scope.fileTitle, tempMap);
-                                }
-                                $rootScope.reviewMeta = $rootScope.metaModel.getRoot().get('review').get($scope.fileTitle);
+                                content = 'System error is ' + JSON.stringify(result.error);
                             }
+                            mainUtils.sendEmail(sendTo, subject, content);
                             callback();
-                        });
-                    }
-                });
+                        } else {
+                            storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
+                                if (metaRealtime && metaRealtime.error) {
+                                    dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
+                                    $scope.fileEditable = false;
+                                    callback();
+                                } else {
+                                    $rootScope.metaRealtime = metaRealtime;
+                                    $rootScope.metaModel = metaRealtime.getModel();
+                                    $rootScope.metaData = metaRealtime.getModel().getRoot().get('review');
+                                    assignMeta(callback);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    assignMeta(callback);
+                }
+
+            }
+            function assignMeta(callback) {
+                if (!$rootScope.metaData.get($scope.fileTitle)) {
+                    var tempMap = $rootScope.metaModel.createMap();
+                    $rootScope.metaData.set($scope.fileTitle, tempMap);
+                }
+                $rootScope.geneMetaData = $rootScope.metaData.get($scope.fileTitle);
+                callback();
             }
 
             function bindDocEvents() {
@@ -2284,7 +2291,6 @@ angular.module('oncokbApp')
                 $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
                 $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
                 $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveMetaChangedEvent);
-                $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, metaValueChanged);
             }
 
             function saveStateChangedEvent(evt) {
@@ -2326,10 +2332,6 @@ angular.module('oncokbApp')
                         updateMetaDocStatus(evt);
                     });
                 }
-            }
-
-            function metaValueChanged(evt) {
-                console.log('Here you go!');
             }
 
             function updateMetaDocStatus(evt) {
@@ -3153,12 +3155,12 @@ angular.module('oncokbApp')
             $modalInstance.close();
 
             var uuid = $scope.meta.cancerTypes_uuid.getText();
-            if ($rootScope.reviewMeta.get(uuid)) {
-                $rootScope.reviewMeta.get(uuid).set('review', true);
+            if ( $rootScope.geneMetaData.get(uuid)) {
+                 $rootScope.geneMetaData.get(uuid).set('review', true);
             } else {
                 var temp = $rootScope.metaModel.createMap();
                 temp.set('review', true);
-                $rootScope.reviewMeta.set(uuid, temp);
+                 $rootScope.geneMetaData.set(uuid, temp);
             }
         }; // end save
 

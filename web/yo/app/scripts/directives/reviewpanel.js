@@ -122,13 +122,13 @@ angular.module('oncokbApp')
                 };
                 function rejectItem(arr, reviewObj) {
                     _.each(arr, function(item) {
-                        if($rootScope.reviewMeta.get(item.uuid.getText()) && $rootScope.reviewMeta.get(item.uuid.getText()).get('review')) {
+                        if(rootScope.geneMetaData.get(item.uuid.getText()) && rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
                             if(item.obj) {
                                 item.obj.setText(item.reviewObj.get('lastReviewed'));
                             }
                             item.reviewObj.clear();
                             item.reviewObj.set('review', false);
-                            $rootScope.reviewMeta.get(item.uuid.getText()).set('review', false);
+                            rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
                         }
                     });
                     if(reviewObj) {
@@ -193,7 +193,7 @@ angular.module('oncokbApp')
                                     {obj: $scope.tt.indication, reviewObj: $scope.tt.indication_review, uuid: $scope.tt.indication_uuid},
                                     {obj: $scope.tt.description, reviewObj: $scope.tt.description_review, uuid: $scope.tt.description_uuid}], $scope.tt.name_review);
                                 // handle level specifically because level and propagation share the same uuid and review object
-                                var levelChanged = $rootScope.reviewMeta.get($scope.tt.level_uuid.getText()) && $rootScope.reviewMeta.get($scope.tt.level_uuid.getText()).get('review');
+                                var levelChanged = rootScope.geneMetaData.get($scope.tt.level_uuid.getText()) && rootScope.geneMetaData.get($scope.tt.level_uuid.getText()).get('review');
                                 if(levelChanged) {
                                     var lastReviewedLevel = $scope.tt.level_review.get('lastReviewed');
                                     var lastReviewedPropagation = $scope.tt.level_review.get('lastReviewedPropagation');
@@ -205,7 +205,7 @@ angular.module('oncokbApp')
                                     }
                                     $scope.tt.level_review.clear();
                                     $scope.tt.level_review.set('review', false);
-                                    $rootScope.reviewMeta.get($scope.tt.level_uuid.getText()).set('review', false);
+                                    rootScope.geneMetaData.get($scope.tt.level_uuid.getText()).set('review', false);
                                 }
                             }
                             break;

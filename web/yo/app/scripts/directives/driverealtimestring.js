@@ -86,7 +86,7 @@ angular.module('oncokbApp')
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().toLocaleString());
                                 var uuid = scope.uuid.getText();
-                                var tempMapping = $rootScope.reviewMeta.get(uuid);
+                                var tempMapping =  $rootScope.geneMetaData.get(uuid);
                                 if (!tempMapping) {
                                     tempMapping = $rootScope.metaModel.createMap();
                                 }
@@ -121,7 +121,7 @@ angular.module('oncokbApp')
                                         }
                                     }
                                 }
-                                $rootScope.reviewMeta.set(uuid, tempMapping);
+                                 $rootScope.geneMetaData.set(uuid, tempMapping);
                             }
                             scope.valueChanged();
                         }
@@ -143,12 +143,12 @@ angular.module('oncokbApp')
                         if (o && n !== o && scope.es && scope.es.get('obsolete') !== 'true') {
                             scope.rs.set('lastReviewedPropagation', o);
                             var uuid = scope.uuid.getText();
-                            var tempMapping = $rootScope.reviewMeta.get(uuid);
+                            var tempMapping =  $rootScope.geneMetaData.get(uuid);
                             if (!tempMapping) {
                                 tempMapping = $rootScope.metaModel.createMap();
                             }
                             tempMapping.set('review', true);
-                            $rootScope.reviewMeta.set(uuid, tempMapping);
+                             $rootScope.geneMetaData.set(uuid, tempMapping);
                             scope.rs.set('updatedBy', user.name);
                             scope.rs.set('updateTime', new Date().toLocaleString());
                         }
