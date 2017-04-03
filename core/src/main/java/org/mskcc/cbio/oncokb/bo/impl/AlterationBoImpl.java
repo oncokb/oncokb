@@ -91,7 +91,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
 
-            if (alteration.getConsequence().getIsGenerallyTruncating()) {
+            if (alteration.getConsequence().getIsGenerallyTruncating() != null && alteration.getConsequence().getIsGenerallyTruncating()) {
                 VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
                 alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
             }
