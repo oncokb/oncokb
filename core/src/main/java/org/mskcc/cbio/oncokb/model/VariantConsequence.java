@@ -43,7 +43,10 @@ public class VariantConsequence implements java.io.Serializable {
     }
 
     public Boolean getIsGenerallyTruncating() {
-        return isGenerallyTruncating;
+        if(this.isGenerallyTruncating == null) {
+            return false;
+        }
+        return this.isGenerallyTruncating;
     }
 
     public void setIsGenerallyTruncating(Boolean isGenerallyTruncating) {
@@ -71,6 +74,6 @@ public class VariantConsequence implements java.io.Serializable {
         }
         return true;
     }
-    
-    
+
+
 }
