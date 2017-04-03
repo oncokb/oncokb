@@ -120,7 +120,7 @@ angular.module('oncokbApp')
                         }
                     }
                 };
-                function rejectItem(arr, reviewObj) {
+                function rejectItem(arr) {
                     _.each(arr, function(item) {
                         if($rootScope.geneMetaData.get(item.uuid.getText()) && $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
                             if(item.obj) {
@@ -136,8 +136,8 @@ angular.module('oncokbApp')
                             $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
                         }
                     });
-                    if(reviewObj) {
-                        reviewObj.set('action', 'rejected');
+                    if($scope.rs) {
+                        $scope.rs.set('action', 'rejected');
                     }
                 }
                 $scope.reject = function(event) {
@@ -150,33 +150,50 @@ angular.module('oncokbApp')
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                     dlg.result.then(function() {
                         var uuid;
+                        var items = [];
                         switch ($scope.tp) {
                         case 'GENE_SUMMARY':
                             uuid = $scope.obj.summary_uuid;
+                            items = [{obj: $scope.obj.summary, reviewObj: $scope.obj.summary_review, uuid: $scope.obj.summary_uuid}];
                             break;
                         case 'GENE_BACKGROUND':
                             uuid = $scope.obj.background_uuid;
+                            items = [{obj: $scope.obj.background, reviewObj: $scope.obj.background_review, uuid: $scope.obj.background_uuid}];
                             break;
                         case 'GENE_TYPE':
-                            uuid = $scope.obj.type_uuid;
+                            // since gene type is not stored in evidence table, there is no need to fetch it.
+                            uuid = '';
+                            items = [{reviewObj: $scope.obj.type_review, uuid: $scope.obj.type_uuid}];
                             break;
                         case 'ONCOGENIC':
                             uuid = $scope.mt.oncogenic_uuid;
+                            items = [{obj: $scope.mt.oncogenic, reviewObj: $scope.mt.oncogenic_review, uuid: $scope.mt.oncogenic_uuid},
+                                {obj: $scope.mt.summary, reviewObj: $scope.mt.summary_review, uuid: $scope.mt.summary_uuid},
+                                {obj: $scope.mt.shortSummary, reviewObj: $scope.mt.shortSummary_review, uuid: $scope.mt.shortSummary_uuid}];
                             break;
                         case 'MUTATION_EFFECT':
                             uuid = $scope.mt.effect_uuid;
+                            items = [{obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
+                                {obj: $scope.mt.description, reviewObj: $scope.mt.description_review, uuid: $scope.mt.description_uuid}];
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
                             uuid = $scope.tm.summary_uuid;
+                            items = [{obj: $scope.tm.summary, reviewObj: $scope.tm.summary_review, uuid: $scope.tm.summary_uuid}];
                             break;
                         case 'PREVALENCE':
                             uuid = $scope.tm.prevalence_uuid;
+                            items = [{obj: $scope.tm.prevalence, reviewObj: $scope.tm.prevalence_review, uuid: $scope.tm.prevalence_uuid}];
                             break;
                         case 'PROGNOSTIC_IMPLICATION':
                             uuid = $scope.tm.progImp_uuid;
+                            items = [{obj: $scope.tm.progImp, reviewObj: $scope.tm.progImp_review, uuid: $scope.tm.progImp_uuid}];
                             break;
                         case 'NCCN_GUIDELINES':
                             uuid = $scope.tm.nccn_uuid;
+                            items = [{obj: $scope.tm.nccn.therapy, reviewObj: $scope.tm.nccn.therapy_review, uuid: $scope.tm.nccn.therapy_uuid},
+                                {obj: $scope.tm.nccn.disease, reviewObj: $scope.tm.nccn.disease_review, uuid: $scope.tm.nccn.disease_uuid},
+                                {obj: $scope.tm.nccn.version, reviewObj: $scope.tm.nccn.version_review, uuid: $scope.tm.nccn.version_uuid},
+                                {obj: $scope.tm.nccn.description, reviewObj: $scope.tm.nccn.description_review, uuid: $scope.tm.nccn.description_uuid}];
                             break;
                         case 'Standard implications for sensitivity to therapy':
                         case 'Standard implications for resistance to therapy':
@@ -184,84 +201,66 @@ angular.module('oncokbApp')
                         case 'Investigational implications for resistance to therapy':
                             if ($scope.tt === null) {
                                 uuid = $scope.ti.description_uuid;
+                                items = [{obj: $scope.ti.description, reviewObj: $scope.ti.description_review, uuid: $scope.ti.description_uuid}];
                             } else {
                                 uuid = $scope.tt.name_uuid;
+                                items = [{obj: $scope.tt.name, reviewObj: $scope.tt.name_review, uuid: $scope.tt.name_uuid},
+                                    {obj: $scope.tt.indication, reviewObj: $scope.tt.indication_review, uuid: $scope.tt.indication_uuid},
+                                    {obj: $scope.tt.description, reviewObj: $scope.tt.description_review, uuid: $scope.tt.description_uuid}];
                             }
                             break;
                         case 'CLINICAL_TRIAL':
                             uuid = $scope.tm.trials_uuid;
+                            items = [{reviewObj: $scope.tm.trials_review, uuid: $scope.tm.trials_uuid}];
                             break;
                         case 'MUTATION_NAME_CHANGE':
+                            uuid = '';
+                            items = [{obj: $scope.mt.name, reviewObj: $scope.mt.name_review, uuid: $scope.mt.name_uuid}];
+                            break;
                         case 'TUMOR_NAME_CHANGE':
+                            uuid = '';
+                            items = [{reviewObj: $scope.tm.cancerTypes_review, uuid: $scope.tm.name_uuid}];
+                            break;
                         case 'TREATMENT_NAME_CHANGE':
                             uuid = '';
+                            items = [{obj: $scope.tt.name, reviewObj: $scope.tt.name_review, uuid: $scope.tt.name_uuid}];
                             break;
                         default:
                             break;
                         }
                         if(uuid) {
                             uuid = uuid.getText();
-                            DatabaseConnector.getEvidencesByUUIDs([uuid], function(result) {
-                                var data = JSON.parse(result.status).data;
-                                if(data.length > 0) {
-                                    $scope.lastUpdateTime = data[0].lastEdit;
+                            DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
+                                if(_.isObject(JSON.parse(result.status)) && _.isArray(JSON.parse(result.status).data) && JSON.parse(result.status).data.length > 0) {
+                                    var eviFromDB = JSON.parse(result.status).data[0];
+                                    $scope.lastUpdateTime = eviFromDB.lastEdit;
                                 }
-                                updateRejectModel();
+                                specialCases();
+                                rejectItem(items);
+                            }, function(error) {
+                                console.log('Failed to fetch evidence based on uuid', error);
                             });
                         } else {
-                            updateRejectModel();
+                            specialCases();
+                            rejectItem(items);
                         }
                     });
                 };
-                function updateRejectModel() {
+                function specialCases() {
                     switch ($scope.tp) {
-                    case 'GENE_SUMMARY':
-                        rejectItem([{obj: $scope.obj.summary, reviewObj: $scope.obj.summary_review, uuid: $scope.obj.summary_uuid}], $scope.obj.summary_review);
-                        break;
-                    case 'GENE_BACKGROUND':
-                        rejectItem([{obj: $scope.obj.background, reviewObj: $scope.obj.background_review, uuid: $scope.obj.background_uuid}], $scope.obj.background_review);
-                        break;
                     case 'GENE_TYPE':
                         $scope.obj.type.set('TSG', $scope.obj.type_review.get('lastReviewed').TSG);
                         $scope.obj.type.set('OCG', $scope.obj.type_review.get('lastReviewed').OCG);
-                        rejectItem([{reviewObj: $scope.obj.type_review, uuid: $scope.obj.type_uuid}], $scope.obj.type_review);
-                        break;
-                    case 'ONCOGENIC':
-                        rejectItem([{obj: $scope.mt.oncogenic, reviewObj: $scope.mt.oncogenic_review, uuid: $scope.mt.oncogenic_uuid},
-                            {obj: $scope.mt.summary, reviewObj: $scope.mt.summary_review, uuid: $scope.mt.summary_uuid},
-                            {obj: $scope.mt.shortSummary, reviewObj: $scope.mt.shortSummary_review, uuid: $scope.mt.shortSummary_uuid}], $scope.mt.oncogenic_review);
-                        break;
-                    case 'MUTATION_EFFECT':
-                        rejectItem([{obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
-                            {obj: $scope.mt.description, reviewObj: $scope.mt.description_review, uuid: $scope.mt.description_uuid}], $scope.mt.effect_review);
-                        break;
-                    case 'TUMOR_TYPE_SUMMARY':
-                        rejectItem([{obj: $scope.tm.summary, reviewObj: $scope.tm.summary_review, uuid: $scope.tm.summary_uuid}], $scope.tm.summary_review);
-                        break;
-                    case 'PREVALENCE':
-                        rejectItem([{obj: $scope.tm.prevalence, reviewObj: $scope.tm.prevalence_review, uuid: $scope.tm.prevalence_uuid}], $scope.tm.prevalence_review);
-                        break;
-                    case 'PROGNOSTIC_IMPLICATION':
-                        rejectItem([{obj: $scope.tm.progImp, reviewObj: $scope.tm.progImp_review, uuid: $scope.tm.progImp_uuid}], $scope.tm.progImp_review);
                         break;
                     case 'NCCN_GUIDELINES':
                         $scope.tm.nccn_review.clear();
                         $scope.tm.nccn_review.set('review', false);
-                        rejectItem([{obj: $scope.tm.nccn.therapy, reviewObj: $scope.tm.nccn.therapy_review, uuid: $scope.tm.nccn.therapy_uuid},
-                            {obj: $scope.tm.nccn.disease, reviewObj: $scope.tm.nccn.disease_review, uuid: $scope.tm.nccn.disease_uuid},
-                            {obj: $scope.tm.nccn.version, reviewObj: $scope.tm.nccn.version_review, uuid: $scope.tm.nccn.version_uuid},
-                            {obj: $scope.tm.nccn.description, reviewObj: $scope.tm.nccn.description_review, uuid: $scope.tm.nccn.description_uuid}], $scope.tm.nccn_review);
                         break;
                     case 'Standard implications for sensitivity to therapy':
                     case 'Standard implications for resistance to therapy':
                     case 'Investigational implications for sensitivity to therapy':
                     case 'Investigational implications for resistance to therapy':
-                        if ($scope.tt === null) {
-                            rejectItem([{obj: $scope.ti.description, reviewObj: $scope.ti.description_review, uuid: $scope.ti.description_uuid}], $scope.ti.description_review);
-                        } else {
-                            rejectItem([{obj: $scope.tt.name, reviewObj: $scope.tt.name_review, uuid: $scope.tt.name_uuid},
-                                {obj: $scope.tt.indication, reviewObj: $scope.tt.indication_review, uuid: $scope.tt.indication_uuid},
-                                {obj: $scope.tt.description, reviewObj: $scope.tt.description_review, uuid: $scope.tt.description_uuid}], $scope.tt.name_review);
+                        if ($scope.tt !== null) {
                             // handle level specifically because level and propagation share the same uuid and review object
                             var levelChanged = $rootScope.geneMetaData.get($scope.tt.level_uuid.getText()) && $rootScope.geneMetaData.get($scope.tt.level_uuid.getText()).get('review');
                             if(levelChanged) {
@@ -282,10 +281,6 @@ angular.module('oncokbApp')
                     case 'CLINICAL_TRIAL':
                         $scope.tm.trials.clear();
                         $scope.tm.trials.pushAll($scope.tm.trials_review.get('lastReviewed'));
-                        rejectItem([{reviewObj: $scope.tm.trials_review, uuid: $scope.tm.trials_uuid}], $scope.tm.trials_review);
-                        break;
-                    case 'MUTATION_NAME_CHANGE':
-                        rejectItem([{obj: $scope.mt.name, reviewObj: $scope.mt.name_review, uuid: $scope.mt.name_uuid}], $scope.mt.name_review);
                         break;
                     case 'TUMOR_NAME_CHANGE':
                         var lastReviewed = $rootScope.model.createList();
@@ -299,10 +294,6 @@ angular.module('oncokbApp')
                             lastReviewed.push(cancerType);
                         });
                         $scope.tm.cancerTypes = lastReviewed;
-                        rejectItem([{reviewObj: $scope.tm.cancerTypes_review, uuid: $scope.tm.name_uuid}], $scope.tm.cancerTypes_review);
-                        break;
-                    case 'TREATMENT_NAME_CHANGE':
-                        rejectItem([{obj: $scope.tt.name, reviewObj: $scope.tt.name_review, uuid: $scope.tt.name_uuid}], $scope.tt.name_review);
                         break;
                     default:
                         break;

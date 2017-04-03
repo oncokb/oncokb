@@ -23,17 +23,17 @@ import java.util.*;
 @Controller
 public class EvidencesApiController implements EvidencesApi {
 
-    public ResponseEntity<ApiObjectResp> evidencesUUIDsGet(
-        @ApiParam(value = "Unique identifier.", required = true) @PathVariable("uuids") Set<String> uuids
+    public ResponseEntity<ApiObjectResp> evidencesUUIDGet(
+        @ApiParam(value = "Unique identifier.", required = true) @PathVariable("uuid") String uuid
     ) {
         ApiObjectResp apiObjectResp = new ApiObjectResp();
         HttpStatus status = HttpStatus.OK;
         Meta meta = MetaUtils.getOKMeta();
-        if (uuids == null) {
+        if (uuid == null) {
             meta = MetaUtils.getBadRequestMeta("Please specify uuid list.");
             status = HttpStatus.BAD_REQUEST;
         } else {
-            apiObjectResp.setData(EvidenceUtils.getEvidenceByUUIDs(uuids));
+            apiObjectResp.setData(EvidenceUtils.getEvidencesByUUID(uuid));
         }
         apiObjectResp.setMeta(meta);
         return new ResponseEntity<ApiObjectResp>(apiObjectResp, status);

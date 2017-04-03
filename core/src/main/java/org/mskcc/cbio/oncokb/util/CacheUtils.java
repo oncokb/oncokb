@@ -592,14 +592,14 @@ public class CacheUtils {
         return mappedEvis;
     }
 
-    public static Set<Evidence> getEvidencesByUUIDs(Set<String> uuids) {
+    public static Set<Evidence> getEvidencesByUUID(String uuid) {
         synEvidences();
 
         Set<Evidence> mappedEvis = new HashSet<>();
-        if (uuids != null) {
+        if (uuid != null) {
             for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
                 for (Evidence evidence : map.getValue()) {
-                    if (uuids.contains(evidence.getUuid())) {
+                    if (uuid.equals(evidence.getUuid())) {
                         mappedEvis.add(evidence);
                     }
                 }
