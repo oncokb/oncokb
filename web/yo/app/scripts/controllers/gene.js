@@ -917,9 +917,9 @@ angular.module('oncokbApp')
                         data.description = treatment.description.getText();
                         data.propagation = levelMapping[treatment.name_eStatus.get('propagation')];
                         data.treatments = [];
-                        var treatments = treatment.name.getText().split('+');
+                        var treatments = treatment.name.getText().split(',');
                         for (i = 0; i < treatments.length; i++) {
-                            var drugs = treatments[i].split(',');
+                            var drugs = treatments[i].split('+');
                             var drugList = [];
                             for (var j = 0; j < drugs.length; j++) {
                                 drugList.push({
