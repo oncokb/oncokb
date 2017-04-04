@@ -199,7 +199,7 @@ angular.module('oncokbApp')
                         case 'Standard implications for resistance to therapy':
                         case 'Investigational implications for sensitivity to therapy':
                         case 'Investigational implications for resistance to therapy':
-                            if ($scope.tt === null) {
+                            if (!$scope.tt) {
                                 uuid = $scope.ti.description_uuid;
                                 items = [{obj: $scope.ti.description, reviewObj: $scope.ti.description_review, uuid: $scope.ti.description_uuid}];
                             } else {
@@ -228,11 +228,12 @@ angular.module('oncokbApp')
                         default:
                             break;
                         }
-                        if(uuid) {
+                        if($rootScope.isDesiredGene && uuid) {
                             uuid = uuid.getText();
                             DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
-                                if(_.isObject(JSON.parse(result.status)) && _.isArray(JSON.parse(result.status).data) && JSON.parse(result.status).data.length > 0) {
-                                    var eviFromDB = JSON.parse(result.status).data[0];
+                                var resultJSON = JSON.parse(result.status);
+                                if(_.isObject(resultJSON) && _.isArray(resultJSON.data) && resultJSON.data.length > 0) {
+                                    var eviFromDB = resultJSON.data[0];
                                     $scope.lastUpdateTime = eviFromDB.lastEdit;
                                 }
                                 specialCases();
@@ -260,7 +261,7 @@ angular.module('oncokbApp')
                     case 'Standard implications for resistance to therapy':
                     case 'Investigational implications for sensitivity to therapy':
                     case 'Investigational implications for resistance to therapy':
-                        if ($scope.tt !== null) {
+                        if ($scope.tt) {
                             // handle level specifically because level and propagation share the same uuid and review object
                             var levelChanged = $rootScope.geneMetaData.get($scope.tt.level_uuid.getText()) && $rootScope.geneMetaData.get($scope.tt.level_uuid.getText()).get('review');
                             if(levelChanged) {

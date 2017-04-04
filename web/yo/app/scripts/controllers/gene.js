@@ -447,6 +447,7 @@ angular.module('oncokbApp')
                     setOriginalStatus([mutation.name_review]);
                     if(needReview(mutation.name_uuid)) {
                         mutation.name_review.set('review', true);
+                        mutationChanged = true;
                     }
                     if (mutationChanged) {
                         mutation.name_review.set('review', true);
