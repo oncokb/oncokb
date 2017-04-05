@@ -30,10 +30,10 @@ public class MvcConfigurationPublic extends MvcConfiguration {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/api").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/v1/").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/v1").setViewName("redirect:/api/v1/swagger-ui.html");
+//        registry.addViewController("/api").setViewName("redirect:/api/v1/swagger-ui.html");
+//        registry.addViewController("/api/").setViewName("redirect:/api/v1/swagger-ui.html");
+//        registry.addViewController("/api/v1/").setViewName("redirect:/api/v1/swagger-ui.html");
+//        registry.addViewController("/api/v1").setViewName("redirect:/api/v1/swagger-ui.html");
     }
 
     @Bean

@@ -64,7 +64,7 @@ public class GenerateGoogleDoc {
     private static final String REPORT_DATA_TEMPLATE = "1740Tw1f06j0IZPKqnNeg0E-7639sd4y50ZiE2ORPCn0";
     private static final String REPORTS_INFO_SHEET_ID = "1dHsXjrk9R5C3MkJ_iEUZ39OQPTSF3UOPYjU_C54zXuA";
         
-    @RequestMapping(value="/legacy-api/generateGoogleDoc", method = POST)
+//    @RequestMapping(value="/legacy-api/generateGoogleDoc", method = POST)
     public @ResponseBody Boolean generateGoogleDoc(
             @RequestParam(value="reportParams", required=true) String reportParams) throws MalformedURLException, ServiceException, URISyntaxException{
         try {

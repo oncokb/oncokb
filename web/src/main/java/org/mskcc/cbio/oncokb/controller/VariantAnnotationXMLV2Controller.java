@@ -21,8 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 public class VariantAnnotationXMLV2Controller {
-    @RequestMapping(value="/legacy-api/var_annotation_v2", method=RequestMethod.POST,
-            produces="application/xml;charset=UTF-8")
+//    @RequestMapping(value="/legacy-api/var_annotation_v2", method=RequestMethod.POST,
+//            produces="application/xml;charset=UTF-8")
     public @ResponseBody String getVariantAnnotation(
             @RequestParam(value="file", required=true) MultipartFile file) {
         if (!file.isEmpty()) {

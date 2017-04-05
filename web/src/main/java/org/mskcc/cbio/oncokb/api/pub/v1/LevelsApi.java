@@ -20,9 +20,9 @@ public interface LevelsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ApiObjectResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/levels",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/levels",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiObjectResp> levelsGet();
 
 
@@ -30,9 +30,9 @@ public interface LevelsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ApiObjectResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/levels/resistence",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/levels/resistence",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiObjectResp> levelsResistenceGet();
 
 
@@ -40,9 +40,9 @@ public interface LevelsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = ApiObjectResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/levels/sensitive",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/levels/sensitive",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiObjectResp> levelsSensitiveGet();
 
 }

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class AlterationController {
     
-    @RequestMapping(value="/legacy-api/alteration.json")
+//    @RequestMapping(value="/legacy-api/alteration.json")
     public @ResponseBody List<Alteration> getAlteration(
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {

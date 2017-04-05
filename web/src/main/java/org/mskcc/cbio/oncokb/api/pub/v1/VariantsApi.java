@@ -18,9 +18,9 @@ public interface VariantsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/variants",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/variants",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> variantsGet();
 
 
@@ -28,9 +28,9 @@ public interface VariantsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-    @RequestMapping(value = "/variants/lookup",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/variants/lookup",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<ApiListResp> variantsLookupGet(
         @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
