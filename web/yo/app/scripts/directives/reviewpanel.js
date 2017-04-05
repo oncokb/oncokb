@@ -228,12 +228,12 @@ angular.module('oncokbApp')
                         default:
                             break;
                         }
-                        if($rootScope.isDesiredGene && uuid) {
+                        if ($rootScope.isDesiredGene && uuid) {
                             uuid = uuid.getText();
                             DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
                                 var resultJSON = JSON.parse(result.status);
-                                if(_.isObject(resultJSON) && _.isArray(resultJSON.data) && resultJSON.data.length > 0) {
-                                    var eviFromDB = resultJSON.data[0];
+                                if (_.isArray(resultJSON) && resultJSON.length > 0) {
+                                    var eviFromDB = resultJSON[0];
                                     $scope.lastUpdateTime = eviFromDB.lastEdit;
                                 }
                                 specialCases();
