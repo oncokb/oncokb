@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user) {
+    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils) {
         return {
             templateUrl: 'views/driveRealtimeString.html',
             restrict: 'AE',
@@ -57,7 +57,9 @@ angular.module('oncokbApp')
                 }
                 scope.content.preStringO = scope.content.stringO;
                 $rootScope.$watch('reviewMode', function(n, o) {
-                    scope.reviewMode = n;
+                    if(n !== o) {
+                        scope.reviewMode = n;
+                    }
                 });
                 scope.$watch('object.text', function(n, o) {
                     if (n !== o) {
@@ -71,6 +73,10 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
+                            if(scope.paste) {
+                                n = stringUtils.getTextString(scope.content.stringO);
+                                scope.paste = false;
+                            }
                             if (scope.es && scope.es.get('obsolete') === 'true') {
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
@@ -201,13 +207,24 @@ angular.module('oncokbApp')
                     }
                     $scope.content.propagationOpts = _propagationOpts;
                 };
-
+                function calculateDiff() {
+                    if(($scope.t === 'p' || $scope.t === 'short') && $scope.rs && $scope.rs.has('lastReviewed')) {
+                        var dmp = new diff_match_patch();
+                        var newContent = $scope.content.stringO;
+                        var diff = dmp.diff_main($scope.lastReviewed, newContent);
+                        dmp.diff_cleanupSemantic(diff);
+                        $scope.diffHTML = dmp.diff_prettyHtml(diff);
+                    }
+                }
                 $scope.valueChanged = function() {
                     if ($scope.t === 'treatment-select' && (!$scope.reviewMode || $scope.rs.get('review') !== false)) {
                         $scope.changePropagation();
                     }
                     if (!_.isUndefined($scope.es)) {
                         $scope.es.set('vetted', 'uv');
+                    }
+                    if($scope.reviewMode === true) {
+                        calculateDiff();
                     }
                 };
 
@@ -224,6 +241,7 @@ angular.module('oncokbApp')
                 $scope.getInputClass = function() {
                     if ($scope.reviewMode) {
                         $scope.lastReviewed = $scope.rs.get('lastReviewed');
+                        calculateDiff();
                     }
                     var contentEditable = $scope.reviewMode ? ($scope.rs.get('review') !== false ? true : false) : $scope.fe;
                     var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
@@ -231,6 +249,9 @@ angular.module('oncokbApp')
                         classResult += ' doubleH';
                     }
                     return classResult;
+                };
+                $scope.togglePaste = function() {
+                    $scope.paste = true;
                 };
             }
         };

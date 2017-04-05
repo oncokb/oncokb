@@ -176,17 +176,17 @@
                 </span>
                 <review-panel rt="'update'" rs="mutation.oncogenic_review" tp="'ONCOGENIC'" mt="mutation" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
               </uib-accordion-heading>
-                <p ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review, null, null, true)">
+                <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review, null, null, true)">
                     <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
                     <drive-realtime-string rs="mutation.oncogenic_review" uuid="mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
                 </p>
                 <!-- Migrate from mutation summary -->
-                <div>
-                    <span ng-if="userRole === 8 && displayCheck(mutation.shortSummary_uuid, mutation.shortSummary_review, mutation.name_review, null, null, true)">
+                <div ng-class="{'seperationLine': reviewMode}" ng-if="userRole === 8 && displayCheck(mutation.shortSummary_uuid, mutation.shortSummary_review, mutation.name_review, null, null, true)">
                     <strong>Summary statement:</strong>
                     <br/>
                     <drive-realtime-string rs="mutation.shortSummary_review" uuid="mutation.shortSummary_uuid" fe="fileEditable" t="'p'" object="mutation.shortSummary" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                  </span>
+                </div>
+                <div>
                     <span ng-if="displayCheck(mutation.summary_uuid, mutation.summary_review, mutation.name_review, null, null, true)">
                     <strong>Description of Evidence:</strong>
                     <br/>
@@ -312,15 +312,15 @@
                       </span>
                       <review-panel rt="'update'" rs="tumor.nccn_review" tp="'NCCN_GUIDELINES'" mt="mutation" tm="tumor" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                     </uib-accordion-heading>
-                    <p ng-if="displayCheck(tumor.nccn.therapy_uuid, tumor.nccn.therapy_review, mutation.name_review, tumor.name_review, null, true)">
+                    <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(tumor.nccn.therapy_uuid, tumor.nccn.therapy_review, mutation.name_review, tumor.name_review, null, true)">
                         <strong>{{::tumor.nccn.therapy.display}}:</strong>
                         <drive-realtime-string rs="tumor.nccn.therapy_review" uuid="tumor.nccn.therapy_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
                     </p>
-                    <p ng-if="displayCheck(tumor.nccn.disease_uuid, tumor.nccn.disease_review, mutation.name_review, tumor.name_review, null, true)">
+                    <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(tumor.nccn.disease_uuid, tumor.nccn.disease_review, mutation.name_review, tumor.name_review, null, true)">
                       <strong>{{::tumor.nccn.disease.display}}:</strong>
                       <drive-realtime-string rs="tumor.nccn.disease_review" uuid="tumor.nccn.disease_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'select-chosen'" object="tumor.nccn.disease" o="nccnDiseaseTypes" chosenid="'CurationNCCNDropDown'"></drive-realtime-string>
                     </p>
-                    <p ng-if="displayCheck(tumor.nccn.version_uuid, tumor.nccn.version_review, mutation.name_review, tumor.name_review, null, true)">
+                    <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(tumor.nccn.version_uuid, tumor.nccn.version_review, mutation.name_review, tumor.name_review, null, true)">
                       <strong>{{::tumor.nccn.version.display}}:</strong>
                       <drive-realtime-string rs="tumor.nccn.version_review" uuid="tumor.nccn.version_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.version"></drive-realtime-string>
                     </p>
@@ -397,7 +397,7 @@
                                 <review-panel rt="'name'" rs="treatment.name_review" tp="'TREATMENT_NAME_CHANGE'" ti="ti" tt="treatment" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                             </span>
                             </uib-accordion-heading>
-                            <p ng-if="displayCheck(treatment.level_uuid, treatment.level_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
+                            <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.level_uuid, treatment.level_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
                               <strong>{{::treatment.level.display}}:</strong><br/>
                               <span ng-if="checkTI(ti, 1, 1)">
                                 <drive-realtime-string rs="treatment.level_review" uuid="treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SS"></drive-realtime-string>
@@ -414,13 +414,10 @@
                                 <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
                               </span>
                             </p>
-                            <div class="approvedIndication" ng-if="checkTI(ti, 1, 1) && displayCheck(treatment.indication_uuid, treatment.indication_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
-                              <div class="header">
+                            <div ng-class="{'seperationLine': reviewMode}" ng-if="checkTI(ti, 1, 1) && displayCheck(treatment.indication_uuid, treatment.indication_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
                                 <strong>{{::treatment.indication.display}}:</strong>
-                              </div>
-                              <div class="content">
+                                <br/>
                                 <drive-realtime-string rs="treatment.indication_review" uuid="treatment.indication_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                              </div>
                             </div>
                             <span ng-if="displayCheck(treatment.description_uuid, treatment.description_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
                               <strong>Description of Evidence:</strong>
