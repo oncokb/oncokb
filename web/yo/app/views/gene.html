@@ -181,12 +181,10 @@
                     <drive-realtime-string rs="mutation.oncogenic_review" uuid="mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
                 </p>
                 <!-- Migrate from mutation summary -->
-                <div ng-class="{'seperationLine': reviewMode}">
-                    <span ng-if="userRole === 8 && displayCheck(mutation.shortSummary_uuid, mutation.shortSummary_review, mutation.name_review, null, null, true)">
+                <div ng-class="{'seperationLine': reviewMode}" ng-if="userRole === 8 && displayCheck(mutation.shortSummary_uuid, mutation.shortSummary_review, mutation.name_review, null, null, true)">
                     <strong>Summary statement:</strong>
                     <br/>
                     <drive-realtime-string rs="mutation.shortSummary_review" uuid="mutation.shortSummary_uuid" fe="fileEditable" t="'p'" object="mutation.shortSummary" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                  </span>
                 </div>
                 <div>
                     <span ng-if="displayCheck(mutation.summary_uuid, mutation.summary_review, mutation.name_review, null, null, true)">

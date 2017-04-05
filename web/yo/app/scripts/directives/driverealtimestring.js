@@ -61,15 +61,6 @@ angular.module('oncokbApp')
                         scope.reviewMode = n;
                     }
                 });
-                scope.calculateDiff = function() {
-                    if((scope.t === 'p' || scope.t === 'short') && scope.rs && scope.rs.has('lastReviewed')) {
-                        var dmp = new diff_match_patch();
-                        var newContent = scope.content.stringO;
-                        var diff = dmp.diff_main(scope.lastReviewed, newContent);
-                        dmp.diff_cleanupSemantic(diff);
-                        scope.diffHTML = dmp.diff_prettyHtml(diff);
-                    }
-                }
                 scope.$watch('object.text', function(n, o) {
                     if (n !== o) {
                         if (scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('review') !== false)) {
@@ -216,7 +207,15 @@ angular.module('oncokbApp')
                     }
                     $scope.content.propagationOpts = _propagationOpts;
                 };
-
+                function calculateDiff() {
+                    if(($scope.t === 'p' || $scope.t === 'short') && $scope.rs && $scope.rs.has('lastReviewed')) {
+                        var dmp = new diff_match_patch();
+                        var newContent = $scope.content.stringO;
+                        var diff = dmp.diff_main($scope.lastReviewed, newContent);
+                        dmp.diff_cleanupSemantic(diff);
+                        $scope.diffHTML = dmp.diff_prettyHtml(diff);
+                    }
+                }
                 $scope.valueChanged = function() {
                     if ($scope.t === 'treatment-select' && (!$scope.reviewMode || $scope.rs.get('review') !== false)) {
                         $scope.changePropagation();
@@ -225,7 +224,7 @@ angular.module('oncokbApp')
                         $scope.es.set('vetted', 'uv');
                     }
                     if($scope.reviewMode === true) {
-                        $scope.calculateDiff();
+                        calculateDiff();
                     }
                 };
 
@@ -242,7 +241,7 @@ angular.module('oncokbApp')
                 $scope.getInputClass = function() {
                     if ($scope.reviewMode) {
                         $scope.lastReviewed = $scope.rs.get('lastReviewed');
-                        $scope.calculateDiff();
+                        calculateDiff();
                     }
                     var contentEditable = $scope.reviewMode ? ($scope.rs.get('review') !== false ? true : false) : $scope.fe;
                     var classResult = contentEditable ? 'editableBox' : 'unEditableBox';

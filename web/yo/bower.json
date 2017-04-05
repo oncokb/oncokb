@@ -58,6 +58,11 @@
         "dist/dialogs.min.js",
         "dist/dialogs-default-translations.min.js"
       ]
+    },
+    "google-diff-match-patch-js": {
+      "main": [
+        "diff_match_patch.js"
+      ]
     }
   }
 }
