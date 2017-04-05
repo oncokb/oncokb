@@ -1216,21 +1216,31 @@ angular.module('oncokbApp')
                         $scope.$emit('doneSaveDataToDatabase');
                     });
                 } else {
-                    if (!$scope.status.isDesiredGene) {
-                        eStatus.set('obsolete', 'true');
-                        return true;
-                    }
-                    // if the whole section is deleted from database, there is no need to make api call any more.
+                    // if the parent section is already obsolted, there is no need to do anything else
                     if(isObsoleted(mutation) || isObsoleted(tumor) || isObsoleted(TI)) {
                         dialogs.error('Warning', 'Current item is located in an obsoleted section');
                         return true;
                     }
                     var uuids = getObsoletedUUIDs(type, mutation, tumor, TI, treatment);
+                    if (!$scope.status.isDesiredGene) {
+                        eStatus.set('obsolete', 'true');
+                        _.each(uuids, function(uuid) {
+                            if(uuid) {
+                                $rootScope.geneMetaData.delete(uuid);
+                            }
+                        });
+                        return true;
+                    }
                     // make the api call to delete evidences
                     $scope.$emit('startSaveDataToDatabase');
                     DatabaseConnector.deleteEvidences(uuids, function(result) {
                         $scope.$emit('doneSaveDataToDatabase');
                         eStatus.set('obsolete', 'true');
+                        _.each(uuids, function(uuid) {
+                            if(uuid) {
+                                $rootScope.geneMetaData.delete(uuid);
+                            }
+                        });
                     }, function(error) {
                         dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                         $scope.$emit('doneSaveDataToDatabase');
@@ -1609,22 +1619,29 @@ angular.module('oncokbApp')
             };
             function collectUUIDs(type, obj, uuids) {
                 if (type === 'mutation') {
+                    uuids.push(obj.name_uuid.getText());
                     uuids.push(obj.oncogenic_uuid.getText());
                     uuids.push(obj.shortSummary_uuid.getText());
+                    uuids.push(obj.summary_uuid.getText());
                     uuids.push(obj.effect_uuid.getText());
+                    uuids.push(obj.description_uuid.getText());
                     _.each(obj.tumors.asArray(), function(tumor) {
                         collectUUIDs('tumor', tumor, uuids);
                     });
                 }
                 if (type === 'tumor') {
+                    uuids.push(obj.name_uuid.getText());
                     uuids.push(obj.summary_uuid.getText());
                     uuids.push(obj.prevalence_uuid.getText());
                     uuids.push(obj.progImp_uuid.getText());
-                    uuids.push(obj.nccn_uuid.getText());
+                    uuids.push(obj.trials_uuid.getText());
+                    uuids.push(obj.nccn.therapy_uuid.getText());
+                    uuids.push(obj.nccn.disease_uuid.getText());
+                    uuids.push(obj.nccn.version_uuid.getText());
+                    uuids.push(obj.nccn.description_uuid.getText());
                     _.each(obj.TI.asArray(), function(ti) {
                         collectUUIDs('TI', ti, uuids);
                     });
-                    uuids.push(obj.trials_uuid.getText());
                 }
                 if(type === 'TI') {
                     uuids.push(obj.description_uuid.getText());
@@ -1634,6 +1651,9 @@ angular.module('oncokbApp')
                 }
                 if (type === 'treatment') {
                     uuids.push(obj.name_uuid.getText());
+                    uuids.push(obj.level_uuid.getText());
+                    uuids.push(obj.indication_uuid.getText());
+                    uuids.push(obj.description_uuid.getText());
                 }
                 return uuids;
             }
@@ -1683,7 +1703,9 @@ angular.module('oncokbApp')
                     break;
                 }
                 _.each(uuids, function(uuid) {
-                     $rootScope.geneMetaData.delete(uuid);
+                    if(uuid) {
+                        $rootScope.geneMetaData.delete(uuid);
+                    }
                 });
             }
 
