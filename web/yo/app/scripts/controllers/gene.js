@@ -350,6 +350,7 @@ angular.module('oncokbApp')
                     }
                     setOriginalStatus([mutation.name_review]);
                     if (mutation.name_review.get('removed')) {
+                        $scope.status.hasReviewContent = true;
                         continue;
                     }
                     tempArr = [mutation.oncogenic_review, mutation.shortSummary_review, mutation.summary_review];
@@ -1006,7 +1007,12 @@ angular.module('oncokbApp')
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
                         item.reviewObj.set('updateTime', tempTime);
-                        $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
+                        // This check is for the case of Mutation/Tumor/Treatment Name change. Since they share the same uuid with deletion.
+                        // We need to make sure not set review to false in meta if it also been removed.
+                        var currentReviewObj = item.tumorNameReview ? item.tumorNameReview : item.reviewObj;
+                        if(!currentReviewObj.get('removed')) {
+                            $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
+                        }
                     }
                 });
                 if (reviewObj) {
@@ -1076,7 +1082,7 @@ angular.module('oncokbApp')
                     acceptItem([{reviewObj: mutation.name_review, uuid: mutation.name_uuid}], mutation.name_review);
                     break;
                 case 'TUMOR_NAME_CHANGE':
-                    acceptItem([{reviewObj: tumor.cancerTypes_review, uuid: tumor.name_uuid}], tumor.cancerTypes_review);
+                    acceptItem([{reviewObj: tumor.cancerTypes_review, uuid: tumor.name_uuid, tumorNameReview: tumor.name_review}], tumor.cancerTypes_review);
                     break;
                 case 'TREATMENT_NAME_CHANGE':
                     acceptItem([{reviewObj: treatment.name_review, uuid: treatment.name_uuid}], treatment.name_review);
