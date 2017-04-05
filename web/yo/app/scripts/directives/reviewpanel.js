@@ -133,7 +133,12 @@ angular.module('oncokbApp')
                             item.reviewObj.clear();
                             item.reviewObj.set('review', false);
                             item.reviewObj.set('updateTime', tempTime);
-                            $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
+                            // This check is for the case of Mutation/Tumor/Treatment Name change. Since they share the same uuid with deletion.
+                            // We need to make sure not set review to false in meta if it also been removed.
+                            var currentReviewObj = item.tumorNameReview ? item.tumorNameReview : item.reviewObj;
+                            if(!currentReviewObj.get('removed')) {
+                                $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
+                            }
                         }
                     });
                     if($scope.rs) {
@@ -219,7 +224,7 @@ angular.module('oncokbApp')
                             break;
                         case 'TUMOR_NAME_CHANGE':
                             uuid = '';
-                            items = [{reviewObj: $scope.tm.cancerTypes_review, uuid: $scope.tm.name_uuid}];
+                            items = [{reviewObj: $scope.tm.cancerTypes_review, uuid: $scope.tm.name_uuid, tumorNameReview: $scope.tm.name_review}];
                             break;
                         case 'TREATMENT_NAME_CHANGE':
                             uuid = '';
