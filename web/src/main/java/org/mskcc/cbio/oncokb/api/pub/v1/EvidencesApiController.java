@@ -19,17 +19,17 @@ import java.util.*;
 @Controller
 public class EvidencesApiController implements EvidencesApi {
 
-    public ResponseEntity<Evidence> evidencesUUIDGet(
+    public ResponseEntity<Set<Evidence>> evidencesUUIDGet(
         @ApiParam(value = "Unique identifier.", required = true) @PathVariable("uuid") String uuid
     ) {
         HttpStatus status = HttpStatus.OK;
-        Evidence evidence = null;
-        if (id == null) {
+        Set<Evidence> evidences = null;
+        if (uuid == null) {
             status = HttpStatus.BAD_REQUEST;
         }else{
-            evidence = EvidenceUtils.getEvidencesByUUID(id);
+            evidences = EvidenceUtils.getEvidencesByUUID(uuid);
         }
-        return new ResponseEntity<>(evidence, status);
+        return new ResponseEntity<>(evidences, status);
     }
 
     public ResponseEntity<List<Evidence>> evidencesLookupGet(
