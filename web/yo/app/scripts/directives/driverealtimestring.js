@@ -210,8 +210,9 @@ angular.module('oncokbApp')
                 function calculateDiff() {
                     if(($scope.t === 'p' || $scope.t === 'short') && $scope.rs && $scope.rs.has('lastReviewed')) {
                         var dmp = new diff_match_patch();
-                        var newContent = $scope.content.stringO;
-                        var diff = dmp.diff_main($scope.lastReviewed, newContent);
+                        var newContent = stringUtils.getTextString($scope.content.stringO);
+                        var oldContent = stringUtils.getTextString($scope.lastReviewed);
+                        var diff = dmp.diff_main(oldContent, newContent);
                         dmp.diff_cleanupSemantic(diff);
                         $scope.diffHTML = dmp.diff_prettyHtml(diff);
                     }
