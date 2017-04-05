@@ -5,12 +5,10 @@ import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.EvidenceQueryRes;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
@@ -24,7 +22,7 @@ public interface EvidencesApi {
     @RequestMapping(value = "/evidences/{uuid}",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<ApiObjectResp> evidencesUUIDGet(
+    ResponseEntity<Set<Evidence>> evidencesUUIDGet(
         @ApiParam(value = "Universally Unique identifier list.", required = true) @PathVariable("uuid") String uuid
     );
 
