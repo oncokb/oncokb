@@ -2,12 +2,13 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
-import org.mskcc.cbio.oncokb.apiModels.ApiListResp;
-import org.mskcc.cbio.oncokb.apiModels.Meta;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.ArticleAbstract;
+import org.mskcc.cbio.oncokb.model.BiologicalVariant;
+import org.mskcc.cbio.oncokb.model.ClinicalVariant;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.MetaUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,11 +22,9 @@ import java.util.*;
 public class UtilsApiController implements UtilsApi {
 
     @Override
-    public ResponseEntity<ApiListResp> utilsAllAnnotatedVariantsGet() {
-        ApiListResp apiListResp = new ApiListResp();
-        Meta meta = MetaUtils.getOKMeta();
+    public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet() {
         HttpStatus status = HttpStatus.OK;
-
+        List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
 
@@ -50,9 +49,8 @@ public class UtilsApiController implements UtilsApi {
             }
         }
 
-        apiListResp.setData(new ArrayList(annotatedVariants));
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<>(apiListResp, status);
+        annotatedVariantList.addAll(annotatedVariants);
+        return new ResponseEntity<>(annotatedVariantList, status);
 
     }
 
@@ -102,11 +100,9 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<ApiListResp> utilsAllActionableVariantsGet() {
-        ApiListResp apiListResp = new ApiListResp();
-        Meta meta = MetaUtils.getOKMeta();
+    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet() {
         HttpStatus status = HttpStatus.OK;
-
+        List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
 
@@ -134,9 +130,8 @@ public class UtilsApiController implements UtilsApi {
             }
         }
 
-        apiListResp.setData(new ArrayList(actionableGenes));
-        apiListResp.setMeta(meta);
-        return new ResponseEntity<>(apiListResp, status);
+        actionableGeneList.addAll(actionableGenes);
+        return new ResponseEntity<>(actionableGeneList, status);
     }
 
     @Override
@@ -185,10 +180,10 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private String getCancerType(OncoTreeType oncoTreeType) {
+    private String getCancerType(TumorType oncoTreeType) {
         return oncoTreeType == null ? null : (
-            oncoTreeType.getSubtype() == null ?
-                oncoTreeType.getCancerType() :
-                oncoTreeType.getSubtype());
+            oncoTreeType.getName() == null ?
+                (oncoTreeType.getMainType() == null ? null : oncoTreeType.getMainType().getName()) :
+                oncoTreeType.getName());
     }
 }

@@ -10,8 +10,6 @@ web/yo/app/data
 target
 dist
 *.iml
-core/src/main/resources/properties/config.properties
-core/src/main/resources/properties/database.properties
-core/src/main/resources/properties/log4j.properties
+core/src/main/resources/properties
 core/src/main/resources/certificate
 web/src/main/resources/certificate

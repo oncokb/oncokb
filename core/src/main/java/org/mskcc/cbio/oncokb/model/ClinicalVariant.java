@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-10T02:49:36.208Z")
 public class ClinicalVariant {
 
-    private OncoTreeType oncoTreeType = null;
+    private TumorType oncoTreeType = null;
     private Alteration variant = null;
     private String level = null;
     private Set<String> drug = new HashSet<String>();
@@ -37,11 +38,11 @@ public class ClinicalVariant {
      **/
     @ApiModelProperty(value = "")
     @JsonProperty("cancerType")
-    public OncoTreeType getOncoTreeType() {
+    public TumorType getOncoTreeType() {
         return oncoTreeType;
     }
 
-    public void setOncoTreeType(OncoTreeType oncoTreeType) {
+    public void setOncoTreeType(TumorType oncoTreeType) {
         this.oncoTreeType = oncoTreeType;
     }
 

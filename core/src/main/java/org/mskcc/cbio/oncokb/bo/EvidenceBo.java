@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.oncotree.model.TumorType;
 
 /**
  *
@@ -17,7 +18,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
     /**
      * Find Evidences by alteration ID
      * @param alterations
-     * @return 
+     * @return
      */
     List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations);
 
@@ -40,34 +41,34 @@ public interface EvidenceBo extends GenericBo<Evidence> {
 
 
     /**
-     * 
+     *
      * @param alterations
      * @param evidenceTypes
      * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes);
 
 
     /**
-     * 
+     *
      * @param alterations
      * @param evidenceTypes
      * @param tumorTypes
      * @param levelOfEvidences
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
 
     /**
      * Find Evidences by Entrez Gene ID
      * @param genes
-     * @return 
+     * @return
      */
     List<Evidence> findEvidencesByGene(Collection<Gene> genes);
 
     /**
-     * 
+     *
      * @param genes
      * @param evidenceTypes
      * @return
@@ -75,24 +76,24 @@ public interface EvidenceBo extends GenericBo<Evidence> {
     List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes);
 
     /**
-     * 
+     *
      * @param genes
      * @param evidenceTypes
      * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<OncoTreeType> tumorTypes);
+    List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes);
 
     /**
-     * 
+     *
      * @param ids
      * @return
      */
     List<Evidence> findEvidencesByIds(List<Integer> ids);
     /**
-     * 
+     *
      * @param alterations
-     * @return 
+     * @return
      */
     List<Drug> findDrugsByAlterations(Collection<Alteration> alterations);
 
@@ -116,8 +117,10 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @return
      */
     List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations);
-    
+
     List<String> findAllCancerTypes();
-    
+
     List<String> findAllSubtypes();
+
+    List<Evidence> findEvidenceByUUIDs(List<String> uuids);
 }

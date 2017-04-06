@@ -6,27 +6,74 @@ We use MySQL to store data after reviewing.
 Current repository contains server-side and curation platform.
 If you wish to deploy/modify OncoKB public website, please refer to OncoKB Public section.
 
-#Front-end
+# Front-end
 OncoKB front-end is built with lots of great open source JS libraries. AngularJS is used as framework. Bower is used to manage denpendencies. Yeoman is used to initiate project and angular-generator is used to create angular directive/service/factory etc.
 
-##Install project
+## Install project
 1. Install npm & bower & yo & grunt-cli (globally)
 2. Go to web/yo folder
 3. npm install
 4. bower install
 
-##Use website without back-end
-1. Copy data-EXAMPLE to data under web/yo/app/
+## Prepare configuration files
+1. Prepare files for front-end  
+    ```
+    cp -r web/yo/app/data-EXAMPLE web/yo/app/data
+    ```
 2. Prepare properties files  
     ```
-    cd core/src/main/resources/properties/
-    cp config-EXAMPLE.properties config.properties
-    cp database-EXAMPLE.properties database.properties
-    cp log4j-EXAMPLE.properties log4j.properties
+    cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/properties
     ```
 
-3. Set configuration 'testing' to true in config.json
-4. Under web/yo/, run 'grunt serve'
+## config.json setting
+File is located under web/yo/app/data
+```
+{
+    clientId: 'Your client ID from google developer console',
+    scopes: [
+        'https://www.googleapis.com/auth/plus.profile.emails.read',
+        'https://www.googleapis.com/auth/drive.file'
+    ],
+    folderId: '', // The folder ID where you put all google realtime documents. By default, we will point you to an example folder.
+    metaFolderId: '', // The folder ID where all meta data of all google realtime documents stored. By default, we will point you to an example folder.
+    userRoles: {
+        'public': 1, // 0001
+        'user':   2, // 0010
+        'curator':4, // 0100
+        'admin':  8  // 1000
+    },
+    backupFolderId: '', //The backup folder ID. By default, we will point you to an example backup folder.
+    users: '', // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission. We will point you to an example file.
+    curationLink: 'legacy-api/', // Your endpoints URL specifically designed for curation platform.
+    apiLink: "legacy-api/",  // Your endpoints URL.
+    privateApiLink: "api/private/", // Endpints are specifically designed to use internally.
+    publicApiLink: "api/v1/",
+    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
+    testing: false // If the testing is set to ture, all endpoints will be disabled and will use the files from web/yo/app/data folder
+};
+```
+
+## Properties file
+1. database.properties
+    * jdbc.driverClassName : We use mysql as database. Here, it will be com.mysql.jdbc.Driver
+    * jdbc.url: Database url
+    * jdbc.username & jdbc.password: MySQL user name and password
+2. config.properties
+    * google.p_twelve : Your P12 private key path (You can generate this file from google developer console, more detials in Wiki)
+    * google.service_account_email : Your service account email from google developer console.
+    * cancerhotspots.single : [Cancer hotspots service](http://cancerhotspots.org). Default: http://cancerhotspots.org/api/hotspots/single
+    * oncotree.api: [OncoTree service](http://oncotree.mskcc.org/oncotree/). Default: http://oncotree.mskcc.org/oncotree/api/
+    * google.username & google.password(Optional) : Google account info. It is used to send email
+    * data.version & data.version_date(Optional) : These two properties will be attached to API call.
+    
+## Profiles in web pom
+* backend - core + API
+* curate - core + API + curation website
+* public - core + API + public website Please reference to OncoKB Public Website section.
+    
+## Use curation website without back-end
+1. Set configuration 'testing' to true in config.json
+2. Under web/yo/, run 'grunt serve'
 
 ## Show error in console
 Uncomment the $delegate
@@ -40,45 +87,7 @@ $provide.decorator('$exceptionHandler', function($delegate, $injector){
 });
 ```
 
-## config.json setting
-File is located under web/yo/app/data
-```
-{
-    clientId: 'Your client ID from google developer console',
-    scopes: [
-        'https://www.googleapis.com/auth/plus.profile.emails.read',
-        'https://www.googleapis.com/auth/drive.file'
-    ],
-    folderId: '', // The folder ID where you put all google realtime documents. By default, we will point you to an example folder.
-    backupFolderId: '', //The backup folder ID. By default, we will point you to an example backup folder.
-    userRoles: {
-        'public': 1, // 0001
-        'user':   2, // 0010
-        'curator':4, // 0100
-        'admin':  8  // 1000
-    },
-    users: '', // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission.
-    curationLink: 'legacy-api/', // Your endpoints URL specifically designed for curation platform.
-    apiLink: "legacy-api/",  // Your endpoints URL.
-    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
-    testing: false // If the testing is set to ture, all endpoints will be disabled and will use the files from web/yo/app/data folder
-};
-```
-
-##Properties file
-1. database.properties
-    * jdbc.driverClassName : We use mysql as database. Here, it will be com.mysql.jdbc.Driver
-    * jdbc.url: Database url
-    * jdbc.username & jdbc.password: MySQL user name and password
-2. config.properties
-    * google.p_twelve : Your P12 private key path (You can generate this file from google developer console, more detials in Wiki)
-    * google.service_account_email : Your service account email from google developer console.
-    * google.username & google.password(Optional) : Google account info. It is used to send email
-    * data.version & data.version_date(Optional) : These two properties will be attached to API call.
-    * springfox.documentation.swagger.v2.path : Swagger.json path. Default: /api-docs
-    * cancerhotspots.single : [Cancer hotspots service](http://cancerhotspots.org). Default: http://cancerhotspots.org/api/hotspots/single
-
-##Coding Rules
+## Coding Rules
 Because of the similarity of the project, we follow jhipster requirement.
 To ensure consistency throughout the source code, keep these rules in mind as you are working:
 
@@ -87,7 +96,7 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 * Web apps JavaScript files **must follow** [Google's JavaScript Style Guide](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
 * AngularJS files **must follow** [John Papa's Angular 1 style guide] (https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md).
 
-##OncoKB Public Website
+## OncoKB Public Website
 In order to build a OncoKB public website instance, please clone [oncokb-public](https://github.com/oncokb/oncokb-public) to web/public folder. And in the pom file, please choose public as profile.
 
 License

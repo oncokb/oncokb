@@ -160,7 +160,7 @@ angular.module('oncokbApp').factory('SendEmail', ['$http', 'OncoKB', function($h
 
     function init(params) {
         return $http.post(
-            OncoKB.config.apiLink + 'sendEmail',
+            OncoKB.config.curationLink + 'sendEmail',
             params,
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -181,7 +181,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
 
     function updateGene(data) {
         return $http.post(
-            OncoKB.config.curationLink + 'driveAnnotation',
+            OncoKB.config.apiLink + 'driveAnnotation',
             data,
             {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
@@ -191,7 +191,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
 
     function updateGeneType(hugoSymbol, data) {
         return $http.post(
-            OncoKB.config.curationLink + 'genes/update/' + hugoSymbol,
+            OncoKB.config.apiLink + 'genes/update/' + hugoSymbol,
             data,
             {
                 transformResponse: function(result) {
@@ -202,7 +202,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
 
     function updateEvidence(uuid, data) {
         return $http.post(
-            OncoKB.config.curationLink + 'evidences/update/' + uuid,
+            OncoKB.config.apiLink + 'evidences/update/' + uuid,
             data,
             {
                 transformResponse: function(result) {
@@ -213,21 +213,59 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
 
     function deleteEvidences(data) {
         return $http.post(
-            OncoKB.config.curationLink + 'evidences/delete',
+            OncoKB.config.apiLink + 'evidences/delete',
             data);
     }
 
+    function updateVUS(hugoSymbol, data) {
+        return $http.post(
+            OncoKB.config.apiLink + 'vus/update/' + hugoSymbol,
+            data,
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
+    function updateEvidenceBatch(data) {
+        return $http.post(
+            OncoKB.config.apiLink + 'evidences/update',
+            data,
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
+    function getEvidencesByUUID(uuid) {
+        return $http.get(
+            OncoKB.config.publicApiLink + 'evidences/' + uuid,
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
         updateEvidence: updateEvidence,
-        deleteEvidences: deleteEvidences
+        deleteEvidences: deleteEvidences,
+        updateVUS: updateVUS,
+        updateEvidenceBatch: updateEvidenceBatch,
+        getEvidencesByUUID: getEvidencesByUUID
     };
 }]);
 
 angular.module('oncokbApp').factory('InternalAccess', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
-    return $http.get(OncoKB.config.apiLink + 'access');
+    function hasAccess() {
+        return $http.get(OncoKB.config.apiLink + 'access');
+    }
+
+    return {
+        hasAccess: hasAccess
+    };
 }]);
 
 angular.module('oncokbApp').factory('Cache', ['$http', 'OncoKB', function($http, OncoKB) {

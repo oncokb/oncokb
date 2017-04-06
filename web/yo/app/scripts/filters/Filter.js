@@ -15,6 +15,22 @@ angular.module('oncokbApp').filter('getIndexByObjectNameInArray', function() {
         return null;
     };
 })
+    .filter('getCancerTypeByMainType', function(_) {
+        return function(array, mainType) {
+            if (!_.isArray(array)) {
+                return null;
+            }
+            for (var i = 0, arrayL = array.length; i < arrayL; i++) {
+                var _datum = array[i];
+                if (_datum.hasOwnProperty('mainType') &&
+                    _datum.mainType.name &&
+                    _datum.mainType.name.toUpperCase() === mainType.toUpperCase()) {
+                    return array[i];
+                }
+            }
+            return null;
+        };
+    })
     .filter('sortObject', function() {
         var delayAttrs = ['description'];
         var prioAttrs = ['trial', 'cancer_type', 'version'];

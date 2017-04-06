@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -22,7 +23,7 @@ public class Evidence implements java.io.Serializable {
 
     private String cancerType;
     private String subtype;
-    private OncoTreeType oncoTreeType;
+    private TumorType oncoTreeType;
     private Gene gene;
     private Set<Alteration> alterations;
     private String description;
@@ -31,6 +32,7 @@ public class Evidence implements java.io.Serializable {
     private String knownEffect;
     private Date lastEdit;
     private LevelOfEvidence levelOfEvidence;
+    private String propagation;
     private Set<Article> articles;
     private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
     private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
@@ -78,15 +80,15 @@ public class Evidence implements java.io.Serializable {
         this.subtype = subtype;
     }
 
-    public void setOncoTreeType(OncoTreeType oncoTreeType) {
+    public void setOncoTreeType(TumorType oncoTreeType) {
         this.oncoTreeType = oncoTreeType;
     }
 
-    public OncoTreeType getOncoTreeType() {
+    public TumorType getOncoTreeType() {
         if (this.oncoTreeType != null)
             return this.oncoTreeType;
 
-        OncoTreeType oncoTreeType = null;
+        TumorType oncoTreeType = null;
 
         if (this.subtype != null) {
             oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);
@@ -161,6 +163,14 @@ public class Evidence implements java.io.Serializable {
         this.levelOfEvidence = levelOfEvidence;
     }
 
+    public String getPropagation() {
+        return propagation;
+    }
+
+    public void setPropagation(String propagation) {
+        this.propagation = propagation;
+    }
+
     public Set<Article> getArticles() {
         return articles;
     }
@@ -211,11 +221,10 @@ public class Evidence implements java.io.Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 67 * hash + Objects.hashCode(this.id == null ? this : this.id);
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.id);
         return hash;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -233,23 +242,48 @@ public class Evidence implements java.io.Serializable {
         return true;
     }
 
-    public Evidence(Evidence e) {
-        id = e.id;
-        uuid = e.uuid;
-        evidenceType = e.evidenceType;
-        cancerType = e.cancerType;
-        subtype = e.subtype;
-        gene = e.gene;
-        alterations = e.alterations;
-        description = e.description;
-        additionalInfo = e.additionalInfo;
-        treatments = e.treatments;
-        knownEffect = e.knownEffect;
-        lastEdit = e.lastEdit;
-        levelOfEvidence = e.levelOfEvidence;
-        articles = e.articles;
-        nccnGuidelines = e.nccnGuidelines;
-        clinicalTrials = e.clinicalTrials;
+    public Evidence(Evidence e, Integer id) {
+        if (id != null) {
+            this.id = id;
+        }
+        this.uuid = e.uuid;
+        this.evidenceType = e.evidenceType;
+        this.cancerType = e.cancerType;
+        this.subtype = e.subtype;
+        this.oncoTreeType = e.oncoTreeType;
+        this.gene = e.gene;
+        this.description = e.description;
+        this.additionalInfo = e.additionalInfo;
+        this.knownEffect = e.knownEffect;
+        this.lastEdit = e.lastEdit;
+        this.levelOfEvidence = e.levelOfEvidence;
+        this.propagation = e.propagation;
+        // make deep copy of sets
+        this.alterations = new HashSet<>(e.alterations);
+        this.treatments = new HashSet<>(e.treatments);
+        this.articles = new HashSet<>(e.articles);
+        this.nccnGuidelines = new HashSet<>(e.nccnGuidelines);
+        this.clinicalTrials = new HashSet<>(e.clinicalTrials);
+    }
+
+    public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, Set<Treatment> treatments,
+                    String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles, Set<NccnGuideline> nccnGuidelines, Set<ClinicalTrial> clinicalTrials) {
+        this.uuid = uuid;
+        this.evidenceType = evidenceType;
+        this.cancerType = cancerType;
+        this.subtype = subtype;
+        this.gene = gene;
+        this.alterations = alterations;
+        this.description = description;
+        this.additionalInfo = additionalInfo;
+        this.treatments = treatments;
+        this.knownEffect = knownEffect;
+        this.lastEdit = lastEdit;
+        this.levelOfEvidence = levelOfEvidence;
+        this.propagation = propagation;
+        this.articles = articles;
+        this.nccnGuidelines = nccnGuidelines;
+        this.clinicalTrials = clinicalTrials;
     }
 }
 

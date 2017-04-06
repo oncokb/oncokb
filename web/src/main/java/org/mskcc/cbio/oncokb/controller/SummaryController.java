@@ -4,6 +4,7 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -79,31 +80,32 @@ public class SummaryController {
         return res;
     }
 
-    private String getSummary(VariantQuery query, String summaryType) {
+    private String getSummary(VariantQuery variantQuery, String summaryType) {
         String summary = null;
 
-        if (query != null && query.getGene() != null) {
+        if (variantQuery != null && variantQuery.getGene() != null) {
+            Query query = new Query(variantQuery);
             switch (summaryType) {
                 case "gene":
-                    summary = SummaryUtils.geneSummary(query.getGene());
+                    summary = SummaryUtils.geneSummary(variantQuery.getGene());
                     break;
                 case "oncogenic":
-                    summary = SummaryUtils.oncogenicSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), false);
+                    summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, false);
                     break;
                 case "variant":
-                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "full":
-                    summary = SummaryUtils.fullSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.fullSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "variantCustomized":
-                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(query.getGene()), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(variantQuery.getGene()), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "tumorType":
-                    summary = SummaryUtils.tumorTypeSummary(query.getGene(), query.getQueryAlteration(), query.getAlterations(), query.getQueryTumorType(), new HashSet<OncoTreeType>(query.getTumorTypes()));
+                    summary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getAlterations(), new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 default:
-                    summary = SummaryUtils.variantTumorTypeSummary(query.getGene(), query.getAlterations(), query.getQueryAlteration(), new HashSet<OncoTreeType>(query.getTumorTypes()), query.getQueryTumorType());
+                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
             }
         }
@@ -112,8 +114,8 @@ public class SummaryController {
 
     private List<String> getSummary(List<VariantQuery> queries, String summaryType) {
         List<String> summaries = new ArrayList<>();
-        for(VariantQuery query : queries) {
-            String test = getSummary(query, summaryType);
+        for(VariantQuery variantQuery : queries) {
+            String test = getSummary(variantQuery, summaryType);
             summaries.add(test);
         }
         return summaries;

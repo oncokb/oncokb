@@ -9,12 +9,12 @@ package org.mskcc.cbio.oncokb.quest;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.oncotree.model.TumorType;
 import org.springframework.stereotype.Controller;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public final class VariantAnnotationXML {
 //        if (gene.getEntrezGeneId() > 0) {
 //            genes.add(gene);
 //        } else {
-            // fake gene... could be a fusion gene
+        // fake gene... could be a fusion gene
 //            Set<String> aliases = gene.getGeneAliases();
 //            for (String alias : aliases) {
 //                Gene g = geneBo.findGeneByHugoSymbol(alias);
@@ -46,7 +46,7 @@ public final class VariantAnnotationXML {
 //            }
 //        }
 
-        Set<OncoTreeType> relevantTumorTypes = new HashSet<OncoTreeType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
+        Set<TumorType> relevantTumorTypes = new HashSet<TumorType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
 
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -61,7 +61,7 @@ public final class VariantAnnotationXML {
         // find tumor types
         Set<String> tumorTypes = new HashSet<>();
 
-        if(alterations != null && alterations.size() > 0) {
+        if (alterations != null && alterations.size() > 0) {
             List<Object> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlterations(alterations);
             for (Object evidence : tumorTypesEvidence) {
                 if (evidence != null) {
@@ -75,10 +75,11 @@ public final class VariantAnnotationXML {
 
 //        sortTumorType(tumorTypes, tumorType);
         Set<ClinicalTrial> allTrails = new HashSet<ClinicalTrial>();
-
+        Query query = new Query(alt);
+        query.setTumorType(tumorType);
         // summary
         sb.append("<annotation_summary>");
-        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, alt.getAlteration(), relevantTumorTypes, tumorType));
+        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, query, relevantTumorTypes));
         sb.append("</annotation_summary>\n");
 
         // gene background
@@ -106,9 +107,11 @@ public final class VariantAnnotationXML {
                 sb.append(ev.getKnownEffect());
             }
             sb.append("</effect>\n");
-            sb.append("    <description>");
-            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
-            sb.append("</description>\n");
+            if (ev.getDescription() != null) {
+                sb.append("    <description>");
+                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+                sb.append("</description>\n");
+            }
             if (ev != null) {
                 exportRefereces(ev, sb, "    ");
             }
@@ -117,7 +120,7 @@ public final class VariantAnnotationXML {
         }
 
         for (String tt : tumorTypes) {
-            OncoTreeType oncoTreeType = TumorTypeUtils.getMappedOncoTreeTypesBySource(tt, "quest").get(0);
+            TumorType oncoTreeType = TumorTypeUtils.getMappedOncoTreeTypesBySource(tt, "quest").get(0);
             boolean isRelevant = relevantTumorTypes.contains(oncoTreeType);
 
             StringBuilder sbTumorType = new StringBuilder();
@@ -289,7 +292,7 @@ public final class VariantAnnotationXML {
         return resistanceEvidences;
     }
 
-    private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -377,16 +380,16 @@ public final class VariantAnnotationXML {
 //        if (!clinicalTrial.isInUSA()) {
 //            return false;
 //        }
-//        
+//
 //        if (!clinicalTrial.isOpen()) {
 //            return false;
 //        }
-//        
+//
 //        String phase = clinicalTrial.getPhase().toLowerCase();
-//        return phase.contains("phase 1") || 
-//                phase.contains("phase 2") || 
-//                phase.contains("phase 3") || 
-//                phase.contains("phase 4") || 
+//        return phase.contains("phase 1") ||
+//                phase.contains("phase 2") ||
+//                phase.contains("phase 3") ||
+//                phase.contains("phase 4") ||
 //                phase.contains("phase 5");
 
         return true;
@@ -440,7 +443,7 @@ public final class VariantAnnotationXML {
         sb.append(indent).append("</clinical_trial>");
     }
 
-    private static void exportTherapeuticImplications(Set<OncoTreeType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
 
         for (Treatment treatment : evidence.getTreatments()) {
@@ -594,7 +597,7 @@ public final class VariantAnnotationXML {
      * @return the number of relevant tumor types
      */
 //    private static void sortTumorType(List<String> tumorTypes, String patientTumorType) {
-//        List<OncoTreeType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(patientTumorType, "quest");
+//        List<TumorType> relevantTumorTypes = TumorTypeUtils.getTumorTypes(patientTumorType, "quest");
 ////        relevantTumorTypes.retainAll(tumorTypes); // only tumor type with evidence
 //        tumorTypes.removeAll(relevantTumorTypes); // other tumor types
 //        tumorTypes.addAll(0, relevantTumorTypes);

@@ -44,7 +44,7 @@ OncoKB.config = {
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
     testing: true
 };
-
+OncoKB.backingUp = false;
 OncoKB.curateInfo = {
     Gene: {
         name: {
@@ -405,6 +405,13 @@ OncoKB.initialize = function() {
                         this[__key + '_eStatus'] = model.createMap();
                         this[__key + '_uuid'] = model.createString('');
                         this[__key + '_review'] = model.createMap();
+                        if(!OncoKB.backingUp) {
+                            var tempString = '';
+                            while(!tempString) {
+                                tempString = UUIDjs.create(4).toString();
+                            }
+                            this[__key + '_uuid'].setText(tempString);
+                        }
                     }
                     switch (OncoKB.curateInfo[id][__key].type) {
                     case 'string':
@@ -590,7 +597,7 @@ var oncokbApp = angular.module('oncokbApp', [
                     case: cause
                 });
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                if (config.testing) {
+                if (!config.production) {
                     $delegate(exception, cause);
                 }
             };
@@ -691,7 +698,7 @@ angular.module('oncokbApp').run(
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
                 DatabaseConnector.sendEmail({
-                    sendTo: 'bugs.pro.exterminator@gmail.com',
+                    sendTo: 'dev.oncokb@gmail.com',
                     subject: 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason,
                     content: 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message
                 }, function() {
@@ -699,11 +706,11 @@ angular.module('oncokbApp').run(
                 });
             });
 
-            $rootScope.$watch('internal', function(n) {
-                if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
-                    dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
-                }
-            });
+            //$rootScope.$watch('internal', function(n) {
+            //    if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
+            //        dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
+            //    }
+            //});
         }]);
 
 /**

@@ -7,16 +7,23 @@
  * # eStatus
  */
 angular.module('oncokbApp')
-    .directive('eStatus', function(gapi, $timeout) {
+    .directive('eStatus', function(gapi, $timeout, $rootScope) {
         return {
             templateUrl: 'views/eStatus.html',
             restrict: 'AE',
             scope: {
                 object: '=',
-                id: '='
+                id: '=',
+                applyObsolete: '&applyObsolete' // reference to the external function "addComment" in the gene controller
             },
             replace: true,
             link: function postLink(scope, element) {
+                scope.display = ($rootScope.userRole === 8 && !$rootScope.reviewMode);
+                $rootScope.$watch('reviewMode', function(n, o) {
+                    if(n !== o) {
+                        scope.display = ($rootScope.userRole === 8 && !n);
+                    }
+                });
                 scope.mouseLeaveTimeout = '';
                 scope.checkboxes = [{
                     display: 'Unvetted',
@@ -70,6 +77,11 @@ angular.module('oncokbApp')
                         element.find('statusBody').hide();
                     }, 500);
                 });
+                scope.$watch("object.get('obsolete')", function(n, o) {
+                    if(n !== o) {
+                        scope.obsolete = n;
+                    }
+                });
             },
             controller: function($scope) {
                 $scope.getStatusByValue = function(status) {
@@ -83,15 +95,9 @@ angular.module('oncokbApp')
                         value: 'na'
                     };
                 };
-
                 $scope.click = function(newStatus) {
                     if (newStatus === 'o') {
-                        if ($scope.obsolete === 'false') {
-                            $scope.obsolete = 'true';
-                        } else {
-                            $scope.obsolete = 'false';
-                        }
-                        $scope.object.set('obsolete', $scope.obsolete);
+                        $scope.applyObsolete();
                     } else {
                         $scope.vetted = $scope.getStatusByValue(newStatus);
                         $scope.object.set('vetted', $scope.vetted.value);

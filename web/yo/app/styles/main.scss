@@ -110,7 +110,56 @@ table.colorHeader thead tr{
   content: attr(placeholder);
   display: block; /* For Firefox */
   color: grey;
-  margin-left: 5px;
+    margin-left: 5px;
+}
+
+#gene {
+    .subtitle {
+        width: 60%;
+        display: inline-block;
+        .fa.fa-external-link {
+            margin-left: 3px;
+        }
+    }
+    .subtitle.subtitle-1 {
+        font-weight: bold;
+        .entrezGene {
+            float: left;
+            margin-right: 10px
+        }
+        .header {
+            float: left;
+            color: grey;
+            margin-right: 10px
+        }
+        .alias-item {
+            float: left;
+            .comma {
+                margin-right: 5px
+            }
+        }
+    }
+    .top-tools-menu {
+        .dropdown-menu {
+            li > a:hover {
+                cursor: pointer;
+            }
+            .fa {
+                margin-right: 5px;
+            }
+        }
+    }
+}
+
+.genes {
+    .header-buttons {
+        .group {
+            margin: 0 10px 0 0;
+        }
+        .backup {
+            width: 200px;
+        }
+    }
 }
 
 /* */
@@ -152,6 +201,12 @@ p.editableBox {
 }
 p.editableBox.doubleH {
   min-height: 40px;
+}
+.reviewed {
+    color: #82E452;
+}
+.reviewedBG {
+    background-color: #EEEEEE;
 }
 .curateTrialItem, .vusItem {
   float: left;
@@ -377,9 +432,22 @@ i.fa-angle-up, i.fa-angle-double-down, i.fa-angle-double-up{
 }
 .fa-comments-red {
   color: red;
+  cursor:pointer;
+  margin-right:10px;
 }
 .fa-comments-green {
   color: #70b500;
+}
+.fa-comments-grey {
+    color: grey;
+    cursor:pointer;
+    margin-right: 10px;
+}
+.fa-margin {
+    margin-left: 10px;
+}
+.left-float {
+    float:left;
 }
 rect {
   fill: none;
@@ -696,6 +764,13 @@ h5 {
     width: 100%;
     margin: 10px 0;
 }
+.drive-realtime-string {
+    .treatment-select {
+        .propagation {
+            margin-top: 10px;
+        }
+    }
+}
 
 #variantDisplay {
     .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
@@ -716,3 +791,27 @@ input[type=radio] + label:hover, input[type=checkbox] + label:hover {
 input[type=radio] + label:before, input[type=checkbox] + label:before { content: "\f096"; letter-spacing: 5px;} /* unchecked icon */
 
 input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:before { content: "\f046"; letter-spacing: 5px;} /* checked icon */
+
+.reviewPanel {
+    float:right;
+    margin-top:-20px;
+    .updateText {
+        font-size:15px;
+        float:left;
+        margin-top:5px;
+        margin-right:10px
+    }
+    .deletionText {
+        color:red;
+        font-size:15px;
+        float:left;
+        margin-top:5px;
+        margin-right:10px
+    }
+    .deletionPanel {
+        margin-top:15px;
+    }
+}
+.seperationLine {
+    border-bottom: 2px solid lightgrey;
+}

@@ -10,6 +10,7 @@ import com.google.gdata.util.ServiceException;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.oncotree.model.TumorType;
 
 import java.io.IOException;
 import java.net.URL;
@@ -40,7 +41,7 @@ public class AllTreatmentsWithPMIDs {
 
                 for (Evidence evidence : relevantEvidences) {
                     LevelOfEvidence level = evidence.getLevelOfEvidence();
-                    OncoTreeType oncoTreeType = evidence.getOncoTreeType();
+                    TumorType oncoTreeType = evidence.getOncoTreeType();
 
                     String levelStr = "";
 
@@ -49,8 +50,8 @@ public class AllTreatmentsWithPMIDs {
                     }
 
                     if (oncoTreeType != null) {
-                        String cancerTypeStr = oncoTreeType.getCancerType() == null ? "" : oncoTreeType.getCancerType();
-                        String subtypeStr = oncoTreeType.getSubtype() == null ? "" : oncoTreeType.getSubtype();
+                        String cancerTypeStr = oncoTreeType.getMainType() == null ? "" : oncoTreeType.getMainType().getName();
+                        String subtypeStr = oncoTreeType.getName() == null ? "" : oncoTreeType.getName();
                         Set<Treatment> treatments = evidence.getTreatments();
                         List<String> treatmentNames = new ArrayList<>();
 
@@ -115,7 +116,7 @@ public class AllTreatmentsWithPMIDs {
         }
     }
 
-    
+
     public static Map<String, Boolean> hasMatch(List<Map<String, String>> records, Map<String, String> query) {
         Boolean hasSameTreatment = false;
         Boolean hasAlt = false;
@@ -123,7 +124,7 @@ public class AllTreatmentsWithPMIDs {
         if (records.contains(query)) {
             hasSameTreatment = true;
         }
-        
+
         for(Map<String, String> record : records) {
             if(query.get("gene").equals(record.get("gene")) && query.get("alteration").equals(record.get("alteration"))) {
                 hasAlt = true;

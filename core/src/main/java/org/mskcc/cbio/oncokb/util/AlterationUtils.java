@@ -6,6 +6,7 @@
 
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -62,7 +63,7 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*]?)");
+        Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*\\?]?)");
         Matcher m = p.matcher(proteinChange);
         if (m.matches()) {
             ref = m.group(1);
@@ -78,11 +79,13 @@ public final class AlterationUtils {
                 consequence = "stop_gained";
             } else if (start == 1) {
                 consequence = "initiator_codon_variant";
+            } else if (var.equals("?")) {
+                consequence = "any";
             } else {
                 consequence = "missense_variant";
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?delins([A-Z]+)");
+            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
@@ -91,15 +94,20 @@ public final class AlterationUtils {
                 } else {
                     end = start;
                 }
-                Integer deletion = end - start + 1;
-                Integer insertion = m.group(4).length();
-
-                if (insertion - deletion > 0) {
+                String type = m.group(4);
+                if (type == "ins") {
                     consequence = "inframe_insertion";
-                } else if (insertion - deletion == 0) {
-                    consequence = "missense_variant";
                 } else {
-                    consequence = "inframe_deletion";
+                    Integer deletion = end - start + 1;
+                    Integer insertion = m.group(5).length();
+
+                    if (insertion - deletion > 0) {
+                        consequence = "inframe_insertion";
+                    } else if (insertion - deletion == 0) {
+                        consequence = "missense_variant";
+                    } else {
+                        consequence = "inframe_deletion";
+                    }
                 }
             } else {
                 p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(_)?splice");
@@ -135,6 +143,9 @@ public final class AlterationUtils {
                             case "trunc":
                                 consequence = "feature_truncation";
                                 break;
+                            case "dup":
+                                consequence = "inframe_insertion";
+                                break;
                             case "mut":
                                 consequence = "any";
                         }
@@ -148,7 +159,7 @@ public final class AlterationUtils {
 
                             consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del))");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup))");
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
                                 ref = m.group(1);
@@ -157,6 +168,9 @@ public final class AlterationUtils {
                                 String v = m.group(3);
                                 switch (v) {
                                     case "ins":
+                                        consequence = "inframe_insertion";
+                                        break;
+                                    case "dup":
                                         consequence = "inframe_insertion";
                                         break;
                                     case "del":
@@ -199,6 +213,30 @@ public final class AlterationUtils {
 
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
+        } else if (alteration.getConsequence() != null && variantConsequence != null &&
+            !alteration.getConsequence().equals(variantConsequence) &&
+            alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
+            // For the query which already contains consequence but different with OncoKB algorithm,
+            // we should keep query consequence unless it is `any`
+            alteration.setConsequence(variantConsequence);
+        }
+
+        // Annotate alteration based on consequence and special rules
+        if (alteration.getAlteration() == null || alteration.getAlteration().isEmpty()) {
+            alteration.setAlteration(proteinChange);
+        }
+        if (alteration.getAlteration().isEmpty()) {
+            if (variantConsequence != null) {
+                if (variantConsequence.getTerm().equals("splice_region_variant")) {
+                    alteration.setAlteration("splice mutation");
+                }
+            }
+        } else {
+            if (alteration.getAlteration().toLowerCase().matches("gain")) {
+                alteration.setAlteration("Amplification");
+            } else if (alteration.getAlteration().toLowerCase().matches("loss")) {
+                alteration.setAlteration("Deletion");
+            }
         }
     }
 
@@ -300,8 +338,7 @@ public final class AlterationUtils {
     public static Set<Alteration> getAllAlterations(Gene gene) {
         if (CacheUtils.isEnabled()) {
             if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
-                CacheUtils.setAlterations(gene.getEntrezGeneId(),
-                    new HashSet<>(alterationBo.findAlterationsByGene(Collections.singleton(gene))));
+                CacheUtils.setAlterations(gene);
             }
             return CacheUtils.getAlterations(gene.getEntrezGeneId());
         } else {
@@ -316,6 +353,10 @@ public final class AlterationUtils {
             alterations.addAll(getAllAlterations(gene));
         }
         return alterations;
+    }
+
+    public static Alteration getTruncatingMutations(Gene gene) {
+        return findAlteration(gene, "Truncating Mutations");
     }
 
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
@@ -458,6 +499,10 @@ public final class AlterationUtils {
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<>();
 
+        if (alteration.getConsequence() == null
+            || !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+            return alterations;
+        }
         if (CacheUtils.isEnabled()) {
             alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
         } else {
@@ -465,7 +510,7 @@ public final class AlterationUtils {
         }
 
         List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
-            alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(),
+            alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
         alleles = filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
 
@@ -598,7 +643,7 @@ public final class AlterationUtils {
     public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {
         exactMatch = exactMatch || false;
         if (exactMatch) {
-            return AlterationUtils.getGeneralAlterations().contains(mutationStr);
+            return MainUtils.containsCaseInsensitive(mutationStr, AlterationUtils.getGeneralAlterations());
         } else if (stringContainsItemFromList(mutationStr, getGeneralAlterations())
             && itemFromListAtEndString(mutationStr, getGeneralAlterations())) {
             return true;
@@ -608,7 +653,7 @@ public final class AlterationUtils {
 
     private static boolean stringContainsItemFromList(String inputString, List<String> items) {
         for (String item : items) {
-            if (inputString.contains(item)) {
+            if (StringUtils.containsIgnoreCase(inputString, item)) {
                 return true;
             }
         }
@@ -617,7 +662,7 @@ public final class AlterationUtils {
 
     private static boolean itemFromListAtEndString(String inputString, List<String> items) {
         for (String item : items) {
-            if (inputString.endsWith(item)) {
+            if (StringUtils.endsWithIgnoreCase(inputString, item)) {
                 return true;
             }
         }

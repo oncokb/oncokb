@@ -23,6 +23,9 @@ public final class NcbiEUtils {
     private static final String URL_NCBI_EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 
     public static Article readPubmedArticle(String pmid) {
+        if (pmid != null) {
+            pmid = pmid.trim();
+        }
         if (!StringUtils.isNumeric(pmid)) {
             System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
             return null;
@@ -54,7 +57,7 @@ public final class NcbiEUtils {
                     System.out.println("Warning: Article doesn't have a title for " + pmid);
                     return null;
                 }
-                
+
                 article.setTitle(title);
 
                 String volume = (String) (articleInfo.get("volume"));

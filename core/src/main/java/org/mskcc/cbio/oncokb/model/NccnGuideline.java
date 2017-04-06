@@ -3,6 +3,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mysql.jdbc.StringUtils;
 
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ public class NccnGuideline implements java.io.Serializable {
     private Integer id;
     @JsonIgnore
     private String uuid;
+    private String therapy;
     private String disease;
     private String version;
     private String pages;
@@ -26,6 +28,14 @@ public class NccnGuideline implements java.io.Serializable {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getTherapy() {
+        return therapy;
+    }
+
+    public void setTherapy(String therapy) {
+        this.therapy = therapy;
     }
 
     public void setId(Integer id) {
@@ -108,6 +118,13 @@ public class NccnGuideline implements java.io.Serializable {
             return false;
         }
         return true;
+    }
+    
+    public boolean isEmpty() {
+        if (StringUtils.isNullOrEmpty(this.therapy) && StringUtils.isNullOrEmpty(this.disease) && StringUtils.isNullOrEmpty(this.version) 
+                && StringUtils.isNullOrEmpty(this.pages) && StringUtils.isNullOrEmpty(this.category) && StringUtils.isNullOrEmpty(this.description))
+            return true;
+        else return false;
     }
 
 

@@ -21,11 +21,11 @@ public interface GeneBo extends GenericBo<Gene> {
      * @return a list of genes
      */
     List<Gene> findGenesByHugoSymbol(Collection<String> symbols);
-    
+
     /**
-     * 
+     *
      * @param symbol
-     * @return 
+     * @return
      */
     Gene findGeneByHugoSymbol(String symbol);
 
@@ -35,11 +35,18 @@ public interface GeneBo extends GenericBo<Gene> {
      * @return a list of genes
      */
     List<Gene> findGenesByEntrezGeneId(Collection<Integer> entrezGeneIds);
-    
+
     /**
-     * 
+     *
      * @param entrezGeneId
-     * @return 
+     * @return
      */
     Gene findGeneByEntrezGeneId(int entrezGeneId);
+
+    /**
+     * Get gene by gene alias
+     * @param geneAlias
+     * @return
+     */
+    Gene findGeneByAlias(String geneAlias);
 }

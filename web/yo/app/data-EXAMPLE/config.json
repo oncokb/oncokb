@@ -1,10 +1,11 @@
 {
-    "clientId": "",
+    "clientId": "19500634524-r0jf2v73enc62qo83cs5rnrm7eb0qndt.apps.googleusercontent.com",
     "scopes": [
         "https://www.googleapis.com/auth/plus.profile.emails.read",
         "https://www.googleapis.com/auth/drive.file"
     ],
     "folderId": "0BzBfo69g8fP6NkgtWGZxd0NjcWs",
+    "metaFolderId": "0BzBfo69g8fP6WkstN2FERlVwaFE",
     "userRoles": {
         "public": 1,
         "user": 2,
@@ -12,10 +13,13 @@
         "admin": 8
     },
     "backupFolderId": "0BzBfo69g8fP6LWozVE56Mk1RYkU",
-    "users": "",
+    "users": "144i_5lLZGtvT44j0ByKhX0mx69CEQTQS38uDECY8nHg",
     "apiLink": "legacy-api/",
     "curationLink": "legacy-api/",
+    "privateApiLink": "api/private/",
+    "publicApiLink": "api/v1/",
     "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
-    "testing": true
+    "accessLevels": {},
+    "testing": false
 }
 

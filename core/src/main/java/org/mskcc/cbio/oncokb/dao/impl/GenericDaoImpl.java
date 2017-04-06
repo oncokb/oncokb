@@ -4,24 +4,24 @@
  */
 package org.mskcc.cbio.oncokb.dao.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.dao.GenericDao;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-
-import org.mskcc.cbio.oncokb.dao.GenericDao;
-import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
  * Adapted from http://wordgraphs.com/post/604/Generic-DAO-design-pattern-with-Java---Hibernate
  * & https://community.jboss.org/wiki/GenericDataAccessObjects#jive_content_id_Preparing_DAOs_with_factories
  * @author jgao
  * @param <T>
- * @param <ID> 
+ * @param <ID>
  */
-public abstract class GenericDaoImpl<T, ID extends Serializable> extends HibernateDaoSupport implements GenericDao<T, ID> {	
+public abstract class GenericDaoImpl<T, ID extends Serializable> extends HibernateDaoSupport implements GenericDao<T, ID> {
 
     private Class<T> type;
 
@@ -89,7 +89,7 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     public List<T> findByNamedQueryAndNamedParam(String queryName, String[] params, List[] values) {
         return getHibernateTemplate().findByNamedQueryAndNamedParam(queryName, params, values);
     }
-    
+
     @Override
     public <C> List<C> findByNamedQueryOfAnyType(String queryName, Object... values) {
         return (List<C>)getHibernateTemplate().findByNamedQuery(queryName, values);
@@ -117,11 +117,18 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
         }
     }
 
+    @Override
+    public void saveOrUpdateAll(List<T> ts) {
+        if (ts != null) {
+            getHibernateTemplate().saveOrUpdateAll(ts);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll()
     {
-        
+
         return (List<T>)getHibernateTemplate().find("FROM " + getClassName());
     }
 
@@ -138,7 +145,14 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
             getHibernateTemplate().delete(obj);
         }
     }
-    
+
+    @Override
+    public void deleteAll(List<T> objs) {
+        if(objs != null) {
+            getHibernateTemplate().deleteAll(objs);
+        }
+    }
+
     @Override
     public void setCacheQueries(boolean cacheQueries) {
         getHibernateTemplate().setCacheQueries(cacheQueries);

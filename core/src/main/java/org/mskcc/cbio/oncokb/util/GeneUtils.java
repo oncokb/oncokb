@@ -21,12 +21,14 @@ public class GeneUtils {
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
         if (hugoSymbol != null) {
+            hugoSymbol = hugoSymbol.toUpperCase();
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
-                if (CacheUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
-                    CacheUtils.setGeneByHugoSymbol(geneBo.findGeneByHugoSymbol(hugoSymbol));
+                Gene gene = CacheUtils.getGeneByHugoSymbol(hugoSymbol);
+                if (gene == null) {
+                    gene = getGeneByAlias(hugoSymbol);
                 }
-                return CacheUtils.getGeneByHugoSymbol(hugoSymbol);
+                return gene;
             } else {
                 return geneBo.findGeneByHugoSymbol(hugoSymbol);
             }
@@ -49,6 +51,32 @@ public class GeneUtils {
         return null;
     }
 
+    public static Gene getGeneByAlias(String geneAlias) {
+        if (geneAlias != null) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            if (CacheUtils.isEnabled()) {
+                Set<Gene> genes = getAllGenes();
+                Set<Gene> matches = new HashSet<>();
+                for (Gene gene : genes) {
+                    for (String alias : gene.getGeneAliases()) {
+                        if (alias.equals(geneAlias)) {
+                            matches.add(gene);
+                            break;
+                        }
+                    }
+                }
+                if (matches.isEmpty() || matches.size() > 1) {
+                    return null;
+                } else {
+                    return matches.iterator().next();
+                }
+            } else {
+                return geneBo.findGeneByAlias(geneAlias);
+            }
+        }
+        return null;
+    }
+
     public static Set<Gene> searchGene(String keywords) {
         Set<Gene> genes = new HashSet<>();
         if (keywords != null && keywords != "") {
@@ -65,6 +93,13 @@ public class GeneUtils {
                     String hugoSymbol = gene.getHugoSymbol();
                     if (StringUtils.containsIgnoreCase(hugoSymbol, keywords)) {
                         genes.add(gene);
+                    } else {
+                        for (String alias : gene.getGeneAliases()) {
+                            if (StringUtils.containsIgnoreCase(alias, keywords)) {
+                                genes.add(gene);
+                                break;
+                            }
+                        }
                     }
                 }
             }

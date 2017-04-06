@@ -300,9 +300,42 @@ angular.module('oncokbApp')
                     });
             }
 
+            function getEvidencesByUUID(uuid, success, fail) {
+                DriveAnnotation
+                    .getEvidencesByUUID(uuid)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
             function deleteEvidences(data, success, fail) {
                 DriveAnnotation
                     .deleteEvidences(data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
+            function updateVUS(hugoSymbol, data, success, fail) {
+                DriveAnnotation
+                    .updateVUS(hugoSymbol, data)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function(error) {
+                        fail(error);
+                    });
+            }
+
+            function updateEvidenceBatch(data, success, fail) {
+                DriveAnnotation
+                    .updateEvidenceBatch(data)
                     .success(function(data) {
                         success(data);
                     })
@@ -330,9 +363,6 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                // Disable send email service
-                success(true);
-
                 if (dataFromFile) {
                     success(true);
                 } else {
@@ -358,17 +388,24 @@ angular.module('oncokbApp')
             }
 
             function testAccess(successCallback, failCallback) {
-                InternalAccess
-                    .success(function(data, status, headers, config) {
-                        if (angular.isFunction(successCallback)) {
-                            successCallback(data, status, headers, config);
-                        }
-                    })
-                    .error(function(data, status, headers, config) {
-                        if (angular.isFunction(failCallback)) {
-                            failCallback(data, status, headers, config);
-                        }
-                    });
+                if (dataFromFile) {
+                    if (angular.isFunction(successCallback)) {
+                        successCallback();
+                    }
+                } else {
+                    InternalAccess
+                        .hasAccess()
+                        .success(function(data, status, headers, config) {
+                            if (angular.isFunction(successCallback)) {
+                                successCallback(data, status, headers, config);
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            if (angular.isFunction(failCallback)) {
+                                failCallback(data, status, headers, config);
+                            }
+                        });
+                }
             }
 
             function getCacheStatus() {
@@ -607,6 +644,8 @@ angular.module('oncokbApp')
                 updateGeneType: updateGeneType,
                 updateEvidence: updateEvidence,
                 deleteEvidences: deleteEvidences,
+                updateVUS: updateVUS,
+                updateEvidenceBatch: updateEvidenceBatch,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {
@@ -629,6 +668,7 @@ angular.module('oncokbApp')
                 getIsoforms: getIsoforms,
                 getOncogeneTSG: getOncogeneTSG,
                 getSuggestedVariants: getSuggestedVariants,
-                isHotspot: isHotspot
+                isHotspot: isHotspot,
+                getEvidencesByUUID: getEvidencesByUUID
             };
         }]);

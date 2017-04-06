@@ -6,7 +6,7 @@ angular.module('oncokbApp')
             var self = {};
             self.id = null;
             self.document = null;
-
+            self.metaDoc = null;
             /**
              * Close the current document.
              */
@@ -61,7 +61,7 @@ angular.module('oncokbApp')
                 return deferred.promise;
             };
 
-            self.createFolder = function(parentID) {
+            self.createFolder = function(parentID, title) {
                 var deferred = $q.defer();
                 var onComplete = function(result) {
                     // console.log(result);
@@ -74,7 +74,7 @@ angular.module('oncokbApp')
                 };
                 var date = new Date();
                 var body = {
-                    title: date.toString(),
+                    title: title ? title : date.toString(),
                     parents: [{id: parentID}],
                     mimeType: 'application/vnd.google-apps.folder'
                 };
@@ -196,7 +196,26 @@ angular.module('oncokbApp')
                 }
                 return self.load(id);
             };
+            /**
+             * Retrive meta file
+             * @param {string} id realtime document id
+             * */
+            self.getMetaRealtimeDocument = function(id) {
+                var deferred = $q.defer();
+                var initialize = function() {
+                };
+                var onLoad = function(document) {
+                    self.metaDoc = document;
+                    deferred.resolve(document);
+                    $rootScope.$digest();
+                };
+                var onError = function(error) {
+                    console.log('error', error);
+                };
+                gapi.drive.realtime.load(id, onLoad, initialize, onError);
+                return deferred.promise;
 
+            };
             /**
              * Retrieve a list of File resources.
              * @return {d.promise|promise|*|h.promise|f} Promise
@@ -230,7 +249,37 @@ angular.module('oncokbApp')
                 });
                 return deferred.promise;
             };
+            /**
+             *
+             * */
+            self.retrieveMeta = function() {
+                var deferred = $q.defer();
 
+                var retrievePageOfFiles = function(request, result) {
+                    request.execute(function(resp) {
+                        result = result.concat(resp.items);
+                        var nextPageToken = resp.nextPageToken;
+                        if (nextPageToken) {
+                            request = gapi.client.drive.files.list({
+                                q: '"' + config.metaFolderId + '" in parents',
+                                pageToken: nextPageToken
+                            });
+                            retrievePageOfFiles(request, result);
+                        } else {
+                            // console.log('get all files', result);
+                            deferred.resolve(result);
+                        }
+                    });
+                };
+
+                gapi.client.load('drive', 'v2', function() {
+                    var initialRequest = gapi.client.drive.files.list({
+                        q: '"' + config.metaFolderId + '" in parents'
+                    });
+                    retrievePageOfFiles(initialRequest, []);
+                });
+                return deferred.promise;
+            };
             /**
              *  Retrieve a list of File resources.
              * @return {d.promise|promise|*|h.promise|f} Promise
@@ -415,7 +464,7 @@ angular.module('oncokbApp')
                         if (error.isFatal && self.document) {
                             var gene = self.document.getModel().getRoot().get('gene');
                             var vus = self.document.getModel().getRoot().get('vus');
-                            var geneData = stringUtils.getGeneData(gene, false, false);
+                            var geneData = stringUtils.getGeneData(gene, false, false, false);
                             var vusData = stringUtils.getVUSFullData(vus, false);
                             errorMessage += '\n\ngene: ' + geneData +
                                 '\n\nVUS: ' + vusData;

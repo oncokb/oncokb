@@ -83,12 +83,6 @@
             <version>3.2.1</version>
         </dependency>
         <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>1.19.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-jackson</artifactId>
             <version>1.19.0</version>
@@ -158,6 +152,16 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mskcc.oncotree</groupId>
+            <artifactId>core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cmo.cancerhotspots</groupId>
+            <artifactId>model</artifactId>
+            <version>0.1.2</version>
         </dependency>
     </dependencies>
 
