@@ -19,7 +19,7 @@ import java.util.List;
 @Controller
 public class TumorTypeController {
 
-    @RequestMapping(value = "/legacy-api/tumorType.json")
+//    @RequestMapping(value = "/legacy-api/tumorType.json")
     public
     @ResponseBody
     List<TumorType> getTumorType(

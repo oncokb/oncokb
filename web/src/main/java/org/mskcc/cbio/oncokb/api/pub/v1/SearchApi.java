@@ -21,9 +21,9 @@ public interface SearchApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})
-    @RequestMapping(value = "/search",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/search",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<IndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
@@ -46,10 +46,10 @@ public interface SearchApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})
-    @RequestMapping(value = "/search",
-        consumes = {"application/json"},
-        produces = {"application/json"},
-        method = RequestMethod.POST)
+//    @RequestMapping(value = "/search",
+//        consumes = {"application/json"},
+//        produces = {"application/json"},
+//        method = RequestMethod.POST)
     ResponseEntity<List<IndicatorQueryResp>> searchPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body
     );
 }

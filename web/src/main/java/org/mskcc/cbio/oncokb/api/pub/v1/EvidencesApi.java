@@ -19,9 +19,9 @@ public interface EvidencesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
-    @RequestMapping(value = "/evidences/{uuid}",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/evidences/{uuid}",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<Set<Evidence>> evidencesUUIDGet(
         @ApiParam(value = "Universally Unique identifier.", required = true) @PathVariable("uuid") String uuid
     );
@@ -30,9 +30,9 @@ public interface EvidencesApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
-    @RequestMapping(value = "/evidences",
-        produces = {"application/json"},
-        method = RequestMethod.POST)
+//    @RequestMapping(value = "/evidences",
+//        produces = {"application/json"},
+//        method = RequestMethod.POST)
     ResponseEntity<Set<Evidence>> evidencesUUIDsGet(
         @ApiParam(value = "Universally Unique identifier list.", required = true) @RequestBody(required = true) Set<String> uuids
     );
@@ -41,9 +41,9 @@ public interface EvidencesApi {
     @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List", tags = {"Evidences", "Search",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List")})
-    @RequestMapping(value = "/evidences/lookup",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/evidences/lookup",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<Evidence>> evidencesLookupGet(
         @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
@@ -61,10 +61,10 @@ public interface EvidencesApi {
     @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List", tags = {"Evidences", "Search",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List")})
-    @RequestMapping(value = "/evidences/lookup",
-        consumes = {"application/json"},
-        produces = {"application/json"},
-        method = RequestMethod.POST)
+//    @RequestMapping(value = "/evidences/lookup",
+//        consumes = {"application/json"},
+//        produces = {"application/json"},
+//        method = RequestMethod.POST)
     ResponseEntity<List<EvidenceQueryRes>> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body
     );
 

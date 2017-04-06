@@ -22,9 +22,9 @@ import java.util.*;
  * Created by Hongxin on 8/10/15.
  */
 @Controller
-@RequestMapping(value = "/legacy-api/summary.json")
+//@RequestMapping(value = "/legacy-api/summary.json")
 public class SummaryController {
-    @RequestMapping(method = RequestMethod.GET)
+//    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     String getSummary(
@@ -47,7 +47,7 @@ public class SummaryController {
         return getSummary(variantQueries.get(0), type);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+//    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     List<SummaryQueryRes> getSummary(

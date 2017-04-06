@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class CreateGoogleFolder {
     private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6fjZSQzlXYVdXaUJVcjllNS1CRnp5eW1LcnlLSDlXRDFFT0w0WkNBek1FTlE";
     
-    @RequestMapping(value="/legacy-api/createGoogleFolder", method = POST)
+//    @RequestMapping(value="/legacy-api/createGoogleFolder", method = POST)
     public @ResponseBody String CreateGoogleFolder(
             @RequestParam(value="folderName", required=true) String folderName) throws MalformedURLException, ServiceException, GeneralSecurityException, URISyntaxException{
         try {

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class PortalAlterationController {
 
-    @RequestMapping(value = "/legacy-api/portalAlterationSampleCount")
+//    @RequestMapping(value = "/legacy-api/portalAlterationSampleCount")
     public @ResponseBody
     List<PortalAlteration> getPortalAlteration(@RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
             @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol) {
@@ -40,7 +40,7 @@ public class PortalAlterationController {
         return portalAlterations;
     }
 
-    @RequestMapping(value = "/legacy-api/mutationMapperData")
+//    @RequestMapping(value = "/legacy-api/mutationMapperData")
     public @ResponseBody
     List<PortalAlteration> getMutationMapperData(@RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
             @RequestParam(value = "hugoSymbol", required = true) String hugoSymbol) {

@@ -17,18 +17,18 @@ public interface DrugsApi {
     @ApiOperation(value = "", notes = "Get all curated drugs.", response = Drug.class, responseContainer = "List", tags = {"Drugs",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List")})
-    @RequestMapping(value = "/drugs",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/drugs",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<Drug>> drugsGet();
 
 
     @ApiOperation(value = "", notes = "Search drugs.", response = Drug.class, responseContainer = "List", tags = {"Drugs", "Search",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List")})
-    @RequestMapping(value = "/drugs/lookup",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/drugs/lookup",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<Drug>> drugsLookupGet(
         @ApiParam(value = "Drug Name") @RequestParam(value = "name", required = false) String name
 //        , @ApiParam(value = "") @RequestParam(value = "fdaApproved", required = false) String fdaApproved

@@ -25,7 +25,7 @@ import java.util.*;
  */
 @Controller
 public class EvidenceController {
-    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.GET)
+//    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.GET)
     public
     @ResponseBody
     List<List<Evidence>> getEvidence(
@@ -66,7 +66,7 @@ public class EvidenceController {
         return evidences;
     }
 
-    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.POST)
+//    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.POST)
     public
     @ResponseBody
     List<EvidenceQueryRes> getEvidence(

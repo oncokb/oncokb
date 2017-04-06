@@ -19,9 +19,9 @@ import java.util.Set;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/legacy-api/indicator.json")
+//@RequestMapping(value = "/legacy-api/indicator.json")
 public class IndicatorController {
-    @RequestMapping(method = RequestMethod.GET)
+//    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     IndicatorQueryResp getEvidence(
@@ -48,7 +48,7 @@ public class IndicatorController {
         return IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+//    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     List<IndicatorQueryResp> getResult(
