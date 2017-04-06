@@ -974,7 +974,12 @@ angular.module('oncokbApp')
                     }
                 }
                 if(data.lastEdit) {
-                    data.lastEdit = new Date(data.lastEdit).getTime().toString();
+                    var tempTime = new Date(data.lastEdit);
+                    if(tempTime instanceof Date && !isNaN(tempTime.getTime())) {
+                        data.lastEdit = tempTime.getTime().toString();
+                    } else {
+                        data.lastEdit = new Date().getTime().toString();
+                    }
                 }
                 if(dataUUID) {
                     evidences[dataUUID] = data;
