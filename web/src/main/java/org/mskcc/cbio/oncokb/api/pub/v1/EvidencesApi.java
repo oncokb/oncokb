@@ -23,7 +23,18 @@ public interface EvidencesApi {
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<Set<Evidence>> evidencesUUIDGet(
-        @ApiParam(value = "Universally Unique identifier list.", required = true) @PathVariable("uuid") String uuid
+        @ApiParam(value = "Universally Unique identifier.", required = true) @PathVariable("uuid") String uuid
+    );
+
+    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, tags = {"Evidences",})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = Evidence.class),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
+    @RequestMapping(value = "/evidences",
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<Set<Evidence>> evidencesUUIDsGet(
+        @ApiParam(value = "Universally Unique identifier list.", required = true) @RequestBody(required = true) Set<String> uuids
     );
 
 

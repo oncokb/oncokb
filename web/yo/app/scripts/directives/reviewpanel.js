@@ -8,7 +8,7 @@
  * This directive is designed specifically for review mode, which cotains change info text, accept icon, reject icon and loading bar
  */
 angular.module('oncokbApp')
-    .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs, _, OncoKB) {
+    .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs, _, OncoKB, mainUtils) {
         return {
             templateUrl: 'views/reviewPanel.html',
             restrict: 'AE',
@@ -144,6 +144,14 @@ angular.module('oncokbApp')
                     if($scope.rs) {
                         $scope.rs.set('action', 'rejected');
                     }
+                    if($scope.bothChanged) {
+                        effectSection();
+                        $scope.bothChanged = false;
+                    }
+                }
+                function effectSection() {
+                    $scope.mt.oncogenic_review.set('updateTime', $scope.oncogenicLastUpdateTime);
+                    $scope.mt.effect_review.set('updateTime', $scope.effectLastUpdateTime);
                 }
                 $scope.reject = function(event) {
                     if (event !== null) {
@@ -171,15 +179,37 @@ angular.module('oncokbApp')
                             items = [{reviewObj: $scope.obj.type_review, uuid: $scope.obj.type_uuid}];
                             break;
                         case 'ONCOGENIC':
-                            uuid = $scope.mt.oncogenic_uuid;
+                            var oncogenicUUID = $scope.mt.oncogenic_uuid.getText();
+                            var effectUUID = $scope.mt.effect_uuid.getText();
+                            $scope.oncogenicLastUpdateTime = new Date().toLocaleString();
+                            $scope.effectLastUpdateTime = new Date().toLocaleString();
                             items = [{obj: $scope.mt.oncogenic, reviewObj: $scope.mt.oncogenic_review, uuid: $scope.mt.oncogenic_uuid},
-                                {obj: $scope.mt.summary, reviewObj: $scope.mt.summary_review, uuid: $scope.mt.summary_uuid},
-                                {obj: $scope.mt.shortSummary, reviewObj: $scope.mt.shortSummary_review, uuid: $scope.mt.shortSummary_uuid}];
-                            break;
-                        case 'MUTATION_EFFECT':
-                            uuid = $scope.mt.effect_uuid;
-                            items = [{obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
+                                {obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
                                 {obj: $scope.mt.description, reviewObj: $scope.mt.description_review, uuid: $scope.mt.description_uuid}];
+
+                            var oncogenicChange = mainUtils.needReview($scope.mt.oncogenic_uuid);
+                            var effectChange = mainUtils.needReview($scope.mt.effect_uuid) || mainUtils.needReview($scope.mt.description_uuid);
+                            if(oncogenicChange && effectChange) {
+                                $scope.bothChanged = true;
+                                DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
+                                    var resultJSON = JSON.parse(result.status);
+                                    if (_.isArray(resultJSON)) {
+                                        if(resultJSON[0]) {
+                                            setUpdateTimeEffectSection(resultJSON[0], oncogenicUUID, effectUUID);
+                                        }
+                                        if(resultJSON[1]) {
+                                            setUpdateTimeEffectSection(resultJSON[1], oncogenicUUID, effectUUID);
+                                        }
+                                    }
+                                    specialCases();
+                                    rejectItem(items);
+                                }, function(error) {
+                                    console.log('Failed to fetch evidence based on uuid', error);
+                                });
+                            } else {
+                                if(oncogenicChange) uuid = oncogenicUUID;
+                                if(effectChange) uuid = effectUUID;
+                            }
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
                             uuid = $scope.tm.summary_uuid;
@@ -246,12 +276,21 @@ angular.module('oncokbApp')
                             }, function(error) {
                                 console.log('Failed to fetch evidence based on uuid', error);
                             });
-                        } else {
+                        } else if(!$scope.bothChanged) {
                             specialCases();
                             rejectItem(items);
                         }
                     });
                 };
+                function setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID) {
+                    if(eviFromDB.lastEdit) {
+                        if(eviFromDB.uuid === oncogenicUUID) {
+                            $scope.oncogenicLastUpdateTime = eviFromDB.lastEdit;
+                        } else if(eviFromDB.uuid === effectUUID) {
+                            $scope.effectLastUpdateTime = eviFromDB.lastEdit;
+                        }
+                    }
+                }
                 function specialCases() {
                     switch ($scope.tp) {
                     case 'GENE_TYPE':

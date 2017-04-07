@@ -311,6 +311,17 @@ angular.module('oncokbApp')
                     });
             }
 
+            function getEvidencesByUUIDs(uuids, success, fail) {
+                DriveAnnotation
+                    .getEvidencesByUUIDs(uuids)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
+
             function deleteEvidences(data, success, fail) {
                 DriveAnnotation
                     .deleteEvidences(data)
@@ -669,6 +680,7 @@ angular.module('oncokbApp')
                 getOncogeneTSG: getOncogeneTSG,
                 getSuggestedVariants: getSuggestedVariants,
                 isHotspot: isHotspot,
-                getEvidencesByUUID: getEvidencesByUUID
+                getEvidencesByUUID: getEvidencesByUUID,
+                getEvidencesByUUIDs: getEvidencesByUUIDs
             };
         }]);
