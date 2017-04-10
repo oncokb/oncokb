@@ -194,14 +194,12 @@ angular.module('oncokbApp')
                                 DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
                                     var resultJSON = JSON.parse(result.status);
                                     if (_.isArray(resultJSON)) {
-                                        if(resultJSON[0]) {
-                                            setUpdateTimeEffectSection(resultJSON[0], oncogenicUUID, effectUUID);
-                                        }
-                                        if(resultJSON[1]) {
-                                            setUpdateTimeEffectSection(resultJSON[1], oncogenicUUID, effectUUID);
-                                        }
+                                        _.each(resultJSON, function(eviFromDB) {
+                                            if(eviFromDB) {
+                                                setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID);
+                                            }
+                                        });
                                     }
-                                    specialCases();
                                     rejectItem(items);
                                 }, function(error) {
                                     console.log('Failed to fetch evidence based on uuid', error);

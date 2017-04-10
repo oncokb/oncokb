@@ -615,7 +615,7 @@ public class CacheUtils {
         if (uuids != null) {
             for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
                 for (Evidence evidence : map.getValue()) {
-                    if (uuids.contains(evidence.getUuid())) {
+                    if (evidence != null && uuids.contains(evidence.getUuid())) {
                         mappedEvis.add(evidence);
                     }
                 }
