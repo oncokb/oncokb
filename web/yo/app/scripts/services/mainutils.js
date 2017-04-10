@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector) {
+    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -319,6 +319,19 @@ angular.module('oncokbApp')
                 }
             );
         }
+        /*
+        *  Check if item needs to be reviewed or not
+        *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
+        * */
+       function needReview(uuid) {
+            if(uuid) {
+                uuid = uuid.getText();
+                if ($rootScope.geneMetaData.get(uuid) && $rootScope.geneMetaData.get(uuid).get('review')) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         return {
             getCancerTypesName: getCancerTypesName,
@@ -330,6 +343,7 @@ angular.module('oncokbApp')
             getIsoform: getIsoform,
             getOncogeneTSG: getOncogeneTSG,
             getLastReviewedCancerTypesName: getLastReviewedCancerTypesName,
-            sendEmail: sendEmail
+            sendEmail: sendEmail,
+            needReview: needReview
         };
     });
