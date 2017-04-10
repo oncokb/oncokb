@@ -128,7 +128,7 @@ angular.module('oncokbApp')
                             }
                             var tempTime = $scope.lastUpdateTime;
                             if(!tempTime) {
-                                tempTime = new Date().toLocaleString();
+                                tempTime = new Date().getTime().toString();
                             }
                             item.reviewObj.clear();
                             item.reviewObj.set('review', false);
@@ -181,8 +181,8 @@ angular.module('oncokbApp')
                         case 'ONCOGENIC':
                             var oncogenicUUID = $scope.mt.oncogenic_uuid.getText();
                             var effectUUID = $scope.mt.effect_uuid.getText();
-                            $scope.oncogenicLastUpdateTime = new Date().toLocaleString();
-                            $scope.effectLastUpdateTime = new Date().toLocaleString();
+                            $scope.oncogenicLastUpdateTime = new Date().getTime().toString();
+                            $scope.effectLastUpdateTime = new Date().getTime().toString();
                             items = [{obj: $scope.mt.oncogenic, reviewObj: $scope.mt.oncogenic_review, uuid: $scope.mt.oncogenic_uuid},
                                 {obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
                                 {obj: $scope.mt.description, reviewObj: $scope.mt.description_review, uuid: $scope.mt.description_uuid}];

@@ -970,7 +970,7 @@ angular.module('oncokbApp')
                 return evidences;
             };
             function validateTimeFormat(updateTime) {
-                var tempTime = new Date(updateTime);
+                var tempTime = new Date(Number(updateTime));
                 if(tempTime instanceof Date && !isNaN(tempTime.getTime())) {
                     updateTime = tempTime.getTime().toString();
                 } else {
@@ -1422,7 +1422,7 @@ angular.module('oncokbApp')
                                 setReview(trialsUuid, true);
                             }
                             trialsReview.set('updatedBy', User.name);
-                            trialsReview.set('updateTime', new Date().toLocaleString());
+                            trialsReview.set('updateTime', new Date().getTime().toString());
                             trials.push(newTrial);
                         } else {
                             dialogs.notify('Warning', 'Please check your trial ID format. (e.g. NCT01562899)');
@@ -1438,7 +1438,7 @@ angular.module('oncokbApp')
                     setReview(trialsUuid, true);
                 }
                 trialsReview.set('updatedBy', User.name);
-                trialsReview.set('updateTime', new Date().toLocaleString());
+                trialsReview.set('updateTime', new Date().getTime().toString());
                 trials.remove(index);
             };
 
@@ -1599,7 +1599,7 @@ angular.module('oncokbApp')
                     } else {
                         obj.name_review.set('removed', true);
                         obj.name_review.set('updatedBy', User.name);
-                        obj.name_review.set('updateTime', new Date().toLocaleString());
+                        obj.name_review.set('updateTime', new Date().getTime().toString());
                         setReview(obj.name_uuid, true);
                     }
                 }, function() {
@@ -3154,7 +3154,7 @@ angular.module('oncokbApp')
                 $scope.meta.cancerTypes_review.set('lastReviewed', lastReviewed);
             }
             $scope.meta.cancerTypes_review.set('updatedBy', user.name);
-            $scope.meta.cancerTypes_review.set('updateTime', new Date().toLocaleString());
+            $scope.meta.cancerTypes_review.set('updateTime', new Date().getTime().toString());
             $scope.meta.cancerTypes.clear();
             _.each($scope.meta.newCancerTypes, function(ct) {
                 if (ct.mainType.name) {
