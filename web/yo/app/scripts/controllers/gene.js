@@ -815,10 +815,12 @@ angular.module('oncokbApp')
                     data.lastEdit = $scope.gene.background_review.get('updateTime');
                     break;
                 case 'ONCOGENIC':
-                    data.knownEffect = mutation.oncogenic.getText();
-                    data.description = mutation.summary.getText();
-                    dataUUID = mutation.oncogenic_uuid.getText();
-                    data.lastEdit = mutation.oncogenic_review.get('updateTime');
+                    if(needReview(mutation.oncogenic_uuid) || needReview(mutation.summary_uuid)) {
+                        data.knownEffect = mutation.oncogenic.getText();
+                        data.description = mutation.summary.getText();
+                        dataUUID = mutation.oncogenic_uuid.getText();
+                        data.lastEdit = mutation.oncogenic_review.get('updateTime');
+                    }
                     if (needReview(mutation.shortSummary_uuid)) {
                         extraData.description = mutation.shortSummary.getText();
                         extraData.evidenceType = 'MUTATION_SUMMARY';
@@ -974,7 +976,10 @@ angular.module('oncokbApp')
                     }
                 }
                 if(data.lastEdit) {
-                    data.lastEdit = new Date(data.lastEdit).getTime().toString();
+                    data.lastEdit = validateTimeFormat(data.lastEdit);
+                }
+                if(extraData.lastEdit) {
+                    extraData.lastEdit = validateTimeFormat(extraData.lastEdit);
                 }
                 if(dataUUID) {
                     evidences[dataUUID] = data;
@@ -988,6 +993,15 @@ angular.module('oncokbApp')
                     });
                 }
                 return evidences;
+            };
+            function validateTimeFormat(updateTime) {
+                var tempTime = new Date(updateTime);
+                if(tempTime instanceof Date && !isNaN(tempTime.getTime())) {
+                    updateTime = tempTime.getTime().toString();
+                } else {
+                    updateTime = new Date().getTime().toString();
+                }
+                return updateTime;
             }
 
             function setReviewModeInterval() {
