@@ -231,7 +231,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.exitReview = function() {
-                $rootScope.geneMetaData.delete('currentReviewer');
+                $rootScope.geneMetaData.get('currentReviewer').setText('');
                 $rootScope.reviewMode = false;
                 $scope.fileEditable = true;
                 myUpdatedEvidenceModels = [];
@@ -442,7 +442,7 @@ angular.module('oncokbApp')
                     $rootScope.geneMetaData.clear();
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
-                    $rootScope.geneMetaData.set('currentReviewer', User.name);
+                    $rootScope.geneMetaData.get('currentReviewer').setText(User.name);
                     $rootScope.reviewMode = true;
                     if($scope.status.mutationChanged) {
                         openChangedSections();
@@ -2327,6 +2327,12 @@ angular.module('oncokbApp')
                     $rootScope.metaData.set($scope.fileTitle, tempMap);
                 }
                 $rootScope.geneMetaData = $rootScope.metaData.get($scope.fileTitle);
+                if(!$rootScope.geneMetaData.has('currentReviewer') || $rootScope.geneMetaData.get('currentReviewer').type !== 'EditableString') {
+                    $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
+                }
+                var tempReviewer = $rootScope.geneMetaData.get('currentReviewer');
+                tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_INSERTED, reviewerChange);
+                tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_DELETED, reviewerChange);
                 callback();
             }
 
@@ -2337,7 +2343,6 @@ angular.module('oncokbApp')
                 $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
                 $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
                 $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveMetaChangedEvent);
-                $rootScope.geneMetaData.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, reviewerChange);
             }
             function reviewerChange() {
                 // set gene document to readable only when it s in review
@@ -2478,11 +2483,14 @@ angular.module('oncokbApp')
             }
 
             function underOthersReview() {
-                var _name = $rootScope.geneMetaData.get('currentReviewer');
-                if (_name &&
-                    _name.toUpperCase() !== User.name.toUpperCase() &&
-                    hasCollaborator(_name)) {
-                    return true;
+                var currentReviewer = $rootScope.geneMetaData.get('currentReviewer');
+                if (currentReviewer) {
+                    var _name = currentReviewer.getText();
+                    if (_name &&
+                        _name.toUpperCase() !== User.name.toUpperCase() &&
+                        hasCollaborator(currentReviewer.getText())) {
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -2501,7 +2509,7 @@ angular.module('oncokbApp')
 
             function underReview() {
                 var currentReviewer = $rootScope.geneMetaData.get('currentReviewer');
-                if (currentReviewer) {
+                if (currentReviewer && currentReviewer.getText()) {
                     return true;
                 }
                 return false;
@@ -3115,7 +3123,7 @@ angular.module('oncokbApp')
                 // the current user.
                 if ($scope.fileEditable) {
                     dialogs.notify('Warning',
-                        $rootScope.geneMetaData.get('currentReviewer') +
+                        $rootScope.geneMetaData.get('currentReviewer').getText() +
                         ' started to review the document, ' +
                         'you can not change anything at this moment. ' +
                         'We will notify you once the reviewer finished ' +
