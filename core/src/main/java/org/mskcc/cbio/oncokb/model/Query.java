@@ -17,6 +17,7 @@ public class Query implements java.io.Serializable {
     private String hugoSymbol;
     private Integer entrezGeneId;
     private String alteration;
+    @JsonIgnore
     private String alterationType;
     private String tumorType;
     private String consequence;

@@ -40,6 +40,8 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/api").setViewName("redirect:/api/v1/swagger-ui.html");
+        registry.addViewController("/api/").setViewName("redirect:/api/v1/swagger-ui.html");
         registry.addViewController("/swagger-ui.html").setViewName("redirect:/api/v1/swagger-ui.html");
     }
 
@@ -51,11 +53,12 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
         return multipartResolver;
     }
 
-    protected ApiInfo apiInfo() {
+    protected ApiInfo apiInfo(String version) {
+        version = version == null ? "v1.0" : version;
         ApiInfo apiInfo = new ApiInfo(
             "OncoKB APIs",
             "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
-            "v1.0.0",
+            version,
             "http://oncokb.org/#/terms",
             new Contact("OncoKB", "http://www.oncokb.org", "team@oncokb.org"),
             "Usage Terms",
