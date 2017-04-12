@@ -554,16 +554,10 @@ angular.module('oncokbApp')
                         myDeletedEvidenceModels.push(['mutation', mutation]);
                         continue;
                     }
-                    tempArr = [mutation.oncogenic_review, mutation.shortSummary_review, mutation.summary_review];
-                    if (mainUtils.needReview(mutation.shortSummary_uuid) || mainUtils.needReview(mutation.summary_uuid) || mainUtils.needReview(mutation.oncogenic_uuid)) {
+                    tempArr = [mutation.oncogenic_review, mutation.effect_review, mutation.description_review];
+                    if (mainUtils.needReview(mutation.description_uuid) || mainUtils.needReview(mutation.effect_uuid) || mainUtils.needReview(mutation.oncogenic_uuid)) {
                         if (isChangedBy(mutation.oncogenic_review, userName)) {
                             formMyEvidences('ONCOGENIC', mutation, null, null, null);
-                        }
-                    }
-                    tempArr = [mutation.effect_review, mutation.description_review];
-                    if (mainUtils.needReview(mutation.description_uuid) || mainUtils.needReview(mutation.effect_uuid)) {
-                        if (isChangedBy(mutation.effect_review, userName)) {
-                            formMyEvidences('MUTATION_EFFECT', mutation, null, null, null);
                         }
                     }
                     for (var j = 0; j < mutation.tumors.length; j++) {
@@ -2147,16 +2141,10 @@ angular.module('oncokbApp')
             };
 
             $scope.checkEmpty = function(mutation, type) {
-                if (type === 'mutationEffect') {
-                    if (mutation.effect.value.text === '' && mutation.description.text === '' && mutation.short.text === '') {
+                if (type === 'oncogenicity') {
+                    if ((!mutation.oncogenic.text || mutation.oncogenic.text === 'false') && !mutation.effect.value.text && !mutation.description.text) {
                         return true;
                     }
-                    return false;
-                } else if (type === 'oncogenicity') {
-                    if ((mutation.oncogenic.text === '' || mutation.oncogenic.text === 'false') && mutation.shortSummary.text === '') {
-                        return true;
-                    }
-                    return false;
                 }
                 return false;
             };
