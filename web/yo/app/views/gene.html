@@ -57,12 +57,15 @@
           {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</div>
       <div ng-if="reviewMode">
           <br/><br/>
-          <p style="color:red;font-size:20px;"><b>You are currently in "Review" mode. Click the "Review Complete" button
-              to exit.
-              <button type="button" class="btn btn-default" ng-click="acceptAllMyChanges()"
-                      ng-disabled="status.noChanges || status.savingAll">{{status.savingAll ? 'Saving ' : 'Accept All My
-                  Changes'}}<i ng-if="status.savingAll" class="fa fa-spinner fa-spin"></i></button>
-          </b></p>
+          <p style="color:red;font-size:20px;"><b>You are currently in "Review" mode. Click the "Review Complete" button to exit.</b></p>
+              <!--<button type="button" class="btn btn-default" ng-click="acceptAllMyChanges()"-->
+                      <!--ng-disabled="status.noChanges || status.savingAll">{{status.savingAll ? 'Saving ' : 'Accept All My-->
+                  <!--Changes'}}<i ng-if="status.savingAll" class="fa fa-spinner fa-spin"></i></button>-->
+
+          <span class="btn-group">
+              <button type="button" class="btn btn-default" ng-click="acceptChangesByPerson(x)"
+              ng-disabled="status[x].noChanges || status[x].savingAll" ng-repeat="x in curatorNames">{{status[x].savingAll ? 'Saving ' : 'Accept All Changes from ' + x}}<i ng-if="status[x].savingAll" class="fa fa-spinner fa-spin"></i></button>
+          </span>
       </div>
 
     <div ng-if="displayCheck(gene.summary_uuid, gene.summary_review, null, null, null, true)">
