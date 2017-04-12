@@ -243,8 +243,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.exitReview = function() {
-                var currentReviewer = $scope.realtimeDocument.getModel().createString('');
-                $scope.gene.name_review.set('currentReviewer', currentReviewer);
+                $rootScope.geneMetaData.get('currentReviewer').setText('');
                 $rootScope.reviewMode = false;
                 $scope.fileEditable = true;
                 myUpdatedEvidenceModels = [];
@@ -330,8 +329,6 @@ angular.module('oncokbApp')
             }
 
             function prepareReviewItems() {
-                var currentReviewer = $scope.realtimeDocument.getModel().createString(User.name);
-                $scope.gene.name_review.set('currentReviewer', currentReviewer);
                 $scope.status.noChanges = false;
                 $scope.status.hasReviewContent = false;
                 $scope.status.mutationChanged = false;
@@ -454,9 +451,10 @@ angular.module('oncokbApp')
                 }
 
                 if($scope.status.hasReviewContent === false) {
-                     $rootScope.geneMetaData.clear();
+                    $rootScope.geneMetaData.clear();
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
+                    $rootScope.geneMetaData.get('currentReviewer').setText(User.name);
                     $rootScope.reviewMode = true;
                     if($scope.status.mutationChanged) {
                         openChangedSections();
@@ -2365,6 +2363,12 @@ angular.module('oncokbApp')
                     $rootScope.metaData.set($scope.fileTitle, tempMap);
                 }
                 $rootScope.geneMetaData = $rootScope.metaData.get($scope.fileTitle);
+                if(!$rootScope.geneMetaData.has('currentReviewer') || $rootScope.geneMetaData.get('currentReviewer').type !== 'EditableString') {
+                    $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
+                }
+                var tempReviewer = $rootScope.geneMetaData.get('currentReviewer');
+                tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_INSERTED, reviewerChange);
+                tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_DELETED, reviewerChange);
                 callback();
             }
 
@@ -2376,8 +2380,7 @@ angular.module('oncokbApp')
                 $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
                 $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveMetaChangedEvent);
             }
-
-            function saveStateChangedEvent(evt) {
+            function reviewerChange() {
                 // set gene document to readable only when it s in review
                 if (underOthersReview()) {
                     $scope.$emit('interruptedDueToOtherReview');
@@ -2389,6 +2392,8 @@ angular.module('oncokbApp')
                     }
                     $scope.fileEditable = $scope.document.editable;
                 }
+            }
+            function saveStateChangedEvent(evt) {
                 if ($scope.$$phase) {
                     updateDocStatus(evt);
                 } else {
@@ -2514,7 +2519,7 @@ angular.module('oncokbApp')
             }
 
             function underOthersReview() {
-                var currentReviewer = $scope.gene.name_review.get('currentReviewer');
+                var currentReviewer = $rootScope.geneMetaData.get('currentReviewer');
                 if (currentReviewer) {
                     var _name = currentReviewer.getText();
                     if (_name &&
@@ -2539,7 +2544,7 @@ angular.module('oncokbApp')
             }
 
             function underReview() {
-                var currentReviewer = $scope.gene.name_review.get('currentReviewer');
+                var currentReviewer = $rootScope.geneMetaData.get('currentReviewer');
                 if (currentReviewer && currentReviewer.getText()) {
                     return true;
                 }
@@ -3104,7 +3109,6 @@ angular.module('oncokbApp')
                     } else {
                         $scope.model = '';
                     }
-                    $scope.gene.name_review.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
                 })
                 .finally(function() {
                     getSuggestedMutations();
@@ -3155,7 +3159,7 @@ angular.module('oncokbApp')
                 // the current user.
                 if ($scope.fileEditable) {
                     dialogs.notify('Warning',
-                        $scope.gene.name_review.get('currentReviewer') +
+                        $rootScope.geneMetaData.get('currentReviewer').getText() +
                         ' started to review the document, ' +
                         'you can not change anything at this moment. ' +
                         'We will notify you once the reviewer finished ' +
