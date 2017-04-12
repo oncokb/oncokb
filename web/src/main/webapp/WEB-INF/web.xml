@@ -39,7 +39,22 @@
         </init-param>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>org.mskcc.cbio.oncokb.config.MvcConfigurationPublic</param-value>
+            <param-value>org.mskcc.cbio.oncokb.config.MvcConfigurationPublicV1</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>publicApiV2</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>
+                org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>org.mskcc.cbio.oncokb.config.MvcConfigurationPublicV2</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -65,6 +80,10 @@
     <servlet-mapping>
         <servlet-name>publicApiV1</servlet-name>
         <url-pattern>/api/v1/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>publicApiV2</servlet-name>
+        <url-pattern>/api/v2/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>privateApi</servlet-name>

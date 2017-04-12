@@ -1,0 +1,30 @@
+package org.mskcc.cbio.oncokb.apiModels;
+
+import java.util.Date;
+
+/**
+ * Created by Hongxin on 4/12/17.
+ */
+public class Summary {
+    private String summary;
+    private Date lastUpdate;
+
+    public Summary() {
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+}
