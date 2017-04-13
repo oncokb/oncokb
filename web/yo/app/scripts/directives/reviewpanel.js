@@ -312,9 +312,7 @@ angular.module('oncokbApp')
                                 if(lastReviewedLevel !== null) {
                                     $scope.tt.level.setText(lastReviewedLevel);
                                 }
-                                if(lastReviewedPropagation !== null) {
-                                    $scope.tt.name_eStatus.set('propagation', lastReviewedPropagation);
-                                }
+                                $scope.tt.name_eStatus.set('propagation', lastReviewedPropagation);
                                 $scope.tt.level_review.clear();
                                 $scope.tt.level_review.set('review', false);
                                 $rootScope.geneMetaData.get($scope.tt.level_uuid.getText()).set('review', false);

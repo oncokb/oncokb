@@ -246,6 +246,7 @@ angular.module('oncokbApp')
                 $rootScope.geneMetaData.get('currentReviewer').setText('');
                 $rootScope.reviewMode = false;
                 $scope.fileEditable = true;
+                $scope.treNameChangeOnly = false;
                 evidencesAllUsers = {};
                 $interval.cancel($scope.reviewMoeInterval);
                 _.each($scope.geneStatus, function(item) {
@@ -265,16 +266,16 @@ angular.module('oncokbApp')
             function setReview(uuid, flag) {
                 uuid = uuid.getText();
                 if (flag) {
-                    if ( $rootScope.geneMetaData.get(uuid)) {
-                         $rootScope.geneMetaData.get(uuid).set('review', true);
+                    if ($rootScope.geneMetaData.get(uuid)) {
+                        $rootScope.geneMetaData.get(uuid).set('review', true);
                     } else {
                         var temp = $rootScope.metaModel.createMap();
                         temp.set('review', true);
-                         $rootScope.geneMetaData.set(uuid, temp);
+                        $rootScope.geneMetaData.set(uuid, temp);
                     }
                 } else if (!flag) {
-                    if ( $rootScope.geneMetaData.get(uuid)) {
-                         $rootScope.geneMetaData.get(uuid).set('review', false);
+                    if ($rootScope.geneMetaData.get(uuid)) {
+                        $rootScope.geneMetaData.get(uuid).set('review', false);
                     }
                 }
             }
@@ -293,7 +294,7 @@ angular.module('oncokbApp')
                         if (reviewObjs[i].get('updateTime')) {
                             mostRecent = i;
                         }
-                    } else if (Date.parse(reviewObjs[mostRecent].get('updateTime')) < Date.parse(reviewObjs[i].get('updateTime'))) {
+                    } else if (reviewObjs[mostRecent].get('updateTime') < reviewObjs[i].get('updateTime')) {
                         mostRecent = i;
                     }
                 }
@@ -305,8 +306,12 @@ angular.module('oncokbApp')
 
             function setUpdatedSignature(tempArr, reviewObj) {
                 var mostRecent = mostRecentItem(tempArr);
-                reviewObj.set('mostRecentUpdatedBy', tempArr[mostRecent].get('updatedBy'));
-                reviewObj.set('mostRecentUpdateTime', tempArr[mostRecent].get('updateTime'));
+                $scope.realtimeDocument.getModel().beginCompoundOperation();
+                var timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
+                timeStamp.value.setText(tempArr[mostRecent].get('updateTime').toString());
+                timeStamp.by.setText(tempArr[mostRecent].get('updatedBy'));
+                reviewObj.set('mostRecent', timeStamp);
+                $scope.realtimeDocument.getModel().endCompoundOperation();
             }
             var evidencesAllUsers = {};
 
@@ -321,18 +326,15 @@ angular.module('oncokbApp')
                 $scope.status.hasReviewContent = false;
                 $scope.status.mutationChanged = false;
                 var userNames = [];
-                if(mainUtils.needReview($scope.gene.summary_uuid)) {
-                    $scope.status.hasReviewContent = true;
-                    userNames.push($scope.gene.summary_review.get('updatedBy'));
-                }
-                if(mainUtils.needReview($scope.gene.type_uuid)) {
-                    $scope.status.hasReviewContent = true;
-                    userNames.push($scope.gene.type_review.get('updatedBy'));
-                }
-                if(mainUtils.needReview($scope.gene.background_uuid)) {
-                    $scope.status.hasReviewContent = true;
-                    userNames.push($scope.gene.background_review.get('updatedBy'));
-                }
+                var geneEvisMapping = [{uuid: $scope.gene.summary_uuid, review: $scope.gene.summary_review},
+                    {uuid: $scope.gene.type_uuid, review: $scope.gene.type_review},
+                    {uuid: $scope.gene.background_uuid, review: $scope.gene.background_review}];
+                _.each(geneEvisMapping, function(item) {
+                    if(mainUtils.needReview(item.uuid)) {
+                        $scope.status.hasReviewContent = true;
+                        userNames.push(item.review.get('updatedBy'));
+                    }
+                });
                 setOriginalStatus([$scope.gene.summary_review, $scope.gene.type_review, $scope.gene.background_review]);
                 var mutationChanged = false;
                 var tumorChanged = false;
@@ -354,10 +356,9 @@ angular.module('oncokbApp')
                     setOriginalStatus(tempArr);
                     if (mainUtils.needReview(mutation.oncogenic_uuid) || mainUtils.needReview(mutation.effect_uuid) || mainUtils.needReview(mutation.description_uuid)) {
                         mutation.oncogenic_review.set('review', true);
-                        mutation.effect_review.set('mutation_effect', true);
                         mutationChanged = true;
                         setUpdatedSignature(tempArr, mutation.oncogenic_review);
-                        userNames.push(mutation.oncogenic_review.get('mostRecentUpdatedBy'));
+                        userNames.push(mutation.oncogenic_review.get('mostRecent').by.getText());
                     }
                     for (var j = 0; j < mutation.tumors.length; j++) {
                         var tumor = mutation.tumors.get(j);
@@ -391,7 +392,7 @@ angular.module('oncokbApp')
                             tumor.nccn_review.set('review', true);
                             tumorChanged = true;
                             setUpdatedSignature(tempArr, tumor.nccn_review);
-                            userNames.push(tumor.nccn_review.get('mostRecentUpdatedBy'));
+                            userNames.push(tumor.nccn_review.get('mostRecent').by.getText());
                         }
                         for (var k = 0; k < tumor.TI.length; k++) {
                             var ti = tumor.TI.get(k);
@@ -413,40 +414,38 @@ angular.module('oncokbApp')
                                 setOriginalStatus(tempArr);
                                 // we set review to TREATMENT_NAME_CHANGE to indicate the case where only treatment name get changed
                                 if (mainUtils.needReview(treatment.level_uuid) || mainUtils.needReview(treatment.indication_uuid) || mainUtils.needReview(treatment.description_uuid)) {
-                                    treatment.name_review.set('review', true);
                                     treatmentChanged = true;
-                                    setUpdatedSignature(tempArr, treatment.name_review);
-                                } else if(mainUtils.needReview(treatment.name_uuid)) {
-                                    treatment.name_review.set('review', 'TREATMENT_NAME_CHANGE');
+                                    setUpdatedSignature([treatment.level_review, treatment.indication_review, treatment.description_review], treatment.name_review);
+                                    userNames.push(treatment.name_review.get('mostRecent').by.getText());
+                                } else if (mainUtils.needReview(treatment.name_uuid)) {
+                                    $scope.treNameChangeOnly = true;
                                     treatmentChanged = true;
                                     userNames.push(treatment.name_review.get('updatedBy'));
                                 }
+                                if(treatmentChanged) {
+                                    treatment.name_review.set('review', true);
+                                }
                             }
                             setOriginalStatus([ti.name_review, ti.description_review]);
-                            if (mainUtils.needReview(ti.description_uuid)) {
+                            if (mainUtils.needReview(ti.description_uuid) || treatmentChanged) {
                                 ti.name_review.set('review', true);
                                 tumorChanged = true;
-                                userNames.push(ti.description_review.get('updatedBy'));
-                            }
-                            if (treatmentChanged) {
-                                ti.name_review.set('review', true);
-                                tumorChanged = true;
+                                if(mainUtils.needReview(ti.description_uuid)) {
+                                    userNames.push(ti.description_review.get('updatedBy'));
+                                }
                             }
                             treatmentChanged = false;
                         }
                         setOriginalStatus([tumor.name_review, tumor.summary_review, tumor.trials_review]);
-                        if(mainUtils.needReview(tumor.summary_uuid)) {
-                            tumorChanged = true;
-                            userNames.push(tumor.summary_review.get('updatedBy'));
-                        }
-                        if(mainUtils.needReview(tumor.name_uuid)) {
-                            tumorChanged = true;
-                            userNames.push(tumor.cancerTypes_review.get('updatedBy'));
-                        }
-                        if(mainUtils.needReview(tumor.trials_uuid)) {
-                            tumorChanged = true;
-                            userNames.push(tumor.trials_review.get('updatedBy'));
-                        }
+                        var tumorEvisMapping = [{uuid: tumor.summary_uuid, review: tumor.summary_review},
+                            {uuid: tumor.name_uuid, review: tumor.cancerTypes_review},
+                            {uuid: tumor.trials_uuid, review: tumor.trials_review}];
+                        _.each(tumorEvisMapping, function(item) {
+                            if(mainUtils.needReview(item.uuid)) {
+                                tumorChanged = true;
+                                userNames.push(item.review.get('updatedBy'));
+                            }
+                        });
                         if (tumorChanged) {
                             tumor.name_review.set('review', true);
                             mutationChanged = true;
@@ -470,6 +469,7 @@ angular.module('oncokbApp')
 
                 if($scope.status.hasReviewContent === false) {
                     $rootScope.geneMetaData.clear();
+                    $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
                     $rootScope.geneMetaData.get('currentReviewer').setText(User.name);
@@ -477,10 +477,14 @@ angular.module('oncokbApp')
                     if($scope.status.mutationChanged) {
                         openChangedSections();
                     }
-                    $scope.curatorNames = _.uniq(userNames);
-                    _.each($scope.curatorNames, function(userName) {
-                        $scope.status[userName] = {};
+                    var validUsers = [];
+                    _.each(_.uniq(userNames), function(userName) {
+                        if(userName) {
+                            $scope.status[userName] = {};
+                            validUsers.push(userName);
+                        }
                     });
+                    $scope.namesWithChanges = validUsers;
                 }
             }
             function openChangedSections() {
@@ -544,6 +548,10 @@ angular.module('oncokbApp')
                 }
             };
             $scope.acceptChangesByPerson = function(userName) {
+                if(!userName) {
+                    dialogs.error('Error', 'Can not accept changes from invalid user name. Please contact the developer.');
+                    return false;
+                }
                 if ($scope.status.isDesiredGene) {
                     $scope.status[userName].savingAll = true;
                 }
@@ -563,11 +571,16 @@ angular.module('oncokbApp')
                         $scope.status[userName].savingAll = false;
                         $scope.status[userName].noChanges = true;
                         evidencesAllUsers[userName] = {};
+                    }, function(error) {
+                        // Errors already been handled seperatly in the single api calls.
+                        console.log('Error happened ', error);
                     });
             };
             function collectChangesByPerson(userName) {
-                $scope.status.savingAll = false;
-                $scope.status.noChanges = false;
+                if(!userName) {
+                    console.log('Can not collect changes from invalid user name. Please double check the userName.');
+                    return false;
+                }
                 evidencesAllUsers[userName] = {
                     updatedEvidences: {},
                     deletedEvidences: [],
@@ -599,7 +612,7 @@ angular.module('oncokbApp')
                         evidencesAllUsers[userName].deletedEvidenceModels.push(['mutation', mutation]);
                         continue;
                     }
-                    if (mutation.oncogenic_review.get('mostRecentUpdatedBy') === userName) {
+                    if (mutation.oncogenic_review.get('mostRecent') && mutation.oncogenic_review.get('mostRecent').by.getText() === userName) {
                         formEvidencesPerUser(userName, 'ONCOGENIC', mutation, null, null, null);
                     }
                     for (var j = 0; j < mutation.tumors.length; j++) {
@@ -621,7 +634,7 @@ angular.module('oncokbApp')
                         if (tumor.progImp_review.get('updatedBy') === userName) {
                             formEvidencesPerUser(userName, 'PROGNOSTIC_IMPLICATION', mutation, tumor, null, null);
                         }
-                        if (tumor.nccn_review.get('mostRecentUpdatedBy') === userName) {
+                        if (tumor.nccn_review.get('mostRecent') && tumor.nccn_review.get('mostRecent').by.getText() === userName) {
                             formEvidencesPerUser(userName, 'NCCN_GUIDELINES', mutation, tumor, null, null);
                         }
                         for (var k = 0; k < tumor.TI.length; k++) {
@@ -642,7 +655,7 @@ angular.module('oncokbApp')
                                 if(treatment.name_review.get('updatedBy') === userName) {
                                     formEvidencesPerUser(userName, 'TREATMENT_NAME_CHANGE', mutation, tumor, ti, treatment);
                                 }
-                                if (treatment.name_review.get('mostRecentUpdatedBy') === userName) {
+                                if (treatment.name_review.get('mostRecent') && treatment.name_review.get('mostRecent').by.getText() === userName) {
                                     formEvidencesPerUser(userName, ti.name.getText(), mutation, tumor, ti, treatment);
                                 }
                             }
@@ -813,7 +826,7 @@ angular.module('oncokbApp')
                         }
                     ];
                     dataUUID = tumor.nccn_uuid.getText();
-                    data.lastEdit = tumor.nccn_review.get('updateTime');
+                    data.lastEdit = tumor.nccn_review.get('mostRecent').value.getText();
                     reviewObj = tumor.nccn_review;
                     break;
                 case 'Standard implications for sensitivity to therapy':
@@ -881,7 +894,7 @@ angular.module('oncokbApp')
                         reviewObj = TI.description_review;
                     } else {
                         dataUUID = treatment.name_uuid.getText();
-                        data.lastEdit = treatment.name_review.get('updateTime');
+                        data.lastEdit = treatment.name_review.has('mostRecent') ? treatment.name_review.get('mostRecent').value.getText() : treatment.name_review.get('updateTime');
                         reviewObj = treatment.name_review;
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
                         data.description = treatment.description.getText();
@@ -1043,11 +1056,11 @@ angular.module('oncokbApp')
                             {reviewObj: treatment.indication_review, uuid: treatment.indication_uuid},
                             {reviewObj: treatment.description_review, uuid: treatment.description_uuid}], treatment.name_review);
                         // handle level specifically because level and propagation share the same uuid and review object
-                        var levelChanged =  $rootScope.geneMetaData.get(treatment.level_uuid.getText()) &&  $rootScope.geneMetaData.get(treatment.level_uuid.getText()).get('review');
+                        var levelChanged = $rootScope.geneMetaData.get(treatment.level_uuid.getText()) && $rootScope.geneMetaData.get(treatment.level_uuid.getText()).get('review');
                         if(levelChanged) {
                             treatment.level_review.clear();
                             treatment.level_review.set('review', false);
-                             $rootScope.geneMetaData.get(treatment.level_uuid.getText()).set('review', false);
+                            $rootScope.geneMetaData.get(treatment.level_uuid.getText()).set('review', false);
                         }
                     }
                     break;

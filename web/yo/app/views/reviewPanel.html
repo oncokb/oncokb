@@ -1,19 +1,19 @@
 <div>
     <div class="reviewPanel" ng-if="reviewMode">
         <div ng-if="rt === 'update'">
-            <p class="updateText" ng-if="signatureCheck()">Updated by {{rs.get('mostRecentUpdatedBy') || rs.get('updatedBy')}} at {{(rs.get('mostRecentUpdateTime') || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
+            <p class="updateText" ng-if="signatureCheck()">Updated by {{rs.get('mostRecent').by.getText() || rs.get('updatedBy')}} at {{(rs.get('mostRecent').value.getText() || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="iconExist('accept')"  ng-click="accept($event)"></i>
             <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="iconExist('reject')"  ng-click="reject($event)"></i>
             <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>
         </div>
         <div ng-if="rt === 'name'">
-            <p class="updateText" ng-if="signatureCheck()">Name updated by {{rs.get('mostRecentUpdatedBy') || rs.get('updatedBy')}} at {{(rs.get('mostRecentUpdateTime') || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
+            <p class="updateText" ng-if="signatureCheck()">Name updated by {{rs.get('mostRecent').by.getText() || rs.get('updatedBy')}} at {{(rs.get('mostRecent').value.getText() || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="iconExist('accept')"  ng-click="accept($event)"></i>
             <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="iconExist('reject')"  ng-click="reject($event)"></i>
             <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>
         </div>
         <div ng-if="rt === 'delete' && rs.get('removed')" class="deletionPanel">
-            <p class="deletionText" ng-if="!rs.get('loading')">Deleted by {{rs.get('mostRecentUpdatedBy') || rs.get('updatedBy')}} at {{(rs.get('mostRecentUpdateTime') || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
+            <p class="deletionText" ng-if="!rs.get('loading')">Deleted by {{rs.get('mostRecent').by.getText() || rs.get('updatedBy')}} at {{(rs.get('mostRecent').value.getText() || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="!rs.get('loading')" ng-click="confirmDelete($event, tp, mt, tm, ti, tt)"></i>
             <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="!rs.get('loading') || rs.get('action') === 'rejected'" ng-click="cancelDelete($event, tp, mt, tm, ti, tt)"></i>
             <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>
