@@ -668,4 +668,31 @@ public final class AlterationUtils {
         }
         return false;
     }
+
+    public static Alteration getAlterationByQuery(Query query) {
+        Alteration alteration = new Alteration(query);
+        annotateAlteration(alteration, alteration.getAlteration());
+        return alteration;
+    }
+
+    public static List<Alteration> getRelevantAlterationsByQuery(Query query) {
+        List<Alteration> relevantAlterations = new ArrayList<>();
+        Alteration alteration = AlterationUtils.getAlterationByQuery(query);
+        List<Alteration> result = AlterationUtils.getRelevantAlterations(alteration);
+        if (result != null) {
+            relevantAlterations.addAll(result);
+        }
+
+        // Map Truncating Mutations to single gene fusion event
+        if (QueryUtils.isFusionQuery(query)) {
+            Set<Gene> genes = GeneUtils.getUniqueGenesFromString(query.getHugoSymbol(), "-");
+            if (genes.size() == 1) {
+                Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(genes.iterator().next());
+                if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
+                    relevantAlterations.add(truncatingMutations);
+                }
+            }
+        }
+        return relevantAlterations;
+    }
 }

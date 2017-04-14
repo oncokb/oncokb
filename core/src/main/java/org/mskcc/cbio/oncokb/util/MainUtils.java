@@ -1,9 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -11,7 +12,8 @@ import java.util.*;
  */
 public class MainUtils {
     static String DataVersion = null;
-    static String DataVersionDate = null;
+    static Date DataVersionDate = null;
+    static Boolean ReadDataVersionDateProperty = false;
 
     public static Map<String, Object> GetRequestQueries(
         String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
@@ -269,11 +271,41 @@ public class MainUtils {
         return DataVersion;
     }
 
-    public static String getDataVersionDate() {
-        if (DataVersionDate == null) {
-            DataVersionDate = getProperty("data.version_date");
+    public static Date getLatestDate(Set<Date> dates) {
+        if (dates != null) {
+            dates.removeAll(Collections.singleton(null));
+            if (dates.size() > 0)
+                return Collections.max(dates);
         }
-        return DataVersionDate;
+        return null;
+    }
+
+    public static Date getLatestDateFromEvidences(Set<Evidence> evidences) {
+        if (evidences != null) {
+            Set<Date> dates = new HashSet<>();
+            for (Evidence evidence : evidences) {
+                if (evidence.getLastEdit() != null)
+                    dates.add(evidence.getLastEdit());
+            }
+            if (dates.size() > 0)
+                return Collections.max(dates);
+        }
+        return null;
+    }
+
+    public static Date getDataVersionDate() {
+        if (ReadDataVersionDateProperty) {
+            return DataVersionDate;
+        } else {
+            try {
+                String dateStr = getProperty("data.version_date");
+                DateFormat format = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH);
+                DataVersionDate = format.parse(dateStr);
+            } finally {
+                ReadDataVersionDateProperty = true;
+                return DataVersionDate;
+            }
+        }
     }
 
     private static String getProperty(String propertyName) {
