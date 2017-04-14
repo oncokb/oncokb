@@ -15,6 +15,11 @@ public class LevelOfEvidenceWithTime {
         this.level = level;
     }
 
+    public LevelOfEvidenceWithTime(LevelOfEvidence level, Date lastUpdate) {
+        this.level = level;
+        this.lastUpdate = lastUpdate;
+    }
+
     public LevelOfEvidence getLevel() {
         return level;
     }

@@ -1,10 +1,9 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.util.MainUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Hongxin on 4/12/17.
@@ -30,6 +29,7 @@ public class SearchResult {
     private Date lastUpdate;
 
     public SearchResult() {
+        this.dataVersion = MainUtils.getDataVersion();
     }
 
     public Query getQuery() {
@@ -172,7 +172,37 @@ public class SearchResult {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+    public void updateLastUpdate() {
+        Set<Date> dates = new HashSet<>();
+        if (this.oncogenic != null)
+            dates.add(this.oncogenic.getLastUpdate());
+        if (this.mutationEffect != null)
+            dates.add(this.mutationEffect.getLastUpdate());
+        if (this.highestSensitiveLevel != null)
+            dates.add(this.highestSensitiveLevel.getLastUpdate());
+        if (this.highestResistanceLevel != null)
+            dates.add(this.highestResistanceLevel.getLastUpdate());
+        if (this.otherSignificantSensitiveLevels != null)
+            for (LevelOfEvidenceWithTime level : this.otherSignificantSensitiveLevels) {
+                dates.add(level.getLastUpdate());
+            }
+        if (this.otherSignificantResistanceLevels != null)
+            for (LevelOfEvidenceWithTime level : this.otherSignificantResistanceLevels) {
+                dates.add(level.getLastUpdate());
+            }
+        if (this.geneSummary != null)
+            dates.add(this.geneSummary.getLastUpdate());
+        if (this.variantSummary != null)
+            dates.add(this.variantSummary.getLastUpdate());
+        if (this.tumorTypeSummary != null)
+            dates.add(this.tumorTypeSummary.getLastUpdate());
+        if (this.treatments != null)
+            for (TreatmentInfo treatmentInfo : this.treatments) {
+                dates.add(treatmentInfo.getLastUpdate());
+            }
+        if (this.VUS != null)
+            dates.add(this.VUS.getLastUpdate());
+
+        this.lastUpdate = MainUtils.getLatestDate(dates);
     }
 }

@@ -9,11 +9,20 @@ import java.util.List;
 public class KnownEffect {
     private String knownEffect;
     private List<String> pmids;
+    private List<Abstract> abstracts;
     private String description;
     private Date lastUpdate;
 
     public KnownEffect(String knownEffect) {
         this.knownEffect = knownEffect;
+    }
+
+    public KnownEffect(String knownEffect, List<String> pmids, List<Abstract> abstracts, String description, Date lastUpdate) {
+        this.knownEffect = knownEffect;
+        this.pmids = pmids;
+        this.abstracts = abstracts;
+        this.description = description;
+        this.lastUpdate = lastUpdate;
     }
 
     public String getKnownEffect() {
@@ -30,6 +39,14 @@ public class KnownEffect {
 
     public void setPmids(List<String> pmids) {
         this.pmids = pmids;
+    }
+
+    public List<Abstract> getAbstracts() {
+        return abstracts;
+    }
+
+    public void setAbstracts(List<Abstract> abstracts) {
+        this.abstracts = abstracts;
     }
 
     public String getDescription() {
