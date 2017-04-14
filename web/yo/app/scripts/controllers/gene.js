@@ -246,7 +246,6 @@ angular.module('oncokbApp')
                 $rootScope.geneMetaData.get('currentReviewer').setText('');
                 $rootScope.reviewMode = false;
                 $scope.fileEditable = true;
-                $scope.treNameChangeOnly = false;
                 evidencesAllUsers = {};
                 $interval.cancel($scope.reviewMoeInterval);
                 _.each($scope.geneStatus, function(item) {
@@ -290,12 +289,18 @@ angular.module('oncokbApp')
             function mostRecentItem(reviewObjs) {
                 var mostRecent = -1;
                 for (var i = 0; i < reviewObjs.length; i++) {
-                    if (mostRecent < 0) {
-                        if (reviewObjs[i].get('updateTime')) {
+                    var currentItemTime = new Date(reviewObjs[i].get('updateTime'));
+                    // we only continue to check if current item time is valid
+                    if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
+                        if (mostRecent < 0) {
                             mostRecent = i;
+                        } else {
+                            // reset mostRect time when current item time is closer
+                            var mostRecentTime = new Date(reviewObjs[mostRecent].get('updateTime'));
+                            if(mostRecentTime < currentItemTime) {
+                                mostRecent = i;
+                            }
                         }
-                    } else if (reviewObjs[mostRecent].get('updateTime') < reviewObjs[i].get('updateTime')) {
-                        mostRecent = i;
                     }
                 }
                 if (mostRecent < 0) {
@@ -306,12 +311,10 @@ angular.module('oncokbApp')
 
             function setUpdatedSignature(tempArr, reviewObj) {
                 var mostRecent = mostRecentItem(tempArr);
-                $scope.realtimeDocument.getModel().beginCompoundOperation();
                 var timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
                 timeStamp.value.setText(tempArr[mostRecent].get('updateTime').toString());
                 timeStamp.by.setText(tempArr[mostRecent].get('updatedBy'));
                 reviewObj.set('mostRecent', timeStamp);
-                $scope.realtimeDocument.getModel().endCompoundOperation();
             }
             var evidencesAllUsers = {};
 
@@ -320,24 +323,25 @@ angular.module('oncokbApp')
                 evidencesAllUsers[userName].updatedEvidences = _.extend(evidencesAllUsers[userName].updatedEvidences, evidenceResult);
                 evidencesAllUsers[userName].updatedEvidenceModels.push([type, mutation, tumor, TI, treatment]);
             }
-
+            $scope.getButtonContent = function(x) {
+                return $scope.status[x].savingAll ? 'Saving ' + '<i class="fa fa-spinner fa-spin"></i>' : 'Accept All Changes from <b>' + x + '</b>';
+            }
             function prepareReviewItems() {
                 $scope.status.noChanges = false;
                 $scope.status.hasReviewContent = false;
                 $scope.status.mutationChanged = false;
                 var userNames = [];
-                var geneEvisMapping = [{uuid: $scope.gene.summary_uuid, review: $scope.gene.summary_review},
-                    {uuid: $scope.gene.type_uuid, review: $scope.gene.type_review},
-                    {uuid: $scope.gene.background_uuid, review: $scope.gene.background_review}];
-                _.each(geneEvisMapping, function(item) {
-                    if(mainUtils.needReview(item.uuid)) {
+                var geneEviKeys = ['summary', 'type', 'background'];
+                _.each(geneEviKeys, function(item) {
+                    if(mainUtils.needReview($scope.gene[item + '_uuid'])) {
                         $scope.status.hasReviewContent = true;
-                        userNames.push(item.review.get('updatedBy'));
+                        userNames.push($scope.gene[item + '_review'].get('updatedBy'));
                     }
                 });
                 setOriginalStatus([$scope.gene.summary_review, $scope.gene.type_review, $scope.gene.background_review]);
                 var mutationChanged = false;
                 var tumorChanged = false;
+                var tiChanged = false;
                 var treatmentChanged = false;
                 var tempArr = [];
                 for (var i = 0; i < $scope.gene.mutations.length; i++) {
@@ -406,35 +410,36 @@ angular.module('oncokbApp')
                                 }
                                 setOriginalStatus([treatment.name_review]);
                                 if (treatment.name_review.get('removed')) {
-                                    treatmentChanged = true;
+                                    tiChanged = true;
                                     userNames.push(treatment.name_review.get('updatedBy'));
                                     continue;
                                 }
                                 tempArr = [treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review];
                                 setOriginalStatus(tempArr);
-                                // we set review to TREATMENT_NAME_CHANGE to indicate the case where only treatment name get changed
                                 if (mainUtils.needReview(treatment.level_uuid) || mainUtils.needReview(treatment.indication_uuid) || mainUtils.needReview(treatment.description_uuid)) {
                                     treatmentChanged = true;
                                     setUpdatedSignature([treatment.level_review, treatment.indication_review, treatment.description_review], treatment.name_review);
                                     userNames.push(treatment.name_review.get('mostRecent').by.getText());
                                 } else if (mainUtils.needReview(treatment.name_uuid)) {
-                                    $scope.treNameChangeOnly = true;
+                                    treatment.name_review.set('specialCase', 'TREATMENT_NAME_CHANGE');
                                     treatmentChanged = true;
                                     userNames.push(treatment.name_review.get('updatedBy'));
                                 }
                                 if(treatmentChanged) {
                                     treatment.name_review.set('review', true);
+                                    tiChanged = true;
                                 }
+                                treatmentChanged = false;
                             }
                             setOriginalStatus([ti.name_review, ti.description_review]);
-                            if (mainUtils.needReview(ti.description_uuid) || treatmentChanged) {
+                            if (mainUtils.needReview(ti.description_uuid) || tiChanged) {
                                 ti.name_review.set('review', true);
                                 tumorChanged = true;
                                 if(mainUtils.needReview(ti.description_uuid)) {
                                     userNames.push(ti.description_review.get('updatedBy'));
                                 }
                             }
-                            treatmentChanged = false;
+                            tiChanged = false;
                         }
                         setOriginalStatus([tumor.name_review, tumor.summary_review, tumor.trials_review]);
                         var tumorEvisMapping = [{uuid: tumor.summary_uuid, review: tumor.summary_review},
@@ -577,10 +582,6 @@ angular.module('oncokbApp')
                     });
             };
             function collectChangesByPerson(userName) {
-                if(!userName) {
-                    console.log('Can not collect changes from invalid user name. Please double check the userName.');
-                    return false;
-                }
                 evidencesAllUsers[userName] = {
                     updatedEvidences: {},
                     deletedEvidences: [],
@@ -995,7 +996,7 @@ angular.module('oncokbApp')
             function acceptItem(arr, reviewObj) {
                 _.each(arr, function(item) {
                     // This condition check is to remove review mapping precisely
-                    if ( $rootScope.geneMetaData.get(item.uuid.getText()) &&  $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
+                    if ($rootScope.geneMetaData.get(item.uuid.getText()) && $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
                         var tempTime = item.reviewObj.get('updateTime');
                         item.reviewObj.clear();
                         item.reviewObj.set('review', false);
