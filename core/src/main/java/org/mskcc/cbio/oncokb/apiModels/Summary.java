@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
+import org.mskcc.cbio.oncokb.util.MainUtils;
+
 import java.util.Date;
 
 /**
@@ -10,6 +12,15 @@ public class Summary {
     private Date lastUpdate;
 
     public Summary() {
+    }
+
+    public Summary(String summary) {
+        this.summary = summary;
+    }
+
+    public Summary(String summary, Date lastUpdate) {
+        this.summary = summary;
+        this.lastUpdate = lastUpdate;
     }
 
     public String getSummary() {
