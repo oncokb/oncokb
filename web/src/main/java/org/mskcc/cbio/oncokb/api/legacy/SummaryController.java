@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.api.legacy;
 
+import org.mskcc.cbio.oncokb.apiModels.Summary;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
@@ -79,7 +80,7 @@ public class SummaryController {
     }
 
     private String getSummary(VariantQuery variantQuery, String summaryType) {
-        String summary = null;
+        Summary summary = null;
 
         if (variantQuery != null && variantQuery.getGene() != null) {
             Query query = new Query(variantQuery);
@@ -88,7 +89,7 @@ public class SummaryController {
                     summary = SummaryUtils.geneSummary(variantQuery.getGene());
                     break;
                 case "oncogenic":
-                    summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, false);
+                    summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), query);
                     break;
                 case "variant":
                     summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
@@ -107,7 +108,7 @@ public class SummaryController {
                     break;
             }
         }
-        return summary;
+        return summary.getSummary();
     }
 
     private List<String> getSummary(List<VariantQuery> queries, String summaryType) {
