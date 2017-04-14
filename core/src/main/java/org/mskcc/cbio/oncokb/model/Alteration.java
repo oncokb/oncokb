@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +40,21 @@ public class Alteration implements java.io.Serializable {
     }
 
     public Alteration() {
+    }
+
+    public Alteration(Query query) {
+        if (query.getEntrezGeneId() != null) {
+            this.gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        }
+        if (this.gene == null && query.getHugoSymbol() != null) {
+            this.gene = GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
+        }
+        this.alteration = query.getAlteration();
+        this.proteinEnd = query.getProteinEnd();
+        this.proteinStart = query.getProteinStart();
+        if (query.getConsequence() != null) {
+            this.consequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
+        }
     }
 
     public Integer getId() {
