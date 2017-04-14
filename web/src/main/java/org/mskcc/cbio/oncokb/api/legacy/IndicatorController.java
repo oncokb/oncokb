@@ -4,10 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.api.legacy;
 
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.http.HttpMethod;
@@ -56,7 +53,7 @@ public class IndicatorController {
         query.setAlterationType(alterationType);
         query.setTumorType(tumorType);
         query.setConsequence(consequence);
-        query.setType(queryType);
+        query.setType(QueryType.valueOf(queryType));
         if (proteinStart != null) {
             query.setProteinStart(Integer.parseInt(proteinStart));
         }
