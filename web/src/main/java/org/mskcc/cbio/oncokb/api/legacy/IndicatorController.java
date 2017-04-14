@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
@@ -22,7 +22,7 @@ import java.util.Set;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/legacy-api/indicator.json")
+@RequestMapping(value = "/indicator.json")
 public class IndicatorController {
     @RequestMapping(method = RequestMethod.GET)
     public

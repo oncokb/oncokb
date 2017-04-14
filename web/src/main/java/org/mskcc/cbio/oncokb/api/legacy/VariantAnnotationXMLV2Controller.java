@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import java.io.IOException;
 import org.mskcc.cbio.oncokb.quest.VariantAnnotationXMLV2;
@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 public class VariantAnnotationXMLV2Controller {
-    @RequestMapping(value="/legacy-api/var_annotation_v2", method=RequestMethod.POST,
+    @RequestMapping(value="/var_annotation_v2", method=RequestMethod.POST,
             produces="application/xml;charset=UTF-8")
     public @ResponseBody String getVariantAnnotation(
             @RequestParam(value="file", required=true) MultipartFile file) {
@@ -35,5 +35,5 @@ public class VariantAnnotationXMLV2Controller {
             return "<xml>Failed to upload file.</xml>";
         }
     }
-    
+
 }

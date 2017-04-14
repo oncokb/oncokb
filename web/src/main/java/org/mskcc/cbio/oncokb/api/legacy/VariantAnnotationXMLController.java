@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class VariantAnnotationXMLController {
-    @RequestMapping(value = "/legacy-api/var_annotation", produces = "application/xml;charset=UTF-8")//plain/text
+    @RequestMapping(value = "/var_annotation", produces = "application/xml;charset=UTF-8")//plain/text
     public
     @ResponseBody
     String getVariantAnnotation(

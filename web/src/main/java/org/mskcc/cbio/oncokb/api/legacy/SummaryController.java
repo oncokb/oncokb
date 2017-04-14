@@ -1,10 +1,8 @@
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
-import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +22,7 @@ import java.util.List;
  * Created by Hongxin on 8/10/15.
  */
 @Controller
-@RequestMapping(value = "/legacy-api/summary.json")
+@RequestMapping(value = "/summary.json")
 public class SummaryController {
     @RequestMapping(method = RequestMethod.GET)
     public

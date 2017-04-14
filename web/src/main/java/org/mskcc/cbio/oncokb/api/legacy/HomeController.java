@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import java.io.IOException;
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class PortalAlterationController {
 
-    @RequestMapping(value = "/legacy-api/portalAlterationSampleCount")
+    @RequestMapping(value = "/portalAlterationSampleCount")
     public @ResponseBody
     List<PortalAlteration> getPortalAlteration(@RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
             @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol) {
@@ -40,8 +40,8 @@ public class PortalAlterationController {
         }
         return portalAlterations;
     }
-    
-    @RequestMapping(value = "/legacy-api/mutationMapperData")
+
+    @RequestMapping(value = "/mutationMapperData")
     public @ResponseBody
     List<PortalAlteration> getMutationMapperData(@RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
             @RequestParam(value = "hugoSymbol", required = true) String hugoSymbol) {
