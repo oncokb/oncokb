@@ -2,9 +2,12 @@ package org.mskcc.cbio.oncokb.api.pub.v2;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.config.annotation.V2Api;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.QueryType;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.LevelUtils;
+import org.mskcc.cbio.oncokb.util.QueryAnnotation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@V2Api
 @Controller
 public class SearchApiV2Controller implements SearchApiV2 {
 
@@ -32,7 +36,7 @@ public class SearchApiV2Controller implements SearchApiV2 {
         @RequestParam(value = "variant", required = false) String variant,
 
         @ApiParam(value = "Variant Consequence")
-        @RequestParam(value = "consequence", required = false) SOTerm consequence,
+        @RequestParam(value = "consequence", required = false) String consequence,
 
         @ApiParam(value = "Protein Start")
         @RequestParam(value = "proteinStart", required = false) Integer proteinStart,
@@ -56,53 +60,28 @@ public class SearchApiV2Controller implements SearchApiV2 {
         @RequestParam(value = "queryType", required = false, defaultValue = "regular") QueryType queryType
     ) {
         HttpStatus status = HttpStatus.OK;
-        SearchResult indicatorQueryResp = null;
+        SearchResult searchResult = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query();
-            query.setId(id);
-
-            if (entrezGeneId != null) {
-                query.setEntrezGeneId(entrezGeneId);
-            }
-            query.setHugoSymbol(hugoSymbol);
-            query.setAlteration(variant);
-            query.setTumorType(tumorType);
-            query.setConsequence(consequence.getVal());
-            query.setType(queryType.name());
-            if (proteinStart != null) {
-                query.setProteinStart(proteinStart);
-            }
-            if (proteinEnd != null) {
-                query.setProteinEnd(proteinEnd);
-            }
-
-            source = source == null ? "oncokb" : source;
-
-            Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : levels;
-//            indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, source, highestLevelOnly);
+            Query query = new Query(hugoSymbol, entrezGeneId, variant, tumorType, consequence, proteinStart, proteinEnd, levels, highestLevelOnly, null, null, id, queryType, source);
+            searchResult = QueryAnnotation.annotateSearchQuery(query);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        return new ResponseEntity<>(searchResult, status);
     }
 
-    public ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body) {
+    public ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.", required = true) @RequestBody() List<Query> body) {
         HttpStatus status = HttpStatus.OK;
 
         List<SearchResult> result = new ArrayList<>();
 
-        if (body == null || body.getQueries() == null || body.getQueries().size() == 0) {
+        if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-
-            String source = body.getSource() == null ? "oncokb" : body.getSource();
-
-//            for (Query query : body.getQueries()) {
-//                result.add(IndicatorUtils.processQuery(query, null,
-//                    body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
-//                    source, body.getHighestLevelOnly()));
-//            }
+            for (Query query : body) {
+                result.add(QueryAnnotation.annotateSearchQuery(query));
+            }
         }
         return new ResponseEntity<>(result, status);
     }
