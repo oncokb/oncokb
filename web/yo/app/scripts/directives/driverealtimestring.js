@@ -92,7 +92,7 @@ angular.module('oncokbApp')
                                 scope.rs.set('updatedBy', user.name);
                                 scope.rs.set('updateTime', new Date().getTime());
                                 var uuid = scope.uuid.getText();
-                                var tempMapping =  $rootScope.geneMetaData.get(uuid);
+                                var tempMapping = $rootScope.geneMetaData.get(uuid);
                                 if (!tempMapping) {
                                     tempMapping = $rootScope.metaModel.createMap();
                                 }
@@ -127,7 +127,7 @@ angular.module('oncokbApp')
                                         }
                                     }
                                 }
-                                 $rootScope.geneMetaData.set(uuid, tempMapping);
+                                $rootScope.geneMetaData.set(uuid, tempMapping);
                             }
                             scope.valueChanged();
                         }
