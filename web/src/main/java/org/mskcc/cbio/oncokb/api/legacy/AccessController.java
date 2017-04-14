@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import java.util.Date;
 
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class AccessController {
-    @RequestMapping(value="/legacy-api/access", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value="/access", method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody
     StringResponse getAlteration() {
         Date date = new Date();

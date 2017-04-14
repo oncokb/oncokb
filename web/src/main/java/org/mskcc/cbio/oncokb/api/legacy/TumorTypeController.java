@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.mskcc.oncotree.model.TumorType;
@@ -19,7 +19,7 @@ import java.util.List;
 @Controller
 public class TumorTypeController {
 
-    @RequestMapping(value = "/legacy-api/tumorType.json")
+    @RequestMapping(value = "/tumorType.json")
     public
     @ResponseBody
     List<TumorType> getTumorType(
@@ -27,7 +27,7 @@ public class TumorTypeController {
         return TumorTypeUtils.getAllTumorTypes();
     }
 
-    @RequestMapping(value = "/legacy-api/tumorType")
+    @RequestMapping(value = "/tumorType")
     public
     @ResponseBody
     List<TumorType> getRelevantTumorType(

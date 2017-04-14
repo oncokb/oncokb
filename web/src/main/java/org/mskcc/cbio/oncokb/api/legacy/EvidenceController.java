@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
@@ -24,7 +24,7 @@ import java.util.*;
  */
 @Controller
 public class EvidenceController {
-    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.GET)
+    @RequestMapping(value = "/evidence.json", method = RequestMethod.GET)
     public
     @ResponseBody
     List<List<Evidence>> getEvidence(
@@ -65,7 +65,7 @@ public class EvidenceController {
         return evidences;
     }
 
-    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.POST)
+    @RequestMapping(value = "/evidence.json", method = RequestMethod.POST)
     public
     @ResponseBody
     List<EvidenceQueryRes> getEvidence(
@@ -96,7 +96,7 @@ public class EvidenceController {
         return result;
     }
 
-    @RequestMapping(value = "/legacy-api/evidences/update/{uuid}", method = RequestMethod.POST)
+    @RequestMapping(value = "/evidences/update/{uuid}", method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
@@ -111,7 +111,7 @@ public class EvidenceController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/legacy-api/evidences/update", method = RequestMethod.POST)
+    @RequestMapping(value = "/evidences/update", method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) throws ParserConfigurationException {
@@ -130,7 +130,7 @@ public class EvidenceController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/legacy-api/evidences/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "/evidences/delete", method = RequestMethod.POST)
     public
     @ResponseBody
     String deleteEvidences(@RequestBody List<String> uuids) {
@@ -143,7 +143,7 @@ public class EvidenceController {
         return "";
     }
 
-    @RequestMapping(value = "/legacy-api/evidences/delete/{uuid}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/evidences/delete/{uuid}", method = RequestMethod.DELETE)
     public
     @ResponseBody
     String deleteEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) {
@@ -155,7 +155,7 @@ public class EvidenceController {
         return "";
     }
 
-    @RequestMapping(value = "/legacy-api/vus/update/{hugoSymbol}", method = RequestMethod.POST)
+    @RequestMapping(value = "/vus/update/{hugoSymbol}", method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,

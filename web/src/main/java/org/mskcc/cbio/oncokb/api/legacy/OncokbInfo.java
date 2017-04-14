@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
@@ -32,7 +32,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
  */
 @Controller
 public class OncokbInfo {
-    @RequestMapping(value = "/legacy-api/oncokbInfo.json", method = GET)
+    @RequestMapping(value = "/oncokbInfo.json", method = GET)
     public
     @ResponseBody
     Map OncokbInfo() throws MalformedURLException, ServiceException {

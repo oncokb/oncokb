@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -14,8 +14,8 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb")
 @EnableWebMvc
+@PropertySource("classpath:swagger.properties")
 public class MvcConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
@@ -24,6 +24,11 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
         resolver.setPrefix("/");
         resolver.setSuffix(".html");
         return resolver;
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "swagger-ui.html");
     }
 
     @Override
@@ -36,13 +41,10 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
         registry.addResourceHandler("/styles/**").addResourceLocations("/styles/");
         registry.addResourceHandler("/views/**").addResourceLocations("/views/");
         registry.addResourceHandler("/data/**").addResourceLocations("/data/");
-    }
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/api").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/swagger-ui.html").setViewName("redirect:/api/v1/swagger-ui.html");
+        registry.addResourceHandler("/swagger-ui.html")
+            .addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**")
+            .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
     @Bean
