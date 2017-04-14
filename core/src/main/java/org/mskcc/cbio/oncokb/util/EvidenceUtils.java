@@ -1116,4 +1116,45 @@ public class EvidenceUtils {
         }
         return evidences;
     }
+
+    public static List<Evidence> sortEvidenceByLevenAndId(Set<Evidence> evidences){
+        List<Evidence> sortedEvidence = new ArrayList<>();
+        if (evidences != null) {
+            sortedEvidence.addAll(evidences);
+            Collections.sort(sortedEvidence, new Comparator<Evidence>() {
+                public int compare(Evidence e1, Evidence e2) {
+                    Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence());
+
+                    if (comparison != 0) {
+                        return comparison;
+                    }
+
+                    if (e1.getId() == null) {
+                        if (e2.getId() == null) {
+                            return 0;
+                        } else {
+                            return 1;
+                        }
+                    }
+                    if (e2.getId() == null)
+                        return -1;
+                    return e1.getId() - e2.getId();
+                }
+            });
+        }
+        return sortedEvidence;
+    }
+
+    public static Set<Evidence> keepHighestSensitiveResistanceTreatmentEvidences(Set<Evidence> treatmentEvidences) {
+        Set<Evidence> filteredEvis = new HashSet<>();
+        // Get highest sensitive evidences
+        Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(treatmentEvidences);
+        filteredEvis.addAll(EvidenceUtils.getOnlySignificantLevelsEvidences(sensitiveEvidences));
+
+        // Get highest resistance evidences
+        Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
+        filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+
+        return filteredEvis;
+    }
 }

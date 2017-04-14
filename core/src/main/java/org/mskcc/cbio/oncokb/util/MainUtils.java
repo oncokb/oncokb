@@ -224,6 +224,19 @@ public class MainUtils {
         return findHighestOncogenicity(oncogenicitySet);
     }
 
+    public static Evidence findEvidenceByHighestOncogenicityInEvidence(Set<Evidence> evidences, Oncogenicity oncogenicity) {
+        if (evidences != null && oncogenicity == null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getKnownEffect() != null) {
+                    if (oncogenicity.equals(Oncogenicity.getByEffect(evidence.getKnownEffect()))) {
+                        return evidence;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public static Oncogenicity setToAlleleOncogenicity(Oncogenicity oncogenicity) {
         if (oncogenicity == null) {
             return null;
@@ -503,6 +516,13 @@ public class MainUtils {
             if (string.equalsIgnoreCase(s)) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    public static Boolean isNotNullOrEmpty(String str) {
+        if (str != null && !str.trim().isEmpty()) {
+            return true;
         }
         return false;
     }
