@@ -324,7 +324,10 @@ angular.module('oncokbApp')
                 evidencesAllUsers[userName].updatedEvidenceModels.push([type, mutation, tumor, TI, treatment]);
             }
             $scope.getButtonContent = function(x) {
-                return $scope.status[x].savingAll ? 'Saving ' + '<i class="fa fa-spinner fa-spin"></i>' : 'Accept All Changes from <b>' + x + '</b>';
+                if(x) {
+                    return $scope.status[x].savingAll ? 'Saving ' + '<i class="fa fa-spinner fa-spin"></i>' : 'Accept All Changes from <b>' + x + '</b>';
+                }
+                return '';
             }
             function prepareReviewItems() {
                 $scope.status.noChanges = false;
