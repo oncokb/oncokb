@@ -145,7 +145,7 @@ public class GeneUtils {
             List<String> geneStrsList = Arrays.asList(genesStr.split(delimiter));
             for (String geneStr : geneStrsList) {
                 Gene gene = GeneUtils.getGeneByHugoSymbol(geneStr);
-                if(gene != null) {
+                if (gene != null) {
                     genes.add(gene);
                 }
             }
@@ -158,11 +158,14 @@ public class GeneUtils {
     public static Gene getGeneByQuery(Query query) {
         Gene gene = null;
 
+        if (query == null)
+            return gene;
+
         // If query has entrezGeneId, ignore hugoSymbol
         if (query.getEntrezGeneId() != null) {
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
-        if (gene == null && gene.getHugoSymbol() != null) {
+        if (gene == null && query.getHugoSymbol() != null) {
             Set<Gene> genes = getUniqueGenesFromString(query.getHugoSymbol(), "-");
             if (genes.size() > 0) {
                 if (genes.size() == 1) {
