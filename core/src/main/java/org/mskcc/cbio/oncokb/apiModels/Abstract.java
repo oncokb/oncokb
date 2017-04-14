@@ -14,6 +14,11 @@ public class Abstract {
         this.abstractContent = abstractContent;
     }
 
+    public Abstract(String abstractContent, String link) {
+        this.abstractContent = abstractContent;
+        this.link = link;
+    }
+
     public String getAbstractContent() {
         return abstractContent;
     }

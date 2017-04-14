@@ -3,6 +3,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Objects;
 /**
  * @author jgao
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Article implements java.io.Serializable {
     @JsonIgnore
     private Integer id;
