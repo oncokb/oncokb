@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -19,12 +20,6 @@ public class IndicatorUtils {
         IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
         indicatorQuery.setQuery(query);
 
-        Gene gene = null;
-        List<Alteration> relevantAlterations = new ArrayList<>();
-
-        // Queried alteration
-        Alteration alteration;
-
         if (query == null) {
             return indicatorQuery;
         }
@@ -38,87 +33,16 @@ public class IndicatorUtils {
 
         // Deal with fusion without primary gene
         // TODO: support entrezGeneId fusion
-        if (query.getHugoSymbol() != null
-            && query.getAlterationType() != null &&
-            query.getAlterationType().equalsIgnoreCase("fusion")) {
-            List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
-            Set<String> geneStrsSet = new HashSet<>();
+        QueryAnnotation.EnrichQuery(query);
 
-            // If the query only indicates this is a fusion event with associated genes but no alteration specified,
-            // need to attach Fusions to the query.
-            if (query.getAlteration() == null || query.getAlteration().isEmpty()) {
-                query.setAlteration("Fusions");
-            }
+        // Check whether query gene is annotated.
+        Gene gene = GeneUtils.getGeneByQuery(query);
 
-            if (geneStrsList != null) {
-                geneStrsSet = new HashSet<>(geneStrsList);
-            }
+        // Check whether query variant is annotated.
+        Alteration alteration = AlterationUtils.getAlterationByQuery(query);
 
-            // Deal with two different genes fusion event.
-            if (geneStrsSet.size() == 2) {
-                List<Gene> tmpGenes = new ArrayList<>();
-                for (String geneStr : geneStrsSet) {
-                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
-                    if (tmpGene != null) {
-                        tmpGenes.add(tmpGene);
-                    }
-                }
-                if (tmpGenes.size() > 0) {
-                    query.setAlteration(query.getHugoSymbol() + " fusion");
-                    for (Gene tmpGene : tmpGenes) {
-                        Alteration alt = AlterationUtils.getAlteration(tmpGene.getHugoSymbol(), query.getAlteration(),
-                            null, null, null, null);
-                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-                        List<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(alt);
-                        if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
-                            gene = tmpGene;
-                            relevantAlterations = tmpRelevantAlts;
-                            break;
-                        }
-                    }
-                    // None of relevant alterations found in both genes.
-                    if (gene == null) {
-                        gene = tmpGenes.get(0);
-                    }
-                }
-            } else {
-                String geneStr = geneStrsSet.iterator().next();
-                if(geneStr != null) {
-                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
-                    if (tmpGene != null) {
-                        gene = tmpGene;
-                        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                            null, null, null, null);
-                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                        relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
-
-                        // Map Truncating Mutations to single gene fusion event
-                        Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
-                        if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
-                            relevantAlterations.add(truncatingMutations);
-                        }
-                    }
-                }
-            }
-        } else {
-            gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
-                GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
-            if (gene != null) {
-                Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-
-                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-                relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
-            }
-        }
-
-
-        alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
-            null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
-
+        // Get relevant alterations
+        List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterationsByQuery(query);
 
         if (gene != null) {
             query.setHugoSymbol(gene.getHugoSymbol());
@@ -127,7 +51,7 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(true);
 
             // Gene summary
-            indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
+            indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene).getSummary());
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
@@ -262,26 +186,36 @@ public class IndicatorUtils {
 
             if (treatmentEvidences != null && !treatmentEvidences.isEmpty()) {
                 if (highestLevelOnly) {
-                    Set<Evidence> filteredEvis = new HashSet<>();
-                    // Get highest sensitive evidences
-                    Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(treatmentEvidences);
-                    filteredEvis.addAll(EvidenceUtils.getOnlySignificantLevelsEvidences(sensitiveEvidences));
-
-                    // Get highest resistance evidences
-                    Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
-                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
-
-                    treatmentEvidences = filteredEvis;
+                    treatmentEvidences = EvidenceUtils.keepHighestSensitiveResistanceTreatmentEvidences(treatmentEvidences);
                 }
                 if (!treatmentEvidences.isEmpty()) {
                     List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
-
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
-                    indicatorQuery.setOtherSignificantSensitiveLevels(getOtherSignificantLevels(indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences));
-                    indicatorQuery.setOtherSignificantResistanceLevels(getOtherSignificantLevels(indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences));
+                    indicatorQuery.setOtherSignificantSensitiveLevels(
+                        new ArrayList<>(
+                            LevelUtils.getLevelsFromEvidenceByLevels(
+                                new HashSet<>(
+                                    getOtherSignificantLevelsEvidences(
+                                        indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences
+                                    )
+                                ), null
+                            )
+                        )
+                    );
+                    indicatorQuery.setOtherSignificantResistanceLevels(
+                        new ArrayList<>(
+                            LevelUtils.getLevelsFromEvidenceByLevels(
+                                new HashSet<>(
+                                    getOtherSignificantLevelsEvidences(
+                                        indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences
+                                    )
+                                ), null
+                            )
+                        )
+                    );
                 }
             }
 
@@ -289,12 +223,12 @@ public class IndicatorUtils {
             if (query.getTumorType() != null) {
                 indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query,
                     new ArrayList<>(relevantAlterations),
-                    new HashSet<>(oncoTreeTypes)));
+                    new HashSet<>(oncoTreeTypes)).getSummary());
             }
 
             // Mutation summary
             indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
-                new ArrayList<>(relevantAlterations), query, false));
+                new ArrayList<>(relevantAlterations), query).getSummary());
 
             // This is special case for KRAS wildtype. May need to come up with a better plan for this.
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
@@ -316,7 +250,9 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(false);
         }
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
-        indicatorQuery.setLastUpdate(MainUtils.getDataVersionDate());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        indicatorQuery.setLastUpdate(sdf.format(MainUtils.getDataVersionDate()));
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
@@ -325,48 +261,31 @@ public class IndicatorUtils {
         return indicatorQuery;
     }
 
-    private static List<LevelOfEvidence> getOtherSignificantLevels(LevelOfEvidence highestLevel, String type, Set<Evidence> evidences) {
-        List<LevelOfEvidence> otherSignificantLevels = new ArrayList<>();
+    public static List<Evidence> getOtherSignificantLevelsEvidences(LevelOfEvidence highestLevel, String type, Set<Evidence> evidences) {
+        List<Evidence> otherSignificantLevelsEvidences = new ArrayList<>();
         if (type != null && highestLevel != null && evidences != null) {
             if (type.equals("sensitive")) {
                 if (highestLevel.equals(LevelOfEvidence.LEVEL_2B)) {
                     Map<LevelOfEvidence, Set<Evidence>> levels = EvidenceUtils.separateEvidencesByLevel(evidences);
                     if (levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
-                        otherSignificantLevels.add(LevelOfEvidence.LEVEL_3A);
+                        for (Evidence evidence : evidences) {
+                            if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
+                                otherSignificantLevelsEvidences.add(evidence);
+                            }
+                        }
                     }
                 }
             } else if (type.equals("resistance")) {
 
             }
         }
-        return otherSignificantLevels;
+        return otherSignificantLevelsEvidences;
     }
 
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
-            List<Evidence> sortedEvidence = new ArrayList<>(evidences);
-
-            Collections.sort(sortedEvidence, new Comparator<Evidence>() {
-                public int compare(Evidence e1, Evidence e2) {
-                    Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence());
-
-                    if (comparison != 0) {
-                        return comparison;
-                    }
-
-                    if (e1.getId() == null) {
-                        if (e2.getId() == null) {
-                            return 0;
-                        } else {
-                            return 1;
-                        }
-                    }
-                    if (e2.getId() == null)
-                        return -1;
-                    return e1.getId() - e2.getId();
-                }
-            });
+            List<Evidence> sortedEvidence = EvidenceUtils.sortEvidenceByLevenAndId(evidences);
 
             for (Evidence evidence : sortedEvidence) {
                 Set<String> pmids = new HashSet<>();
