@@ -2,10 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v2;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.QueryType;
-import org.mskcc.cbio.oncokb.model.SOTerm;
+import org.mskcc.cbio.oncokb.model.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +19,7 @@ public interface SearchApiV2 {
     @ApiOperation(value = "", notes = "General search", response = SearchResult.class, tags = {"Search",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = SearchResult.class)})
-    @RequestMapping(value = "/search",
+    @RequestMapping(value = {"/v2/search"},
         produces = MediaType.APPLICATION_JSON_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<SearchResult> searchGet(
@@ -39,7 +36,7 @@ public interface SearchApiV2 {
         @RequestParam(value = "variant", required = false) String variant,
 
         @ApiParam(value = "Variant Consequence")
-        @RequestParam(value = "consequence", required = false) SOTerm consequence,
+        @RequestParam(value = "consequence", required = false) String consequence,
 
         @ApiParam(value = "Protein Start")
         @RequestParam(value = "proteinStart", required = false) Integer proteinStart,
@@ -67,10 +64,10 @@ public interface SearchApiV2 {
     @ApiOperation(value = "", notes = "General search.", response = SearchResult.class, responseContainer = "List", tags = {"Search",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = SearchResult.class, responseContainer = "List")})
-    @RequestMapping(value = "/search",
+    @RequestMapping(value = "/v2/search",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE,
         method = RequestMethod.POST)
-    ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.") @RequestBody() EvidenceQueries body
+    ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.") @RequestBody() List<Query> body
     );
 }
