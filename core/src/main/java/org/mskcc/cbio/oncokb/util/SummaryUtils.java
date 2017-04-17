@@ -98,7 +98,7 @@ public class SummaryUtils {
 
     public static Summary tumorTypeSummary(Gene gene, Query query, List<Alteration> alterations, Set<TumorType> relevantTumorTypes) {
         //Tumor type summary
-        Summary tumorTypeSummary = null;
+        Summary tumorTypeSummary = new Summary();
         String queryTumorType = query.getTumorType();
         String queryAlteration = query.getAlteration();
         queryTumorType = convertTumorTypeNameInSummary(queryTumorType);

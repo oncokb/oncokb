@@ -12,7 +12,7 @@ public class SearchResult {
     private Query query;
     private Boolean geneAnnotated;
     private Boolean variantAnnotated;
-    private Boolean alterativeVariantAlleleAnnotated;
+    private Boolean alternativeVariantAlleleAnnotated;
     private KnownEffect oncogenic;
     private KnownEffect mutationEffect;
     private LevelOfEvidenceWithTime highestSensitiveLevel;
@@ -56,12 +56,12 @@ public class SearchResult {
         this.variantAnnotated = variantAnnotated;
     }
 
-    public Boolean getAlterativeVariantAlleleAnnotated() {
-        return alterativeVariantAlleleAnnotated;
+    public Boolean getAlternativeVariantAlleleAnnotated() {
+        return alternativeVariantAlleleAnnotated;
     }
 
-    public void setAlterativeVariantAlleleAnnotated(Boolean alterativeVariantAlleleAnnotated) {
-        this.alterativeVariantAlleleAnnotated = alterativeVariantAlleleAnnotated;
+    public void setAlternativeVariantAlleleAnnotated(Boolean alternativeVariantAlleleAnnotated) {
+        this.alternativeVariantAlleleAnnotated = alternativeVariantAlleleAnnotated;
     }
 
     public KnownEffect getOncogenic() {
