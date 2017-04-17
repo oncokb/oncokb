@@ -74,7 +74,7 @@ public class QueryAnnotation {
 
             // Get alternative alleles info
             List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
-            result.setAlterativeVariantAlleleAnnotated(!(alleles == null || alleles.size() == 0));
+            result.setAlternativeVariantAlleleAnnotated(!(alleles == null || alleles.size() == 0));
 
             // Get relevant alterations
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterationsByQuery(query);
@@ -125,7 +125,7 @@ public class QueryAnnotation {
                         (query.getLevels() != null ?
                             new HashSet<>(CollectionUtils.intersection(query.getLevels(),
                                 LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
-            } else if (result.getAlterativeVariantAlleleAnnotated() || (result.getVUS() != null && result.getVUS().getStatus())) {
+            } else if (result.getAlternativeVariantAlleleAnnotated() || (result.getVUS() != null && result.getVUS().getStatus())) {
                 Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
                 List<Alteration> alleleAndRelevantAlterations = new ArrayList<>();
                 Set<Alteration> oncogenicMutations = null;

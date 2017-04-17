@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
@@ -12,7 +11,6 @@ import java.util.Set;
 /**
  * Created by Hongxin on 4/12/17.
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TreatmentInfo extends Treatment {
     private LevelOfEvidence level;
     private List<Article> articles;

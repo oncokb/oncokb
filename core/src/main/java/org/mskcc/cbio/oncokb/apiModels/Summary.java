@@ -1,7 +1,5 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
-import org.mskcc.cbio.oncokb.util.MainUtils;
-
 import java.util.Date;
 
 /**

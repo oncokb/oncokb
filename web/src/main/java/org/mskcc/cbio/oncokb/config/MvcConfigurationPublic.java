@@ -1,17 +1,26 @@
 package org.mskcc.cbio.oncokb.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.mskcc.cbio.oncokb.config.annotation.DefaultApi;
 import org.mskcc.cbio.oncokb.config.annotation.V1Api;
 import org.mskcc.cbio.oncokb.config.annotation.V2Api;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 @Configuration
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pub")
@@ -27,6 +36,35 @@ public class MvcConfigurationPublic extends MvcConfiguration {
 
         registry.addViewController("/legacy").setViewName("redirect:/legacy-api/swagger-ui.html");
         registry.addViewController("/legacy/").setViewName("redirect:/legacy-api/swagger-ui.html");
+    }
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(jsonConverter());
+        super.configureMessageConverters(converters);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        javaTimeModule.addSerializer(Date.class, new DateSerializer());
+        javaTimeModule.addDeserializer(Date.class, new DateDeserializer());
+        mapper.registerModule(javaTimeModule);
+        mapper.setDateFormat(dateFormat);
+
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        return mapper;
+    }
+
+    @Bean
+    public MappingJackson2HttpMessageConverter jsonConverter() {
+        MappingJackson2HttpMessageConverter jacksonConverter = new
+            MappingJackson2HttpMessageConverter();
+        jacksonConverter.setObjectMapper(objectMapper());
+        return jacksonConverter;
     }
 
     @Bean

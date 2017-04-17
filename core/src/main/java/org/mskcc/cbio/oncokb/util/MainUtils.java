@@ -225,7 +225,7 @@ public class MainUtils {
     }
 
     public static Evidence findEvidenceByHighestOncogenicityInEvidence(Set<Evidence> evidences, Oncogenicity oncogenicity) {
-        if (evidences != null && oncogenicity == null) {
+        if (evidences != null && oncogenicity != null) {
             for (Evidence evidence : evidences) {
                 if (evidence.getKnownEffect() != null) {
                     if (oncogenicity.equals(Oncogenicity.getByEffect(evidence.getKnownEffect()))) {
