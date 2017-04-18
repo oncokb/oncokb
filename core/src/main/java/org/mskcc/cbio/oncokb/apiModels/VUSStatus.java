@@ -9,6 +9,9 @@ public class VUSStatus {
     private Boolean status;
     private Date lastUpdate;
 
+    public VUSStatus() {
+    }
+
     public VUSStatus(Boolean status) {
         this.status = status;
     }

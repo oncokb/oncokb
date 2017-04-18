@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.mskcc.cbio.oncokb.apiModels.References;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
@@ -525,5 +526,33 @@ public class MainUtils {
             return true;
         }
         return false;
+    }
+
+    public static Boolean isVUS(Set<Evidence> evidenceList) {
+        for (Evidence evidence : evidenceList) {
+            if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static References getReferencesFromArticles(Set<Article> articles) {
+        References references = new References();
+        if (articles != null) {
+            List<Article> pmids = new ArrayList<>();
+            List<Article> abstracts = new ArrayList<>();
+            for (Article article : articles) {
+                if (article.getPmid() != null) {
+                    pmids.add(article);
+                }
+                if (article.getAbstractContent() != null) {
+                    abstracts.add(article);
+                }
+            }
+            references.setAbstractList(abstracts);
+            references.setArticles(pmids);
+        }
+        return references;
     }
 }

@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v2;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.apiModels.Projection;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
 import org.mskcc.cbio.oncokb.model.*;
 import org.springframework.http.MediaType;
@@ -57,7 +58,10 @@ public interface SearchApiV2 {
         @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly,
 
         @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.")
-        @RequestParam(value = "queryType", required = false, defaultValue = "regular") QueryType queryType
+        @RequestParam(value = "queryType", required = false, defaultValue = "regular") QueryType queryType,
+
+        @ApiParam("Level of detail of the response")
+        @RequestParam(defaultValue = "DETAILED") Projection projection
     );
 
 

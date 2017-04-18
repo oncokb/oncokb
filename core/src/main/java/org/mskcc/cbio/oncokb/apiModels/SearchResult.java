@@ -20,6 +20,7 @@ public class SearchResult {
     private List<LevelOfEvidenceWithTime> otherSignificantSensitiveLevels;
     private List<LevelOfEvidenceWithTime> otherSignificantResistanceLevels;
     private Summary geneSummary;
+    private Summary geneBackground;
     private Summary variantSummary;
     private Summary tumorTypeSummary;
     private List<TreatmentInfo> treatments = new ArrayList<>();
@@ -120,6 +121,18 @@ public class SearchResult {
         this.geneSummary = geneSummary;
     }
 
+    public Summary getGeneBackground() {
+        return geneBackground;
+    }
+
+    public void setGeneBackground(Summary geneBackground) {
+        this.geneBackground = geneBackground;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
     public Summary getVariantSummary() {
         return variantSummary;
     }
@@ -192,6 +205,8 @@ public class SearchResult {
             }
         if (this.geneSummary != null)
             dates.add(this.geneSummary.getLastUpdate());
+        if (this.geneBackground != null)
+            dates.add(this.geneBackground.getLastUpdate());
         if (this.variantSummary != null)
             dates.add(this.variantSummary.getLastUpdate());
         if (this.tumorTypeSummary != null)

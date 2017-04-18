@@ -84,7 +84,7 @@ public class IndicatorUtils {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
 
-            indicatorQuery.setVUS(isVUS(
+            indicatorQuery.setVUS(MainUtils.isVUS(
                 EvidenceUtils.getRelevantEvidences(query, source,
                     geneStatus, Collections.singleton(EvidenceType.VUS), null)
             ));
@@ -313,15 +313,6 @@ public class IndicatorUtils {
             }
         }
         return treatments;
-    }
-
-    private static Boolean isVUS(Set<Evidence> evidenceList) {
-        for (Evidence evidence : evidenceList) {
-            if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static Map<String, LevelOfEvidence> findHighestLevel(Set<IndicatorQueryTreatment> treatments) {

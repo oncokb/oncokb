@@ -412,6 +412,7 @@ public class SummaryUtils {
                         summaryStr = summaryStr.endsWith(".") ? summaryStr : summaryStr + ".";
                         summary.setSummary(summaryStr);
                         summary.setLastUpdate(ev.getLastEdit());
+                        summary.setReferences(MainUtils.getReferencesFromArticles(ev.getArticles()));
                         break;
                     }
                 }
