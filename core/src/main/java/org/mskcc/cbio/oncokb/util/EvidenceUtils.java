@@ -386,7 +386,7 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery){
+    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
         if (evidenceQuery.getGene() != null) {
@@ -486,6 +486,36 @@ public class EvidenceUtils {
         } else {
             return null;
         }
+    }
+
+    public static Map<String, Object> getMutationEffectMapFromEvidence(Set<Evidence> evidences) {
+        Map<String, Object> map = new HashedMap();
+        Map<MutationEffect, Set<Evidence>> result = new HashedMap();
+        MutationEffect mutationEffect = null;
+
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect() != null) {
+                MutationEffect mappedModel = MutationEffect.getByName(evidence.getKnownEffect());
+                if (mappedModel != null) {
+                    if (!result.containsKey(mappedModel))
+                        result.put(mappedModel, new HashSet<Evidence>());
+                    result.get(mappedModel).add(evidence);
+                }
+            }
+        }
+
+        if (result.size() > 1) {
+            mutationEffect = MainUtils.findHighestMutationEffect(result.keySet());
+        } else if (result.size() == 1) {
+            mutationEffect = result.keySet().iterator().next();
+        }
+
+        if (mutationEffect != null) {
+            Set<Evidence> mappedEvis = result.get(mutationEffect);
+            map.put("mutationEffect", mutationEffect);
+            map.put("evidence", mappedEvis.iterator().next());
+        }
+        return map;
     }
 
     public static Oncogenicity getOncogenicityFromEvidence(Set<Evidence> evidences) {
@@ -969,11 +999,11 @@ public class EvidenceUtils {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Gene gene = geneBo.findGeneByHugoSymbol(evidence.getGene().getHugoSymbol());
         evidence.setGene(gene);
-        if(gene == null) {
+        if (gene == null) {
             return;
         }
         Set<Alteration> queryAlterations = evidence.getAlterations();
-        if(queryAlterations != null && !queryAlterations.isEmpty()) {
+        if (queryAlterations != null && !queryAlterations.isEmpty()) {
             AlterationType type = AlterationType.MUTATION;
             Set<Alteration> alterations = new HashSet<Alteration>();
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -1117,7 +1147,7 @@ public class EvidenceUtils {
         return evidences;
     }
 
-    public static List<Evidence> sortEvidenceByLevenAndId(Set<Evidence> evidences){
+    public static List<Evidence> sortEvidenceByLevenAndId(Set<Evidence> evidences) {
         List<Evidence> sortedEvidence = new ArrayList<>();
         if (evidences != null) {
             sortedEvidence.addAll(evidences);

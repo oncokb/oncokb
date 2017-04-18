@@ -1,15 +1,13 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by Hongxin on 4/12/17.
  */
 public class KnownEffect {
     private String knownEffect;
-    private List<String> pmids;
-    private List<Abstract> abstracts;
+    private References references;
     private String description;
     private Date lastUpdate;
 
@@ -17,10 +15,9 @@ public class KnownEffect {
         this.knownEffect = knownEffect;
     }
 
-    public KnownEffect(String knownEffect, List<String> pmids, List<Abstract> abstracts, String description, Date lastUpdate) {
+    public KnownEffect(String knownEffect, References references, String description, Date lastUpdate) {
         this.knownEffect = knownEffect;
-        this.pmids = pmids;
-        this.abstracts = abstracts;
+        this.references = references;
         this.description = description;
         this.lastUpdate = lastUpdate;
     }
@@ -33,20 +30,12 @@ public class KnownEffect {
         this.knownEffect = knownEffect;
     }
 
-    public List<String> getPmids() {
-        return pmids;
+    public References getReferences() {
+        return references;
     }
 
-    public void setPmids(List<String> pmids) {
-        this.pmids = pmids;
-    }
-
-    public List<Abstract> getAbstracts() {
-        return abstracts;
-    }
-
-    public void setAbstracts(List<Abstract> abstracts) {
-        this.abstracts = abstracts;
+    public void setReferences(References references) {
+        this.references = references;
     }
 
     public String getDescription() {

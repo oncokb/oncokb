@@ -26,10 +26,10 @@ public class Article implements java.io.Serializable {
     private String pages;
     private String authors;
     private String elocationId;
+    @JsonProperty("abstract")
     private String abstractContent;
     private String link;
 
-    @JsonProperty("abstract")
     public String getAbstractContent() {
         return abstractContent;
     }

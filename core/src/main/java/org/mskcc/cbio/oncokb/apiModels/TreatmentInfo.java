@@ -13,10 +13,8 @@ import java.util.Set;
  */
 public class TreatmentInfo extends Treatment {
     private LevelOfEvidence level;
-    private List<Article> articles;
-    @JsonProperty("abstracts")
-    private List<Article> abstractList;
     private List<NccnGuideline> guidelines;
+    private References references;
     @JsonProperty("annotatedVariants")
     private List<Alteration> alterations;
     @JsonProperty("annotatedTumorTypes")
@@ -24,12 +22,11 @@ public class TreatmentInfo extends Treatment {
     private String description;
     private Date lastUpdate;
 
-    public TreatmentInfo(Set<Drug> drugs, Set<String> approvedIndications, LevelOfEvidence level, List<Article> articles, List<Article> abstractList, List<NccnGuideline> guidelines, List<Alteration> alterations, List<TumorType> tumorTypes, String description, Date lastUpdate) {
+    public TreatmentInfo(Set<Drug> drugs, Set<String> approvedIndications, LevelOfEvidence level, References references, List<NccnGuideline> guidelines, List<Alteration> alterations, List<TumorType> tumorTypes, String description, Date lastUpdate) {
         this.setDrugs(drugs);
         this.setApprovedIndications(approvedIndications);
         this.level = level;
-        this.articles = articles;
-        this.abstractList = abstractList;
+        this.references = references;
         this.guidelines = guidelines;
         this.alterations = alterations;
         this.tumorTypes = tumorTypes;
@@ -45,20 +42,12 @@ public class TreatmentInfo extends Treatment {
         this.level = level;
     }
 
-    public List<Article> getArticles() {
-        return articles;
+    public References getReferences() {
+        return references;
     }
 
-    public void setArticles(List<Article> articles) {
-        this.articles = articles;
-    }
-
-    public List<Article> getAbstractList() {
-        return abstractList;
-    }
-
-    public void setAbstractList(List<Article> abstractList) {
-        this.abstractList = abstractList;
+    public void setReferences(References references) {
+        this.references = references;
     }
 
     public List<NccnGuideline> getGuidelines() {

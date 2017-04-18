@@ -7,6 +7,7 @@ import java.util.Date;
  */
 public class Summary {
     private String summary;
+    private References references;
     private Date lastUpdate;
 
     public Summary() {
@@ -19,6 +20,20 @@ public class Summary {
     public Summary(String summary, Date lastUpdate) {
         this.summary = summary;
         this.lastUpdate = lastUpdate;
+    }
+
+    public Summary(String summary, References references, Date lastUpdate) {
+        this.summary = summary;
+        this.references = references;
+        this.lastUpdate = lastUpdate;
+    }
+
+    public References getReferences() {
+        return references;
+    }
+
+    public void setReferences(References references) {
+        this.references = references;
     }
 
     public String getSummary() {

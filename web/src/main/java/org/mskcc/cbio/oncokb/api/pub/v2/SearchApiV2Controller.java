@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v2;
 
 import io.swagger.annotations.ApiParam;
+import org.mskcc.cbio.oncokb.apiModels.Projection;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
 import org.mskcc.cbio.oncokb.config.annotation.V2Api;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
@@ -57,7 +58,10 @@ public class SearchApiV2Controller implements SearchApiV2 {
         @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly,
 
         @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.")
-        @RequestParam(value = "queryType", required = false, defaultValue = "regular") QueryType queryType
+        @RequestParam(value = "queryType", required = false, defaultValue = "regular") QueryType queryType,
+
+        @ApiParam("Level of detail of the response")
+        @RequestParam(defaultValue = "DETAILED") Projection projection
     ) {
         HttpStatus status = HttpStatus.OK;
         SearchResult searchResult = null;
@@ -65,7 +69,7 @@ public class SearchApiV2Controller implements SearchApiV2 {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(hugoSymbol, entrezGeneId, variant, tumorType, consequence, proteinStart, proteinEnd, levels, highestLevelOnly, null, null, id, queryType, source);
+            Query query = new Query(hugoSymbol, entrezGeneId, variant, tumorType, consequence, proteinStart, proteinEnd, levels, highestLevelOnly, null, null, id, queryType, source, projection);
             searchResult = QueryAnnotation.annotateSearchQuery(query);
         }
         return new ResponseEntity<>(searchResult, status);

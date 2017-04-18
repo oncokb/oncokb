@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.Projection;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 
 import java.util.ArrayList;
@@ -29,11 +30,12 @@ public class Query implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
     private QueryType type; // Query type. Different type may return different result.
     private String source = "oncotree";
+    private Projection projection = Projection.DETAILED;
 
     public Query() {
     }
 
-    public Query(String hugoSymbol, Integer entrezGeneId, String alteration, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, Set<LevelOfEvidence> levels, Boolean highestLevelOnly, Set<EvidenceType> evidenceTypes, String alterationType, String id, QueryType type, String source) {
+    public Query(String hugoSymbol, Integer entrezGeneId, String alteration, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, Set<LevelOfEvidence> levels, Boolean highestLevelOnly, Set<EvidenceType> evidenceTypes, String alterationType, String id, QueryType type, String source, Projection projection) {
         this.hugoSymbol = hugoSymbol;
         this.entrezGeneId = entrezGeneId;
         this.setAlteration(alteration);
@@ -48,6 +50,7 @@ public class Query implements java.io.Serializable {
         this.alterationType = alterationType;
         this.id = id;
         this.type = type;
+        this.projection = projection;
     }
 
     public Query(String hugoSymbol, Integer entrezGeneId, String alteration, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
@@ -230,6 +233,14 @@ public class Query implements java.io.Serializable {
         this.evidenceTypes = evidenceTypes;
     }
 
+    public Projection getProjection() {
+        return projection;
+    }
+
+    public void setProjection(Projection projection) {
+        this.projection = projection;
+    }
+
     @JsonIgnore
     public String getQueryId() {
 
@@ -283,6 +294,13 @@ public class Query implements java.io.Serializable {
         } else {
             content.add("");
         }
+
+        if (this.projection != null) {
+            content.add(this.projection.toString());
+        } else {
+            content.add("");
+        }
+
 
         return StringUtils.join(content.toArray(), "&");
     }
