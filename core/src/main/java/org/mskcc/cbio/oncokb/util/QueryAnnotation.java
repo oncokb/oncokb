@@ -56,6 +56,16 @@ public class QueryAnnotation {
                 searchResult.setTumorTypeSummary(null);
                 searchResult.setGeneBackground(null);
             }
+
+            // Always return Unknown if no oncogenicity specified
+            if (searchResult.getOncogenic() == null) {
+                searchResult.setOncogenic(new KnownEffect(Oncogenicity.UNKNOWN.getOncogenic()));
+            }
+
+            // Always return Unknown if no mutation effect specified
+            if (searchResult.getMutationEffect() == null) {
+                searchResult.setMutationEffect(new KnownEffect(MutationEffect.UNKNOWN.getMutationEffect()));
+            }
             searchResult.updateLastUpdate();
         }
         return searchResult;
@@ -86,7 +96,7 @@ public class QueryAnnotation {
         getGeneBackground(result);
 
         // Check whether query variant is annotated.
-        Alteration alteration = AlterationUtils.getAlterationByQuery(query);
+        Alteration alteration = getAlteration(gene, query);
 
         // Whether alteration is hotpot from Matt's list
         result.getOtherSources().setHotspot(HotspotUtils.isHotspot(alteration));
@@ -104,10 +114,9 @@ public class QueryAnnotation {
 
         if (relevantAlterations.size() == 0) {
             result.setVariantAnnotated(false);
-            return result;
+        } else {
+            result.setVariantAnnotated(true);
         }
-
-        result.setVariantAnnotated(true);
 
         // Get VUS info
         annotateVusInfo(result);
@@ -139,6 +148,14 @@ public class QueryAnnotation {
                 alleleAndRelevantAlterations.addAll(oncogenicMutations);
             }
 
+            treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
+                EvidenceUtils.convertEvidenceLevel(
+                    EvidenceUtils.getEvidence(new ArrayList<>(alleles),
+                        MainUtils.getSensitiveTreatmentEvidenceTypes(),
+                        (query.getLevels() != null ?
+                            new HashSet<LevelOfEvidence>(CollectionUtils.intersection(query.getLevels(),
+                                LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
+
             if (oncogenicMutations != null) {
                 treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                     EvidenceUtils.convertEvidenceLevel(
@@ -154,7 +171,10 @@ public class QueryAnnotation {
 
             if (oncogenicity != null) {
                 Evidence evidence = MainUtils.findEvidenceByHighestOncogenicityInEvidence(oncogenicEvis, oncogenicity);
-                result.setOncogenic(getKnownEffect(MainUtils.setToAlleleOncogenicity(oncogenicity).getOncogenic(), evidence));
+                Oncogenicity alternativeAllelOncogenicity = MainUtils.setToAlleleOncogenicity(oncogenicity);
+                if (alternativeAllelOncogenicity != null) {
+                    result.setOncogenic(getKnownEffect(MainUtils.setToAlleleOncogenicity(oncogenicity).getOncogenic(), evidence));
+                }
             }
         }
 
@@ -386,5 +406,15 @@ public class QueryAnnotation {
         levels.put("sensitive", levelSIndex > -1 ? new LevelOfEvidenceWithTime(LevelUtils.SENSITIVE_LEVELS.get(levelSIndex), levelSTreatment.getLastUpdate()) : null);
         levels.put("resistant", levelRIndex > -1 ? new LevelOfEvidenceWithTime(LevelUtils.RESISTANCE_LEVELS.get(levelRIndex), levelRTreatment.getLastUpdate()) : null);
         return levels;
+    }
+
+    private static Alteration getAlteration(Gene gene, Query query) {
+
+        Alteration alteration = AlterationUtils.findAlteration(gene, query.getAlteration());
+
+        if (alteration == null) {
+            alteration = AlterationUtils.getAlterationByQuery(query);
+        }
+        return alteration;
     }
 }

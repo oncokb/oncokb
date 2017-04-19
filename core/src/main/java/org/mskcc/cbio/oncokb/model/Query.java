@@ -245,11 +245,11 @@ public class Query implements java.io.Serializable {
     public String getQueryId() {
 
         List<String> content = new ArrayList<>();
-        if (this.entrezGeneId != null) {
-            content.add(Integer.toString(this.entrezGeneId));
+        if (this.hugoSymbol != null) {
+            content.add(this.hugoSymbol);
         } else {
-            if (this.hugoSymbol != null) {
-                content.add(this.hugoSymbol);
+            if (this.entrezGeneId != null) {
+                content.add(Integer.toString(this.entrezGeneId));
             } else {
                 content.add("");
             }
@@ -303,6 +303,11 @@ public class Query implements java.io.Serializable {
 
 
         return StringUtils.join(content.toArray(), "&");
+    }
+
+    @Override
+    public String toString() {
+        return getQueryId();
     }
 }
 

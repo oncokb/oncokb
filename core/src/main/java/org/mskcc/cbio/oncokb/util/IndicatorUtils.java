@@ -39,7 +39,11 @@ public class IndicatorUtils {
         Gene gene = GeneUtils.getGeneByQuery(query);
 
         // Check whether query variant is annotated.
-        Alteration alteration = AlterationUtils.getAlterationByQuery(query);
+        Alteration alteration = AlterationUtils.findAlteration(gene, query.getAlteration());
+
+        if (alteration == null) {
+            alteration = AlterationUtils.getAlterationByQuery(query);
+        }
 
         // Get relevant alterations
         List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterationsByQuery(query);
@@ -60,18 +64,10 @@ public class IndicatorUtils {
 
             if (relevantAlterations == null || relevantAlterations.size() == 0) {
                 indicatorQuery.setVariantExist(false);
-
-                if (alteration != null) {
-                    alleles = AlterationUtils.getAlleleAlterations(alteration);
-                }
             } else {
                 indicatorQuery.setVariantExist(true);
-                if (!relevantAlterations.isEmpty()) {
-                    for (Alteration alt : relevantAlterations) {
-                        alleles.addAll(AlterationUtils.getAlleleAlterations(alt));
-                    }
-                }
             }
+            alleles = AlterationUtils.getAlleleAlterations(alteration);
 
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {

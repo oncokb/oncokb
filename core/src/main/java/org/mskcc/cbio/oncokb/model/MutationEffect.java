@@ -14,6 +14,7 @@ import java.util.Map;
 public enum MutationEffect {
     GAIN_OF_FUNCTION("Gain-of-function"),
     INCONCLUSIVE("Inconclusive"),
+    UNKNOWN("Unknown"),
     LOSS_OF_FUNCTION("Loss-of-function"),
     LIKELY_LOSS_OF_FUNCTION("Likely Loss-of-function"),
     LIKELY_GAIN_OF_FUNCTION("Likely Gain-of-function"),
@@ -32,7 +33,7 @@ public enum MutationEffect {
     public String getMutationEffect() {
         return mutation_effect;
     }
-    
+
     private static final Map<String, MutationEffect> map = new HashMap<String, MutationEffect>();
     static {
         for (MutationEffect mutationEffect : MutationEffect.values()) {
