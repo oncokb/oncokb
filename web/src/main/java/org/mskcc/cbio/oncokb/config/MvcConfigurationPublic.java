@@ -18,7 +18,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -49,11 +48,9 @@ public class MvcConfigurationPublic extends MvcConfiguration {
         ObjectMapper mapper = new ObjectMapper();
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         javaTimeModule.addSerializer(Date.class, new DateSerializer());
         javaTimeModule.addDeserializer(Date.class, new DateDeserializer());
         mapper.registerModule(javaTimeModule);
-        mapper.setDateFormat(dateFormat);
 
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         return mapper;
