@@ -155,23 +155,6 @@ public class Article implements java.io.Serializable {
         this.elocationId = elocationId;
     }
 
-    public String getReference() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(authors).append(". ")
-            .append(journal).append(". ");
-        if (pubDate != null)
-            sb.append(pubDate).append(";");
-        if (volume != null)
-            sb.append(volume);
-        if (issue != null)
-            sb.append("(").append(issue).append(")");
-        if (pages != null)
-            sb.append(pages);
-        sb.append(".");
-
-        return sb.toString();
-    }
-
     @Override
     public int hashCode() {
         int hash = 7;
