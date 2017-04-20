@@ -365,6 +365,9 @@ public class EvidenceController {
         } else if(!isCancerEvidence){
             // For the evidences which tumor type infomation is not involved, update it directly
             for (Evidence evidence : evidences) {
+                if(evidence.getAlterations() == null || evidence.getAlterations().isEmpty()) {
+                    evidence.setAlterations(alterations);
+                }
                 evidence.setEvidenceType(evidenceType);
                 evidence.setSubtype(subType);
                 evidence.setCancerType(cancerType);
