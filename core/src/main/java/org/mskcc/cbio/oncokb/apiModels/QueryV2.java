@@ -3,7 +3,6 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.apiModels.Projection;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 
@@ -18,7 +17,7 @@ import java.util.Set;
 public class QueryV2 implements java.io.Serializable {
     private String hugoSymbol;
     private Integer entrezGeneId;
-    private String alteration;
+    private String variant;
     private String tumorType;
     private String consequence;
     private Integer proteinStart;
@@ -36,10 +35,10 @@ public class QueryV2 implements java.io.Serializable {
     public QueryV2() {
     }
 
-    public QueryV2(String hugoSymbol, Integer entrezGeneId, String alteration, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, Set<LevelOfEvidence> levels, Boolean highestLevelOnly, Set<EvidenceType> evidenceTypes, String alterationType, String id, QueryType type, String source, Projection projection) {
+    public QueryV2(String hugoSymbol, Integer entrezGeneId, String variant, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, Set<LevelOfEvidence> levels, Boolean highestLevelOnly, Set<EvidenceType> evidenceTypes, String alterationType, String id, QueryType type, String source, Projection projection) {
         this.hugoSymbol = hugoSymbol;
         this.entrezGeneId = entrezGeneId;
-        this.setAlteration(alteration);
+        this.setVariant(variant);
         this.tumorType = tumorType;
         this.consequence = consequence;
         this.proteinStart = proteinStart;
@@ -54,10 +53,10 @@ public class QueryV2 implements java.io.Serializable {
         this.projection = projection;
     }
 
-    public QueryV2(String hugoSymbol, Integer entrezGeneId, String alteration, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
+    public QueryV2(String hugoSymbol, Integer entrezGeneId, String variant, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
         this.hugoSymbol = hugoSymbol;
         this.entrezGeneId = entrezGeneId;
-        this.alteration = alteration;
+        this.variant = variant;
         this.tumorType = tumorType;
         this.consequence = consequence;
         this.proteinStart = proteinStart;
@@ -70,7 +69,7 @@ public class QueryV2 implements java.io.Serializable {
                 this.hugoSymbol = alt.getGene().getHugoSymbol();
                 this.entrezGeneId = alt.getGene().getEntrezGeneId();
             }
-            this.alteration = alt.getAlteration();
+            this.variant = alt.getAlteration();
             this.alterationType = alt.getAlterationType() == null ? "MUTATION" : alt.getAlterationType().name();
             this.consequence = alt.getConsequence() == null ? null : alt.getConsequence().getTerm();
             this.proteinStart = alt.getProteinStart();
@@ -84,23 +83,23 @@ public class QueryV2 implements java.io.Serializable {
                 this.hugoSymbol = variantQuery.getGene().getHugoSymbol();
                 this.entrezGeneId = variantQuery.getGene().getEntrezGeneId();
             }
-            this.alteration = variantQuery.getQueryAlteration();
+            this.variant = variantQuery.getQueryAlteration();
             this.consequence = variantQuery.getConsequence();
             this.proteinStart = variantQuery.getProteinStart();
             this.proteinEnd = variantQuery.getProteinEnd();
         }
     }
 
-    public QueryV2(String hugoSymbol, String alteration, String tumorType) {
+    public QueryV2(String hugoSymbol, String variant, String tumorType) {
         this.hugoSymbol = hugoSymbol;
-        this.alteration = alteration;
+        this.variant = variant;
         this.tumorType = tumorType;
     }
 
-    public QueryV2(String hugoSymbol, Integer entrezGeneId, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
+    public QueryV2(String hugoSymbol, Integer entrezGeneId, String variant, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
         this.hugoSymbol = hugoSymbol;
         this.entrezGeneId = entrezGeneId;
-        this.alteration = alteration;
+        this.variant = variant;
         this.alterationType = alterationType;
         this.tumorType = tumorType;
         this.consequence = consequence;
@@ -140,14 +139,14 @@ public class QueryV2 implements java.io.Serializable {
         this.entrezGeneId = entrezGeneId;
     }
 
-    public String getAlteration() {
-        return alteration;
+    public String getVariant() {
+        return variant;
     }
 
-    public void setAlteration(String alteration) {
-        if (alteration == null)
-            alteration = "";
-        this.alteration = alteration;
+    public void setVariant(String variant) {
+        if (variant == null)
+            variant = "";
+        this.variant = variant;
     }
 
     public String getAlterationType() {
@@ -255,8 +254,8 @@ public class QueryV2 implements java.io.Serializable {
                 content.add("");
             }
         }
-        if (this.alteration != null) {
-            content.add(this.alteration);
+        if (this.variant != null) {
+            content.add(this.variant);
         } else {
             content.add("");
         }
