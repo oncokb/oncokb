@@ -794,7 +794,7 @@ angular.module('oncokbApp')
                     if (mainUtils.needReview(mutation.effect_uuid) || mainUtils.needReview(mutation.description_uuid)) {
                         extraData.knownEffect = mutation.effect.value.getText();
                         extraDataUUID = mutation.effect_uuid.getText();
-                        extraData.lastEdit = mutation.effect_review.get('updateTime');
+                        extraData.lastEdit = mutation.oncogenic_review.get('mostRecent').value.getText();
                         extraData.description = mutation.description.getText();
                         extraData.evidenceType = 'MUTATION_EFFECT';
                     }
@@ -876,7 +876,13 @@ angular.module('oncokbApp')
                 }
 
                 if (mutation) {
-                    data.alterations = parseMutationString(stringUtils.getTextString(mutation.name.getText()));
+                    var mutationStrResult = parseMutationString(stringUtils.getTextString(mutation.name.getText()));
+                    if(dataUUID) {
+                        data.alterations = mutationStrResult;
+                    }
+                    if(extraDataUUID) {
+                        extraData.alterations = mutationStrResult;
+                    }
                 }
                 if (tumor) {
                     var tempArr1 = [];
@@ -921,30 +927,10 @@ angular.module('oncokbApp')
                     }
                 }
                 if (data.description) {
-                    data.description = stringUtils.getTextString(data.description);
-                    var abstractResults = FindRegex.result(data.description);
-                    var tempAbstract;
-                    for (var i = 0; i < abstractResults.length; i++) {
-                        tempAbstract = abstractResults[i];
-                        switch (tempAbstract.type) {
-                        case 'pmid':
-                            data.articles.push({
-                                pmid: tempAbstract.id
-                            });
-                            break;
-                        case 'abstract':
-                            data.articles.push({
-                                abstract: tempAbstract.id,
-                                link: tempAbstract.link
-                            });
-                            break;
-                        case 'nct':
-                            data.clinicalTrials.push({
-                                nctId: tempAbstract.id
-                            });
-                            break;
-                        }
-                    }
+                    formArticles(data);
+                }
+                if (extraData.description) {
+                    formArticles(extraData);
                 }
                 if(data.lastEdit) {
                     data.lastEdit = validateTimeFormat(data.lastEdit, reviewObj);
@@ -965,6 +951,32 @@ angular.module('oncokbApp')
                 }
                 return evidences;
             };
+            function formArticles(data) {
+                var description = stringUtils.getTextString(data.description);
+                var abstractResults = FindRegex.result(description);
+                var tempAbstract;
+                for (var i = 0; i < abstractResults.length; i++) {
+                    tempAbstract = abstractResults[i];
+                    switch (tempAbstract.type) {
+                    case 'pmid':
+                        data.articles.push({
+                            pmid: tempAbstract.id
+                        });
+                        break;
+                    case 'abstract':
+                        data.articles.push({
+                            abstract: tempAbstract.id,
+                            link: tempAbstract.link
+                        });
+                        break;
+                    case 'nct':
+                        data.clinicalTrials.push({
+                            nctId: tempAbstract.id
+                        });
+                        break;
+                    }
+                }
+            }
             function validateTimeFormat(updateTime, reviewObj) {
                 var tempTime = new Date(updateTime);
                 if(tempTime instanceof Date && !isNaN(tempTime.getTime())) {
