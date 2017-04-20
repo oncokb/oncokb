@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.QueryV2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,21 @@ public class Query implements java.io.Serializable {
             this.consequence = variantQuery.getConsequence();
             this.proteinStart = variantQuery.getProteinStart();
             this.proteinEnd = variantQuery.getProteinEnd();
+        }
+    }
+
+    public Query(QueryV2 queryV2) {
+        if (queryV2 != null) {
+            this.id = queryV2.getId();
+            this.type = queryV2.getType() == null ? "regular" : queryV2.getType().name();
+            this.entrezGeneId = queryV2.getEntrezGeneId();
+            this.hugoSymbol = queryV2.getHugoSymbol();
+            this.alteration = queryV2.getVariant();
+            this.tumorType = queryV2.getTumorType();
+            this.alterationType = queryV2.getAlterationType();
+            this.consequence = queryV2.getConsequence();
+            this.proteinStart = queryV2.getProteinStart();
+            this.proteinEnd = queryV2.getProteinEnd();
         }
     }
 

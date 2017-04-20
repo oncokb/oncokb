@@ -56,7 +56,7 @@ public class IndicatorController {
         if (queryType != null) {
             QueryType matchedQueryType = QueryType.valueOf(queryType);
             if (matchedQueryType != null) {
-                query.setType(matchedQueryType);
+                query.setType(matchedQueryType.name());
             }
         }
         if (proteinStart != null) {

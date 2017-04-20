@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 
@@ -9,10 +10,10 @@ import java.util.*;
  * Created by Hongxin on 4/12/17.
  */
 public class SearchResult {
-    private Query query;
+    private QueryV2 query;
     private Boolean geneAnnotated;
-    private Boolean variantAnnotated;
-    private Boolean alternativeVariantAlleleAnnotated;
+    private List<Alteration> annotatedMatchingVariants;
+    private List<Alteration> annotatedAlternativeAlleleVariants;
     private KnownEffect oncogenic;
     private KnownEffect mutationEffect;
     private LevelOfEvidenceWithTime highestSensitiveLevel;
@@ -33,11 +34,11 @@ public class SearchResult {
         this.dataVersion = MainUtils.getDataVersion();
     }
 
-    public Query getQuery() {
+    public QueryV2 getQuery() {
         return query;
     }
 
-    public void setQuery(Query query) {
+    public void setQuery(QueryV2 query) {
         this.query = query;
     }
 
@@ -49,20 +50,20 @@ public class SearchResult {
         this.geneAnnotated = geneAnnotated;
     }
 
-    public Boolean getVariantAnnotated() {
-        return variantAnnotated;
+    public List<Alteration> getAnnotatedMatchingVariants() {
+        return annotatedMatchingVariants;
     }
 
-    public void setVariantAnnotated(Boolean variantAnnotated) {
-        this.variantAnnotated = variantAnnotated;
+    public void setAnnotatedMatchingVariants(List<Alteration> annotatedMatchingVariants) {
+        this.annotatedMatchingVariants = annotatedMatchingVariants;
     }
 
-    public Boolean getAlternativeVariantAlleleAnnotated() {
-        return alternativeVariantAlleleAnnotated;
+    public List<Alteration> getAnnotatedAlternativeAlleleVariants() {
+        return annotatedAlternativeAlleleVariants;
     }
 
-    public void setAlternativeVariantAlleleAnnotated(Boolean alternativeVariantAlleleAnnotated) {
-        this.alternativeVariantAlleleAnnotated = alternativeVariantAlleleAnnotated;
+    public void setAnnotatedAlternativeAlleleVariants(List<Alteration> annotatedAlternativeAlleleVariants) {
+        this.annotatedAlternativeAlleleVariants = annotatedAlternativeAlleleVariants;
     }
 
     public KnownEffect getOncogenic() {

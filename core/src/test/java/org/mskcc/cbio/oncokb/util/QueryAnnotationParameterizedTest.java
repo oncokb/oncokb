@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.apiModels.LevelOfEvidenceWithTime;
+import org.mskcc.cbio.oncokb.apiModels.QueryV2;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
 import org.mskcc.cbio.oncokb.apiModels.TreatmentInfo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -42,18 +43,20 @@ public class QueryAnnotationParameterizedTest {
 
     @Test
     public void testAnnotateSearchQuery() throws Exception {
-        Query query = new Query();
-        query.setHugoSymbol(gene);
-        query.setAlteration(variant);
-        query.setTumorType(tumorType);
+        QueryV2 queryV2 = new QueryV2();
+        queryV2.setHugoSymbol(gene);
+        queryV2.setVariant(variant);
+        queryV2.setTumorType(tumorType);
 
-        SearchResult searchResult = QueryAnnotation.annotateSearchQuery(query);
+        Query query = new Query(queryV2);
+
+        SearchResult searchResult = QueryAnnotation.annotateSearchQuery(queryV2);
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false);
 
         assertEquals("Oncogenicity should be the same. " + query.toString(), resp.getOncogenic() == "" ? "Unknown" : resp.getOncogenic(), searchResult.getOncogenic() == null ? "" : searchResult.getOncogenic().getKnownEffect());
         assertTrue("Gene exist should match. " + query.toString(), searchResult.getGeneAnnotated().equals(resp.getGeneExist()));
-        assertTrue("Variant exist should match. " + query.toString(), searchResult.getVariantAnnotated().equals(resp.getVariantExist()));
-        assertTrue("Alternative allele exist should match. " + query.toString(), searchResult.getAlternativeVariantAlleleAnnotated().equals(resp.getAlleleExist()));
+        assertEquals("Variant exist should match. " + query.toString(), resp.getVariantExist(), searchResult.getAnnotatedMatchingVariants().size() > 0);
+        assertEquals("Alternative allele exist should match. " + query.toString(), resp.getAlleleExist(), searchResult.getAnnotatedAlternativeAlleleVariants().size() > 0);
 
         assertTrue("Gene summary should match. " + query.toString(), searchResult.getGeneSummary().getSummary().equals(resp.getGeneSummary()));
         assertTrue("Variant summary should match. " + query.toString(), searchResult.getVariantSummary().getSummary().equals(resp.getVariantSummary()));

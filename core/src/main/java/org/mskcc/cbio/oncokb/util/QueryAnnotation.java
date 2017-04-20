@@ -19,18 +19,6 @@ public class QueryAnnotation {
             query.setAlteration("");
         }
 
-        if (query.getSource() == null || query.getSource().isEmpty()) {
-            query.setSource("oncotree");
-        }
-
-        if (query.getHighestLevelOnly() == null) {
-            query.setHighestLevelOnly(false);
-        }
-
-        if (query.getLevels() == null) {
-            query.setLevels(LevelUtils.getPublicAndOtherIndicationLevels());
-        }
-
         if (QueryUtils.isFusionQuery(query)) {
             // If the query only indicates this is a fusion event with associated genes but no alteration specified,
             // need to attach Fusions to the query.
@@ -45,7 +33,39 @@ public class QueryAnnotation {
         }
     }
 
-    public static SearchResult annotateSearchQuery(Query query) {
+    public static void EnrichQueryV2(QueryV2 query2) {
+        // Set the alteration to empty string in order to get relevant variants.
+        if (query2.getVariant() == null) {
+            query2.setVariant("");
+        }
+
+        if (query2.getSource() == null || query2.getSource().isEmpty()) {
+            query2.setSource("oncotree");
+        }
+
+        if (query2.getHighestLevelOnly() == null) {
+            query2.setHighestLevelOnly(false);
+        }
+
+        if (query2.getLevels() == null) {
+            query2.setLevels(LevelUtils.getPublicAndOtherIndicationLevels());
+        }
+
+        if (QueryUtils.isFusionQuery(new Query(query2))) {
+            // If the query2 only indicates this is a fusion event with associated genes but no alteration specified,
+            // need to attach Fusions to the query2.
+            if (query2.getVariant() == null || query2.getVariant().isEmpty()) {
+                query2.setVariant("Fusions");
+            }
+
+            Set<Gene> genes = GeneUtils.getUniqueGenesFromString(query2.getHugoSymbol(), "-");
+            if (genes.size() > 0) {
+                query2.setVariant(query2.getHugoSymbol() + " fusion");
+            }
+        }
+    }
+
+    public static SearchResult annotateSearchQuery(QueryV2 query) {
         SearchResult searchResult = annotateQuery(query);
         if (searchResult != null) {
             // Only keep reserved properties in SUMMARY projection
@@ -71,7 +91,7 @@ public class QueryAnnotation {
         return searchResult;
     }
 
-    private static SearchResult annotateQuery(Query query) {
+    private static SearchResult annotateQuery(QueryV2 query) {
         SearchResult result = new SearchResult();
         OtherSources otherSources = new OtherSources();
         result.setOtherSources(otherSources);
@@ -80,10 +100,10 @@ public class QueryAnnotation {
         if (query == null) {
             return result;
         }
-        EnrichQuery(query);
+        EnrichQueryV2(query);
 
         // Check whether query gene is annotated.
-        Gene gene = GeneUtils.getGeneByQuery(query);
+        Gene gene = GeneUtils.getGeneByQuery(new Query(query));
         if (gene != null) {
             result.setGeneAnnotated(true);
             result.setGeneSummary(SummaryUtils.geneSummary(gene));
@@ -103,20 +123,19 @@ public class QueryAnnotation {
 
         // Get alternative alleles info
         List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
-        result.setAlternativeVariantAlleleAnnotated(!(alleles == null || alleles.size() == 0));
+        if(alleles == null || alleles.size() == 0) {
+            result.setAnnotatedAlternativeAlleleVariants(new ArrayList<Alteration>());
+        }else{
+            result.setAnnotatedAlternativeAlleleVariants(alleles);
+        }
 
         // Get relevant alterations
-        List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterationsByQuery(query);
+        List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterationsByQuery(new Query(query));
+        result.setAnnotatedMatchingVariants(relevantAlterations);
 
         // Get list of alterations which are not VUS
         List<Alteration> nonVUSRelevantAlts = new ArrayList<>();
         nonVUSRelevantAlts.addAll(AlterationUtils.excludeVUS(relevantAlterations));
-
-        if (relevantAlterations.size() == 0) {
-            result.setVariantAnnotated(false);
-        } else {
-            result.setVariantAnnotated(true);
-        }
 
         // Get VUS info
         annotateVusInfo(result);
@@ -132,12 +151,12 @@ public class QueryAnnotation {
             annotateKnownAltOncogenicity(result, alteration);
 
             treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                EvidenceUtils.getRelevantEvidences(query, query.getSource(), null,
+                EvidenceUtils.getRelevantEvidences(new Query(query), query.getSource(), null,
                     MainUtils.getTreatmentEvidenceTypes(),
                     (query.getLevels() != null ?
                         new HashSet<>(CollectionUtils.intersection(query.getLevels(),
                             LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
-        } else if (result.getAlternativeVariantAlleleAnnotated() || (result.getVUS() != null && result.getVUS().getStatus())) {
+        } else if (result.getAnnotatedAlternativeAlleleVariants().size() > 0 || (result.getVUS() != null && result.getVUS().getStatus())) {
             Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
             List<Alteration> alleleAndRelevantAlterations = new ArrayList<>();
             Set<Alteration> oncogenicMutations = null;
@@ -237,19 +256,19 @@ public class QueryAnnotation {
 
         // Tumor type summary
         if (query.getTumorType() != null) {
-            result.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query,
+            result.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, new Query(query),
                 new ArrayList<>(relevantAlterations),
                 new HashSet<>(oncoTreeTypes)));
         }
 
         // Mutation summary
         result.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
-            new ArrayList<>(relevantAlterations), query));
+            new ArrayList<>(relevantAlterations), new Query(query)));
 
         // This is special case for KRAS wildtype. May need to come up with a better plan for this.
         if ((gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
-            && query.getAlteration() != null
-            && StringUtils.containsIgnoreCase(query.getAlteration(), "wildtype")) {
+            && query.getVariant() != null
+            && StringUtils.containsIgnoreCase(query.getVariant(), "wildtype")) {
             if (oncoTreeTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
                 result.setGeneSummary(new Summary("RAS (KRAS/NRAS) which is wildtype (not mutated) in this sample, encodes an upstream activator of the pro-oncogenic MAP- and PI3-kinase pathways and is mutated in approximately 40% of late stage colorectal cancers."));
                 result.setVariantSummary(new Summary("The absence of a mutation in the RAS genes is clinically important because it expands approved treatments available to treat this tumor. RAS status in stage IV colorectal cancer influences patient responses to the anti-EGFR antibody therapies cetuximab and panitumumab."));
@@ -272,7 +291,7 @@ public class QueryAnnotation {
     }
 
     private static void getGeneBackground(SearchResult searchResult) {
-        Set<Evidence> geneBackground = EvidenceUtils.getRelevantEvidences(searchResult.getQuery(), searchResult.getQuery().getSource(), null, Collections.singleton(EvidenceType.GENE_BACKGROUND), null);
+        Set<Evidence> geneBackground = EvidenceUtils.getRelevantEvidences(new Query(searchResult.getQuery()), searchResult.getQuery().getSource(), null, Collections.singleton(EvidenceType.GENE_BACKGROUND), null);
         if (geneBackground != null && geneBackground.size() > 0) {
             Evidence evidence = geneBackground.iterator().next();
             References references = MainUtils.getReferencesFromArticles(evidence.getArticles());
@@ -319,7 +338,7 @@ public class QueryAnnotation {
         }
         // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
         if (oncogenicity == null) {
-            oncogenicEvis = EvidenceUtils.getRelevantEvidences(searchResult.getQuery(), searchResult.getQuery().getSource(), null,
+            oncogenicEvis = EvidenceUtils.getRelevantEvidences(new Query(searchResult.getQuery()), searchResult.getQuery().getSource(), null,
                 Collections.singleton(EvidenceType.ONCOGENIC), null);
             oncogenicity = MainUtils.findHighestOncogenicByEvidences(oncogenicEvis);
         }
@@ -345,7 +364,7 @@ public class QueryAnnotation {
         }
         // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
         if (!map.containsKey("mutationEffect")) {
-            mutationEffectEvis = EvidenceUtils.getRelevantEvidences(searchResult.getQuery(), searchResult.getQuery().getSource(), null,
+            mutationEffectEvis = EvidenceUtils.getRelevantEvidences(new Query(searchResult.getQuery()), searchResult.getQuery().getSource(), null,
                 Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
             map = EvidenceUtils.getMutationEffectMapFromEvidence(mutationEffectEvis);
         }
@@ -358,7 +377,7 @@ public class QueryAnnotation {
 
     private static void annotateVusInfo(SearchResult searchResult) {
         VUSStatus vusStatus = new VUSStatus();
-        Set<Evidence> vusEvidences = EvidenceUtils.getRelevantEvidences(searchResult.getQuery(), searchResult.getQuery().getSource(),
+        Set<Evidence> vusEvidences = EvidenceUtils.getRelevantEvidences(new Query(searchResult.getQuery()), searchResult.getQuery().getSource(),
             null, Collections.singleton(EvidenceType.VUS), null);
 
         if (vusEvidences != null && vusEvidences.size() > 0) {
@@ -408,12 +427,12 @@ public class QueryAnnotation {
         return levels;
     }
 
-    private static Alteration getAlteration(Gene gene, Query query) {
+    private static Alteration getAlteration(Gene gene, QueryV2 query) {
 
-        Alteration alteration = AlterationUtils.findAlteration(gene, query.getAlteration());
+        Alteration alteration = AlterationUtils.findAlteration(gene, query.getVariant());
 
         if (alteration == null) {
-            alteration = AlterationUtils.getAlterationByQuery(query);
+            alteration = AlterationUtils.getAlterationByQuery(new Query(query));
         }
         return alteration;
     }

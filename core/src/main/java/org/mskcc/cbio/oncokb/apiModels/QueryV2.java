@@ -107,6 +107,21 @@ public class QueryV2 implements java.io.Serializable {
         this.proteinEnd = proteinEnd;
     }
 
+    public QueryV2(Query query) {
+        if (query != null) {
+            this.id = query.getId();
+            this.type = QueryType.valueOf(query.getType());
+            this.entrezGeneId = query.getEntrezGeneId();
+            this.hugoSymbol = query.getHugoSymbol();
+            this.variant = query.getAlteration();
+            this.tumorType = query.getTumorType();
+            this.alterationType = query.getAlterationType();
+            this.consequence = query.getConsequence();
+            this.proteinStart = query.getProteinStart();
+            this.proteinEnd = query.getProteinEnd();
+        }
+    }
+
     public String getId() {
         return id;
     }

@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.QueryV2;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 

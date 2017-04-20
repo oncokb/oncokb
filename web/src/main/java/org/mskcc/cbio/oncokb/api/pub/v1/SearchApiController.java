@@ -55,7 +55,7 @@ public class SearchApiController implements SearchApi {
             query.setAlteration(variant);
             query.setTumorType(tumorType);
             query.setConsequence(consequence);
-            query.setType(QueryType.valueOf(queryType));
+            query.setType(queryType);
             if (proteinStart != null) {
                 query.setProteinStart(proteinStart);
             }

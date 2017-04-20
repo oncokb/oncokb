@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v2;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.Projection;
+import org.mskcc.cbio.oncokb.apiModels.QueryV2;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
 import org.mskcc.cbio.oncokb.config.annotation.V2Api;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
@@ -69,13 +70,13 @@ public class SearchApiV2Controller implements SearchApiV2 {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(hugoSymbol, entrezGeneId, variant, tumorType, consequence, proteinStart, proteinEnd, levels, highestLevelOnly, null, null, id, queryType, source, projection);
+            QueryV2 query = new QueryV2(hugoSymbol, entrezGeneId, variant, tumorType, consequence, proteinStart, proteinEnd, levels, highestLevelOnly, null, null, id, queryType, source, projection);
             searchResult = QueryAnnotation.annotateSearchQuery(query);
         }
         return new ResponseEntity<>(searchResult, status);
     }
 
-    public ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.", required = true) @RequestBody() List<Query> body) {
+    public ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.", required = true) @RequestBody() List<QueryV2> body) {
         HttpStatus status = HttpStatus.OK;
 
         List<SearchResult> result = new ArrayList<>();
@@ -83,7 +84,7 @@ public class SearchApiV2Controller implements SearchApiV2 {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            for (Query query : body) {
+            for (QueryV2 query : body) {
                 result.add(QueryAnnotation.annotateSearchQuery(query));
             }
         }

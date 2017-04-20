@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v2;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.Projection;
+import org.mskcc.cbio.oncokb.apiModels.QueryV2;
 import org.mskcc.cbio.oncokb.apiModels.SearchResult;
 import org.mskcc.cbio.oncokb.model.*;
 import org.springframework.http.MediaType;
@@ -72,6 +73,6 @@ public interface SearchApiV2 {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE,
         method = RequestMethod.POST)
-    ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.") @RequestBody() List<Query> body
+    ResponseEntity<List<SearchResult>> searchPost(@ApiParam(value = "List of queries.") @RequestBody() List<QueryV2> body
     );
 }
