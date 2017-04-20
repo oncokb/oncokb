@@ -28,7 +28,7 @@ public class Query implements java.io.Serializable {
     @JsonIgnore
     private String alterationType;
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
-    private QueryType type; // Query type. Different type may return different result.
+    private QueryType type = QueryType.regular; // Query type. Different type may return different result.
     private String source = "oncotree";
     private Projection projection = Projection.DETAILED;
 

@@ -53,7 +53,12 @@ public class IndicatorController {
         query.setAlterationType(alterationType);
         query.setTumorType(tumorType);
         query.setConsequence(consequence);
-        query.setType(QueryType.valueOf(queryType));
+        if (queryType != null) {
+            QueryType matchedQueryType = QueryType.valueOf(queryType);
+            if (matchedQueryType != null) {
+                query.setType(matchedQueryType);
+            }
+        }
         if (proteinStart != null) {
             query.setProteinStart(Integer.parseInt(proteinStart));
         }
