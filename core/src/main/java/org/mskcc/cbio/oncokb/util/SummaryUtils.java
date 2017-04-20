@@ -4,6 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.Summary;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
@@ -18,11 +19,13 @@ import java.util.regex.Pattern;
  */
 public class SummaryUtils {
 
-    public static long lastUpdateVariantSummaries = new Date().getTime();
+    /**
+     * Public methods
+     **/
 
-    public static String variantTumorTypeSummary(Gene gene, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
+    public static Summary variantTumorTypeSummary(Gene gene, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
         if (gene == null) {
-            return "";
+            return new Summary();
         }
         String geneId = Integer.toString(gene.getEntrezGeneId());
         String key = geneId + "&&" + query.getQueryId();
@@ -31,6 +34,7 @@ public class SummaryUtils {
         }
 
         StringBuilder sb = new StringBuilder();
+        Set<Date> dates = new HashSet<>();
 
         //Mutation summary (MUTATION_SUMMARY: Deprecated)
 //            List<Evidence> mutationSummaryEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_SUMMARY));
@@ -49,42 +53,52 @@ public class SummaryUtils {
 //            } else {
 //            }
 
-        String os = oncogenicSummary(gene, alterations, query, false);
-        if (os != null && !os.equals("")) {
+        Summary os = oncogenicSummary(gene, alterations, query);
+        if (os != null && os.getSummary() != null && !os.equals("")) {
             sb.append(" " + os);
+            dates.add(os.getLastUpdate());
         }
 
-        String ts = tumorTypeSummary(gene, query, alterations, relevantTumorTypes);
-        if (ts != null && !ts.equals("")) {
+        Summary ts = tumorTypeSummary(gene, query, alterations, relevantTumorTypes);
+        if (ts != null && ts.getSummary() != null && !ts.equals("")) {
             sb.append(" " + ts);
+            dates.add(ts.getLastUpdate());
         }
+
+
+        Date date = MainUtils.getLatestDate(dates);
+        String summaryStr = sb.toString().trim();
+        Summary summary = new Summary(summaryStr, date);
 
         if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, sb.toString().trim());
+            CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, summary);
         }
-        return sb.toString().trim();
+        return summary;
     }
 
-    public static String variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
+    public static Summary variantCustomizedSummary(Set<Gene> genes, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
         String geneId = Integer.toString(genes.iterator().next().getEntrezGeneId());
         Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(geneId));
 
         StringBuilder sb = new StringBuilder();
+        Set<Date> dates = new HashSet<>();
 
-        sb.append(geneSummary(genes.iterator().next()));
+        Summary gs = geneSummary(genes.iterator().next());
+        sb.append(gs.getSummary());
+        dates.add(gs.getLastUpdate());
 
-        String os = oncogenicSummary(gene, alterations, query, false);
-        if (os != null && !os.equals("")) {
+        Summary os = oncogenicSummary(gene, alterations, query);
+        if (os != null && os.getSummary() != null && !os.getSummary().equals("")) {
             sb.append(" " + os);
+            dates.add(os.getLastUpdate());
         }
 
-        return sb.toString().trim();
+        return new Summary(sb.toString().trim(), MainUtils.getLatestDate(dates));
     }
 
-    public static String tumorTypeSummary(Gene gene, Query query, List<Alteration> alterations, Set<TumorType> relevantTumorTypes) {
+    public static Summary tumorTypeSummary(Gene gene, Query query, List<Alteration> alterations, Set<TumorType> relevantTumorTypes) {
         //Tumor type summary
-        Boolean ttSummaryNotGenerated = true;
-        String tumorTypeSummary = null;
+        Summary tumorTypeSummary = new Summary();
         String queryTumorType = query.getTumorType();
         String queryAlteration = query.getAlteration();
         queryTumorType = convertTumorTypeNameInSummary(queryTumorType);
@@ -101,115 +115,111 @@ public class SummaryUtils {
         }
 
         if (gene == null || alterations == null || relevantTumorTypes == null) {
-            return "";
+            return new Summary("");
         }
 
         if (CacheUtils.isEnabled() && CacheUtils.containVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType)) {
             return CacheUtils.getVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType);
         }
 
-//        if (gene.getHugoSymbol().equals("KIT")) {
-//            tumorTypeSummary = getKITtumorTypeSummaries(queryAlteration, alterations, queryTumorType, relevantTumorTypes);
-//        } else {
         // Get all tumor type summary evidences specifically for the alteration
-            if (tumorTypeSummary == null) {
-                Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
-                if (alteration != null) {
-                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+        if (tumorTypeSummary.getSummary() == null) {
+            Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
+            if (alteration != null) {
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
 
-                    // Get Other Tumor Types summary within this alteration
-                    if (tumorTypeSummary == null) {
-                        tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                    }
-                }
-            }
-
-            // Get all tumor type summary evidences for the alternate alleles
-            if (tumorTypeSummary == null) {
-                Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
-                if (alteration == null) {
-                    alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
-                    AlterationUtils.annotateAlteration(alteration, queryAlteration);
-                }
-                if (alteration.getConsequence() != null) {
-                    if (alteration.getConsequence().getTerm().equals("missense_variant")) {
-                        List<Alteration> alternateAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
-
-                        // Special case for PDGFRA: don't match D842V as alternative allele
-                        if (gene.getHugoSymbol().equals("PDGFRA") && alteration.getProteinStart() == 842) {
-                            Alteration specialAllele = AlterationUtils.findAlteration(gene, "D842V");
-                            alternateAlleles.remove(specialAllele);
-                        }
-
-                        for (Alteration allele : alternateAlleles) {
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
-                            if (tumorTypeSummary != null) {
-                                break;
-                            }
-
-                            // Get Other Tumor Types summary
-                            tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                            if (tumorTypeSummary != null) {
-                                break;
-                            }
-                        }
-                    } else if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
-                        // No summary for synonymous variant
-                        return "";
-                    }
-                }
-            }
-
-            // Get all tumor type summary evidence for relevant alterations
-            if (tumorTypeSummary == null) {
-                // Sort all tumor type summaries, the more specific tumor type summary will be picked.
-                // Deal with KIT, give Exon annotation highers priority
-                if (gene.getHugoSymbol().equals("KIT")) {
-                    Collections.sort(alterations, new Comparator<Alteration>() {
-                        public int compare(Alteration x, Alteration y) {
-                            Integer result = 0;
-                            // TODO: need more comprehensive method to determine the order.
-                            String nameX = (x.getName() != null ? x.getName() : x.getAlteration()).toLowerCase();
-                            String nameY = (y.getName() != null ? y.getName() : y.getAlteration()).toLowerCase();
-                            if (nameX.contains("exon")) {
-                                if (nameY.contains("exon")) {
-                                    result = 0;
-                                } else {
-                                    result = -1;
-                                }
-                            } else {
-                                if (nameY.contains("exon")) {
-                                    result = 1;
-                                } else {
-                                    result = 0;
-                                }
-                            }
-                            return result;
-                        }
-                    });
-                }
-
-                // Base on the priority of relevant alterations
-                for (Alteration alteration : alterations) {
-                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
-                    if (tumorTypeSummary != null) {
-                        break;
-                    }
-
-                    // Get Other Tumor Types summary
+                // Get Other Tumor Types summary within this alteration
+                if (tumorTypeSummary.getSummary() == null) {
                     tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
-                    if (tumorTypeSummary != null) {
-                        break;
-                    }
                 }
             }
-//        }
-
-        if (tumorTypeSummary == null) {
-            tumorTypeSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].";
         }
 
-        tumorTypeSummary = replaceSpecialCharacterInTumorTypeSummary(tumorTypeSummary, gene, queryAlteration, queryTumorType);
+        // Get all tumor type summary evidences for the alternate alleles
+        if (tumorTypeSummary.getSummary() == null) {
+            Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
+            if (alteration == null) {
+                alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
+                AlterationUtils.annotateAlteration(alteration, queryAlteration);
+            }
+            if (alteration.getConsequence() != null) {
+                if (alteration.getConsequence().getTerm().equals("missense_variant")) {
+                    List<Alteration> alternateAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
+
+                    // Special case for PDGFRA: don't match D842V as alternative allele
+                    if (gene.getHugoSymbol().equals("PDGFRA") && alteration.getProteinStart() == 842) {
+                        Alteration specialAllele = AlterationUtils.findAlteration(gene, "D842V");
+                        alternateAlleles.remove(specialAllele);
+                    }
+
+                    for (Alteration allele : alternateAlleles) {
+                        tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+                        if (tumorTypeSummary.getSummary() != null) {
+                            break;
+                        }
+
+                        // Get Other Tumor Types summary
+                        tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                        if (tumorTypeSummary.getSummary() != null) {
+                            break;
+                        }
+                    }
+                } else if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+                    // No summary for synonymous variant
+                    return new Summary("");
+                }
+            }
+        }
+
+        // Get all tumor type summary evidence for relevant alterations
+        if (tumorTypeSummary.getSummary() == null) {
+            // Sort all tumor type summaries, the more specific tumor type summary will be picked.
+            // Deal with KIT, give Exon annotation highers priority
+            if (gene.getHugoSymbol().equals("KIT")) {
+                Collections.sort(alterations, new Comparator<Alteration>() {
+                    public int compare(Alteration x, Alteration y) {
+                        Integer result = 0;
+                        // TODO: need more comprehensive method to determine the order.
+                        String nameX = (x.getName() != null ? x.getName() : x.getAlteration()).toLowerCase();
+                        String nameY = (y.getName() != null ? y.getName() : y.getAlteration()).toLowerCase();
+                        if (nameX.contains("exon")) {
+                            if (nameY.contains("exon")) {
+                                result = 0;
+                            } else {
+                                result = -1;
+                            }
+                        } else {
+                            if (nameY.contains("exon")) {
+                                result = 1;
+                            } else {
+                                result = 0;
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            // Base on the priority of relevant alterations
+            for (Alteration alteration : alterations) {
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+                if (tumorTypeSummary.getSummary() != null) {
+                    break;
+                }
+
+                // Get Other Tumor Types summary
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+                if (tumorTypeSummary.getSummary() != null) {
+                    break;
+                }
+            }
+        }
+
+        if (tumorTypeSummary.getSummary() == null) {
+            tumorTypeSummary = new Summary("There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].");
+        }
+
+        tumorTypeSummary.setSummary(replaceSpecialCharacterInTumorTypeSummary(tumorTypeSummary.getSummary(), gene, queryAlteration, queryTumorType));
         if (CacheUtils.isEnabled()) {
             CacheUtils.setVariantTumorTypeSummary(gene.getEntrezGeneId(), queryAlteration, queryTumorType, tumorTypeSummary);
         }
@@ -217,20 +227,21 @@ public class SummaryUtils {
         return tumorTypeSummary;
     }
 
-    public static String unknownOncogenicSummary(Gene gene) {
+    public static Summary unknownOncogenicSummary(Gene gene) {
         String str = gene == null ? "variant" : (gene.getHugoSymbol() + " alteration");
-        return "The oncogenic activity of this " + str + " is unknown as it has not specifically been investigated by the OncoKB team.";
+        return new Summary("The oncogenic activity of this " + str + " is unknown as it has not specifically been investigated by the OncoKB team.");
     }
 
-    public static String synonymousSummary() {
-        return "This is a synonymous mutation and is not annotated by OncoKB.";
+    public static Summary synonymousSummary() {
+        return new Summary("This is a synonymous mutation and is not annotated by OncoKB.");
     }
 
-    public static String oncogenicSummary(Gene gene, List<Alteration> alterations, Query query, Boolean addition) {
-        StringBuilder sb = new StringBuilder();
+    public static Summary oncogenicSummary(Gene gene, List<Alteration> alterations, Query query) {
         Alteration alteration = null;
         Boolean isHotspot = false;
         String queryAlteration = query.getAlteration();
+        Summary summary = new Summary();
+
         if (gene != null && queryAlteration != null) {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, AlterationType.MUTATION.label(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             if (alteration == null) {
@@ -246,9 +257,9 @@ public class SummaryUtils {
         if (gene == null || alterations == null || alterations.isEmpty() || AlterationUtils.excludeVUS(alterations).size() == 0) {
             if (gene != null && queryAlteration != null) {
                 if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("synonymous_variant")) {
-                    sb.append(synonymousSummary());
+                    summary = synonymousSummary();
                 } else if (AlterationUtils.hasAlleleAlterations(alteration)) {
-                    sb.append(alleleSummary(alteration));
+                    summary = alleleSummary(alteration);
                 } else if (AlterationUtils.excludeVUS(alterations).size() == 0) {
                     List<Evidence> evidences = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.VUS), null);
                     Date lastEdit = null;
@@ -264,25 +275,26 @@ public class SummaryUtils {
                     }
                     if (lastEdit == null) {
                         if (isHotspot) {
-                            sb.append(hotspotSummary(query));
+                            summary = hotspotSummary(query);
                         } else {
-                            sb.append(unknownOncogenicSummary(gene));
+                            summary = unknownOncogenicSummary(gene);
                         }
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-                        sb.append("As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.");
+                        String summaryStr = "As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.";
 
                         if (isHotspot) {
-                            sb.append(" " + hotspotSummary(query));
+                            summaryStr += " " + hotspotSummary(query).getSummary();
                         }
+                        summary = new Summary(summaryStr, lastEdit);
                     }
                 } else if (isHotspot) {
-                    sb.append(hotspotSummary(query));
+                    summary = hotspotSummary(query);
                 } else {
-                    sb.append(unknownOncogenicSummary(gene));
+                    summary = unknownOncogenicSummary(gene);
                 }
             } else {
-                sb.append(unknownOncogenicSummary(gene));
+                summary = unknownOncogenicSummary(gene);
             }
         } else {
             if (AlterationUtils.isGeneralAlterations(queryAlteration, false)) {
@@ -297,7 +309,7 @@ public class SummaryUtils {
                 return null;
             }
             String geneId = Integer.toString(gene.getEntrezGeneId());
-            String key = geneId + "&&" + query.getQueryId() + "&&" + addition.toString();
+            String key = geneId + "&&" + query.getQueryId();
             if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
                 return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
             }
@@ -320,6 +332,8 @@ public class SummaryUtils {
                     }
                 }
             }
+
+            StringBuilder sb = new StringBuilder();
             if (oncogenic != null && !oncogenic.equals(Oncogenicity.INCONCLUSIVE)) {
                 if (appendThe) {
                     sb.append("The ");
@@ -361,64 +375,71 @@ public class SummaryUtils {
                 sb.append(" oncogenic.");
             }
 
-            if (addition) {
-                List<Evidence> oncogenicEvs = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.ONCOGENIC), null);
-                List<String> clinicalSummaries = new ArrayList<>();
+//            if (addition) {
+//                List<Evidence> oncogenicEvs = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.ONCOGENIC), null);
+//                List<String> clinicalSummaries = new ArrayList<>();
+//
+//                for (Evidence evidence : oncogenicEvs) {
+//                    if (evidence.getDescription() != null && !evidence.getDescription().isEmpty()) {
+//                        clinicalSummaries.add(evidence.getDescription());
+//                    }
+//                }
+//
+//                if (clinicalSummaries.size() > 1) {
+//                    sb.append("Warning: variant has multiple clinical summaries.");
+//                } else if (clinicalSummaries.size() == 1) {
+//                    sb.append(clinicalSummaries.get(0));
+//                }
+//            }
 
-                for (Evidence evidence : oncogenicEvs) {
-                    if (evidence.getDescription() != null && !evidence.getDescription().isEmpty()) {
-                        clinicalSummaries.add(evidence.getDescription());
-                    }
-                }
-
-                if (clinicalSummaries.size() > 1) {
-                    sb.append("Warning: variant has multiple clinical summaries.");
-                } else if (clinicalSummaries.size() == 1) {
-                    sb.append(clinicalSummaries.get(0));
-                }
-            }
-
+            summary.setSummary(sb.toString().trim());
             if (CacheUtils.isEnabled()) {
-                CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, sb.toString().trim());
+                CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, summary);
             }
         }
 
-        return sb.toString();
-    }
-
-    public static String geneSummary(Gene gene) {
-        Set<Evidence> geneSummaryEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
-        String summary = "";
-        if (!geneSummaryEvs.isEmpty()) {
-            Evidence ev = geneSummaryEvs.iterator().next();
-            if (ev != null) {
-                summary = ev.getDescription();
-
-                if (summary != null) {
-                    summary = StringEscapeUtils.escapeXml(summary).trim();
-                }
-            }
-        }
-
-        summary = summary.trim();
-        summary = summary.endsWith(".") ? summary : summary + ".";
         return summary;
     }
 
-    public static String fullSummary(Gene gene, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(geneSummary(gene));
-
-        String vts = SummaryUtils.variantTumorTypeSummary(gene, alterations, query, relevantTumorTypes);
-        if (vts != null && !vts.equals("")) {
-            sb.append(" " + vts);
+    public static Summary geneSummary(Gene gene) {
+        Set<Evidence> geneSummaryEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
+        Summary summary = new Summary();
+        if (!geneSummaryEvs.isEmpty()) {
+            for (Evidence ev : geneSummaryEvs) {
+                if (ev != null) {
+                    if (ev.getDescription() != null) {
+                        String summaryStr = StringEscapeUtils.escapeXml(ev.getDescription()).trim();
+                        summaryStr = summaryStr.endsWith(".") ? summaryStr : summaryStr + ".";
+                        summary.setSummary(summaryStr);
+                        summary.setLastUpdate(ev.getLastEdit());
+                        summary.setReferences(MainUtils.getReferencesFromArticles(ev.getArticles()));
+                        break;
+                    }
+                }
+            }
         }
-
-        return sb.toString();
+        return summary;
     }
 
-    public static String alleleSummary(Alteration alteration) {
+    public static Summary fullSummary(Gene gene, List<Alteration> alterations, Query query, Set<TumorType> relevantTumorTypes) {
+        StringBuilder sb = new StringBuilder();
+        Set<Date> dates = new HashSet<>();
+
+        Summary gs = geneSummary(gene);
+        dates.add(gs.getLastUpdate());
+        sb.append(sb);
+
+        Summary vts = SummaryUtils.variantTumorTypeSummary(gene, alterations, query, relevantTumorTypes);
+        if (vts != null && vts.getSummary() != null && !vts.getSummary().equals("")) {
+            sb.append(" " + vts);
+            dates.add(vts.getLastUpdate());
+        }
+
+        return new Summary(sb.toString(), MainUtils.getLatestDate(dates));
+    }
+
+    // TODO: include alllele lastupdate
+    public static Summary alleleSummary(Alteration alteration) {
         StringBuilder sb = new StringBuilder();
 
         String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration());
@@ -444,10 +465,11 @@ public class SummaryUtils {
             sb.append(", and therefore " + alteration.getGene().getHugoSymbol() + " " + alteration.getAlteration() + " is considered likely oncogenic.");
         }
 
-        return sb.toString();
+        return new Summary(sb.toString());
     }
 
-    public static String hotspotSummary(Query query) {
+    public static Summary hotspotSummary(Query query) {
+        Summary summary = new Summary();
         StringBuilder sb = new StringBuilder();
         sb.append("This mutation is predicted to be oncogenic as it was identified " +
             "as a statistically significant hotspot");
@@ -466,9 +488,104 @@ public class SummaryUtils {
             }
         }
         sb.append(".");
+        summary.setSummary(sb.toString());
+        return summary;
+    }
+
+    public static String getGeneMutationNameInVariantSummary(Gene gene, String queryAlteration) {
+        StringBuilder sb = new StringBuilder();
+        if (queryAlteration == null) {
+            return "";
+        } else {
+            queryAlteration = queryAlteration.trim();
+        }
+        Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
+        if (alteration == null) {
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
+            AlterationUtils.annotateAlteration(alteration, queryAlteration);
+        }
+        if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")) {
+            queryAlteration = "amplification (gain)";
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
+            queryAlteration = "deletion (loss)";
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+        } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
+            queryAlteration = queryAlteration.replace("Fusion", "fusion");
+            sb.append(queryAlteration);
+        } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
+            || (alteration.getConsequence() != null
+            && (alteration.getConsequence().getTerm().equals("inframe_deletion")
+            || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+            || StringUtils.containsIgnoreCase(queryAlteration, "indel")
+            || StringUtils.containsIgnoreCase(queryAlteration, "dup")
+            || StringUtils.containsIgnoreCase(queryAlteration, "del")
+            || StringUtils.containsIgnoreCase(queryAlteration, "ins")
+            || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
+        } else {
+            if (!queryAlteration.contains(gene.getHugoSymbol())) {
+                sb.append(gene.getHugoSymbol() + " ");
+            }
+            sb.append(queryAlteration + " mutation");
+        }
         return sb.toString();
     }
 
+    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, String queryAlteration) {
+        StringBuilder sb = new StringBuilder();
+        if (queryAlteration == null) {
+            return "";
+        } else {
+            queryAlteration = queryAlteration.trim();
+        }
+        Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
+        if (alteration == null) {
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
+            AlterationUtils.annotateAlteration(alteration, queryAlteration);
+        }
+        if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
+            if (queryAlteration.toLowerCase().equals("fusions")) {
+                queryAlteration = gene.getHugoSymbol() + " fusion";
+            }
+            queryAlteration = queryAlteration.replace("Fusion", "fusion");
+            sb.append(queryAlteration + " positive");
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")
+            || StringUtils.equalsIgnoreCase(queryAlteration, "amplification")) {
+            queryAlteration = gene.getHugoSymbol() + "-amplified";
+            sb.append(queryAlteration);
+        } else {
+            if (!queryAlteration.contains(gene.getHugoSymbol())) {
+                sb.append(gene.getHugoSymbol() + " ");
+            }
+            if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
+                sb.append(queryAlteration.toLowerCase());
+            } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
+                queryAlteration = "deletion";
+                sb.append(queryAlteration);
+            } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
+                || (alteration.getConsequence() != null
+                && (alteration.getConsequence().getTerm().equals("inframe_deletion")
+                || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+                || StringUtils.containsIgnoreCase(queryAlteration, "indel")
+                || StringUtils.containsIgnoreCase(queryAlteration, "dup")
+                || StringUtils.containsIgnoreCase(queryAlteration, "del")
+                || StringUtils.containsIgnoreCase(queryAlteration, "ins")
+                || StringUtils.containsIgnoreCase(queryAlteration, "splice")
+                ) {
+                sb.append(queryAlteration + " altered");
+            } else {
+                sb.append(queryAlteration + " mutant");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Private methods
+     **/
     private static String alleleNamesStr(Set<Alteration> alterations) {
         if (alterations != null && alterations.size() > 0) {
             Alteration tmp = alterations.iterator().next();
@@ -842,109 +959,19 @@ public class SummaryUtils {
         return appendThe;
     }
 
-    private static String getTumorTypeSummaryFromEvidences(List<Evidence> evidences) {
-        String summary = null;
+    private static Summary getTumorTypeSummaryFromEvidences(List<Evidence> evidences) {
+        Summary summary = new Summary();
         if (evidences != null && evidences.size() > 0) {
             evidences = EvidenceUtils.sortTumorTypeEvidenceBasedNumOfAlts(evidences, false);
 
             Evidence ev = evidences.get(0);
             String tumorTypeSummary = ev.getDescription();
             if (tumorTypeSummary != null) {
-                summary = StringEscapeUtils.escapeXml(tumorTypeSummary).trim();
+                summary.setSummary(StringEscapeUtils.escapeXml(tumorTypeSummary).trim());
+                summary.setLastUpdate(ev.getLastEdit());
             }
         }
         return summary;
-    }
-
-    public static String getGeneMutationNameInVariantSummary(Gene gene, String queryAlteration) {
-        StringBuilder sb = new StringBuilder();
-        if (queryAlteration == null) {
-            return "";
-        } else {
-            queryAlteration = queryAlteration.trim();
-        }
-        Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
-        if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
-            AlterationUtils.annotateAlteration(alteration, queryAlteration);
-        }
-        if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration.toLowerCase());
-        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")) {
-            queryAlteration = "amplification (gain)";
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
-        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
-            queryAlteration = "deletion (loss)";
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
-        } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
-            queryAlteration = queryAlteration.replace("Fusion", "fusion");
-            sb.append(queryAlteration);
-        } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
-            || (alteration.getConsequence() != null
-            && (alteration.getConsequence().getTerm().equals("inframe_deletion")
-            || alteration.getConsequence().getTerm().equals("inframe_insertion")))
-            || StringUtils.containsIgnoreCase(queryAlteration, "indel")
-            || StringUtils.containsIgnoreCase(queryAlteration, "dup")
-            || StringUtils.containsIgnoreCase(queryAlteration, "del")
-            || StringUtils.containsIgnoreCase(queryAlteration, "ins")
-            || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
-        } else {
-            if (!queryAlteration.contains(gene.getHugoSymbol())) {
-                sb.append(gene.getHugoSymbol() + " ");
-            }
-            sb.append(queryAlteration + " mutation");
-        }
-        return sb.toString();
-    }
-
-    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, String queryAlteration) {
-        StringBuilder sb = new StringBuilder();
-        if (queryAlteration == null) {
-            return "";
-        } else {
-            queryAlteration = queryAlteration.trim();
-        }
-        Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
-        if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
-            AlterationUtils.annotateAlteration(alteration, queryAlteration);
-        }
-        if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
-            if (queryAlteration.toLowerCase().equals("fusions")) {
-                queryAlteration = gene.getHugoSymbol() + " fusion";
-            }
-            queryAlteration = queryAlteration.replace("Fusion", "fusion");
-            sb.append(queryAlteration + " positive");
-        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")
-            || StringUtils.equalsIgnoreCase(queryAlteration, "amplification")) {
-            queryAlteration = gene.getHugoSymbol() + "-amplified";
-            sb.append(queryAlteration);
-        } else {
-            if (!queryAlteration.contains(gene.getHugoSymbol())) {
-                sb.append(gene.getHugoSymbol() + " ");
-            }
-            if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
-                sb.append(queryAlteration.toLowerCase());
-            } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
-                queryAlteration = "deletion";
-                sb.append(queryAlteration);
-            } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
-                || (alteration.getConsequence() != null
-                && (alteration.getConsequence().getTerm().equals("inframe_deletion")
-                || alteration.getConsequence().getTerm().equals("inframe_insertion")))
-                || StringUtils.containsIgnoreCase(queryAlteration, "indel")
-                || StringUtils.containsIgnoreCase(queryAlteration, "dup")
-                || StringUtils.containsIgnoreCase(queryAlteration, "del")
-                || StringUtils.containsIgnoreCase(queryAlteration, "ins")
-                || StringUtils.containsIgnoreCase(queryAlteration, "splice")
-                ) {
-                sb.append(queryAlteration + " altered");
-            } else {
-                sb.append(queryAlteration + " mutant");
-            }
-        }
-        return sb.toString();
     }
 
     private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, String queryAlteration, String queryTumorType) {
@@ -984,8 +1011,8 @@ public class SummaryUtils {
         return summary;
     }
 
-    private static String getTumorTypeSummaryFromPickedTreatment(Gene gene, Alteration alteration, Set<TumorType> relevantTumorTypes) {
-        String tumorTypeSummary = null;
+    private static Summary getTumorTypeSummaryFromPickedTreatment(Gene gene, Alteration alteration, Set<TumorType> relevantTumorTypes) {
+        Summary tumorTypeSummary = null;
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
         Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
 
@@ -1012,13 +1039,13 @@ public class SummaryUtils {
         return tumorTypeSummary;
     }
 
-    private static String getKITtumorTypeSummaries(String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<TumorType> relevantTumorTypes) {
+    private static Summary getKITtumorTypeSummaries(String queryAlteration, List<Alteration> alterations, String queryTumorType, Set<TumorType> relevantTumorTypes) {
         Gene gene = GeneUtils.getGeneByHugoSymbol("KIT");
-        String tumorTypeSummary = null;
+        Summary tumorTypeSummary = new Summary();
         Evidence pickedTreatment = null;
 
         // Get all tumor type summary evidences specifically for the alteration
-        if (tumorTypeSummary == null) {
+        if (tumorTypeSummary.getSummary() == null) {
             Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
             if (alteration != null) {
                 tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, alteration, relevantTumorTypes);
@@ -1026,7 +1053,9 @@ public class SummaryUtils {
         }
 
         // Get all tumor type summary evidences for the alternate alleles
-        if (tumorTypeSummary == null) {
+        if (tumorTypeSummary.getSummary() == null) {
+            tumorTypeSummary = new Summary();
+
             Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
             if (alteration == null) {
                 alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
@@ -1040,9 +1069,9 @@ public class SummaryUtils {
                     pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternateAlleles, MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
                     if (pickedTreatment != null) {
                         tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, (Alteration) CollectionUtils.intersection(alternateAlleles, new ArrayList<>(pickedTreatment.getAlterations())).iterator().next(), relevantTumorTypes);
-                        if (tumorTypeSummary != null) {
+                        if (tumorTypeSummary.getSummary() != null) {
                             // Only keep the first sentence for alternate allele
-                            tumorTypeSummary = tumorTypeSummary.split("\\.")[0] + ".";
+                            tumorTypeSummary.setSummary(tumorTypeSummary.getSummary().split("\\.")[0] + ".");
                         }
                     } else {
                         // If all alternate alleles don't have any treatment, check whether they have tumor type summaries.
@@ -1050,24 +1079,25 @@ public class SummaryUtils {
                             tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, allele, relevantTumorTypes);
                             if (tumorTypeSummary != null) {
                                 // Only keep the first sentence for alternate allele
-                                tumorTypeSummary = tumorTypeSummary.split("\\.")[0] + ".";
+                                tumorTypeSummary.setSummary(tumorTypeSummary.getSummary().split("\\.")[0] + ".");
                                 break;
                             }
                         }
                     }
                 } else if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
                     // No summary for synonymous variant
-                    return "";
+                    return new Summary();
                 }
             }
         }
 
         // Get all tumor type summary evidence for relevant alterations
         if (tumorTypeSummary == null) {
+            tumorTypeSummary = new Summary();
             // Base on the priority of relevant alterations
             for (Alteration alteration : alterations) {
                 tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, alteration, relevantTumorTypes);
-                if (tumorTypeSummary != null) {
+                if (tumorTypeSummary.getSummary() != null) {
                     break;
                 }
             }

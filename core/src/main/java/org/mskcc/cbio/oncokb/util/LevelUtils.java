@@ -117,7 +117,7 @@ public class LevelUtils {
         if (evidences != null) {
             for (Evidence evidence : evidences) {
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
-                if (levels.contains(level) && !result.contains(level)) {
+                if (levels == null || (levels.contains(level) && !result.contains(level))) {
                     result.add(level);
                 }
             }

@@ -3,6 +3,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Objects;
 /**
  * @author jgao
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Article implements java.io.Serializable {
     @JsonIgnore
     private Integer id;
@@ -24,10 +26,10 @@ public class Article implements java.io.Serializable {
     private String pages;
     private String authors;
     private String elocationId;
+    @JsonProperty("abstract")
     private String abstractContent;
     private String link;
 
-    @JsonProperty("abstract")
     public String getAbstractContent() {
         return abstractContent;
     }
@@ -151,23 +153,6 @@ public class Article implements java.io.Serializable {
 
     public void setElocationId(String elocationId) {
         this.elocationId = elocationId;
-    }
-
-    public String getReference() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(authors).append(". ")
-            .append(journal).append(". ");
-        if (pubDate != null)
-            sb.append(pubDate).append(";");
-        if (volume != null)
-            sb.append(volume);
-        if (issue != null)
-            sb.append("(").append(issue).append(")");
-        if (pages != null)
-            sb.append(pages);
-        sb.append(".");
-
-        return sb.toString();
     }
 
     @Override

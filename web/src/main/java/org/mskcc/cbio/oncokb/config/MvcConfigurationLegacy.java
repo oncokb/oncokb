@@ -11,21 +11,21 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pvt")
+@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.legacy")
 @EnableWebMvc
 @EnableSwagger2
-public class MvcConfigurationPrivate extends MvcConfiguration {
+public class MvcConfigurationLegacy extends MvcConfiguration {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         super.addViewControllers(registry);
-        registry.addViewController("/api/private").setViewName("redirect:/api/private/swagger-ui.html");
+        registry.addViewController("/legacy-api").setViewName("redirect:/legacy-api/swagger-ui.html");
     }
 
     @Bean
-    public Docket privateApi() {
+    public Docket legacyApi() {
         return new Docket(DocumentationType.SWAGGER_2)
             .select()
-            .apis(RequestHandlerSelectors.basePackage("org.mskcc.cbio.oncokb.api.pvt"))
+            .apis(RequestHandlerSelectors.basePackage("org.mskcc.cbio.oncokb.api.legacy"))
             .build()
             .apiInfo(apiInfo("v1.0"));
     }

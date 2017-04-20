@@ -20,7 +20,7 @@ public interface SearchApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})
-    @RequestMapping(value = "/search",
+    @RequestMapping(value = {"/v1/search", "/search"},
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<IndicatorQueryResp> searchGet(

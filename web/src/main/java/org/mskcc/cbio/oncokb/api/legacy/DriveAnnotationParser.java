@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,7 +30,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class DriveAnnotationParser {
     private static final String DO_NOT_IMPORT = "DO NOT IMPORT";
 
-    @RequestMapping(value = "/legacy-api/driveAnnotation", method = POST)
+    @RequestMapping(value = "/driveAnnotation", method = POST)
     public
     @ResponseBody
     void getEvidence(

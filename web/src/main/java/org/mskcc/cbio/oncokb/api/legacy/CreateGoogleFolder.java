@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -33,15 +33,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class CreateGoogleFolder {
     private static final String REPORT_PARENT_FOLDER = "0BzBfo69g8fP6fjZSQzlXYVdXaUJVcjllNS1CRnp5eW1LcnlLSDlXRDFFT0w0WkNBek1FTlE";
-    
-    @RequestMapping(value="/legacy-api/createGoogleFolder", method = POST)
+
+    @RequestMapping(value="/createGoogleFolder", method = POST)
     public @ResponseBody String CreateGoogleFolder(
             @RequestParam(value="folderName", required=true) String folderName) throws MalformedURLException, ServiceException, GeneralSecurityException, URISyntaxException{
         try {
             if(folderName != null && !folderName.equals("")) {
                 Drive driveService = GoogleAuth.getDriveService();
                 System.out.println("Got drive service");
-                
+
                 File folder = new File();
                 folder.setTitle(folderName);
                 folder.setMimeType("application/vnd.google-apps.folder");
@@ -52,7 +52,7 @@ public class CreateGoogleFolder {
             }else {
                 throw new Error("Invalid folder name.");
             }
-            
+
         } catch (GoogleJsonResponseException e) {
             GoogleJsonError error = e.getDetails();
 

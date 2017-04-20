@@ -2,12 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.http.HttpMethod;
@@ -22,7 +19,7 @@ import java.util.Set;
  * @author jgao
  */
 @Controller
-@RequestMapping(value = "/legacy-api/indicator.json")
+@RequestMapping(value = "/indicator.json")
 public class IndicatorController {
     @RequestMapping(method = RequestMethod.GET)
     public
@@ -56,7 +53,12 @@ public class IndicatorController {
         query.setAlterationType(alterationType);
         query.setTumorType(tumorType);
         query.setConsequence(consequence);
-        query.setType(queryType);
+        if (queryType != null) {
+            QueryType matchedQueryType = QueryType.valueOf(queryType);
+            if (matchedQueryType != null) {
+                query.setType(matchedQueryType);
+            }
+        }
         if (proteinStart != null) {
             query.setProteinStart(Integer.parseInt(proteinStart));
         }

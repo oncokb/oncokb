@@ -1,10 +1,9 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.config.annotation.DefaultApi;
+import org.mskcc.cbio.oncokb.config.annotation.V1Api;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
@@ -22,6 +21,8 @@ import java.util.Set;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
 @Controller
+@V1Api
+@DefaultApi
 public class SearchApiController implements SearchApi {
 
     public ResponseEntity<IndicatorQueryResp> searchGet(
@@ -54,7 +55,7 @@ public class SearchApiController implements SearchApi {
             query.setAlteration(variant);
             query.setTumorType(tumorType);
             query.setConsequence(consequence);
-            query.setType(queryType);
+            query.setType(QueryType.valueOf(queryType));
             if (proteinStart != null) {
                 query.setProteinStart(proteinStart);
             }

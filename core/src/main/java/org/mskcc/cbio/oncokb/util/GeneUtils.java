@@ -2,9 +2,13 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.Query;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -133,5 +137,60 @@ public class GeneUtils {
             flag = true;
         }
         return flag;
+    }
+
+    public static Set<Gene> getUniqueGenesFromString(String genesStr, String delimiter) {
+        Set<Gene> genes = new HashSet<>();
+        try {
+            List<String> geneStrsList = Arrays.asList(genesStr.split(delimiter));
+            for (String geneStr : geneStrsList) {
+                Gene gene = GeneUtils.getGeneByHugoSymbol(geneStr);
+                if (gene != null) {
+                    genes.add(gene);
+                }
+            }
+            return genes;
+        } catch (Exception e) {
+            return genes;
+        }
+    }
+
+    public static Gene getGeneByQuery(Query query) {
+        Gene gene = null;
+
+        if (query == null)
+            return gene;
+
+        // If query has entrezGeneId, ignore hugoSymbol
+        if (query.getEntrezGeneId() != null) {
+            gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        }
+        if (gene == null && query.getHugoSymbol() != null) {
+            Set<Gene> genes = getUniqueGenesFromString(query.getHugoSymbol(), "-");
+            if (genes.size() > 0) {
+                if (genes.size() == 1) {
+                    gene = genes.iterator().next();
+                } else {
+                    // Find which gene we have annotation for.
+                    for (Gene tmpGene : genes) {
+                        Alteration alt = AlterationUtils.getAlteration(tmpGene.getHugoSymbol(),
+                            query.getAlteration(), query.getAlterationType(), query.getConsequence(),
+                            query.getProteinStart(), query.getProteinEnd());
+                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+
+                        List<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(alt);
+                        if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
+                            gene = tmpGene;
+                            break;
+                        }
+                    }
+                    // None of relevant alterations found in both genes.
+                    if (gene == null) {
+                        gene = genes.iterator().next();
+                    }
+                }
+            }
+        }
+        return gene;
     }
 }

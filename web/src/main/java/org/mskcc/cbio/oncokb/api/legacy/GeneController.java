@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import io.swagger.annotations.ApiParam;
 import java.util.ArrayList;
@@ -10,7 +10,6 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 
 import org.springframework.stereotype.Controller;
@@ -27,29 +26,29 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class GeneController {
-    
-    @RequestMapping(value="/legacy-api/gene.json")
+
+    @RequestMapping(value="/gene.json")
     public @ResponseBody List<Gene> getGene(
             @RequestParam(value="entrezGeneId", required=false) List<Integer> entrezGeneIds,
             @RequestParam(value="hugoSymbol", required=false) List<String> hugoSymbols) {
-        
+
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-        
+
         if (entrezGeneIds == null && hugoSymbols == null) {
             return geneBo.findAll();
         }
-        
+
         List<Gene> genes = new ArrayList<Gene>();
         if (entrezGeneIds!=null) {
             genes.addAll(geneBo.findGenesByEntrezGeneId(entrezGeneIds));
         } else if (hugoSymbols!=null) {
             genes.addAll(geneBo.findGenesByHugoSymbol(hugoSymbols));
         }
-        
+
         return genes;
     }
-    
-    @RequestMapping(value="/legacy-api/genes/update/{hugoSymbol}", method = RequestMethod.POST)
+
+    @RequestMapping(value="/genes/update/{hugoSymbol}", method = RequestMethod.POST)
     public @ResponseBody String updateGene(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
             @RequestBody(required = true) Gene queryGene) {
         if(!hugoSymbol.equalsIgnoreCase(queryGene.getHugoSymbol())){
@@ -60,7 +59,7 @@ public class GeneController {
         gene.setTSG(queryGene.getTSG());
         gene.setOncogene(queryGene.getOncogene());
         geneBo.update(gene);
-        
+
         return "success";
     }
 }

@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.mskcc.cbio.oncokb.apiModels.Summary;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
@@ -28,8 +29,8 @@ import com.mysql.jdbc.StringUtils;
 
 
 public class CacheUtils {
-    private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
-    private static Map<Integer, Map<String, Map<String, String>>> variantTumorTypeSummary = new HashMap<>();
+    private static Map<Integer, Map<String, Summary>> variantSummary = new HashMap<>();
+    private static Map<Integer, Map<String, Map<String, Summary>>> variantTumorTypeSummary = new HashMap<>();
     private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
@@ -402,7 +403,7 @@ public class CacheUtils {
         relevantEvidences.get(entrezGeneId).put(variant, mappedEvidenceIds);
     }
 
-    public static String getVariantSummary(Integer entrezGeneId, String variant) {
+    public static Summary getVariantSummary(Integer entrezGeneId, String variant) {
         if (variantSummary.containsKey(entrezGeneId) && variantSummary.get(entrezGeneId).containsKey(variant)) {
             return variantSummary.get(entrezGeneId).get(variant);
         } else {
@@ -415,14 +416,14 @@ public class CacheUtils {
             variantSummary.get(entrezGeneId).containsKey(variant)) ? true : false;
     }
 
-    public static void setVariantSummary(Integer entrezGeneId, String variant, String summary) {
+    public static void setVariantSummary(Integer entrezGeneId, String variant, Summary summary) {
         if (!variantSummary.containsKey(entrezGeneId)) {
-            variantSummary.put(entrezGeneId, new HashMap<String, String>());
+            variantSummary.put(entrezGeneId, new HashMap<String, Summary>());
         }
         variantSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static String getVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType) {
+    public static Summary getVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType) {
         if (variantTumorTypeSummary.containsKey(entrezGeneId)
             && variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)
             && variantTumorTypeSummary.get(entrezGeneId).get(variant).containsKey(tumorType)) {
@@ -438,12 +439,12 @@ public class CacheUtils {
             && variantTumorTypeSummary.get(entrezGeneId).get(variant).containsKey(tumorType)) ? true : false;
     }
 
-    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType, String summary) {
+    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType, Summary summary) {
         if (!variantTumorTypeSummary.containsKey(entrezGeneId)) {
-            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, Map<String, String>>());
+            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, Map<String, Summary>>());
         }
         if (!variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)) {
-            variantTumorTypeSummary.get(entrezGeneId).put(variant, new HashMap<String, String>());
+            variantTumorTypeSummary.get(entrezGeneId).put(variant, new HashMap<String, Summary>());
         }
         variantTumorTypeSummary.get(entrezGeneId).get(variant).put(tumorType, summary);
     }

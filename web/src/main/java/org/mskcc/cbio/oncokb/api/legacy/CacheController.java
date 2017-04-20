@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
@@ -26,7 +26,7 @@ import java.util.*;
  */
 @Controller
 public class CacheController {
-    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/cache", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
     Map<String, String> getAlteration(
@@ -47,7 +47,7 @@ public class CacheController {
         return result;
     }
 
-    @RequestMapping(value = "/legacy-api/cache/getGeneCache", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/cache/getGeneCache", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
     Map<String, Object> getGeneCache(
@@ -84,7 +84,7 @@ public class CacheController {
         return result;
     }
 
-    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/cache", method = RequestMethod.POST, produces = "application/json")
     public
     @ResponseBody
     Map<String, String> postAlteration(

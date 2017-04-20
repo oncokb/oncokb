@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.mskcc.cbio.oncokb.controller;
+package org.mskcc.cbio.oncokb.api.legacy;
 
 //import com.google.api.services.gmail.model.Message;
 import com.google.gdata.util.ServiceException;
@@ -11,24 +11,16 @@ import com.google.gdata.util.ServiceException;
 import java.io.*;
 
 
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
 
 import org.springframework.stereotype.Controller;
@@ -43,7 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class SendEmailController {
-    @RequestMapping(value="/legacy-api/sendEmail", method = POST)
+    @RequestMapping(value="/sendEmail", method = POST)
     public @ResponseBody Boolean getEmailContent(
             @RequestParam(value="subject", required=false) String subject,
             @RequestParam(value="content", required=false) String body,
