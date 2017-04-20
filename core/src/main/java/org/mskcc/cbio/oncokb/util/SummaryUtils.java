@@ -358,7 +358,7 @@ public class SummaryUtils {
                     sb.append(" oncogenic.");
                 }
             } else if (isHotspot) {
-                sb.append(hotspotSummary(query));
+                sb.append(hotspotSummary(query).getSummary());
             } else {
                 sb.append("It is unknown whether ");
                 if (appendThe) {
