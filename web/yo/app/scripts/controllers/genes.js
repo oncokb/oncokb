@@ -131,6 +131,85 @@ angular.module('oncokbApp')
                     });
                 }
             };
+            $scope.setUpdateTime = function () {
+                fetchGeneDoc(0);
+            };
+            function fetchGeneDoc(index) {
+                if(index < $scope.documents.length) {
+                    var fileId = $scope.documents[index].id;
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                            $timeout(function() {
+                                fetchGeneDoc(++index);
+                            },    2000, false);
+                        } else {
+                            $scope.docUpdateTime = new Date($scope.documents[index].modifiedDate).getTime();
+                            $scope.geneRealtimeModel = realtime.getModel();
+                            $scope.geneDoc = realtime.getModel().getRoot().get('gene');
+                            console.log(index, $scope.geneDoc.name.getText());
+                            setUpdateTimeGene();
+                            $timeout(function() {
+                                fetchGeneDoc(++index);
+                            },    2000, false);
+                        }
+                    });
+                } else {
+                    console.log('It is finished.');
+                }
+            }
+            function checkAndSet(reviewObj) {
+                if(!reviewObj) {
+                    reviewObj = $scope.geneRealtimeModel.createMap();
+                    console.log($scope.geneDoc.name.getText(), 'new map assigned');
+                }
+                if(!reviewObj.get('updateTime')) {
+                    reviewObj.set('updateTime', $scope.docUpdateTime);
+                    console.log('set time');
+                }
+            }
+            function setUpdateTimeGene() {
+                $scope.geneRealtimeModel.beginCompoundOperation();
+                checkAndSet($scope.geneDoc.summary_review);
+                checkAndSet($scope.geneDoc.type_review);
+                checkAndSet($scope.geneDoc.background_review);
+                for (var i = 0; i < $scope.geneDoc.mutations.length; i++) {
+                    var mutation = $scope.geneDoc.mutations.get(i);
+                    checkAndSet(mutation.name_review);
+                    checkAndSet(mutation.oncogenic_review);
+                    checkAndSet(mutation.shortSummary_review);
+                    checkAndSet(mutation.summary_review);
+                    checkAndSet(mutation.effect_review);
+                    checkAndSet(mutation.description_review);
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors.get(j);
+                        checkAndSet(tumor.name_review);
+                        checkAndSet(tumor.summary_review);
+                        checkAndSet(tumor.trials_review);
+                        checkAndSet(tumor.prevalence_review);
+                        checkAndSet(tumor.progImp_review);
+                        checkAndSet(tumor.cancerTypes_review);
+                        checkAndSet(tumor.nccn_review);
+                        checkAndSet(tumor.nccn.therapy_review);
+                        checkAndSet(tumor.nccn.disease_review);
+                        checkAndSet(tumor.nccn.version_review);
+                        checkAndSet(tumor.nccn.description_review);
+                        for (var k = 0; k < tumor.TI.length; k++) {
+                            var ti = tumor.TI.get(k);
+                            checkAndSet(ti.name_review);
+                            checkAndSet(ti.description_review);
+                            for (var m = 0; m < ti.treatments.length; m++) {
+                                var treatment = ti.treatments.get(m);
+                                checkAndSet(treatment.name_review);
+                                checkAndSet(treatment.level_review);
+                                checkAndSet(treatment.description_review);
+                            }
+                        }
+                    }
+                }
+                $scope.geneRealtimeModel.endCompoundOperation();
+            }
+
             function assignReviewColumn() {
                 var genes = $rootScope.metaData.keys();
                 for (var i = 0; i < genes.length; i++) {
