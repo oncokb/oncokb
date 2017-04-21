@@ -1,9 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -473,5 +473,16 @@ public class MainUtils {
             }
         }
         return false;
+    }
+
+    public static String getCurrentTime() {
+        return getCurrentTime(null);
+    }
+
+    public static String getCurrentTime(String timeformat) {
+        if (timeformat == null) {
+            timeformat = "MM/dd/yyy hh:mm:ss";
+        }
+        return new SimpleDateFormat(timeformat).format(new Date());
     }
 }
