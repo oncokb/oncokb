@@ -181,7 +181,7 @@ public class CacheUtils {
         if (cmd == null) {
             cmd = "";
         }
-        System.out.println("Notify other services...");
+        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
         if (cmd == "update" && entrezGeneId != null) {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
@@ -217,7 +217,7 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(drugsObserver);
 
             if (status.equals("enabled")) {
-                System.out.println("Observer: " + MainUtils.getTimestampDiff(current));
+                System.out.println("Observer: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
                 cacheAllGenes();
 
@@ -225,16 +225,16 @@ public class CacheUtils {
 
                 current = MainUtils.getCurrentTimestamp();
                 drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-                System.out.println("Cache all drugs: " + MainUtils.getTimestampDiff(current));
+                System.out.println("Cache all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
                 current = MainUtils.getCurrentTimestamp();
 
                 Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
-                System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current));
+                System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
                 current = MainUtils.getCurrentTimestamp();
 
                 Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, geneEvidences);
 
-                System.out.println("Separate all evidences: " + MainUtils.getTimestampDiff(current));
+                System.out.println("Separate all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
                 current = MainUtils.getCurrentTimestamp();
 
                 Iterator it = mappedEvidence.entrySet().iterator();
@@ -242,33 +242,33 @@ public class CacheUtils {
                     Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
                     evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
                 }
-                System.out.println("Cache all evidences: " + MainUtils.getTimestampDiff(current));
+                System.out.println("Cache all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
                 current = MainUtils.getCurrentTimestamp();
 
                 for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
                     setVUS(entry.getKey(), entry.getValue());
                 }
-                System.out.println("Cache all VUSs: " + MainUtils.getTimestampDiff(current));
+                System.out.println("Cache all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             } else {
-                System.out.println("CacheUtil is disabled.");
+                System.out.println("CacheUtil is disabled at " + MainUtils.getCurrentTime());
             }
             current = MainUtils.getCurrentTimestamp();
 
             allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
             allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
 
-            System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current));
+            System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             HotspotUtils.getHotspots();
-            System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current));
+            System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             registerOtherServices();
-            System.out.println("Register other services: " + MainUtils.getTimestampDiff(current));
+            System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e + " at " + MainUtils.getCurrentTime());
         }
     }
 
@@ -309,7 +309,7 @@ public class CacheUtils {
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
 
-        System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current));
+        System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
@@ -551,7 +551,7 @@ public class CacheUtils {
             }
             alterations.get(gene.getEntrezGeneId()).add(alteration);
         }
-        System.out.println("Cache all alterations: " + MainUtils.getTimestampDiff(current));
+        System.out.println("Cache all alterations: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 
     public static Set<Drug> getAllDrugs() {
@@ -645,7 +645,7 @@ public class CacheUtils {
 
     public static void updateGene(Integer entrezGeneId) {
         try {
-            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name"));
+            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -655,7 +655,7 @@ public class CacheUtils {
 
     public static void updateGene(Integer entrezGeneId, Boolean propagate) {
         try {
-            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name"));
+            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -670,7 +670,7 @@ public class CacheUtils {
 
     public static void resetAll() {
         try {
-            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name"));
+            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -680,7 +680,7 @@ public class CacheUtils {
 
     public static void resetAll(Boolean propagate) {
         try {
-            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name"));
+            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -732,6 +732,6 @@ public class CacheUtils {
             Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
             evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
         }
-        System.out.println("Cache all evidences by gene: " + MainUtils.getTimestampDiff(current));
+        System.out.println("Cache all evidences by gene: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 }
