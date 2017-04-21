@@ -1105,20 +1105,6 @@ angular.module('oncokbApp')
             return reviewObj;
         }
 
-        function getString(string) {
-            if(!string || !_.isString(string)) {
-                return '';
-            }
-            var tmp = window.document.createElement('DIV');
-            var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
-            var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
-            tmp.innerHTML = processdStr;
-            /* eslint new-cap: 0*/
-            var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
-            string = S(_string).collapseWhitespace().s;
-            return string;
-        }
-
         function getComments(model) {
             var comments = [];
             var commentKeys = Object.keys(OncoKB.curateInfo.Comment);
@@ -1218,6 +1204,6 @@ angular.module('oncokbApp')
             isUndefinedOrEmpty: isUndefinedOrEmpty,
             stringObject: stringObject,
             getVUSFullData: getVUSFullData,
-            getTextString: getString
+            getTextString: OncoKB.utils.getString
         };
     });
