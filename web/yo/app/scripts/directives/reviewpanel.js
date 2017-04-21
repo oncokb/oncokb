@@ -329,6 +329,7 @@ angular.module('oncokbApp')
                             var cancerType = $rootScope.model.create(OncoKB.CancerType);
                             cancerType.cancerType.setText(ct.cancerType);
                             cancerType.subtype.setText(ct.subtype);
+                            cancerType.oncoTreeCode.setText(ct.oncoTreeCode);
                             cancerType.cancerType_eStatus.set('obsolete', 'false');
                             cancerType.subtype_eStatus.set('obsolete', 'false');
                             cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');

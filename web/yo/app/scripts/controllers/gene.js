@@ -773,13 +773,13 @@ angular.module('oncokbApp')
                 var reviewObj;
                 switch (type) {
                 case 'GENE_SUMMARY':
-                    data.description = $scope.gene.summary.getText();
+                    data.description = $scope.gene.summary.text;
                     dataUUID = $scope.gene.summary_uuid.getText();
                     data.lastEdit = $scope.gene.summary_review.get('updateTime');
                     reviewObj = $scope.gene.summary_review;
                     break;
                 case 'GENE_BACKGROUND':
-                    data.description = $scope.gene.background.getText();
+                    data.description = $scope.gene.background.text;
                     dataUUID = $scope.gene.background_uuid.getText();
                     data.lastEdit = $scope.gene.background_review.get('updateTime');
                     reviewObj = $scope.gene.background_review;
@@ -795,38 +795,38 @@ angular.module('oncokbApp')
                         extraData.knownEffect = mutation.effect.value.getText();
                         extraDataUUID = mutation.effect_uuid.getText();
                         extraData.lastEdit = mutation.oncogenic_review.get('mostRecent').value.getText();
-                        extraData.description = mutation.description.getText();
+                        extraData.description = mutation.description.text;
                         extraData.evidenceType = 'MUTATION_EFFECT';
                     }
                     break;
                 case 'TUMOR_TYPE_SUMMARY':
-                    data.description = tumor.summary.getText();
+                    data.description = tumor.summary.text;
                     dataUUID = tumor.summary_uuid.getText();
                     data.lastEdit = tumor.summary_review.get('updateTime');
                     reviewObj = tumor.summary_review;
                     break;
                 case 'PREVALENCE':
-                    data.description = tumor.prevalence.getText();
+                    data.description = tumor.prevalence.text;
                     dataUUID = tumor.prevalence_uuid.getText();
                     data.lastEdit = tumor.prevalence_review.get('updateTime');
                     reviewObj = tumor.prevalence_review;
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
-                    data.description = tumor.progImp.getText();
+                    data.description = tumor.progImp.text;
                     dataUUID = tumor.progImp_uuid.getText();
                     data.lastEdit = tumor.progImp_review.get('updateTime');
                     reviewObj = tumor.progImp_review;
                     break;
                 case 'NCCN_GUIDELINES':
-                    data.description = tumor.nccn.description.getText();
+                    data.description = tumor.nccn.description.text;
                     data.nccnGuidelines = [
                         {
-                            therapy: stringUtils.getTextString(tumor.nccn.therapy.getText()),
+                            therapy: tumor.nccn.therapy.text,
                             category: '',
-                            description: stringUtils.getTextString(tumor.nccn.description.getText()),
-                            disease: stringUtils.getTextString(tumor.nccn.disease.getText()),
+                            description: tumor.nccn.description.text,
+                            disease: tumor.nccn.disease.text,
                             pages: '',
-                            version: stringUtils.getTextString(tumor.nccn.version.getText())
+                            version: tumor.nccn.version.text
                         }
                     ];
                     dataUUID = tumor.nccn_uuid.getText();
@@ -876,7 +876,13 @@ angular.module('oncokbApp')
                 }
 
                 if (mutation) {
-                    var mutationStrResult = parseMutationString(stringUtils.getTextString(mutation.name.getText()));
+                    var mutationStr;
+                    if(mainUtils.needReview(mutation.name_uuid) && mutation.name_review.get('lastReviewed')) {
+                      mutationStr = stringUtils.getTextString(mutation.name_review.get('lastReviewed'));
+                    } else {
+                      mutationStr = mutation.name.text;
+                    }
+                    var mutationStrResult = parseMutationString(mutationStr);
                     if(dataUUID) {
                         data.alterations = mutationStrResult;
                     }
@@ -887,10 +893,17 @@ angular.module('oncokbApp')
                 if (tumor) {
                     var tempArr1 = [];
                     var tempArr2 = [];
-                    _.each(tumor.cancerTypes.asArray(), function(item) {
+                    if(mainUtils.needReview(tumor.name_uuid) && _.isArray(tumor.cancerTypes_review.get('lastReviewed')) && tumor.cancerTypes_review.get('lastReviewed').length > 0) {
+                      _.each(tumor.cancerTypes_review.get('lastReviewed'), function(item) {
+                        tempArr1.push(item.cancerType);
+                        tempArr2.push(item.oncoTreeCode ? item.oncoTreeCode : 'null');
+                      });
+                    } else {
+                      _.each(tumor.cancerTypes.asArray(), function(item) {
                         tempArr1.push(item.cancerType.getText());
                         tempArr2.push(item.oncoTreeCode.getText() ? item.oncoTreeCode.getText() : 'null');
-                    });
+                      });
+                    }
                     if(tempArr1.length > 0) {
                         data.cancerType = tempArr1.join(',');
                         data.subtype = tempArr2.join(',');
@@ -898,7 +911,7 @@ angular.module('oncokbApp')
                 }
                 if (TI) {
                     if (!treatment) {
-                        data.description = TI.description.getText();
+                        data.description = TI.description.text;
                         dataUUID = TI.description_uuid.getText();
                         data.lastEdit = TI.description_review.get('updateTime');
                         reviewObj = TI.description_review;
@@ -907,20 +920,20 @@ angular.module('oncokbApp')
                         data.lastEdit = treatment.name_review.has('mostRecent') ? treatment.name_review.get('mostRecent').value.getText() : treatment.name_review.get('updateTime');
                         reviewObj = treatment.name_review;
                         data.levelOfEvidence = levelMapping[treatment.level.getText()];
-                        data.description = treatment.description.getText();
+                        data.description = treatment.description.text;
                         data.propagation = levelMapping[treatment.name_eStatus.get('propagation')];
                         data.treatments = [];
-                        var treatments = treatment.name.getText().split(',');
+                        var treatments = treatment.name.text.split(',');
                         for (i = 0; i < treatments.length; i++) {
                             var drugs = treatments[i].split('+');
                             var drugList = [];
                             for (var j = 0; j < drugs.length; j++) {
                                 drugList.push({
-                                    drugName: stringUtils.getTextString(drugs[j])
+                                    drugName: drugs[j]
                                 });
                             }
                             data.treatments.push({
-                                approvedIndications: [stringUtils.getTextString(treatment.indication.getText())],
+                                approvedIndications: [treatment.indication.text],
                                 drugs: drugList
                             });
                         }
@@ -952,7 +965,7 @@ angular.module('oncokbApp')
                 return evidences;
             };
             function formArticles(data) {
-                var description = stringUtils.getTextString(data.description);
+                var description = data.description;
                 var abstractResults = FindRegex.result(description);
                 var tempAbstract;
                 for (var i = 0; i < abstractResults.length; i++) {
@@ -1665,6 +1678,7 @@ angular.module('oncokbApp')
                     uuids.push(obj.prevalence_uuid.getText());
                     uuids.push(obj.progImp_uuid.getText());
                     uuids.push(obj.trials_uuid.getText());
+                    uuids.push(obj.nccn_uuid.getText());
                     uuids.push(obj.nccn.therapy_uuid.getText());
                     uuids.push(obj.nccn.disease_uuid.getText());
                     uuids.push(obj.nccn.version_uuid.getText());
@@ -3190,7 +3204,7 @@ angular.module('oncokbApp')
             var lastReviewed = [];
             for(var i = 0; i < $scope.meta.cancerTypes.length; i++) {
                 var item = $scope.meta.cancerTypes.get(i);
-                lastReviewed.push({cancerType: item.cancerType.getText(), subtype: item.subtype.getText()});
+                lastReviewed.push({cancerType: item.cancerType.getText(), subtype: item.subtype.getText(), oncoTreeCode: item.oncoTreeCode.getText()});
             }
             if ($scope.meta.cancerTypes_review && _.isNull($scope.meta.cancerTypes_review.get('lastReviewed'))) {
                 $scope.meta.cancerTypes_review.set('lastReviewed', lastReviewed);
