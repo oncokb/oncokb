@@ -2,8 +2,11 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -140,7 +143,6 @@ public class Alteration implements java.io.Serializable {
         return hash;
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -165,6 +167,59 @@ public class Alteration implements java.io.Serializable {
     @Override
     public String toString() {
         return gene + " " + alteration;
+    }
+
+    public String getUniqueId() {
+        List<String> content = new ArrayList<>();
+        if(this.gene != null) {
+            if (this.gene.getHugoSymbol() != null) {
+                content.add(this.gene.getHugoSymbol());
+            } else {
+                content.add("");
+            }
+        }
+        if (this.alteration != null) {
+            content.add(this.alteration);
+        } else {
+            content.add("");
+        }
+        if (this.name != null) {
+            content.add(this.name);
+        } else {
+            content.add("");
+        }
+        if (this.alterationType != null) {
+            content.add(this.alterationType.name());
+        } else {
+            content.add("");
+        }
+        if (this.consequence != null) {
+            content.add(this.consequence.getTerm());
+        } else {
+            content.add("");
+        }
+        if (this.proteinStart != null) {
+            content.add(Integer.toString(this.proteinStart));
+        } else {
+            content.add("");
+        }
+        if (this.proteinEnd != null) {
+            content.add(Integer.toString(this.proteinEnd));
+        } else {
+            content.add("");
+        }
+        if (this.refResidues != null) {
+            content.add(this.refResidues);
+        } else {
+            content.add("");
+        }
+        if (this.variantResidues != null) {
+            content.add(this.variantResidues);
+        } else {
+            content.add("");
+        }
+
+        return StringUtils.join(content.toArray(), "&");
     }
 }
 

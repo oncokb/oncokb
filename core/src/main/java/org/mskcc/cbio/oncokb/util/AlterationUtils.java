@@ -548,7 +548,7 @@ public final class AlterationUtils {
         Integer proteinStart = alteration.getProteinStart();
         Integer proteinEnd = alteration.getProteinEnd();
 
-        String id = gene.getHugoSymbol() + alteration.getAlteration() + (consequence == null ? "" : consequence);
+        String id = alteration.getUniqueId();
 
         if (CacheUtils.isEnabled()) {
             if (!CacheUtils.containRelevantAlterations(gene.getEntrezGeneId(), id)) {
