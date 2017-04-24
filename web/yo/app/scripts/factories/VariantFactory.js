@@ -256,6 +256,9 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 }
             });
     }
+    function getPubMedArticle(pubMedIDs) {
+        return $http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=' + pubMedIDs.join(','));
+    }
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
@@ -264,7 +267,8 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
         updateVUS: updateVUS,
         updateEvidenceBatch: updateEvidenceBatch,
         getEvidencesByUUID: getEvidencesByUUID,
-        getEvidencesByUUIDs: getEvidencesByUUIDs
+        getEvidencesByUUIDs: getEvidencesByUUIDs,
+        getPubMedArticle: getPubMedArticle
     };
 }]);
 

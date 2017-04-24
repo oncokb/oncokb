@@ -26,5 +26,17 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
 
     'date-desc': function(a, b) {
         return b - a;
+    },
+    'curated-pre': function(a) {
+        var x = jQuery(a)[0].value;
+        return x;
+    },
+
+    'curated-asc': function(a, b) {
+        return a > b;
+    },
+
+    'curated-desc': function(a, b) {
+        return b > a;
     }
 });

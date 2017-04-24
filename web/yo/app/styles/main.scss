@@ -815,3 +815,15 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 .seperationLine {
     border-bottom: 2px solid lightgrey;
 }
+
+.curationQueue {
+    display: inline-block;
+    width: 100%;
+    .headerStyle {
+        margin-top:50px;
+        margin-bottom:30px;
+    }
+    .buttonStyle {
+        color: white !important
+    }
+}

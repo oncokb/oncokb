@@ -540,6 +540,7 @@
       </div>
     </div>
   </div>
+  <curation-queue></curation-queue>
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
   <span class="btn btn-default" style="opacity: 1" disabled>{{::gene.name.text}}</span>
@@ -578,6 +579,5 @@
     <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>-->
   <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>
 </div>
-
 <loading ng-model="status.saveDataToDatabase" content="Please wait, we are saving the data into database." class="loading-save-to-database"></loading>
 <loading ng-model="status.rendering" content="Please wait, we are loading gene information."></loading>
