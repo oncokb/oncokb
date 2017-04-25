@@ -194,7 +194,7 @@ public class EvidenceController {
 
         for (Alteration alt : alts) {
             List<Evidence> altEvidences = evidenceBo.findEvidencesByAlteration(Collections.singletonList(alt));
-            if (altEvidences == null && altEvidences.isEmpty()) {
+            if (altEvidences == null || altEvidences.isEmpty()) {
                 removedAlts.add(alt);
             }
         }
