@@ -2,11 +2,16 @@ package org.mskcc.cbio.oncokb.validation;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.FileUtils;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.JsonUtils;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Hongxin on 4/21/17.
@@ -24,20 +29,13 @@ public class isoformCheck {
                     if (ensembl != null && ensembl.getSeq() != null && ensembl.getId() != null) {
                         Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
                         for (Alteration alteration : alterations) {
-                            if (alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
-                                if (alteration.getRefResidues() != null && alteration.getProteinStart() != null) {
-                                    if (ensembl.getSeq().length() < alteration.getProteinStart()) {
-                                        System.out.println("Annotation out of range on gene " + gene.getHugoSymbol() + ". Current protein start is " + alteration.getProteinStart() + " but the length of protein is " + ensembl.getSeq().length());
-                                    } else {
-                                        char ref = alteration.getRefResidues().charAt(0);
-                                        char ensemblRef = ensembl.getSeq().charAt(alteration.getProteinStart() - 1);
-                                        if (ref != ensemblRef) {
-                                            System.out.println("Reference mismatch: " + gene.getHugoSymbol() + " " + alteration.getAlteration() + " is supposed to be " + ensemblRef + " at " + alteration.getProteinStart());
-                                        }
-                                    }
-                                } else {
-                                    System.out.println(gene.getHugoSymbol() + " " + alteration.getAlteration() + " does not have reference AA or protein start.");
-                                }
+                            Pattern p = Pattern.compile("([A-Z])([0-9]+)(_([A-Z])([0-9]+))?.*");
+                            Matcher m = p.matcher(alteration.getAlteration());
+
+                            // As long as there is match, we should check.
+                            if (m.matches()) {
+                                validate(gene, m.group(1), m.group(2), ensembl, alteration.getAlteration());
+                                validate(gene, m.group(4), m.group(5), ensembl, alteration.getAlteration());
                             }
                         }
                     } else {
@@ -49,6 +47,35 @@ public class isoformCheck {
                 }
             } else {
                 System.out.println(gene.getHugoSymbol() + " does not have ensembl id.");
+            }
+        }
+    }
+
+    private static void validate(Gene gene, String refStr, String locationStr, Ensembl ensembl, String alteration) {
+        if (refStr != null && locationStr != null) {
+            String errorMessage = "";
+            Integer location = Integer.parseInt(locationStr);
+            Character ref = refStr.charAt(0);
+            if (ensembl.getSeq().length() < location) {
+                errorMessage = "Annotation out of range on variant " + gene.getHugoSymbol() + " " + alteration + ". Current protein start is " + location + " but the length of protein is " + ensembl.getSeq().length();
+            } else {
+                Character ensemblRef = ensembl.getSeq().charAt(location - 1);
+                if (ref != ensemblRef) {
+                    errorMessage = "Reference mismatch: " + gene.getHugoSymbol() + " " + alteration + " is supposed to be " + ensemblRef + " at " + location;
+                }
+            }
+
+            if (!errorMessage.isEmpty()) {
+                errorMessage = errorMessage.trim();
+                if (!errorMessage.endsWith(".")) {
+                    errorMessage = errorMessage + ".";
+                }
+                errorMessage += " Current ensembl ID (isoform) is " + gene.getCuratedIsoform();
+                if (ensembl.getId().equals(gene.getCuratedIsoform())) {
+                    errorMessage +=". But grch37 doesn't agree with the isoform, it returns as " + ensembl.getId();
+                }
+
+                System.out.println(errorMessage);
             }
         }
     }
