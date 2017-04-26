@@ -1,15 +1,13 @@
 package org.mskcc.cbio.oncokb.validation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.FileUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.JsonUtils;
+import org.mskcc.cbio.oncokb.util.*;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,8 +32,10 @@ public class isoformCheck {
 
                             // As long as there is match, we should check.
                             if (m.matches()) {
-                                validate(gene, m.group(1), m.group(2), ensembl, alteration.getAlteration());
-                                validate(gene, m.group(4), m.group(5), ensembl, alteration.getAlteration());
+                                List<Evidence> evidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alteration));
+
+                                validate(gene, m.group(1), m.group(2), ensembl, alteration.getAlteration(), evidences);
+                                validate(gene, m.group(4), m.group(5), ensembl, alteration.getAlteration(), evidences);
                             }
                         }
                     } else {
@@ -51,31 +51,44 @@ public class isoformCheck {
         }
     }
 
-    private static void validate(Gene gene, String refStr, String locationStr, Ensembl ensembl, String alteration) {
+    private static void validate(Gene gene, String refStr, String locationStr, Ensembl ensembl, String alteration, List<Evidence> evidences) {
         if (refStr != null && locationStr != null) {
-            String errorMessage = "";
+            StringBuilder errorMessage = new StringBuilder();
             Integer location = Integer.parseInt(locationStr);
             Character ref = refStr.charAt(0);
             if (ensembl.getSeq().length() < location) {
-                errorMessage = "Annotation out of range on variant " + gene.getHugoSymbol() + " " + alteration + ". Current protein start is " + location + " but the length of protein is " + ensembl.getSeq().length();
+                errorMessage.append("Annotation out of range on variant " + gene.getHugoSymbol() + " " + alteration + ". Current protein start is " + location + " but the length of protein is " + ensembl.getSeq().length());
             } else {
                 Character ensemblRef = ensembl.getSeq().charAt(location - 1);
                 if (ref != ensemblRef) {
-                    errorMessage = "Reference mismatch: " + gene.getHugoSymbol() + " " + alteration + " is supposed to be " + ensemblRef + " at " + location;
+                    errorMessage.append("Reference mismatch: " + gene.getHugoSymbol() + " " + alteration + " is supposed to be " + ensemblRef + " at " + location);
                 }
             }
 
-            if (!errorMessage.isEmpty()) {
-                errorMessage = errorMessage.trim();
-                if (!errorMessage.endsWith(".")) {
-                    errorMessage = errorMessage + ".";
-                }
-                errorMessage += " Current ensembl ID (isoform) is " + gene.getCuratedIsoform();
+            if (errorMessage.length() > 0) {
+                errorMessage.append(" Current ensembl ID (isoform) is " + gene.getCuratedIsoform());
                 if (ensembl.getId().equals(gene.getCuratedIsoform())) {
-                    errorMessage +=". But grch37 doesn't agree with the isoform, it returns as " + ensembl.getId();
+                    errorMessage.append(". But grch37 doesn't agree with the isoform, it returns as " + ensembl.getId());
                 }
 
-                System.out.println(errorMessage);
+                if (evidences != null && evidences.size() > 0) {
+                    for (Evidence evidence : evidences) {
+                        if (evidence.getArticles() != null && evidence.getArticles().size() > 0) {
+                            Set<String> pmids = EvidenceUtils.getPmids(Collections.singleton(evidence));
+                            if (pmids != null && pmids.size() > 0) {
+                                errorMessage.append(" Evidence type: " + evidence.getEvidenceType().name() + " pmids: " + StringUtils.join(pmids, ", "));
+                            }
+                        }
+                    }
+
+                    if (evidences.size() > 1) {
+                        Set<String> pmids = EvidenceUtils.getPmids(new HashSet<>(evidences));
+                        if (pmids != null && pmids.size() > 0) {
+                            errorMessage.append(" All pmids: " + StringUtils.join(pmids, ", "));
+                        }
+                    }
+                }
+                System.out.println(errorMessage.toString());
             }
         }
     }
