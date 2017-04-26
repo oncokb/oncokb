@@ -864,7 +864,7 @@ angular.module('oncokbApp')
             return vusData;
         }
 
-        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands, onlyReviewedContent, excludeRemoved) {
+        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands, onlyReviewedContent) {
             var gene = {};
             var geneData = realtime;
 
@@ -872,7 +872,6 @@ angular.module('oncokbApp')
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
-            excludeRemoved = _.isBoolean(excludeRemoved) ? excludeRemoved : false;
 
             gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments, onlyReviewedContent);
             gene.mutations = [];
@@ -889,7 +888,7 @@ angular.module('oncokbApp')
                 gene.transcripts.push(_transcript);
             });
             geneData.mutations.asArray().forEach(function(e) {
-                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && (!excludeRedHands || e.oncogenic_eStatus.get('curated') !== false) && (!excludeRemoved || !e.name_review || !e.name_review.get('removed'))) {
+                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && (!excludeRedHands || e.oncogenic_eStatus.get('curated') !== false)) {
                     var _mutation = {};
                     _mutation.tumors = [];
                     _mutation.effect = {};
@@ -939,7 +938,7 @@ angular.module('oncokbApp')
                     }
 
                     e.tumors.asArray().forEach(function(e1) {
-                        if (!(excludeObsolete && e1.name_eStatus && e1.name_eStatus.has('obsolete') && e1.name_eStatus.get('obsolete') === 'true') && (!excludeRemoved || !e1.name_review || !e1.name_review.get('removed'))) {
+                        if (!(excludeObsolete && e1.name_eStatus && e1.name_eStatus.has('obsolete') && e1.name_eStatus.get('obsolete') === 'true')) {
                             var __tumor = {};
                             var selectedAttrs = ['name', 'summary'];
 
@@ -998,7 +997,7 @@ angular.module('oncokbApp')
 
                                     e2.treatments.asArray().forEach(function(e3) {
                                         var treatment = {};
-                                        if ((excludeObsolete && e3.name_eStatus && e3.name_eStatus.has('obsolete') && e3.name_eStatus.get('obsolete') === 'true') || (excludeRemoved && e3.name_review && e3.name_review.get('removed'))) {
+                                        if (excludeObsolete && e3.name_eStatus && e3.name_eStatus.has('obsolete') && e3.name_eStatus.get('obsolete') === 'true') {
                                             return;
                                         }
                                         treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
