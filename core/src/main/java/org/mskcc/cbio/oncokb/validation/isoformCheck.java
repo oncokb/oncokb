@@ -66,10 +66,7 @@ public class isoformCheck {
             }
 
             if (errorMessage.length() > 0) {
-                errorMessage.append(" Current ensembl ID (isoform) is " + gene.getCuratedIsoform());
-                if (ensembl.getId().equals(gene.getCuratedIsoform())) {
-                    errorMessage.append(". But grch37 doesn't agree with the isoform, it returns as " + ensembl.getId());
-                }
+                errorMessage.append(" RefSeq is " + gene.getCuratedRefSeq());
 
                 if (evidences != null && evidences.size() > 0) {
                     for (Evidence evidence : evidences) {
@@ -87,6 +84,11 @@ public class isoformCheck {
                             errorMessage.append(" All pmids: " + StringUtils.join(pmids, ", "));
                         }
                     }
+                }
+
+                errorMessage.append(" Current ensembl ID (isoform) is " + gene.getCuratedIsoform());
+                if (!ensembl.getId().equals(gene.getCuratedIsoform())) {
+                    errorMessage.append(". But grch37 doesn't agree with the isoform, it returns as " + ensembl.getId());
                 }
                 System.out.println(errorMessage.toString());
             }
