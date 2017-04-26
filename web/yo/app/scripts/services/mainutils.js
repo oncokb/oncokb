@@ -233,7 +233,7 @@ angular.module('oncokbApp')
          */
         function getLastReviewedCancerTypesName(cancerTypes) {
             var list = [];
-            if(_.isArray(cancerTypes)) {
+            if (_.isArray(cancerTypes)) {
                 cancerTypes.forEach(function(cancerType) {
                     if (cancerType.subtype) {
                         var str = cancerType.subtype;
@@ -301,12 +301,13 @@ angular.module('oncokbApp')
             }
             return deferred.promise;
         }
+
         /**
          * Util to send email systematically
          * @param {string} sendTo The receipent
          * @param {string} subject The email subject
          * @param {string} content The email content
-        * */
+         * */
         function sendEmail(sendTo, subject, content) {
             var param = {sendTo: sendTo, subject: subject, content: content};
             DatabaseConnector.sendEmail(
@@ -319,16 +320,33 @@ angular.module('oncokbApp')
                 }
             );
         }
+
         /*
-        *  Check if item needs to be reviewed or not
-        *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
-        * */
-       function needReview(uuid) {
-            if(uuid) {
+         *  Check if item needs to be reviewed or not
+         *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
+         * */
+        function needReview(uuid) {
+            if (uuid) {
                 uuid = uuid.getText();
                 if ($rootScope.geneMetaData.get(uuid) && $rootScope.geneMetaData.get(uuid).get('review')) {
                     return true;
                 }
+            }
+            return false;
+        }
+
+        /**
+         * Check whether user is developer
+         * @param {string} userName The user name
+         * @return {boolean} whether user is developer
+         */
+        function developerCheck(userName) {
+            if (!userName) {
+                return false;
+            }
+            var developers = ['Hongxin Zhang', 'Jianjiong Gao', 'Jiaojiao Wang'];
+            if (developers.indexOf(userName) !== -1) {
+                return true;
             }
             return false;
         }
@@ -344,6 +362,7 @@ angular.module('oncokbApp')
             getOncogeneTSG: getOncogeneTSG,
             getLastReviewedCancerTypesName: getLastReviewedCancerTypesName,
             sendEmail: sendEmail,
-            needReview: needReview
+            needReview: needReview,
+            developerCheck: developerCheck
         };
     });

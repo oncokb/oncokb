@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, false, true);
+                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, true, true);
                                 var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
@@ -101,7 +101,7 @@ angular.module('oncokbApp')
                                             var sendTo = 'dev.oncokb@gmail.com';
                                             var subject = 'Fail to retrieve meta file';
                                             var content;
-                                            if(_.isArray(result) && result.length === 0) {
+                                            if (_.isArray(result) && result.length === 0) {
                                                 content = 'There is no meta file inside the Meta folder';
                                             } else {
                                                 content = 'System error is ' + JSON.stringify(result.error);
@@ -464,40 +464,44 @@ angular.module('oncokbApp')
                 });
             };
 
+            $scope.developerCheck = function() {
+                return MainUtils.developerCheck(users.getMe().name);
+            };
+
             function convertOncogenic(oncogenic) {
                 var result = 'Unknown';
                 if (oncogenic) {
                     switch (oncogenic) {
-                        case 'YES':
-                            result = 'Yes';
-                            break;
-                        case 'LIKELY':
-                            result = 'Likely';
-                            break;
-                        case 'NO':
-                            result = 'Likely Neutral';
-                            break;
-                        case 'UNKNOWN':
-                            result = 'Unknown';
-                            break;
-                        case 'false':
-                            result = 'Likely Neutral';
-                            break;
-                        case 'Yes':
-                            result = 'Yes';
-                            break;
-                        case 'Likely':
-                            result = 'Likely';
-                            break;
-                        case 'Likely Neutral':
-                            result = 'Likely Neutral';
-                            break;
-                        case 'Inconclusive':
-                            result = 'Inconclusive';
-                            break;
-                        default:
-                            console.log('Couldn\'t find mapping for', oncogenic);
-                            break;
+                    case 'YES':
+                        result = 'Yes';
+                        break;
+                    case 'LIKELY':
+                        result = 'Likely';
+                        break;
+                    case 'NO':
+                        result = 'Likely Neutral';
+                        break;
+                    case 'UNKNOWN':
+                        result = 'Unknown';
+                        break;
+                    case 'false':
+                        result = 'Likely Neutral';
+                        break;
+                    case 'Yes':
+                        result = 'Yes';
+                        break;
+                    case 'Likely':
+                        result = 'Likely';
+                        break;
+                    case 'Likely Neutral':
+                        result = 'Likely Neutral';
+                        break;
+                    case 'Inconclusive':
+                        result = 'Inconclusive';
+                        break;
+                    default:
+                        console.log('Couldn\'t find mapping for', oncogenic);
+                        break;
                     }
                 }
                 return result;
@@ -1588,4 +1592,4 @@ angular.module('oncokbApp')
                 }
             }
         }]
-);
+    );

@@ -903,7 +903,7 @@ angular.module('oncokbApp')
                     if (!(excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
                         _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
                         _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false, excludeComments, onlyReviewedContent);
-                        if(e.effect_uuid) {
+                        if (e.effect_uuid) {
                             _mutation.effect_uuid = validUUID(e.effect_uuid);
                         }
                         _mutation.effect_review = getReview(e.effect_review);
@@ -967,7 +967,7 @@ angular.module('oncokbApp')
 
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
                                 __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                if(e1.nccn_uuid) {
+                                if (e1.nccn_uuid) {
                                     __tumor.nccn_uuid = validUUID(e1.nccn_uuid);
                                 }
                                 __tumor.nccn_review = getReview(e1.nccn_review);
@@ -981,7 +981,7 @@ angular.module('oncokbApp')
                                 if (!excludeComments && e1.trials_comments) {
                                     __tumor.trials_comments = getComments(e1.trials_comments);
                                 }
-                                if(e1.trials_uuid) {
+                                if (e1.trials_uuid) {
                                     __tumor.trials_uuid = validUUID(e1.trials_uuid);
                                 }
                                 __tumor.trials_review = getReview(e1.trials_review);
@@ -992,8 +992,8 @@ angular.module('oncokbApp')
                                     var ti = {};
 
                                     ti = combineData(ti, e2, ['name', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                    ti.status = getString(e2.types.get('status'));
-                                    ti.type = getString(e2.types.get('type'));
+                                    ti.status = OncoKB.utils.getString(e2.types.get('status'));
+                                    ti.type = OncoKB.utils.getString(e2.types.get('type'));
                                     ti.treatments = [];
 
                                     e2.treatments.asArray().forEach(function(e3) {
@@ -1048,22 +1048,22 @@ angular.module('oncokbApp')
                         }
                         if (model[e + '_review']) {
                             object[e + '_review'] = getReview(model[e + '_review']);
-                            if(e === 'type' && model[e + '_review'].has('lastReviewed')) {
+                            if (e === 'type' && model[e + '_review'].has('lastReviewed')) {
                                 object[e + '_review'].lastReviewed = model[e + '_review'].get('lastReviewed');
                             }
                         }
                     } else {
-                        if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].get('lastReviewed')) {
+                        if (onlyReviewedContent && model[e + '_review'] && (model[e + '_review'].get('lastReviewed') || model[e + '_review'].get('lastReviewed') === '')) {
                             if (model[e + '_review'].get('lastReviewed').type && model[e + '_review'].get('lastReviewed').type === 'Map') {
                                 object[e] = {};
                                 _.each(model[e + '_review'].get('lastReviewed').keys, function(keyMapping) {
-                                    object[e][keyMapping] = getString(model[e].get(keyMapping));
+                                    object[e][keyMapping] = OncoKB.utils.getString(model[e].get(keyMapping));
                                 });
                             } else {
-                                object[e] = getString(model[e + '_review'].get('lastReviewed'));
+                                object[e] = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
                             }
                         } else {
-                            object[e] = getString(model[e].getText());
+                            object[e] = model[e].text;
                         }
                         if (!excludeComments && model[e + '_comments']) {
                             object[e + '_comments'] = getComments(model[e + '_comments']);
@@ -1097,8 +1097,8 @@ angular.module('oncokbApp')
                 if (model.get(e)) {
                     if (model.get(e).type === 'Map') {
                         reviewObj[e] = getReview(model[e]);
-                    } else if(_.isString(model.get(e))) {
-                        reviewObj[e] = getString(model.get(e));
+                    } else if (_.isString(model.get(e))) {
+                        reviewObj[e] = OncoKB.utils.getString(model.get(e));
                     }
                 }
             });
@@ -1167,14 +1167,16 @@ angular.module('oncokbApp')
         }
 
         function validUUID(obj) {
-            if(!obj.getText()) {
+            if (!obj.getText()) {
                 var tempString = '';
-                while(!tempString) {
+                while (!tempString) {
                     tempString = UUIDjs.create(4).toString();
                 }
                 obj.setText(tempString);
                 return tempString;
-            } else return obj.getText();
+            } else {
+                return obj.getText();
+            }
         }
 
         // Public API here

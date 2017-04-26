@@ -253,11 +253,7 @@ angular.module('oncokbApp')
                 });
             };
             $scope.developerCheck = function() {
-                var developers = ['Hongxin Zhang', 'Jianjiong Gao', 'Jiaojiao Wang'];
-                if (developers.indexOf(Users.getMe().name) !== -1) {
-                    return true;
-                }
-                return false;
+                return mainUtils.developerCheck(Users.getMe().name);
             };
             $scope.geneMainDivStyle = {
                 opacity: '1'
@@ -312,10 +308,15 @@ angular.module('oncokbApp')
             function setUpdatedSignature(tempArr, reviewObj) {
                 var mostRecent = mostRecentItem(tempArr);
                 var timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                timeStamp.value.setText(tempArr[mostRecent].get('updateTime').toString());
-                timeStamp.by.setText(tempArr[mostRecent].get('updatedBy'));
+                if (tempArr[mostRecent].get('updateTime')) {
+                    timeStamp.value.setText(tempArr[mostRecent].get('updateTime').toString());
+                }
+                if (tempArr[mostRecent].get('updateTime')) {
+                    timeStamp.by.setText(tempArr[mostRecent].get('updatedBy'));
+                }
                 reviewObj.set('mostRecent', timeStamp);
             }
+
             var evidencesAllUsers = {};
 
             function formEvidencesPerUser(userName, type, mutation, tumor, TI, treatment) {
@@ -1272,7 +1273,7 @@ angular.module('oncokbApp')
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
 
-                var gene = stringUtils.getGeneData(this.gene, true, true, true, false, true);
+                var gene = stringUtils.getGeneData(this.gene, true, true, true, true, true);
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
 
