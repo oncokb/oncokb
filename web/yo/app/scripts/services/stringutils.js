@@ -944,6 +944,8 @@ angular.module('oncokbApp')
                                     __tumor.nccn_uuid = validUUID(e1.nccn_uuid);
                                 }
                                 __tumor.nccn_review = getReview(e1.nccn_review);
+                                var nccnReviewItems = [e1.nccn.therapy_review, e1.nccn.disease_review, e1.nccn.version_review, e1.nccn.description_review];
+                                __tumor.nccn_review.updateTime = nccnReviewItems[mostRecentItem(nccnReviewItems)].get('updateTime');
                             }
 
                             if (!(excludeObsolete && e1.trials_eStatus && e1.trials_eStatus.has('obsolete') && e1.trials_eStatus.get('obsolete') === 'true')) {
@@ -978,6 +980,8 @@ angular.module('oncokbApp')
                                         if (e3.name_eStatus.has('propagation')) {
                                             treatment.propagation = e3.name_eStatus.get('propagation');
                                         }
+                                        var treatmentReviewItems = [e3.name_review, e3.level_review, e3.indication_review, e3.description_review];
+                                        treatment.name_review.updateTime = treatmentReviewItems[mostRecentItem(treatmentReviewItems)].get('updateTime');
                                         ti.treatments.push(treatment);
                                     });
                                     __tumor.TI.push(ti);
@@ -1080,6 +1084,8 @@ angular.module('oncokbApp')
                 if (model.get(e)) {
                     if (model.get(e).type === 'Map') {
                         reviewObj[e] = getReview(model[e]);
+                    } else if(_.isNumber(model.get(e))) {
+                        reviewObj[e] = model.get(e);
                     } else if (_.isString(model.get(e))) {
                         reviewObj[e] = OncoKB.utils.getString(model.get(e));
                     }
@@ -1162,6 +1168,29 @@ angular.module('oncokbApp')
             }
         }
 
+        function mostRecentItem(reviewObjs) {
+            var mostRecent = -1;
+            for (var i = 0; i < reviewObjs.length; i++) {
+                var currentItemTime = new Date(reviewObjs[i].get('updateTime'));
+                // we only continue to check if current item time is valid
+                if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
+                    if (mostRecent < 0) {
+                        mostRecent = i;
+                    } else {
+                        // reset mostRect time when current item time is closer
+                        var mostRecentTime = new Date(reviewObjs[mostRecent].get('updateTime'));
+                        if(mostRecentTime < currentItemTime) {
+                            mostRecent = i;
+                        }
+                    }
+                }
+            }
+            if (mostRecent < 0) {
+                return 0;
+            }
+            return mostRecent;
+        }
+
         // Public API here
         return {
             trimMutationName: function(mutation) {
@@ -1189,6 +1218,7 @@ angular.module('oncokbApp')
             isUndefinedOrEmpty: isUndefinedOrEmpty,
             stringObject: stringObject,
             getVUSFullData: getVUSFullData,
-            getTextString: OncoKB.utils.getString
+            getTextString: OncoKB.utils.getString,
+            mostRecentItem: mostRecentItem
         };
     });

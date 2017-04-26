@@ -286,7 +286,6 @@ angular.module('oncokbApp')
             function mostRecentItem(reviewObjs) {
                 var mostRecent = -1;
                 for (var i = 0; i < reviewObjs.length; i++) {
-                    if (!reviewObjs[i].get('updatedBy')) continue;
                     var currentItemTime = new Date(reviewObjs[i].get('updateTime'));
                     // we only continue to check if current item time is valid
                     if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
@@ -308,7 +307,7 @@ angular.module('oncokbApp')
             }
 
             function setUpdatedSignature(tempArr, reviewObj) {
-                var mostRecent = mostRecentItem(tempArr);
+                var mostRecent = stringUtils.mostRecentItem(tempArr);
                 var timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
                 if (tempArr[mostRecent].get('updateTime')) {
                     timeStamp.value.setText(tempArr[mostRecent].get('updateTime').toString());
