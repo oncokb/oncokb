@@ -346,18 +346,36 @@ OncoKB.curateInfo = {
     }
 };
 
+function getString(string) {
+    if(!string || !_.isString(string)) {
+        return '';
+    }
+    var tmp = window.document.createElement('DIV');
+    var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
+    var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
+    tmp.innerHTML = processdStr;
+    /* eslint new-cap: 0*/
+    var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
+    string = S(_string).collapseWhitespace().s;
+    return string;
+}
+OncoKB.utils = {
+    getString: getString
+};
 OncoKB.setUp = function(object) {
     if (OncoKB.curateInfo.hasOwnProperty(object.attr)) {
         for (var key1 in OncoKB.curateInfo[object.attr]) {
             if (object[key1] && OncoKB.curateInfo[object.attr][key1].hasOwnProperty('display')) {
                 object[key1].display = OncoKB.curateInfo[object.attr][key1].display;
             }
-
             if (object[key1] && object[key1].type === 'EditableString') {
-                Object.defineProperty(object[key1], 'text', {
-                    set: object[key1].setText,
-                    get: object[key1].getText
-                });
+              Object.defineProperty(object[key1], 'text', {
+                  set: object[key1].setText,
+                  get: function() {
+                      return getString(this.getText());
+                  },
+                  configurable: true
+              });
             }
         }
     }

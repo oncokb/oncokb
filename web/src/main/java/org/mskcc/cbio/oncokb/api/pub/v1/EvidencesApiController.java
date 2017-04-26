@@ -32,6 +32,19 @@ public class EvidencesApiController implements EvidencesApi {
         return new ResponseEntity<>(evidences, status);
     }
 
+    public ResponseEntity<Set<Evidence>> evidencesUUIDsGet(
+        @ApiParam(value = "Unique identifier list.", required = true) @RequestBody(required = true) Set<String> uuids
+    ) {
+        HttpStatus status = HttpStatus.OK;
+        Set<Evidence> evidences = null;
+        if (uuids == null) {
+            status = HttpStatus.BAD_REQUEST;
+        }else{
+            evidences = EvidenceUtils.getEvidencesByUUIDs(uuids);
+        }
+        return new ResponseEntity<>(evidences, status);
+    }
+
     public ResponseEntity<List<Evidence>> evidencesLookupGet(
         @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol

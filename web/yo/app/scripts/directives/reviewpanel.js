@@ -8,7 +8,7 @@
  * This directive is designed specifically for review mode, which cotains change info text, accept icon, reject icon and loading bar
  */
 angular.module('oncokbApp')
-    .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs, _, OncoKB) {
+    .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs, _, OncoKB, mainUtils) {
         return {
             templateUrl: 'views/reviewPanel.html',
             restrict: 'AE',
@@ -128,7 +128,7 @@ angular.module('oncokbApp')
                             }
                             var tempTime = $scope.lastUpdateTime;
                             if(!tempTime) {
-                                tempTime = new Date().toLocaleString();
+                                tempTime = new Date().getTime();
                             }
                             item.reviewObj.clear();
                             item.reviewObj.set('review', false);
@@ -144,6 +144,14 @@ angular.module('oncokbApp')
                     if($scope.rs) {
                         $scope.rs.set('action', 'rejected');
                     }
+                    if($scope.bothChanged) {
+                        effectSection();
+                        $scope.bothChanged = false;
+                    }
+                }
+                function effectSection() {
+                    $scope.mt.oncogenic_review.set('updateTime', $scope.oncogenicLastUpdateTime);
+                    $scope.mt.effect_review.set('updateTime', $scope.effectLastUpdateTime);
                 }
                 $scope.reject = function(event) {
                     if (event !== null) {
@@ -171,15 +179,35 @@ angular.module('oncokbApp')
                             items = [{reviewObj: $scope.obj.type_review, uuid: $scope.obj.type_uuid}];
                             break;
                         case 'ONCOGENIC':
-                            uuid = $scope.mt.oncogenic_uuid;
+                            var oncogenicUUID = $scope.mt.oncogenic_uuid.getText();
+                            var effectUUID = $scope.mt.effect_uuid.getText();
+                            $scope.oncogenicLastUpdateTime = new Date().getTime();
+                            $scope.effectLastUpdateTime = new Date().getTime();
                             items = [{obj: $scope.mt.oncogenic, reviewObj: $scope.mt.oncogenic_review, uuid: $scope.mt.oncogenic_uuid},
-                                {obj: $scope.mt.summary, reviewObj: $scope.mt.summary_review, uuid: $scope.mt.summary_uuid},
-                                {obj: $scope.mt.shortSummary, reviewObj: $scope.mt.shortSummary_review, uuid: $scope.mt.shortSummary_uuid}];
-                            break;
-                        case 'MUTATION_EFFECT':
-                            uuid = $scope.mt.effect_uuid;
-                            items = [{obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
+                                {obj: $scope.mt.effect.value, reviewObj: $scope.mt.effect_review, uuid: $scope.mt.effect_uuid},
                                 {obj: $scope.mt.description, reviewObj: $scope.mt.description_review, uuid: $scope.mt.description_uuid}];
+
+                            var oncogenicChange = mainUtils.needReview($scope.mt.oncogenic_uuid);
+                            var effectChange = mainUtils.needReview($scope.mt.effect_uuid) || mainUtils.needReview($scope.mt.description_uuid);
+                            if(oncogenicChange && effectChange) {
+                                $scope.bothChanged = true;
+                                DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
+                                    var resultJSON = JSON.parse(result.status);
+                                    if (_.isArray(resultJSON)) {
+                                        _.each(resultJSON, function(eviFromDB) {
+                                            if(eviFromDB) {
+                                                setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID);
+                                            }
+                                        });
+                                    }
+                                    rejectItem(items);
+                                }, function(error) {
+                                    console.log('Failed to fetch evidence based on uuid', error);
+                                });
+                            } else {
+                                if(oncogenicChange) uuid = oncogenicUUID;
+                                if(effectChange) uuid = effectUUID;
+                            }
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
                             uuid = $scope.tm.summary_uuid;
@@ -246,12 +274,21 @@ angular.module('oncokbApp')
                             }, function(error) {
                                 console.log('Failed to fetch evidence based on uuid', error);
                             });
-                        } else {
+                        } else if(!$scope.bothChanged) {
                             specialCases();
                             rejectItem(items);
                         }
                     });
                 };
+                function setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID) {
+                    if(eviFromDB.lastEdit) {
+                        if(eviFromDB.uuid === oncogenicUUID) {
+                            $scope.oncogenicLastUpdateTime = eviFromDB.lastEdit;
+                        } else if(eviFromDB.uuid === effectUUID) {
+                            $scope.effectLastUpdateTime = eviFromDB.lastEdit;
+                        }
+                    }
+                }
                 function specialCases() {
                     switch ($scope.tp) {
                     case 'GENE_TYPE':
@@ -275,9 +312,7 @@ angular.module('oncokbApp')
                                 if(lastReviewedLevel !== null) {
                                     $scope.tt.level.setText(lastReviewedLevel);
                                 }
-                                if(lastReviewedPropagation !== null) {
-                                    $scope.tt.name_eStatus.set('propagation', lastReviewedPropagation);
-                                }
+                                $scope.tt.name_eStatus.set('propagation', lastReviewedPropagation);
                                 $scope.tt.level_review.clear();
                                 $scope.tt.level_review.set('review', false);
                                 $rootScope.geneMetaData.get($scope.tt.level_uuid.getText()).set('review', false);
@@ -294,6 +329,7 @@ angular.module('oncokbApp')
                             var cancerType = $rootScope.model.create(OncoKB.CancerType);
                             cancerType.cancerType.setText(ct.cancerType);
                             cancerType.subtype.setText(ct.subtype);
+                            cancerType.oncoTreeCode.setText(ct.oncoTreeCode);
                             cancerType.cancerType_eStatus.set('obsolete', 'false');
                             cancerType.subtype_eStatus.set('obsolete', 'false');
                             cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');

@@ -864,7 +864,7 @@ angular.module('oncokbApp')
             return vusData;
         }
 
-        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands, onlyReviewedContent, excludeRemoved) {
+        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands, onlyReviewedContent) {
             var gene = {};
             var geneData = realtime;
 
@@ -872,7 +872,6 @@ angular.module('oncokbApp')
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
-            excludeRemoved = _.isBoolean(excludeRemoved) ? excludeRemoved : false;
 
             gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments, onlyReviewedContent);
             gene.mutations = [];
@@ -889,7 +888,7 @@ angular.module('oncokbApp')
                 gene.transcripts.push(_transcript);
             });
             geneData.mutations.asArray().forEach(function(e) {
-                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && (!excludeRedHands || e.oncogenic_eStatus.get('curated') !== false) && (!excludeRemoved || !e.name_review || !e.name_review.get('removed'))) {
+                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && (!excludeRedHands || e.oncogenic_eStatus.get('curated') !== false)) {
                     var _mutation = {};
                     _mutation.tumors = [];
                     _mutation.effect = {};
@@ -901,37 +900,11 @@ angular.module('oncokbApp')
                         _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false, excludeComments, onlyReviewedContent);
                     }
                     if (!(excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false, excludeComments, onlyReviewedContent);
-                        if(e.effect_uuid) {
+                        _mutation = combineData(_mutation, e, ['description', 'short', 'effect'], excludeObsolete, excludeComments, onlyReviewedContent);
+                        if (e.effect_uuid) {
                             _mutation.effect_uuid = validUUID(e.effect_uuid);
                         }
                         _mutation.effect_review = getReview(e.effect_review);
-                        // if(_mutation.effect && _mutation.effect.value) {
-                        //     var effect = _mutation.effect.value;
-                        //
-                        //     if(_mutation.effect.value.toLowerCase() === 'other') {
-                        //         if(_mutation.effect.addOn) {
-                        //             effect = _mutation.effect.addOn;
-                        //         }else {
-                        //             effect = 'Other';
-                        //         }
-                        //     }else {
-                        //         if(_mutation.effect.addOn) {
-                        //             if(_mutation.effect.addOn.toLowerCase().indexOf(_mutation.effect.value.toLowerCase()) !== -1) {
-                        //                 effect = _mutation.effect.addOn;
-                        //             }else {
-                        //                 effect += ' ' + _mutation.effect.addOn;
-                        //             }
-                        //         }
-                        //     }
-                        //
-                        //     var message = '\t\t' + _mutation.name + '\tThe original mutation effect is ' + effect;
-                        //     _mutation.effect.value = stringUtils.findMutationEffect(effect);
-                        //     message += '\tconverting to: ' + _mutation.effect.value;
-                        //     // console.log(message);
-                        //     _mutation.effect.addOn = '';
-                        // }
 
                         if (!excludeComments && e.effect_comments) {
                             _mutation.effect_comments = getComments(e.effect_comments);
@@ -939,7 +912,7 @@ angular.module('oncokbApp')
                     }
 
                     e.tumors.asArray().forEach(function(e1) {
-                        if (!(excludeObsolete && e1.name_eStatus && e1.name_eStatus.has('obsolete') && e1.name_eStatus.get('obsolete') === 'true') && (!excludeRemoved || !e1.name_review || !e1.name_review.get('removed'))) {
+                        if (!(excludeObsolete && e1.name_eStatus && e1.name_eStatus.has('obsolete') && e1.name_eStatus.get('obsolete') === 'true')) {
                             var __tumor = {};
                             var selectedAttrs = ['name', 'summary'];
 
@@ -967,7 +940,7 @@ angular.module('oncokbApp')
 
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
                                 __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                if(e1.nccn_uuid) {
+                                if (e1.nccn_uuid) {
                                     __tumor.nccn_uuid = validUUID(e1.nccn_uuid);
                                 }
                                 __tumor.nccn_review = getReview(e1.nccn_review);
@@ -981,7 +954,7 @@ angular.module('oncokbApp')
                                 if (!excludeComments && e1.trials_comments) {
                                     __tumor.trials_comments = getComments(e1.trials_comments);
                                 }
-                                if(e1.trials_uuid) {
+                                if (e1.trials_uuid) {
                                     __tumor.trials_uuid = validUUID(e1.trials_uuid);
                                 }
                                 __tumor.trials_review = getReview(e1.trials_review);
@@ -992,13 +965,13 @@ angular.module('oncokbApp')
                                     var ti = {};
 
                                     ti = combineData(ti, e2, ['name', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                    ti.status = getString(e2.types.get('status'));
-                                    ti.type = getString(e2.types.get('type'));
+                                    ti.status = OncoKB.utils.getString(e2.types.get('status'));
+                                    ti.type = OncoKB.utils.getString(e2.types.get('type'));
                                     ti.treatments = [];
 
                                     e2.treatments.asArray().forEach(function(e3) {
                                         var treatment = {};
-                                        if ((excludeObsolete && e3.name_eStatus && e3.name_eStatus.has('obsolete') && e3.name_eStatus.get('obsolete') === 'true') || (excludeRemoved && e3.name_review && e3.name_review.get('removed'))) {
+                                        if (excludeObsolete && e3.name_eStatus && e3.name_eStatus.has('obsolete') && e3.name_eStatus.get('obsolete') === 'true') {
                                             return;
                                         }
                                         treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
@@ -1038,7 +1011,7 @@ angular.module('oncokbApp')
 
             keys.forEach(function(e) {
                 if (!(excludeObsolete && model[e + '_eStatus'] && model[e + '_eStatus'].has('obsolete') && model[e + '_eStatus'].get('obsolete') === 'true')) {
-                    if (model[e].type === 'Map') {
+                    if (model[e].type === 'Map' || model[e] instanceof OncoKB.ME) {
                         object[e] = {};
                         _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping) {
                             object[e][keyMapping] = model[e].get(keyMapping);
@@ -1048,22 +1021,32 @@ angular.module('oncokbApp')
                         }
                         if (model[e + '_review']) {
                             object[e + '_review'] = getReview(model[e + '_review']);
-                            if(e === 'type' && model[e + '_review'].has('lastReviewed')) {
+                            if (e === 'type' && model[e + '_review'].has('lastReviewed')) {
                                 object[e + '_review'].lastReviewed = model[e + '_review'].get('lastReviewed');
                             }
                         }
+
+                        if (model[e] instanceof OncoKB.ME) {
+                            // Handle special case for mutation effect. Current review info has been attached on higher level instead of `value`
+                            object.effect = combineData(object.effect, model.effect, ['value', 'addOn'], excludeObsolete, excludeComments, onlyReviewedContent);
+                            if (onlyReviewedContent && model[e + '_review'] && (model[e + '_review'].get('lastReviewed') || model[e + '_review'].get('lastReviewed') === '')) {
+                                object.effect.value = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
+                            } else {
+                                object.effect.value = model.effect.value.text;
+                            }
+                        }
                     } else {
-                        if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].get('lastReviewed')) {
+                        if (onlyReviewedContent && model[e + '_review'] && (model[e + '_review'].get('lastReviewed') || model[e + '_review'].get('lastReviewed') === '')) {
                             if (model[e + '_review'].get('lastReviewed').type && model[e + '_review'].get('lastReviewed').type === 'Map') {
                                 object[e] = {};
                                 _.each(model[e + '_review'].get('lastReviewed').keys, function(keyMapping) {
-                                    object[e][keyMapping] = getString(model[e].get(keyMapping));
+                                    object[e][keyMapping] = OncoKB.utils.getString(model[e].get(keyMapping));
                                 });
                             } else {
-                                object[e] = getString(model[e + '_review'].get('lastReviewed'));
+                                object[e] = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
                             }
                         } else {
-                            object[e] = getString(model[e].getText());
+                            object[e] = model[e].text;
                         }
                         if (!excludeComments && model[e + '_comments']) {
                             object[e + '_comments'] = getComments(model[e + '_comments']);
@@ -1097,26 +1080,12 @@ angular.module('oncokbApp')
                 if (model.get(e)) {
                     if (model.get(e).type === 'Map') {
                         reviewObj[e] = getReview(model[e]);
-                    } else if(_.isString(model.get(e))) {
-                        reviewObj[e] = getString(model.get(e));
+                    } else if (_.isString(model.get(e))) {
+                        reviewObj[e] = OncoKB.utils.getString(model.get(e));
                     }
                 }
             });
             return reviewObj;
-        }
-
-        function getString(string) {
-            if(!string || !_.isString(string)) {
-                return '';
-            }
-            var tmp = window.document.createElement('DIV');
-            var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
-            var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
-            tmp.innerHTML = processdStr;
-            /* eslint new-cap: 0*/
-            var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
-            string = S(_string).collapseWhitespace().s;
-            return string;
         }
 
         function getComments(model) {
@@ -1181,14 +1150,16 @@ angular.module('oncokbApp')
         }
 
         function validUUID(obj) {
-            if(!obj.getText()) {
+            if (!obj.getText()) {
                 var tempString = '';
-                while(!tempString) {
+                while (!tempString) {
                     tempString = UUIDjs.create(4).toString();
                 }
                 obj.setText(tempString);
                 return tempString;
-            } else return obj.getText();
+            } else {
+                return obj.getText();
+            }
         }
 
         // Public API here
@@ -1218,6 +1189,6 @@ angular.module('oncokbApp')
             isUndefinedOrEmpty: isUndefinedOrEmpty,
             stringObject: stringObject,
             getVUSFullData: getVUSFullData,
-            getTextString: getString
+            getTextString: OncoKB.utils.getString
         };
     });

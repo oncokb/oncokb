@@ -608,6 +608,22 @@ public class CacheUtils {
         return mappedEvis;
     }
 
+    public static Set<Evidence> getEvidencesByUUIDs(Set<String> uuids) {
+        synEvidences();
+
+        Set<Evidence> mappedEvis = new HashSet<>();
+        if (uuids != null) {
+            for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+                for (Evidence evidence : map.getValue()) {
+                    if (evidence != null && uuids.contains(evidence.getUuid())) {
+                        mappedEvis.add(evidence);
+                    }
+                }
+            }
+        }
+        return mappedEvis;
+    }
+
     private static void setEvidences(Gene gene) {
         evidences.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGene(Collections.singleton(gene))));
     }

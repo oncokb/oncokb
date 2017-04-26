@@ -90,9 +90,9 @@ angular.module('oncokbApp')
                             } else if(!scope.reviewMode || scope.rs.get('review') !== false) {
                                 // exclude the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
-                                scope.rs.set('updateTime', new Date().toLocaleString());
+                                scope.rs.set('updateTime', new Date().getTime());
                                 var uuid = scope.uuid.getText();
-                                var tempMapping =  $rootScope.geneMetaData.get(uuid);
+                                var tempMapping = $rootScope.geneMetaData.get(uuid);
                                 if (!tempMapping) {
                                     tempMapping = $rootScope.metaModel.createMap();
                                 }
@@ -127,7 +127,7 @@ angular.module('oncokbApp')
                                         }
                                     }
                                 }
-                                 $rootScope.geneMetaData.set(uuid, tempMapping);
+                                $rootScope.geneMetaData.set(uuid, tempMapping);
                             }
                             scope.valueChanged();
                         }
@@ -156,7 +156,7 @@ angular.module('oncokbApp')
                             tempMapping.set('review', true);
                              $rootScope.geneMetaData.set(uuid, tempMapping);
                             scope.rs.set('updatedBy', user.name);
-                            scope.rs.set('updateTime', new Date().toLocaleString());
+                            scope.rs.set('updateTime', new Date().getTime());
                         }
                     });
                 }
