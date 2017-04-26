@@ -1273,7 +1273,7 @@ angular.module('oncokbApp')
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
 
-                var gene = stringUtils.getGeneData(this.gene, true, true, true, true, true);
+                var gene = stringUtils.getGeneData(this.gene, true, true, true, true);
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
 
