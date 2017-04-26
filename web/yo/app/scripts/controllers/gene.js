@@ -311,7 +311,7 @@ angular.module('oncokbApp')
                 if (tempArr[mostRecent].get('updateTime')) {
                     timeStamp.value.setText(tempArr[mostRecent].get('updateTime').toString());
                 }
-                if (tempArr[mostRecent].get('updateTime')) {
+                if (tempArr[mostRecent].get('updatedBy')) {
                     timeStamp.by.setText(tempArr[mostRecent].get('updatedBy'));
                 }
                 reviewObj.set('mostRecent', timeStamp);
