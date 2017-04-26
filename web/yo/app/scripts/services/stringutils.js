@@ -900,37 +900,11 @@ angular.module('oncokbApp')
                         _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false, excludeComments, onlyReviewedContent);
                     }
                     if (!(excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                        _mutation.effect = combineData(_mutation.effect, e.effect, ['value', 'addOn'], false, excludeComments, onlyReviewedContent);
+                        _mutation = combineData(_mutation, e, ['description', 'short', 'effect'], excludeObsolete, excludeComments, onlyReviewedContent);
                         if (e.effect_uuid) {
                             _mutation.effect_uuid = validUUID(e.effect_uuid);
                         }
                         _mutation.effect_review = getReview(e.effect_review);
-                        // if(_mutation.effect && _mutation.effect.value) {
-                        //     var effect = _mutation.effect.value;
-                        //
-                        //     if(_mutation.effect.value.toLowerCase() === 'other') {
-                        //         if(_mutation.effect.addOn) {
-                        //             effect = _mutation.effect.addOn;
-                        //         }else {
-                        //             effect = 'Other';
-                        //         }
-                        //     }else {
-                        //         if(_mutation.effect.addOn) {
-                        //             if(_mutation.effect.addOn.toLowerCase().indexOf(_mutation.effect.value.toLowerCase()) !== -1) {
-                        //                 effect = _mutation.effect.addOn;
-                        //             }else {
-                        //                 effect += ' ' + _mutation.effect.addOn;
-                        //             }
-                        //         }
-                        //     }
-                        //
-                        //     var message = '\t\t' + _mutation.name + '\tThe original mutation effect is ' + effect;
-                        //     _mutation.effect.value = stringUtils.findMutationEffect(effect);
-                        //     message += '\tconverting to: ' + _mutation.effect.value;
-                        //     // console.log(message);
-                        //     _mutation.effect.addOn = '';
-                        // }
 
                         if (!excludeComments && e.effect_comments) {
                             _mutation.effect_comments = getComments(e.effect_comments);
@@ -1037,7 +1011,7 @@ angular.module('oncokbApp')
 
             keys.forEach(function(e) {
                 if (!(excludeObsolete && model[e + '_eStatus'] && model[e + '_eStatus'].has('obsolete') && model[e + '_eStatus'].get('obsolete') === 'true')) {
-                    if (model[e].type === 'Map') {
+                    if (model[e].type === 'Map' || model[e] instanceof OncoKB.ME) {
                         object[e] = {};
                         _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping) {
                             object[e][keyMapping] = model[e].get(keyMapping);
@@ -1049,6 +1023,16 @@ angular.module('oncokbApp')
                             object[e + '_review'] = getReview(model[e + '_review']);
                             if (e === 'type' && model[e + '_review'].has('lastReviewed')) {
                                 object[e + '_review'].lastReviewed = model[e + '_review'].get('lastReviewed');
+                            }
+                        }
+
+                        if (model[e] instanceof OncoKB.ME) {
+                            // Handle special case for mutation effect. Current review info has been attached on higher level instead of `value`
+                            object.effect = combineData(object.effect, model.effect, ['value', 'addOn'], excludeObsolete, excludeComments, onlyReviewedContent);
+                            if (onlyReviewedContent && model[e + '_review'] && (model[e + '_review'].get('lastReviewed') || model[e + '_review'].get('lastReviewed') === '')) {
+                                object.effect.value = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
+                            } else {
+                                object.effect.value = model.effect.value.text;
                             }
                         }
                     } else {
