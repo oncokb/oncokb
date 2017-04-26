@@ -99,7 +99,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/update/{uuid}", method = RequestMethod.POST)
     public
     @ResponseBody
-    ResponseEntity updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
+    synchronized ResponseEntity updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
                                   @RequestBody Evidence queryEvidence) throws ParserConfigurationException {
 
         List<Evidence> updatedEvidences = updateEvidenceBasedOnUuid(uuid, queryEvidence);
@@ -114,7 +114,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/update", method = RequestMethod.POST)
     public
     @ResponseBody
-    ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) throws ParserConfigurationException {
+    synchronized ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) throws ParserConfigurationException {
         Set<Evidence> updatedEvidenceSet = new HashSet<>();
 
         for (Map.Entry<String, Evidence> entry : queryEvidences.entrySet()) {
@@ -133,7 +133,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/delete", method = RequestMethod.POST)
     public
     @ResponseBody
-    String deleteEvidences(@RequestBody List<String> uuids) {
+    synchronized String deleteEvidences(@RequestBody List<String> uuids) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         if (uuids != null) {
             List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(uuids);
@@ -146,7 +146,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/delete/{uuid}", method = RequestMethod.DELETE)
     public
     @ResponseBody
-    String deleteEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) {
+    synchronized String deleteEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
@@ -158,7 +158,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/vus/update/{hugoSymbol}", method = RequestMethod.POST)
     public
     @ResponseBody
-    ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
+    synchronized ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
                              @RequestBody String vus) {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -194,7 +194,7 @@ public class EvidenceController {
 
         for (Alteration alt : alts) {
             List<Evidence> altEvidences = evidenceBo.findEvidencesByAlteration(Collections.singletonList(alt));
-            if (altEvidences == null && altEvidences.isEmpty()) {
+            if (altEvidences == null || altEvidences.isEmpty()) {
                 removedAlts.add(alt);
             }
         }

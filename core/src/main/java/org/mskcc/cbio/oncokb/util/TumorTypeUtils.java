@@ -187,10 +187,12 @@ public class TumorTypeUtils {
 
         if (codes != null) {
             for (String code : codes) {
-                for (TumorType oncoTreeType : allOncoTreeSubtypes) {
-                    if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
-                        mapped.add(oncoTreeType);
-                        break;
+                if(code != null) {
+                    for (TumorType oncoTreeType : allOncoTreeSubtypes) {
+                        if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
+                            mapped.add(oncoTreeType);
+                            break;
+                        }
                     }
                 }
             }
