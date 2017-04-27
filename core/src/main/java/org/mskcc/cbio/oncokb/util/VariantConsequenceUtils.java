@@ -43,7 +43,7 @@ public class VariantConsequenceUtils {
         put("nonsense", "stop_gained");
         put("nonsense_mutation", "stop_gained");
         put("nonstop_mutation", "stop_lost");
-        put("nonsynonymous_snv", "protein_altering_variant");
+        put("nonsynonymous_snv", "any");
         put("silent", "synonymous_variant");
         put("splice", "splice_region_variant");
         put("splice_region", "splice_region_variant");
