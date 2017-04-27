@@ -66,17 +66,15 @@ angular.module('oncokbApp')
                         if (scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('review') !== false)) {
                             scope.rs.set('lastReviewed', o);
                         }
-                        scope.content.stringO = scope.object.text;
+                        if (scope.content.stringO !== scope.object.getText()) {
+                            scope.content.stringO = scope.object.text;
+                        }
                     }
                 });
                 scope.$watch('content.stringO', function(n, o) {
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
-                            if(scope.paste) {
-                                n = stringUtils.getTextString(scope.content.stringO);
-                                scope.paste = false;
-                            }
                             if (scope.es && scope.es.get('obsolete') === 'true') {
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
@@ -86,7 +84,6 @@ angular.module('oncokbApp')
                             } else if(!scope.uuid || !scope.uuid.getText() || !scope.rs) {
                                 // for the additional info items, since we don't need to track them in the review mode
                                 scope.object.text = n;
-                                scope.content.stringO = n;
                             } else if(!scope.reviewMode || scope.rs.get('review') !== false) {
                                 // exclude the case of reject action changing real time doc
                                 scope.rs.set('updatedBy', user.name);
@@ -117,7 +114,6 @@ angular.module('oncokbApp')
                                     scope.object.set(scope.objectkey, n);
                                 } else {
                                     scope.object.text = n;
-                                    scope.content.stringO = n;
                                     if (scope.rs.get('lastReviewed') !== n) {
                                         tempMapping.set('review', true);
                                     } else {
@@ -250,9 +246,6 @@ angular.module('oncokbApp')
                         classResult += ' doubleH';
                     }
                     return classResult;
-                };
-                $scope.togglePaste = function() {
-                    $scope.paste = true;
                 };
             }
         };

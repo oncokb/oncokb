@@ -4,7 +4,6 @@
         <p contenteditable="{{reviewMode ? (rs.get('review') !== false ? true : false) : fe}}"
            ng-class="getInputClass()"
            placeholder="{{ph}}"
-           ng-paste="togglePaste()"
            ng-model="content.stringO">
         </p>
         <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
