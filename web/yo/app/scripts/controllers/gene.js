@@ -286,6 +286,7 @@ angular.module('oncokbApp')
             function mostRecentItem(reviewObjs) {
                 var mostRecent = -1;
                 for (var i = 0; i < reviewObjs.length; i++) {
+                    if (!reviewObjs[i].get('updatedBy')) continue;
                     var currentItemTime = new Date(reviewObjs[i].get('updateTime'));
                     // we only continue to check if current item time is valid
                     if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
