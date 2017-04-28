@@ -153,6 +153,7 @@ angular.module('oncokbApp')
                 var proteinChange = '';
                 var displayName = '';
                 for (var i = 0; i < parts.length; i++) {
+                    if (!parts[i])continue;
                     if (parts[i].indexOf('[') === -1) {
                         proteinChange = parts[i];
                         displayName = parts[i];
@@ -875,26 +876,10 @@ angular.module('oncokbApp')
                 default:
                     break;
                 }
-
-                if (mutation) {
-                    var mutationStr;
-                    if(mainUtils.needReview(mutation.name_uuid) && mutation.name_review.get('lastReviewed')) {
-                      mutationStr = stringUtils.getTextString(mutation.name_review.get('lastReviewed'));
-                    } else {
-                      mutationStr = mutation.name.text;
-                    }
-                    var mutationStrResult = parseMutationString(mutationStr);
-                    if(dataUUID) {
-                        data.alterations = mutationStrResult;
-                    }
-                    if(extraDataUUID) {
-                        extraData.alterations = mutationStrResult;
-                    }
-                }
                 if (tumor) {
                     var tempArr1 = [];
                     var tempArr2 = [];
-                    if(mainUtils.needReview(tumor.name_uuid) && _.isArray(tumor.cancerTypes_review.get('lastReviewed')) && tumor.cancerTypes_review.get('lastReviewed').length > 0) {
+                    if(mainUtils.needReview(tumor.name_uuid) && _.isArray(tumor.cancerTypes_review.get('lastReviewed')) && tumor.cancerTypes_review.get('lastReviewed').length > 0 && type !== 'TUMOR_NAME_CHANGE') {
                       _.each(tumor.cancerTypes_review.get('lastReviewed'), function(item) {
                         tempArr1.push(item.cancerType);
                         tempArr2.push(item.oncoTreeCode ? item.oncoTreeCode : 'null');
@@ -938,6 +923,21 @@ angular.module('oncokbApp')
                                 drugs: drugList
                             });
                         }
+                    }
+                }
+                if (mutation) {
+                    var mutationStr;
+                    if(mainUtils.needReview(mutation.name_uuid) && mutation.name_review.get('lastReviewed') && type !== 'MUTATION_NAME_CHANGE') {
+                      mutationStr = stringUtils.getTextString(mutation.name_review.get('lastReviewed'));
+                    } else {
+                      mutationStr = mutation.name.text;
+                    }
+                    var mutationStrResult = parseMutationString(mutationStr);
+                    if(dataUUID || type === 'MUTATION_NAME_CHANGE') {
+                      data.alterations = mutationStrResult;
+                    }
+                    if(extraDataUUID) {
+                      extraData.alterations = mutationStrResult;
                     }
                 }
                 if (data.description) {
