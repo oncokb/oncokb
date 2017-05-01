@@ -78,7 +78,7 @@ public final class AlterationUtils {
             } else if (var.equals("*")) {
                 consequence = "stop_gained";
             } else if (start == 1) {
-                consequence = "initiator_codon_variant";
+                consequence = "start_lost";
             } else if (var.equals("?")) {
                 consequence = "any";
             } else {
