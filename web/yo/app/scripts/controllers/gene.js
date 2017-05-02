@@ -278,6 +278,9 @@ angular.module('oncokbApp')
             function setOriginalStatus(reviewObjs) {
                 for (var i = 0; i < reviewObjs.length; i++) {
                     var reviewObj = reviewObjs[i];
+                    if(reviewObj === null) {
+                        reviewObj = $scope.realtimeDocument.getModel().createMap();
+                    }
                     resetReview(reviewObj, true);
                 }
             }
