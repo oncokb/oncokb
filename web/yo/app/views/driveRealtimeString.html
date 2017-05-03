@@ -1,12 +1,12 @@
 <div class="drive-realtime-string">
     <div ng-if="t === 'p' || t === 'short'">
-        <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+        <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">New Content:</h4>
         <p contenteditable="{{reviewMode ? (rs.get('review') !== false ? true : false) : fe}}"
            ng-class="getInputClass()"
            placeholder="{{ph}}"
            ng-model="content.stringO">
         </p>
-        <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
+        <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">
             <h4>Difference comparing to the old content:</h4>
             <p ng-bind-html="diffHTML"></p>
             <!--<h4>Old Content:</h4>-->
@@ -18,20 +18,20 @@
         </pub-iframe>
     </div>
     <div ng-if="t === 'name'">
-        <h4 ng-if="reviewMode && rs.get('lastReviewed') && !rs.get('removedItem')">New Content:</h4>
+        <h4 ng-if="reviewMode && rs.get('lastReviewed') && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">New Content:</h4>
         <span contenteditable="{{reviewMode ? (rs.get('lastReviewed') ? true : false) : fe}}"
               ng-class="editableBox"
            ng-model="content.stringO">
         </span>
         <br/>
-        <div ng-if="reviewMode && rs.get('lastReviewed') && !rs.get('removedItem')">
+        <div ng-if="reviewMode && rs.get('lastReviewed') && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">
             <h4>Old Content:</h4>
             <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewed')}}</p>
         </div>
     </div>
     <div ng-if="t === 'treatment-select'" class="treatment-select">
         <div>
-            <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+            <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">New Content:</h4>
             <div>
                 <select ng-disabled="reviewMode ? (rs.get('review') === false ? true : false) : !fe"
                         ng-model="content.stringO"
@@ -53,7 +53,7 @@
                     <p>{{es.get('propagation')}}</p>
                 </div>
             </div>
-            <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
+            <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">
                 <h4>Old Content:</h4>
                 <p ng-class="unEditableBox" contenteditable="false">{{rs.has('lastReviewed') ? rs.get('lastReviewed') : content.stringO}}</p>
                 <div class="propagation" ng-if="rs.has('lastReviewedPropagation')">
@@ -65,13 +65,13 @@
 
     </div>
     <div ng-if="t === 'select-chosen'" class="chosen-full-width">
-        <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+        <h4 ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">New Content:</h4>
         <select ng-disabled="reviewMode ? (rs.get('review') === false ? true : false) : !fe"
             chosen ng-attr-id="{{chosenid}}" allow-single-deselect="true" ng-model="content.stringO"
                 ng-options="opt for opt in o">
             <option value="NA"></option>
         </select>
-        <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem')">
+        <div ng-if="reviewMode && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">
             <h4>Old Content:</h4>
             <p ng-class="unEditableBox" contenteditable="false">{{rs.get('lastReviewed')}}</p>
         </div>
@@ -79,7 +79,7 @@
     <div ng-if="t === 'checkbox'">
         <div>
             <br/>
-            <h4 ng-if="reviewMode && !objecttype && rs.get('review') !== false && !rs.get('removedItem')">New Content:</h4>
+            <h4 ng-if="reviewMode && !objecttype && rs.get('review') !== false && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">New Content:</h4>
             <div>
                     <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || rs.get('review') !== false">
                       <input
@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <div ng-if="reviewMode && !rs.get('removedItem')">
+        <div ng-if="reviewMode && !rs.get('removedItem') && !rs.get('addedItem') && !rs.get('unobsoleted')">
             <h4 ng-if="!objecttype && rs.get('review') !== false">Old Content:</h4>
             <div>
                 <span ng-if="!objecttype" ng-repeat="checkbox in checkboxes" class="reviewedBG">

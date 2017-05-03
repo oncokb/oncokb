@@ -160,7 +160,10 @@
               <span class="pull-right">
                   <review-panel rt="'delete'" rs="mutation.name_review" tp="'mutation'" mt="mutation" confirm-delete="confirmDelete(event, type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(event, type, mutation, tumor, ti, treatment)"></review-panel>
               </span>
-              <span class="pull-right" ng-if="mutation.name_review.get('lastReviewed') || mutation.name_review.get('action')">
+              <span class="pull-right">
+                  <review-panel rt="'add'" rs="mutation.name_review" tp="'mutation'" mt="mutation" accept-added="acceptAdded(event, type, mutation, tumor, ti, treatment, reviewObj)" reject-added="rejectAdded(event, type, mutation, tumor, ti, treatment)"></review-panel>
+              </span>
+              <span class="pull-right">
                   <review-panel rt="'name'" rs="mutation.name_review" tp="'MUTATION_NAME_CHANGE'" mt="mutation" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
               </span>
           </uib-accordion-heading>
@@ -228,8 +231,11 @@
                         <p>Old Content: </p>
                         <span ng-class="{unEditableBox: true}" contenteditable="false">{{getLastReviewedCancerTypesName(tumor.cancerTypes_review.get('lastReviewed'))}}</span>
                     </span>
-                    <span class="pull-right">
+                    <span class="pull-right" ng-hide="mutation.name_review.get('removed')">
                         <review-panel rt="'delete'" rs="tumor.name_review" tp="'tumor'" mt="mutation" tm="tumor" confirm-delete="confirmDelete(event, type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(event, type, mutation, tumor, ti, treatment)"></review-panel>
+                    </span>
+                    <span class="pull-right" ng-hide="mutation.name_review.get('added')">
+                        <review-panel rt="'add'" rs="tumor.name_review" tp="'tumor'" mt="mutation" tm="tumor" accept-added="acceptAdded(event, type, mutation, tumor, ti, treatment, reviewObj)" reject-added="rejectAdded(event, type, mutation, tumor, ti, treatment)"></review-panel>
                     </span>
                     <span class="pull-right" ng-if="tumor.cancerTypes_review.get('lastReviewed') || tumor.cancerTypes_review.get('action')">
                         <review-panel rt="'name'" rs="tumor.cancerTypes_review" tp="'TUMOR_NAME_CHANGE'" tm="tumor" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
@@ -364,8 +370,11 @@
                               <div ng-if="treatment.name_review.get('specialCase') !== 'TREATMENT_NAME_CHANGE'">
                                   <review-panel rt="'update'" rs="treatment.name_review" tp="ti.name.getText()" mt="mutation" tm="tumor" TI="ti" tt="treatment" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                               </div>
-                            <span class="pull-right" style="margin-top:-10px">
+                            <span class="pull-right" style="margin-top:-10px" ng-hide="mutation.name_review.get('removed') || tumor.name_review.get('removed')">
                                 <review-panel rt="'delete'" rs="treatment.name_review" tp="'treatment'" mt="mutation" tm="tumor" ti="ti" tt="treatment" confirm-delete="confirmDelete(event, type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(event, type, mutation, tumor, ti, treatment)"></review-panel>
+                            </span>
+                            <span class="pull-right"  ng-hide="mutation.name_review.get('added') || tumor.name_review.get('added')">
+                                <review-panel rt="'add'" rs="treatment.name_review" tp="'treatment'" mt="mutation" tm="tumor" ti="ti" tt="treatment" accept-added="acceptAdded(event, type, mutation, tumor, ti, treatment, reviewObj)" reject-added="rejectAdded(event, type, mutation, tumor, ti, treatment)"></review-panel>
                             </span>
                             <span class="pull-right" ng-if="treatment.name_review.get('specialCase') === 'TREATMENT_NAME_CHANGE'">
                                 <review-panel rt="'name'" rs="treatment.name_review" tp="'TREATMENT_NAME_CHANGE'" ti="ti" tt="treatment" get-evidence="getEvidence(type, mutation, tumor, TI, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>

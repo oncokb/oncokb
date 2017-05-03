@@ -24,7 +24,9 @@ angular.module('oncokbApp')
                 confirmDeleteInGene: '&confirmDelete',
                 cancelDeleteInGene: '&cancelDelete',
                 getEvidenceInGene: '&getEvidence',
-                modelUpdateInGene: '&modelUpdate'
+                modelUpdateInGene: '&modelUpdate',
+                acceptAddedInGene: '&acceptAdded',
+                rejectAddedInGene: '&rejectAdded'
             },
             replace: true,
             link: function postLink(scope, element) {
@@ -36,15 +38,59 @@ angular.module('oncokbApp')
                 });
             },
             controller: function($scope) {
-                $scope.signatureCheck = function() {
-                    if ($scope.mt && $scope.mt.name_review.get('removed') || $scope.tm && $scope.tm.name_review.get('removed') || $scope.tt && $scope.tt.name_review.get('removed')) {
-                        return false;
-                    } else if ($scope.rs.get('action') || $scope.loading || $scope.rs.get('rollback')) {
-                        return false;
+                $scope.operationsName = {'update': 'Updated', 'name': 'Name Changed', 'add': 'Added', 'delete': 'Deleted'};
+                $scope.acceptChanges = function(event) {
+                    switch($scope.rt) {
+                    case 'update':
+                        $scope.accept(event);
+                        break;
+                    case 'name':
+                        $scope.accept(event);
+                        break;
+                    case 'delete':
+                        $scope.confirmDelete(event, $scope.tp, $scope.mt, $scope.tm, $scope.ti, $scope.tt);
+                        break;
+                    case 'add':
+                        $scope.acceptAdded(event, $scope.tp, $scope.mt, $scope.tm, $scope.ti, $scope.tt, $scope.rs);
+                        break;
                     }
-                    return true;
+                };
+                $scope.rejectChanges = function(event) {
+                    switch($scope.rt) {
+                    case 'update':
+                        $scope.reject(event);
+                        break;
+                    case 'name':
+                        $scope.reject(event);
+                        break;
+                    case 'delete':
+                        $scope.cancelDelete(event, $scope.tp, $scope.mt, $scope.tm, $scope.ti, $scope.tt);
+                        break;
+                    case 'add':
+                        $scope.rejectAdded(event, $scope.tp, $scope.mt, $scope.tm, $scope.ti, $scope.tt);
+                        break;
+                    }
+                };
+                $scope.signatureCheck = function() {
+                    if ($scope.rt === 'update') {
+                        if ($scope.mt && $scope.mt.name_review.get('removed') || $scope.tm && $scope.tm.name_review.get('removed') || $scope.tt && $scope.tt.name_review.get('removed')
+                            || $scope.mt && $scope.mt.name_review.get('added') || $scope.tm && $scope.tm.name_review.get('added') || $scope.tt && $scope.tt.name_review.get('added')) {
+                            return false;
+                        } else if ($scope.rs.get('action') || $scope.loading || $scope.rs.get('rollback')) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    } else if ($scope.rt === 'delete') {
+                        return $scope.rs.get('removed');
+                    } else if ($scope.rt === 'add' && !$scope.rs.get('removed') && $scope.rs.get('action') !== 'DELETION_REJECTED') {
+                        return $scope.rs.get('added');
+                    } else if ($scope.rt === 'name') {
+                        return $scope.rs.get('lastReviewed');
+                    }
                 };
                 $scope.iconClass = function(type) {
+                    // before any decision is made
                     if (!$scope.rs.get('action')) {
                         if (type === 'accept') {
                             return 'fa-comments-red';
@@ -52,22 +98,56 @@ angular.module('oncokbApp')
                         if (type === 'reject') {
                             return 'fa-comments-grey';
                         }
-                    } else if (type === 'accept' && $scope.rs.get('action') === 'accepted' || type === 'reject' && $scope.rs.get('action') === 'rejected') {
-                        return 'reviewed';
+                    }
+                    // after they accept or reject an evidence
+                    if ($scope.rt === 'update') {
+                        if (type === 'accept' && $scope.rs.get('action') === 'accepted' || type === 'reject' && $scope.rs.get('action') === 'rejected') return 'reviewed';
+                    } else if ($scope.rt === 'delete') {
+                        if (type === 'reject' && $scope.rs.get('action') === 'DELETION_REJECTED') return 'reviewed';
+                    } else if ($scope.rt === 'add') {
+                        if (type === 'accept' && $scope.rs.get('action') === 'ADD_ACCEPTED') return 'reviewed';
                     }
                 };
                 $scope.iconExist = function(type) {
-                    if ($scope.mt && $scope.mt.name_review.get('removed') || $scope.tm && $scope.tm.name_review.get('removed') || $scope.tt && $scope.tt.name_review.get('removed')) {
-                        return false;
-                    }
-                    if (type === 'accept') {
-                        return !$scope.loading && $scope.rs.get('action') !== 'rejected' && !$scope.rs.get('rollback') && !$scope.removedItem;
-                    } else if (type === 'reject') {
-                        return !$scope.loading && $scope.rs.get('action') !== 'accepted' && !$scope.rs.get('rollback') && !$scope.removedItem;
-                    } else if (type === 'loading') {
+                    if (type === 'loading') {
                         return $scope.loading;
                     }
+                    // treatment section is special because it has update/add/delete/name panels all together
+                    if ($scope.rt === 'update') {
+                        if ($scope.mt && $scope.mt.name_review.get('removed') || $scope.tm && $scope.tm.name_review.get('removed') || $scope.tt && ($scope.tt.name_review.get('removed') || $scope.tt.name_review.get('action') === 'DELETION_REJECTED')
+                            || $scope.mt && $scope.mt.name_review.get('added') || $scope.tm && $scope.tm.name_review.get('added') || $scope.tt && ($scope.tt.name_review.get('added') || $scope.tt.name_review.get('action') === 'ADD_ACCEPTED')) {
+                            return false;
+                        }
+                        if (type === 'accept') {
+                            return !$scope.loading && $scope.rs.get('action') !== 'rejected' && !$scope.rs.get('rollback');
+                        } else if (type === 'reject') {
+                            return !$scope.loading && $scope.rs.get('action') !== 'accepted' && !$scope.rs.get('rollback');
+                        }
+                    } else if ($scope.rt === 'delete') {
+                        if ($scope.rs.get('removed')) return true;
+                        else if (type === 'reject') {
+                            return $scope.rs.get('action') === 'DELETION_REJECTED';
+                        }
+                    } else if ($scope.rt === 'add' && !$scope.rs.get('removed') && $scope.rs.get('action') !== 'DELETION_REJECTED') {
+                        if ($scope.rs.get('added')) return true;
+                        else if (type === 'accept') {
+                            return $scope.rs.get('action') === 'ADD_ACCEPTED';
+                        }
+                    } else if ($scope.rt === 'name') {
+                        return $scope.rs.get('lastReviewed');
+                    }
                 };
+                $scope.panelClass = function(type) {
+                    if ($scope.rt === 'update' || $scope.rt === 'name') {
+                        return type === 'text' ? 'updateText' : '';
+                    } else if ($scope.rt === 'add') {
+                        if (type === 'text') return 'updateText';
+                        else if (type === 'panel') return 'sectionPanel';
+                    } if ($scope.rt === 'delete') {
+                        if (type === 'text') return 'sectionText';
+                        else if (type === 'panel') return 'sectionPanel';
+                    }
+                }
                 $scope.getEvidence = function(type, mutation, tumor, TI, treatment) {
                     return $scope.getEvidenceInGene({
                         type: type, mutation: mutation, tumor: tumor, TI: TI, treatment: treatment
@@ -349,6 +429,16 @@ angular.module('oncokbApp')
                 $scope.cancelDelete = function(event, type, mutation, tumor, ti, treatment) {
                     $scope.cancelDeleteInGene({
                         event: event, type: type, mutation: mutation, tumor: tumor, ti: ti, treatment: treatment
+                    });
+                };
+                $scope.acceptAdded = function(event, type, mutation, tumor, ti, treatment) {
+                    $scope.acceptAddedInGene({
+                      event: event, type: type, mutation: mutation, tumor: tumor, ti: ti, treatment: treatment
+                    });
+                };
+                $scope.rejectAdded = function(event, type, mutation, tumor, ti, treatment) {
+                    $scope.rejectAddedInGene({
+                      event: event, type: type, mutation: mutation, tumor: tumor, ti: ti, treatment: treatment
                     });
                 };
                 $scope.modelUpdate = function(type, mutation, tumor, ti, treatment) {
