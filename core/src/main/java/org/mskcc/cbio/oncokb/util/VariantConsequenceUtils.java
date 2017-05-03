@@ -90,9 +90,6 @@ public class VariantConsequenceUtils {
         if (variantConsequence == null) {
             variantConsequence = findVariantConsequenceByTCGATerm(searchTerm);
         }
-        if (variantConsequence == null) {
-            variantConsequence = findVariantConsequenceBySoTerm("any");
-        }
         return variantConsequence;
     }
 
@@ -104,13 +101,15 @@ public class VariantConsequenceUtils {
     }
 
     private static VariantConsequence findVariantConsequenceByTCGATerm(String term) {
-        String matchStr = "any";
-        if (term != null) {
+        if (term == null) {
+            return null;
+        } else {
+            String matchStr = "";
             term = term.toLowerCase();
             if (TCGAMapping.containsKey(term)) {
                 matchStr = TCGAMapping.get(term);
             }
+            return findVariantConsequenceBySoTerm(matchStr);
         }
-        return findVariantConsequenceBySoTerm(matchStr);
     }
 }
