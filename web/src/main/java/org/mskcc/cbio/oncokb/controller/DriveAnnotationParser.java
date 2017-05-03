@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -185,10 +185,10 @@ public class DriveAnnotationParser {
                     }
 
                     // summary
-                    parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, geneInfo.has("summary_uuid") ? geneInfo.getString("summary_uuid") : null, getUpdateTime(geneInfo.get("summary_review")));
+                    parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, geneInfo.has("summary_uuid") ? geneInfo.getString("summary_uuid") : null, (geneInfo.has("summary_review") ? getUpdateTime(geneInfo.get("summary_review")) : null));
 
                     // background
-                    parseGeneBackground(gene, geneInfo.has("background") ? geneInfo.getString("background").trim() : null, geneInfo.has("background_uuid") ? geneInfo.getString("background_uuid") : null, getUpdateTime(geneInfo.get("background_review")));
+                    parseGeneBackground(gene, geneInfo.has("background") ? geneInfo.getString("background").trim() : null, geneInfo.has("background_uuid") ? geneInfo.getString("background_uuid") : null, (geneInfo.has("background_review") ? getUpdateTime(geneInfo.get("background_review")) : null));
 
                     // mutations
                     parseMutations(gene, geneInfo.has("mutations") ? geneInfo.getJSONArray("mutations") : null);
@@ -205,14 +205,15 @@ public class DriveAnnotationParser {
             }
         }
     }
+
     private static Date getUpdateTime(Object obj) {
-        if(obj == null) return null; 
+        if (obj == null) return null;
         JSONObject reviewObj = new JSONObject(obj.toString());
         if (reviewObj.has("updateTime") && StringUtils.isNumeric(reviewObj.get("updateTime").toString())) {
-            Date d = new Date((long)reviewObj.get("updateTime"));
+            Date d = new Date((long) reviewObj.get("updateTime"));
             return d;
         }
-        return null;       
+        return null;
     }
 
     private static void parseSummary(Gene gene, String geneSummary, String uuid, Date lastEdit) {
@@ -275,8 +276,8 @@ public class DriveAnnotationParser {
 
             Oncogenicity oncogenic = getOncogenicity(mutationObj);
             String oncogenic_uuid = mutationObj.has("oncogenic_uuid") ? mutationObj.getString("oncogenic_uuid") : "";
-            Date oncogenic_lastEdit = getUpdateTime(mutationObj.get("oncogenic_review"));
-            Date effect_lastEdit = getUpdateTime(mutationObj.get("effect_review"));
+            Date oncogenic_lastEdit = mutationObj.has("oncogenic_review") ? getUpdateTime(mutationObj.get("oncogenic_review")) : null;
+            Date effect_lastEdit = mutationObj.has("effect_review") ? getUpdateTime(mutationObj.get("effect_review")) : null;
             String effect = getMutationEffect(mutationObj);
             String effect_uuid = mutationObj.has("effect_uuid") ? mutationObj.getString("effect_uuid") : "";
             // If both mutation effect and oncogenicity both unknown, ignore variant.
@@ -342,7 +343,10 @@ public class DriveAnnotationParser {
                 for (int i = 0; i < cancers.length(); i++) {
                     JSONArray subTumorTypes = cancers.getJSONObject(i).getJSONArray("cancerTypes");
                     for (int j = 0; j < subTumorTypes.length(); j++) {
-                        parseCancer(gene, alterations, cancers.getJSONObject(i), subTumorTypes.getJSONObject(j).getString("cancerType"), subTumorTypes.getJSONObject(j).getString("oncoTreeCode") != "" ? subTumorTypes.getJSONObject(j).getString("oncoTreeCode") : null);
+                        JSONObject subTT = subTumorTypes.getJSONObject(j);
+                        parseCancer(gene, alterations, cancers.getJSONObject(i),
+                            subTT.has("cancerType") ? subTT.getString("cancerType") : null,
+                            (subTT.has("oncoTreeCode") && subTT.getString("oncoTreeCode") != "") ? subTT.getString("oncoTreeCode") : null);
                     }
                 }
             } else {
@@ -477,7 +481,7 @@ public class DriveAnnotationParser {
         System.out.println("##      Summary");
 
         if (cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
-            Date lastEdit = getUpdateTime(cancerObj.get("summary_review"));
+            Date lastEdit = cancerObj.has("summary_review") ? getUpdateTime(cancerObj.get("summary_review")) : null;
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(EvidenceType.TUMOR_TYPE_SUMMARY);
             evidence.setGene(gene);
@@ -485,7 +489,7 @@ public class DriveAnnotationParser {
             evidence.setUuid(cancerObj.has("summary_uuid") ? cancerObj.getString("summary_uuid") : "");
             evidence.setAlterations(alterations);
             evidence.setLastEdit(lastEdit);
-            if(oncoTreeType.getMainType() != null) {
+            if (oncoTreeType.getMainType() != null) {
                 evidence.setCancerType(oncoTreeType.getMainType().getName());
             }
             evidence.setSubtype(oncoTreeType.getCode());
@@ -498,12 +502,12 @@ public class DriveAnnotationParser {
         // Prevalence
         if ((cancerObj.has("prevalence") && !cancerObj.getString("prevalence").trim().isEmpty()) || (cancerObj.has("shortPrevalence") && !cancerObj.getString("shortPrevalence").trim().isEmpty())) {
             System.out.println("##      Prevalence: " + alterations.toString());
-            Date lastEdit = getUpdateTime(cancerObj.get("prevalence_review"));
+            Date lastEdit = cancerObj.has("prevalence_review") ? getUpdateTime(cancerObj.get("prevalence_review")) : null;
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(EvidenceType.PREVALENCE);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if(oncoTreeType.getMainType() != null) {
+            if (oncoTreeType.getMainType() != null) {
                 evidence.setCancerType(oncoTreeType.getMainType().getName());
             }
             evidence.setSubtype(oncoTreeType.getCode());
@@ -529,12 +533,12 @@ public class DriveAnnotationParser {
         // Prognostic implications
         if ((cancerObj.has("progImp") && !cancerObj.getString("progImp").trim().isEmpty()) || (cancerObj.has("shortProgImp") && !cancerObj.getString("shortProgImp").trim().isEmpty())) {
             System.out.println("##      Prognostic implications:" + alterations.toString());
-            Date lastEdit = getUpdateTime(cancerObj.get("progImp_review"));
+            Date lastEdit = cancerObj.has("progImp_review") ? getUpdateTime(cancerObj.get("progImp_review")) : null;
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(EvidenceType.PROGNOSTIC_IMPLICATION);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if(oncoTreeType.getMainType() != null) {
+            if (oncoTreeType.getMainType() != null) {
                 evidence.setCancerType(oncoTreeType.getMainType().getName());
             }
             evidence.setSubtype(oncoTreeType.getCode());
@@ -590,14 +594,14 @@ public class DriveAnnotationParser {
         // NCCN
         if (cancerObj.has("nccn") && cancerObj.getJSONObject("nccn").has("disease") && !cancerObj.getJSONObject("nccn").getString("disease").isEmpty()) {
             System.out.println("##      NCCN for " + alterations.toString());
-            parseNCCN(gene, alterations, oncoTreeType, cancerObj.getJSONObject("nccn"), cancerObj.has("nccn_uuid") ? cancerObj.getString("nccn_uuid") : "", getUpdateTime(cancerObj.get("nccn_review")));
+            parseNCCN(gene, alterations, oncoTreeType, cancerObj.getJSONObject("nccn"), cancerObj.has("nccn_uuid") ? cancerObj.getString("nccn_uuid") : "", (cancerObj.has("nccn_review") ? getUpdateTime(cancerObj.get("nccn_review")) : null));
         } else {
             System.out.println("##      No NCCN for " + alterations.toString());
         }
 
         if (cancerObj.has("trials") && cancerObj.getJSONArray("trials").length() > 0) {
             System.out.println("##      Clincial trials for " + alterations.toString());
-            parseClinicalTrials(gene, alterations, oncoTreeType, cancerObj.getJSONArray("trials"), cancerObj.has("trials_uuid") ? cancerObj.getString("trials_uuid") : "", getUpdateTime(cancerObj.get("trials_review")));
+            parseClinicalTrials(gene, alterations, oncoTreeType, cancerObj.getJSONArray("trials"), cancerObj.has("trials_uuid") ? cancerObj.getString("trials_uuid") : "", (cancerObj.has("trials_review") ? getUpdateTime(cancerObj.get("trials_review")) : null));
         } else {
             System.out.println("##      No Clincial trials for " + alterations.toString());
         }
@@ -626,7 +630,7 @@ public class DriveAnnotationParser {
             evidence.setEvidenceType(EvidenceType.CLINICAL_TRIAL);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if(oncoTreeType.getMainType() != null) {
+            if (oncoTreeType.getMainType() != null) {
                 evidence.setCancerType(oncoTreeType.getMainType().getName());
             }
             evidence.setSubtype(oncoTreeType.getCode());
@@ -647,12 +651,12 @@ public class DriveAnnotationParser {
 
         if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
             // general description
-            Date lastEdit = getUpdateTime(implicationObj.get("description_review"));
+            Date lastEdit = implicationObj.has("description_review") ? getUpdateTime(implicationObj.get("description_review")) : null;
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if(oncoTreeType.getMainType() != null) {
+            if (oncoTreeType.getMainType() != null) {
                 evidence.setCancerType(oncoTreeType.getMainType().getName());
             }
             evidence.setSubtype(oncoTreeType.getCode());
@@ -679,12 +683,12 @@ public class DriveAnnotationParser {
 
             String drugNameStr = drugObj.getString("name").trim();
             System.out.println("##        drugs: " + drugNameStr);
-            Date lastEdit = getUpdateTime(drugObj.get("name_review"));
+            Date lastEdit = drugObj.has("name_review") ? getUpdateTime(drugObj.get("name_review")) : null;
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if(oncoTreeType.getMainType() != null) {
+            if (oncoTreeType.getMainType() != null) {
                 evidence.setCancerType(oncoTreeType.getMainType().getName());
             }
             evidence.setSubtype(oncoTreeType.getCode());
@@ -834,7 +838,7 @@ public class DriveAnnotationParser {
         evidence.setEvidenceType(EvidenceType.NCCN_GUIDELINES);
         evidence.setAlterations(alterations);
         evidence.setGene(gene);
-        if(oncoTreeType.getMainType() != null) {
+        if (oncoTreeType.getMainType() != null) {
             evidence.setCancerType(oncoTreeType.getMainType().getName());
         }
         evidence.setSubtype(oncoTreeType.getCode());
