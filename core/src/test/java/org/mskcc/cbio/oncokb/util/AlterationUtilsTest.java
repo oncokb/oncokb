@@ -58,8 +58,8 @@ public class AlterationUtilsTest {
                 {"I744_K745delinsKIPVAI", "744", "745", null, null, "inframe_insertion"},
                 {"762_823ins", "762", "823", null, null, "inframe_insertion"},
 
-                // initiator_codon_variant,
-                {"M1I", "1", "1", "M", "I", "initiator_codon_variant"},
+                // start_lost,
+                {"M1I", "1", "1", "M", "I", "start_lost"},
 
                 // NA
                 {"BCR-ABL1 Fusion", "-1", "100000", null, null, "NA"},

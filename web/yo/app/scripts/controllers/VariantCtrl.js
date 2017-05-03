@@ -247,7 +247,7 @@ angular.module('oncokbApp')
                     frameshift_variant: 'Frame shift',
                     inframe_deletion: 'In frame deletion',
                     inframe_insertion: 'In frame insertion',
-                    initiator_codon_variant: 'Initiator codon',
+                    start_lost: 'Initiator codon',
                     missense_variant: 'Missense',
                     stop_gained: 'Stop gained',
                     synonymous_variant: 'Synonymous'
