@@ -944,8 +944,8 @@ angular.module('oncokbApp')
                                     __tumor.nccn_uuid = validUUID(e1.nccn_uuid);
                                 }
                                 __tumor.nccn_review = getReview(e1.nccn_review);
-                                var nccnReviewItems = [e1.nccn.therapy_review, e1.nccn.disease_review, e1.nccn.version_review, e1.nccn.description_review];
-                                __tumor.nccn_review.updateTime = nccnReviewItems[mostRecentItem(nccnReviewItems)].get('updateTime');
+                                var nccnReviewItems = [e1.nccn_review, e1.nccn.therapy_review, e1.nccn.disease_review, e1.nccn.version_review, e1.nccn.description_review];
+                                __tumor.nccn_review.updateTime = nccnReviewItems[mostRecentItem(nccnReviewItems, true)].get('updateTime');
                             }
 
                             if (!(excludeObsolete && e1.trials_eStatus && e1.trials_eStatus.has('obsolete') && e1.trials_eStatus.get('obsolete') === 'true')) {
@@ -981,7 +981,7 @@ angular.module('oncokbApp')
                                             treatment.propagation = e3.name_eStatus.get('propagation');
                                         }
                                         var treatmentReviewItems = [e3.name_review, e3.level_review, e3.indication_review, e3.description_review];
-                                        treatment.name_review.updateTime = treatmentReviewItems[mostRecentItem(treatmentReviewItems)].get('updateTime');
+                                        treatment.name_review.updateTime = treatmentReviewItems[mostRecentItem(treatmentReviewItems, true)].get('updateTime');
                                         ti.treatments.push(treatment);
                                     });
                                     __tumor.TI.push(ti);
@@ -1168,9 +1168,15 @@ angular.module('oncokbApp')
             }
         }
 
-        function mostRecentItem(reviewObjs) {
+        function mostRecentItem(reviewObjs, include) {
             var mostRecent = -1;
             for (var i = 0; i < reviewObjs.length; i++) {
+                if (!include) {
+                    // This is designed to handle the reviewObj with systematically set updatetime
+                    // when 'include' equals true, it will use all reviewObj in the list
+                    // otherwise, we will only use the reviewObj with updatedBy info.
+                    if (!reviewObjs[i].get('updatedBy')) continue;
+                }
                 var currentItemTime = new Date(reviewObjs[i].get('updateTime'));
                 // we only continue to check if current item time is valid
                 if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
