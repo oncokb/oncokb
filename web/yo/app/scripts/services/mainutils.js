@@ -227,6 +227,25 @@ angular.module('oncokbApp')
         }
 
         /**
+         * Check whether searched mainType in cancerTypes
+         * @param {array} cancerTypes array of cancer types
+         * @param {string} mainType searched main type
+         * @return {boolean} whether exist
+         */
+        function containMainType(cancerTypes, mainType) {
+            if (!cancerTypes || !mainType) {
+                return null;
+            }
+            mainType = mainType.toLowerCase().trim();
+            cancerTypes.asArray().forEach(function(cancerType) {
+                if (cancerType.cancerType && cancerType.cancerType.text.toLowerCase().indexOf(mainType) !== -1) {
+                    return true;
+                }
+            });
+            return false;
+        }
+
+        /**
          * Output last reviewed cancer type name, either subtype or cancerType
          * @param {array} cancerTypes array of cancer types
          * @return {string} TumorType name
@@ -353,6 +372,7 @@ angular.module('oncokbApp')
 
         return {
             getCancerTypesName: getCancerTypesName,
+            containMainType: containMainType,
             createGene: createGene,
             createMutation: createMutation,
             createTumorType: createTumorType,
