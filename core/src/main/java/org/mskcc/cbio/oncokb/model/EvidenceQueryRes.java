@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import org.mskcc.oncotree.model.TumorType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -13,11 +14,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
     private Query query;
     private Gene gene;
-    private List<Alteration> alterations;
-    private List<Alteration> alleles;
-    private List<TumorType> tumorTypes;
-    private List<Evidence> evidences;
-    private List<LevelOfEvidence> levelOfEvidences;
+    private List<Alteration> alterations = new ArrayList<>();
+    private List<Alteration> alleles = new ArrayList<>();
+    private List<TumorType> tumorTypes = new ArrayList<>();
+    private List<Evidence> evidences = new ArrayList<>();
+    private List<LevelOfEvidence> levelOfEvidences = new ArrayList<>();
 
     public EvidenceQueryRes() {
     }
@@ -51,7 +52,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
     }
 
     public void setAlterations(List<Alteration> alterations) {
-        this.alterations = alterations;
+        if (alterations != null) {
+            this.alterations = alterations;
+        } else {
+            this.alterations = new ArrayList<>();
+        }
     }
 
     public List<Alteration> getAlleles() {
@@ -59,7 +64,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
     }
 
     public void setAlleles(List<Alteration> alleles) {
-        this.alleles = alleles;
+        if (alleles != null) {
+            this.alleles = alleles;
+        } else {
+            this.alleles = new ArrayList<>();
+        }
     }
 
     public List<TumorType> getOncoTreeTypes() {
@@ -67,7 +76,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
     }
 
     public void setOncoTreeTypes(List<TumorType> cancerTypes) {
-        this.tumorTypes = cancerTypes;
+        if (cancerTypes != null) {
+            this.tumorTypes = cancerTypes;
+        } else {
+            this.tumorTypes = new ArrayList<>();
+        }
     }
 
     public List<Evidence> getEvidences() {
@@ -75,7 +88,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
     }
 
     public void setEvidences(List<Evidence> evidences) {
-        this.evidences = evidences;
+        if (evidences != null) {
+            this.evidences = evidences;
+        } else {
+            this.evidences = new ArrayList<>();
+        }
     }
 
     public List<LevelOfEvidence> getLevelOfEvidences() {
@@ -83,7 +100,11 @@ public class EvidenceQueryRes implements java.io.Serializable {
     }
 
     public void setLevelOfEvidences(List<LevelOfEvidence> levelOfEvidences) {
-        this.levelOfEvidences = levelOfEvidences;
+        if (levelOfEvidences != null) {
+            this.levelOfEvidences = levelOfEvidences;
+        } else {
+            this.levelOfEvidences = new ArrayList<>();
+        }
     }
 }
 
