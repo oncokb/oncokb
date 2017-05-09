@@ -80,20 +80,19 @@
             </tr>
             </tbody>
         </table>
-        <div class="row"  ng-show="userRole === 8">
+        <div class="row"  ng-show="userRole === 8" >
             <br/><br/>
             <div class="col-sm-2"><h5>Notify Curators: </h5></div>
-            <div class="col-sm-4">
+            <div class="col-sm-6" style="width:400px">
                 <select chosen multiple
                         data-placeholder="Choose A Curator"
                         ng-model="curatorsToNotify"
                         ng-options="m.name for m in curators"
                         class="chosen-select">
-                    <option value=""></option>
                 </select>
             </div>
-            <div class="col-sm-2">
-                <button tyle="button" class="btn btn-success" ng-click="sendEmail(curatorsToNotify)">Notify</button>
+            <div class="col-sm-3">
+                <button tyle="button" class="btn btn-success" ng-disabled="!curatorsToNotify || curatorsToNotify.length === 0" ng-click="sendEmail(curatorsToNotify)">Notify</button>
             </div>
         </div>
     </div>

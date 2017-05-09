@@ -13,7 +13,7 @@ angular.module('oncokbApp')
     .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, user, DatabaseConnector, $rootScope, $timeout, users, mainUtils) {
         return {
             templateUrl: 'views/curationQueue.html',
-            restrict: 'AE',
+            restrict: 'E',
             scope: {
             },
             replace: true,
@@ -54,59 +54,11 @@ angular.module('oncokbApp')
                 }
             },
             controller: function($scope) {
-                $scope.curators = [
-                    {
-                        name: 'Debyani Chakravarty',
-                        email: 'debyani.c@gmail.com'
-                    },
-                    {
-                        name: 'Ritika Kundra',
-                        email: 'ritika.kundra@gmail.com'
-                    },
-                    {
-                        name: 'Sarah Phillips',
-                        email: 's.m.phillips2@gmail.com'
-                    },
-                    {
-                        name: 'Moriah Nissan',
-                        email: 'moriah.heller@gmail.com'
-                    },
-                    {
-                        name: 'Lindsay Saunders',
-                        email: 'lindsau@gmail.com'
-                    },
-                    {
-                        name: 'Philip Jonsson',
-                        email: 'philip.jonsson@gmail.com'
-                    },
-                    {
-                        name: 'Eneda Toska',
-                        email: 'enedatoska@gmail.com'
-                    },
-                    {
-                        name: 'Inigo Landa-Lopez',
-                        email: 'landa.inigo@gmail.com'
-                    },
-                    {
-                        name: 'Kinisha Gala',
-                        email: 'kpgala15@gmail.com'
-                    },
-                    {
-                        name: 'Fiona Brown',
-                        email: 'fiona.brown200@gmail.com'
-                    },
-                    {
-                        name: 'Tripti Shrestha',
-                        email: 'shrestha.tripti@gmail.com'
-                    },
-                    {
-                        name: 'Hannah Johnsen',
-                        email: 'hannah.c.johnsen@gmail.com'
-                    },
-                    {
-                        name: 'Neel Shah',
-                        email: 'neely2K@gmail.com'
-                    }];
+                DatabaseConnector.getOncokbInfo(function(oncokbInfo) {
+                    if (oncokbInfo && oncokbInfo.users) {
+                        $scope.curators = oncokbInfo.users;
+                    }
+                });
                 $scope.userRole = users.getMe().role;
                 $scope.addCuration = function() {
                     var item = $rootScope.model.createMap({
