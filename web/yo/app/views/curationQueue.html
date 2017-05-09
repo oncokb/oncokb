@@ -1,5 +1,13 @@
 <div class="curationQueue">
-    <h3 class="headerStyle">Curation Queue</h3>
+    <h3 class="headerStyle">Curation Queue
+        <span style="font-size:14px; margin-left:20px">
+            <input id="displaySwitch"
+                   type="checkbox"
+                   ng-model="allCuration"
+                   ng-value="allCuration">
+            <label for="displaySwitch">Display All Curations</label>
+        </span>
+    </h3>
     <form ng-submit="addCuration()">
         <div class="row">
             <div class="col-sm-5">
@@ -29,12 +37,12 @@
                 <th>Added by</th>
                 <th>Added at</th>
                 <th>Curator</th>
-                <th>Curated</th>
-                <th ng-show="userRole === 8">Operation</th>
+                <th>Curated in</th>
+                <th>Operation</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="x in queue">
+            <tr ng-repeat="x in queue" ng-show="allCuration || !x.curated">
                 <td>
                     <div ng-if="x.editable">
                         <a href="{{x.link}}" target="_blank" ng-if="x.pmid">{{x.article}}</a>
@@ -56,26 +64,21 @@
                 <td>{{x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
                 <td>
                     <select chosen
-                            data-placeholder="Choose A Curator"
-                            ng-model="x.curator"
+                            ng-model="modifiedCurator"
                             ng-options="m.name for m in curators"
+                            ng-change="synchronize(modifiedCurator)"
                             ng-if="x.editable"
                             class="chosen-select">
-                        <option value=""></option>
                     </select>
                     <p ng-if="!x.editable">{{x.curator}}</p></td>
                 <td>
-                    <input id="{{$index+'curated'}}"
-                           type="checkbox"
-                           ng-model="x.curated"
-                           ng-value="x.curated"
-                           ng-click="updateCurated($index, x.curated)">
-                    <label for="{{$index+'curated'}}"></label>
+                    {{getAnnotationLocation(x)}}
                 </td>
-                <td ng-show="userRole === 8">
-                    <button type="button" class="btn btn-warning" ng-click="editCuration($index)" ng-if="!x.editable"><i class="fa fa-edit"></i></button>
-                    <button type="button" class="btn btn-success" ng-click="updateCuration($index, x)" ng-if="x.editable"><i class="fa fa-check"></i></button>
-                    <button type="button" class="btn btn-danger" ng-click="deleteCuration($index)"><i class="fa fa-trash-o"></i></button>
+                <td style="width: 15%" ng-show="!x.curated">
+                    <button type="button" class="btn btn-success" ng-click="completeCuration($index)" ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Complete curation"><i class="fa fa-check"></i></button>
+                    <button type="button" class="btn btn-warning" ng-click="editCuration($index)" ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i></button>
+                    <button type="button" class="btn btn-warning" ng-click="updateCuration($index, x)" ng-show="x.editable" uib-tooltip-placement="top" uib-tooltip="Save curation modification"><i class="fa fa-check"></i></button>
+                    <button type="button" class="btn btn-danger" ng-click="deleteCuration($index)" ng-show="userRole === 8 && !x.editable" uib-tooltip-placement="top" uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i></button>
                 </td>
             </tr>
             </tbody>
@@ -85,14 +88,14 @@
             <div class="col-sm-2"><h5>Notify Curators: </h5></div>
             <div class="col-sm-6" style="width:400px">
                 <select chosen multiple
-                        data-placeholder="Choose A Curator"
                         ng-model="curatorsToNotify"
                         ng-options="m.name for m in curators"
+                        ng-change="markEmailSent()"
                         class="chosen-select">
                 </select>
             </div>
             <div class="col-sm-3">
-                <button tyle="button" class="btn btn-success" ng-disabled="!curatorsToNotify || curatorsToNotify.length === 0" ng-click="sendEmail(curatorsToNotify)">Notify</button>
+                <button tyle="button" class="btn btn-success" ng-disabled="!curatorsToNotify || curatorsToNotify.length === 0 || emailSent" ng-click="sendEmail(curatorsToNotify)">Notify</button>
             </div>
         </div>
     </div>

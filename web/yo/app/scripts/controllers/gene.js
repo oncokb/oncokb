@@ -1951,6 +1951,28 @@ angular.module('oncokbApp')
                 }
                 dialogs.notify('All Citations', messageContent.join(''), {size: 'lg'});
             };
+            var annotationLocation = {};
+            $scope.specifyAnnotation = function() {
+                setAnnotationResult(fetchResults(FindRegex.result(this.gene.background.text)), 'Gene Background');
+                var mutations = stringUtils.getGeneData(this.gene, true, true, true).mutations;
+                _.each(mutations, function(mutation) {
+                    setAnnotationResult(fetchResults(FindRegex.result(JSON.stringify(mutation))), mutation.name);
+                });
+                return annotationLocation;
+            };
+            function setAnnotationResult(results, location) {
+                _.each([results.PMIDs, results.abstracts], function(annotations) {
+                    _.each(annotations, function(annotation) {
+                        annotation = annotation.trim();
+                        if(_.has(annotationLocation, annotation)) {
+                            annotationLocation[annotation].push(location);
+                        } else {
+                            annotationLocation[annotation] = [location];
+                        }
+                    });
+                });
+            }
+
             $scope.curatorsName = function() {
                 return this.gene.curators.asArray().map(function(d) {
                     return d.name;
