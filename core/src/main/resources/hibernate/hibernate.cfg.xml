@@ -16,8 +16,6 @@
     <!--<property name="hibernate.hbm2ddl.auto">create</property>-->
     <!--<property name="hibernate.query.factory_class">org.hibernate.hql.internal.classic.ClassicQueryTranslatorFactory</property>-->
     <!--2nd level caching-->
-    <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
-    <property name="net.sf.ehcache.configurationResourceName">/hibernate/ehcache.conf.xml</property>
     <property name="hibernate.cache.use_second_level_cache">false</property>
     <property name="hibernate.cache.use_query_cache">false</property>
     <mapping resource="hibernate/Drug.hbm.xml"/>

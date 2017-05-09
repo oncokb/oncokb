@@ -2,7 +2,7 @@
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-	
+
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreResourceNotFound" value="true"/>
 		<property name="location">
@@ -32,5 +32,11 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
         <property name="url" value="${jdbc.url}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="maxWait" value="10000"/>
+        <property name="logAbandoned" value="true"/>
+        <property name="maxActive" value="100"/>
+        <property name="removeAbandoned" value="true"/>
     </bean>
 </beans>
