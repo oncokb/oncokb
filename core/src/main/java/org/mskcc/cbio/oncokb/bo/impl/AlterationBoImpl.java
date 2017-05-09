@@ -38,20 +38,27 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, List<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
-        if (gene != null && consequence != null) {
-            for (String cons : consequence.getTerm().split("\\s*,\\s*")) {
-                VariantConsequence tmpConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(cons);
-                if (alterations != null && alterations.size() > 0) {
-                    for (Alteration alteration : alterations) {
-                        if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(tmpConsequence) && alteration.getProteinStart() <= start && alteration.getProteinEnd() >= end) {
+        // Don't search for NA cases
+        if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
+            if (alterations != null && alterations.size() > 0) {
+                for (Alteration alteration : alterations) {
+                    if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
+
+                        //For missense variant, as long as they are overlapped to each, return the alteration
+                        if (consequence.equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+                            if (end >= alteration.getProteinStart()
+                                && start <= alteration.getProteinEnd()) {
+                                result.add(alteration);
+                            }
+                        } else if (alteration.getProteinStart() <= start && alteration.getProteinEnd() >= end) {
                             result.add(alteration);
                         }
                     }
-                } else {
-                    List<Alteration> queryResult = getDao().findMutationsByConsequenceAndPosition(gene, tmpConsequence, start, end);
-                    if (queryResult != null) {
-                        result.addAll(queryResult);
-                    }
+                }
+            } else {
+                List<Alteration> queryResult = getDao().findMutationsByConsequenceAndPosition(gene, consequence, start, end);
+                if (queryResult != null) {
+                    result.addAll(queryResult);
                 }
             }
         }
