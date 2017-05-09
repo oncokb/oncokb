@@ -36,7 +36,7 @@ public class HotspotUtils {
         String response = null;
 
         if (cancerHotspotsUrl != null) {
-            response = HttpUtils.postRequest(cancerHotspotsUrl, "");
+            response = HttpUtils.postRequest(cancerHotspotsUrl, "", true);
         }
 
         if (cancerHotspotsUrl == null || response.equals("TIMEOUT")) {
