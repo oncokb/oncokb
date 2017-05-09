@@ -9,10 +9,12 @@ import java.net.URL;
  * Created by Hongxin on 11/03/16.
  */
 public class HttpUtils {
-    
-    public static String postRequest(String url, String postBody) {
-        if (url != null) {
 
+    public static String postRequest(String url, String postBody, Boolean retry) {
+        if (retry == null) {
+            retry = false;
+        }
+        if (url != null) {
             try {
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -23,10 +25,10 @@ public class HttpUtils {
 
                 // Send post request
                 con.setDoOutput(true);
-                
+
                 // Set timeout to 10 seconds
                 con.setConnectTimeout(10000);
-                
+
                 DataOutputStream wr = new DataOutputStream(con.getOutputStream());
                 wr.writeBytes(postBody);
                 wr.flush();
@@ -44,7 +46,13 @@ public class HttpUtils {
             } catch (Exception e) {
                 System.out.println(e);
                 e.printStackTrace();
-                return null;
+
+                // If retry needed, but only retry once
+                if (retry) {
+                    return postRequest(url, postBody, false);
+                } else {
+                    return null;
+                }
             }
         } else {
             return null;

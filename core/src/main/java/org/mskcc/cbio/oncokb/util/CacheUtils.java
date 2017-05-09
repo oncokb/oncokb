@@ -188,14 +188,14 @@ public class CacheUtils {
                 for (String service : otherServices) {
                     if(!StringUtils.isNullOrEmpty(service)) {
                         HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
-                            gene.getHugoSymbol(), "");
+                            gene.getHugoSymbol(), "", true);
                     }
                 }
             }
         } else if (cmd == "reset") {
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
-                    HttpUtils.postRequest(service + "?cmd=reset", "");
+                    HttpUtils.postRequest(service + "?cmd=reset", "", true);
                 }
             }
         }

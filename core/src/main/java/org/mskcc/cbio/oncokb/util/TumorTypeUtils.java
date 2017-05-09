@@ -550,7 +550,7 @@ public class TumorTypeUtils {
             }
             postData.put("queries", queries);
 
-            String response = HttpUtils.postRequest(url, postData.toString());
+            String response = HttpUtils.postRequest(url, postData.toString(), true);
             if (response != null && !response.equals("TIMEOUT")) {
                 Map map = JsonUtils.jsonToMap(response);
 
