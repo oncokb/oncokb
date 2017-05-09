@@ -1,7 +1,7 @@
 <div>
     <div class="reviewPanel" ng-if="reviewMode">
-        <div ng-class="panelClass('panel')">
-            <p ng-class="panelClass('text')" ng-if="signatureCheck()">{{operationsName[rt]}} by {{rs.get('mostRecent').by.getText() || rs.get('updatedBy')}} at {{(rs.get('mostRecent').value.getText() || rs.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
+        <div ng-class="panelClass('panel')" ng-if="panelExist()">
+            <p ng-class="panelClass('text')" ng-if="signatureCheck()">{{operationsName[panelType]}} by {{reviewObj.get('mostRecent').by.getText() || reviewObj.get('updatedBy')}} at {{(reviewObj.get('mostRecent').value.getText() || reviewObj.get('updateTime')) | date : 'MMM d, h:mm a yyyy'}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="iconExist('accept')" ng-click="acceptChanges($event)"></i>
             <i class="fa fa-times" ng-class="iconClass('reject')" ng-if="iconExist('reject')" ng-click="rejectChanges($event)"></i>
             <span ng-if="iconExist('loading')"><i class="fa fa-spinner fa-spin"></i></span>

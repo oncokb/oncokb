@@ -801,20 +801,15 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .updateText {
         font-size:15px;
         float:left;
-        margin-top:5px;
         margin-right:10px
     }
     .sectionText {
         color:red;
         font-size:15px;
         float:left;
-        margin-top:5px;
         margin-right:10px
     }
-    .sectionPanel {
-        margin-top:15px;
-    }
-    .finalSectionPanel {
+    .panelMargin {
       margin-top:20px;
     }
 }
