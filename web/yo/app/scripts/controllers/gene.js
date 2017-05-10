@@ -1954,7 +1954,7 @@ angular.module('oncokbApp')
             var annotationLocation = {};
             $scope.specifyAnnotation = function() {
                 setAnnotationResult(fetchResults(FindRegex.result(this.gene.background.text)), 'Gene Background');
-                var mutations = stringUtils.getGeneData(this.gene, true, true, true).mutations;
+                var mutations = stringUtils.getGeneData(this.gene, false, false, false, false, true).mutations;
                 _.each(mutations, function(mutation) {
                     setAnnotationResult(fetchResults(FindRegex.result(JSON.stringify(mutation))), mutation.name);
                 });

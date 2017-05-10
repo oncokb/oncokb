@@ -10,7 +10,7 @@
  * # curationQueue
  */
 angular.module('oncokbApp')
-    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, user, DatabaseConnector, $rootScope, $timeout, users, mainUtils) {
+    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, user, DatabaseConnector, $rootScope, $timeout, users, mainUtils, dialogs) {
         return {
             templateUrl: 'views/curationQueue.html',
             restrict: 'E',
@@ -25,6 +25,8 @@ angular.module('oncokbApp')
                     _.each(scope.queueModel.asArray(), function(item) {
                         scope.queue.push({article: item.get('article'), pmid: item.get('pmid'), pmidString: 'PMID: ' + item.get('pmid'), link: item.get('link'), variant: item.get('variant'), addedBy: item.get('addedBy'), addedAt: item.get('addedAt'), curated: item.get('curated'), curator: item.get('curator')});
                     });
+                    scope.getCuratorsList();
+                    scope.getArticleList();
                     scope.dtOptions = {
                         hasBootstrap: true,
                         paging: false,
@@ -62,7 +64,39 @@ angular.module('oncokbApp')
                     }
                 });
                 $scope.userRole = users.getMe().role;
+                $scope.getCuratorsList = function() {
+                    var tempArr = [];
+                    _.each($scope.queue, function(item) {
+                        if (!item.curated && item.curator) {
+                            tempArr.push(item.curator);
+                        }
+                    });
+                    $scope.curatorNotificationList = _.uniq(tempArr);
+                };
+                $scope.getArticleList = function() {
+                    var tempArr = [];
+                    _.each($scope.queue, function(item) {
+                        if (item.pmid) {
+                            tempArr.push(item.pmid);
+                        } else if (item.article) {
+                            tempArr.push(item.article);
+                        }
+                    });
+                    $scope.articleList = _.uniq(tempArr);
+                };
                 $scope.addCuration = function() {
+                    if ($scope.articleList.indexOf($scope.article) !== -1) {
+                        var dlg = dialogs.confirm('Confirmation', $scope.article + ' has already been curated or added. Are you sure you want to add this?');
+                        dlg.result.then(function() {
+                            addConfirmedCuration();
+                        }, function() {
+                            console.log('canceled');
+                        });
+                    } else {
+                        addConfirmedCuration();
+                    }
+                };
+                function addConfirmedCuration() {
                     var item = $rootScope.model.createMap({
                         link: $scope.link,
                         variant: $scope.variant,
@@ -86,7 +120,9 @@ angular.module('oncokbApp')
                     $scope.curator = '';
                     $scope.predictedArticle = '';
                     $scope.validPMID = false;
-                };
+                    $scope.getCuratorsList();
+                    $scope.getArticleList();
+                }
                 $scope.editCuration = function(index) {
                     if (!$scope.queue[index]) return;
                     $scope.queue[index].editable = true;
@@ -104,15 +140,33 @@ angular.module('oncokbApp')
                     var queueModelItem = $scope.queueModel.get(index);
                     var queueItem = $scope.queue[index];
                     if(queueModelItem.get('addedAt') === queueItem.addedAt) {
-                        $scope.queue[index].editable = false;
-                        $scope.queue[index].curator = $scope.modifiedCurator ? $scope.modifiedCurator.name : '';
-                        if(!x.pmid) {
-                            queueModelItem.set('article', x.article);
+                        if (x.article !== queueModelItem.get('article') && $scope.articleList.indexOf(x.article) !== -1) {
+                            var dlg = dialogs.confirm('Confirmation', x.article + ' has already been curated or added. Are you sure you want to modify to this?');
+                            dlg.result.then(function() {
+                                updateConfirmedCuration(index, x);
+                            }, function() {
+                                $scope.queue[index].editable = false;
+                                x.article = queueModelItem.get('article');
+                                x.variant = queueModelItem.get('variant');
+                                x.curator = queueModelItem.get('curator');
+                            });
+                        } else {
+                            updateConfirmedCuration(index, x);
                         }
-                        queueModelItem.set('variant', x.variant);
-                        queueModelItem.set('curator', $scope.modifiedCurator ? $scope.modifiedCurator.name : '');
                     }
                 };
+                function updateConfirmedCuration(index, x) {
+                    var queueModelItem = $scope.queueModel.get(index);
+                    $scope.queue[index].editable = false;
+                    $scope.queue[index].curator = $scope.modifiedCurator ? $scope.modifiedCurator.name : '';
+                    if(!x.pmid) {
+                        queueModelItem.set('article', x.article);
+                        $scope.getArticleList();
+                    }
+                    queueModelItem.set('variant', x.variant);
+                    queueModelItem.set('curator', $scope.modifiedCurator ? $scope.modifiedCurator.name : '');
+                    $scope.getCuratorsList();
+                }
                 $scope.synchronize = function(modifiedCurator) {
                     $scope.modifiedCurator = modifiedCurator;
                 };
@@ -128,6 +182,8 @@ angular.module('oncokbApp')
                     if($scope.queueModel.get(index).get('addedAt') === $scope.queue[index].addedAt) {
                         $scope.queueModel.remove(index);
                         $scope.queue.splice(index, 1);
+                        $scope.getCuratorsList();
+                        $scope.getArticleList();
                     }
                 };
                 $scope.getArticle = function(pmid) {
@@ -169,16 +225,26 @@ angular.module('oncokbApp')
                     });
                 };
                 $scope.sendEmail = function(curatorsToNotify) {
-                    _.each(curatorsToNotify, function(curator) {
-                        var articles = [];
-                        _.each($scope.queue, function(item) {
-                            if (curator.name === item.curator) {
-                                articles.push({link: item.link, article: item.article});
+                    _.each(curatorsToNotify, function(name) {
+                        var email;
+                        for (var i = 0; i < $scope.curators.length; i++) {
+                            if (name === $scope.curators[i].name) {
+                                email = $scope.curators[i].email;
+                                break;
                             }
-                        });
-                        if (articles.length > 0) {
-                            generateEmail(curator.email, curator.name, user.name, articles, new Date().getTime());
-                            $scope.emailSent = true;
+                        }
+                        if (email) {
+                            var articles = [];
+                            _.each($scope.queue, function(item) {
+                                if (name === item.curator) {
+                                    articles.push({link: item.link, article: item.article});
+                                }
+                            });
+                            if (articles.length > 0) {
+                                generateEmail(email, name, user.name, articles, new Date().getTime());
+                                $scope.emailSent = true;
+                                $scope.emailReturnMessage = 'Email Sent';
+                            }
                         }
                     });
                 };
@@ -196,6 +262,7 @@ angular.module('oncokbApp')
                 }
                 $scope.markEmailSent = function() {
                     $scope.emailSent = false;
+                    $scope.emailReturnMessage = '';
                 };
                 $scope.toggleCompletedCuration = function() {
                     return function(item) {

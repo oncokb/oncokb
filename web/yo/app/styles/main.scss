@@ -826,4 +826,29 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .buttonStyle {
         color: white !important
     }
+    .successButton {
+        padding: 1px 5px;
+    }
+    .warningButton {
+      padding: 2px 4px;
+    }
+    .dangerButton {
+      padding: 1px 7px;
+    }
+    .cell {
+        padding: 5px !important;
+    }
+    .curator {
+        min-width: 200px;
+    }
+    .article {
+        width: 30%;
+    }
+    .message {
+        color: darkgreen;
+    }
+    .displayAll {
+        font-size:14px;
+        margin-left:20px
+    }
 }
