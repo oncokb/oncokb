@@ -97,21 +97,25 @@ angular.module('oncokbApp')
                                     scope.rs.set('rollback', null);
                                 }
                                 if (scope.objecttype === 'object' && scope.objectkey) {
+                                    // currently this condition is only designed for gene type
                                     if (!scope.rs.get('lastReviewed')) {
                                         scope.rs.set('lastReviewed', _.clone({
                                             TSG: scope.object.get('TSG'),
                                             OCG: scope.object.get('OCG')
                                         }));
                                     }
-                                    if (scope.rs.get('lastReviewed')[scope.objectkey] !== n) {
-                                        tempMapping.set('review', true);
-                                    } else {
+                                    scope.object.set(scope.objectkey, n);
+                                    if (scope.rs.get('lastReviewed').TSG === scope.object.get('TSG')
+                                        && scope.rs.get('lastReviewed').OCG === scope.object.get('OCG')) {
                                         tempMapping.set('review', false);
                                         if (scope.reviewMode) {
                                             scope.rs.set('rollback', true);
                                         }
+                                        scope.rs.delete('lastReviewed');
+                                        scope.rs.delete('updatedBy');
+                                    } else {
+                                        tempMapping.set('review', true);
                                     }
-                                    scope.object.set(scope.objectkey, n);
                                 } else {
                                     scope.object.text = n;
                                     if (scope.rs.get('lastReviewed') !== n) {
@@ -121,6 +125,8 @@ angular.module('oncokbApp')
                                         if (scope.reviewMode) {
                                             scope.rs.set('rollback', true);
                                         }
+                                        scope.rs.delete('lastReviewed');
+                                        scope.rs.delete('updatedBy');
                                     }
                                 }
                                 $rootScope.geneMetaData.set(uuid, tempMapping);
