@@ -97,6 +97,7 @@ angular.module('oncokbApp')
                                     scope.rs.set('rollback', null);
                                 }
                                 if (scope.objecttype === 'object' && scope.objectkey) {
+                                    // currently this condition is only designed for gene type
                                     if (!scope.rs.get('lastReviewed')) {
                                         scope.rs.set('lastReviewed', _.clone({
                                             TSG: scope.object.get('TSG'),
