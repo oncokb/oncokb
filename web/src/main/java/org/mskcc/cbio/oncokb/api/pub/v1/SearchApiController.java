@@ -75,7 +75,7 @@ public class SearchApiController implements SearchApi {
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 
-        if (body == null || body.getQueries() == null || body.getQueries().size() == 0) {
+        if (body == null || body.getQueries() == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
 

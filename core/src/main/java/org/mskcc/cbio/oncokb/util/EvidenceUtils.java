@@ -811,7 +811,7 @@ public class EvidenceUtils {
                         }
                         query.setAlterations(relevantAlts);
 
-                        Alteration alteration = AlterationUtils.getAlteration(requestQuery.getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                         query.setAlleles(new ArrayList<>(allelesAlts));
                     } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
@@ -978,7 +978,7 @@ public class EvidenceUtils {
 
     public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-        Gene gene = geneBo.findGeneByHugoSymbol(evidence.getGene().getHugoSymbol());
+        Gene gene = geneBo.findGeneByEntrezGeneId(evidence.getGene().getEntrezGeneId());
         evidence.setGene(gene);
         if(gene == null) {
             return;
