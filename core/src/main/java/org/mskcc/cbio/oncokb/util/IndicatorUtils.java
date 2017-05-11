@@ -82,9 +82,9 @@ public class IndicatorUtils {
                         gene = tmpGenes.get(0);
                     }
                 }
-            } else {
+            } else if (geneStrsSet.size() > 0) {
                 String geneStr = geneStrsSet.iterator().next();
-                if(geneStr != null) {
+                if (geneStr != null) {
                     Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
                     if (tmpGene != null) {
                         gene = tmpGene;
