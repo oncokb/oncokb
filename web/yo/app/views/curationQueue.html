@@ -14,8 +14,10 @@
                 <input type="text" class="form-control" ng-model="article" placeholder="PMID or Abstract" size="25">
                 <span ng-bind-html="predictedArticle"></span>
             </div>
-            <div class="col-sm-2"><input type="text" class="form-control" ng-model="link" placeholder="Link" size="10"></div>
-            <div class="col-sm-2"><input type="text" class="form-control" ng-model="variant" placeholder="Variant" size="10"></div>
+            <div class="col-sm-2"><input type="text" class="form-control" ng-model="link" placeholder="Link" size="10">
+            </div>
+            <div class="col-sm-2"><input type="text" class="form-control" ng-model="variant" placeholder="Variant"
+                                         size="10"></div>
             <div class="col-sm-2">
                 <select chosen
                         data-placeholder="Choose A Curator"
@@ -26,7 +28,10 @@
                     <option value=""></option>
                 </select>
             </div>
-            <div class="col-sm-1"><button tyle="submit" class="btn btn-success" ng-disabled="!article"><i class="fa fa-plus buttonStyle"></i></button></div>
+            <div class="col-sm-1">
+                <button tyle="submit" class="btn btn-success" ng-disabled="!article"><i
+                    class="fa fa-plus buttonStyle"></i></button>
+            </div>
         </div>
     </form>
     <div ng-if="queue.length > 0">
@@ -44,7 +49,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="x in queue" ng-show="allCuration || !x.curated">
-                <td class="cell article">
+                <td class=" article">
                     <div ng-if="x.editable">
                         <a href="{{x.link}}" target="_blank" ng-if="x.pmid">{{x.article}}</a>
                         <input type="text" class="form-control" ng-model="x.article" ng-if="!x.pmid"/>
@@ -53,17 +58,17 @@
                         <a href="{{x.link}}" target="_blank">{{x.article}}</a>
                     </div>
                     <pub-iframe
-                            ng-model="x.pmidString"
-                            ng-if="x.pmid">
+                        ng-model="x.pmidString"
+                        ng-if="x.pmid">
                     </pub-iframe>
                 </td>
-                <td class="cell">
+                <td>
                     <input type="text" class="form-control" ng-model="x.variant" ng-if="x.editable"/>
-                    <p ng-if="!x.editable">{{x.variant}}</p>
+                    <span ng-if="!x.editable">{{x.variant}}</span>
                 </td>
-                <td class="cell">{{x.addedBy}}</td>
-                <td class="cell">{{x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
-                <td class="cell curator">
+                <td>{{x.addedBy}}</td>
+                <td>{{x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
+                <td class=" curator">
                     <select chosen
                             ng-model="modifiedCurator"
                             ng-options="m.name for m in curators"
@@ -73,37 +78,50 @@
                             class="chosen-select">
                         <option value=""></option>
                     </select>
-                    <p ng-if="!x.editable">{{x.curator}}</p></td>
-                <td class="cell">
+                    <span ng-if="!x.editable">{{x.curator}}</span></td>
+                <td>
                     {{getAnnotationLocation(x)}}
                 </td>
-                <td class="cell">
+                <td>
                     <span ng-show="!x.curated">
-                        <button type="button" class="btn btn-success successButton" ng-click="completeCuration($index)" ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Complete curation"><i class="fa fa-check"></i></button>
-                        <button type="button" class="btn btn-warning warningButton" ng-click="editCuration($index)" ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i></button>
-                        <button type="button" class="btn btn-warning warningButton" ng-click="updateCuration($index, x)" ng-show="x.editable" uib-tooltip-placement="top" uib-tooltip="Save curation modification"><i class="fa fa-check"></i></button>
-                        <button type="button" class="btn btn-danger dangerButton" ng-click="deleteCuration($index)" ng-show="userRole === 8 && !x.editable" uib-tooltip-placement="top" uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i></button>
+                        <button type="button" class="btn btn-success successButton" ng-click="completeCuration($index)"
+                                ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Complete curation"><i
+                            class="fa fa-check"></i></button>
+                        <button type="button" class="btn btn-warning warningButton" ng-click="editCuration($index)"
+                                ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i
+                            class="fa fa-edit"></i></button>
+                        <button type="button" class="btn btn-warning warningButton" ng-click="updateCuration($index, x)"
+                                ng-show="x.editable" uib-tooltip-placement="top"
+                                uib-tooltip="Save curation modification"><i class="fa fa-check"></i></button>
+                        <button type="button" class="btn btn-danger dangerButton" ng-click="deleteCuration($index)"
+                                ng-show="userRole === 8 && !x.editable" uib-tooltip-placement="top"
+                                uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i></button>
                     </span>
                 </td>
             </tr>
             </tbody>
         </table>
-        <div class="row"  ng-show="userRole === 8" >
+        <div class="row" ng-show="userRole === 8">
             <br/><br/>
             <div class="col-sm-2"><h5>Notify Curators: </h5></div>
             <div class="col-sm-6">
                 <select chosen multiple
                         ng-model="curatorsToNotify"
                         ng-options="m for m in curatorNotificationList"
-                        ng-change="markEmailSent()"
+                        ng-change="prepareSendEmail()"
                         class="chosen-select">
                 </select>
             </div>
             <div class="col-sm-2">
-                <button tyle="button" class="btn btn-success" ng-disabled="!curatorsToNotify || curatorsToNotify.length === 0 || emailSent" ng-click="sendEmail(curatorsToNotify)">Notify</button>
+                <button tyle="button" class="btn btn-success"
+                        ng-disabled="!curatorsToNotify || curatorsToNotify.length === 0 || email.status.sending"
+                        ng-click="sendEmail(curatorsToNotify)">
+                    <span ng-show="!email.status.sending">Notify</span>
+                    <i ng-show="email.status.sending" class="fa fa-spinner fa-spin"></i>
+                </button>
             </div>
             <div class="col-sm-2">
-                <p class="message">{{emailReturnMessage}}</p>
+                <span ng-if="email.returnMessage"><b>{{email.returnMessage}}</b></span>
             </div>
         </div>
     </div>

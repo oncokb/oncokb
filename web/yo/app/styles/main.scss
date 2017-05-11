@@ -816,27 +816,28 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     border-bottom: 2px solid lightgrey;
 }
 
+.pub-iframe {
+    margin-bottom: 10px
+}
+
 .curationQueue {
     display: inline-block;
     width: 100%;
     .headerStyle {
-        margin-top:50px;
-        margin-bottom:30px;
+        margin-top: 50px;
+        margin-bottom: 30px;
     }
     .buttonStyle {
         color: white !important
     }
-    .successButton {
-        padding: 1px 5px;
-    }
-    .warningButton {
-      padding: 2px 4px;
-    }
-    .dangerButton {
-      padding: 1px 7px;
-    }
-    .cell {
-        padding: 5px !important;
+    .successButton, .warningButton, .dangerButton {
+        padding: 5px;
+        font-size: 14px;
+        line-height: 14px;
+        i {
+            width: 14px;
+            height: 14px;
+        }
     }
     .curator {
         min-width: 200px;
@@ -844,11 +845,14 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .article {
         width: 30%;
     }
-    .message {
-        color: darkgreen;
-    }
     .displayAll {
-        font-size:14px;
-        margin-left:20px
+        font-size: 14px;
+        margin-left: 20px
+    }
+    .pub-iframe {
+        margin-bottom: 0;
+    }
+    table > tbody > tr > td, table > thead > tr > th {
+        padding: 5px;
     }
 }
