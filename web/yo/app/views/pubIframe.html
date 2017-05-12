@@ -1,4 +1,4 @@
-<div ng-if="pubs.length > 0" style="margin-bottom: 10px">Publication IDs:
+<div class="pub-iframe" ng-if="pubs.length > 0">Publication IDs:
   <span ng-repeat="pub in pubs">
     <span ng-if="pub.type === 'pmid'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://www.ncbi.nlm.nih.gov/pubmed/{{pub.id}}" target="_blank">{{pub.type | uppercase}}:{{pub.id}}</a></span>
     <span ng-if="pub.type === 'nct'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://clinicaltrials.gov/show/{{pub.id}}" target="_blank">{{pub.id}}</a></span>

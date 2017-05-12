@@ -1,0 +1,125 @@
+<div class="curationQueue">
+    <h3 class="headerStyle">Curation Queue
+        <span class="displayAll">
+            <input id="displaySwitch"
+                   type="checkbox"
+                   ng-model="allCuration"
+                   ng-value="allCuration">
+            <label for="displaySwitch">Display All Curations</label>
+        </span>
+    </h3>
+    <form ng-submit="addCuration()">
+        <div class="row">
+            <div class="col-sm-5">
+                <input type="text" class="form-control" ng-model="article" placeholder="PMID or Abstract" size="25">
+                <span ng-bind-html="predictedArticle"></span>
+            </div>
+            <div class="col-sm-2"><input type="text" class="form-control" ng-model="link" placeholder="Link" size="10">
+            </div>
+            <div class="col-sm-2"><input type="text" class="form-control" ng-model="variant" placeholder="Variant"
+                                         size="10"></div>
+            <div class="col-sm-2">
+                <select chosen
+                        data-placeholder="Choose A Curator"
+                        ng-model="curator"
+                        ng-options="m.name for m in curators"
+                        allow-single-deselect="true"
+                        class="chosen-select">
+                    <option value=""></option>
+                </select>
+            </div>
+            <div class="col-sm-1">
+                <button tyle="submit" class="btn btn-success" ng-disabled="!article"><i
+                    class="fa fa-plus buttonStyle"></i></button>
+            </div>
+        </div>
+    </form>
+    <div ng-if="queue.length > 0">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" style="width:100%">
+            <thead>
+            <tr>
+                <th>Article</th>
+                <th>Variant</th>
+                <th>Added by</th>
+                <th>Added at</th>
+                <th>Curator</th>
+                <th>Curated in</th>
+                <th>Operation</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="x in queue" ng-show="allCuration || !x.curated">
+                <td class=" article">
+                    <div ng-if="x.editable">
+                        <a href="{{x.link}}" target="_blank" ng-if="x.pmid">{{x.article}}</a>
+                        <input type="text" class="form-control" ng-model="x.article" ng-if="!x.pmid"/>
+                    </div>
+                    <div ng-if="!x.editable">
+                        <a href="{{x.link}}" target="_blank">{{x.article}}</a>
+                    </div>
+                    <pub-iframe
+                        ng-model="x.pmidString"
+                        ng-if="x.pmid">
+                    </pub-iframe>
+                </td>
+                <td>
+                    <input type="text" class="form-control" ng-model="x.variant" ng-if="x.editable"/>
+                    <span ng-if="!x.editable">{{x.variant}}</span>
+                </td>
+                <td>{{x.addedBy}}</td>
+                <td>{{x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
+                <td class=" curator">
+                    <select chosen
+                            ng-model="data.modifiedCurator"
+                            ng-options="m.name for m in curators"
+                            ng-if="x.editable"
+                            allow-single-deselect="true"
+                            class="chosen-select">
+                        <option value=""></option>
+                    </select>
+                    <span ng-if="!x.editable">{{x.curator}}</span></td>
+                <td>
+                    {{getAnnotationLocation(x)}}
+                </td>
+                <td>
+                    <span ng-show="!x.curated">
+                        <button type="button" class="btn btn-success successButton" ng-click="completeCuration($index)"
+                                ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Complete curation"><i
+                            class="fa fa-check"></i></button>
+                        <button type="button" class="btn btn-warning warningButton" ng-click="editCuration($index)"
+                                ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i
+                            class="fa fa-edit"></i></button>
+                        <button type="button" class="btn btn-warning warningButton" ng-click="updateCuration($index, x)"
+                                ng-show="x.editable" uib-tooltip-placement="top"
+                                uib-tooltip="Save curation modification"><i class="fa fa-check"></i></button>
+                        <button type="button" class="btn btn-danger dangerButton" ng-click="deleteCuration($index)"
+                                ng-show="userRole === 8 && !x.editable" uib-tooltip-placement="top"
+                                uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i></button>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row" ng-show="userRole === 8">
+            <div class="col-md-8 col-sm-12">
+                <span><b>Notify Curators:</b></span>
+                <select id="curationQueueEmailCuratorSelect"
+                        chosen multiple
+                        ng-model="data.curatorsToNotify"
+                        ng-options="m for m in data.curatorNotificationList"
+                        ng-change="prepareSendEmail()">
+                </select>
+                <button type="button" class="btn btn-sm btn-success"
+                        ng-disabled="!data.curatorsToNotify || data.curatorsToNotify.length === 0 || email.status.sending"
+                        ng-click="sendEmail()">
+                    <span ng-show="!email.status.sending">Notify</span>
+                    <i ng-show="email.status.sending" class="fa fa-spinner fa-spin"></i>
+                </button>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <span ng-if="email.returnMessage" ng-bind-html="email.returnMessage"></span>
+            </div>
+        </div>
+    </div>
+
+</div>

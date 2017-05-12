@@ -323,21 +323,24 @@ angular.module('oncokbApp')
 
         /**
          * Util to send email systematically
-         * @param {string} sendTo The receipent
+         * @param {string} sendTo The recipient
          * @param {string} subject The email subject
          * @param {string} content The email content
-         * */
+         * @return {*|h.promise|promise|r.promise|d.promise} Promise
+        * */
         function sendEmail(sendTo, subject, content) {
+            var deferred = $q.defer();
             var param = {sendTo: sendTo, subject: subject, content: content};
             DatabaseConnector.sendEmail(
                 param,
                 function(result) {
-                    console.log('success', result);
+                    deferred.resolve(result);
                 },
                 function(result) {
-                    console.log('failed', result);
+                    deferred.reject(result);
                 }
             );
+            return deferred.promise;
         }
 
         /*

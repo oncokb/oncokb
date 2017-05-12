@@ -656,6 +656,9 @@ h5 {
 ,#curateTumorTypesDropdown_chosen {
   width: 100% !important;
 }
+#curationQueueEmailCuratorSelect_chosen {
+    width: calc(100% - 200px) !important;
+}
 
 #consequencesDropDown_chosen {
   width: 160px !important;
@@ -814,4 +817,45 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 }
 .seperationLine {
     border-bottom: 2px solid lightgrey;
+}
+
+.pub-iframe {
+    margin-bottom: 10px
+}
+
+.curationQueue {
+    display: inline-block;
+    width: 100%;
+    .headerStyle {
+        margin-top: 50px;
+        margin-bottom: 30px;
+    }
+    .buttonStyle {
+        color: white !important
+    }
+    .successButton, .warningButton, .dangerButton {
+        padding: 5px;
+        font-size: 14px;
+        line-height: 14px;
+        i {
+            width: 14px;
+            height: 14px;
+        }
+    }
+    .curator {
+        min-width: 200px;
+    }
+    .article {
+        width: 30%;
+    }
+    .displayAll {
+        font-size: 14px;
+        margin-left: 20px
+    }
+    .pub-iframe {
+        margin-bottom: 0;
+    }
+    table > tbody > tr > td, table > thead > tr > th {
+        padding: 5px;
+    }
 }

@@ -321,7 +321,16 @@ angular.module('oncokbApp')
                         fail();
                     });
             }
-
+            function getPubMedArticle(pubMedIDs, success, fail) {
+                DriveAnnotation
+                    .getPubMedArticle(pubMedIDs)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
             function deleteEvidences(data, success, fail) {
                 DriveAnnotation
                     .deleteEvidences(data)
@@ -681,6 +690,7 @@ angular.module('oncokbApp')
                 getSuggestedVariants: getSuggestedVariants,
                 isHotspot: isHotspot,
                 getEvidencesByUUID: getEvidencesByUUID,
-                getEvidencesByUUIDs: getEvidencesByUUIDs
+                getEvidencesByUUIDs: getEvidencesByUUIDs,
+                getPubMedArticle: getPubMedArticle
             };
         }]);
