@@ -102,26 +102,23 @@
             </tbody>
         </table>
         <div class="row" ng-show="userRole === 8">
-            <br/><br/>
-            <div class="col-sm-2"><h5>Notify Curators: </h5></div>
-            <div class="col-sm-6">
-                <select chosen multiple
-                        ng-model="curatorsToNotify"
-                        ng-options="m for m in curatorNotificationList"
-                        ng-change="prepareSendEmail()"
-                        class="chosen-select">
+            <div class="col-md-8 col-sm-12">
+                <span><b>Notify Curators:</b></span>
+                <select id="curationQueueEmailCuratorSelect"
+                        chosen multiple
+                        ng-model="data.curatorsToNotify"
+                        ng-options="m for m in data.curatorNotificationList"
+                        ng-change="prepareSendEmail()">
                 </select>
-            </div>
-            <div class="col-sm-2">
-                <button tyle="button" class="btn btn-success"
-                        ng-disabled="!curatorsToNotify || curatorsToNotify.length === 0 || email.status.sending || email.returnMessage"
-                        ng-click="sendEmail(curatorsToNotify)">
+                <button type="button" class="btn btn-sm btn-success"
+                        ng-disabled="!data.curatorsToNotify || data.curatorsToNotify.length === 0 || email.status.sending"
+                        ng-click="sendEmail()">
                     <span ng-show="!email.status.sending">Notify</span>
                     <i ng-show="email.status.sending" class="fa fa-spinner fa-spin"></i>
                 </button>
             </div>
-            <div class="col-sm-2">
-                <span ng-if="email.returnMessage"><b>{{email.returnMessage}}</b></span>
+            <div class="col-md-4 col-sm-12">
+                <span ng-if="email.returnMessage" ng-bind-html="email.returnMessage"></span>
             </div>
         </div>
     </div>

@@ -656,6 +656,9 @@ h5 {
 ,#curateTumorTypesDropdown_chosen {
   width: 100% !important;
 }
+#curationQueueEmailCuratorSelect_chosen {
+    width: calc(100% - 200px) !important;
+}
 
 #consequencesDropDown_chosen {
   width: 160px !important;

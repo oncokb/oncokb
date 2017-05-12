@@ -21,6 +21,10 @@ angular.module('oncokbApp')
             link: {
                 pre: function preLink(scope) {
                     scope.queue = [];
+                    scope.data = {
+                        curatorsToNotify: [],
+                        curatorNotificationList: []
+                    };
                     scope.email = {
                         status: {sending: false},
                         returnMessage: ''
@@ -85,7 +89,7 @@ angular.module('oncokbApp')
                             tempArr.push(item.curator);
                         }
                     });
-                    $scope.curatorNotificationList = _.uniq(tempArr);
+                    $scope.data.curatorNotificationList = _.uniq(tempArr);
                 };
                 $scope.getArticleList = function() {
                     var tempArr = [];
@@ -254,39 +258,59 @@ angular.module('oncokbApp')
                         console.log('error');
                     });
                 };
-                $scope.sendEmail = function(curatorsToNotify) {
-                    $scope.email.status.sending = true;
-                    _.each(curatorsToNotify, function(name) {
-                        var email;
+                $scope.sendEmail = function() {
+                    if (_.isArray($scope.data.curatorsToNotify) && $scope.data.curatorsToNotify.length > 0) {
+                        $scope.email.status.sending = true;
+                        sendIndividualEmail(0);
+                    } else {
+                        $scope.data.curatorsToNotify = [];
+                    }
+                };
+
+                /**
+                 * Notify curator individually.
+                 * @param {number} curatorIndex The current index of data.curatorsToNotify.
+                 */
+                function sendIndividualEmail(curatorIndex) {
+                    if (curatorIndex < $scope.data.curatorsToNotify.length) {
+                        var _email = '';
+                        var _curator = $scope.data.curatorsToNotify[curatorIndex];
                         for (var i = 0; i < $scope.curators.length; i++) {
-                            if (name === $scope.curators[i].name) {
-                                email = $scope.curators[i].email;
+                            if (_curator === $scope.curators[i].name) {
+                                _email = $scope.curators[i].email;
                                 break;
                             }
                         }
-                        if (email) {
-                            var articles = [];
+                        if (_email) {
+                            var _articles = [];
                             _.each($scope.queue, function(item) {
-                                if (name === item.curator) {
-                                    articles.push({
+                                if (_curator === item.curator) {
+                                    _articles.push({
                                         link: item.link,
                                         article: item.article
                                     });
                                 }
                             });
-                            if (articles.length > 0) {
-                                generateEmail(email, name, user.name, articles, new Date().getTime())
+                            if (_articles.length > 0) {
+                                generateEmail(_email, _curator, user.name, _articles, new Date().getTime())
                                     .then(function() {
-                                        $scope.email.status.sending = false;
-                                        $scope.email.returnMessage = 'Email Sent';
+                                        $scope.email.returnMessage += _curator + ' has been notified' + '.<br/>';
+                                        sendIndividualEmail(++curatorIndex);
                                     }, function(error) {
-                                        $scope.email.status.sending = false;
-                                        $scope.email.returnMessage = 'Failed to send Email. Please mention following message to developer: ' + error;
+                                        $scope.email.returnMessage += '<span style="color: red;">Failed to send Email. Please mention following message to developer: ' + error + '.</span><br/>';
+                                        sendIndividualEmail(++curatorIndex);
                                     });
                             }
+                        } else {
+                            $scope.email.returnMessage += '<span style="color: red;">Can not find email for ' + _curator + '.</span><br/>';
+                            sendIndividualEmail(++curatorIndex);
                         }
-                    });
-                };
+                    } else {
+                        $scope.email.status.sending = false;
+                        $scope.data.curatorsToNotify = [];
+                    }
+                }
+
                 function generateEmail(email, curatorName, adminName, articles, time) {
                     var deferred = $q.defer();
                     var content = 'Dear ' + curatorName.split(' ')[0] + ',\n\n';
