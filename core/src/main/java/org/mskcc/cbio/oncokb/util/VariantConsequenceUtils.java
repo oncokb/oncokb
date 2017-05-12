@@ -47,9 +47,9 @@ public class VariantConsequenceUtils {
         put("silent", "synonymous_variant");
         put("splice", "splice_region_variant");
         put("splice_region", "splice_region_variant");
-        put("splice_site", "splice_site_variant");
+        put("splice_site", "splice_region_variant");
         put("splice_site_del", "splice_region_variant");
-        put("splice_site_snp", "splice_site_variant");
+        put("splice_site_snp", "splice_region_variant");
         put("splicing", "splice_region_variant");
         put("stopgain_snv", "stop_gained");
         put("translation_start_site", "start_lost");
