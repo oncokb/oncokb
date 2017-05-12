@@ -119,7 +119,7 @@ public class IndicatorUtilsTest {
         query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
-        assertTrue("Genes are the same", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Genes are not the same", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("Oncogenicities are not the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("Treatments are not the same", resp1.getTreatments().equals(resp2.getTreatments()));
         assertTrue("Highest sensitive levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
@@ -131,7 +131,7 @@ public class IndicatorUtilsTest {
         query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
-        assertTrue("Genes are the same", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Genes are not the same", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("Oncogenicities are not the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("Treatments are not the same", resp1.getTreatments().equals(resp2.getTreatments()));
         assertTrue("Highest sensitive levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
@@ -142,7 +142,7 @@ public class IndicatorUtilsTest {
         query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
-        assertTrue("Genes are the same", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Genes are not the same", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("Oncogenicities are not the same", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("Treatments are not the same", resp1.getTreatments().equals(resp2.getTreatments()));
         assertTrue("Highest sensitive levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
