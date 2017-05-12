@@ -59,8 +59,12 @@ public class Query implements java.io.Serializable {
         this.tumorType = tumorType;
     }
 
-    public Query(String hugoSymbol, Integer entrezGeneId, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
-        this.hugoSymbol = hugoSymbol;
+    public Query(String id, String type, Integer entrezGeneId, String hugoSymbol, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
+        this.id = id;
+        this.type = type;
+        if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
+            this.hugoSymbol = hugoSymbol;
+        }
         this.entrezGeneId = entrezGeneId;
         this.alteration = alteration;
         this.alterationType = alterationType;

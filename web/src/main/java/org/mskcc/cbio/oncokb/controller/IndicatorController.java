@@ -30,14 +30,14 @@ public class IndicatorController {
     IndicatorQueryResp getEvidence(
         HttpMethod method,
         @RequestParam(value = "id", required = false) String id,
-        @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
+        @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,
         @RequestParam(value = "alterationType", required = false) String alterationType,
         @RequestParam(value = "tumorType", required = false) String tumorType,
         @RequestParam(value = "consequence", required = false) String consequence,
-        @RequestParam(value = "proteinStart", required = false) String proteinStart,
-        @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
+        @RequestParam(value = "proteinStart", required = false) Integer proteinStart,
+        @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd,
         @RequestParam(value = "geneStatus", required = false) String geneStatus,
         @RequestParam(value = "source", required = false) String source,
         @RequestParam(value = "levels", required = false) String levels,
@@ -45,25 +45,7 @@ public class IndicatorController {
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly
     ) {
 
-        Query query = new Query();
-        query.setId(id);
-
-        if (entrezGeneId != null) {
-            query.setEntrezGeneId(Integer.parseInt(entrezGeneId));
-        }
-        query.setHugoSymbol(hugoSymbol);
-        query.setAlteration(alteration);
-        query.setAlterationType(alterationType);
-        query.setTumorType(tumorType);
-        query.setConsequence(consequence);
-        query.setType(queryType);
-        if (proteinStart != null) {
-            query.setProteinStart(Integer.parseInt(proteinStart));
-        }
-        if (proteinEnd != null) {
-            query.setProteinEnd(Integer.parseInt(proteinEnd));
-        }
-
+        Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, tumorType, consequence, proteinStart, proteinEnd);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
         return IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
     }
