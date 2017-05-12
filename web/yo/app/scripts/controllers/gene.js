@@ -1951,16 +1951,16 @@ angular.module('oncokbApp')
                 }
                 dialogs.notify('All Citations', messageContent.join(''), {size: 'lg'});
             };
-            var annotationLocation = {};
             $scope.specifyAnnotation = function() {
-                setAnnotationResult(fetchResults(FindRegex.result(this.gene.background.text)), 'Gene Background');
+                var annotationLocation = {};
+                setAnnotationResult(annotationLocation, fetchResults(FindRegex.result(this.gene.background.text)), 'Gene Background');
                 var mutations = stringUtils.getGeneData(this.gene, false, false, false, false, true).mutations;
                 _.each(mutations, function(mutation) {
-                    setAnnotationResult(fetchResults(FindRegex.result(JSON.stringify(mutation))), mutation.name);
+                    setAnnotationResult(annotationLocation, fetchResults(FindRegex.result(JSON.stringify(mutation))), mutation.name);
                 });
                 return annotationLocation;
             };
-            function setAnnotationResult(results, location) {
+            function setAnnotationResult(annotationLocation, results, location) {
                 _.each([results.PMIDs, results.abstracts], function(annotations) {
                     _.each(annotations, function(annotation) {
                         annotation = annotation.trim();

@@ -26,6 +26,7 @@ angular.module('oncokbApp')
                         curatorNotificationList: [],
                         modifiedCurator: {}
                     };
+                    scope.curators = [];
                     scope.email = {
                         status: {sending: false},
                         returnMessage: ''
