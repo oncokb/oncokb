@@ -103,7 +103,7 @@ public class IndicatorUtils {
             }
         } else {
             gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
-                GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol());
+                GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
             if (gene != null) {
                 Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                     null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
@@ -115,11 +115,6 @@ public class IndicatorUtils {
         }
 
 
-        alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(),
-            null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
-
-
         if (gene != null) {
             query.setHugoSymbol(gene.getHugoSymbol());
             query.setEntrezGeneId(gene.getEntrezGeneId());
@@ -128,6 +123,10 @@ public class IndicatorUtils {
 
             // Gene summary
             indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
+
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+            AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();

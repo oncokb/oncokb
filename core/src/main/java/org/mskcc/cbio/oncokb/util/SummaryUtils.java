@@ -456,6 +456,7 @@ public class SummaryUtils {
             try {
                 cancerHotspotsLink = PropertiesUtils.getProperties("cancerhotspots.website.link");
             } catch (IOException e) {
+                cancerHotspotsLink = "";
                 e.printStackTrace();
             }
             cancerHotspotsLink = cancerHotspotsLink.trim();
