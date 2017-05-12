@@ -70,9 +70,8 @@
                 <td>{{x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
                 <td class=" curator">
                     <select chosen
-                            ng-model="modifiedCurator"
+                            ng-model="data.modifiedCurator"
                             ng-options="m.name for m in curators"
-                            ng-change="synchronize(modifiedCurator)"
                             ng-if="x.editable"
                             allow-single-deselect="true"
                             class="chosen-select">

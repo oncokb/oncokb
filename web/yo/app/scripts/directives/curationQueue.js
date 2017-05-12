@@ -23,7 +23,8 @@ angular.module('oncokbApp')
                     scope.queue = [];
                     scope.data = {
                         curatorsToNotify: [],
-                        curatorNotificationList: []
+                        curatorNotificationList: [],
+                        modifiedCurator: {}
                     };
                     scope.email = {
                         status: {sending: false},
@@ -157,10 +158,11 @@ angular.module('oncokbApp')
                         return;
                     }
                     $scope.queue[index].editable = true;
+                    $scope.data.modifiedCurator = {};
                     if ($scope.queue[index].curator) {
                         for (var i = 0; i < $scope.curators.length; i++) {
                             if ($scope.curators[i].name === $scope.queue[index].curator) {
-                                $scope.modifiedCurator = $scope.curators[i];
+                                $scope.data.modifiedCurator = $scope.curators[i];
                                 break;
                             }
                         }
@@ -191,19 +193,15 @@ angular.module('oncokbApp')
                 function updateConfirmedCuration(index, x) {
                     var queueModelItem = $scope.queueModel.get(index);
                     $scope.queue[index].editable = false;
-                    $scope.queue[index].curator = $scope.modifiedCurator ? $scope.modifiedCurator.name : '';
+                    $scope.queue[index].curator = !_.isEmpty($scope.data.modifiedCurator) ? $scope.data.modifiedCurator.name : '';
                     if (!x.pmid) {
                         queueModelItem.set('article', x.article);
                         $scope.getArticleList();
                     }
                     queueModelItem.set('variant', x.variant);
-                    queueModelItem.set('curator', $scope.modifiedCurator ? $scope.modifiedCurator.name : '');
+                    queueModelItem.set('curator', $scope.queue[index].curator);
                     $scope.getCuratorsList();
                 }
-
-                $scope.synchronize = function(modifiedCurator) {
-                    $scope.modifiedCurator = modifiedCurator;
-                };
                 $scope.completeCuration = function(index) {
                     var queueModelItem = $scope.queueModel.get(index);
                     var queueItem = $scope.queue[index];
