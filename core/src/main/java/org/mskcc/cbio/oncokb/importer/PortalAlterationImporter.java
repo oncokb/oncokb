@@ -54,6 +54,7 @@ public class PortalAlterationImporter {
         mapper.put("Splice_Site_Del", new String[]{"splice_region_variant"});
         mapper.put("Splice_Site_SNP", new String[]{"splice_region_variant"});
         mapper.put("splicing", new String[]{"splice_region_variant"});
+        mapper.put("Splice_Region", new String[]{"splice_region_variant"});
         mapper.put("Translation_Start_Site", new String[]{"start_lost"});
         mapper.put("vIII deletion", new String[]{"any"});
         mapper.put("exon14skip", new String[]{"inframe_deletion"});
@@ -149,7 +150,7 @@ public class PortalAlterationImporter {
                             alterationBo.update(oncoKBAlteration);
                         }
 
-                        //remove saved sample from sequenced sample list 
+                        //remove saved sample from sequenced sample list
                         for (int n = 0; n < sequencedSamples.length(); n++) {
                             if (sequencedSamples.get(n).equals(sampleId)) {
                                 sequencedSamples.remove(n);
