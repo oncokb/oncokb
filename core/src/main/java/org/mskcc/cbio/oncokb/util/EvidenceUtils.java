@@ -977,12 +977,18 @@ public class EvidenceUtils {
     }
 
     public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
-        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-        Gene gene = geneBo.findGeneByEntrezGeneId(evidence.getGene().getEntrezGeneId());
-        evidence.setGene(gene);
-        if(gene == null) {
+        // If evidence does not have gene info, we can not help with anything here.
+        if (evidence.getGene() == null) {
             return;
         }
+
+        // If the gene does not match with any one in our database, we can not help with anything here.
+        Gene gene = GeneUtils.getGene(evidence.getGene().getEntrezGeneId(), evidence.getGene().getHugoSymbol());
+        if (gene == null) {
+            return;
+        }
+
+        evidence.setGene(gene);
         Set<Alteration> queryAlterations = evidence.getAlterations();
         if(queryAlterations != null && !queryAlterations.isEmpty()) {
             AlterationType type = AlterationType.MUTATION;
