@@ -848,6 +848,29 @@ angular.module('oncokbApp')
             return vusData;
         }
 
+        // Return all info
+        function getQueueData(queue) {
+            var queueData = [];
+            if (queue) {
+                queue.asArray().forEach(function(queueItem) {
+                    var datum = {
+                        link: queueItem.get('link'),
+                        variant: queueItem.get('variant'),
+                        curator: queueItem.get('curator'),
+                        curated: queueItem.get('curated'),
+                        addedBy: queueItem.get('addedBy'),
+                        addedAt: queueItem.get('addedAt'),
+                        article: queueItem.get('article')
+                    };
+                    if (queueItem.has('pmid')) {
+                        datum.pmid = queueItem.get('pmid');
+                    }
+                    queueData.push(datum);
+                });
+            }
+            return queueData;
+        }
+
         // Only return last edit info
         function getVUSData(vus) {
             var vusData = [];
@@ -1225,6 +1248,7 @@ angular.module('oncokbApp')
             stringObject: stringObject,
             getVUSFullData: getVUSFullData,
             getTextString: OncoKB.utils.getString,
-            mostRecentItem: mostRecentItem
+            mostRecentItem: mostRecentItem,
+            getQueueData: getQueueData
         };
     });

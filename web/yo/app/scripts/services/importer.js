@@ -318,7 +318,21 @@ angular.module('oncokbApp')
             }
             vusModel.push(vus);
         }
-
+        function createQueueItem(queueItem, queueModel, model) {
+            var queue = model.createMap({
+                link: queueItem.link,
+                variant: queueItem.variant,
+                curator: queueItem.curator,
+                curated: queueItem.curated,
+                addedBy: queueItem.addedBy,
+                addedAt: queueItem.addedAt,
+                article: queueItem.article
+            });
+            if (queueItem.pmid) {
+                queue.set('pmid', queueItem.pmid);
+            }
+            queueModel.push(queue);
+        }
         function copyFileData(folderId, fileId, fileTitle, docIndex) {
             var deferred = $q.defer();
             storage.requireAuth(true).then(function() {
@@ -331,14 +345,16 @@ angular.module('oncokbApp')
                             console.log('\t Copying');
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
+                            var queue = realtime.getModel().getRoot().get('queue');
                             if (gene) {
                                 var geneData = stringUtils.getGeneData(gene);
                                 var vusData = stringUtils.getVUSFullData(vus);
+                                var queueData = stringUtils.getQueueData(queue);
                                 storage.getRealtimeDocument(file.id).then(function(newRealtime) {
                                     var model = createModel(newRealtime.getModel());
                                     var geneModel = model.getRoot().get('gene');
                                     var vusModel = model.getRoot().get('vus');
-
+                                    var queueModel = model.getRoot().get('queue');
                                     model.beginCompoundOperation();
                                     for (var key in geneData) {
                                         if (geneModel[key]) {
@@ -349,6 +365,12 @@ angular.module('oncokbApp')
                                     if (vusData) {
                                         _.each(vusData, function(vusItem) {
                                             createVUSItem(vusItem, vusModel, newRealtime.getModel());
+                                        });
+                                    }
+
+                                    if (queueData) {
+                                        _.each(queueData, function(queueItem) {
+                                            createQueueItem(queueItem, queueModel, newRealtime.getModel());
                                         });
                                     }
                                     model.endCompoundOperation();
@@ -493,6 +515,7 @@ angular.module('oncokbApp')
         function createModel(model) {
             model = createGeneModel(model);
             model = createVUSModel(model);
+            model = createQueueModel(model);
             return model;
         }
 
@@ -508,6 +531,14 @@ angular.module('oncokbApp')
             if (!model.getRoot().get('vus')) {
                 var vus = model.createList();
                 model.getRoot().set('vus', vus);
+            }
+            return model;
+        }
+
+        function createQueueModel(model) {
+            if (!model.getRoot().get('queue')) {
+                var queue = model.createList();
+                model.getRoot().set('queue', queue);
             }
             return model;
         }
