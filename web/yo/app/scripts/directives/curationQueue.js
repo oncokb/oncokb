@@ -128,7 +128,6 @@ angular.module('oncokbApp')
                     if ($scope.predictedArticle && $scope.validPMID) {
                         item.set('article', $scope.predictedArticle);
                         item.set('pmid', $scope.article);
-                        item.set('pmidString', 'PMID: ' + $scope.article);
                     } else {
                         item.set('article', $scope.article);
                     }
