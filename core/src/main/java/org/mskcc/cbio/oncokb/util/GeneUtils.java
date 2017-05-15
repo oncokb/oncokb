@@ -19,6 +19,16 @@ public class GeneUtils {
         }
     }
 
+    // EntrezGeneId always has higher priority then HugoSymbol
+    public static Gene getGene(Integer entrezGeneId, String hugoSymbol) {
+        Gene gene = getGeneByEntrezId(entrezGeneId);
+        if (gene != null) {
+            return gene;
+        }
+        gene = getGeneByHugoSymbol(hugoSymbol);
+        return gene;
+    }
+
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
         if (hugoSymbol != null) {
             hugoSymbol = hugoSymbol.toUpperCase();
