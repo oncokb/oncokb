@@ -540,7 +540,10 @@
       </div>
     </div>
   </div>
-  <curation-queue specify-annotation="specifyAnnotation()"></curation-queue>
+    <div ng-if="!reviewMode">
+        <curation-queue specify-annotation="specifyAnnotation()"></curation-queue>
+    </div>
+
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
   <span class="btn btn-default" style="opacity: 1" disabled>{{::gene.name.text}}</span>
