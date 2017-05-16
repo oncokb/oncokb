@@ -142,7 +142,10 @@ public class VariantPairUtils {
 
         for (int i = 0; i < pairwiseLength; i++) {
             String tumorType = tumorTypes == null ? null : tumorTypes[i];
-            List<TumorType> relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, tumorTypeSource);
+            List<TumorType> relevantTumorTypes = new ArrayList<>();
+            if (tumorType != null) {
+                relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, tumorTypeSource);
+            }
             if (pairs.get(i) != null) {
                 pairs.get(i).setQueryTumorType(tumorType);
                 pairs.get(i).setTumorTypes(relevantTumorTypes);
