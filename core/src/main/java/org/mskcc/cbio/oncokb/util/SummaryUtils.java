@@ -100,7 +100,7 @@ public class SummaryUtils {
             }
         }
 
-        if (gene == null || alterations == null || relevantTumorTypes == null) {
+        if (gene == null || alterations == null || relevantTumorTypes == null || queryTumorType == null) {
             return "";
         }
 

@@ -163,16 +163,17 @@ public class TumorTypeUtils {
     }
 
     public static TumorType getOncoTreeSubtypeByName(String name) {
-        List<TumorType> matchedSubtypes = getOncoTreeSubtypesByName(Collections.singletonList(name));
-        if (matchedSubtypes != null && matchedSubtypes.size() > 0) {
-            return matchedSubtypes.get(0);
-        }
+        if (name != null) {
+            List<TumorType> matchedSubtypes = getOncoTreeSubtypesByName(Collections.singletonList(name));
+            if (matchedSubtypes != null && matchedSubtypes.size() > 0) {
+                return matchedSubtypes.get(0);
+            }
 
-        List<TumorType> matchedCancerTypes = getOncoTreeCancerTypes(Collections.singletonList(name));
-        if (matchedCancerTypes != null && matchedCancerTypes.size() > 0) {
-            return matchedCancerTypes.get(0);
+            List<TumorType> matchedCancerTypes = getOncoTreeCancerTypes(Collections.singletonList(name));
+            if (matchedCancerTypes != null && matchedCancerTypes.size() > 0) {
+                return matchedCancerTypes.get(0);
+            }
         }
-
         return null;
     }
 
@@ -187,7 +188,7 @@ public class TumorTypeUtils {
 
         if (codes != null) {
             for (String code : codes) {
-                if(code != null) {
+                if (code != null) {
                     for (TumorType oncoTreeType : allOncoTreeSubtypes) {
                         if (code.equalsIgnoreCase(oncoTreeType.getCode())) {
                             mapped.add(oncoTreeType);
@@ -202,14 +203,16 @@ public class TumorTypeUtils {
     }
 
     public static TumorType getOncoTreeSubtypeByCode(String code) {
-        List<TumorType> matchedSubtypes = getOncoTreeSubtypesByCode(Collections.singletonList(code));
-        if (matchedSubtypes != null && matchedSubtypes.size() > 0) {
-            return matchedSubtypes.get(0);
-        }
+        if (code != null) {
+            List<TumorType> matchedSubtypes = getOncoTreeSubtypesByCode(Collections.singletonList(code));
+            if (matchedSubtypes != null && matchedSubtypes.size() > 0) {
+                return matchedSubtypes.get(0);
+            }
 
-        List<TumorType> matchedCancerTypes = getOncoTreeCancerTypes(Collections.singletonList(code));
-        if (matchedCancerTypes != null && matchedCancerTypes.size() > 0) {
-            return matchedCancerTypes.get(0);
+            List<TumorType> matchedCancerTypes = getOncoTreeCancerTypes(Collections.singletonList(code));
+            if (matchedCancerTypes != null && matchedCancerTypes.size() > 0) {
+                return matchedCancerTypes.get(0);
+            }
         }
 
         return null;
