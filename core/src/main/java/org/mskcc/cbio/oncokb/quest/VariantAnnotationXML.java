@@ -10,10 +10,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.SummaryUtils;
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.mskcc.oncotree.model.TumorType;
 import org.springframework.stereotype.Controller;
 
@@ -176,7 +173,7 @@ public final class VariantAnnotationXML {
             //Remove level_R3
             stdImpEbsResisitance = filterResistanceEvidence(stdImpEbsResisitance);
 
-            exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ");
+            exportTherapeuticImplications(relevantTumorTypes, stdImpEbsSensitivity, stdImpEbsResisitance, "standard_therapeutic_implications", sbTumorType, "    ", isRelevant);
 
             // NCCN_GUIDELINES
             List<Evidence> nccnEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.NCCN_GUIDELINES), Collections.singleton(oncoTreeType));
@@ -222,7 +219,7 @@ public final class VariantAnnotationXML {
             //Remove level_R3
             invImpEbsResisitance = filterResistanceEvidence(invImpEbsResisitance);
 
-            exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sbTumorType, "    ");
+            exportTherapeuticImplications(relevantTumorTypes, invImpEbsSensitivity, invImpEbsResisitance, "investigational_therapeutic_implications", sbTumorType, "    ", isRelevant);
 
             // CLINICAL_TRIAL
             {
@@ -292,7 +289,7 @@ public final class VariantAnnotationXML {
         return resistanceEvidences;
     }
 
-    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent, Boolean sameIndication) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -322,14 +319,18 @@ public final class VariantAnnotationXML {
         //boolean isInvestigational = tagTherapeuticImp.equals("investigational_therapeutic_implications");
         if (!evsSensitivity.get(1).isEmpty() || !evsResisitance.get(1).isEmpty()) {
             for (Evidence ev : evsSensitivity.get(1)) {
-                sb.append(indent).append("    <sensitive_to>\n");
-                exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent + "        ");
-                sb.append(indent).append("    </sensitive_to>\n");
+                if(sameIndication || ev.getPropagation() == null || !ev.getPropagation().equals("NO")) {
+                    sb.append(indent).append("    <sensitive_to>\n");
+                    exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent + "        ");
+                    sb.append(indent).append("    </sensitive_to>\n");
+                }
             }
             for (Evidence ev : evsResisitance.get(1)) {
-                sb.append(indent).append("    <resistant_to>\n");
-                exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent + "        ");
-                sb.append(indent).append("    </resistant_to>\n");
+                if(sameIndication || ev.getPropagation() == null || !ev.getPropagation().equals("NO")) {
+                    sb.append(indent).append("    <resistant_to>\n");
+                    exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent + "        ");
+                    sb.append(indent).append("    </resistant_to>\n");
+                }
             }
         }
 
@@ -453,10 +454,7 @@ public final class VariantAnnotationXML {
         }
 
         if (levelOfEvidence != null) {
-            if (levelOfEvidence == LevelOfEvidence.LEVEL_1 &&
-                !relevantTumorTypes.contains(evidence.getOncoTreeType())) {
-                levelOfEvidence = LevelOfEvidence.LEVEL_2B;
-            }
+            levelOfEvidence = LevelUtils.updateOrKeepLevelByIndication(levelOfEvidence, evidence.getPropagation(), relevantTumorTypes.contains(evidence.getOncoTreeType()));
             sb.append(indent).append("<level_of_evidence_for_patient_indication>\n");
             sb.append(indent).append("    <level>");
             sb.append(levelOfEvidence.getLevel());
