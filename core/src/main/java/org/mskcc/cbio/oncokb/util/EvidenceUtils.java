@@ -55,8 +55,7 @@ public class EvidenceUtils {
         if (query == null) {
             return new HashSet<>();
         }
-        Gene gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol())
-            : GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
         if (gene != null) {
             String variantId = query.getQueryId() +
                 (source != null ? ("&" + source) : "") +
@@ -787,7 +786,7 @@ public class EvidenceUtils {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
                 query.setQuery(requestQuery);
-                query.setGene(getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
+                query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
                 if (query.getGene() != null) {
                     if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
@@ -829,27 +828,6 @@ public class EvidenceUtils {
         return assignEvidence(EvidenceUtils.getEvidence(evidenceQueries, evidenceTypes, geneStatus, levelOfEvidences),
             evidenceQueries, highestLevelOnly);
     }
-
-    private static Gene getGene(Integer entrezGeneId, String hugoSymbol) {
-        Gene entrezGene = null;
-        Gene hugoGene = null;
-
-        if (entrezGeneId != null) {
-            entrezGene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-        }
-        if (hugoSymbol != null) {
-            hugoGene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-        }
-        if (entrezGene != null) {
-            if (hugoGene != null && !entrezGene.equals(hugoGene)) {
-                return null;
-            } else {
-                return entrezGene;
-            }
-        }
-        return hugoGene;
-    }
-
 
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
                                                          Boolean highestLevelOnly) {

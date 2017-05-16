@@ -102,8 +102,7 @@ public class IndicatorUtils {
                 }
             }
         } else {
-            gene = query.getEntrezGeneId() == null ? GeneUtils.getGeneByHugoSymbol(query.getHugoSymbol()) :
-                GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+            gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
                 Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                     null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
