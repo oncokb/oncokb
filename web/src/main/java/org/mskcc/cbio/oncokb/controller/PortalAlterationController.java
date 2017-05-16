@@ -33,22 +33,20 @@ public class PortalAlterationController {
         if (hugoSymbol == null && entrezGeneId == null) {
             portalAlterations.addAll(portalAlterationBo.findPortalAlterationCount());
         } else {
-            Gene gene = entrezGeneId == null ? GeneUtils.getGeneByHugoSymbol(hugoSymbol) :
-                GeneUtils.getGeneByEntrezId(entrezGeneId);
+            Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             portalAlterations.addAll(portalAlterationBo.findPortalAlterationCountByGene(gene));
 
         }
         return portalAlterations;
     }
-    
+
     @RequestMapping(value = "/legacy-api/mutationMapperData")
     public @ResponseBody
     List<PortalAlteration> getMutationMapperData(@RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
             @RequestParam(value = "hugoSymbol", required = true) String hugoSymbol) {
         PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
         List<PortalAlteration> portalAlterations = new ArrayList<>();
-        Gene gene = entrezGeneId == null ? GeneUtils.getGeneByHugoSymbol(hugoSymbol) :
-            GeneUtils.getGeneByEntrezId(entrezGeneId);
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
         portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
         return portalAlterations;
     }
