@@ -357,6 +357,7 @@ function getString(string) {
     /* eslint new-cap: 0*/
     var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
     string = S(_string).collapseWhitespace().s;
+    string = string.replace(/<!--.*-->/g, '');
     return string;
 }
 OncoKB.utils = {
