@@ -744,7 +744,6 @@ angular.module('oncokbApp')
                     description: null,
                     evidenceType: type,
                     gene: {
-                        entrezGeneId: $scope.meta.gene.entrezGeneId,
                         hugoSymbol: $scope.gene.name.getText()
                     },
                     knownEffect: null,
@@ -757,6 +756,9 @@ angular.module('oncokbApp')
                     treatments: null,
                     propagation: null
                 };
+                if ($scope.meta.gene) {
+                    data.gene.entrezGeneId = $scope.meta.gene.entrezGeneId;
+                }
                 var levelMapping = {
                     '0': 'LEVEL_0',
                     '1': 'LEVEL_1',
