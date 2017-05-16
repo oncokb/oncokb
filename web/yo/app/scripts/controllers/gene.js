@@ -744,7 +744,7 @@ angular.module('oncokbApp')
                     description: null,
                     evidenceType: type,
                     gene: {
-                        entrezGeneId: $scope.meta.gene.entrezGeneId,
+                        entrezGeneId: $scope.meta.gene ? $scope.meta.gene.entrezGeneId : 0,
                         hugoSymbol: $scope.gene.name.getText()
                     },
                     knownEffect: null,
