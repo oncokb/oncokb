@@ -218,7 +218,7 @@ angular.module('oncokbApp')
                     }
                     return true;
                 } else if(reviewObj && reviewObj.get('addedItem')) {
-                        reviewObj.delete('addedItem');
+                    reviewObj.delete('addedItem');
                 }
                 // precisely check for this element
                 if(_.isBoolean(precise) && precise) {
@@ -350,7 +350,9 @@ angular.module('oncokbApp')
                     if (mutation.name_review.get('removed') || mutation.name_review.get('added')) {
                         $scope.status.hasReviewContent = true;
                         userNames.push(mutation.name_review.get('updatedBy'));
-                        continue;
+                        if (mutation.name_review.get('removed')) {
+                            continue;
+                        }
                     }
                     tempArr = [mutation.oncogenic_review, mutation.effect_review, mutation.description_review];
                     setOriginalStatus(tempArr);
@@ -369,7 +371,9 @@ angular.module('oncokbApp')
                         if (tumor.name_review.get('removed') || tumor.name_review.get('added')) {
                             mutationChanged = true;
                             userNames.push(tumor.name_review.get('updatedBy'));
-                            continue;
+                            if (tumor.name_review.get('removed')) {
+                                continue;
+                            }
                         }
                         tempArr = [tumor.prevalence_review];
                         setOriginalStatus(tempArr);
@@ -408,7 +412,9 @@ angular.module('oncokbApp')
                                 if (treatment.name_review.get('removed') || treatment.name_review.get('added')) {
                                     tiChanged = true;
                                     userNames.push(treatment.name_review.get('updatedBy'));
-                                    continue;
+                                    if (treatment.name_review.get('removed')) {
+                                        continue;
+                                    }
                                 }
                                 tempArr = [treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review];
                                 setOriginalStatus(tempArr);
@@ -1387,6 +1393,7 @@ angular.module('oncokbApp')
                     mutation.name_review.clear();
                     if (firstLayer) {
                         mutation.name_review.set('action', 'ADD_ACCEPTED');
+                        mutation.oncogenic_review.clear();
                     }
                     _.each(mutation.tumors.asArray(), function(tumor) {
                         if (tumor.name_review.get('added')) {
@@ -1398,8 +1405,14 @@ angular.module('oncokbApp')
                     tumor.name_review.clear();
                     if (firstLayer) {
                         tumor.name_review.set('action', 'ADD_ACCEPTED');
+                        tumor.summary_review.clear();
+                        tumor.prevalence_review.clear();
+                        tumor.progImp_review.clear();
+                        tumor.nccn_review.clear();
+                        tumor.trials_review.clear();
                     }
                     _.each(tumor.TI.asArray(), function(ti) {
+                        ti.description_review.clear();
                         _.each(ti.treatments.asArray(), function(treatment) {
                             if (treatment.name_review.get('added')) {
                                 acceptSectionItems('treatment', mutation, tumor, ti, treatment);
@@ -1436,9 +1449,12 @@ angular.module('oncokbApp')
             };
             $scope.rejectAdded = function (event, type, mutation, tumor, ti, treatment) {
                 $scope.stopCollopse(event);
-                removeModel(type, mutation, tumor, ti, treatment);
-                var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
-                removeUUIDs(tempUUIDs);
+                var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
+                dlg.result.then(function() {
+                    removeModel(type, mutation, tumor, ti, treatment);
+                    var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
+                    removeUUIDs(tempUUIDs);
+                });
             }
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
