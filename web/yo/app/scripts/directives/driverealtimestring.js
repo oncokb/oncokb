@@ -26,13 +26,19 @@ angular.module('oncokbApp')
                 chosenid: '=', // Chosen selection ID
                 checkboxes: '=', // checkbox list for input is checkbox
                 checkboxid: '=',
-                ph: '=' // Place holder
+                ph: '=', // Place holder
+                mutation: '=',
+                therapyCategory: '=',
+                treatment: '=',
+                validateMutationInGene: '&validateMutation',
+                validateTreatmentInGene: '&validateTreatment'
             },
             replace: true,
             link: function postLink(scope) {
                 scope.reviewMode = $rootScope.reviewMode;
                 scope.addOnTimeoutPromise = '';
                 scope.stringTimeoutPromise = '';
+
                 if (scope.objecttype === 'object' && scope.objectkey) {
                     if (scope.object.has(scope.objectkey)) {
                         scope.content.stringO = scope.object.get(scope.objectkey);
@@ -75,6 +81,12 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
+                            if (scope.t === 'MUTATION_NAME') {
+                                scope.error = scope.validateMutation(n);
+                            }
+                            if (scope.t === 'TREATMENT_NAME') {
+                                scope.error = scope.validateTreatment(n, false, false, scope.therapyCategory);
+                            }
                             if (scope.es && scope.es.get('obsolete') === 'true') {
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
@@ -164,6 +176,7 @@ angular.module('oncokbApp')
                 }
             },
             controller: function($scope) {
+                $scope.error = '';
                 $scope.content = {};
                 $scope.content.propagationOpts = [];
                 $scope.propagationOpts = {
@@ -253,6 +266,32 @@ angular.module('oncokbApp')
                     }
                     return classResult;
                 };
+                $scope.validateMutation = function(newMutationName, alert, firstEnter, mutation) {
+                    return $scope.validateMutationInGene({
+                        newMutationName: newMutationName,
+                        alert: alert,
+                        firstEnter: firstEnter,
+                        mutation: mutation
+                    });
+                };
+                $scope.validateTreatment = function(newTreatmentName, alert, firstEnter, therapyCategory, treatment) {
+                    return $scope.validateTreatmentInGene({
+                        newTreatmentName: newTreatmentName,
+                        alert: alert,
+                        firstEnter: firstEnter,
+                        therapyCategory: therapyCategory,
+                        treatment: treatment
+                    });
+                };
+                function duplicatedNameCheck() {
+                    if ($scope.t === 'MUTATION_NAME') {
+                        $scope.error = $scope.validateMutation($scope.object.text, false, true, $scope.mutation);
+                    }
+                    if ($scope.t === 'TREATMENT_NAME') {
+                        $scope.error = $scope.validateTreatment($scope.object.text, false, true, $scope.therapyCategory, $scope.treatment);
+                    }
+                }
+                duplicatedNameCheck();
             }
         };
     })
