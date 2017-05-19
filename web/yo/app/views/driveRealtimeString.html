@@ -18,13 +18,13 @@
         </pub-iframe>
     </div>
     <div ng-if="t === 'name'">
-        <h4 ng-if="reviewMode && reviewObj.get('lastReviewed') && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">New Content:</h4>
+        <h4 ng-if="reviewMode && reviewObj.get('lastReviewed') && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('added')">New Content:</h4>
         <span contenteditable="{{reviewMode ? (reviewObj.get('lastReviewed') ? true : false) : fe}}"
               ng-class="editableBox"
            ng-model="content.stringO">
         </span>
         <br/>
-        <div ng-if="reviewMode && reviewObj.get('lastReviewed') && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">
+        <div ng-if="reviewMode && reviewObj.get('lastReviewed') && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('added')">
             <h4>Old Content:</h4>
             <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewed')}}</p>
         </div>
