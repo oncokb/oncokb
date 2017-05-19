@@ -57,12 +57,15 @@ public class AlterationUtilsTest {
                 {"V600delinsYM", "600", "600", null, null, "inframe_insertion"},
                 {"I744_K745delinsKIPVAI", "744", "745", null, null, "inframe_insertion"},
                 {"762_823ins", "762", "823", null, null, "inframe_insertion"},
+                {"V561_I562insER", "561", "562", null, null, "inframe_insertion"},
 
                 // start_lost,
                 {"M1I", "1", "1", "M", "I", "start_lost"},
+                {"M1?", "1", "1", "M", "?", "start_lost"},
 
                 // NA
                 {"BCR-ABL1 Fusion", "-1", "100000", null, null, "NA"},
+                {"Oncogenic Mutations", "-1", "100000", null, null, "NA"},
 
                 // Splice
                 {"X405_splice", "405", "405", null, null, "splice_region_variant"},

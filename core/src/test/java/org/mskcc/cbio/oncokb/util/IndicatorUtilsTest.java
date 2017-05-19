@@ -72,6 +72,34 @@ public class IndicatorUtilsTest {
             LevelOfEvidence.LEVEL_R1, indicatorQueryResp.getHighestResistanceLevel());
 
 
+        // Test cases generated through MSK-IMPACT reports which ran into issue before
+        query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, "Non-Small Cell Lung Cancer", "missense_variant", null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Variant should not exist", false, indicatorQueryResp.getVariantExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 1",
+            LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query = new Query(null, null, null, "TMPRSS2-ERG", null, "Fusion", "Prostate Adenocarcinoma", "missense_variant", null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Is expected to be oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be null",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query = new Query(null, null, null, "ERCC2", "P13Rfs*43", null, "Prostate Adenocarcinoma", "frame_shift", null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 3B",
+            LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query = new Query(null, null, null, "CDKN2A", "M1?", null, "Colon Adenocarcinoma", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+
         /**
          * Comparing between two queries
          */
