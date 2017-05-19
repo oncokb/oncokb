@@ -1,10 +1,11 @@
 package org.mskcc.cbio.oncokb.controller;
 
-import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.SummaryQueries;
+import org.mskcc.cbio.oncokb.model.SummaryQueryRes;
+import org.mskcc.cbio.oncokb.model.VariantQuery;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
-import org.mskcc.oncotree.model.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -30,16 +31,16 @@ public class SummaryController {
     public
     @ResponseBody
     List<String> getSummary(
-            HttpMethod method,
-            @RequestParam(value = "type", required = false) String type,
-            @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
-            @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
-            @RequestParam(value = "alteration", required = false) String alteration,
-            @RequestParam(value = "tumorType", required = false) String tumorType,
-            @RequestParam(value = "consequence", required = false) String consequence,
-            @RequestParam(value = "proteinStart", required = false) String proteinStart,
-            @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
-            @RequestParam(value = "source", required = false) String source) {
+        HttpMethod method,
+        @RequestParam(value = "type", required = false) String type,
+        @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
+        @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
+        @RequestParam(value = "alteration", required = false) String alteration,
+        @RequestParam(value = "tumorType", required = false) String tumorType,
+        @RequestParam(value = "consequence", required = false) String consequence,
+        @RequestParam(value = "proteinStart", required = false) String proteinStart,
+        @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
+        @RequestParam(value = "source", required = false) String source) {
 
         List<String> summaryList = new ArrayList<>();
         List<VariantQuery> variantQueries = VariantPairUtils.getGeneAlterationTumorTypeConsequence(entrezGeneId, hugoSymbol, alteration, tumorType, consequence, proteinStart, proteinEnd, source);
@@ -55,7 +56,7 @@ public class SummaryController {
     public
     @ResponseBody
     List<SummaryQueryRes> getSummary(
-            @RequestBody SummaryQueries body) {
+        @RequestBody SummaryQueries body) {
 
         List<SummaryQueryRes> res = new ArrayList<>();
         if (body.getSource() == null) {
@@ -70,10 +71,10 @@ public class SummaryController {
             SummaryQueryRes queryRes = new SummaryQueryRes();
             queryRes.setId(query.getId());
             VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
-                    query.getHugoSymbol(), query.getAlteration(), query.getTumorType(), query.getConsequence(),
-                    query.getProteinStart() != null ? Integer.toString(query.getProteinStart()) : null,
-                    query.getProteinEnd() != null ? Integer.toString(query.getProteinEnd()) : null,
-                    body.getSource()).get(0);
+                query.getHugoSymbol(), query.getAlteration(), query.getTumorType(), query.getConsequence(),
+                query.getProteinStart() != null ? Integer.toString(query.getProteinStart()) : null,
+                query.getProteinEnd() != null ? Integer.toString(query.getProteinEnd()) : null,
+                body.getSource()).get(0);
             queryRes.setSummary(getSummary(variantQuery, body.getType()));
             res.add(queryRes);
         }
@@ -90,22 +91,22 @@ public class SummaryController {
                     summary = SummaryUtils.geneSummary(variantQuery.getGene());
                     break;
                 case "oncogenic":
-                    summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, false);
+                    summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query);
                     break;
                 case "variant":
-                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "full":
-                    summary = SummaryUtils.fullSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.fullSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "variantCustomized":
-                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(variantQuery.getGene()), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(variantQuery.getGene()), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "tumorType":
                     summary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getAlterations(), new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 default:
-                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
             }
         }
@@ -114,7 +115,7 @@ public class SummaryController {
 
     private List<String> getSummary(List<VariantQuery> queries, String summaryType) {
         List<String> summaries = new ArrayList<>();
-        for(VariantQuery variantQuery : queries) {
+        for (VariantQuery variantQuery : queries) {
             String test = getSummary(variantQuery, summaryType);
             summaries.add(test);
         }

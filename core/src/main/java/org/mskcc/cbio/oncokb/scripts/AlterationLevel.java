@@ -37,7 +37,7 @@ public class AlterationLevel {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
             List<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(alterations);
             for (Alteration alteration : alterationsWithoutVUS) {
-                List<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
+                LinkedHashSet<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
                 List<Evidence> relevantEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidencesByAlteration(relevantAlts);
 //                LevelOfEvidence levelOfEvidence = LevelUtils.getHighestLevelFromEvidence(new HashSet<>(relevantEvidences));
 

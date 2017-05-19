@@ -457,7 +457,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                List<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -471,7 +471,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                List<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -487,7 +487,7 @@ public final class AlterationUtils {
             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
             Alteration revertFusion = getRevertFusions(alt);
             if (revertFusion != null) {
-                List<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, new ArrayList<>(fullAlterations));
                 if (alts != null) {
                     alterations.addAll(alts);
                 }
@@ -499,8 +499,8 @@ public final class AlterationUtils {
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
         List<Alteration> alterations = new ArrayList<>();
 
-        if (alteration.getConsequence() == null
-            || !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+        if (alteration == null || alteration.getConsequence() == null ||
+            !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             return alterations;
         }
         if (CacheUtils.isEnabled()) {
@@ -512,7 +512,6 @@ public final class AlterationUtils {
         List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
-        alleles = filterAllelesBasedOnLocation(alleles, alteration.getProteinStart());
 
         // Remove alteration itself
         alleles.remove(alteration);
@@ -592,21 +591,6 @@ public final class AlterationUtils {
         } else {
             return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
         }
-    }
-
-    public static List<Alteration> filterAllelesBasedOnLocation(List<Alteration> alterations, Integer location) {
-        List<Alteration> result = new ArrayList<>();
-
-        for (Alteration alteration : alterations) {
-            if (alteration.getProteinStart() != null
-                && alteration.getProteinEnd() != null
-                && alteration.getProteinStart().equals(alteration.getProteinEnd())
-                && alteration.getProteinStart().equals(location)) {
-
-                result.add(alteration);
-            }
-        }
-        return result;
     }
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {

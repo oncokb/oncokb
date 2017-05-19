@@ -32,12 +32,12 @@ public class AllOncogenicMutationEffect {
             List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
             List<Alteration> alterationsWithoutVUS = AlterationUtils.excludeVUS(alterations);
             for (Alteration alteration : alterationsWithoutVUS) {
-                List<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
+                LinkedHashSet<Alteration> relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, alterations);
                 Set<EvidenceType> evidenceTypes = new HashSet<>();
                 evidenceTypes.add(EvidenceType.MUTATION_EFFECT);
                 evidenceTypes.add(EvidenceType.ONCOGENIC);
 
-                List<Evidence> relevantEvidences = EvidenceUtils.getEvidence(relevantAlts, evidenceTypes, null);
+                List<Evidence> relevantEvidences = EvidenceUtils.getEvidence(new ArrayList<>(relevantAlts), evidenceTypes, null);
 
                 for(Evidence evidence : relevantEvidences) {
                     String knownEffect = evidence.getKnownEffect();
