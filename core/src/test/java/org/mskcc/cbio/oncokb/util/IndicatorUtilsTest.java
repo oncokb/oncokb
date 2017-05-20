@@ -55,9 +55,9 @@ public class IndicatorUtilsTest {
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_2B));
 
         // Test for predicted oncogenic
-        query = new Query(null, null, null, "KRAS", "Q61K", null, "Pancreatic Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "PIK3R1", "K567E", null, "Pancreatic Adenocarcinoma", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
-        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // No longer test 3A. KRAS has been downgraded to level 4
 //        assertEquals("The highest sensitive level should be null, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
@@ -65,7 +65,7 @@ public class IndicatorUtilsTest {
 
         query = new Query(null, null, null, "KRAS", "Q61K", null, "Colorectal Cancer", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
-        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Likely Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 4",
             LevelOfEvidence.LEVEL_4, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
