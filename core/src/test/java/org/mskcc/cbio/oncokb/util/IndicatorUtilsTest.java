@@ -55,9 +55,9 @@ public class IndicatorUtilsTest {
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_2B));
 
         // Test for predicted oncogenic
-        query = new Query(null, null, null, "KRAS", "Q61K", null, "Pancreatic Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "PIK3R1", "K567E", null, "Pancreatic Adenocarcinoma", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
-        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // No longer test 3A. KRAS has been downgraded to level 4
 //        assertEquals("The highest sensitive level should be null, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
@@ -65,12 +65,40 @@ public class IndicatorUtilsTest {
 
         query = new Query(null, null, null, "KRAS", "Q61K", null, "Colorectal Cancer", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
-        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Likely Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 4",
             LevelOfEvidence.LEVEL_4, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R1, indicatorQueryResp.getHighestResistanceLevel());
 
+
+        // Test cases generated through MSK-IMPACT reports which ran into issue before
+        query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, "Non-Small Cell Lung Cancer", "missense_variant", null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Variant should not exist", false, indicatorQueryResp.getVariantExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 1",
+            LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query = new Query(null, null, null, "TMPRSS2-ERG", null, "Fusion", "Prostate Adenocarcinoma", "missense_variant", null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Is expected to be oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be null",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query = new Query(null, null, null, "ERCC2", "P13Rfs*43", null, "Prostate Adenocarcinoma", "frame_shift", null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 3B",
+            LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query = new Query(null, null, null, "CDKN2A", "M1?", null, "Colon Adenocarcinoma", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         /**
          * Comparing between two queries

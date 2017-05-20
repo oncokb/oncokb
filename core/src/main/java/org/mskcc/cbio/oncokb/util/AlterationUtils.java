@@ -95,7 +95,7 @@ public final class AlterationUtils {
                     end = start;
                 }
                 String type = m.group(4);
-                if (type == "ins") {
+                if (type.equals("ins")) {
                     consequence = "inframe_insertion";
                 } else {
                     Integer deletion = end - start + 1;
