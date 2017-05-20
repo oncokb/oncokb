@@ -976,7 +976,7 @@ public class SummaryUtils {
         summary = summary.replace("[[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[mutation]] [[[mutation]]]", alterationName);
         // In case of miss typed
-        summary = summary.replace("[[mutation]] [[mutation]]", alterationName);
+        summary = summary.replace("[[mutation]] [[mutation]]", queryAlteration);
         summary = summary.replace("[[mutation]]", queryAlteration);
         summary = summary.replace("[[tumorType]]", queryTumorType);
         summary = summary.replace("[[tumor type]]", queryTumorType);
