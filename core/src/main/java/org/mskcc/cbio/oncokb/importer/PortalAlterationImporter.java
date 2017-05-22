@@ -74,13 +74,7 @@ public class PortalAlterationImporter {
                 Alteration alt = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(),
                     proteinChange, null, consequence, proteinStartPosition, proteinEndPosition);
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
-                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alt);
-
-                // Remove alternative alleles for now, they weren't calculated in previous logic
-                relevantAlts.removeAll(alternativeAlleles);
-
-                alterations.addAll(relevantAlts);
+                alterations.addAll(AlterationUtils.getRelevantAlterations(alt));
             }
             alterationsSet = AlterationUtils.excludeVUS(alterations);
         }
