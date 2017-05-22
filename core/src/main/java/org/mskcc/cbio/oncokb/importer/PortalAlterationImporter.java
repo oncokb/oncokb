@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class PortalAlterationImporter {
 
-    public static List<Alteration> findAlterationList(Gene gene, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
+    private static List<Alteration> findAlterationList(Gene gene, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
         List<Alteration> alterations = new ArrayList<>();
         List<Alteration> alterationsSet = new ArrayList<>();
         HashMap<String, String[]> mapper = new HashMap<>();
@@ -73,7 +73,14 @@ public class PortalAlterationImporter {
             for (String consequence : consequences) {
                 Alteration alt = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(),
                     proteinChange, null, consequence, proteinStartPosition, proteinEndPosition);
-                alterations.addAll(AlterationUtils.getRelevantAlterations(alt));
+                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
+                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alt);
+
+                // Remove alternative alleles for now, they weren't calculated in previous logic
+                relevantAlts.removeAll(alternativeAlleles);
+
+                alterations.addAll(relevantAlts);
             }
             alterationsSet = AlterationUtils.excludeVUS(alterations);
         }

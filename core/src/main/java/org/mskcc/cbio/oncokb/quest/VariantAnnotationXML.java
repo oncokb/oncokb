@@ -50,6 +50,10 @@ public final class VariantAnnotationXML {
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
         LinkedHashSet<Alteration> alterations = alterationBo.findRelevantAlterations(alt, null);
 
+        // In previous logic, we do not include alternative alleles
+        List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alt);
+        alterations.removeAll(alternativeAlleles);
+
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
         // find all drugs

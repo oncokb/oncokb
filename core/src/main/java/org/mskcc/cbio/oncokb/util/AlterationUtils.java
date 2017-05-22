@@ -437,7 +437,7 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
+    private static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
         VariantConsequence variantConsequence = null;
 
