@@ -283,17 +283,17 @@ public class SummaryUtils {
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
 
-        // Get oncogenic summary from alternative alleles
-        List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
-        List<Alteration> alternativeAllelesWithoutVUS = AlterationUtils.excludeVUS(gene, alternativeAlleles);
-
-        // VUS alternative alleles are not accounted into oncogenic summary calculation
-        if (oncogenic == null && alternativeAllelesWithoutVUS.size() > 0) {
-            sb.append(alleleSummary(alteration));
-            return sb.toString();
-        }
-
         if (oncogenic == null) {
+            // Get oncogenic summary from alternative alleles
+            List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
+            List<Alteration> alternativeAllelesWithoutVUS = AlterationUtils.excludeVUS(gene, alternativeAlleles);
+
+            // VUS alternative alleles are not accounted into oncogenic summary calculation
+            if (alternativeAllelesWithoutVUS.size() > 0) {
+                sb.append(alleleSummary(alteration));
+                return sb.toString();
+            }
+
             // Get oncogenic info from rest of relevant alterations except AA
             alterations.removeAll(alternativeAlleles);
             Set<Oncogenicity> oncogenicities = new HashSet<>();
@@ -328,7 +328,7 @@ public class SummaryUtils {
 
     private static String getVUSOncogenicSummary(Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        String summary = null;
+        String summary = "no functional data about this alteration was available.";
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
             if (evidence.getLastEdit() == null) {
@@ -342,9 +342,9 @@ public class SummaryUtils {
         }
         if (lastEdit != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            summary = "As of " + sdf.format(lastEdit) + ", no functional data about this alteration was available.";
+            summary = "as of " + sdf.format(lastEdit) + ", " + summary;
         }
-        return summary;
+        return summary.substring(0, 1).toUpperCase() + summary.substring(1);
     }
 
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, String queryAlteration, String altName) {
@@ -531,12 +531,12 @@ public class SummaryUtils {
         Set<Alteration> specialAlts = new HashSet<>();
 
         for (Alteration alteration : alterations) {
-            if(alteration.getProteinStart() != null && alteration.getProteinEnd() != null &&
+            if (alteration.getProteinStart() != null && alteration.getProteinEnd() != null &&
                 alteration.getProteinStart().equals(alteration.getProteinEnd())) {
                 if (!locationBasedAlts.containsKey(alteration.getProteinStart()))
                     locationBasedAlts.put(alteration.getProteinStart(), new HashSet<Alteration>());
                 locationBasedAlts.get(alteration.getProteinStart()).add(alteration);
-            }else{
+            } else {
                 specialAlts.add(alteration);
             }
         }

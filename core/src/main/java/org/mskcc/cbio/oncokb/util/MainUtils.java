@@ -510,11 +510,6 @@ public class MainUtils {
 
     public static Boolean isVUS(Alteration alteration) {
         List<Evidence> evidenceList = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        for (Evidence evidence : evidenceList) {
-            if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
-                return true;
-            }
-        }
-        return false;
+        return !(evidenceList == null || evidenceList.isEmpty());
     }
 }

@@ -174,9 +174,6 @@ public class IndicatorUtils {
 
                 // Find Oncogenicity from alternative alleles
                 if(indicatorQuery.getAlleleExist()) {
-                    Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
-                    Set<Alteration> oncogenicMutations = null;
-
                     oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
                 }
 
