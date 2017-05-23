@@ -135,7 +135,7 @@ public class IndicatorUtils {
 
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
             Alteration matchedAlt = alterationBo.findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
-            indicatorQuery.setVariantExist(matchedAlt == null);
+            indicatorQuery.setVariantExist(matchedAlt != null);
 
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {

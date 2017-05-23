@@ -515,7 +515,18 @@ public final class AlterationUtils {
 
         // Remove alteration itself
         alleles.remove(alteration);
+        sortAlternativeAlleles(alleles);
         return alleles;
+    }
+
+    // Sort the alternative alleles alphabetically
+    private static void sortAlternativeAlleles(List<Alteration> alternativeAlleles) {
+        Collections.sort(alternativeAlleles, new Comparator<Alteration>() {
+            @Override
+            public int compare(Alteration a1, Alteration a2) {
+                return a1.getAlteration().compareTo(a2.getAlteration());
+            }
+        });
     }
 
     public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {

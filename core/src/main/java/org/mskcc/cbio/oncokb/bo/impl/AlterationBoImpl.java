@@ -142,14 +142,49 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
 
         if (alteration.getConsequence().getIsGenerallyTruncating()) {
-            VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+            addTruncatingMutations = true;
         }
 
         // Match all variants with `any` as consequence. Currently, only format start_endmut is supported.
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
+        // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
+        if (alteration.getAlteration().toLowerCase().matches("deletion")) {
+            addDeletion = true;
+            addTruncatingMutations = true;
+        }
+
+        if (addDeletion) {
+            Alteration deletion = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Deletion");
+            if (deletion != null) {
+                alterations.add(deletion);
+
+                // If there is Deletion annotated already, do not associate Truncating Mutations
+                addTruncatingMutations = false;
+            }
+        }
+
+        if (addTruncatingMutations) {
+            VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        }
+
+        // Looking for oncogenic mutations
+        if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
+            for (Alteration alt : alterations) {
+                if (AlterationUtils.isOncogenicAlteration(alt)) {
+                    addOncogenicMutations = true;
+                    break;
+                }
+            }
+        }
+        if (addOncogenicMutations) {
+            Alteration oncogenicMutations = findAlteration(alteration.getGene(), alteration.getAlterationType(), "oncogenic mutations");
+            if (oncogenicMutations != null) {
+                alterations.add(oncogenicMutations);
+            }
+        }
 
         // Looking for general biological effect variants. Gain-of-function mutations, Loss-of-function mutations etc.
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -171,44 +206,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), effect + " mutations");
             if (alt != null) {
                 alterations.add(alt);
-            }
-        }
-
-        // Looking for oncogenic mutations
-        if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
-            for (Alteration alt : alterations) {
-                if (AlterationUtils.isOncogenicAlteration(alt)) {
-                    addOncogenicMutations = true;
-                    break;
-                }
-            }
-        }
-
-        if (addTruncatingMutations) {
-            Alteration truncatingMutations = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Truncating Mutations");
-            if (truncatingMutations != null) {
-                alterations.add(truncatingMutations);
-            }
-        }
-        if (addDeletion) {
-            Alteration deletion = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Deletion");
-            if (deletion != null) {
-                alterations.add(deletion);
-            }
-        }
-        if (addOncogenicMutations) {
-            Alteration oncogenicMutations = findAlteration(alteration.getGene(), alteration.getAlterationType(), "oncogenic mutations");
-            if (oncogenicMutations != null) {
-                alterations.add(oncogenicMutations);
-            }
-        }
-
-        // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
-        Alteration truncAlt = AlterationUtils.findAlteration(alteration.getGene(), "Truncating Mutations");
-        if (truncAlt != null && !alterations.contains(truncAlt)) {
-            Alteration deletion = AlterationUtils.findAlteration(alteration.getGene(), "Deletion");
-            if (deletion == null && alteration.getAlteration().toLowerCase().matches("deletion")) {
-                alterations.add(truncAlt);
             }
         }
         return alterations;
