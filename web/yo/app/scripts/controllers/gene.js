@@ -894,8 +894,8 @@ angular.module('oncokbApp')
                       });
                     }
                     if(tempArr1.length > 0) {
-                        data.cancerType = tempArr1.join(',');
-                        data.subtype = tempArr2.join(',');
+                        data.cancerType = tempArr1.join(';');
+                        data.subtype = tempArr2.join(';');
                     }
                 }
                 if (TI) {

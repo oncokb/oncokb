@@ -266,9 +266,9 @@ public class EvidenceController {
         if(cancerType == null) {
             isCancerEvidence = false;
         } else {
-            cancerTypes = Arrays.asList(cancerType.split(","));
+            cancerTypes = Arrays.asList(cancerType.split(";"));
             if(subType != null) {
-                subTypes = Arrays.asList(subType.split(","));
+                subTypes = Arrays.asList(subType.split(";"));
                 for(int i = 0;i < subTypes.size();i++) {
                     if(subTypes.get(i).equals("null")) {
                         subTypes.set(i, null);
