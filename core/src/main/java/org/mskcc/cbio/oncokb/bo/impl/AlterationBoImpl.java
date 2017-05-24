@@ -6,7 +6,6 @@ package org.mskcc.cbio.oncokb.bo.impl;
 
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
@@ -74,139 +73,120 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
      * @return
      */
     @Override
-    public List<Alteration> findRelevantAlterations(Alteration alteration, List<Alteration> fullAlterations) {
-        List<Alteration> alterations = new ArrayList<Alteration>();
+    public LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, List<Alteration> fullAlterations) {
+        LinkedHashSet<Alteration> alterations = new LinkedHashSet<>();
+        Boolean addTruncatingMutations = false;
+        Boolean addDeletion = false;
+        Boolean addOncogenicMutations = false;
+
+        // Alteration should always has consequence attached.
+        if (alteration.getConsequence() == null) {
+            AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+        }
+
+        if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
+            return alterations;
+        }
+
+        // Find exact match
         Alteration matchedAlt = findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
         if (matchedAlt != null) {
             alterations.add(matchedAlt);
         }
-        if (alteration.getConsequence() != null) {
-            if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
-                return new ArrayList<>();
-            }
-            // we need to develop better way to match mutation
-            if (alteration.getProteinStart() != null) {
-                List<Alteration> alts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
-                if (!alteration.getConsequence().getTerm().equals("missense_variant")) {
-                    alterations.addAll(alts);
-                } else {
-                    for (Alteration alt : alts) {
-                        if (!alt.getAlteration().matches("[A-Z][0-9]+[A-Z]")) {
-                            alterations.add(alt);
-                        }
-                    }
-                }
-            }
 
-            if (alteration.getConsequence().getIsGenerallyTruncating()) {
-                VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
-                alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        // Find fusion variant
+        //If alteration contains 'fusion' or alterationType is fusion
+        if ((alteration.getAlteration() != null && alteration.getAlteration().toLowerCase().contains("fusion"))
+            || (alteration.getAlterationType() != null && alteration.getAlterationType().equals(AlterationType.FUSION))) {
+            // TODO: match fusion partner
+
+            //the alteration 'fusions' should be injected into alteration list
+            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
+            if (alt != null) {
+                alterations.add(alt);
+            } else {
+                // If no fusions curated, check the Truncating Mutations.
+                addTruncatingMutations = true;
             }
         }
 
+        // Map Truncating Mutations to Translocation and Inversion
+        // These two are all structural variants, need a better way to model them.
+//            if (alteration.getAlteration().toLowerCase().equals("translocation")
+//                || alteration.getAlteration().toLowerCase().equals("inversion")) {
+//                // If no fusions curated, check the Truncating Mutations.
+//                if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
+//                    alterations.add(truncatingMutation);
+//                }
+//            }
+
+        // Map intragenic to Deletion or Truncating Mutation
+        // If no Deletion curated, attach Truncating Mutations
+//            if (alteration.getAlteration().toLowerCase().contains("intragenic") ||
+//                alteration.getAlteration().toLowerCase().equals("deletion")) {
+//                if (deletion != null) {
+//                    if (!alterations.contains(deletion)) {
+//                        alterations.add(deletion);
+//                    }
+//                } else if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
+//                    alterations.add(truncatingMutation);
+//                }
+//            }
+
+        //Find Alternative Alleles for missense variant
+        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+            alterations.addAll(AlterationUtils.getAlleleAlterations(alteration));
+        } else {
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        }
+
+
+        if (alteration.getConsequence().getIsGenerallyTruncating()) {
+            addTruncatingMutations = true;
+        }
+
+        // Match all variants with `any` as consequence. Currently, only format start_endmut is supported.
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
-        if (alteration.getAlteration() != null) {
-            Alteration truncatingMutation = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Truncating Mutations");
+        // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
+        if (alteration.getAlteration().toLowerCase().matches("deletion")) {
+            addDeletion = true;
+            addTruncatingMutations = true;
+        }
+
+        if (addDeletion) {
             Alteration deletion = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Deletion");
-            //If alteration contains 'fusion'
-            if (alteration.getAlteration().toLowerCase().contains("fusion")) {
-                boolean matchFusionForBothPatnerGenes = false;
-                if (matchFusionForBothPatnerGenes) {
-                    GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-                    String fusion = alteration.getAlteration(); // e.g. TRB-NKX2-1 fusion
-                    int ix = fusion.toLowerCase().indexOf("fusion");
-                    if (ix >= 0) {
-                        Gene gene = alteration.getGene();
-                        if (gene.getEntrezGeneId() > 0) {
-                            // find fusions annotated in the other gene
-                            String symbol = gene.getHugoSymbol();
-                            String genes = fusion.substring(0, ix);
-                            int ixg = genes.indexOf(symbol);
-                            if (ixg < 0) {
-                                System.err.println(fusion + " was under " + symbol);
-                            } else {
-                                String theOtherGene = genes.replace(symbol, "")
-                                    .replaceAll("-", " ").trim() // trim -
-                                    .replaceAll(" ", "-");
+            if (deletion != null) {
+                alterations.add(deletion);
 
-                                Gene tog = geneBo.findGeneByHugoSymbol(theOtherGene);
-                                if (tog != null) {
-                                    String reverse;
-                                    if (ixg == 0) {
-                                        reverse = tog.getHugoSymbol() + "-" + symbol + " fusion";
-                                    } else {
-                                        reverse = symbol + "-" + tog.getHugoSymbol() + " fusion";
-                                    }
-
-                                    Alteration toa = findAlteration(tog, alteration.getAlterationType(), reverse);
-                                    if (toa != null) {
-                                        alterations.add(toa);
-                                    }
-
-                                    toa = findAlteration(tog, alteration.getAlterationType(), "fusions");
-                                    if (toa != null) {
-                                        alterations.add(toa);
-                                    }
-                                }
-                            }
-                        } else {
-                            if (gene.getGeneAliases().size() == 2) {
-                                String[] aliases = gene.getGeneAliases().toArray(new String[0]);
-                                Gene gene0 = geneBo.findGeneByHugoSymbol(aliases[0]);
-                                Gene gene1 = geneBo.findGeneByHugoSymbol(aliases[1]);
-                                Alteration toa = findAlteration(gene1, alteration.getAlterationType(), aliases[0] + "-" + aliases[1] + " fusion");
-                                if (toa != null) {
-                                    alterations.add(toa);
-                                }
-                                toa = findAlteration(gene0, alteration.getAlterationType(), aliases[1] + "-" + aliases[0] + " fusion");
-                                if (toa != null) {
-                                    alterations.add(toa);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //the alteration 'fusions' should be injected into alteration list
-                Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
-                if (alt != null) {
-                    alterations.add(alt);
-                } else {
-                    // If no fusions curated, check the Truncating Mutations.
-                    if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-                        alterations.add(truncatingMutation);
-                    }
-                }
-            }
-
-            // Map Truncating Mutations to Translocation and Inversion
-            // These two are all structural variants, need a better way to model them.
-            if (alteration.getAlteration().toLowerCase().equals("translocation")
-                || alteration.getAlteration().toLowerCase().equals("inversion")) {
-                // If no fusions curated, check the Truncating Mutations.
-                if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-                    alterations.add(truncatingMutation);
-                }
-            }
-
-            // Map intragenic to Deletion or Truncating Mutation
-            // If no Deletion curated, attach Truncating Mutations
-            if (alteration.getAlteration().toLowerCase().contains("intragenic") ||
-                alteration.getAlteration().toLowerCase().equals("deletion")) {
-                if (deletion != null) {
-                    if (!alterations.contains(deletion)) {
-                        alterations.add(deletion);
-                    }
-                } else if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-                    alterations.add(truncatingMutation);
-                }
+                // If there is Deletion annotated already, do not associate Truncating Mutations
+                addTruncatingMutations = false;
             }
         }
 
+        if (addTruncatingMutations) {
+            VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        }
 
-        // Looking for inferred mutations.
+        // Looking for oncogenic mutations
+        if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
+            for (Alteration alt : alterations) {
+                if (AlterationUtils.isOncogenicAlteration(alt)) {
+                    addOncogenicMutations = true;
+                    break;
+                }
+            }
+        }
+        if (addOncogenicMutations) {
+            Alteration oncogenicMutations = findAlteration(alteration.getGene(), alteration.getAlterationType(), "oncogenic mutations");
+            if (oncogenicMutations != null) {
+                alterations.add(oncogenicMutations);
+            }
+        }
+
+        // Looking for general biological effect variants. Gain-of-function mutations, Loss-of-function mutations etc.
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
         Set<String> effects = new HashSet<>();
@@ -226,28 +206,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), effect + " mutations");
             if (alt != null) {
                 alterations.add(alt);
-            }
-        }
-
-        // Looking for oncogenic mutations
-        if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
-            for (Alteration alt : alterations) {
-                if (AlterationUtils.isOncogenicAlteration(alt)) {
-                    Alteration oncogenicMutations = findAlteration(alt.getGene(), alt.getAlterationType(), "oncogenic mutations");
-                    if (oncogenicMutations != null) {
-                        alterations.add(oncogenicMutations);
-                    }
-                    break;
-                }
-            }
-        }
-
-        // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
-        Alteration truncAlt = AlterationUtils.findAlteration(alteration.getGene(), "Truncating Mutations");
-        if (truncAlt != null && !alterations.contains(truncAlt)) {
-            Alteration deletion = AlterationUtils.findAlteration(alteration.getGene(), "Deletion");
-            if (deletion == null && alteration.getAlteration().toLowerCase().matches("deletion")) {
-                alterations.add(truncAlt);
             }
         }
         return alterations;

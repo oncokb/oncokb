@@ -309,6 +309,28 @@ public class MainUtils {
         return sb.toString();
     }
 
+    public static String listToString(List<String> list) {
+        if (list.isEmpty()) {
+            return "";
+        }
+
+        int n = list.size();
+        StringBuilder sb = new StringBuilder();
+        sb.append(list.get(0));
+        if (n == 1) {
+            return sb.toString();
+        } else if (n == 2) {
+            return sb.append(" and ").append(list.get(1)).toString();
+        }
+
+        for (int i = 1; i < n - 1; i++) {
+            sb.append(", ").append(list.get(i));
+        }
+        sb.append(" and ").append(list.get(n - 1));
+
+        return sb.toString();
+    }
+
     public static List<Integer> stringToIntegers(String ids) {
         if (ids == null) {
             return null;
@@ -484,5 +506,10 @@ public class MainUtils {
             timeformat = "MM/dd/yyy hh:mm:ss";
         }
         return new SimpleDateFormat(timeformat).format(new Date());
+    }
+
+    public static Boolean isVUS(Alteration alteration) {
+        List<Evidence> evidenceList = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
+        return !(evidenceList == null || evidenceList.isEmpty());
     }
 }

@@ -18,6 +18,7 @@ public class VariantQuery implements java.io.Serializable {
     private String consequence;
     private Integer proteinStart;
     private Integer proteinEnd;
+    private Alteration exactMatchAlteration;
     private List<Alteration> alterations;
     private List<TumorType> tumorTypes;
 
@@ -54,6 +55,14 @@ public class VariantQuery implements java.io.Serializable {
 
     public void setQueryAlteration(String queryAlteration) {
         this.queryAlteration = queryAlteration;
+    }
+
+    public Alteration getExactMatchAlteration() {
+        return exactMatchAlteration;
+    }
+
+    public void setExactMatchAlteration(Alteration exactMatchAlteration) {
+        this.exactMatchAlteration = exactMatchAlteration;
     }
 
     public List<Alteration> getAlterations() {

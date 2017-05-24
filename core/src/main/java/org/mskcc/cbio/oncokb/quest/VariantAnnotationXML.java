@@ -48,7 +48,11 @@ public final class VariantAnnotationXML {
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        List<Alteration> alterations = alterationBo.findRelevantAlterations(alt, null);
+        LinkedHashSet<Alteration> alterations = alterationBo.findRelevantAlterations(alt, null);
+
+        // In previous logic, we do not include alternative alleles
+        List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alt);
+        alterations.removeAll(alternativeAlleles);
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
@@ -59,7 +63,7 @@ public final class VariantAnnotationXML {
         Set<String> tumorTypes = new HashSet<>();
 
         if (alterations != null && alterations.size() > 0) {
-            List<Object> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlterations(alterations);
+            List<Object> tumorTypesEvidence = evidenceBo.findTumorTypesWithEvidencesForAlterations(new ArrayList<>(alterations));
             for (Object evidence : tumorTypesEvidence) {
                 if (evidence != null) {
                     Object[] evidences = (Object[]) evidence;
@@ -76,7 +80,7 @@ public final class VariantAnnotationXML {
         query.setTumorType(tumorType);
         // summary
         sb.append("<annotation_summary>");
-        sb.append(SummaryUtils.fullSummary(gene, alterations.isEmpty() ? Collections.singletonList(alt) : alterations, query, relevantTumorTypes));
+        sb.append(SummaryUtils.fullSummary(gene, alt, alterations.isEmpty() ? Collections.singletonList(alt) : new ArrayList<>(alterations), query, relevantTumorTypes));
         sb.append("</annotation_summary>\n");
 
         // gene background

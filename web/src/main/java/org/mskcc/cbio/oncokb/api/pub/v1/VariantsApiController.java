@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -62,7 +63,7 @@ public class VariantsApiController implements VariantsApi {
                     } else {
                         AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
                         Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), variant, variantType, consequence, proteinStart, proteinEnd);
-                        alterationList = alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(AlterationUtils.getAllAlterations(gene)));
+                        alterationList.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(AlterationUtils.getAllAlterations(gene))));
                     }
                 }
             }

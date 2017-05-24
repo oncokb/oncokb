@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
@@ -129,23 +130,12 @@ public class IndicatorUtils {
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-            List<Alteration> alleles = new ArrayList<>();
+            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
             List<TumorType> oncoTreeTypes = new ArrayList<>();
 
-            if (relevantAlterations == null || relevantAlterations.size() == 0) {
-                indicatorQuery.setVariantExist(false);
-
-                if (alteration != null) {
-                    alleles = AlterationUtils.getAlleleAlterations(alteration);
-                }
-            } else {
-                indicatorQuery.setVariantExist(true);
-                if (!relevantAlterations.isEmpty()) {
-                    for (Alteration alt : relevantAlterations) {
-                        alleles.addAll(AlterationUtils.getAlleleAlterations(alt));
-                    }
-                }
-            }
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            Alteration matchedAlt = alterationBo.findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
+            indicatorQuery.setVariantExist(matchedAlt != null);
 
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {
@@ -182,7 +172,12 @@ public class IndicatorUtils {
                     oncogenicity = MainUtils.findHighestOncogenicByEvidences(new HashSet<>(selfAltOncogenicEvis));
                 }
 
-                // If there is no oncogenic info availble for this variant, find oncogenicity from relevant variants
+                // Find Oncogenicity from alternative alleles
+                if(indicatorQuery.getAlleleExist()) {
+                    oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
+                }
+
+                // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
                 if (oncogenicity == null) {
                     oncogenicity = MainUtils.findHighestOncogenicByEvidences(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
@@ -201,42 +196,6 @@ public class IndicatorUtils {
                         (levels != null ?
                             new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
                                 LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
-
-
-            } else if (indicatorQuery.getAlleleExist() || indicatorQuery.getVUS()) {
-                Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
-                List<Alteration> alleleAndRelevantAlterations = new ArrayList<>();
-                Set<Alteration> oncogenicMutations = null;
-
-                alleleAndRelevantAlterations.addAll(alleles);
-                if (oncogenicAllele != null) {
-                    oncogenicMutations = AlterationUtils.getOncogenicMutations(oncogenicAllele);
-                    alleleAndRelevantAlterations.addAll(oncogenicMutations);
-                }
-
-                Oncogenicity oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleleAndRelevantAlterations), Collections.singleton(EvidenceType.ONCOGENIC), null))));
-                treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                    EvidenceUtils.convertEvidenceLevel(
-                        EvidenceUtils.getEvidence(new ArrayList<>(alleles),
-                            MainUtils.getSensitiveTreatmentEvidenceTypes(),
-                            (levels != null ?
-                                new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                    LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes)));
-
-                if (oncogenicMutations != null) {
-                    treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
-                        EvidenceUtils.convertEvidenceLevel(
-                            EvidenceUtils.getEvidence(new ArrayList<>(oncogenicMutations),
-                                MainUtils.getTreatmentEvidenceTypes(),
-                                (levels != null ?
-                                    new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                        LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes))));
-                }
-
-                // Only set oncogenicity if no previous data assigned.
-                if (indicatorQuery.getOncogenic() == null && oncogenicity != null) {
-                    indicatorQuery.setOncogenic(oncogenicity.getOncogenic());
-                }
             }
 
             // Set hotspot oncogenicity to Predicted Oncogenic
@@ -291,8 +250,8 @@ public class IndicatorUtils {
             }
 
             // Mutation summary
-            indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene,
-                new ArrayList<>(relevantAlterations), query, false));
+            indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene, matchedAlt,
+                new ArrayList<>(relevantAlterations), query));
 
             // This is special case for KRAS wildtype. May need to come up with a better plan for this.
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))

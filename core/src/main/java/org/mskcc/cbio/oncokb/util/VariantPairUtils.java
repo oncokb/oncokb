@@ -132,6 +132,8 @@ public class VariantPairUtils {
                     query.setQueryAlteration(alterations[i]);
                     Alteration alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), query.getQueryAlteration(),
                         null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                    Alteration matchedAlt = alterationBo.findAlteration(alt.getGene(), alt.getAlterationType(), alt.getAlteration());
+                    query.setExactMatchAlteration(matchedAlt);
                     query.setAlterations(
                         new ArrayList<>(AlterationUtils.getRelevantAlterations(alt)
                         )
