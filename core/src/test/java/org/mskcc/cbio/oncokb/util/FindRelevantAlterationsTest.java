@@ -50,6 +50,7 @@ public class FindRelevantAlterationsTest {
                 // Check range
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Gain-of-function Mutations"},
 
                 // Range missense variant
                 {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
