@@ -279,14 +279,18 @@ angular.module('oncokbApp')
             }
 
             function updateGeneType(hugoSymbol, data, success, fail) {
-                DriveAnnotation
-                    .updateGeneType(hugoSymbol, data)
-                    .success(function(data) {
-                        success(data);
-                    })
-                    .error(function() {
-                        fail();
-                    });
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .updateGeneType(hugoSymbol, data)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
             }
 
             function updateEvidence(uuid, data, success, fail) {
@@ -301,25 +305,33 @@ angular.module('oncokbApp')
             }
 
             function getEvidencesByUUID(uuid, success, fail) {
-                DriveAnnotation
-                    .getEvidencesByUUID(uuid)
-                    .success(function(data) {
-                        success(data);
-                    })
-                    .error(function() {
-                        fail();
-                    });
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .getEvidencesByUUID(uuid)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
             }
 
             function getEvidencesByUUIDs(uuids, success, fail) {
-                DriveAnnotation
-                    .getEvidencesByUUIDs(uuids)
-                    .success(function(data) {
-                        success(data);
-                    })
-                    .error(function() {
-                        fail();
-                    });
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .getEvidencesByUUIDs(uuids)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
             }
             function getPubMedArticle(pubMedIDs, success, fail) {
                 DriveAnnotation
@@ -332,14 +344,18 @@ angular.module('oncokbApp')
                     });
             }
             function deleteEvidences(data, success, fail) {
-                DriveAnnotation
-                    .deleteEvidences(data)
-                    .success(function(data) {
-                        success(data);
-                    })
-                    .error(function() {
-                        fail();
-                    });
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .deleteEvidences(data)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
             }
 
             function updateVUS(hugoSymbol, data, success, fail) {
@@ -354,14 +370,18 @@ angular.module('oncokbApp')
             }
 
             function updateEvidenceBatch(data, success, fail) {
-                DriveAnnotation
-                    .updateEvidenceBatch(data)
-                    .success(function(data) {
-                        success(data);
-                    })
-                    .error(function() {
-                        fail();
-                    });
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .updateEvidenceBatch(data)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
             }
 
             function createGoogleFolder(params) {

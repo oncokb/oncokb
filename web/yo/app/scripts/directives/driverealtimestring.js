@@ -13,7 +13,7 @@ angular.module('oncokbApp')
             restrict: 'AE',
             scope: {
                 es: '=', // Evidence Status
-                rs: '=', // Review status and last reviewed content
+                reviewObj: '=', // Review status and last reviewed content
                 uuid: '=', // evidence uuid
                 object: '=', // target object
                 objecttype: '=', // drive document attribute type; Default: string
@@ -63,8 +63,8 @@ angular.module('oncokbApp')
                 });
                 scope.$watch('object.text', function(n, o) {
                     if (n !== o) {
-                        if (scope.rs && _.isNull(scope.rs.get('lastReviewed')) && (!scope.reviewMode || scope.rs.get('review') !== false)) {
-                            scope.rs.set('lastReviewed', o);
+                        if (scope.reviewObj && _.isNull(scope.reviewObj.get('lastReviewed')) && (!scope.reviewMode || scope.reviewObj.get('review') !== false)) {
+                            scope.reviewObj.set('lastReviewed', o);
                         }
                         if (scope.content.stringO !== scope.object.getText()) {
                             scope.content.stringO = scope.object.text;
@@ -81,52 +81,52 @@ angular.module('oncokbApp')
                                 } else {
                                     scope.object.text = n;
                                 }
-                            } else if(!scope.uuid || !scope.uuid.getText() || !scope.rs) {
+                            } else if(!scope.uuid || !scope.uuid.getText() || !scope.reviewObj) {
                                 // for the additional info items, since we don't need to track them in the review mode
                                 scope.object.text = n;
-                            } else if(!scope.reviewMode || scope.rs.get('review') !== false) {
+                            } else if(!scope.reviewMode || scope.reviewObj.get('review') !== false) {
                                 // exclude the case of reject action changing real time doc
-                                scope.rs.set('updatedBy', user.name);
-                                scope.rs.set('updateTime', new Date().getTime());
+                                scope.reviewObj.set('updatedBy', user.name);
+                                scope.reviewObj.set('updateTime', new Date().getTime());
                                 var uuid = scope.uuid.getText();
                                 var tempMapping = $rootScope.geneMetaData.get(uuid);
                                 if (!tempMapping) {
                                     tempMapping = $rootScope.metaModel.createMap();
                                 }
-                                if (scope.rs && scope.rs.get('rollback')) {
-                                    scope.rs.set('rollback', null);
+                                if (scope.reviewObj && scope.reviewObj.get('rollback')) {
+                                    scope.reviewObj.set('rollback', null);
                                 }
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     // currently this condition is only designed for gene type
-                                    if (!scope.rs.get('lastReviewed')) {
-                                        scope.rs.set('lastReviewed', _.clone({
+                                    if (!scope.reviewObj.get('lastReviewed')) {
+                                        scope.reviewObj.set('lastReviewed', _.clone({
                                             TSG: scope.object.get('TSG'),
                                             OCG: scope.object.get('OCG')
                                         }));
                                     }
                                     scope.object.set(scope.objectkey, n);
-                                    if (scope.rs.get('lastReviewed').TSG === scope.object.get('TSG')
-                                        && scope.rs.get('lastReviewed').OCG === scope.object.get('OCG')) {
+                                    if (scope.reviewObj.get('lastReviewed').TSG === scope.object.get('TSG')
+                                        && scope.reviewObj.get('lastReviewed').OCG === scope.object.get('OCG')) {
                                         tempMapping.set('review', false);
                                         if (scope.reviewMode) {
-                                            scope.rs.set('rollback', true);
+                                            scope.reviewObj.set('rollback', true);
                                         }
-                                        scope.rs.delete('lastReviewed');
-                                        scope.rs.delete('updatedBy');
+                                        scope.reviewObj.delete('lastReviewed');
+                                        scope.reviewObj.delete('updatedBy');
                                     } else {
                                         tempMapping.set('review', true);
                                     }
                                 } else {
                                     scope.object.text = n;
-                                    if (scope.rs.get('lastReviewed') !== n) {
+                                    if (scope.reviewObj.get('lastReviewed') !== n) {
                                         tempMapping.set('review', true);
                                     } else {
                                         tempMapping.set('review', false);
                                         if (scope.reviewMode) {
-                                            scope.rs.set('rollback', true);
+                                            scope.reviewObj.set('rollback', true);
                                         }
-                                        scope.rs.delete('lastReviewed');
-                                        scope.rs.delete('updatedBy');
+                                        scope.reviewObj.delete('lastReviewed');
+                                        scope.reviewObj.delete('updatedBy');
                                     }
                                 }
                                 $rootScope.geneMetaData.set(uuid, tempMapping);
@@ -149,7 +149,7 @@ angular.module('oncokbApp')
                             }
                         }
                         if (o && n !== o && scope.es && scope.es.get('obsolete') !== 'true') {
-                            scope.rs.set('lastReviewedPropagation', o);
+                            scope.reviewObj.set('lastReviewedPropagation', o);
                             var uuid = scope.uuid.getText();
                             var tempMapping =  $rootScope.geneMetaData.get(uuid);
                             if (!tempMapping) {
@@ -157,8 +157,8 @@ angular.module('oncokbApp')
                             }
                             tempMapping.set('review', true);
                              $rootScope.geneMetaData.set(uuid, tempMapping);
-                            scope.rs.set('updatedBy', user.name);
-                            scope.rs.set('updateTime', new Date().getTime());
+                            scope.reviewObj.set('updatedBy', user.name);
+                            scope.reviewObj.set('updateTime', new Date().getTime());
                         }
                     });
                 }
@@ -210,7 +210,7 @@ angular.module('oncokbApp')
                     $scope.content.propagationOpts = _propagationOpts;
                 };
                 function calculateDiff() {
-                    if(($scope.t === 'p' || $scope.t === 'short') && $scope.rs && $scope.rs.has('lastReviewed')) {
+                    if(($scope.t === 'p' || $scope.t === 'short') && $scope.reviewObj && $scope.reviewObj.has('lastReviewed')) {
                         var dmp = new diff_match_patch();
                         var newContent = stringUtils.getTextString($scope.content.stringO);
                         var oldContent = stringUtils.getTextString($scope.lastReviewed);
@@ -220,7 +220,7 @@ angular.module('oncokbApp')
                     }
                 }
                 $scope.valueChanged = function() {
-                    if ($scope.t === 'treatment-select' && (!$scope.reviewMode || $scope.rs.get('review') !== false)) {
+                    if ($scope.t === 'treatment-select' && (!$scope.reviewMode || $scope.reviewObj.get('review') !== false)) {
                         $scope.changePropagation();
                     }
                     if (!_.isUndefined($scope.es)) {
@@ -243,10 +243,10 @@ angular.module('oncokbApp')
                 };
                 $scope.getInputClass = function() {
                     if ($scope.reviewMode) {
-                        $scope.lastReviewed = $scope.rs.get('lastReviewed');
+                        $scope.lastReviewed = $scope.reviewObj.get('lastReviewed');
                         calculateDiff();
                     }
-                    var contentEditable = $scope.reviewMode ? ($scope.rs.get('review') !== false ? true : false) : $scope.fe;
+                    var contentEditable = $scope.reviewMode ? ($scope.reviewObj.get('review') !== false ? true : false) : $scope.fe;
                     var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
                     if ($scope.t === 'p') {
                         classResult += ' doubleH';

@@ -2,7 +2,7 @@
   <status style="position: relative">
     <i class="fa {{vetted.icon}}" ng-style="{color: obsolete==='true'?'red':vetted.color}" ng-if="display"></i>
     <statusBody class="eStatusComments">
-        <span>
+        <span ng-if="obsolete === 'true'" >
             <input
                 id="{{id}}-obsolete"
                 type="checkbox"
