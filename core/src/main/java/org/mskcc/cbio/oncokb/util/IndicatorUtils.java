@@ -148,10 +148,7 @@ public class IndicatorUtils {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
 
-            indicatorQuery.setVUS(isVUS(
-                EvidenceUtils.getRelevantEvidences(query, source,
-                    geneStatus, Collections.singleton(EvidenceType.VUS), null)
-            ));
+            indicatorQuery.setVUS(isVUS(matchedAlt == null ? alteration : matchedAlt));
 
             if (alleles == null || alleles.size() == 0) {
                 indicatorQuery.setAlleleExist(false);
@@ -173,7 +170,7 @@ public class IndicatorUtils {
                 }
 
                 // Find Oncogenicity from alternative alleles
-                if(indicatorQuery.getAlleleExist()) {
+                if (oncogenicity == null && indicatorQuery.getAlleleExist()) {
                     oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
                 }
 
@@ -353,13 +350,12 @@ public class IndicatorUtils {
         return treatments;
     }
 
-    private static Boolean isVUS(Set<Evidence> evidenceList) {
-        for (Evidence evidence : evidenceList) {
-            if (evidence.getEvidenceType().equals(EvidenceType.VUS)) {
-                return true;
-            }
+    private static Boolean isVUS(Alteration alteration) {
+        if (alteration == null) {
+            return false;
         }
-        return false;
+        List<Alteration> alterations = AlterationUtils.excludeVUS(Collections.singletonList(alteration));
+        return alterations.size() == 0;
     }
 
     private static Map<String, LevelOfEvidence> findHighestLevel(Set<IndicatorQueryTreatment> treatments) {

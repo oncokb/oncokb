@@ -31,6 +31,19 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The oncogenicity is not matched in variant summary.", "The KRAS V14I mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
+        // Check critical case
+        query = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertTrue("The geneExist in the response should be set to true", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantExist in the response should be set to true", indicatorQueryResp.getVariantExist() == true);
+        assertTrue("The alleleExist in the response should be set to true", indicatorQueryResp.getAlleleExist() == true);
+        assertTrue("Should be hotspot", indicatorQueryResp.getHotspot() == true);
+        assertTrue("Should not be VUS", indicatorQueryResp.getVUS() == false);
+        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 2B", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
+        assertTrue("Should have no other significant level", indicatorQueryResp.getOtherSignificantSensitiveLevels().size() == 0);
+
         // Check fusion.
         query = new Query(null, null, null, "BRAF", "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
