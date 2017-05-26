@@ -28,6 +28,7 @@ angular.module('oncokbApp')
                 checkboxid: '=',
                 ph: '=', // Place holder
                 mutation: '=',
+                tumor: '=',
                 therapyCategory: '=',
                 treatment: '=',
                 validateMutationInGene: '&validateMutation',
@@ -82,10 +83,10 @@ angular.module('oncokbApp')
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
                             if (scope.t === 'MUTATION_NAME') {
-                                scope.error = scope.validateMutation(n);
+                                scope.error = scope.validateMutation(n, false);
                             }
                             if (scope.t === 'TREATMENT_NAME') {
-                                scope.error = scope.validateTreatment(n, false, false, scope.therapyCategory);
+                                scope.error = scope.validateTreatment(n, false, false, scope.mutation, scope.tumor, scope.therapyCategory);
                             }
                             if (scope.es && scope.es.get('obsolete') === 'true') {
                                 if (scope.objecttype === 'object' && scope.objectkey) {
@@ -266,29 +267,29 @@ angular.module('oncokbApp')
                     }
                     return classResult;
                 };
-                $scope.validateMutation = function(newMutationName, alert, firstEnter, mutation) {
+                $scope.validateMutation = function(newMutationName, firstEnter, alert) {
                     return $scope.validateMutationInGene({
                         newMutationName: newMutationName,
-                        alert: alert,
                         firstEnter: firstEnter,
-                        mutation: mutation
+                        alert: alert
                     });
                 };
-                $scope.validateTreatment = function(newTreatmentName, alert, firstEnter, therapyCategory, treatment) {
+                $scope.validateTreatment = function(newTreatmentName, firstEnter, alert, mutation, tumor, therapyCategory) {
                     return $scope.validateTreatmentInGene({
                         newTreatmentName: newTreatmentName,
-                        alert: alert,
                         firstEnter: firstEnter,
-                        therapyCategory: therapyCategory,
-                        treatment: treatment
+                        alert: alert,
+                        mutation: mutation,
+                        tumor: tumor,
+                        therapyCategory: therapyCategory
                     });
                 };
                 function duplicatedNameCheck() {
                     if ($scope.t === 'MUTATION_NAME') {
-                        $scope.error = $scope.validateMutation($scope.object.text, false, true, $scope.mutation);
+                        $scope.error = $scope.validateMutation($scope.object.text, true, false);
                     }
                     if ($scope.t === 'TREATMENT_NAME') {
-                        $scope.error = $scope.validateTreatment($scope.object.text, false, true, $scope.therapyCategory, $scope.treatment);
+                        $scope.error = $scope.validateTreatment($scope.object.text, true, false, $scope.mutation, $scope.tumor, $scope.therapyCategory);
                     }
                 }
                 duplicatedNameCheck();
