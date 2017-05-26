@@ -241,9 +241,9 @@ public class IndicatorUtils {
 
             // Tumor type summary
             if (query.getTumorType() != null) {
-                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query,
+                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
-                    new HashSet<>(oncoTreeTypes)));
+                    oncoTreeTypes));
             }
 
             // Mutation summary

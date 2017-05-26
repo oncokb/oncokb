@@ -29,7 +29,7 @@ import com.mysql.jdbc.StringUtils;
 
 public class CacheUtils {
     private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
-    private static Map<Integer, Map<String, Map<String, String>>> variantTumorTypeSummary = new HashMap<>();
+    private static Map<Integer, Map<String, String>> variantTumorTypeSummary = new HashMap<>();
     private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
@@ -422,30 +422,26 @@ public class CacheUtils {
         variantSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static String getVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType) {
+    public static String getVariantTumorTypeSummary(Integer entrezGeneId, String key) {
         if (variantTumorTypeSummary.containsKey(entrezGeneId)
-            && variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)
-            && variantTumorTypeSummary.get(entrezGeneId).get(variant).containsKey(tumorType)) {
-            return variantTumorTypeSummary.get(entrezGeneId).get(variant).get(tumorType);
+            && variantTumorTypeSummary.get(entrezGeneId).containsKey(key)) {
+            return variantTumorTypeSummary.get(entrezGeneId).get(key);
         } else {
             return null;
         }
     }
 
-    public static Boolean containVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType) {
+    public static Boolean containVariantTumorTypeSummary(Integer entrezGeneId, String key) {
         return (variantTumorTypeSummary.containsKey(entrezGeneId)
-            && variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)
-            && variantTumorTypeSummary.get(entrezGeneId).get(variant).containsKey(tumorType)) ? true : false;
+            && variantTumorTypeSummary.get(entrezGeneId).containsKey(key)) ? true : false;
     }
 
-    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String variant, String tumorType, String summary) {
+    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String key, String summary) {
+        System.out.println(key + " "  + summary);
         if (!variantTumorTypeSummary.containsKey(entrezGeneId)) {
-            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, Map<String, String>>());
+            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, String>());
         }
-        if (!variantTumorTypeSummary.get(entrezGeneId).containsKey(variant)) {
-            variantTumorTypeSummary.get(entrezGeneId).put(variant, new HashMap<String, String>());
-        }
-        variantTumorTypeSummary.get(entrezGeneId).get(variant).put(tumorType, summary);
+        variantTumorTypeSummary.get(entrezGeneId).put(key, summary);
     }
 
     public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
