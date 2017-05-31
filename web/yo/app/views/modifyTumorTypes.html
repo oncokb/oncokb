@@ -39,6 +39,7 @@
         </div>
     </div>
     <div class="modal-footer">
+        <p style="color:red;float:left" ng-if="invalidTumor">Same tumor type already exists</p>
         <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
         <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="invalidTumor">Save</button>
     </div>

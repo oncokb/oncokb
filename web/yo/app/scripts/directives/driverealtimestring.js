@@ -7,13 +7,15 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils) {
+    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils, mainUtils) {
         return {
             templateUrl: 'views/driveRealtimeString.html',
             restrict: 'AE',
             scope: {
                 es: '=', // Evidence Status
                 reviewObj: '=', // Review status and last reviewed content
+                mutationMessages: '=',
+                treatmentMessages: '=',
                 uuid: '=', // evidence uuid
                 object: '=', // target object
                 objecttype: '=', // drive document attribute type; Default: string
@@ -31,8 +33,8 @@ angular.module('oncokbApp')
                 tumor: '=',
                 therapyCategory: '=',
                 treatment: '=',
-                validateMutationInGene: '&validateMutation',
-                validateTreatmentInGene: '&validateTreatment'
+                getMutationMessagesInGene: '&getMutationMessages',
+                getTreatmentMessagesInGene: '&getTreatmentMessages'
             },
             replace: true,
             link: function postLink(scope) {
@@ -82,12 +84,6 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
-                            if (scope.t === 'MUTATION_NAME') {
-                                scope.error = scope.validateMutation(n, false);
-                            }
-                            if (scope.t === 'TREATMENT_NAME') {
-                                scope.error = scope.validateTreatment(n, false, false, scope.mutation, scope.tumor, scope.therapyCategory);
-                            }
                             if (scope.es && scope.es.get('obsolete') === 'true') {
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
@@ -177,7 +173,6 @@ angular.module('oncokbApp')
                 }
             },
             controller: function($scope) {
-                $scope.error = '';
                 $scope.content = {};
                 $scope.content.propagationOpts = [];
                 $scope.propagationOpts = {
@@ -243,6 +238,12 @@ angular.module('oncokbApp')
                     if($scope.reviewMode === true) {
                         calculateDiff();
                     }
+                    if ($scope.t === 'MUTATION_NAME') {
+                        $scope.getMutationMessages();
+                    }
+                    if ($scope.t === 'TREATMENT_NAME') {
+                        $scope.getTreatmentMessages($scope.mutation, $scope.tumor, $scope.therapyCategory);
+                    }
                 };
 
                 $scope.sCheckboxChange = function() {
@@ -267,32 +268,28 @@ angular.module('oncokbApp')
                     }
                     return classResult;
                 };
-                $scope.validateMutation = function(newMutationName, firstEnter, alert) {
-                    return $scope.validateMutationInGene({
-                        newMutationName: newMutationName,
-                        firstEnter: firstEnter,
-                        alert: alert
-                    });
+                $scope.getMutationMessages = function() {
+                    return $scope.getMutationMessagesInGene();
                 };
-                $scope.validateTreatment = function(newTreatmentName, firstEnter, alert, mutation, tumor, therapyCategory) {
-                    return $scope.validateTreatmentInGene({
-                        newTreatmentName: newTreatmentName,
-                        firstEnter: firstEnter,
-                        alert: alert,
+                $scope.getTreatmentMessages = function(mutation, tumor, ti) {
+                    return $scope.getTreatmentMessagesInGene({
                         mutation: mutation,
                         tumor: tumor,
-                        therapyCategory: therapyCategory
+                        ti: ti
                     });
                 };
-                function duplicatedNameCheck() {
+                $scope.getDuplicationMessage = function() {
+                    var mutationName = $scope.mutation.name.text.toLowerCase();
                     if ($scope.t === 'MUTATION_NAME') {
-                        $scope.error = $scope.validateMutation($scope.object.text, true, false);
+                        return $scope.mutationMessages[mutationName];
+                    } else if ($scope.t === 'TREATMENT_NAME') {
+                        var tumorName = mainUtils.getCancerTypesName($scope.tumor.cancerTypes).toLowerCase();
+                        var tiName = $scope.therapyCategory.name.text.toLowerCase();
+                        var treatmentName = $scope.object.text.toLowerCase();
+                        return $scope.treatmentMessages[mutationName][tumorName][tiName][treatmentName];
                     }
-                    if ($scope.t === 'TREATMENT_NAME') {
-                        $scope.error = $scope.validateTreatment($scope.object.text, true, false, $scope.mutation, $scope.tumor, $scope.therapyCategory);
-                    }
+
                 }
-                duplicatedNameCheck();
             }
         };
     })
