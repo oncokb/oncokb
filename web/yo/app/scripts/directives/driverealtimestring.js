@@ -7,13 +7,15 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils) {
+    .directive('driveRealtimeString', function(gapi, $timeout, _, $rootScope, user, stringUtils, mainUtils) {
         return {
             templateUrl: 'views/driveRealtimeString.html',
             restrict: 'AE',
             scope: {
                 es: '=', // Evidence Status
                 reviewObj: '=', // Review status and last reviewed content
+                mutationMessages: '=',
+                treatmentMessages: '=',
                 uuid: '=', // evidence uuid
                 object: '=', // target object
                 objecttype: '=', // drive document attribute type; Default: string
@@ -26,13 +28,20 @@ angular.module('oncokbApp')
                 chosenid: '=', // Chosen selection ID
                 checkboxes: '=', // checkbox list for input is checkbox
                 checkboxid: '=',
-                ph: '=' // Place holder
+                ph: '=', // Place holder
+                mutation: '=',
+                tumor: '=',
+                therapyCategory: '=',
+                treatment: '=',
+                getMutationMessagesInGene: '&getMutationMessages',
+                getTreatmentMessagesInGene: '&getTreatmentMessages'
             },
             replace: true,
             link: function postLink(scope) {
                 scope.reviewMode = $rootScope.reviewMode;
                 scope.addOnTimeoutPromise = '';
                 scope.stringTimeoutPromise = '';
+
                 if (scope.objecttype === 'object' && scope.objectkey) {
                     if (scope.object.has(scope.objectkey)) {
                         scope.content.stringO = scope.object.get(scope.objectkey);
@@ -229,6 +238,12 @@ angular.module('oncokbApp')
                     if($scope.reviewMode === true) {
                         calculateDiff();
                     }
+                    if ($scope.t === 'MUTATION_NAME') {
+                        $scope.getMutationMessages();
+                    }
+                    if ($scope.t === 'TREATMENT_NAME') {
+                        $scope.getTreatmentMessages($scope.mutation, $scope.tumor, $scope.therapyCategory);
+                    }
                 };
 
                 $scope.sCheckboxChange = function() {
@@ -253,6 +268,28 @@ angular.module('oncokbApp')
                     }
                     return classResult;
                 };
+                $scope.getMutationMessages = function() {
+                    return $scope.getMutationMessagesInGene();
+                };
+                $scope.getTreatmentMessages = function(mutation, tumor, ti) {
+                    return $scope.getTreatmentMessagesInGene({
+                        mutation: mutation,
+                        tumor: tumor,
+                        ti: ti
+                    });
+                };
+                $scope.getDuplicationMessage = function() {
+                    var mutationName = $scope.mutation.name.text.toLowerCase();
+                    if ($scope.t === 'MUTATION_NAME') {
+                        return $scope.mutationMessages[mutationName];
+                    } else if ($scope.t === 'TREATMENT_NAME') {
+                        var tumorName = mainUtils.getCancerTypesName($scope.tumor.cancerTypes).toLowerCase();
+                        var tiName = $scope.therapyCategory.name.text.toLowerCase();
+                        var treatmentName = $scope.object.text.toLowerCase();
+                        return $scope.treatmentMessages[mutationName][tumorName][tiName][treatmentName];
+                    }
+
+                }
             }
         };
     })

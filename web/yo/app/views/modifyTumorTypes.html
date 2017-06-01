@@ -14,7 +14,8 @@
                                 data-placeholder="Choose a main tumor type"
                                 no-results-text="'Could not find any'"
                                 ng-model="cancerType.mainType"
-                                ng-options="tt.name for tt in meta.oncoTree.mainTypes | orderBy: 'name' track by tt.name">
+                                ng-options="tt.name for tt in meta.oncoTree.mainTypes | orderBy: 'name' track by tt.name"
+                                ng-change="tumorDuplicationCheck()">
                             <option value=""></option>
                         </select>
                     </div>
@@ -27,7 +28,8 @@
                                 data-placeholder="Choose a tumor type"
                                 no-results-text="'Could not find any'"
                                 ng-model="cancerType.subtype"
-                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
+                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code"
+                                ng-change="tumorDuplicationCheck()">
                             <option value=""></option>
                         </select>
                     </div>
@@ -37,7 +39,8 @@
         </div>
     </div>
     <div class="modal-footer">
+        <p style="color:red;float:left" ng-if="invalidTumor">Same tumor type already exists</p>
         <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
-        <button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+        <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="invalidTumor">Save</button>
     </div>
 </div>

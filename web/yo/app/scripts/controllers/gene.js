@@ -24,50 +24,11 @@ angular.module('oncokbApp')
 
             $scope.addMutation = function(newMutationName) {
                 if (this.gene && newMutationName) {
-                    newMutationName = newMutationName.toString().trim();
-                    var exists = false;
-                    var removed = false;
-                    var tempMutation;
-                    var isVUS = false;
-                    var mutationNameBlackList = [
-                        'activating mutations',
-                        'activating mutation',
-                        'inactivating mutations',
-                        'inactivating mutation'
-                    ];
-                    this.gene.mutations.asArray().forEach(function(e) {
-                        if (e.name.getText().toLowerCase() === newMutationName.toLowerCase()) {
-                            exists = true;
-                            if(e.name_review.get('removed')) {
-                                removed = true;
-                                tempMutation = e;
-                            }
-                        }
-                    });
-                    this.vus.asArray().forEach(function(e) {
-                        if (e.name.getText().toLowerCase() === newMutationName.toLowerCase()) {
-                            isVUS = true;
-                        }
-                    });
-
-                    if (mutationNameBlackList
-                            .indexOf(newMutationName.toLowerCase()) !== -1) {
-                        dialogs.notify('Warning',
-                            'This mutation name is not allowed.');
-                    } else if (exists) {
-                        if(removed) {
-                            dialogs.notify('Warning', 'This mutation just got removed, we will reuse the old one.');
-                            tempMutation.name_review.set('removed', false);
-                            $rootScope.geneMetaData.delete(tempMutation.name_uuid.getText());
-                        } else {
-                            dialogs.notify('Warning', 'Mutation exists.');
-                        }
-                    } else if (isVUS) {
-                        dialogs.notify('Warning', 'Mutation is in VUS list.');
-                    } else {
-                        var _mutation = '';
+                    if ($scope.validateMutation(newMutationName) === true) {
+                        // This check is for the case that a mutation got deleted and confirmed. And then add the same name mutation
+                        $scope.getMutationMessages();
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
-                        _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
+                        var _mutation = $scope.realtimeDocument.getModel().create(OncoKB.Mutation);
                         var filteredContent = [];
                         _.each(newMutationName.split(','), function(item) {
                             item = item.trim();
@@ -84,6 +45,130 @@ angular.module('oncokbApp')
                         $scope.realtimeDocument.getModel().endCompoundOperation();
                         $scope.initGeneStatus(_mutation);
                     }
+                }
+            };
+            $scope.getMutationMessages = function() {
+                $scope.mutationMessages = {};
+                var vusList = [];
+                $scope.vus.asArray().forEach(function(e) {
+                    vusList.push(e.name.text.toLowerCase());
+                });
+                var mutationNameBlackList = [
+                    'activating mutations',
+                    'activating mutation',
+                    'inactivating mutations',
+                    'inactivating mutation'
+                ];
+
+                var tempNameList = [];
+                for (var i = 0; i < $scope.gene.mutations.length; i++) {
+                    var mutationName = $scope.gene.mutations.get(i).name.text.toLowerCase();
+                    if (mutationNameBlackList.indexOf(mutationName) !== -1) {
+                        $scope.mutationMessages[mutationName] = 'This mutation name is not allowed';
+                    } else if (vusList.indexOf(mutationName) !== -1) {
+                        $scope.mutationMessages[mutationName] = 'Mutation exists in VUS list';
+                    } else if (tempNameList.indexOf(mutationName) !== -1) {
+                        $scope.mutationMessages[mutationName] = 'Mutation exists';
+                    }  else if (tempNameList.indexOf(mutationName) === -1) {
+                        tempNameList.push(mutationName);
+                        $scope.mutationMessages[mutationName] = '';
+                    }
+                }
+            }
+            $rootScope.getTumorMessages = function(mutation) {
+                var mutationName = mutation.name.text.toLowerCase();
+                if (!$scope.tumorMessages) {
+                    $scope.tumorMessages = {};
+                }
+                $scope.tumorMessages[mutationName] = {};
+                var tempNameList = [];
+                for (var j = 0; j < mutation.tumors.length; j++) {
+                    var tumor = mutation.tumors.get(j);
+                    var tumorName = $scope.getCancerTypesName(tumor.cancerTypes).toLowerCase();
+                    if (tempNameList.indexOf(tumorName) === -1) {
+                        tempNameList.push(tumorName);
+                        $scope.tumorMessages[mutationName][tumorName] = '';
+                    } else {
+                        $scope.tumorMessages[mutationName][tumorName] = 'Tumor exists';
+                    }
+                }
+            }
+            $scope.getTreatmentMessages = function(mutation, tumor, ti) {
+                var mutationName = mutation.name.text.toLowerCase();
+                var tumorName = $scope.getCancerTypesName(tumor.cancerTypes).toLowerCase();
+                var tiName = ti.name.text.toLowerCase();
+                var tempNameList = [];
+                if (!$scope.treatmentMessages) {
+                    $scope.treatmentMessages = {};
+                }
+                if (!$scope.treatmentMessages[mutationName]) {
+                    $scope.treatmentMessages[mutationName] = {};
+                }
+                if (!$scope.treatmentMessages[mutationName][tumorName]) {
+                    $scope.treatmentMessages[mutationName][tumorName] = {};
+                }
+                $scope.treatmentMessages[mutationName][tumorName][tiName] = {};
+                for (var n = 0; n < ti.treatments.length; n++) {
+                    var treatmentName = ti.treatments.get(n).name.text.toLowerCase();
+                    if (tempNameList.indexOf(treatmentName) === -1) {
+                        tempNameList.push(treatmentName);
+                    } else {
+                        $scope.treatmentMessages[mutationName][tumorName][tiName][treatmentName] = 'Therapy exists';
+                    }
+                }
+            }
+            $scope.validateMutation = function(newMutationName) {
+                newMutationName = newMutationName.toLowerCase();
+                var exists = false;
+                var removed = false;
+                var tempMutation;
+                var isVUS = false;
+                var mutationNameBlackList = [
+                    'activating mutations',
+                    'activating mutation',
+                    'inactivating mutations',
+                    'inactivating mutation'
+                ];
+                var vusList = [];
+                $scope.vus.asArray().forEach(function(e) {
+                    vusList.push(e.name.text.toLowerCase());
+                });
+                if (vusList.indexOf(newMutationName) !== -1) {
+                    isVUS = true;
+                }
+                _.some($scope.gene.mutations.asArray(), function(e) {
+                    if (e.name.getText().toLowerCase() === newMutationName) {
+                        exists = true;
+                        if(e.name_review.get('removed')) {
+                            removed = true;
+                            tempMutation = e;
+                        } else {
+                            // set 'removed' to false to make sure we only put removed mutation back when there is only duplicated mutation
+                            removed = false;
+                            return true;
+                        }
+                    }
+                });
+                if (mutationNameBlackList
+                        .indexOf(newMutationName) !== -1) {
+                    dialogs.notify('Warning',
+                        'This mutation name is not allowed.');
+                    return false;
+                } else if (isVUS) {
+                    dialogs.notify('Warning', 'Mutation is in VUS list.');
+                    return false;
+                } else if (exists) {
+                    if(removed) {
+                        dialogs.notify('Warning', 'This mutation just got removed, we will reuse the old one.');
+                        tempMutation.name_review.set('removed', false);
+                        $rootScope.geneMetaData.delete(tempMutation.name_uuid.getText());
+                        return false;
+                    } else {
+                        dialogs.notify('Warning', 'Mutation exists.');
+                        return false;
+                    }
+                } else {
+                    return true;
                 }
             };
 
@@ -1573,38 +1658,50 @@ angular.module('oncokbApp')
                 }
                 $scope.docStatus.updateGene = true;
             }
+            $scope.validateTumor = function(mutation, tumor) {
+                var exists = false;
+                var removed = false;
+                var tempTumor;
+                var newTumorTypesName = getNewCancerTypesName($scope.meta.newCancerTypes).toLowerCase();
+                _.some(mutation.tumors.asArray(), function(e) {
+                    if ($scope.getCancerTypesName(e.cancerTypes).toLowerCase() === newTumorTypesName) {
+                        exists = true;
+                        if(e.name_review.get('removed')) {
+                            removed = true;
+                            tempTumor = e;
+                        } else {
+                            removed = false;
+                            return true;
+                        }
+                    }
+                });
+                if (exists) {
+                    if(removed) {
+                        dialogs.notify('Warning', 'This tumor just got removed, we will reuse the old one.');
+                        tempTumor.name_review.set('removed', false);
+                        $rootScope.geneMetaData.delete(tempTumor.name_uuid.getText());
+                        return false;
+                    } else {
+                        dialogs.notify('Warning', 'Tumor type exists.');
+                        return false;
+                    }
+                } else {
+                    return true;
+                }
+            };
+            $scope.getTumorDuplication = function(mutation, tumor) {
+                var mutationName = mutation.name.text.toLowerCase();
+                var tumorName = $scope.getCancerTypesName(tumor.cancerTypes).toLowerCase();
+                return $scope.tumorMessages[mutationName][tumorName];
+            };
 
             $scope.addTumorType = function(mutation) {
-                var newTumorTypesName = getNewCancerTypesName($scope.meta.newCancerTypes);
-
-                if (mutation && newTumorTypesName) {
-                    var _tumorType = '';
-                    var exists = false;
-                    var removed = false;
-                    var tempTumor;
-                    var model = $scope.realtimeDocument.getModel();
-
-                    mutation.tumors.asArray().forEach(function(e) {
-                        if ($scope.getCancerTypesName(e.cancerTypes).toLowerCase() === newTumorTypesName.toLowerCase()) {
-                            exists = true;
-                            if(e.name_review.get('removed')) {
-                                removed = true;
-                                tempTumor = e;
-                            }
-                        }
-                    });
-
-                    if (exists) {
-                        if(removed) {
-                            dialogs.notify('Warning', 'This tumor just got removed, we will reuse the old one.');
-                            tempTumor.name_review.set('removed', false);
-                            $rootScope.geneMetaData.delete(tempTumor.name_uuid.getText());
-                        } else {
-                            dialogs.notify('Warning', 'Tumor type exists.');
-                        }
-                    } else {
+                if (mutation) {
+                    if ($scope.validateTumor(mutation)) {
+                        $rootScope.getTumorMessages(mutation);
+                        var model = $scope.realtimeDocument.getModel();
                         model.beginCompoundOperation();
-                        _tumorType = model.create(OncoKB.Tumor);
+                        var _tumorType = model.create(OncoKB.Tumor);
 
                         _.each($scope.meta.newCancerTypes, function(ct) {
                             if (ct.mainType && ct.mainType.name) {
@@ -1652,9 +1749,10 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.modifyTumorType = function(tumorType) {
+            $scope.modifyTumorType = function(tumorType, mutation) {
                 var dlg = dialogs.create('views/modifyTumorTypes.html', 'ModifyTumorTypeCtrl', {
                     model: $scope.realtimeDocument.getModel(),
+                    mutation: mutation,
                     cancerTypes: tumorType.cancerTypes,
                     oncoTree: $scope.oncoTree,
                     cancerTypes_review: tumorType.cancerTypes_review,
@@ -1669,37 +1767,45 @@ angular.module('oncokbApp')
                     console.log('failed to updated tumor type');
                 });
             };
+            $scope.validateTreatment = function(newTreatmentName, firstEnter, alert, mutation, tumor, ti) {
+                var exists = false;
+                var removed = false;
+                var tempTreatment;
+                newTreatmentName = newTreatmentName.toString().trim().toLowerCase();
+                _.some(ti.treatments.asArray(), function(e) {
+                    if (e.name.getText().toLowerCase() === newTreatmentName) {
+                        exists = true;
+                        if(e.name_review.get('removed')) {
+                            removed = true;
+                            tempTreatment = e;
+                        } else {
+                            removed = false;
+                            return true;
+                        }
+                    }
+                });
+                if (exists) {
+                    if(removed) {
+                        dialogs.notify('Warning', 'This Therapy just got removed, we will reuse the old one.');
+                        tempTreatment.name_review.set('removed', false);
+                        $rootScope.geneMetaData.delete(tempTreatment.name_uuid.getText());
+                        return false;
+                    } else {
+                        dialogs.notify('Warning', 'Therapy exists.');
+                        return false;
+                    }
+                } else {
+                    return true;
+                }
+            };
 
             // Add new therapeutic implication
             $scope.addTI = function(newTIName, mutation, tumor, ti) {
                 if (ti && newTIName) {
-                    var _treatment = '';
-                    var exists = false;
-                    var removed = false;
-                    var tempTreatment;
-                    newTIName = newTIName.toString().trim();
-
-                    ti.treatments.asArray().forEach(function(e) {
-                        if (e.name.getText().toLowerCase() === newTIName.toLowerCase()) {
-                            exists = true;
-                            if(e.name_review.get('removed')) {
-                                removed = true;
-                                tempTreatment = e;
-                            }
-                        }
-                    });
-
-                    if (exists) {
-                        if(removed) {
-                            dialogs.notify('Warning', 'This treatment just got removed, we will reuse the old one.');
-                            tempTreatment.name_review.set('removed', false);
-                            $rootScope.geneMetaData.delete(tempTreatment.name_uuid.getText());
-                        } else {
-                            dialogs.notify('Warning', 'Therapy exists.');
-                        }
-                    } else {
+                    if ($scope.validateTreatment(newTIName, false, true, mutation, tumor, ti) === true) {
+                        $scope.getTreatmentMessages(mutation, tumor, ti);
                         $scope.realtimeDocument.getModel().beginCompoundOperation();
-                        _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
+                        var _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
                         _treatment.name.setText(newTIName);
                         _treatment.type.setText('Therapy');
                         if ($scope.checkTI(ti, 1, 1)) {
@@ -1716,9 +1822,6 @@ angular.module('oncokbApp')
                         _treatment.name_review.set('updateTime', new Date().getTime());
                         ti.treatments.push(_treatment);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
-                        var mutationIndex = this.gene.mutations.indexOf(mutation);
-                        var tumorIndex = mutation.tumors.indexOf(tumor);
-                        var tiIndex = tumor.TI.indexOf(ti);
                         $scope.initGeneStatus(mutation, tumor, ti, _treatment);
                     }
                 }
@@ -2022,13 +2125,13 @@ angular.module('oncokbApp')
                 removeUUIDs(uuids);
             }
             function removeUUIDs(uuids) {
-              if (uuids && _.isArray(uuids)) {
-                _.each(uuids, function(uuid) {
-                  if(uuid) {
-                    $rootScope.geneMetaData.delete(uuid);
-                  }
-                });
-              }
+                if (uuids && _.isArray(uuids)) {
+                    _.each(uuids, function(uuid) {
+                        if (uuid) {
+                            $rootScope.geneMetaData.delete(uuid);
+                        }
+                    });
+                }
             }
 
             function getIndex(mutation, tumor, ti, treatment) {
@@ -2775,7 +2878,6 @@ angular.module('oncokbApp')
                 }
                 $scope.document = file;
                 $scope.fileEditable = file.editable;
-                addVUS();
                 $scope.status.rendering = false;
                 displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
 
@@ -3427,6 +3529,8 @@ angular.module('oncokbApp')
                     } else {
                         $scope.model = '';
                     }
+                    addVUS();
+                    $scope.getMutationMessages();
                 })
                 .finally(function() {
                     getSuggestedMutations();
@@ -3513,6 +3617,7 @@ angular.module('oncokbApp')
     .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, _, OncoKB, $rootScope, user) {
         $scope.meta = {
             model: data.model,
+            mutation: data.mutation,
             oncoTree: data.oncoTree,
             cancerTypes: data.cancerTypes,
             newCancerTypes: [],
@@ -3561,13 +3666,14 @@ angular.module('oncokbApp')
             $modalInstance.close();
 
             var uuid = $scope.meta.cancerTypes_uuid.getText();
-            if ( $rootScope.geneMetaData.get(uuid)) {
-                 $rootScope.geneMetaData.get(uuid).set('review', true);
+            if ($rootScope.geneMetaData.get(uuid)) {
+                $rootScope.geneMetaData.get(uuid).set('review', true);
             } else {
                 var temp = $rootScope.metaModel.createMap();
                 temp.set('review', true);
-                 $rootScope.geneMetaData.set(uuid, temp);
+                $rootScope.geneMetaData.set(uuid, temp);
             }
+            $rootScope.getTumorMessages($scope.meta.mutation);
         }; // end save
 
         $scope.$watch('meta.newCancerTypes', function(n) {
@@ -3657,4 +3763,50 @@ angular.module('oncokbApp')
             }
             return '';
         }
+        $scope.invalidTumor = false;
+        $scope.tumorDuplicationCheck = function() {
+            var tumorNameList = [];
+            _.each($scope.meta.mutation.tumors.asArray(), function(tumor) {
+                var tempTumorStr = '';
+                _.each(tumor.cancerTypes.asArray(), function(cancerType) {
+                    var mainType = cancerType.cancerType.getText();
+                    var subtype = cancerType.subtype.getText();
+                    var nonEmpty = false;
+                    if (mainType) {
+                        tempTumorStr += mainType;
+                        nonEmpty = true;
+                    }
+                    if (subtype) {
+                        tempTumorStr += subtype;
+                        nonEmpty = true;
+                    }
+                    if (nonEmpty) {
+                        tempTumorStr += ';';
+                    }
+                });
+                tumorNameList.push(tempTumorStr);
+            });
+            var currentTumorStr = '';
+            _.each($scope.meta.newCancerTypes, function(cancerType) {
+                var mainType = cancerType.mainType;
+                var subtype = cancerType.subtype;
+                var nonEmpty = false;
+                if (mainType) {
+                    currentTumorStr += mainType.name;
+                    nonEmpty = true;
+                }
+                if (subtype) {
+                    currentTumorStr += subtype.name;
+                    nonEmpty = true;
+                }
+                if (nonEmpty) {
+                    currentTumorStr += ';';
+                }
+            });
+            if (tumorNameList.indexOf(currentTumorStr) !== -1) {
+                $scope.invalidTumor = true;
+            } else {
+                $scope.invalidTumor = false;
+            }
+        };
     });
