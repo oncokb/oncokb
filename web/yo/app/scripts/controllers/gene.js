@@ -136,12 +136,16 @@ angular.module('oncokbApp')
                 if (vusList.indexOf(newMutationName) !== -1) {
                     isVUS = true;
                 }
-                $scope.gene.mutations.asArray().forEach(function(e) {
+                _.some($scope.gene.mutations.asArray(), function(e) {
                     if (e.name.getText().toLowerCase() === newMutationName) {
                         exists = true;
                         if(e.name_review.get('removed')) {
                             removed = true;
                             tempMutation = e;
+                        } else {
+                            // set 'removed' to false to make sure we only put removed mutation back when there is only duplicated mutation
+                            removed = false;
+                            return true;
                         }
                     }
                 });
@@ -1659,12 +1663,15 @@ angular.module('oncokbApp')
                 var removed = false;
                 var tempTumor;
                 var newTumorTypesName = getNewCancerTypesName($scope.meta.newCancerTypes).toLowerCase();
-                mutation.tumors.asArray().forEach(function(e) {
+                _.some(mutation.tumors.asArray(), function(e) {
                     if ($scope.getCancerTypesName(e.cancerTypes).toLowerCase() === newTumorTypesName) {
                         exists = true;
                         if(e.name_review.get('removed')) {
                             removed = true;
                             tempTumor = e;
+                        } else {
+                            removed = false;
+                            return true;
                         }
                     }
                 });
@@ -1765,12 +1772,15 @@ angular.module('oncokbApp')
                 var removed = false;
                 var tempTreatment;
                 newTreatmentName = newTreatmentName.toString().trim().toLowerCase();
-                ti.treatments.asArray().forEach(function(e) {
+                _.some(ti.treatments.asArray(), function(e) {
                     if (e.name.getText().toLowerCase() === newTreatmentName) {
                         exists = true;
                         if(e.name_review.get('removed')) {
                             removed = true;
                             tempTreatment = e;
+                        } else {
+                            removed = false;
+                            return true;
                         }
                     }
                 });
