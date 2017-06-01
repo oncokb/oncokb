@@ -30,6 +30,10 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        if(query.getEntrezGeneId() == null && query.getHugoSymbol() == null) {
+            query.setEntrezGeneId(-2);
+        }
+
         // Set the alteration to empty string in order to get relevant variants.
         if (query.getAlteration() == null) {
             query.setAlteration("");
