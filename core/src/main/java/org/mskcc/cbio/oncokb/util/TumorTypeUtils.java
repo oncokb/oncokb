@@ -1,9 +1,11 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
+import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.oncotree.model.MainType;
 import org.mskcc.oncotree.model.TumorType;
 import org.mskcc.oncotree.utils.TumorTypesUtil;
@@ -29,6 +31,9 @@ public class TumorTypeUtils {
     private static Map<String, TumorType> allNestedOncoTreeSubtypes = getAllNestedOncoTreeSubtypesFromSource();
     private static Map<String, List<TumorType>> questTumorTypeMap = null;
     private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
+    private static final ImmutableList<String> LiquidTumorMainTypes = ImmutableList.of(
+        "Blastic Plasmacytoid Dendritic Cell Neoplasm", "Histiocytosis", "Leukemia", "Multiple Myeloma",
+        "Myelodysplasia", "Myeloproliferative Neoplasm", "Mastocytosis");
 
     /**
      * Get all exist OncoTree tumor types including cancer types and subtypes
@@ -280,6 +285,38 @@ public class TumorTypeUtils {
         }
     }
 
+    public static Boolean isSolidTumor(TumorType tumorType) {
+        TumorForm tumorForm = checkTumorForm(tumorType);
+        return tumorForm != null && tumorForm.equals(TumorForm.SOLID);
+    }
+
+    public static Boolean isLiquidTumor(TumorType tumorType) {
+        TumorForm tumorForm = checkTumorForm(tumorType);
+        return tumorForm != null && tumorForm.equals(TumorForm.LIQUID);
+    }
+
+    public static Boolean hasSolidTumor(Set<TumorType> tumorTypes) {
+        if (tumorTypes == null)
+            return null;
+        for (TumorType tumorType : tumorTypes) {
+            if (isSolidTumor(tumorType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static Boolean hasLiquidTumor(Set<TumorType> tumorTypes) {
+        if (tumorTypes == null)
+            return null;
+        for (TumorType tumorType : tumorTypes) {
+            if (isLiquidTumor(tumorType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /*-- PRIVATE --*/
     public static List<TumorType> findTumorTypes(String tumorType, String source) {
         List<TumorType> mappedTumorTypesFromSource = new ArrayList<>();
@@ -319,6 +356,16 @@ public class TumorTypeUtils {
         }
         if (oncoTreeTumorTypes != null && oncoTreeTumorTypes.size() > 0) {
             mappedTumorTypesFromSource = filterOutDiffMainType(mappedTumorTypesFromSource, oncoTreeTumorTypes.get(0));
+        }
+
+        // Include all solid tumors
+        if (hasSolidTumor(new HashSet<>(mappedTumorTypesFromSource))) {
+            mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS));
+        }
+
+        // Include all liquid tumors
+        if (hasLiquidTumor(new HashSet<>(mappedTumorTypesFromSource))) {
+            mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS));
         }
 
         // Include all tumors
@@ -601,5 +648,23 @@ public class TumorTypeUtils {
             }
         }
         return ONCO_TREE_API_URL;
+    }
+
+    private static TumorForm checkTumorForm(TumorType tumorType) {
+        if (tumorType == null)
+            return null;
+        if (tumorType.getTissue() != null) {
+            if (tumorType.getTissue().equals("BLOOD"))
+                return TumorForm.LIQUID;
+            else
+                return TumorForm.SOLID;
+        }
+        if (tumorType.getMainType() != null && tumorType.getMainType().getName() != null) {
+            if (LiquidTumorMainTypes.contains(tumorType.getMainType().getName()))
+                return TumorForm.LIQUID;
+            else
+                return TumorForm.SOLID;
+        }
+        return null;
     }
 }
