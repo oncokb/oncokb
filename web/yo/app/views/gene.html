@@ -45,8 +45,8 @@
 
     </h2>
       <div ng-if="meta.gene" class="subtitle subtitle-1">
-          <span class="entrezGene">Entrez Gene: {{::meta.gene.entrezGeneId}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/gene/?term={{::meta.gene.entrezGeneId}}"><i class="fa fa-external-link"></i></a></span>
-          <div ng-if="meta.gene.geneAliases">
+          <span class="entrezGene" ng-if="meta.gene.entrezGeneId > 0">Entrez Gene: {{::meta.gene.entrezGeneId}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/gene/?term={{::meta.gene.entrezGeneId}}"><i class="fa fa-external-link"></i></a></span>
+          <div ng-if="meta.gene.geneAliases && meta.gene.geneAliases.length > 0">
               <span class="header">Also known as</span>
               <span ng-repeat="alias in meta.gene.geneAliases" class="alias-item">{{::alias}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/pubmed/?term={{::alias}}"><i class="fa fa-external-link"></i></a><span ng-if="!$last" class="comma">,</span>
               </span>
