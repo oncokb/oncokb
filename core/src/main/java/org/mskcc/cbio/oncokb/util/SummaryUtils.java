@@ -312,7 +312,7 @@ public class SummaryUtils {
         }
 
         if (oncogenic != null) {
-            return getOncogenicSummaryFromOncogenicity(oncogenic, queryAlteration, altName);
+            return getOncogenicSummaryFromOncogenicity(oncogenic, gene, queryAlteration, altName);
         }
 
         if (alteration != null && MainUtils.isVUS(alteration)) {
@@ -347,7 +347,7 @@ public class SummaryUtils {
         return summary.substring(0, 1).toUpperCase() + summary.substring(1);
     }
 
-    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, String queryAlteration, String altName) {
+    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Gene gene, String queryAlteration, String altName) {
         StringBuilder sb = new StringBuilder();
         Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
@@ -355,7 +355,10 @@ public class SummaryUtils {
         if (queryAlteration.toLowerCase().contains("fusions")) {
             isPlural = true;
         }
-        if (oncogenicity != null && !oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
+        if (oncogenicity != null) {
+            if (oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
+                return unknownOncogenicSummary(gene);
+            }
             if (appendThe) {
                 sb.append("The ");
             }
