@@ -189,6 +189,14 @@ public class IndicatorUtilsTest {
         assertTrue("Highest sensitive levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
         assertTrue("Highest resistance levels are not the same.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
+        //Other Biomarker tests
+        query = new Query(null, null, null,  null, "MSI-H", null, "Colorectal Cancer", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertTrue("The geneExist should be false", indicatorQueryResp.getGeneExist() == false);
+        assertEquals("The oncogenicity of should be Oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be Level 2A", LevelOfEvidence.LEVEL_2A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The gene summary should be empty", "", indicatorQueryResp.getGeneSummary());
+
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {
