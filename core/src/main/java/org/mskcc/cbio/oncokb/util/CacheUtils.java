@@ -432,8 +432,8 @@ public class CacheUtils {
     }
 
     public static Boolean containVariantTumorTypeSummary(Integer entrezGeneId, String key) {
-        return (variantTumorTypeSummary.containsKey(entrezGeneId)
-            && variantTumorTypeSummary.get(entrezGeneId).containsKey(key)) ? true : false;
+        return variantTumorTypeSummary.containsKey(entrezGeneId)
+            && variantTumorTypeSummary.get(entrezGeneId).containsKey(key);
     }
 
     public static void setVariantTumorTypeSummary(Integer entrezGeneId, String key, String summary) {
