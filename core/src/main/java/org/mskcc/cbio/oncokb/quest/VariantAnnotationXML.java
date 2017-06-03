@@ -43,7 +43,7 @@ public final class VariantAnnotationXML {
 //            }
 //        }
 
-        Set<TumorType> relevantTumorTypes = new HashSet<TumorType>(TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest"));
+        List<TumorType> relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorType, "quest");
 
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -293,7 +293,7 @@ public final class VariantAnnotationXML {
         return resistanceEvidences;
     }
 
-    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent, Boolean sameIndication) {
+    private static void exportTherapeuticImplications(List<TumorType> relevantTumorTypes, List<Evidence> evSensitivity, List<Evidence> evResisitance, String tagTherapeuticImp, StringBuilder sb, String indent, Boolean sameIndication) {
         if (evSensitivity.isEmpty() && evResisitance.isEmpty()) {
             return;
         }
@@ -448,7 +448,7 @@ public final class VariantAnnotationXML {
         sb.append(indent).append("</clinical_trial>");
     }
 
-    private static void exportTherapeuticImplications(Set<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
+    private static void exportTherapeuticImplications(List<TumorType> relevantTumorTypes, Evidence evidence, StringBuilder sb, String indent) {
         LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
 
         for (Treatment treatment : evidence.getTreatments()) {

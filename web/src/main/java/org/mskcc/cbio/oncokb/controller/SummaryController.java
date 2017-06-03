@@ -94,19 +94,19 @@ public class SummaryController {
                     summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query);
                     break;
                 case "variant":
-                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
                     break;
                 case "full":
-                    summary = SummaryUtils.fullSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.fullSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
                     break;
                 case "variantCustomized":
                     summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(variantQuery.getGene()), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "tumorType":
-                    summary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getAlterations(), new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), variantQuery.getTumorTypes());
                     break;
                 default:
-                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
+                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
                     break;
             }
         }
