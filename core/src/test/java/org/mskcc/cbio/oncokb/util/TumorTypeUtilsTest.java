@@ -18,17 +18,17 @@ public class TumorTypeUtilsTest extends TestCase {
         MainType mainType = new MainType();
 
         tumorType.setMainType(mainType);
-        assertFalse("Empty tumor type is not solid tumor", TumorTypeUtils.isSolidTumor(tumorType));
+        assertFalse("Empty tumor type is solid tumor, but it should not be.", TumorTypeUtils.isSolidTumor(tumorType));
 
         mainType.setName("Melanoma");
-        assertTrue("Melanoma is solid tumor", TumorTypeUtils.isSolidTumor(tumorType));
+        assertTrue("Melanoma is not solid tumor, but it should be.", TumorTypeUtils.isSolidTumor(tumorType));
 
         mainType.setName("Leukemia");
-        assertFalse("Leukemia is not solid tumor", TumorTypeUtils.isSolidTumor(tumorType));
+        assertFalse("Leukemia is solid tumor, but it should not be.", TumorTypeUtils.isSolidTumor(tumorType));
 
         mainType.setName("Leukemia");
         tumorType.setTissue("EYE");
-        assertTrue("Tissue has higher priority than main type", TumorTypeUtils.isSolidTumor(tumorType));
+        assertTrue("Tissue does not have higher priority than main type, but it should have.", TumorTypeUtils.isSolidTumor(tumorType));
     }
 
     public void testIsLiquidTumor() throws Exception {
@@ -36,17 +36,17 @@ public class TumorTypeUtilsTest extends TestCase {
         MainType mainType = new MainType();
 
         tumorType.setMainType(mainType);
-        assertFalse("Empty tumor type is not liquid tumor", TumorTypeUtils.isLiquidTumor(tumorType));
+        assertFalse("Empty tumor type is liquid tumor, but it should not be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
         mainType.setName("Leukemia");
-        assertTrue("Leukemia is liquid tumor", TumorTypeUtils.isLiquidTumor(tumorType));
+        assertTrue("Leukemia is not liquid tumor, but it should be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
         mainType.setName("Melanoma");
-        assertFalse("Melanoma is not liquid tumor", TumorTypeUtils.isLiquidTumor(tumorType));
+        assertFalse("Melanoma is liquid tumor, but it should not be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
         mainType.setName("Melanoma");
         tumorType.setTissue("BLOOD");
-        assertTrue("Tissue has higher priority than main type", TumorTypeUtils.isLiquidTumor(tumorType));
+        assertTrue("Tissue does not have higher priority than main type, but it should have.", TumorTypeUtils.isLiquidTumor(tumorType));
     }
 
     public void testHasSolidTumor() throws Exception {
@@ -58,17 +58,17 @@ public class TumorTypeUtilsTest extends TestCase {
         tumorTypeSet.add(tt1);
         tumorTypeSet.add(tt2);
 
-        assertFalse("No tumor type should be solid tumor", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
+        assertFalse("Empty tumor type set has solid tumor, but it should not.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
 
         tt1.setTissue("EYE");
-        assertTrue("One tumor type is solid tumor, should be true", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
+        assertTrue("Tumor types set does not have solid tumor, but it should because of EYE is solid tumor.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
 
         tt2.setTissue("BONE");
-        assertTrue("Both tumor types are solid tumor, should be true", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
+        assertTrue("Tumor types set does not have solid tumor, but both tumor types in the set are solid tumor.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
 
         tt1.setTissue("BLOOD");
         tt2.setTissue("BONE");
-        assertTrue("One tumor type is solid tumor, should be true", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
+        assertTrue("Tumor types set does not have solid tumor, but one of tumor types BONE is solid tumor.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
     }
 
     public void testHasLiquidTumor() throws Exception {
@@ -80,14 +80,14 @@ public class TumorTypeUtilsTest extends TestCase {
         tumorTypeSet.add(tt1);
         tumorTypeSet.add(tt2);
 
-        assertFalse("No tumor type should be liquid tumor", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
+        assertFalse("Empty tumor type set has liquid tumor, but it should not have", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
 
         tt1.setTissue("BLOOD");
-        assertTrue("One tumor type is liquid tumor, should be true", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
+        assertTrue("Tumor types set does not have liquid tumor, but one tumor type in the set is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
 
         tt1.setTissue("BLOOD");
         tt2.setTissue("BONE");
-        assertTrue("One tumor type is liquid tumor, should be true", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
+        assertTrue("Tumor types set does not have liquid tumor, but one of tumor types BLOOD is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
     }
 
 }

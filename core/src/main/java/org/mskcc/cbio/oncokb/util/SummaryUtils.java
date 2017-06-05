@@ -282,11 +282,12 @@ public class SummaryUtils {
                 List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(exactMatchAlteration), Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
 
                 // Technically the list should only contain no more than one record.
-                if (evidences.size() > 0) {
-                    return evidences.iterator().next().getDescription();
-                } else {
-                    return "";
+                for (Evidence evidence : evidences) {
+                    if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(evidence.getDescription())) {
+                        return evidence.getDescription();
+                    }
                 }
+                return "";
             } else {
                 return "";
             }
