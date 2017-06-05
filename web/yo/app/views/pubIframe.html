@@ -1,10 +1,18 @@
 <div class="pub-iframe" ng-if="pubs.length > 0">Publication IDs:
   <span ng-repeat="pub in pubs">
-    <span ng-if="pub.type === 'pmid'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://www.ncbi.nlm.nih.gov/pubmed/{{pub.id}}" target="_blank">{{pub.type | uppercase}}:{{pub.id}}</a></span>
-    <span ng-if="pub.type === 'nct'" class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://clinicaltrials.gov/show/{{pub.id}}" target="_blank">{{pub.id}}</a></span>
-    <span ng-if="pub.type === 'abstract'" ng-class="pub.link.length > 0 ? 'geneKeywordSpan' : ''" qtip  type="{{pub.type}}" number="{{pub.link}}">
-        <a ng-if="pub.link" href="{{pub.link}}" target="_blank">Abstract: {{pub.id}}</a>
-        <span ng-if="!pub.link">Abstract: {{pub.id}}</span>
-    </span>
+      <span ng-switch on="pub.type">
+          <span ng-switch-when="pmid">
+              <span class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://www.ncbi.nlm.nih.gov/pubmed/{{pub.id}}" target="_blank">{{pub.type | uppercase}}:{{pub.id}}</a></span>
+          </span>
+          <span ng-switch-when="nct">
+              <span class="geneKeywordSpan" qtip type="{{pub.type}}" number="{{pub.id}}"><a href="https://clinicaltrials.gov/show/{{pub.id}}" target="_blank">{{pub.id}}</a></span>
+          </span>
+          <span ng-switch-when="abstract">
+                <span ng-class="pub.link.length > 0 ? 'geneKeywordSpan' : ''" qtip  type="{{pub.type}}" number="{{pub.link}}">
+                    <a ng-if="pub.link" href="{{pub.link}}" target="_blank">Abstract: {{pub.id}}</a>
+                    <span ng-if="!pub.link">Abstract: {{pub.id}}</span>
+                </span>
+          </span>
+      </span>
   </span>
 </div>
