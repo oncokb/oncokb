@@ -4,23 +4,23 @@
     <statusBody class="eStatusComments">
         <span ng-if="obsolete === 'true'" >
             <input
-                id="{{id}}-obsolete"
+                id="::({{id}}-obsolete)"
                 type="checkbox"
                 ng-model="obsolete"
                 ng-true-value="'true'"
                 ng-false-value="'false'"
             >
-            <label ng-click="click('o')" for="{{id}}-obsolete" ng-style="{color: 'red'}">Obsolete</label>
+            <label ng-click="click('o')" for="::({{id}}-obsolete)" ng-style="{color: 'red'}">Obsolete</label>
         </span>
 
         <span ng-repeat="checkbox in checkboxes">
         <input
-            id="{{id}}-{{$index}}"
+            id="::({{id}}-{{$index}})"
             type="radio"
             ng-model="vetted.value"
             ng-value="checkbox.value"
         >
-        <label ng-click="click(checkbox.value)" for="{{id}}-{{$index}}" ng-style="{color: checkbox.color}">{{checkbox.display}}</label>
+        <label ng-click="click(checkbox.value)" for="::({{id}}-{{$index}})" ng-style="{color: checkbox.color}">{{::checkbox.display}}</label>
       </span>
     </statusBody>
   </status>

@@ -50,7 +50,7 @@
             <tbody>
                 <tr data-ng-repeat="gene in documents">
                     <!-- <td>{{$index + 1}}</td> -->
-                    <td><strong><a ng-href="#/gene/{{gene.title}}">{{gene.title}}</a></strong></td>
+                    <td><strong><a ng-href="#/gene/{{::gene.title}}">{{::gene.title}}</a></strong></td>
                     <td>{{gene.modifiedDate | date : 'MMM d, h:mm a yyyy'}}</a></td>
                     <td>{{gene.lastModifyingUserName}}</a></td>
                     <td>

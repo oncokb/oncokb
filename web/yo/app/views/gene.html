@@ -2,22 +2,22 @@
   <div id="gene" style="margin-bottom:50px">
     <h2>
       <!-- Gene: <span>{{gene.name.text}}</span> -->
-      Gene: <span contenteditable="false" ng-model="gene.name.text"></span><comments-dict gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+      Gene: <span contenteditable="false" ng-model="::gene.name.text"></span><comments-dict file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.displayName}}">
       </span>
       <span ng-if="document" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastEdit')">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
-      <span ng-if="document && userRole === 8" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
+      <span ng-if="::(document && userRole === 8)" class="geneLastModify" ng-show="gene.status_timeStamp.has('lastUpdate')">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
-        <button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-disabled="!fileEditable || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
+        <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
         <!--<button type="button" class="btn btn-default" ng-click="getData()">Gene</button>-->
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
-        <button type="button" class="btn btn-default" uib-dropdown-toggle ng-if="userRole === 8">
+        <button type="button" class="btn btn-default" uib-dropdown-toggle ng-if="::(userRole === 8)">
           More tools
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body" ng-if="userRole === 8">
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="btn-append-to-body" ng-if="::(userRole === 8)">
           <li ng-click="generatePDF()"><a><i class="fa fa-download"></i>Download PDF</a></li>
           <li ng-click="status.hideAllEmpty=true"><a><i class="fa fa-eye-slash"></i>Hide all empty</a></li>
           <li ng-click="status.hideAllEmpty=false"><a><i class="fa fa-eye"></i>Show all empty</a></li>
@@ -27,10 +27,10 @@
           <li ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" ng-click="status.expandAll=false"><a><i class="fa fa-compress"></i>Collapse all</a></li>
         </ul>
 
-        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true" ng-if="userRole === 4">
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=true" ng-if="::(userRole === 4)">
           <i class="fa fa-eye"></i>Hide all empty
         </button>
-        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false" ng-if="userRole === 4">
+        <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false" ng-if="::(userRole === 4)">
           <i class="fa fa-eye"></i>Show all empty
         </button>
         <button type="button" class="btn btn-default"  ng-click="status.expandAll=true"
@@ -45,16 +45,16 @@
 
     </h2>
       <div ng-if="meta.gene" class="subtitle subtitle-1">
-          <span class="entrezGene">Entrez Gene: {{meta.gene.entrezGeneId}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/gene/?term={{meta.gene.entrezGeneId}}"><i class="fa fa-external-link"></i></a></span>
+          <span class="entrezGene">Entrez Gene: {{::meta.gene.entrezGeneId}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/gene/?term={{::meta.gene.entrezGeneId}}"><i class="fa fa-external-link"></i></a></span>
           <div ng-if="meta.gene.geneAliases">
               <span class="header">Also known as</span>
-              <span ng-repeat="alias in meta.gene.geneAliases" class="alias-item">{{alias}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/pubmed/?term={{alias}}"><i class="fa fa-external-link"></i></a><span ng-if="!$last" class="comma">,</span>
+              <span ng-repeat="alias in meta.gene.geneAliases" class="alias-item">{{::alias}}<a target="_blank" ng-href="https://www.ncbi.nlm.nih.gov/pubmed/?term={{::alias}}"><i class="fa fa-external-link"></i></a><span ng-if="!$last" class="comma">,</span>
               </span>
           </div>
       </div>
       <div ng-if="!reviewMode && gene.transcripts.asArray().length > 0" class="subtitle subtitle-2">Transcript:
-          {{gene.transcripts.asArray()[0].isoform_override.text}},
-          {{gene.transcripts.asArray()[0].dmp_refseq_id.text}}</div>
+          {{::gene.transcripts.asArray()[0].isoform_override.text}},
+          {{::gene.transcripts.asArray()[0].dmp_refseq_id.text}}</div>
       <div ng-if="reviewMode">
           <br/><br/>
           <p style="color:red;font-size:20px;"><b>You are currently in "Review" mode. Click the "Review Complete" button to exit.</b></p>
@@ -66,23 +66,23 @@
 
     <div ng-if="displayCheck(gene.summary_uuid, gene.summary_review, null, null, null, true)">
         <h3>{{::gene.summary.display}}:
-          <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" gene-name="{{::gene.name.text}}" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+          <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'" apply-obsolete="applyObsolete(gene.summary_eStatus, 'GENE_SUMMARY')"></e-status>
-          <review-panel panel-type="'update'" review-obj="gene.summary_review" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
+          <review-panel review-obj="gene.summary_review" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
-        <drive-realtime-string review-obj="gene.summary_review" uuid="gene.summary_uuid" es="gene.summary_eStatus" fe="fileEditable" t="'p'" object="gene.summary"></drive-realtime-string>
+        <drive-realtime-string review-obj="gene.summary_review" uuid="::gene.summary_uuid" es="gene.summary_eStatus" fe="fileEditable" t="'p'" object="gene.summary"></drive-realtime-string>
     </div>
     <div ng-if="displayCheck(gene.type_uuid, gene.type_review, null, null, null, true)">
         <h3 ng-if="reviewMode">Gene Type:
-            <review-panel panel-type="'update'" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
+            <review-panel review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
         <span><h4 style="margin-bottom:-10px" ng-if="reviewMode && !gene.type_review.get('action')">New Content:</h4></span>
         <div>
             <span style="float:left">
-            <drive-realtime-string review-obj="gene.type_review" uuid="gene.type_uuid" fe="reviewMode && gene.type_review.get('action') ? false : fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
+            <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="reviewMode && gene.type_review.get('action') ? false : fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
             </span>
             <span style="float:left">
-                <drive-realtime-string review-obj="gene.type_review" uuid="gene.type_uuid" fe="reviewMode && gene.type_review.get('action') ? false : fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
+                <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="reviewMode && gene.type_review.get('action') ? false : fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
             </span>
         </div>
         <div ng-if="reviewMode">
@@ -109,11 +109,11 @@
     <div ng-if="displayCheck(gene.background_uuid, gene.background_review, null, null, null, true)">
         <br/><br/>
         <h3>{{::gene.background.display}}:
-            <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" gene-name="{{gene.name.text}}" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+            <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'" apply-obsolete="applyObsolete(gene.background_eStatus, 'GENE_BACKGROUND')"></e-status>
-            <review-panel panel-type="'update'" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
+            <review-panel review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
-        <drive-realtime-string review-obj="gene.background_review" uuid="gene.background_uuid"  es="gene.background_eStatus" fe="fileEditable" t="'p'" object="gene.background"></drive-realtime-string>
+        <drive-realtime-string review-obj="gene.background_review" uuid="::gene.background_uuid"  es="gene.background_eStatus" fe="fileEditable" t="'p'" object="gene.background"></drive-realtime-string>
         <pub-iframe ng-model="gene.background.text"></pub-iframe>
     </div>
     <div ng-if="gene.name.text && !reviewMode">
@@ -141,10 +141,10 @@
               <!--<span ng-click="stopCollopse($event)" ng-class="{editableBox:mutationNameEditable(mutation.name.text), unEditableBox:!mutationNameEditable(mutation.name.text)}" contenteditable="{{mutationNameEditable(mutation.name.text)}}" ng-model="mutation.name.text"/></span>-->
              <div ng-if="reviewMode && mutation.name_review.get('lastReviewed')"><br/></div>
               <div style="display:inline-block">
-                 <drive-realtime-string review-obj="mutation.name_review" mutation-messages="mutationMessages" uuid="mutation.name_uuid"  es="mutation.name_eStatus" fe="fileEditable" t="'MUTATION_NAME'" object="mutation.name" mutation="mutation" get-mutation-messages="getMutationMessages()" ng-click="stopCollopse($event)"></drive-realtime-string>
+                 <drive-realtime-string review-obj="mutation.name_review" mutation-messages="mutationMessages" uuid="::mutation.name_uuid"  es="mutation.name_eStatus" fe="fileEditable" t="'MUTATION_NAME'" object="mutation.name" mutation="mutation" get-mutation-messages="getMutationMessages()" ng-click="stopCollopse($event)"></drive-realtime-string>
               </div>
             <div ng-if="!reviewMode" style="display:inline-block">
-                <comments-dict mutation="{{mutation.name.text}}" gene-name="{{::gene.name.text}}" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+                <comments-dict ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                 <i class="fa fa-hand-o-left" uib-tooltip-placement="top" uib-tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===false || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===false}"></i>
             </div>
             <span class="pull-right" ng-show="!reviewMode && fileEditable">
@@ -168,27 +168,27 @@
             <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic')" ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
               <uib-accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="tmpGeneStatus.isOpen"></i>
-                <span>Mutation Effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict mutation="{{mutation.name.text}}" file-editable="fileEditable" gene-name="{{::gene.name.text}}" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
+                <span>Mutation Effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict file-editable="fileEditable" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                 <span class="pull-right" ng-show="fileEditable">
                    <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.shortSummary_eStatus" id="mutation.name.text  + '-shortSummary'"  apply-obsolete="applyObsolete(mutation.shortSummary_eStatus, 'ONCOGENIC', mutation)"></e-status>
                 </span>
-                <review-panel panel-type="'update'" review-obj="mutation.oncogenic_review" evidence-type="'ONCOGENIC'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"></review-panel>
+                <review-panel review-obj="mutation.oncogenic_review" evidence-type="'ONCOGENIC'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"></review-panel>
               </uib-accordion-heading>
                 <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(mutation.oncogenic_uuid, mutation.oncogenic_review, mutation.name_review, null, null, true)">
                     <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
-                    <drive-realtime-string review-obj="mutation.oncogenic_review" uuid="mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
+                    <drive-realtime-string review-obj="mutation.oncogenic_review" uuid="::mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
                 </p>
                 <div class="mutationEffect" ng-if="displayCheck(mutation.effect_uuid, mutation.effect_review, mutation.name_review, null, null, true)">
                     <strong class="header">Mutation effect:</strong>
                     <div>
-                        <drive-realtime-string review-obj="mutation.effect_review" uuid="mutation.effect_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutationEffect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
+                        <drive-realtime-string review-obj="mutation.effect_review" uuid="::mutation.effect_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutationEffect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
                     </div>
                 </div>
                 <br/>
                 <span ng-if="displayCheck(mutation.description_uuid, mutation.description_review, mutation.name_review, null, null, true)">
                     <strong>Description of Evidence:</strong>
                     <br/>
-                    <drive-realtime-string review-obj="mutation.description_review" uuid="mutation.description_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                    <drive-realtime-string review-obj="mutation.description_review" uuid="::mutation.description_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                   </span>
                 <span ng-if="!reviewMode">
                     <strong>Additional Information (Optional):</strong>
@@ -211,7 +211,7 @@
                     <span style="color:red" ng-if="!reviewMode">{{getTumorDuplication(mutation, tumor)}}</span>
                     <span class="original-tumor-type"
                           ng-if="getCancerTypesName(tumor.cancerTypes).toLowerCase() !== tumor.name.text.toLowerCase() && tumor.name.text">Original Tumor Type: {{tumor.name.text}}</span>
-                    <comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                    <comments-dict file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="!reviewMode && fileEditable">
                     <span style="margin-right: 20px">
@@ -239,9 +239,9 @@
                   <!--<pub-iframe ng-model="tumor.shortSummary.text"></pub-iframe>-->
                 <div ng-if="displayCheck(tumor.summary_uuid, tumor.summary_review, mutation.name_review, tumor.name_review, null, true)">
                     <h5><b>Tumor Type Summary (Optional): </b>
-                        <review-panel panel-type="'update'" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                        <review-panel review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </h5>
-                    <drive-realtime-string review-obj="tumor.summary_review" uuid="tumor.summary_uuid" es="tumor.summary_eStatus" fe="fileEditable" t="'p'" object="tumor.summary"></drive-realtime-string>
+                    <drive-realtime-string review-obj="tumor.summary_review" uuid="::tumor.summary_uuid" es="tumor.summary_eStatus" fe="fileEditable" t="'p'" object="tumor.summary"></drive-realtime-string>
                     <pub-iframe ng-model="tumor.summary.text"></pub-iframe>
                 </div>
                   <!-- Prevalence -->
@@ -249,13 +249,13 @@
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>{{::tumor.prevalence.display}}: </span>
-                      <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === '' && tumor.shortPrevalence.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                      <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === '' && tumor.shortPrevalence.text === ''">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
                          <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'" apply-obsolete="applyObsolete(tumor.prevalence_eStatus, 'PREVALENCE', mutation, tumor)"></e-status>
                       </span>
-                      <review-panel panel-type="'update'" review-obj="tumor.prevalence_review" evidence-type="'PREVALENCE'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                      <review-panel review-obj="tumor.prevalence_review" evidence-type="'PREVALENCE'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </uib-accordion-heading>
-                    <drive-realtime-string ng-if="displayCheck(tumor.prevalence_uuid, tumor.prevalence_review, mutation.name_review, tumor.name_review, null, true)" review-obj="tumor.prevalence_review" uuid="tumor.prevalence_uuid" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
+                    <drive-realtime-string ng-if="displayCheck(tumor.prevalence_uuid, tumor.prevalence_review, mutation.name_review, tumor.name_review, null, true)" review-obj="tumor.prevalence_review" uuid="::tumor.prevalence_uuid" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
                     <drive-realtime-string ng-if="!reviewMode" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                 </uib-accordion-group>
 
@@ -264,13 +264,13 @@
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>{{::tumor.progImp.display}}: </span>
-                      <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === '' && tumor.shortProgImp.text === ''">No Entry</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                      <span  ng-click="stopCollopse($event)"class="curationNoEntry" ng-if="tumor.progImp.text === '' && tumor.shortProgImp.text === ''">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.progImp_comments" object="tumor" key="progImp" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
                          <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.progImp_eStatus" id="mutation.name.text + tumor.name.text + '-progImp'" apply-obsolete="applyObsolete(tumor.progImp_eStatus, 'PROGNOSTIC_IMPLICATION', mutation, tumor)"></e-status>
                       </span>
-                      <review-panel panel-type="'update'" review-obj="tumor.progImp_review" evidence-type="'PROGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                      <review-panel review-obj="tumor.progImp_review" evidence-type="'PROGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </uib-accordion-heading>
-                    <drive-realtime-string ng-if="displayCheck(tumor.progImp_uuid, tumor.progImp_review, mutation.name_review, tumor.name_review, null, true)" review-obj="tumor.progImp_review" uuid="tumor.progImp_uuid" es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
+                    <drive-realtime-string ng-if="displayCheck(tumor.progImp_uuid, tumor.progImp_review, mutation.name_review, tumor.name_review, null, true)" review-obj="tumor.progImp_review" uuid="::tumor.progImp_uuid" es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.progImp" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
                     <drive-realtime-string ng-if="!reviewMode" es="tumor.progImp_eStatus" fe="fileEditable" t="'p'" object="tumor.shortProgImp" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                   </uib-accordion-group>
 
@@ -279,23 +279,23 @@
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>NCCN guidelines: </span>
-                      <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict display-name="NCCN guidelines" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}" file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                      <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                       <span class="pull-right" ng-show="fileEditable">
                          <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'" apply-obsolete="applyObsolete(tumor.nccn_eStatus, 'NCCN_GUIDELINES', mutation, tumor)"></e-status>
                       </span>
-                      <review-panel panel-type="'update'" review-obj="tumor.nccn_review" evidence-type="'NCCN_GUIDELINES'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                      <review-panel review-obj="tumor.nccn_review" evidence-type="'NCCN_GUIDELINES'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </uib-accordion-heading>
                     <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(tumor.nccn.therapy_uuid, tumor.nccn.therapy_review, mutation.name_review, tumor.name_review, null, true)">
                         <strong>{{::tumor.nccn.therapy.display}}:</strong>
-                        <drive-realtime-string review-obj="tumor.nccn.therapy_review" uuid="tumor.nccn.therapy_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
+                        <drive-realtime-string review-obj="tumor.nccn.therapy_review" uuid="::tumor.nccn.therapy_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
                     </p>
                     <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(tumor.nccn.disease_uuid, tumor.nccn.disease_review, mutation.name_review, tumor.name_review, null, true)">
                       <strong>{{::tumor.nccn.disease.display}}:</strong>
-                      <drive-realtime-string review-obj="tumor.nccn.disease_review" uuid="tumor.nccn.disease_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'select-chosen'" object="tumor.nccn.disease" o="nccnDiseaseTypes" chosenid="'CurationNCCNDropDown'"></drive-realtime-string>
+                      <drive-realtime-string review-obj="tumor.nccn.disease_review" uuid="::tumor.nccn.disease_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'select-chosen'" object="tumor.nccn.disease" o="nccnDiseaseTypes" chosenid="'CurationNCCNDropDown'"></drive-realtime-string>
                     </p>
                     <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(tumor.nccn.version_uuid, tumor.nccn.version_review, mutation.name_review, tumor.name_review, null, true)">
                       <strong>{{::tumor.nccn.version.display}}:</strong>
-                      <drive-realtime-string review-obj="tumor.nccn.version_review" uuid="tumor.nccn.version_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.version"></drive-realtime-string>
+                      <drive-realtime-string review-obj="tumor.nccn.version_review" uuid="::tumor.nccn.version_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.version"></drive-realtime-string>
                     </p>
                     <!--<p>-->
                       <!--<strong>{{::tumor.nccn.pages.display}}:</strong>-->
@@ -308,7 +308,7 @@
                     <span ng-if="displayCheck(tumor.nccn.description_uuid, tumor.nccn.description_review, mutation.name_review, tumor.name_review, null, true)">
                         <strong>Description of Evidence:</strong>
                         <br/>
-                        <drive-realtime-string review-obj="tumor.nccn.description_review" uuid="tumor.nccn.description_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                        <drive-realtime-string review-obj="tumor.nccn.description_review" uuid="::tumor.nccn.description_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                     </span>
                     <span ng-if="!reviewMode">
                         <strong>Additional Information (Optional):</strong>
@@ -324,7 +324,7 @@
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                         <span>{{::ti.name.text}}: </span>
                         <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!ti.short.text && !ti.description.text && ti.treatments.length === 0">No Entry</span>
-                        <comments-dict display-name="{{::ti.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}" file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                        <comments-dict file-editable="fileEditable" comments="ti.name_comments" object="ti" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                         <span class="pull-right" ng-show="fileEditable">
                             <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="ti.name_eStatus" id="ti.name.text  + '-name'" apply-obsolete="applyObsolete(ti.name_eStatus, 'TI', mutation, tumor, ti)"></e-status>
                         </span>
@@ -333,9 +333,9 @@
                       <!--<pub-iframe ng-model="ti.short.text" ng-if="tmpGeneStatus.isOpen"></pub-iframe>-->
                         <div ng-if="displayCheck(ti.description_uuid, ti.description_review, mutation.name_review, tumor.name_review, null, true)">
                             <h5><b>General Summary (Optional): </b>
-                                <review-panel panel-type="'update'" review-obj="ti.description_review" evidence-type="ti.name.getText()" mutation="mutation" tumor="tumor" therapy-category="ti" get-evidence="getEvidence(type, mutation, tumor, ti)" model-update="modelUpdate(type, mutation, tumor, ti)"></review-panel>
+                                <review-panel review-obj="ti.description_review" evidence-type="ti.name.getText()" mutation="mutation" tumor="tumor" therapy-category="ti" get-evidence="getEvidence(type, mutation, tumor, ti)" model-update="modelUpdate(type, mutation, tumor, ti)"></review-panel>
                             </h5>
-                            <drive-realtime-string review-obj="ti.description_review" uuid="ti.description_uuid" es="ti.description_eStatus" fe="fileEditable" t="'p'" object="ti.description"></drive-realtime-string>
+                            <drive-realtime-string review-obj="ti.description_review" uuid="::ti.description_uuid" es="ti.description_eStatus" fe="fileEditable" t="'p'" object="ti.description"></drive-realtime-string>
                             <pub-iframe ng-model="ti.description.text" ng-if="tmpGeneStatus.isOpen"></pub-iframe>
                         </div>
                       <uib-accordion close-others="false">
@@ -343,13 +343,13 @@
                             <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti, treatment)" ng-if="displayCheck(null, treatment.name_review, mutation.name_review, tumor.name_review, treatment.name_review) && showEntry(treatment)" is-open="tmpGeneStatus.isOpen" class="levelFourHeader">
                             <uib-accordion-heading>
                               <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}"></i>
-                              <span>{{treatment.type.text}}: </span>
+                              <span>{{::treatment.type.text}}: </span>
                               <div ng-if="reviewMode && treatment.name_review.get('lastReviewed')"><br/></div>
                               <div style="display:inline-block">
-                                   <drive-realtime-string review-obj="treatment.name_review" treatment-messages="treatmentMessages" get-treatment-messages="getTreatmentMessages(mutation, tumor, ti)" uuid="treatment.name_uuid"  es="treatment.name_eStatus" fe="fileEditable" t="'TREATMENT_NAME'" object="treatment.name" ng-click="stopCollopse($event)" mutation="mutation" tumor="tumor" therapy-category="ti" treatment="treatment" validate-treatment="validateTreatment(newTreatmentName, firstEnter, alert, mutation, tumor, therapyCategory)"></drive-realtime-string>
+                                   <drive-realtime-string review-obj="treatment.name_review" treatment-messages="treatmentMessages" get-treatment-messages="getTreatmentMessages(mutation, tumor, ti)" uuid="::treatment.name_uuid"  es="treatment.name_eStatus" fe="fileEditable" t="'TREATMENT_NAME'" object="treatment.name" ng-click="stopCollopse($event)" mutation="mutation" tumor="tumor" therapy-category="ti" treatment="treatment" validate-treatment="validateTreatment(newTreatmentName, firstEnter, alert, mutation, tumor, therapyCategory)"></drive-realtime-string>
                               </div>
                               <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="!treatment.level.text && !treatment.indication.text && !treatment.description.text && !treatment.short.text">No Entry</span>
-                              <comments-dict gene-name="{{::gene.name.text}}" therapy="{{treatment.name.text}}" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                              <comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                               <span class="pull-right" ng-show="!reviewMode && fileEditable">
                                 <span style="margin-right: 20px">
                                   <i class="fa fa-angle-up" ng-if="$parent.$index !== 0" ng-click="move(ti.treatments, $parent.$index, $parent.$index, $event)"></i>
@@ -370,29 +370,29 @@
                             <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.level_uuid, treatment.level_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
                               <strong>{{::treatment.level.display}}:</strong><br/>
                               <span ng-if="checkTI(ti, 1, 1)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SS"></drive-realtime-string>
+                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 1, 0)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SR" class="floatLeft"></drive-realtime-string>
+                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SR" class="floatLeft"></drive-realtime-string>
                                 <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i>
                               </span>
                               <span ng-if="checkTI(ti, 0, 1)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IS"></drive-realtime-string>
+                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IS"></drive-realtime-string>
                               </span>
                               <span ng-if="checkTI(ti, 0, 0)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IR" class="floatLeft"></drive-realtime-string>
+                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IR" class="floatLeft"></drive-realtime-string>
                                 <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
                               </span>
                             </p>
                             <div ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.indication_uuid, treatment.indication_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
                                 <strong>{{::treatment.indication.display}}:</strong>
                                 <br/>
-                                <drive-realtime-string review-obj="treatment.indication_review" uuid="treatment.indication_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                                <drive-realtime-string review-obj="treatment.indication_review" uuid="::treatment.indication_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                             </div>
                             <span ng-if="displayCheck(treatment.description_uuid, treatment.description_review, mutation.name_review, tumor.name_review, treatment.name_review, true)" style="float:left">
                               <strong>Description of Evidence:</strong>
                               <br/>
-                              <drive-realtime-string review-obj="treatment.description_review" uuid="treatment.description_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                              <drive-realtime-string review-obj="treatment.description_review" uuid="::treatment.description_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                             </span>
                             <span ng-if="!reviewMode">
                               <strong>Additional Information (Optional):</strong>
@@ -419,11 +419,11 @@
                       <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                         <span>Ongoing clinical trials: </span>
-                        <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict display-name="Ongoing clinical trials" mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{gene.name.text}}"file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                        <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                         <span class="pull-right" ng-show="fileEditable">
                             <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.trials_eStatus" id="ti.name.text  + '-trials'" apply-obsolete="applyObsolete(tumor.trials_eStatus, 'CLINICAL_TRIAL', mutation, tumor)"></e-status>
                         </span>
-                        <review-panel panel-type="'update'" review-obj="tumor.trials_review" evidence-type="'CLINICAL_TRIAL'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                        <review-panel review-obj="tumor.trials_review" evidence-type="'CLINICAL_TRIAL'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                       </uib-accordion-heading>
 
                       <h4 ng-if="reviewMode && !tumor.trials_review.get('action') && !tumor.trials_review.get('removedItem')">New Content:</h4>
@@ -438,7 +438,7 @@
                                     <button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials, newTrial, tumor.trials_review, tumor.trials_uuid); newTrial=''">
                                         <i class="fa fa-plus"></i> Add Trial
                                     </button>
-                                    <!-- <button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="cleanTrial(tumor.trials)">
+                                    <!-- <button type="button" class="btn btn-default" ng-if="::(userRole === 8)" ng-click="cleanTrial(tumor.trials)">
                                     <i class="fa fa-plus"></i> Clean Trial
                                     </button> -->
                                 </span>
@@ -449,13 +449,13 @@
                           <h4 ng-if="!tumor.trials_review.get('action') && !tumor.trials_review.get('removedItem')">Old Content:</h4>
                           <div ng-if="!tumor.trials_review.get('action') && !tumor.trials_review.get('removedItem')">
                               <span ng-if="tumor.trials_review.get('lastReviewed').length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials_review.get('lastReviewed')">
-                                <a ng-href="https://clinicaltrials.gov/show/{{x}}" target="_blank">{{x}}</a>
+                                <a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>
                               </span>
                               <p class="reviewedBG" ng-if="!tumor.trials_review.get('lastReviewed') || tumor.trials_review.get('lastReviewed').length === 0">No Entry</p>
                           </div>
                           <div ng-if="tumor.trials_review.get('action')">
                               <span ng-if="tumor.trials.length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials.asArray()">
-                                <a ng-href="https://clinicaltrials.gov/show/{{x}}" target="_blank">{{x}}</a>
+                                <a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>
                               </span>
                               <p class="reviewedBG" ng-if="tumor.trials.length === 0">No Entry</p>
                           </div>
@@ -510,7 +510,7 @@
     </uib-accordion>
   </div>
   <div ng-if="!reviewMode" class="input-group input-group-sm accordionMarginTop">
-    <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{addMutationPlaceholder}}"  uib-typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
+    <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{::addMutationPlaceholder}}"  uib-typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator" empty-typeahead  ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
     <span class="input-group-btn">
       <button type="button" class="btn btn-default" ng-disabled="!(!!newMutationName)" ng-click="addMutation(newMutationName); newMutationName=''">
         <i class="fa fa-plus"></i> Add Mutation
@@ -550,10 +550,10 @@
   <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
     <i class="fa fa-eye"></i>Show all empty
   </button>
-  <button ng-if="userRole === 8" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=true">
+  <button ng-if="::(userRole === 8)" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=true">
     <i class="fa fa-eye-slash"></i>Hide all obsolete
   </button>
-  <button ng-if="userRole === 8" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=false">
+  <button ng-if="::(userRole === 8)" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=false">
     <i class="fa fa-eye-slash"></i>Show all obsolete
   </button>
     <button type="button" class="btn btn-default" ng-click="status.expandAll=true"
@@ -572,10 +572,10 @@
     <!--<i class="fa " ng-class="{'fa-eye':status.hideAllEmpty, 'fa-eye-slash':!status.hideAllEmpty}"></i>-->
     <!--<span ng-if="!status.hideAllEmpty">Hide</span><span ng-if="status.hideAllEmpty">Show</span> all empty-->
   <!--</button>-->
-  <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getData()">Check gene data</button>-->
-  <button ng-style="{color: updateGeneColor()}" type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
-  <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="getComments()">Check comments</button>-->
-    <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="checkScope()">Check Scope</button>-->
+  <!--<button type="button" class="btn btn-default" ng-if="::(userRole === 8)" ng-click="getData()">Check gene data</button>-->
+  <button ng-style="{color: updateGeneColor()}" type="button" class="btn btn-default" ng-if="::(userRole === 8 && developerCheck())" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>
+  <!--<button type="button" class="btn btn-default" ng-if="::(userRole === 8)" ng-click="getComments()">Check comments</button>-->
+    <button type="button" class="btn btn-default" ng-if="::(userRole === 8)" ng-click="checkScope()">Check Scope</button>
   <span class="btn btn-default" disabled><span ng-show="docStatus.saving">Saving <i class="fa fa-spinner fa-spin"></i></span><span ng-show="docStatus.saved">All changes saved</span><span style="color: red; font-weight: bold;" ng-show="docStatus.closed">Error saving the changes, please refresh the page</span></span>
 </div>
 <loading ng-model="status.saveDataToDatabase" content="Please wait, we are saving the data into database." class="loading-save-to-database"></loading>

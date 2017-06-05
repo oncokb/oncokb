@@ -66,8 +66,8 @@
                     <input type="text" class="form-control" ng-model="x.variant" ng-if="x.editable"/>
                     <span ng-if="!x.editable">{{x.variant}}</span>
                 </td>
-                <td>{{x.addedBy}}</td>
-                <td>{{x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
+                <td>{{::x.addedBy}}</td>
+                <td>{{::x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
                 <td class=" curator">
                     <select chosen
                             ng-model="data.modifiedCurator"
@@ -79,7 +79,7 @@
                     </select>
                     <span ng-if="!x.editable">{{x.curator}}</span></td>
                 <td>
-                    {{getAnnotationLocation(x)}}
+                    {{::getAnnotationLocation(x)}}
                 </td>
                 <td>
                     <span ng-show="!x.curated">

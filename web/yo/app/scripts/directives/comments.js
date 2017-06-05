@@ -29,26 +29,6 @@ angular.module('oncokbApp')
                 };
                 scope.userRole = users.getMe().role;
 
-                if (attrs.geneName) {
-                    scope.geneName = attrs.geneName;
-                }
-
-                if (attrs.mutation) {
-                    scope.mutation = attrs.mutation;
-                }
-
-                if (attrs.tumorType) {
-                    scope.tumorType = attrs.tumorType;
-                }
-
-                if (attrs.therapy) {
-                    scope.therapy = attrs.therapy;
-                }
-
-                if (attrs.displayName) {
-                    scope.displayName = attrs.displayName;
-                }
-
                 // create a copy of comments. The original comments is a big
                 // object, has too many methods, cannot use scope watch on the
                 // whole object.
