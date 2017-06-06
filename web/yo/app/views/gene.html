@@ -1,4 +1,4 @@
-<div ng-if="gene && !status.rendering" class="geneMainDiv" ng-style="geneMainDivStyle">
+<div ng-hide="status.rendering" ng-if="gene" class="geneMainDiv" ng-style="geneMainDivStyle">
   <div id="gene" style="margin-bottom:50px">
     <h2>
       <!-- Gene: <span>{{gene.name.text}}</span> -->
