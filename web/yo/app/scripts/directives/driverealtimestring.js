@@ -279,7 +279,7 @@ angular.module('oncokbApp')
                     });
                 };
                 $scope.getDuplicationMessage = function() {
-                    var mutationName = $scope.mutation.name.text.toLowerCase();
+                    var mutationName = $scope.mutation.name.getText().trim().toLowerCase();
                     if ($scope.t === 'MUTATION_NAME') {
                         return $scope.mutationMessages[mutationName];
                     } else if ($scope.t === 'TREATMENT_NAME') {

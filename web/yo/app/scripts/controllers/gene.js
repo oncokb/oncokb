@@ -51,7 +51,7 @@ angular.module('oncokbApp')
                 $scope.mutationMessages = {};
                 var vusList = [];
                 $scope.vus.asArray().forEach(function(e) {
-                    vusList.push(e.name.text.toLowerCase());
+                    vusList.push(e.name.getText().trim().toLowerCase());
                 });
                 var mutationNameBlackList = [
                     'activating mutations',
@@ -62,7 +62,7 @@ angular.module('oncokbApp')
 
                 var tempNameList = [];
                 for (var i = 0; i < $scope.gene.mutations.length; i++) {
-                    var mutationName = $scope.gene.mutations.get(i).name.text.toLowerCase();
+                    var mutationName = $scope.gene.mutations.get(i).name.getText().trim().toLowerCase();
                     if (mutationNameBlackList.indexOf(mutationName) !== -1) {
                         $scope.mutationMessages[mutationName] = 'This mutation name is not allowed';
                     } else if (vusList.indexOf(mutationName) !== -1) {
