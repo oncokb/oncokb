@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,32 +42,19 @@ public class VariantsApiController implements VariantsApi {
         HttpStatus httpStatus = HttpStatus.OK;
         List<Alteration> alterationList = new ArrayList<>();
         if (hugoSymbol != null || entrezGeneId != null) {
-            Gene gene = null;
-            if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-                httpStatus = HttpStatus.BAD_REQUEST;
-            } else {
-                if (entrezGeneId != null) {
-                    gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-                }
-
-                if (hugoSymbol != null && gene == null) {
-                    gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-                }
-
-                if (gene != null) {
-
-                    Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
-                    if (variant == null && proteinStart == null && proteinEnd == null) {
-                        alterationList.addAll(allAlterations);
-                    } else {
-                        AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
-                        Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), variant, variantType, consequence, proteinStart, proteinEnd);
-                        alterationList.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(AlterationUtils.getAllAlterations(gene))));
-                    }
+            Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+            if (gene != null) {
+                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
+                if (variant == null && proteinStart == null && proteinEnd == null) {
+                    alterationList.addAll(allAlterations);
+                } else {
+                    AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
+                    Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), variant, variantType, consequence, proteinStart, proteinEnd);
+                    alterationList.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(AlterationUtils.getAllAlterations(gene))));
                 }
             }
-        } else {
-            httpStatus = HttpStatus.BAD_REQUEST;
+        } else if (variant != null) {
+            alterationList = AlterationUtils.lookupVarinat(variant, false, AlterationUtils.getAllAlterations());
         }
 
         return new ResponseEntity<>(alterationList, HttpStatus.OK);

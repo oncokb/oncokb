@@ -117,7 +117,7 @@ public class GenesApiController implements GenesApi {
         , @ApiParam(value = "The entrez gene ID. (Deprecated, use query instead)") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
     ) {
-        Set<Gene> genes = GeneUtils.searchGene(query);
+        Set<Gene> genes = GeneUtils.searchGene(query, false);
         HttpStatus status = HttpStatus.OK;
 
         List<Gene> geneList = new ArrayList<>(genes);

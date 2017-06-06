@@ -169,6 +169,7 @@ public class Alteration implements java.io.Serializable {
         return gene + " " + alteration;
     }
 
+    @JsonIgnore
     public String getUniqueId() {
         List<String> content = new ArrayList<>();
         if(this.gene != null) {

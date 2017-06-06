@@ -1,24 +1,22 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Hongxin on 10/28/16.
  */
 @Controller
 public class PrivateSearchApiController implements PrivateSearchApi {
+    private Integer TYPEAHEAD_RETURN_LIMIT = 5;
 
     @Override
     public ResponseEntity<Set<BiologicalVariant>> searchVariantsBiologicalGet(
@@ -75,5 +73,151 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             }
         }
         return new ResponseEntity<>(treatments, status);
+    }
+
+    @Override
+    public ResponseEntity<LinkedHashSet<TypeaheadSearchResp>> searchTypeAheadGet(
+        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant.", required = true) @RequestParam(value = "query") String query,
+        @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit) {
+        LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
+        if (limit == null) {
+            limit = TYPEAHEAD_RETURN_LIMIT;
+        }
+        if (query != null) {
+            List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
+
+            if (keywords.size() == 1) {
+                // Find exact matched gene
+                result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), true)));
+
+                // Find exact matched variant
+                result.addAll(convertVariant(AlterationUtils.lookupVarinat(keywords.get(0), true, AlterationUtils.getAllAlterations())));
+
+                // Blur search gene
+                result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false)));
+
+                // Blur search variant
+                result.addAll(convertVariant(AlterationUtils.lookupVarinat(keywords.get(0), false, AlterationUtils.getAllAlterations())));
+            } else if (keywords.size() == 2) {
+                // Assume one of the keyword is gene
+                Map<String, Set<Gene>> map = new HashedMap();
+                for (String keyword : keywords) {
+                    map.put(keyword, GeneUtils.searchGene(keyword, true));
+                }
+
+                //Find exact match
+                result.addAll(getMatch(map, keywords, true));
+                result.addAll(getMatch(map, keywords, false));
+
+                if (result.size() == 0) {
+                    for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
+                        if (entry.getValue().size() > 0) {
+                            for (Gene gene : entry.getValue()) {
+                                for (String keyword : keywords) {
+                                    if (!keyword.equals(entry.getKey())) {
+                                        Alteration alteration =
+                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null);
+                                        AlterationUtils.annotateAlteration(alteration, keyword);
+                                        TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
+                                        typeaheadSearchResp.setVariantExist(false);
+                                        result.add(typeaheadSearchResp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return new ResponseEntity<>(getLimit(result, limit), HttpStatus.OK);
+    }
+
+    private LinkedHashSet<TypeaheadSearchResp> getMatch(Map<String, Set<Gene>> map, List<String> keywords, Boolean exactMatch) {
+        LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
+        if (map == null || keywords == null) {
+            return result;
+        }
+        if (exactMatch == null)
+            exactMatch = false;
+        for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
+            if (entry.getValue().size() > 0) {
+                for (Gene gene : entry.getValue()) {
+                    Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
+                    for (String keyword : keywords) {
+                        if (!keyword.equals(entry.getKey()))
+                            result.addAll(convertVariant(AlterationUtils.lookupVarinat(keyword, exactMatch, alterations)));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private LinkedHashSet<TypeaheadSearchResp> convertGene(Set<Gene> genes) {
+        LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
+        if (genes != null) {
+            for (Gene gene : genes) {
+                TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+                typeaheadSearchResp.setGene(gene);
+                typeaheadSearchResp.setVariantExist(false);
+                typeaheadSearchResp.setLink("/genes/" + gene.getHugoSymbol());
+                typeaheadSearchResp.setQueryType("gene");
+                result.add(typeaheadSearchResp);
+            }
+        }
+        return result;
+    }
+
+    private LinkedHashSet<TypeaheadSearchResp> convertVariant(List<Alteration> alterations) {
+        LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
+        if (alterations != null) {
+            for (Alteration alteration : alterations) {
+                result.add(newTypeaheadVariant(alteration));
+            }
+        }
+        return result;
+    }
+
+    private TypeaheadSearchResp newTypeaheadVariant(Alteration alteration) {
+        TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+        typeaheadSearchResp.setGene(alteration.getGene());
+        typeaheadSearchResp.setVariant(alteration);
+        typeaheadSearchResp.setVariantExist(true);
+
+        Query query = new Query();
+        query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
+        query.setAlteration(alteration.getAlteration());
+
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false);
+        typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
+
+        // Not ready populate treatment info yet.
+//        Set<Evidence> evidences = EvidenceUtils.getRelevantEvidences(query, null, null, MainUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+//        if (!evidences.isEmpty()) {
+//            Map<String, LevelOfEvidence> highestLevels = IndicatorUtils.findHighestLevelByEvidences(evidences);
+//            if (highestLevels.get("sensitive") != null) {
+//                typeaheadSearchResp.setHighestLevelOfSensitivity(highestLevels.get("sensitive").getLevel());
+//            }
+//            if (highestLevels.get("resistant") != null) {
+//                typeaheadSearchResp.setHighestLevelOfResistance(highestLevels.get("resistant").getLevel());
+//            }
+//        }
+
+        typeaheadSearchResp.setQueryType("variant");
+        typeaheadSearchResp.setLink("/genes/" + alteration.getGene().getHugoSymbol() + "/variants/" + alteration.getAlteration());
+        return typeaheadSearchResp;
+    }
+
+    private LinkedHashSet<TypeaheadSearchResp> getLimit(LinkedHashSet<TypeaheadSearchResp> result, Integer limit) {
+        if (limit == null)
+            limit = TYPEAHEAD_RETURN_LIMIT;
+        Integer count = 0;
+        LinkedHashSet<TypeaheadSearchResp> firstFew = new LinkedHashSet<>();
+        Iterator<TypeaheadSearchResp> itr = result.iterator();
+        while (itr.hasNext() && count < limit) {
+            firstFew.add(itr.next());
+            count++;
+        }
+        return firstFew;
     }
 }

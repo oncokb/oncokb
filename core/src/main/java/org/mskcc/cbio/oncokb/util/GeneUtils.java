@@ -86,27 +86,49 @@ public class GeneUtils {
         return null;
     }
 
-    public static Set<Gene> searchGene(String keywords) {
+    public static Set<Gene> searchGene(String keyword, Boolean exactSearch) {
         Set<Gene> genes = new HashSet<>();
-        if (keywords != null && keywords != "") {
+        if (exactSearch == null)
+            exactSearch = false;
+        if (keyword != null && keyword != "") {
             Set<Gene> allGenes = GeneUtils.getAllGenes();
-            if (org.apache.commons.lang3.math.NumberUtils.isNumber(keywords)) {
+            if (org.apache.commons.lang3.math.NumberUtils.isNumber(keyword)) {
                 for (Gene gene : allGenes) {
                     String entrezId = Integer.toString(gene.getEntrezGeneId());
-                    if (entrezId.contains(keywords)) {
-                        genes.add(gene);
+                    if (exactSearch) {
+                        if (entrezId.equals(keyword)) {
+                            genes.add(gene);
+                        }
+                    } else {
+                        if (entrezId.contains(keyword)) {
+                            genes.add(gene);
+                        }
                     }
                 }
             } else {
+                keyword = keyword.toLowerCase();
                 for (Gene gene : allGenes) {
-                    String hugoSymbol = gene.getHugoSymbol();
-                    if (StringUtils.containsIgnoreCase(hugoSymbol, keywords)) {
-                        genes.add(gene);
+                    String hugoSymbol = gene.getHugoSymbol().toLowerCase();
+                    if (exactSearch) {
+                        if (hugoSymbol.equals(keyword)) {
+                            genes.add(gene);
+                        } else {
+                            for (String alias : gene.getGeneAliases()) {
+                                if (alias.toLowerCase().equals(keyword)) {
+                                    genes.add(gene);
+                                    break;
+                                }
+                            }
+                        }
                     } else {
-                        for (String alias : gene.getGeneAliases()) {
-                            if (StringUtils.containsIgnoreCase(alias, keywords)) {
-                                genes.add(gene);
-                                break;
+                        if (StringUtils.containsIgnoreCase(hugoSymbol, keyword)) {
+                            genes.add(gene);
+                        } else {
+                            for (String alias : gene.getGeneAliases()) {
+                                if (StringUtils.containsIgnoreCase(alias, keyword)) {
+                                    genes.add(gene);
+                                    break;
+                                }
                             }
                         }
                     }

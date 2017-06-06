@@ -238,6 +238,10 @@ public final class AlterationUtils {
                 alteration.setAlteration("Deletion");
             }
         }
+
+        if (alteration.getName() == null && alteration.getAlteration() != null) {
+            alteration.setName(alteration.getAlteration());
+        }
     }
 
     public static Boolean isFusion(String variant) {
@@ -517,6 +521,46 @@ public final class AlterationUtils {
         alleles.remove(alteration);
         sortAlternativeAlleles(alleles);
         return alleles;
+    }
+
+    public static List<Alteration> lookupVarinat(String query, Boolean exactMatch, Set<Alteration> alterations) {
+        List<Alteration> alterationList = new ArrayList<>();
+        // Only support variant blur search for now.
+        query = query.toLowerCase().trim();
+        if (exactMatch == null)
+            exactMatch = false;
+        if (com.mysql.jdbc.StringUtils.isNullOrEmpty(query))
+            return alterationList;
+        query = query.trim().toLowerCase();
+        for (Alteration alteration : alterations) {
+            if (alteration.getAlteration() != null) {
+                if (exactMatch) {
+                    if (alteration.getAlteration().toLowerCase().equals(query)) {
+                        alterationList.add(alteration);
+                        continue;
+                    }
+                } else {
+                    if (alteration.getAlteration().toLowerCase().contains(query)) {
+                        alterationList.add(alteration);
+                        continue;
+                    }
+                }
+            }
+            if (alteration.getName() != null) {
+                if (exactMatch) {
+                    if (alteration.getName().toLowerCase().equals(query)) {
+                        alterationList.add(alteration);
+                        continue;
+                    }
+                } else {
+                    if (alteration.getName().toLowerCase().contains(query)) {
+                        alterationList.add(alteration);
+                        continue;
+                    }
+                }
+            }
+        }
+        return alterationList;
     }
 
     // Sort the alternative alleles alphabetically
