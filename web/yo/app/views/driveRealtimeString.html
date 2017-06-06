@@ -4,7 +4,7 @@
             <h4 ng-if="reviewMode && reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">New Content:</h4>
             <p contenteditable="{{reviewMode ? (reviewObj.get('review') !== false ? true : false) : fe}}"
                ng-class="getInputClass()"
-               placeholder="{{ph}}"
+               placeholder="{{::ph}}"
                ng-model="content.stringO">
             </p>
             <div ng-if="reviewMode && reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">
@@ -22,7 +22,7 @@
             <h4 ng-if="reviewMode && reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">New Content:</h4>
             <p contenteditable="{{reviewMode ? (reviewObj.get('review') !== false ? true : false) : fe}}"
                ng-class="getInputClass()"
-               placeholder="{{ph}}"
+               placeholder="{{::ph}}"
                ng-model="content.stringO">
             </p>
             <div ng-if="reviewMode && reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">
@@ -46,7 +46,7 @@
             <br/>
             <div ng-if="reviewMode && reviewObj.get('lastReviewed') && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('added')">
                 <h4>Old Content:</h4>
-                <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewed')}}</p>
+                <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
             </div>
         </div>
         <div ng-switch-when="TREATMENT_NAME">
@@ -59,7 +59,7 @@
             <br/>
             <div ng-if="reviewMode && reviewObj.get('lastReviewed') && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('added')">
                 <h4>Old Content:</h4>
-                <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewed')}}</p>
+                <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
             </div>
         </div>
         <div ng-switch-when="treatment-select" class="treatment-select">
@@ -91,7 +91,7 @@
                     <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.has('lastReviewed') ? reviewObj.get('lastReviewed') : content.stringO}}</p>
                     <div class="propagation" ng-if="reviewObj.has('lastReviewedPropagation')">
                         <span>Level of Evidence in other tumor types: </span>
-                        <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewedPropagation')}}</p>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewedPropagation')}}</p>
                     </div>
                 </div>
             </div>
@@ -100,13 +100,13 @@
         <div ng-switch-when="select-chosen" class="chosen-full-width">
             <h4 ng-if="reviewMode && reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">New Content:</h4>
             <select ng-disabled="reviewMode ? (reviewObj.get('review') === false ? true : false) : !fe"
-                    chosen ng-attr-id="{{chosenid}}" allow-single-deselect="true" ng-model="content.stringO"
+                    chosen allow-single-deselect="true" ng-model="content.stringO"
                     ng-options="opt for opt in o">
                 <option value="NA"></option>
             </select>
             <div ng-if="reviewMode && reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">
                 <h4>Old Content:</h4>
-                <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewed')}}</p>
+                <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
             </div>
         </div>
         <div ng-switch-when="checkbox">
@@ -116,14 +116,14 @@
                 <div>
                     <span ng-repeat="checkbox in checkboxes" ng-if="!reviewMode || reviewObj.get('review') !== false">
                       <input
-                              id="{{checkboxid}}-{{$index}}"
+                              id="::({{checkboxid}}-{{$index}})"
                               type="radio"
                               ng-model="content.stringO"
                               ng-value="checkbox"
                               ng-disabled="!reviewMode ? !fe : false"
                               ng-click="uncheck($event)"
                       >
-                      <label for="{{checkboxid}}-{{$index}}">{{checkbox}}</label>
+                      <label for="::({{checkboxid}}-{{$index}})">{{checkbox}}</label>
                     </span>
                 </div>
             </div>
@@ -133,12 +133,12 @@
                 <div>
                 <span ng-if="!objecttype" ng-repeat="checkbox in checkboxes" class="reviewedBG">
                   <input
-                          id="{{checkboxid}}-{{$index}}-review"
+                          id="::({{checkboxid}}-{{$index}}-review)"
                           type="radio"
                           ng-checked="(reviewObj.get('review') !== false ? reviewObj.get('lastReviewed') : content.stringO) === checkbox ? true : false"
                           ng-disabled="true"
                   >
-                  <label for="{{checkboxid}}-{{$index}}-review">{{checkbox}}</label>
+                  <label for="::({{checkboxid}}-{{$index}}-review)">{{checkbox}}</label>
                 </span>
                 </div>
 
