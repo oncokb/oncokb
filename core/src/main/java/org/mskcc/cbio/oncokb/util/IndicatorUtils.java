@@ -30,6 +30,10 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        if(query.getEntrezGeneId() == null && query.getHugoSymbol() == null) {
+            query.setEntrezGeneId(-2);
+        }
+
         // Set the alteration to empty string in order to get relevant variants.
         if (query.getAlteration() == null) {
             query.setAlteration("");
@@ -119,7 +123,8 @@ public class IndicatorUtils {
             query.setHugoSymbol(gene.getHugoSymbol());
             query.setEntrezGeneId(gene.getEntrezGeneId());
 
-            indicatorQuery.setGeneExist(true);
+            // Gene exist should only be set to true if entrezGeneId is bigger than 0
+            indicatorQuery.setGeneExist(gene.getEntrezGeneId() > 0);
 
             // Gene summary
             indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));

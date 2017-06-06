@@ -276,6 +276,23 @@ public class SummaryUtils {
             queryAlteration = queryAlteration.substring(0, 1).toUpperCase() + queryAlteration.substring(1);
         }
 
+        // if the gene is Other Biomarker, return the mutation effect description for alteration instead
+        if (gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
+            if (exactMatchAlteration != null) {
+                List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(exactMatchAlteration), Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
+
+                // Technically the list should only contain no more than one record.
+                for (Evidence evidence : evidences) {
+                    if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(evidence.getDescription())) {
+                        return evidence.getDescription();
+                    }
+                }
+                return "";
+            } else {
+                return "";
+            }
+        }
+
         String altName = getGeneMutationNameInVariantSummary(gene, queryAlteration);
 
         if (exactMatchAlteration != null) {
@@ -408,6 +425,9 @@ public class SummaryUtils {
     }
 
     public static String geneSummary(Gene gene) {
+        if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
+            return "";
+        }
         Set<Evidence> geneSummaryEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
         String summary = "";
         if (!geneSummaryEvs.isEmpty()) {

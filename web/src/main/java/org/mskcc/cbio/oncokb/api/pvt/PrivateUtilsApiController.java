@@ -9,10 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -89,9 +86,15 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         if (CacheUtils.isEnabled()) {
             if (CacheUtils.getNumbers("main") == null) {
-                mainNumber.setGene(ApplicationContextSingleton.getGeneBo().countAll());
+                Set<Gene> allGenes = GeneUtils.getAllGenes();
+                Integer numRealGenes = 0;
+                for (Gene gene : allGenes) {
+                    if (gene.getEntrezGeneId() > 0)
+                        numRealGenes++;
+                }
+                mainNumber.setGene(numRealGenes);
 
-                List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
+                List<Alteration> alterations = new ArrayList<>(AlterationUtils.getAllAlterations());
                 alterations = AlterationUtils.excludeVUS(alterations);
                 alterations = AlterationUtils.excludeInferredAlterations(alterations);
 
