@@ -28,14 +28,6 @@ angular.module('oncokbApp')
                 rejectAddedInGene: '&rejectAdded'
             },
             replace: true,
-            link: function postLink(scope, element) {
-                scope.reviewMode = $rootScope.reviewMode;
-                $rootScope.$watch('reviewMode', function(n, o) {
-                    if(n !== o) {
-                        scope.reviewMode = n;
-                    }
-                });
-            },
             controller: function($scope) {
                 $scope.operationsName = {'update': 'Updated', 'name': 'Name Changed', 'add': 'Added', 'delete': 'Deleted'};
                 $scope.adjustedEvidenceType = $scope.evidenceType;
