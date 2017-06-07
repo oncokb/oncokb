@@ -11,7 +11,7 @@
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
-        <!--<button type="button" class="btn btn-default" ng-click="getData()">Gene</button>-->
+        <button type="button" class="btn btn-default" ng-click="getData()">Gene</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
         <button type="button" class="btn btn-default" uib-dropdown-toggle ng-if="::(userRole === 8)">
           More tools

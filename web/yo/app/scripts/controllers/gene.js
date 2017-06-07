@@ -224,6 +224,7 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function() {
+                var test = $rootScope.model.getRoot();
             };
             $scope.showEntry = function(obj) {
                 if (obj) {
