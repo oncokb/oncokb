@@ -24,7 +24,9 @@ angular.module('oncokbApp')
                     scope.data = {
                         curatorsToNotify: [],
                         curatorNotificationList: [],
-                        modifiedCurator: {}
+                        modifiedCurator: {},
+                        sectionList: ['Mutation Effect', 'Prevalence', 'Prognostic implications', 'NCCN guidelines', 'Standard sensitivity', 'Standard resistance', 'Investigational sensitivity', 'Investigational resistance'],
+                        modifiedSection: ''
                     };
                     scope.curators = [];
                     scope.email = {
@@ -39,6 +41,8 @@ angular.module('oncokbApp')
                             pmidString: 'PMID: ' + item.get('pmid'),
                             link: item.get('link'),
                             variant: item.get('variant'),
+                            tumorType: item.get('tumorType'),
+                            section: item.get('section'),
                             addedBy: item.get('addedBy'),
                             addedAt: item.get('addedAt'),
                             curated: item.get('curated'),
@@ -57,10 +61,12 @@ angular.module('oncokbApp')
                         DTColumnDefBuilder.newColumnDef(0),
                         DTColumnDefBuilder.newColumnDef(1),
                         DTColumnDefBuilder.newColumnDef(2),
-                        DTColumnDefBuilder.newColumnDef(3).withOption('sType', 'date'),
+                        DTColumnDefBuilder.newColumnDef(3),
                         DTColumnDefBuilder.newColumnDef(4),
-                        DTColumnDefBuilder.newColumnDef(5),
-                        DTColumnDefBuilder.newColumnDef(6)
+                        DTColumnDefBuilder.newColumnDef(5).withOption('sType', 'date'),
+                        DTColumnDefBuilder.newColumnDef(6),
+                        DTColumnDefBuilder.newColumnDef(7),
+                        DTColumnDefBuilder.newColumnDef(8)
                     ];
                 },
                 post: function postLink(scope) {
@@ -120,6 +126,8 @@ angular.module('oncokbApp')
                     var item = $rootScope.model.createMap({
                         link: $scope.link,
                         variant: $scope.variant,
+                        tumorType: $scope.tumorType,
+                        section: $scope.section,
                         curator: $scope.curator ? $scope.curator.name : '',
                         curated: false,
                         addedBy: user.name,
@@ -138,6 +146,8 @@ angular.module('oncokbApp')
                         pmidString: 'PMID: ' + item.get('pmid'),
                         link: item.get('link'),
                         variant: item.get('variant'),
+                        tumorType: item.get('tumorType'),
+                        section: item.get('section'),
                         addedBy: item.get('addedBy'),
                         addedAt: item.get('addedAt'),
                         curated: item.get('curated'),
@@ -146,6 +156,8 @@ angular.module('oncokbApp')
                     $scope.article = '';
                     $scope.link = '';
                     $scope.variant = '';
+                    $scope.tumorType = '';
+                    $scope.section = '';
                     $scope.curator = '';
                     $scope.predictedArticle = '';
                     $scope.validPMID = false;
@@ -167,6 +179,7 @@ angular.module('oncokbApp')
                             }
                         }
                     }
+                    $scope.data.modifiedSection = $scope.queue[index].section;
                 };
                 $scope.updateCuration = function(index, x) {
                     if (!$scope.queue[index]) {
@@ -183,6 +196,8 @@ angular.module('oncokbApp')
                                 $scope.queue[index].editable = false;
                                 x.article = queueModelItem.get('article');
                                 x.variant = queueModelItem.get('variant');
+                                x.tumorType = queueModelItem.get('tumorType');
+                                x.section = queueModelItem.get('section');
                                 x.curator = queueModelItem.get('curator');
                             });
                         } else {
@@ -194,11 +209,14 @@ angular.module('oncokbApp')
                     var queueModelItem = $scope.queueModel.get(index);
                     $scope.queue[index].editable = false;
                     $scope.queue[index].curator = !_.isEmpty($scope.data.modifiedCurator) ? $scope.data.modifiedCurator.name : '';
+                    $scope.queue[index].section = $scope.data.modifiedSection;
                     if (!x.pmid) {
                         queueModelItem.set('article', x.article);
                         $scope.getArticleList();
                     }
                     queueModelItem.set('variant', x.variant);
+                    queueModelItem.set('tumorType', x.tumorType);
+                    queueModelItem.set('section', $scope.queue[index].section);
                     queueModelItem.set('curator', $scope.queue[index].curator);
                     $scope.getCuratorsList();
                 }
@@ -282,10 +300,13 @@ angular.module('oncokbApp')
                         if (_email) {
                             var _articles = [];
                             _.each($scope.queue, function(item) {
-                                if (_curator === item.curator) {
+                                if (_curator === item.curator && !item.curated) {
                                     _articles.push({
                                         link: item.link,
-                                        article: item.article
+                                        article: item.article,
+                                        variant: item.variant,
+                                        tumorType: item.tumorType,
+                                        section: item.section
                                     });
                                 }
                             });
@@ -312,9 +333,22 @@ angular.module('oncokbApp')
                 function generateEmail(email, curatorName, adminName, articles, time) {
                     var deferred = $q.defer();
                     var content = 'Dear ' + curatorName.split(' ')[0] + ',\n\n';
-                    content += adminName + ' of OncoKB would like you curate the following publications:\n\n';
+                    content += adminName + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
                     _.each(articles, function(article, index) {
-                        content += (index + 1) + ') ' + article.article + ' (' + article.link + ')\n';
+                        var tempArr = [index + 1 + ')', article.article];
+                        if (article.link) {
+                            tempArr = tempArr.concat(['(', article.link, ')']);
+                        }
+                        if (article.variant) {
+                            tempArr = tempArr.concat(['Alteration:', article.variant + ',']);
+                        }
+                        if (article.tumorType) {
+                            tempArr = tempArr.concat(['Tumor type:', article.tumorType + ',']);
+                        }
+                        if (article.section) {
+                            tempArr = tempArr.concat(['Section:', article.section]);
+                        }
+                        content += tempArr.join(' ') + '\n';
                     });
                     content += '\nPlease try to curate this literature within two weeks (' + new Date(time + 12096e5).toDateString() + ') and remember to log your hours for curating this data.\n\n';
                     content += 'If you have any questions or concerns please email or slack ' + adminName + '.\n\n';

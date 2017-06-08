@@ -10,14 +10,24 @@
     </h3>
     <form ng-submit="addCuration()">
         <div class="row">
-            <div class="col-sm-5">
+            <div class="col-sm-2">
                 <input type="text" class="form-control" ng-model="article" placeholder="PMID or Abstract" size="25">
                 <span ng-bind-html="predictedArticle"></span>
             </div>
-            <div class="col-sm-2"><input type="text" class="form-control" ng-model="link" placeholder="Link" size="10">
+            <div class="col-sm-1"><input type="text" class="form-control" ng-model="link" placeholder="Link" size="10">
             </div>
             <div class="col-sm-2"><input type="text" class="form-control" ng-model="variant" placeholder="Variant"
                                          size="10"></div>
+            <div class="col-sm-2"><input type="text" class="form-control" ng-model="tumorType" placeholder="Tumor Type"
+                                         size="10"></div>
+            <div class="col-sm-2">
+                <select chosen
+                        ng-model="section"
+                        ng-options="m for m in data.sectionList"
+                        allow-single-deselect="true"
+                        class="chosen-select">
+                </select>
+            </div>
             <div class="col-sm-2">
                 <select chosen
                         data-placeholder="Choose A Curator"
@@ -40,61 +50,112 @@
             <tr>
                 <th>Article</th>
                 <th>Variant</th>
+                <th>Tumor Type</th>
+                <th>Section</th>
                 <th>Added by</th>
                 <th>Added at</th>
                 <th>Curator</th>
-                <th>Curated in</th>
+                <th>Previously Curated in</th>
                 <th>Operation</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="x in queue" ng-show="allCuration || !x.curated">
                 <td class=" article">
-                    <div ng-if="x.editable">
-                        <a href="{{x.link}}" target="_blank" ng-if="x.pmid">{{x.article}}</a>
-                        <input type="text" class="form-control" ng-model="x.article" ng-if="!x.pmid"/>
-                    </div>
-                    <div ng-if="!x.editable">
-                        <a href="{{x.link}}" target="_blank">{{x.article}}</a>
+                    <div ng-switch on="x.editable">
+                        <div ng-switch-when="true">
+                            <a href="{{x.link}}" target="_blank" ng-if="x.pmid">{{x.article}}</a>
+                            <input type="text" class="form-control" ng-model="x.article" ng-if="!x.pmid"/>
+                        </div>
+                        <div ng-switch-default>
+                            <a href="{{x.link}}" target="_blank">{{x.article}}</a>
+                        </div>
                     </div>
                     <pub-iframe
-                        ng-model="x.pmidString"
-                        ng-if="x.pmid">
+                            ng-model="x.pmidString"
+                            ng-if="x.pmid">
                     </pub-iframe>
                 </td>
                 <td>
-                    <input type="text" class="form-control" ng-model="x.variant" ng-if="x.editable"/>
-                    <span ng-if="!x.editable">{{x.variant}}</span>
+                    <div ng-switch on="x.editable">
+                        <div ng-switch-when="true">
+                            <input type="text" class="form-control" ng-model="x.variant"/>
+                        </div>
+                        <div ng-switch-default>
+                            <span>{{x.variant}}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div ng-switch on="x.editable">
+                        <div ng-switch-when="true">
+                            <input type="text" class="form-control" ng-model="x.tumorType"/>
+                        </div>
+                        <div ng-switch-default>
+                            <span>{{x.tumorType}}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div ng-switch on="x.editable">
+                        <div ng-switch-when="true" class="chosenStyle">
+                            <select chosen
+                                    ng-model="data.modifiedSection"
+                                    ng-options="m for m in data.sectionList"
+                                    allow-single-deselect="true"
+                                    class="chosen-select">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div ng-switch-default>
+                            <span>{{x.section}}</span>
+                        </div>
+                    </div>
                 </td>
                 <td>{{::x.addedBy}}</td>
                 <td>{{::x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
-                <td class=" curator">
-                    <select chosen
-                            ng-model="data.modifiedCurator"
-                            ng-options="m.name for m in curators"
-                            ng-if="x.editable"
-                            allow-single-deselect="true"
-                            class="chosen-select">
-                        <option value=""></option>
-                    </select>
-                    <span ng-if="!x.editable">{{x.curator}}</span></td>
+                <td>
+                    <div ng-switch on="x.editable">
+                        <div ng-switch-when="true" class="chosenStyle">
+                            <select chosen
+                                    ng-model="data.modifiedCurator"
+                                    ng-options="m.name for m in curators"
+                                    allow-single-deselect="true"
+                                    class="chosen-select">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div ng-switch-default>
+                            <span>{{x.curator}}</span>
+                        </div>
+                    </div>
+                </td>
                 <td>
                     {{::getAnnotationLocation(x)}}
                 </td>
                 <td>
                     <span ng-show="!x.curated">
-                        <button type="button" class="btn btn-success successButton" ng-click="completeCuration($index)"
-                                ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Complete curation"><i
-                            class="fa fa-check"></i></button>
-                        <button type="button" class="btn btn-warning warningButton" ng-click="editCuration($index)"
-                                ng-show="!x.editable" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i
-                            class="fa fa-edit"></i></button>
-                        <button type="button" class="btn btn-warning warningButton" ng-click="updateCuration($index, x)"
-                                ng-show="x.editable" uib-tooltip-placement="top"
-                                uib-tooltip="Save curation modification"><i class="fa fa-check"></i></button>
-                        <button type="button" class="btn btn-danger dangerButton" ng-click="deleteCuration($index)"
-                                ng-show="userRole === 8 && !x.editable" uib-tooltip-placement="top"
-                                uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i></button>
+                        <div ng-switch on="x.editable">
+                                <div ng-switch-when="true">
+                                    <button type="button" class="btn btn-warning warningButton" ng-click="updateCuration($index, x)"
+                                            uib-tooltip-placement="top" uib-tooltip="Save curation modification"><i class="fa fa-check"></i>
+                                    </button>
+                                </div>
+                                <div ng-switch-default>
+                                    <button type="button" class="btn btn-success successButton" ng-click="completeCuration($index)"
+                                            uib-tooltip-placement="top" uib-tooltip="Complete curation"><i
+                                            class="fa fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-warning warningButton" ng-click="editCuration($index)"
+                                            uib-tooltip-placement="top" uib-tooltip="Modify curation"><i
+                                            class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger dangerButton" ng-click="deleteCuration($index)"
+                                            ng-show="userRole === 8" uib-tooltip-placement="top"
+                                            uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i>
+                                    </button>
+                                </div>
+                            </div>
                     </span>
                 </td>
             </tr>
