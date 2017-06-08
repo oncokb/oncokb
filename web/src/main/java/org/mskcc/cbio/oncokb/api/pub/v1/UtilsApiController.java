@@ -2,10 +2,8 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
-import org.mskcc.cbio.oncokb.model.ArticleAbstract;
-import org.mskcc.cbio.oncokb.model.BiologicalVariant;
-import org.mskcc.cbio.oncokb.model.ClinicalVariant;
-import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.CancerGeneUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.oncotree.model.TumorType;
@@ -14,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.util.*;
-
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -185,5 +182,11 @@ public class UtilsApiController implements UtilsApi {
             oncoTreeType.getName() == null ?
                 (oncoTreeType.getMainType() == null ? null : oncoTreeType.getMainType().getName()) :
                 oncoTreeType.getName());
+    }
+
+    @Override
+    public ResponseEntity<List<CancerGene>> utilsCancerGeneListTxtGet() {
+        List<CancerGene> result = CancerGeneUtils.getCancerGeneList();
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
