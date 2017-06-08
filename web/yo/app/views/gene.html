@@ -1,6 +1,6 @@
 <div ng-hide="status.rendering" ng-if="gene" class="geneMainDiv" ng-style="geneMainDivStyle">
   <div id="gene" style="margin-bottom:50px">
-    <h2>
+     <h2>
       <!-- Gene: <span>{{gene.name.text}}</span> -->
       Gene: <span>{{::gene.name.text}}</span><comments-dict file-editable="fileEditable" comments="gene.name_comments" object="gene" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
       <span ng-repeat="collaborator in collaborators">
@@ -70,7 +70,7 @@
           <e-status ng-show="!reviewMode && fileEditable" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'" apply-obsolete="applyObsolete(gene.summary_eStatus, 'GENE_SUMMARY')"></e-status>
           <review-panel ng-if="reviewMode" review-obj="gene.summary_review" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
-        <drive-realtime-string review-obj="gene.summary_review" uuid="::gene.summary_uuid" es="gene.summary_eStatus" fe="fileEditable" t="'p'" object="gene.summary"></drive-realtime-string>
+        <drive-realtime-string review-obj="gene.summary_review" uuid="::gene.summary_uuid" es="gene.summary_eStatus" fe="geneEditable" t="'p'" object="gene.summary"></drive-realtime-string>
     </div>
     <div ng-if="displayCheck(gene.type_uuid, gene.type_review, null, null, null, true)">
         <h3 ng-if="reviewMode">Gene Type:
@@ -79,10 +79,10 @@
         <span><h4 style="margin-bottom:-10px" ng-if="reviewMode && !gene.type_review.get('action')">New Content:</h4></span>
         <div>
             <span style="float:left">
-            <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="reviewMode && gene.type_review.get('action') ? false : fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
+            <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
             </span>
             <span style="float:left">
-                <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="reviewMode && gene.type_review.get('action') ? false : fileEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
+                <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
             </span>
         </div>
         <div ng-if="reviewMode">
@@ -113,7 +113,7 @@
             <e-status ng-show="!reviewMode && fileEditable" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'" apply-obsolete="applyObsolete(gene.background_eStatus, 'GENE_BACKGROUND')"></e-status>
             <review-panel ng-if="reviewMode" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
-        <drive-realtime-string review-obj="gene.background_review" uuid="::gene.background_uuid"  es="gene.background_eStatus" fe="fileEditable" t="'p'" object="gene.background"></drive-realtime-string>
+        <drive-realtime-string review-obj="gene.background_review" uuid="::gene.background_uuid"  es="gene.background_eStatus" fe="geneEditable" t="'p'" object="gene.background"></drive-realtime-string>
     </div>
     <div ng-if="gene.name.text && !reviewMode">
       <table class="table geneLinks">

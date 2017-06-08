@@ -280,6 +280,9 @@ angular.module('oncokbApp')
             $scope.displayCheck = function(uuid, reviewObj, mutationReview, tumorReview, treatmentReview, precise) {
                 // regular mode check
                 if (!$rootScope.reviewMode) {
+                    if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8 && !mutationReview) {
+                        $scope.geneEditable = false;
+                    }
                     if (mutationReview && mutationReview.get('removed') || tumorReview && tumorReview.get('removed') || treatmentReview && treatmentReview.get('removed')) {
                         return false;
                     }
@@ -326,6 +329,9 @@ angular.module('oncokbApp')
                 }
             };
             function resetReview(reviewObj) {
+                if (reviewObj.get('rollback') === true) {
+                    reviewObj.delete('lastReviewed');
+                }
                 reviewObj.delete('review');
                 reviewObj.delete('action');
                 reviewObj.delete('rollback');
@@ -362,6 +368,7 @@ angular.module('oncokbApp')
                 _.each($scope.geneStatus, function(item) {
                     item.isOpen = false;
                 });
+                $scope.geneEditable = $scope.fileEditable;
             };
             $scope.developerCheck = function() {
                 return mainUtils.developerCheck(Users.getMe().name);
@@ -2814,6 +2821,7 @@ angular.module('oncokbApp')
                             'You can now continue editing the document. Thanks.');
                     }
                     $scope.fileEditable = $scope.document.editable;
+                    $scope.geneEditable = $scope.fileEditable;
                 }
             }
             function saveStateChangedEvent(evt) {
@@ -2885,6 +2893,7 @@ angular.module('oncokbApp')
                     // This will only happen if the currentReviewer is not empty
                     $scope.fileEditable = false;
                 }
+                $scope.geneEditable = $scope.fileEditable;
                 // Add timeout until the collaborator join event is triggered.
                 $timeout(function() {
                     if (underOthersReview()) {
@@ -3073,6 +3082,7 @@ angular.module('oncokbApp')
                 if (type === 'meta') {
                     $scope.metaDocStatus.saved = false;
                 }
+                $scope.geneEditable = $scope.fileEditable;
             }
 
             function getOncoTreeMainTypes() {
@@ -3589,6 +3599,7 @@ angular.module('oncokbApp')
                         'Sorry for any inconvinience.');
                 }
                 $scope.fileEditable = false;
+                $scope.geneEditable = $scope.fileEditable;
             });
 
             $scope.$on('startSaveDataToDatabase', function() {
