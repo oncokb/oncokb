@@ -2891,7 +2891,6 @@ angular.module('oncokbApp')
                     // This will only happen if the currentReviewer is not empty
                     $scope.fileEditable = false;
                 }
-                $scope.geneEditable = $scope.fileEditable;
                 // Add timeout until the collaborator join event is triggered.
                 $timeout(function() {
                     if (underOthersReview()) {
