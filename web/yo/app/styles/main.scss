@@ -843,6 +843,9 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .chosenStyle {
         min-width: 150px;
     }
+    .operationStyle {
+        min-width: 90px;
+    }
     .article {
         width: 30%;
     }
