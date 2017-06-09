@@ -368,7 +368,6 @@ angular.module('oncokbApp')
                 _.each($scope.geneStatus, function(item) {
                     item.isOpen = false;
                 });
-                $scope.geneEditable = $scope.fileEditable;
             };
             $scope.developerCheck = function() {
                 return mainUtils.developerCheck(Users.getMe().name);
@@ -2821,7 +2820,6 @@ angular.module('oncokbApp')
                             'You can now continue editing the document. Thanks.');
                     }
                     $scope.fileEditable = $scope.document.editable;
-                    $scope.geneEditable = $scope.fileEditable;
                 }
             }
             function saveStateChangedEvent(evt) {
@@ -3082,7 +3080,6 @@ angular.module('oncokbApp')
                 if (type === 'meta') {
                     $scope.metaDocStatus.saved = false;
                 }
-                $scope.geneEditable = $scope.fileEditable;
             }
 
             function getOncoTreeMainTypes() {
@@ -3438,6 +3435,11 @@ angular.module('oncokbApp')
             } else {
                 $scope.status.hideAllObsolete = true;
             }
+            $scope.$watch('fileEditable', function(n, o) {
+                if (n !== o) {
+                    $scope.geneEditable = n;
+                }
+            });
 
             $scope.$watch('status.hideAllEmpty', function(n, o) {
                 if (n !== o) {
@@ -3599,7 +3601,6 @@ angular.module('oncokbApp')
                         'Sorry for any inconvinience.');
                 }
                 $scope.fileEditable = false;
-                $scope.geneEditable = $scope.fileEditable;
             });
 
             $scope.$on('startSaveDataToDatabase', function() {
