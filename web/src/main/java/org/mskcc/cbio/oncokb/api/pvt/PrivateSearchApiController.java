@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
@@ -87,17 +88,11 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
 
             if (keywords.size() == 1) {
-                // Find exact matched gene
-                result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), true)));
-
-                // Find exact matched variant
-                result.addAll(convertVariant(AlterationUtils.lookupVarinat(keywords.get(0), true, AlterationUtils.getAllAlterations())));
-
                 // Blur search gene
-                result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false)));
+                result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false), keywords.get(0)));
 
                 // Blur search variant
-                result.addAll(convertVariant(AlterationUtils.lookupVarinat(keywords.get(0), false, AlterationUtils.getAllAlterations())));
+                result.addAll(convertVariant(AlterationUtils.lookupVarinat(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
             } else if (keywords.size() == 2) {
                 // Assume one of the keyword is gene
                 Map<String, Set<Gene>> map = new HashedMap();
@@ -145,7 +140,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
                     for (String keyword : keywords) {
                         if (!keyword.equals(entry.getKey()))
-                            result.addAll(convertVariant(AlterationUtils.lookupVarinat(keyword, exactMatch, alterations)));
+                            result.addAll(convertVariant(AlterationUtils.lookupVarinat(keyword, exactMatch, alterations), keyword));
                     }
                 }
             }
@@ -153,8 +148,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return result;
     }
 
-    private LinkedHashSet<TypeaheadSearchResp> convertGene(Set<Gene> genes) {
-        LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
+    private TreeSet<TypeaheadSearchResp> convertGene(Set<Gene> genes, String keyword) {
+        TreeSet<TypeaheadSearchResp> result = new TreeSet<>(new GeneComp(keyword));
         if (genes != null) {
             for (Gene gene : genes) {
                 TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
@@ -168,8 +163,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return result;
     }
 
-    private LinkedHashSet<TypeaheadSearchResp> convertVariant(List<Alteration> alterations) {
-        LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
+    private TreeSet<TypeaheadSearchResp> convertVariant(List<Alteration> alterations, String keyword) {
+        TreeSet<TypeaheadSearchResp> result = new TreeSet<>(new VarianteComp(keyword));
         if (alterations != null) {
             for (Alteration alteration : alterations) {
                 result.add(newTypeaheadVariant(alteration));
@@ -219,5 +214,104 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             count++;
         }
         return firstFew;
+    }
+}
+
+class GeneComp implements Comparator<TypeaheadSearchResp> {
+    private String keyword;
+
+    public GeneComp(String keyword) {
+        this.keyword = keyword.toLowerCase();
+    }
+
+    @Override
+    public int compare(TypeaheadSearchResp e1, TypeaheadSearchResp e2) {
+        Gene g1 = e1.getGene();
+        Gene g2 = e2.getGene();
+        String s1 = "";
+        String s2 = "";
+        Integer i1 = -1;
+        Integer i2 = -1;
+
+        if (StringUtils.isNumeric(this.keyword)) {
+            s1 = Integer.toString(g1.getEntrezGeneId());
+            s2 = Integer.toString(g2.getEntrezGeneId());
+        } else {
+            s1 = g1.getHugoSymbol().toLowerCase();
+            s2 = g2.getHugoSymbol().toLowerCase();
+        }
+        if (s1.equals(this.keyword)) {
+            return -1;
+        }
+        if (s2.equals(this.keyword)) {
+            return 1;
+        }
+
+        i1 = s1.indexOf(this.keyword);
+        i2 = s2.indexOf(this.keyword);
+
+        if (i1.equals(i2) && i1.equals(-1)) {
+            Integer i1Alias = 100;
+            Integer i2Alias = 100;
+            Integer index = -1;
+            for (String geneAlias : g1.getGeneAliases()) {
+                index = geneAlias.toLowerCase().indexOf(this.keyword);
+                if (index > -1 && index < i1Alias) {
+                    i1Alias = index;
+                }
+            }
+
+            index = -1;
+            for (String geneAlias : g2.getGeneAliases()) {
+                index = geneAlias.toLowerCase().indexOf(this.keyword);
+                if (index > -1 && index < i2Alias) {
+                    i2Alias = index;
+                }
+            }
+            if (i1Alias.equals(-1))
+                return 1;
+            if (i2Alias.equals(-1))
+                return -1;
+            return -1;
+        } else {
+            if (i1.equals(-1))
+                return 1;
+            if (i2.equals(-1))
+                return -1;
+            if (i1.equals(i2)) {
+                return s1.compareTo(s2);
+            } else {
+                return i1 - i2;
+            }
+        }
+    }
+}
+
+class VarianteComp implements Comparator<TypeaheadSearchResp> {
+    private String keyword;
+
+    public VarianteComp(String keyword) {
+        this.keyword = keyword.toLowerCase();
+    }
+
+    @Override
+    public int compare(TypeaheadSearchResp e1, TypeaheadSearchResp e2) {
+        String name1 = e1.getVariant().getAlteration().toLowerCase();
+        String name2 = e2.getVariant().getAlteration().toLowerCase();
+        if (e1.getVariant().getName() != null && e2.getVariant().getName() != null) {
+            name1 = e1.getVariant().getName().toLowerCase();
+            name2 = e2.getVariant().getName().toLowerCase();
+        }
+        Integer index1 = name1.indexOf(this.keyword);
+        Integer index2 = name2.indexOf(this.keyword);
+        if (index1.equals(index2)) {
+            return name1.compareTo(name2);
+        } else {
+            if (index1.equals(-1))
+                return 1;
+            if (index2.equals(-1))
+                return -1;
+            return index1 - index2;
+        }
     }
 }
