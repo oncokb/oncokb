@@ -523,9 +523,9 @@ public final class AlterationUtils {
         return alleles;
     }
 
-    public static List<Alteration> lookupVarinat(String query, Boolean exactMatch, Set<Alteration> alterations) {
+    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Set<Alteration> alterations) {
         List<Alteration> alterationList = new ArrayList<>();
-        // Only support variant blur search for now.
+        // Only support columns(alteration/name) blur search.
         query = query.toLowerCase().trim();
         if (exactMatch == null)
             exactMatch = false;
@@ -533,36 +533,33 @@ public final class AlterationUtils {
             return alterationList;
         query = query.trim().toLowerCase();
         for (Alteration alteration : alterations) {
-            if (alteration.getAlteration() != null) {
-                if (exactMatch) {
-                    if (alteration.getAlteration().toLowerCase().equals(query)) {
-                        alterationList.add(alteration);
-                        continue;
-                    }
-                } else {
-                    if (alteration.getAlteration().toLowerCase().contains(query)) {
-                        alterationList.add(alteration);
-                        continue;
-                    }
-                }
+            if(isMatch(exactMatch, query, alteration.getAlteration())) {
+                alterationList.add(alteration);
+                continue;
             }
-            if (alteration.getName() != null) {
-                if (exactMatch) {
-                    if (alteration.getName().toLowerCase().equals(query)) {
-                        alterationList.add(alteration);
-                        continue;
-                    }
-                } else {
-                    if (alteration.getName().toLowerCase().contains(query)) {
-                        alterationList.add(alteration);
-                        continue;
-                    }
-                }
+
+            if(isMatch(exactMatch, query, alteration.getName())) {
+                alterationList.add(alteration);
+                continue;
             }
         }
         return alterationList;
     }
 
+    private static Boolean isMatch(Boolean exactMatch, String query, String string) {
+        if (string != null) {
+            if (exactMatch) {
+                if (string.toLowerCase().equals(query)) {
+                    return true;
+                }
+            } else {
+                if (string.toLowerCase().contains(query)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     // Sort the alternative alleles alphabetically
     private static void sortAlternativeAlleles(List<Alteration> alternativeAlleles) {
         Collections.sort(alternativeAlleles, new Comparator<Alteration>() {

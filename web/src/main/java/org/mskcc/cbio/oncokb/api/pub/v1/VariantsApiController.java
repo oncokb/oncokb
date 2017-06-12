@@ -54,7 +54,7 @@ public class VariantsApiController implements VariantsApi {
                 }
             }
         } else if (variant != null) {
-            alterationList = AlterationUtils.lookupVarinat(variant, false, AlterationUtils.getAllAlterations());
+            alterationList = AlterationUtils.lookupVariant(variant, false, AlterationUtils.getAllAlterations());
         }
 
         return new ResponseEntity<>(alterationList, HttpStatus.OK);

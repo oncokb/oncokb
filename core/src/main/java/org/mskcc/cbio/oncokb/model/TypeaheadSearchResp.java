@@ -10,6 +10,7 @@ public class TypeaheadSearchResp {
     private String highestLevelOfSensitivity;
     private String highestLevelOfResistance;
     private Boolean variantExist;
+    private String annotation;
     private String queryType;
     private String link;
 
@@ -53,6 +54,14 @@ public class TypeaheadSearchResp {
         this.highestLevelOfResistance = highestLevelOfResistance;
     }
 
+    public String getAnnotation() {
+        return annotation;
+    }
+
+    public void setAnnotation(String annotation) {
+        this.annotation = annotation;
+    }
+
     public Boolean getVariantExist() {
         return variantExist;
     }
@@ -94,6 +103,8 @@ public class TypeaheadSearchResp {
             return false;
         if (getVariantExist() != null ? !getVariantExist().equals(that.getVariantExist()) : that.getVariantExist() != null)
             return false;
+        if (getAnnotation() != null ? !getAnnotation().equals(that.getAnnotation()) : that.getAnnotation() != null)
+            return false;
         if (getQueryType() != null ? !getQueryType().equals(that.getQueryType()) : that.getQueryType() != null)
             return false;
         return getLink() != null ? getLink().equals(that.getLink()) : that.getLink() == null;
@@ -107,6 +118,7 @@ public class TypeaheadSearchResp {
         result = 31 * result + (getHighestLevelOfSensitivity() != null ? getHighestLevelOfSensitivity().hashCode() : 0);
         result = 31 * result + (getHighestLevelOfResistance() != null ? getHighestLevelOfResistance().hashCode() : 0);
         result = 31 * result + (getVariantExist() != null ? getVariantExist().hashCode() : 0);
+        result = 31 * result + (getAnnotation() != null ? getAnnotation().hashCode() : 0);
         result = 31 * result + (getQueryType() != null ? getQueryType().hashCode() : 0);
         result = 31 * result + (getLink() != null ? getLink().hashCode() : 0);
         return result;

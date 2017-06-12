@@ -92,7 +92,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false), keywords.get(0)));
 
                 // Blur search variant
-                result.addAll(convertVariant(AlterationUtils.lookupVarinat(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
+                result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
             } else if (keywords.size() == 2) {
                 // Assume one of the keyword is gene
                 Map<String, Set<Gene>> map = new HashedMap();
@@ -104,6 +104,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 result.addAll(getMatch(map, keywords, true));
                 result.addAll(getMatch(map, keywords, false));
 
+                // If there is no match in OncoKB database, still try to annotate variant
                 if (result.size() == 0) {
                     for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
                         if (entry.getValue().size() > 0) {
@@ -140,7 +141,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
                     for (String keyword : keywords) {
                         if (!keyword.equals(entry.getKey()))
-                            result.addAll(convertVariant(AlterationUtils.lookupVarinat(keyword, exactMatch, alterations), keyword));
+                            result.addAll(convertVariant(AlterationUtils.lookupVariant(keyword, exactMatch, alterations), keyword));
                     }
                 }
             }
@@ -186,7 +187,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
 
-        // Not ready populate treatment info yet.
+        typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
+        // TODO: populate treatment info.
 //        Set<Evidence> evidences = EvidenceUtils.getRelevantEvidences(query, null, null, MainUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
 //        if (!evidences.isEmpty()) {
 //            Map<String, LevelOfEvidence> highestLevels = IndicatorUtils.findHighestLevelByEvidences(evidences);
@@ -199,7 +201,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 //        }
 
         typeaheadSearchResp.setQueryType("variant");
-        typeaheadSearchResp.setLink("/genes/" + alteration.getGene().getHugoSymbol() + "/variants/" + alteration.getAlteration());
+
+        // TODO: switch to variant page once it's ready.
+        typeaheadSearchResp.setLink("/genes/" + alteration.getGene().getHugoSymbol());
         return typeaheadSearchResp;
     }
 
@@ -226,6 +230,12 @@ class GeneComp implements Comparator<TypeaheadSearchResp> {
 
     @Override
     public int compare(TypeaheadSearchResp e1, TypeaheadSearchResp e2) {
+        if (e1 == null || e1.getGene() == null) {
+            return 1;
+        }
+        if (e2 == null || e2.getGene() == null) {
+            return -1;
+        }
         Gene g1 = e1.getGene();
         Gene g2 = e2.getGene();
         String s1 = "";
@@ -296,6 +306,12 @@ class VarianteComp implements Comparator<TypeaheadSearchResp> {
 
     @Override
     public int compare(TypeaheadSearchResp e1, TypeaheadSearchResp e2) {
+        if (e1 == null || e1.getVariant() == null) {
+            return 1;
+        }
+        if (e2 == null || e2.getVariant() == null) {
+            return -1;
+        }
         String name1 = e1.getVariant().getAlteration().toLowerCase();
         String name2 = e2.getVariant().getAlteration().toLowerCase();
         if (e1.getVariant().getName() != null && e2.getVariant().getName() != null) {
