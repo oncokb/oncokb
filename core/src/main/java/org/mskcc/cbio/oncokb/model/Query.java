@@ -56,7 +56,7 @@ public class Query implements java.io.Serializable {
     public Query(String hugoSymbol, String alteration, String tumorType) {
         this.hugoSymbol = hugoSymbol;
         this.alteration = alteration;
-        this.tumorType = tumorType;
+        this.setTumorType(tumorType);
     }
 
     public Query(String id, String type, Integer entrezGeneId, String hugoSymbol, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
@@ -68,7 +68,7 @@ public class Query implements java.io.Serializable {
         this.entrezGeneId = entrezGeneId;
         this.alteration = alteration;
         this.alterationType = alterationType;
-        this.tumorType = tumorType;
+        this.setTumorType(tumorType);
         this.consequence = consequence;
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
@@ -127,6 +127,9 @@ public class Query implements java.io.Serializable {
     }
 
     public void setTumorType(String tumorType) {
+        if (tumorType != null) {
+            tumorType = tumorType.trim();
+        }
         this.tumorType = tumorType;
     }
 
