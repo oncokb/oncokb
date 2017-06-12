@@ -236,64 +236,7 @@ class GeneComp implements Comparator<TypeaheadSearchResp> {
         if (e2 == null || e2.getGene() == null) {
             return -1;
         }
-        Gene g1 = e1.getGene();
-        Gene g2 = e2.getGene();
-        String s1 = "";
-        String s2 = "";
-        Integer i1 = -1;
-        Integer i2 = -1;
-
-        if (StringUtils.isNumeric(this.keyword)) {
-            s1 = Integer.toString(g1.getEntrezGeneId());
-            s2 = Integer.toString(g2.getEntrezGeneId());
-        } else {
-            s1 = g1.getHugoSymbol().toLowerCase();
-            s2 = g2.getHugoSymbol().toLowerCase();
-        }
-        if (s1.equals(this.keyword)) {
-            return -1;
-        }
-        if (s2.equals(this.keyword)) {
-            return 1;
-        }
-
-        i1 = s1.indexOf(this.keyword);
-        i2 = s2.indexOf(this.keyword);
-
-        if (i1.equals(i2) && i1.equals(-1)) {
-            Integer i1Alias = 100;
-            Integer i2Alias = 100;
-            Integer index = -1;
-            for (String geneAlias : g1.getGeneAliases()) {
-                index = geneAlias.toLowerCase().indexOf(this.keyword);
-                if (index > -1 && index < i1Alias) {
-                    i1Alias = index;
-                }
-            }
-
-            index = -1;
-            for (String geneAlias : g2.getGeneAliases()) {
-                index = geneAlias.toLowerCase().indexOf(this.keyword);
-                if (index > -1 && index < i2Alias) {
-                    i2Alias = index;
-                }
-            }
-            if (i1Alias.equals(-1))
-                return 1;
-            if (i2Alias.equals(-1))
-                return -1;
-            return -1;
-        } else {
-            if (i1.equals(-1))
-                return 1;
-            if (i2.equals(-1))
-                return -1;
-            if (i1.equals(i2)) {
-                return s1.compareTo(s2);
-            } else {
-                return i1 - i2;
-            }
-        }
+        return GeneUtils.compareGenesByKeyword(e1.getGene(), e2.getGene(), this.keyword);
     }
 }
 
@@ -321,7 +264,12 @@ class VarianteComp implements Comparator<TypeaheadSearchResp> {
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
         if (index1.equals(index2)) {
-            return name1.compareTo(name2);
+            Integer result = name1.compareTo(name2);
+            if(result == 0) {
+                return GeneUtils.compareGenesByKeyword(e1.getGene(), e2.getGene(), this.keyword);
+            }else{
+                return result;
+            }
         } else {
             if (index1.equals(-1))
                 return 1;
