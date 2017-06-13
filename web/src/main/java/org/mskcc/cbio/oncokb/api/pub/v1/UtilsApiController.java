@@ -185,7 +185,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<CancerGene>> utilsCancerGeneListTxtGet() {
+    public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet() {
         List<CancerGene> result = CancerGeneUtils.getCancerGeneList();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

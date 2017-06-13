@@ -8,12 +8,12 @@ public class CancerGene {
     private String entrezGeneId;
     private Boolean oncokbAnnotated;
     private Integer occurrenceCount;
-    private Boolean MSKImpact;
-    private Boolean MSKHeme;
+    private Boolean mSKImpact;
+    private Boolean mSKHeme;
     private Boolean foundation;
     private Boolean foundationHeme;
-    private Boolean Vogelstein;
-    private Boolean SangerCGC;
+    private Boolean vogelstein;
+    private Boolean sangerCGC;
 
     public String getHugoSymbol() {
         return hugoSymbol;
@@ -47,20 +47,20 @@ public class CancerGene {
         this.occurrenceCount = occurrenceCount;
     }
 
-    public Boolean getMSKImpact() {
-        return MSKImpact;
+    public Boolean getmSKImpact() {
+        return mSKImpact;
     }
 
-    public void setMSKImpact(Boolean MSKImpact) {
-        this.MSKImpact = MSKImpact;
+    public void setmSKImpact(Boolean mSKImpact) {
+        this.mSKImpact = mSKImpact;
     }
 
-    public Boolean getMSKHeme() {
-        return MSKHeme;
+    public Boolean getmSKHeme() {
+        return mSKHeme;
     }
 
-    public void setMSKHeme(Boolean MSKHeme) {
-        this.MSKHeme = MSKHeme;
+    public void setmSKHeme(Boolean mSKHeme) {
+        this.mSKHeme = mSKHeme;
     }
 
     public Boolean getFoundation() {
@@ -80,18 +80,18 @@ public class CancerGene {
     }
 
     public Boolean getVogelstein() {
-        return Vogelstein;
+        return vogelstein;
     }
 
     public void setVogelstein(Boolean vogelstein) {
-        Vogelstein = vogelstein;
+        this.vogelstein = vogelstein;
     }
 
     public Boolean getSangerCGC() {
-        return SangerCGC;
+        return sangerCGC;
     }
 
     public void setSangerCGC(Boolean sangerCGC) {
-        SangerCGC = sangerCGC;
+        this.sangerCGC = sangerCGC;
     }
 }

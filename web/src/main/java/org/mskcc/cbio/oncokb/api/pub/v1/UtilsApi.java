@@ -52,5 +52,5 @@ public interface UtilsApi {
             @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/cancerGeneList",
             method = RequestMethod.GET)
-    ResponseEntity<List<CancerGene>> utilsCancerGeneListTxtGet();
+    ResponseEntity<List<CancerGene>> utilsCancerGeneListGet();
 }
