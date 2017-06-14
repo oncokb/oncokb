@@ -1615,10 +1615,37 @@ angular.module('oncokbApp')
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     removeUUIDs(tempUUIDs);
                 });
+            };
+            function clearRollbackLastReview(reviewObjs) {
+                _.each(reviewObjs, function(reviewObj) {
+                    if (reviewObj.get('rollback') === true) {
+                        reviewObj.delete('lastReviewed');
+                    }
+                });
+            }
+            function clearUnnecessartLastReviewed() {
+                clearRollbackLastReview([$scope.gene.summary_review, $scope.gene.type_review, $scope.gene.background_review]);
+                for (var i = 0; i < $scope.gene.mutations.length; i++) {
+                    var mutation = $scope.gene.mutations.get(i);
+                    clearRollbackLastReview([mutation.name_review, mutation.oncogenic_review, mutation.effect_review, mutation.description_review]);
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors.get(j);
+                        clearRollbackLastReview([tumor.summary_review, tumor.prevalence_review, tumor.progImp_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review]);
+                        for (var k = 0; k < tumor.TI.length; k++) {
+                            var ti = tumor.TI.get(k);
+                            clearRollbackLastReview([ti.description_review]);
+                            for (var m = 0; m < ti.treatments.length; m++) {
+                                var treatment = ti.treatments.get(m);
+                                clearRollbackLastReview([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review]);
+
+                            }
+                        }
+                    }
+                }
             }
             $scope.updateGene = function() {
                 $scope.docStatus.savedGene = false;
-
+                clearUnnecessartLastReviewed();
                 var gene = stringUtils.getGeneData(this.gene, true, true, true, true);
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
