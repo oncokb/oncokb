@@ -247,16 +247,21 @@ angular.module('oncokbApp')
                     if ($scope.reviewObj.get('action')) {
                         return;
                     }
-                    var evidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+
                     if ($scope.adjustedEvidenceType === 'GENE_TYPE') {
                         var params = {
                             hugoSymbol: $scope.obj.name.getText(),
                             oncogene: $scope.obj.type.get('OCG').trim().length > 0,
                             tsg: $scope.obj.type.get('TSG').trim().length > 0
                         };
+                        var historyData = [{
+                            lastEditBy: $scope.obj.type_review.get('updatedBy'),
+                            operationName: 'update',
+                            uuids: $scope.obj.type_uuid.getText()
+                        }];
                         if ($rootScope.isDesiredGene) {
                             $scope.loading = true;
-                            DatabaseConnector.updateGeneType($scope.obj.name.getText(), params, function(result) {
+                            DatabaseConnector.updateGeneType($scope.obj.name.getText(), params, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                                 $scope.loading = false;
                             }, function(error) {
@@ -269,8 +274,11 @@ angular.module('oncokbApp')
                         }
                     } else {
                         if($rootScope.isDesiredGene) {
+                            var getEvidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+                            var evidences = getEvidenceResult.evidences;
+                            var historyData = [getEvidenceResult.historyData];
                             $scope.loading = true;
-                            DatabaseConnector.updateEvidenceBatch(evidenceResult, function(result) {
+                            DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                                 $scope.loading = false;
                             }, function(error) {

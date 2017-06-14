@@ -4,6 +4,7 @@ angular.module('oncokbApp')
     .factory('DatabaseConnector', [
         '$timeout',
         '$q',
+        '$rootScope',
         'config',
         'Gene',
         'Alteration',
@@ -20,8 +21,10 @@ angular.module('oncokbApp')
         'InternalAccess',
         'ApiUtils',
         'PrivateApiUtils',
+        'user',
         function($timeout,
                  $q,
+                 $rootScope,
                  config,
                  Gene,
                  Alteration,
@@ -37,7 +40,8 @@ angular.module('oncokbApp')
                  OncoTree,
                  InternalAccess,
                  ApiUtils,
-                 PrivateApiUtils) {
+                 PrivateApiUtils,
+                 user) {
             var numOfLocks = {};
             var data = {};
 
@@ -278,7 +282,7 @@ angular.module('oncokbApp')
                 }
             }
 
-            function updateGeneType(hugoSymbol, data, success, fail) {
+            function updateGeneType(hugoSymbol, data, historyData, success, fail) {
                 if (dataFromFile) {
                     success('');
                 } else {
@@ -286,6 +290,7 @@ angular.module('oncokbApp')
                         .updateGeneType(hugoSymbol, data)
                         .success(function(data) {
                             success(data);
+                            updateHistory(historyData);
                         })
                         .error(function() {
                             fail();
@@ -354,6 +359,7 @@ angular.module('oncokbApp')
                     });
             }
             function deleteEvidences(data, success, fail) {
+            function deleteEvidences(data, historyData, success, fail) {
                 if (dataFromFile) {
                     success('');
                 } else {
@@ -361,6 +367,7 @@ angular.module('oncokbApp')
                         .deleteEvidences(data)
                         .success(function(data) {
                             success(data);
+                            updateHistory(historyData);
                         })
                         .error(function() {
                             fail();
@@ -379,7 +386,7 @@ angular.module('oncokbApp')
                     });
             }
 
-            function updateEvidenceBatch(data, success, fail) {
+            function updateEvidenceBatch(data, historyData, success, fail) {
                 if (dataFromFile) {
                     success('');
                 } else {
@@ -387,6 +394,7 @@ angular.module('oncokbApp')
                         .updateEvidenceBatch(data)
                         .success(function(data) {
                             success(data);
+                            updateHistory(historyData);
                         })
                         .error(function() {
                             fail();
@@ -645,6 +653,33 @@ angular.module('oncokbApp')
                         });
                 }
                 return deferred.promise;
+            }
+
+            function updateHistory(historyData) {
+                var apiHistory = $rootScope.model.getRoot().get('history').get('api');
+                if (!apiHistory || !_.isArray(Array.from(apiHistory))) {
+                    apiHistory = [];
+                } else {
+                    apiHistory = Array.from(apiHistory);
+                }
+                if (apiHistory.length > 3000) {
+                    // send email to the oncokb dev account with the oldest 500 records
+                    var historyToRemove = apiHistory.splice(0, 500);
+                    sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: 'OncoKB Review History', content: JSON.stringify(historyToRemove)},
+                        function(result) {
+                            console.log('sent old history to oncokb dev account');
+                        },
+                        function(error) {
+                            console.log('fail to send old history to oncokb dev account', error);
+                        }
+                    );
+                }
+                apiHistory.push({
+                    admin: user.name,
+                    timeStamp: new Date().getTime(),
+                    records: historyData
+                });
+                $rootScope.model.getRoot().get('history').set('api', apiHistory);
             }
 
             // Public API here
