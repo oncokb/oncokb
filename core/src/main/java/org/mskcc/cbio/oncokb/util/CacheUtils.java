@@ -437,7 +437,6 @@ public class CacheUtils {
     }
 
     public static void setVariantTumorTypeSummary(Integer entrezGeneId, String key, String summary) {
-        System.out.println(key + " "  + summary);
         if (!variantTumorTypeSummary.containsKey(entrezGeneId)) {
             variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, String>());
         }

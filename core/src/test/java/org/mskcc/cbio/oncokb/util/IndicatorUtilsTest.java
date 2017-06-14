@@ -194,7 +194,7 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level is not 2A, but it should be.", LevelOfEvidence.LEVEL_2A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
 
     }
