@@ -120,7 +120,6 @@ angular.module('oncokbApp')
                                         if (scope.reviewMode) {
                                             scope.reviewObj.set('rollback', true);
                                         }
-                                        scope.reviewObj.delete('lastReviewed');
                                         scope.reviewObj.delete('updatedBy');
                                     } else {
                                         tempMapping.set('review', true);
@@ -134,7 +133,6 @@ angular.module('oncokbApp')
                                         if (scope.reviewMode) {
                                             scope.reviewObj.set('rollback', true);
                                         }
-                                        scope.reviewObj.delete('lastReviewed');
                                         scope.reviewObj.delete('updatedBy');
                                     }
                                 }

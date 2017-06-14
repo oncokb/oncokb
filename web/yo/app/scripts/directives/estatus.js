@@ -18,11 +18,6 @@ angular.module('oncokbApp')
             },
             replace: true,
             link: function postLink(scope, element) {
-                $rootScope.$watch('reviewMode', function(n, o) {
-                    if(n !== o) {
-                        scope.display = ($rootScope.userRole === 8 && !n);
-                    }
-                });
                 scope.mouseLeaveTimeout = '';
                 scope.checkboxes = [{
                     display: 'Unvetted',

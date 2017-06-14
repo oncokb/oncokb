@@ -280,6 +280,9 @@ angular.module('oncokbApp')
             $scope.displayCheck = function(uuid, reviewObj, mutationReview, tumorReview, treatmentReview, precise) {
                 // regular mode check
                 if (!$rootScope.reviewMode) {
+                    if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8 && !mutationReview) {
+                        $scope.geneEditable = false;
+                    }
                     if (mutationReview && mutationReview.get('removed') || tumorReview && tumorReview.get('removed') || treatmentReview && treatmentReview.get('removed')) {
                         return false;
                     }
@@ -326,6 +329,9 @@ angular.module('oncokbApp')
                 }
             };
             function resetReview(reviewObj) {
+                if (reviewObj.get('rollback') === true) {
+                    reviewObj.delete('lastReviewed');
+                }
                 reviewObj.delete('review');
                 reviewObj.delete('action');
                 reviewObj.delete('rollback');
@@ -3428,6 +3434,11 @@ angular.module('oncokbApp')
             } else {
                 $scope.status.hideAllObsolete = true;
             }
+            $scope.$watch('fileEditable', function(n, o) {
+                if (n !== o) {
+                    $scope.geneEditable = n;
+                }
+            });
 
             $scope.$watch('status.hideAllEmpty', function(n, o) {
                 if (n !== o) {
