@@ -66,7 +66,8 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.panelExist = function() {
-                    if ($scope.reviewObj.get('removedItem') || $scope.reviewObj.get('addedItem')) {
+                    if ($scope.reviewObj.get('removed') !== true && $scope.reviewObj.get('removedItem') ||
+                        $scope.reviewObj.get('added') !== true && $scope.reviewObj.get('addedItem')) {
                         return false;
                     }
                     var sectionResult = {
