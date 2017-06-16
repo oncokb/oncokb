@@ -12,7 +12,8 @@ public class GeneNumber {
     private Gene gene = null;
     private Integer alteration = null;
     private Integer tumorType = null;
-    private String highestLevel = null;
+    private String highestSensitiveLevel = null;
+    private String highestResistanceLevel = null;
 
     /**
      **/
@@ -52,40 +53,49 @@ public class GeneNumber {
     }
 
 
-    /**
-     **/
-    @ApiModelProperty(value = "")
-    @JsonProperty("highestLevel")
-    public String getHighestLevel() {
-        return highestLevel;
+    public String getHighestSensitiveLevel() {
+        return highestSensitiveLevel;
     }
 
-    public void setHighestLevel(String highestLevel) {
-        this.highestLevel = highestLevel;
+    public void setHighestSensitiveLevel(String highestSensitiveLevel) {
+        this.highestSensitiveLevel = highestSensitiveLevel;
     }
 
+    public String getHighestResistenceLevel() {
+        return highestResistanceLevel;
+    }
+
+    public void setHighestResistenceLevel(String highestResistanceLevel) {
+        this.highestResistanceLevel = highestResistanceLevel;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof GeneNumber)) return false;
 
         GeneNumber that = (GeneNumber) o;
 
-        if (gene != null ? !gene.equals(that.gene) : that.gene != null) return false;
-        if (alteration != null ? !alteration.equals(that.alteration) : that.alteration != null) return false;
-        if (tumorType != null ? !tumorType.equals(that.tumorType) : that.tumorType != null) return false;
-        if (highestLevel != null ? !highestLevel.equals(that.highestLevel) : that.highestLevel != null) return false;
+        if (getGene() != null ? !getGene().equals(that.getGene()) : that.getGene() != null) return false;
+        if (getAlteration() != null ? !getAlteration().equals(that.getAlteration()) : that.getAlteration() != null)
+            return false;
+        if (getTumorType() != null ? !getTumorType().equals(that.getTumorType()) : that.getTumorType() != null)
+            return false;
+        if (getHighestSensitiveLevel() != null ? !getHighestSensitiveLevel().equals(that.getHighestSensitiveLevel()) : that.getHighestSensitiveLevel() != null)
+            return false;
+        if (getHighestResistenceLevel() != null ? !getHighestResistenceLevel().equals(that.getHighestResistenceLevel()) : that.getHighestResistenceLevel() != null)
+            return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = gene != null ? gene.hashCode() : 0;
-        result = 31 * result + (alteration != null ? alteration.hashCode() : 0);
-        result = 31 * result + (tumorType != null ? tumorType.hashCode() : 0);
-        result = 31 * result + (highestLevel != null ? highestLevel.hashCode() : 0);
+        int result = getGene() != null ? getGene().hashCode() : 0;
+        result = 31 * result + (getAlteration() != null ? getAlteration().hashCode() : 0);
+        result = 31 * result + (getTumorType() != null ? getTumorType().hashCode() : 0);
+        result = 31 * result + (getHighestSensitiveLevel() != null ? getHighestSensitiveLevel().hashCode() : 0);
+        result = 31 * result + (getHighestResistenceLevel() != null ? getHighestResistenceLevel().hashCode() : 0);
         return result;
     }
 
@@ -95,7 +105,8 @@ public class GeneNumber {
             "gene=" + gene +
             ", alteration=" + alteration +
             ", tumorType=" + tumorType +
-            ", highestLevel='" + highestLevel + '\'' +
+            ", highestSensitiveLevel='" + highestSensitiveLevel + '\'' +
+            ", highestResistanceLevel='" + highestResistanceLevel + '\'' +
             '}';
     }
 }
