@@ -165,7 +165,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     }
 
     private TreeSet<TypeaheadSearchResp> convertVariant(List<Alteration> alterations, String keyword) {
-        TreeSet<TypeaheadSearchResp> result = new TreeSet<>(new VarianteComp(keyword));
+        TreeSet<TypeaheadSearchResp> result = new TreeSet<>(new VariantComp(keyword));
         if (alterations != null) {
             for (Alteration alteration : alterations) {
                 result.add(newTypeaheadVariant(alteration));
@@ -240,10 +240,10 @@ class GeneComp implements Comparator<TypeaheadSearchResp> {
     }
 }
 
-class VarianteComp implements Comparator<TypeaheadSearchResp> {
+class VariantComp implements Comparator<TypeaheadSearchResp> {
     private String keyword;
 
-    public VarianteComp(String keyword) {
+    public VariantComp(String keyword) {
         this.keyword = keyword.toLowerCase();
     }
 
@@ -266,7 +266,7 @@ class VarianteComp implements Comparator<TypeaheadSearchResp> {
         if (index1.equals(index2)) {
             Integer result = name1.compareTo(name2);
             if(result == 0) {
-                return GeneUtils.compareGenesByKeyword(e1.getGene(), e2.getGene(), this.keyword);
+                return e1.getGene().getHugoSymbol().compareTo(e2.getGene().getHugoSymbol());
             }else{
                 return result;
             }
