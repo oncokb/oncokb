@@ -2,10 +2,15 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 /**
  * Created by hongxinzhang on 4/5/16.
  */
@@ -511,5 +516,21 @@ public class MainUtils {
     public static Boolean isVUS(Alteration alteration) {
         List<Evidence> evidenceList = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
         return !(evidenceList == null || evidenceList.isEmpty());
+    }
+
+    public static Map<String, Boolean> validateTrials(List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
+        Map<String, Boolean> result = new HashMap<>();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        for (String nctId : nctIds) {
+            String strUrl = "https://clinicaltrials.gov/show/" + nctId + "?displayxml=true";
+            try {
+                Document doc = db.parse(strUrl);
+                result.put(nctId, true);
+            } catch (IOException e) {
+                result.put(nctId, false);
+            }
+        }
+        return result;
     }
 }

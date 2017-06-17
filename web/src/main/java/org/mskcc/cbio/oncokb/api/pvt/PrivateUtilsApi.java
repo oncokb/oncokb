@@ -8,8 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,6 +72,14 @@ public interface PrivateUtilsApi {
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<Set<LevelNumber>> utilsNumbersLevelsGet();
+
+    @ApiOperation(value = "", notes = "Check if clinical trials are valid or not by nctId.", response = Map.class, tags = "Utils")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/validation/trials",
+            produces = {"application/json"},
+            method = RequestMethod.GET)
+    ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
 
 }
 

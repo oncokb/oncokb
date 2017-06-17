@@ -20,6 +20,7 @@ angular.module('oncokbApp')
                     modelValue = S(modelValue).collapseWhitespace().s;
                     var pubs = FindRegex.result(modelValue);
                     scope.pubs = pubs;
+                    FindRegex.validation(scope.pubs);
                 }
 
                 scope.pubs = [];

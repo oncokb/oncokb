@@ -343,6 +343,16 @@ angular.module('oncokbApp')
                         fail();
                     });
             }
+            function getClinicalTrial(nctId, success, fail) {
+                DriveAnnotation
+                    .getClinicalTrial(nctId)
+                    .success(function(data) {
+                        success(data);
+                    })
+                    .error(function() {
+                        fail();
+                    });
+            }
             function deleteEvidences(data, success, fail) {
                 if (dataFromFile) {
                     success('');
@@ -711,6 +721,7 @@ angular.module('oncokbApp')
                 isHotspot: isHotspot,
                 getEvidencesByUUID: getEvidencesByUUID,
                 getEvidencesByUUIDs: getEvidencesByUUIDs,
-                getPubMedArticle: getPubMedArticle
+                getPubMedArticle: getPubMedArticle,
+                getClinicalTrial: getClinicalTrial
             };
         }]);
