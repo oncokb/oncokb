@@ -49,8 +49,8 @@ public class NumberUtils {
 
             geneNumber.setGene(pair.getKey());
 
-            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getSensitiveLevels())));
-            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getResistanceLevels())));
+            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicSensitiveLevels())));
+            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicResistanceLevels())));
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
             geneNumber.setHighestResistenceLevel(highestResistanceLevel != null ? highestSensitiveLevel.name() : null);
 

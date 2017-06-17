@@ -2,7 +2,6 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
@@ -189,16 +188,16 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
         // TODO: populate treatment info.
-//        Set<Evidence> evidences = EvidenceUtils.getRelevantEvidences(query, null, null, MainUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
-//        if (!evidences.isEmpty()) {
-//            Map<String, LevelOfEvidence> highestLevels = IndicatorUtils.findHighestLevelByEvidences(evidences);
-//            if (highestLevels.get("sensitive") != null) {
-//                typeaheadSearchResp.setHighestLevelOfSensitivity(highestLevels.get("sensitive").getLevel());
-//            }
-//            if (highestLevels.get("resistant") != null) {
-//                typeaheadSearchResp.setHighestLevelOfResistance(highestLevels.get("resistant").getLevel());
-//            }
-//        }
+        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(Collections.singletonList(alteration), null, null, null));
+        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicSensitiveLevels());
+        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicResistanceLevels());
+
+        if (highestSensitiveLevel != null) {
+            typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel.getLevel());
+        }
+        if (highestResistanceLevel != null) {
+            typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel.getLevel());
+        }
 
         typeaheadSearchResp.setQueryType("variant");
 
@@ -264,12 +263,32 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
         if (index1.equals(index2)) {
-            Integer result = name1.compareTo(name2);
-            if(result == 0) {
-                return e1.getGene().getHugoSymbol().compareTo(e2.getGene().getHugoSymbol());
-            }else{
-                return result;
+            //Compare Oncogenicity. Treat YES, LIKELY, PREDICTED as the same
+            Oncogenicity o1 = Oncogenicity.getByEffect(e1.getOncogenicity());
+            Oncogenicity o2 = Oncogenicity.getByEffect(e2.getOncogenicity());
+            if (o1 != null && (o1.equals(Oncogenicity.LIKELY) || o1.equals(Oncogenicity.PREDICTED))) {
+                o1 = Oncogenicity.YES;
             }
+            if (o2 != null && (o2.equals(Oncogenicity.LIKELY) || o2.equals(Oncogenicity.PREDICTED))) {
+                o2 = Oncogenicity.YES;
+            }
+            Integer result = MainUtils.compareOncogenicity(o1, o2, true);
+            if (result == 0) {
+                // Compare highest sensitive level
+                result = LevelUtils.compareLevel(LevelOfEvidence.getByLevel(e1.getHighestSensitiveLevel()), LevelOfEvidence.getByLevel(e2.getHighestSensitiveLevel()));
+                if (result == 0) {
+                    // Compare highest resistance level
+                    result = LevelUtils.compareLevel(LevelOfEvidence.getByLevel(e1.getHighestResistanceLevel()), LevelOfEvidence.getByLevel(e2.getHighestResistanceLevel()));
+                    if (result == 0) {
+                        result = name1.compareTo(name2);
+                        if (result == 0) {
+                            // Compare gene name
+                            result = e1.getGene().getHugoSymbol().compareTo(e2.getGene().getHugoSymbol());
+                        }
+                    }
+                }
+            }
+            return result;
         } else {
             if (index1.equals(-1))
                 return 1;

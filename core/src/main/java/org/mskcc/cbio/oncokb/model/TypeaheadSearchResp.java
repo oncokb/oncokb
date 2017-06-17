@@ -7,8 +7,8 @@ public class TypeaheadSearchResp {
     private Gene gene;
     private Alteration variant;
     private String oncogenicity;
-    private String highestLevelOfSensitivity;
-    private String highestLevelOfResistance;
+    private String highestSensitiveLevel;
+    private String highestResistanceLevel;
     private Boolean variantExist;
     private String annotation;
     private String queryType;
@@ -38,20 +38,20 @@ public class TypeaheadSearchResp {
         this.oncogenicity = oncogenicity;
     }
 
-    public String getHighestLevelOfSensitivity() {
-        return highestLevelOfSensitivity;
+    public String getHighestSensitiveLevel() {
+        return highestSensitiveLevel;
     }
 
-    public void setHighestLevelOfSensitivity(String highestLevelOfSensitivity) {
-        this.highestLevelOfSensitivity = highestLevelOfSensitivity;
+    public void setHighestSensitiveLevel(String highestSensitiveLevel) {
+        this.highestSensitiveLevel = highestSensitiveLevel;
     }
 
-    public String getHighestLevelOfResistance() {
-        return highestLevelOfResistance;
+    public String getHighestResistanceLevel() {
+        return highestResistanceLevel;
     }
 
-    public void setHighestLevelOfResistance(String highestLevelOfResistance) {
-        this.highestLevelOfResistance = highestLevelOfResistance;
+    public void setHighestResistanceLevel(String highestResistanceLevel) {
+        this.highestResistanceLevel = highestResistanceLevel;
     }
 
     public String getAnnotation() {
@@ -97,9 +97,9 @@ public class TypeaheadSearchResp {
         if (getVariant() != null ? !getVariant().equals(that.getVariant()) : that.getVariant() != null) return false;
         if (getOncogenicity() != null ? !getOncogenicity().equals(that.getOncogenicity()) : that.getOncogenicity() != null)
             return false;
-        if (getHighestLevelOfSensitivity() != null ? !getHighestLevelOfSensitivity().equals(that.getHighestLevelOfSensitivity()) : that.getHighestLevelOfSensitivity() != null)
+        if (getHighestSensitiveLevel() != null ? !getHighestSensitiveLevel().equals(that.getHighestSensitiveLevel()) : that.getHighestSensitiveLevel() != null)
             return false;
-        if (getHighestLevelOfResistance() != null ? !getHighestLevelOfResistance().equals(that.getHighestLevelOfResistance()) : that.getHighestLevelOfResistance() != null)
+        if (getHighestResistanceLevel() != null ? !getHighestResistanceLevel().equals(that.getHighestResistanceLevel()) : that.getHighestResistanceLevel() != null)
             return false;
         if (getVariantExist() != null ? !getVariantExist().equals(that.getVariantExist()) : that.getVariantExist() != null)
             return false;
@@ -115,8 +115,8 @@ public class TypeaheadSearchResp {
         int result = getGene() != null ? getGene().hashCode() : 0;
         result = 31 * result + (getVariant() != null ? getVariant().hashCode() : 0);
         result = 31 * result + (getOncogenicity() != null ? getOncogenicity().hashCode() : 0);
-        result = 31 * result + (getHighestLevelOfSensitivity() != null ? getHighestLevelOfSensitivity().hashCode() : 0);
-        result = 31 * result + (getHighestLevelOfResistance() != null ? getHighestLevelOfResistance().hashCode() : 0);
+        result = 31 * result + (getHighestSensitiveLevel() != null ? getHighestSensitiveLevel().hashCode() : 0);
+        result = 31 * result + (getHighestResistanceLevel() != null ? getHighestResistanceLevel().hashCode() : 0);
         result = 31 * result + (getVariantExist() != null ? getVariantExist().hashCode() : 0);
         result = 31 * result + (getAnnotation() != null ? getAnnotation().hashCode() : 0);
         result = 31 * result + (getQueryType() != null ? getQueryType().hashCode() : 0);

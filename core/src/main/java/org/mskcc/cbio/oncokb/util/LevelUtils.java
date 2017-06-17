@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 
@@ -128,6 +129,14 @@ public class LevelUtils {
 
     public static Set<LevelOfEvidence> getPublicLevels() {
         return new HashSet<>(PUBLIC_LEVELS);
+    }
+
+    public static Set<LevelOfEvidence> getPublicSensitiveLevels() {
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, SENSITIVE_LEVELS));
+    }
+
+    public static Set<LevelOfEvidence> getPublicResistanceLevels() {
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, RESISTANCE_LEVELS));
     }
 
     public static Set<LevelOfEvidence> getPublicAndOtherIndicationLevels() {
