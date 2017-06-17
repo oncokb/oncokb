@@ -15,6 +15,7 @@ public class HttpUtils {
             retry = false;
         }
         if (url != null) {
+            url = url.replaceAll(" ", "%20");
             try {
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
