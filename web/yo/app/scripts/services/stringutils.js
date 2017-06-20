@@ -873,11 +873,11 @@ angular.module('oncokbApp')
 
         // get history data
         function getHistoryData(history) {
-            if (history && history.has('api')) {
-                return {'api': Array.from(history.get('api'))};
-            } else {
-                return {};
-            }
+            var result = {};
+            _.each(history.keys(), function(key) {
+                result[key] = history.get(key);
+            });
+            return result;
         }
 
         // Only return last edit info
