@@ -348,15 +348,18 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             var queue = realtime.getModel().getRoot().get('queue');
+                            var history = realtime.getModel().getRoot().get('history');
                             if (gene) {
                                 var geneData = stringUtils.getGeneData(gene);
                                 var vusData = stringUtils.getVUSFullData(vus);
                                 var queueData = stringUtils.getQueueData(queue);
+                                var historyData = stringUtils.getHistoryData(history);
                                 storage.getRealtimeDocument(file.id).then(function(newRealtime) {
                                     var model = createModel(newRealtime.getModel());
                                     var geneModel = model.getRoot().get('gene');
                                     var vusModel = model.getRoot().get('vus');
                                     var queueModel = model.getRoot().get('queue');
+                                    var historyModel = model.getRoot().get('history');
                                     model.beginCompoundOperation();
                                     for (var key in geneData) {
                                         if (geneModel[key]) {
@@ -374,6 +377,10 @@ angular.module('oncokbApp')
                                         _.each(queueData, function(queueItem) {
                                             createQueueItem(queueItem, queueModel, newRealtime.getModel());
                                         });
+                                    }
+
+                                    if (!_.isEmpty(historyData)) {
+                                        historyModel.set('api', historyData.api);
                                     }
                                     model.endCompoundOperation();
                                     console.log('\t Done.');
@@ -518,6 +525,7 @@ angular.module('oncokbApp')
             model = createGeneModel(model);
             model = createVUSModel(model);
             model = createQueueModel(model);
+            model = createHistoryModel(model);
             return model;
         }
 
@@ -541,6 +549,14 @@ angular.module('oncokbApp')
             if (!model.getRoot().get('queue')) {
                 var queue = model.createList();
                 model.getRoot().set('queue', queue);
+            }
+            return model;
+        }
+
+        function createHistoryModel(model) {
+            if (!model.getRoot().get('history')) {
+                var history = model.createMap();
+                model.getRoot().set('history', history);
             }
             return model;
         }
