@@ -151,12 +151,20 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     private TreeSet<TypeaheadSearchResp> convertGene(Set<Gene> genes, String keyword) {
         TreeSet<TypeaheadSearchResp> result = new TreeSet<>(new GeneComp(keyword));
         if (genes != null) {
+            Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
             for (Gene gene : genes) {
                 TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
                 typeaheadSearchResp.setGene(gene);
                 typeaheadSearchResp.setVariantExist(false);
                 typeaheadSearchResp.setLink("/genes/" + gene.getHugoSymbol());
                 typeaheadSearchResp.setQueryType("gene");
+
+                if (evidences.containsKey(gene)) {
+                    LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getPublicSensitiveLevels());
+                    LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getPublicResistanceLevels());
+                    typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel == null ? "" : highestSensitiveLevel.getLevel());
+                    typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
+                }
                 result.add(typeaheadSearchResp);
             }
         }
@@ -185,10 +193,11 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
-
+        typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
         // TODO: populate treatment info.
-        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(Collections.singletonList(alteration), null, null, null));
+
+        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(alteration), null, null, null));
         LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicSensitiveLevels());
         LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicResistanceLevels());
 

@@ -10,6 +10,7 @@ public class TypeaheadSearchResp {
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
     private Boolean variantExist;
+    private Boolean isVUS;
     private String annotation;
     private String queryType;
     private String link;
@@ -86,6 +87,14 @@ public class TypeaheadSearchResp {
         this.link = link;
     }
 
+    public Boolean getVUS() {
+        return isVUS;
+    }
+
+    public void setVUS(Boolean VUS) {
+        isVUS = VUS;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,6 +112,7 @@ public class TypeaheadSearchResp {
             return false;
         if (getVariantExist() != null ? !getVariantExist().equals(that.getVariantExist()) : that.getVariantExist() != null)
             return false;
+        if (isVUS != null ? !isVUS.equals(that.isVUS) : that.isVUS != null) return false;
         if (getAnnotation() != null ? !getAnnotation().equals(that.getAnnotation()) : that.getAnnotation() != null)
             return false;
         if (getQueryType() != null ? !getQueryType().equals(that.getQueryType()) : that.getQueryType() != null)
@@ -118,6 +128,7 @@ public class TypeaheadSearchResp {
         result = 31 * result + (getHighestSensitiveLevel() != null ? getHighestSensitiveLevel().hashCode() : 0);
         result = 31 * result + (getHighestResistanceLevel() != null ? getHighestResistanceLevel().hashCode() : 0);
         result = 31 * result + (getVariantExist() != null ? getVariantExist().hashCode() : 0);
+        result = 31 * result + (isVUS != null ? isVUS.hashCode() : 0);
         result = 31 * result + (getAnnotation() != null ? getAnnotation().hashCode() : 0);
         result = 31 * result + (getQueryType() != null ? getQueryType().hashCode() : 0);
         result = 31 * result + (getLink() != null ? getLink().hashCode() : 0);
