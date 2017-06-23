@@ -42,6 +42,10 @@ angular.module('oncokbApp')
                                             var vus = model.createList();
                                             model.getRoot().set('vus', vus);
                                         }
+                                        if (!model.getRoot().get('history')) {
+                                            var history = model.createMap();
+                                            model.getRoot().set('history', history);
+                                        }
                                         if (!model.getRoot().get('queue')) {
                                             var queue = model.createList();
                                             model.getRoot().set('queue', queue);
