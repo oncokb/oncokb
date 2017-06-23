@@ -42,6 +42,10 @@ angular.module('oncokbApp')
                                             var vus = model.createList();
                                             model.getRoot().set('vus', vus);
                                         }
+                                        if (!model.getRoot().get('queue')) {
+                                            var queue = model.createList();
+                                            model.getRoot().set('queue', queue);
+                                        }
                                         $q.all([getIsoform(hugoSymbol),
                                             getOncogeneTSG(hugoSymbol)])
                                             .then(function(result) {
@@ -273,10 +277,16 @@ angular.module('oncokbApp')
         function getIsoform(hugoSymbol) {
             var deferred = $q.defer();
             if (Object.keys(isoforms).length === 0) {
-                DatabaseConnector.getIsoforms()
+                $q.all([DatabaseConnector.getIsoforms(), DatabaseConnector.getIsoforms('msk')])
                     .then(function(result) {
                         if (_.isArray(result)) {
+                            var allGenes = [];
                             _.each(result, function(item) {
+                                if (_.isArray(item)) {
+                                    allGenes = allGenes.concat(item);
+                                }
+                            });
+                            _.each(allGenes, function(item) {
                                 if (_.isObject(item) &&
                                     _.isString(item.gene_name)) {
                                     isoforms[item.gene_name] = item;
