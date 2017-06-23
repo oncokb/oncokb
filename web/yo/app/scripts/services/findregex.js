@@ -131,17 +131,15 @@ angular.module('oncokbApp')
                                         var match = myRegexp.exec(item);
                                         var text;
                                         var link;
-                                        if (match === null) {
-                                            text = item;
-                                        } else {
+                                        if (match !== null) {
                                             text = match[1];
                                             link = match[2];
+                                            uniqueResultA.push({
+                                                type: 'abstract',
+                                                id: text,
+                                                link: link
+                                            });
                                         }
-                                        uniqueResultA.push({
-                                            type: 'abstract',
-                                            id: text,
-                                            link: link
-                                        });
                                     });
                                 }
                                 break;
