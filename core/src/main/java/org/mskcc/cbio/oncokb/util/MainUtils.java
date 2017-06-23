@@ -520,6 +520,9 @@ public class MainUtils {
 
     public static Map<String, Boolean> validateTrials(List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         Map<String, Boolean> result = new HashMap<>();
+        if (nctIds == null || nctIds.size() == 0) {
+            return result;
+        }
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         for (String nctId : nctIds) {

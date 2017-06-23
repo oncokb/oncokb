@@ -79,7 +79,7 @@ public interface PrivateUtilsApi {
     @RequestMapping(value = "/utils/validation/trials",
             produces = {"application/json"},
             method = RequestMethod.GET)
-    ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
+    ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCT ID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
 
 }
 

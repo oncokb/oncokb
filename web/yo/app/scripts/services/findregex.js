@@ -155,11 +155,10 @@ angular.module('oncokbApp')
         }
 
         function validation(articles) {
-            if (!_.isArray(articles) || articles.length === 0) {
-                return ;
-            }
+            var deferred = $q.defer();
             var pubmedArticles = [];
             var trials = [];
+            var abstracts = [];
             _.each(articles, function(article) {
                 switch(article.type) {
                 case 'pmid':
@@ -167,6 +166,9 @@ angular.module('oncokbApp')
                     break;
                 case 'nct':
                     trials.push(article);
+                    break;
+                case 'abstract':
+                    abstracts.push(article);
                     break;
                 }
             });
@@ -177,16 +179,16 @@ angular.module('oncokbApp')
             if(trials.length > 0) {
                 apiCalls.push(validateTrials(trials));
             }
-            if (apiCalls.length > 0) {
-                $q.all(apiCalls)
-                    .then(function(result) {
-                        articles = _.union(pubmedArticles, trials);
-                    }, function(error) {
-                        console.log('Error happened ', error);
-                    });
-            }
+            $q.all(apiCalls)
+                .then(function(result) {
+                    deferred.resolve(_.union(pubmedArticles, trials, abstracts));
+                }, function(error) {
+                    deferred.reject(error);
+                });
+            return deferred.promise;
         }
         function validatePubmed(pubmedArticles) {
+            var deferred = $q.defer();
             var pmids = _.map(pubmedArticles, function(item) {
                 return item.id;
             });
@@ -207,11 +209,14 @@ angular.module('oncokbApp')
                         });
                     }
                 }
-            }, function() {
-                console.log('error');
+                deferred.resolve(pubmedArticles);
+            }, function(error) {
+                deferred.reject(error);
             });
+            return deferred.promise;
         }
         function validateTrials(trials) {
+            var deferred = $q.defer();
             var nctIds = _.map(trials, function(item) {
                 return item.id;
             });
@@ -221,9 +226,11 @@ angular.module('oncokbApp')
                         trial.invalid = true;
                     }
                 });
+                deferred.resolve(trials);
             }, function(error) {
-                console.log('error');
+                deferred.reject(error);
             });
+            return deferred.promise;
         }
         function createTag(type, link, content) {
             var str = '';

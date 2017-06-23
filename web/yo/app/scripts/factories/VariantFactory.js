@@ -266,7 +266,11 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
         return $http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=' + validPubMedIDs.join(','));
     }
     function getClinicalTrial(nctIds) {
-        return $http.get(OncoKB.config.privateApiLink  + 'utils/validation/trials?nctIds=' + nctIds.join());
+        if (!nctIds || !_.isArray(nctIds) || nctIds.length === 0) {
+            return {};
+        } else {
+            return $http.get(OncoKB.config.privateApiLink  + 'utils/validation/trials?nctIds=' + nctIds.join());
+        }
     }
     return {
         updateGene: updateGene,
