@@ -301,8 +301,6 @@ public class SummaryUtils {
                 return synonymousSummary();
             }
 
-            isHotspot = HotspotUtils.isHotspot(exactMatchAlteration);
-
             // Find oncogenic info from exact matched variant
             List<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singletonList(exactMatchAlteration), Collections.singleton(EvidenceType.ONCOGENIC), null);
             if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
@@ -321,6 +319,8 @@ public class SummaryUtils {
                 query.getAlterationType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
+
+        isHotspot = HotspotUtils.isHotspot(alteration);
 
         if (oncogenic == null) {
             // Get oncogenic summary from alternative alleles
