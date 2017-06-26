@@ -672,26 +672,38 @@ angular.module('oncokbApp')
                     $scope.status[userName].savingAll = true;
                 }
                 collectChangesByPerson(userName);
-                var apiCalls = [];
-                if(!_.isEmpty(evidencesAllUsers[userName].geneTypeEvidence)) {
-                    apiCalls.push(geneTypeUpdate(userName));
-                }
-                if(!_.isEmpty(evidencesAllUsers[userName].updatedEvidences)) {
-                    apiCalls.push(evidenceBatchUpdate(userName));
-                }
-                if(!_.isEmpty(evidencesAllUsers[userName].deletedEvidences)) {
-                    apiCalls.push(evidenceDeleteUpdate(userName));
-                }
-                if (apiCalls.length === 0) {
-                    doneSaving(userName);
+                if ($scope.status.isDesiredGene) {
+                    var apiCalls = [];
+                    if(!_.isEmpty(evidencesAllUsers[userName].geneTypeEvidence)) {
+                        apiCalls.push(geneTypeUpdateAPI(userName));
+                    }
+                    if(!_.isEmpty(evidencesAllUsers[userName].updatedEvidences)) {
+                        apiCalls.push(evidenceBatchUpdateAPI(userName));
+                    }
+                    if(!_.isEmpty(evidencesAllUsers[userName].deletedEvidences)) {
+                        apiCalls.push(evidenceDeleteUpdateAPI(userName));
+                    }
+                    if (apiCalls.length === 0) {
+                        doneSaving(userName);
+                    } else {
+                        $q.all(apiCalls)
+                            .then(function(result) {
+                                doneSaving(userName);
+                            }, function(error) {
+                                dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                            });
+                    }
                 } else {
-                    $q.all(apiCalls)
-                        .then(function(result) {
-                            doneSaving(userName);
-                        }, function(error) {
-                            // Errors already been handled seperatly in the single api calls.
-                            console.log('Error happened ', error);
-                        });
+                    if(!_.isEmpty(evidencesAllUsers[userName].geneTypeEvidence)) {
+                        geneTypeUpdateModel();
+                    }
+                    if(!_.isEmpty(evidencesAllUsers[userName].updatedEvidences)) {
+                        evidenceBatchUpdateModel(userName);
+                    }
+                    if(!_.isEmpty(evidencesAllUsers[userName].deletedEvidences)) {
+                        evidenceDeleteUpdateModel(userName);
+                    }
+                    doneSaving(userName);
                 }
             };
             function processAddedSection(userName, type, mutation, tumor, ti, treatment) {
@@ -812,58 +824,67 @@ angular.module('oncokbApp')
                     }
                 }
             }
-            function geneTypeUpdate(userName) {
-                if ($scope.status.isDesiredGene) {
-                    var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
-                    DatabaseConnector.updateGeneType($scope.gene.name.getText(), geneTypeEvidence, function(result) {
-                        $scope.modelUpdate('GENE_TYPE', null, null, null, null);
-                    }, function(error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                    });
-                } else {
-                    $scope.modelUpdate('GENE_TYPE', null, null, null, null);
+            function geneTypeUpdateModel() {
+                $scope.modelUpdate('GENE_TYPE', null, null, null, null);
+            }
+
+            function geneTypeUpdateAPI(userName) {
+                var deferred = $q.defer();
+                var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
+                DatabaseConnector.updateGeneType($scope.gene.name.getText(), geneTypeEvidence, function(result) {
+                    geneTypeUpdateModel();
+                    deferred.resolve();
+                }, function(error) {
+                    deferred.reject(error);
+                });
+                return deferred.promise;
+            }
+
+            function evidenceBatchUpdateModel(userName) {
+                var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
+                var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
+                _.each(_.keys(updatedEvidences), function(uuid) {
+                    if ( $rootScope.geneMetaData.get(uuid) && ! $rootScope.geneMetaData.get(uuid).get('review')) {
+                        delete updatedEvidences[uuid];
+                    }
+                });
+                for (var i = 0; i < updatedEvidenceModels.length; i++) {
+                    $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
                 }
             }
 
-            function evidenceBatchUpdate(userName) {
-                var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
-                if ($scope.status.isDesiredGene) {
-                    var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
-                    _.each(_.keys(updatedEvidences), function(uuid) {
-                        if ( $rootScope.geneMetaData.get(uuid) && ! $rootScope.geneMetaData.get(uuid).get('review')) {
-                            delete updatedEvidences[uuid];
-                        }
-                    });
-                    DatabaseConnector.updateEvidenceBatch(updatedEvidences, function(result) {
-                        for (var i = 0; i < updatedEvidenceModels.length; i++) {
-                            $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
-                        }
-                    }, function(error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                    });
-                } else {
-                    for (var i = 0; i < updatedEvidenceModels.length; i++) {
-                        $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
-                    }
-                }
+            function evidenceBatchUpdateAPI(userName) {
+                var deferred = $q.defer();
+                var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
+                DatabaseConnector.updateEvidenceBatch(updatedEvidences, function(result) {
+                    evidenceBatchUpdateModel(userName);
+                    deferred.resolve();
+                }, function(error) {
+                    deferred.reject(error);
+                });
+                return deferred.promise;
             }
-            function evidenceDeleteUpdate(userName) {
+
+            function evidenceDeleteUpdateModel(userName) {
+                var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
                 var deletedEvidenceModels = evidencesAllUsers[userName].deletedEvidenceModels;
-                if ($scope.status.isDesiredGene) {
-                    var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
-                    DatabaseConnector.deleteEvidences(deletedEvidences, function(result) {
-                        _.each(deletedEvidenceModels, function(item) {
-                            removeModel(item[0], item[1], item[2], item[3], item[4], deletedEvidences);
-                        });
-                    }, function(error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                    });
-                } else {
-                    _.each(deletedEvidenceModels, function(item) {
-                        removeModel(item[0], item[1], item[2], item[3], item[4], deletedEvidences);
-                    });
-                }
+                _.each(deletedEvidenceModels, function(item) {
+                    removeModel(item[0], item[1], item[2], item[3], item[4], deletedEvidences);
+                });
             }
+
+            function evidenceDeleteUpdateAPI(userName) {
+                var deferred = $q.defer();
+                var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
+                DatabaseConnector.deleteEvidences(deletedEvidences, function(result) {
+                    evidenceDeleteUpdateModel(userName);
+                    deferred.resolve();
+                }, function(error) {
+                    deferred.reject(error);
+                });
+                return deferred.promise;
+            }
+
             $scope.getEvidence = function(type, mutation, tumor, TI, treatment) {
                 var tempReviewObjArr;
                 var tempRecentIndex;
