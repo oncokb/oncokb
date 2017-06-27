@@ -118,6 +118,8 @@ angular.module('oncokbApp')
                                                             var record = newMetaModel.createMap();
                                                             record.set('review', originalMeta.get(hugoSymbol).get(uuid).get('review'));
                                                             uuidMapping.set(uuid, record);
+                                                        } else if (uuid === 'CurationQueueArticles') {
+                                                            uuidMapping.set('CurationQueueArticles', originalMeta.get(hugoSymbol).get('CurationQueueArticles'));
                                                         }
                                                     });
                                                     newReview.set(hugoSymbol, uuidMapping);
