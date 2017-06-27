@@ -50,7 +50,7 @@ public class VariantsApiController implements VariantsApi {
                 } else {
                     AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
                     Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), variant, variantType, consequence, proteinStart, proteinEnd);
-                    alterationList.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(AlterationUtils.getAllAlterations(gene))));
+                    alterationList.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
                 }
             }
         } else if (variant != null) {

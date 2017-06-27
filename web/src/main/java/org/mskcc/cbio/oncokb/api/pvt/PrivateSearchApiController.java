@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
@@ -92,18 +93,17 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
                 // Blur search variant
                 result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
-            } else if (keywords.size() == 2) {
+            } else {
                 // Assume one of the keyword is gene
                 Map<String, Set<Gene>> map = new HashedMap();
                 for (String keyword : keywords) {
                     map.put(keyword, GeneUtils.searchGene(keyword, true));
                 }
 
-                //Find exact match
-                result.addAll(getMatch(map, keywords, true));
                 result.addAll(getMatch(map, keywords, false));
 
                 // If there is no match in OncoKB database, still try to annotate variant
+                // Only when the oncogenicity is not empty
                 if (result.size() == 0) {
                     for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
                         if (entry.getValue().size() > 0) {
@@ -115,7 +115,10 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                                         AlterationUtils.annotateAlteration(alteration, keyword);
                                         TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                         typeaheadSearchResp.setVariantExist(false);
-                                        result.add(typeaheadSearchResp);
+                                        if (typeaheadSearchResp.getOncogenicity() != null
+                                            && !typeaheadSearchResp.getOncogenicity().isEmpty()) {
+                                            result.add(typeaheadSearchResp);
+                                        }
                                     }
                                 }
                             }
@@ -137,10 +140,33 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
             if (entry.getValue().size() > 0) {
                 for (Gene gene : entry.getValue()) {
+
                     Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
-                    for (String keyword : keywords) {
-                        if (!keyword.equals(entry.getKey()))
-                            result.addAll(convertVariant(AlterationUtils.lookupVariant(keyword, exactMatch, alterations), keyword));
+                    // When more than two keywords present, the index does not matter anymore.
+                    // As long as there is match, return it.
+                    if (keywords.size() > 2) {
+                        Set<Alteration> keywordsMatches = null;
+                        for (String keyword : keywords) {
+                            if (!keyword.equals(entry.getKey())) {
+                                List<Alteration> matches = AlterationUtils.lookupVariant(keyword, exactMatch, alterations);
+                                if (matches != null) {
+                                    if (keywordsMatches == null) {
+                                        keywordsMatches = new HashSet<>();
+                                        keywordsMatches.addAll(matches);
+                                    } else {
+                                        List<Alteration> intersection = (List<Alteration>) CollectionUtils.intersection(keywordsMatches, matches);
+                                        keywordsMatches = new HashSet<>();
+                                        keywordsMatches.addAll(intersection);
+                                    }
+                                }
+                            }
+                        }
+                        result.addAll(convertVariant(new ArrayList<>(keywordsMatches), ""));
+                    } else {
+                        for (String keyword : keywords) {
+                            if (!keyword.equals(entry.getKey()))
+                                result.addAll(convertVariant(AlterationUtils.lookupVariant(keyword, exactMatch, alterations), keyword));
+                        }
                     }
                 }
             }

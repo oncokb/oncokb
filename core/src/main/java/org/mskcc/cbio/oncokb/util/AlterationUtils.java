@@ -549,11 +549,11 @@ public final class AlterationUtils {
     private static Boolean isMatch(Boolean exactMatch, String query, String string) {
         if (string != null) {
             if (exactMatch) {
-                if (string.toLowerCase().equals(query)) {
+                if (StringUtils.containsIgnoreCase(string, query)) {
                     return true;
                 }
             } else {
-                if (string.toLowerCase().contains(query)) {
+                if (StringUtils.containsIgnoreCase(string, query)) {
                     return true;
                 }
             }

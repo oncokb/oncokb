@@ -146,13 +146,16 @@ public class MainUtils {
     }
 
     public static Integer compareOncogenicity(Oncogenicity o1, Oncogenicity o2, Boolean asc) {
+        if (asc == null) {
+            asc = true;
+        }
         if (o1 == null) {
             if (o2 == null)
                 return 0;
-            return 1;
+            return asc ? 1 : -1;
         }
         if (o2 == null)
-            return -1;
+            return asc ? -1 : 1;
         return (PRIORITIZED_ONCOGENICITY.indexOf(o2) - PRIORITIZED_ONCOGENICITY.indexOf(o1)) * (asc ? 1 : -1);
     }
 

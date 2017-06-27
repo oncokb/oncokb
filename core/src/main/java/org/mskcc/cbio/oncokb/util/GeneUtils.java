@@ -108,9 +108,9 @@ public class GeneUtils {
             } else {
                 keyword = keyword.toLowerCase();
                 for (Gene gene : allGenes) {
-                    String hugoSymbol = gene.getHugoSymbol().toLowerCase();
+                    String hugoSymbol = gene.getHugoSymbol();
                     if (exactSearch) {
-                        if (hugoSymbol.equals(keyword)) {
+                        if (hugoSymbol.equalsIgnoreCase(keyword)) {
                             genes.add(gene);
                         } else {
                             for (String alias : gene.getGeneAliases()) {
@@ -217,7 +217,7 @@ public class GeneUtils {
                 return 1;
             if (i2Alias.equals(-1))
                 return -1;
-            return -1;
+            return i1Alias - i2Alias;
         } else {
             if (i1.equals(-1))
                 return 1;
