@@ -689,8 +689,8 @@ angular.module('oncokbApp')
                         .then(function(result) {
                             doneSaving(userName);
                         }, function(error) {
-                            // Errors already been handled seperatly in the single api calls.
-                            console.log('Error happened ', error);
+                            doneSaving(userName);
+                            dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                         });
                 }
             };
@@ -813,19 +813,24 @@ angular.module('oncokbApp')
                 }
             }
             function geneTypeUpdate(userName) {
+                var deferred = $q.defer();
                 if ($scope.status.isDesiredGene) {
                     var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
                     DatabaseConnector.updateGeneType($scope.gene.name.getText(), geneTypeEvidence, function(result) {
                         $scope.modelUpdate('GENE_TYPE', null, null, null, null);
+                        deferred.resolve();
                     }, function(error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                        deferred.reject(error);
                     });
                 } else {
                     $scope.modelUpdate('GENE_TYPE', null, null, null, null);
+                    deferred.resolve();
                 }
+                return deferred.promise;
             }
 
             function evidenceBatchUpdate(userName) {
+                var deferred = $q.defer();
                 var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
                 if ($scope.status.isDesiredGene) {
                     var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
@@ -838,16 +843,20 @@ angular.module('oncokbApp')
                         for (var i = 0; i < updatedEvidenceModels.length; i++) {
                             $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
                         }
+                        deferred.resolve();
                     }, function(error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                        deferred.reject(error);
                     });
                 } else {
                     for (var i = 0; i < updatedEvidenceModels.length; i++) {
                         $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
                     }
+                    deferred.resolve();
                 }
+                return deferred.promise;
             }
             function evidenceDeleteUpdate(userName) {
+                var deferred = $q.defer();
                 var deletedEvidenceModels = evidencesAllUsers[userName].deletedEvidenceModels;
                 if ($scope.status.isDesiredGene) {
                     var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
@@ -855,14 +864,17 @@ angular.module('oncokbApp')
                         _.each(deletedEvidenceModels, function(item) {
                             removeModel(item[0], item[1], item[2], item[3], item[4], deletedEvidences);
                         });
+                        deferred.resolve();
                     }, function(error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                        deferred.reject(error);
                     });
                 } else {
                     _.each(deletedEvidenceModels, function(item) {
                         removeModel(item[0], item[1], item[2], item[3], item[4], deletedEvidences);
                     });
+                    deferred.resolve();
                 }
+                return deferred.promise;
             }
             $scope.getEvidence = function(type, mutation, tumor, TI, treatment) {
                 var tempReviewObjArr;
