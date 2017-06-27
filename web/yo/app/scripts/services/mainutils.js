@@ -293,7 +293,7 @@ angular.module('oncokbApp')
                                 }
                             });
                         }
-                        return deferred.resolve(isoforms[hugoSymbol]);
+                        deferred.resolve(isoforms[hugoSymbol]);
                     }, function() {
                         deferred.reject();
                     });

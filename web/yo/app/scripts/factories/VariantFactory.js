@@ -393,7 +393,7 @@ angular.module('oncokbApp').factory('ApiUtils', ['$http', function($http) {
     'use strict';
 
     function getIsoforms(type) {
-        if (type && type === 'msk') {
+        if (type === 'msk') {
             return $http.get('data/isoformMskcc.json');
         }
         return $http.get('data/isoformUniport.json');
