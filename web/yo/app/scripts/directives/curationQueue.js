@@ -163,6 +163,7 @@ angular.module('oncokbApp')
                     $scope.validPMID = false;
                     $scope.getCuratorsList();
                     $scope.getArticleList();
+                    setArticlesNumberInMeta();
                 }
 
                 $scope.editCuration = function(index) {
@@ -226,6 +227,7 @@ angular.module('oncokbApp')
                     if (queueModelItem.get('addedAt') === queueItem.addedAt) {
                         queueModelItem.set('curated', true);
                         queueItem.curated = true;
+                        setArticlesNumberInMeta();
                     }
                 };
                 $scope.deleteCuration = function(index) {
@@ -234,6 +236,7 @@ angular.module('oncokbApp')
                         $scope.queue.splice(index, 1);
                         $scope.getCuratorsList();
                         $scope.getArticleList();
+                        setArticlesNumberInMeta();
                     }
                 };
                 $scope.getArticle = function(pmid) {
@@ -382,6 +385,15 @@ angular.module('oncokbApp')
                         return annotationLocation[x.article].join('; ');
                     }
                 };
+                function setArticlesNumberInMeta() {
+                    var count = 0;
+                    _.each($scope.queue, function(item) {
+                        if (!item.curated) {
+                            count++;
+                        }
+                    });
+                    $rootScope.geneMetaData.set('CurationQueueArticles', count);
+                }
             }
         };
     })

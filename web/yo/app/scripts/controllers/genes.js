@@ -134,18 +134,26 @@ angular.module('oncokbApp')
             function assignReviewColumn() {
                 var genes = $rootScope.metaData.keys();
                 for (var i = 0; i < genes.length; i++) {
+                    $scope.metaFlags[genes[i]] = {};
                     var geneMetaData = $rootScope.metaData.get(genes[i]);
                     var uuids = geneMetaData.keys();
                     var flag = true;
+                    var curationQueueChecked = false;
                     for (var j = 0; j < uuids.length; j++) {
                         if (geneMetaData.get(uuids[j]).type === 'Map' && geneMetaData.get(uuids[j]).get('review')) {
-                            $scope.metaFlags[genes[i]] = true;
+                            $scope.metaFlags[genes[i]].review = true;
                             flag = false;
-                            break;
+                            if (curationQueueChecked) {
+                                break;
+                            }
+                        }
+                        if (uuids[j] === 'CurationQueueArticles') {
+                            $scope.metaFlags[genes[i]].CurationQueueArticles = geneMetaData.get('CurationQueueArticles');
+                            curationQueueChecked = true;
                         }
                     }
                     if (flag) {
-                        $scope.metaFlags[genes[i]] = false;
+                        $scope.metaFlags[genes[i]].review = false;
                     }
                 }
             }
@@ -178,7 +186,7 @@ angular.module('oncokbApp')
 
             var sorting = [[2, 'asc'], [1, 'desc'], [0, 'asc']];
             if (users.getMe().role === 8) {
-                sorting = [[4, 'desc'], [1, 'desc'], [0, 'asc']];
+                sorting = [[4, 'desc'], [5, 'desc'], [1, 'desc'], [0, 'asc']];
             }
 
             $scope.dtOptions = DTOptionsBuilder
@@ -195,6 +203,7 @@ angular.module('oncokbApp')
             ];
             if (users.getMe().role === 8) {
                 $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(4));
+                $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(5));
             }
 
             $scope.status = {
