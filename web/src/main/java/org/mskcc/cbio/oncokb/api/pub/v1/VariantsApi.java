@@ -40,6 +40,7 @@ public interface VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
+        , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
     );
 
     @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List", tags = {"Variants", "Search",})

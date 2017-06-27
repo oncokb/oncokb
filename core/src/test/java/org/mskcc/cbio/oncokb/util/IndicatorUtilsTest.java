@@ -17,22 +17,22 @@ public class IndicatorUtilsTest {
         // We do not check gene/variant/tumor type summaries here. The test will be done in SummaryUtilsTest.
 
         // Gene not exists
-        Query query = new Query(null, null, null, "FGF6", "V123M", null, "Pancreatic Adenocarcinoma", null, null, null);
+        Query query = new Query(null, null, null, "FGF6", "V123M", null, "Pancreatic Adenocarcinoma", null, null, null, null);
         IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertTrue("The geneExist in the response is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
         // Oncogenic should always match with oncogenic summary, similar to likely oncogenic
-        query = new Query(null, null, null, "TP53", "R248Q", null, "Pancreatic Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "TP53", "R248Q", null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The oncogenicity is not matched in variant summary.", "The TP53 R248Q mutation is likely oncogenic.", indicatorQueryResp.getVariantSummary());
-        query = new Query(null, null, null, "KRAS", "V14I", null, "Pancreatic Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "KRAS", "V14I", null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The oncogenicity is not matched in variant summary.", "The KRAS V14I mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
         // Check critical case
-        query = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
+        query = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertTrue("The geneExist in the response is not true, but it should.", indicatorQueryResp.getGeneExist() == true);
         assertTrue("The variantExist in the response is not true, but it should.", indicatorQueryResp.getVariantExist() == true);
@@ -45,18 +45,18 @@ public class IndicatorUtilsTest {
         assertTrue("Should have no other significant level", indicatorQueryResp.getOtherSignificantSensitiveLevels().size() == 0);
 
         // Check fusion.
-        query = new Query(null, null, null, "BRAF", "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null);
+        query = new Query(null, null, null, "BRAF", "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The highest sensitive level of CUL1-BRAF fusion should be Level 3A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The oncogenicity of CUL1-BRAF fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Test Intragenic Mutation
-        query = new Query(null, null, null, "CTCF", "CTCF-intragenic", null, "Ovarian Cancer", null, null, null);
+        query = new Query(null, null, null, "CTCF", "CTCF-intragenic", null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The oncogenicity of CTCF-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Check other significant level
-        query = new Query(null, null, null, "BRAF", "V600E", null, "Colorectal Cancer", null, null, null);
+        query = new Query(null, null, null, "BRAF", "V600E", null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The highest sensitive level should be 2B", LevelOfEvidence.LEVEL_2B, indicatorQueryResp.getHighestSensitiveLevel());
         assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
@@ -65,7 +65,7 @@ public class IndicatorUtilsTest {
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3A));
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_2B));
 
-        query = new Query(null, null, null, "BRAF", "V600E", null, "Breast Cancer", null, null, null);
+        query = new Query(null, null, null, "BRAF", "V600E", null, "Breast Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertEquals("The highest sensitive level should be 2B", LevelOfEvidence.LEVEL_2B, indicatorQueryResp.getHighestSensitiveLevel());
         assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
@@ -73,11 +73,11 @@ public class IndicatorUtilsTest {
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_2B));
 
         // Test for predicted oncogenic
-        query = new Query(null, null, null, "PIK3R1", "K567E", null, "Pancreatic Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "PIK3R1", "K567E", null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
 
-        query = new Query(null, null, null, "ALK", "R401Q", null, "Colon Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "ALK", "R401Q", null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 2B",
@@ -88,7 +88,7 @@ public class IndicatorUtilsTest {
 //        assertEquals("The highest sensitive level should be null, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
 //            null, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query = new Query(null, null, null, "KRAS", "Q61K", null, "Colorectal Cancer", null, null, null);
+        query = new Query(null, null, null, "KRAS", "Q61K", null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
         assertEquals("The oncogenicity should be 'Likely Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 4",
@@ -98,7 +98,7 @@ public class IndicatorUtilsTest {
 
 
         // Test cases generated through MSK-IMPACT reports which ran into issue before
-        query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, "Non-Small Cell Lung Cancer", "missense_variant", null, null);
+        query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, "Non-Small Cell Lung Cancer", "missense_variant", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("Variant should not exist", false, indicatorQueryResp.getVariantExist());
@@ -106,28 +106,28 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level should be 1",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query = new Query(null, null, null, "TMPRSS2-ERG", null, "Fusion", "Prostate Adenocarcinoma", "missense_variant", null, null);
+        query = new Query(null, null, null, "TMPRSS2-ERG", null, "Fusion", "Prostate Adenocarcinoma", "missense_variant", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not YES, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be null",
             null, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query = new Query(null, null, null, "ERCC2", "P13Rfs*43", null, "Prostate Adenocarcinoma", "frame_shift", null, null);
+        query = new Query(null, null, null, "ERCC2", "P13Rfs*43", null, "Prostate Adenocarcinoma", "frame_shift", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 3B",
             LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query = new Query(null, null, null, "CDKN2A", "M1?", null, "Colon Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "CDKN2A", "M1?", null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // Oncogenicity of Alternative Allele overwrites Inconclusive
         // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
-        query = new Query(null, null, null, "BRCA1", "C24Y", null, "Colon Adenocarcinoma", null, null, null);
+        query = new Query(null, null, null, "BRCA1", "C24Y", null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
@@ -166,8 +166,8 @@ public class IndicatorUtilsTest {
         assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
 
         // Check unknown denominator fusion, it should return same data as querying specific fusion.
-        query1 = new Query(null, null, null, "BRAF", "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null);
-        query2 = new Query(null, null, null, "CUL1-BRAF", null, "fusion", "Ovarian Cancer", null, null, null);
+        query1 = new Query(null, null, null, "BRAF", "CUL1-BRAF Fusion", null, "Ovarian Cancer", null, null, null, null);
+        query2 = new Query(null, null, null, "CUL1-BRAF", null, "fusion", "Ovarian Cancer", null, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
         assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
@@ -176,8 +176,8 @@ public class IndicatorUtilsTest {
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
         // Check hugoSymbol and entrezGene pair
-        query1 = new Query(null, null, 673, null, "V600E", null, "Melanoma", null, null, null);
-        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
+        query1 = new Query(null, null, 673, null, "V600E", null, "Melanoma", null, null, null, null);
+        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
@@ -188,8 +188,8 @@ public class IndicatorUtilsTest {
 
 
         //EntrezGeneId has higher priority then hugoSymbol
-        query1 = new Query(null, null, 673, "EGFR", "V600E", null, "Melanoma", null, null, null);
-        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
+        query1 = new Query(null, null, 673, "EGFR", "V600E", null, "Melanoma", null, null, null, null);
+        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
@@ -199,8 +199,8 @@ public class IndicatorUtilsTest {
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
         //Check whether empty hugoSymbol will effect the result
-        query1 = new Query(null, null, 673, "", "V600E", null, "Melanoma", null, null, null);
-        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null);
+        query1 = new Query(null, null, 673, "", "V600E", null, "Melanoma", null, null, null, null);
+        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
@@ -210,13 +210,37 @@ public class IndicatorUtilsTest {
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
         //Other Biomarker tests
-        query = new Query(null, null, null,  null, "MSI-H", null, "Colorectal Cancer", null, null, null);
+        query = new Query(null, null, null,  null, "MSI-H", null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
 
+        // Test indicator endpoint supports HGVS
+        query = new Query(null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        query1 = new Query(null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
+        query2 = new Query(null, null, null, "BRAF", "V600E", null, "Melanoma", null, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertEquals("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertEquals("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+        // Test HGVS has higher priority than gene/variant pair
+        // 7:g.140453136A>T is BRAF V600E
+        query = new Query(null, null, null, "ALK", "R401Q", null, "Melanoma", null, null, null, "7:g.140453136A>T");
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {

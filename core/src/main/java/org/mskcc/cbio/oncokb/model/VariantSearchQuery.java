@@ -11,11 +11,12 @@ public class VariantSearchQuery implements java.io.Serializable {
     private String consequence;
     private Integer proteinStart;
     private Integer proteinEnd;
+    private String hgvs;
 
     public VariantSearchQuery() {
     }
 
-    public VariantSearchQuery(Integer entrezGeneId, String hugoSymbol, String variant, String variantType, String consequence, Integer proteinStart, Integer proteinEnd) {
+    public VariantSearchQuery(Integer entrezGeneId, String hugoSymbol, String variant, String variantType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
         this.variant = variant;
@@ -23,6 +24,7 @@ public class VariantSearchQuery implements java.io.Serializable {
         this.consequence = consequence;
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
+        this.hgvs = hgvs;
     }
 
     public Integer getEntrezGeneId() {
@@ -79,5 +81,13 @@ public class VariantSearchQuery implements java.io.Serializable {
 
     public void setProteinEnd(Integer proteinEnd) {
         this.proteinEnd = proteinEnd;
+    }
+
+    public String getHgvs() {
+        return hgvs;
+    }
+
+    public void setHgvs(String hgvs) {
+        this.hgvs = hgvs;
     }
 }

@@ -39,8 +39,9 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
+        , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
-        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd);
+        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs);
         return new ResponseEntity<>(getVariants(query), HttpStatus.OK);
     }
 
@@ -59,7 +60,13 @@ public class VariantsApiController implements VariantsApi {
         LinkedHashSet<Alteration> alterationSet = new LinkedHashSet<>();
         List<Alteration> alterationList = new ArrayList<>();
         if (query != null) {
-            if (query.getHugoSymbol() != null || query.getEntrezGeneId() != null) {
+            if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
+                Alteration alteration = AlterationUtils.getAlterationByHGVS(query.getHgvs());
+                if (alteration.getGene() != null) {
+                    Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(alteration.getGene());
+                    alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
+                }
+            } else if (query.getHugoSymbol() != null || query.getEntrezGeneId() != null) {
                 Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
                 if (gene != null) {
                     if (AlterationUtils.isInferredAlterations(query.getVariant())) {

@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class Query implements java.io.Serializable {
     private String consequence;
     private Integer proteinStart;
     private Integer proteinEnd;
+    private String hgvs;
 
     public Query() {
     }
@@ -32,7 +34,7 @@ public class Query implements java.io.Serializable {
                 this.hugoSymbol = alt.getGene().getHugoSymbol();
                 this.entrezGeneId = alt.getGene().getEntrezGeneId();
             }
-            this.alteration = alt.getAlteration();
+            setAlteration(alt.getAlteration());
             this.alterationType = alt.getAlterationType() == null ? "MUTATION" : alt.getAlterationType().name();
             this.consequence = alt.getConsequence() == null ? null : alt.getConsequence().getTerm();
             this.proteinStart = alt.getProteinStart();
@@ -46,7 +48,7 @@ public class Query implements java.io.Serializable {
                 this.hugoSymbol = variantQuery.getGene().getHugoSymbol();
                 this.entrezGeneId = variantQuery.getGene().getEntrezGeneId();
             }
-            this.alteration = variantQuery.getQueryAlteration();
+            setAlteration(variantQuery.getQueryAlteration());
             this.consequence = variantQuery.getConsequence();
             this.proteinStart = variantQuery.getProteinStart();
             this.proteinEnd = variantQuery.getProteinEnd();
@@ -55,23 +57,24 @@ public class Query implements java.io.Serializable {
 
     public Query(String hugoSymbol, String alteration, String tumorType) {
         this.hugoSymbol = hugoSymbol;
-        this.alteration = alteration;
+        this.setAlteration(alteration);
         this.setTumorType(tumorType);
     }
 
-    public Query(String id, String type, Integer entrezGeneId, String hugoSymbol, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd) {
+    public Query(String id, String type, Integer entrezGeneId, String hugoSymbol, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
         this.id = id;
         this.type = type;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
             this.hugoSymbol = hugoSymbol;
         }
         this.entrezGeneId = entrezGeneId;
-        this.alteration = alteration;
+        this.setAlteration(alteration);
         this.alterationType = alterationType;
         this.setTumorType(tumorType);
         this.consequence = consequence;
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
+        this.setHgvs(hgvs);
     }
 
     public String getId() {
@@ -111,6 +114,9 @@ public class Query implements java.io.Serializable {
     }
 
     public void setAlteration(String alteration) {
+        if (alteration != null) {
+            alteration = alteration.replace("p.", "");
+        }
         this.alteration = alteration;
     }
 
@@ -157,8 +163,32 @@ public class Query implements java.io.Serializable {
         this.proteinEnd = proteinEnd;
     }
 
+    public String getHgvs() {
+        return hgvs;
+    }
+
+    public void setHgvs(String hgvs) {
+        this.hgvs = hgvs;
+        if (hgvs != null && !hgvs.trim().isEmpty()) {
+            Alteration alteration = AlterationUtils.getAlterationByHGVS(hgvs);
+            if (alteration != null) {
+                if (alteration.getGene() != null) {
+                    this.hugoSymbol = alteration.getGene().getHugoSymbol();
+                    this.entrezGeneId = alteration.getGene().getEntrezGeneId();
+                }
+                this.alterationType = null;
+                this.setAlteration(alteration.getAlteration());
+                this.proteinStart = alteration.getProteinStart();
+                this.proteinEnd = alteration.getProteinEnd();
+                if (alteration.getConsequence() != null)
+                    this.consequence = alteration.getConsequence().getTerm();
+            }
+        }
+    }
+
     public void enrich() {
-        if(this.getEntrezGeneId() == null && this.getHugoSymbol() == null) {
+        if (this.getEntrezGeneId() == null && this.getHugoSymbol() == null
+            && this.getAlteration() != null && !this.getAlteration().isEmpty()) {
             this.setEntrezGeneId(-2);
         }
 
@@ -220,8 +250,15 @@ public class Query implements java.io.Serializable {
         } else {
             content.add("");
         }
+
         if (this.proteinEnd != null) {
             content.add(Integer.toString(this.proteinEnd));
+        } else {
+            content.add("");
+        }
+
+        if (this.hgvs != null) {
+            content.add(this.hgvs);
         } else {
             content.add("");
         }

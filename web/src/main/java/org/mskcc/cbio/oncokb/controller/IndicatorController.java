@@ -42,10 +42,10 @@ public class IndicatorController {
         @RequestParam(value = "source", required = false) String source,
         @RequestParam(value = "levels", required = false) String levels,
         @RequestParam(value = "queryType", required = false) String queryType,
-        @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly
+        @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly,
+        @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
-
-        Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, tumorType, consequence, proteinStart, proteinEnd);
+        Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
         return IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
     }

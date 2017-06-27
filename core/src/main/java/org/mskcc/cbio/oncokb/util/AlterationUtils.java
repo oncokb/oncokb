@@ -9,6 +9,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
@@ -327,6 +328,36 @@ public final class AlterationUtils {
 
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         return alt;
+    }
+
+    public static Alteration getAlterationByHGVS(String hgvs) {
+        Alteration alteration = null;
+        if (hgvs != null && !hgvs.trim().isEmpty()) {
+            TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(hgvs);
+            if (transcriptConsequence != null) {
+                String hugoSymbol = transcriptConsequence.getGeneSymbol();
+                Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+                if (gene != null) {
+                    alteration = new Alteration();
+                    alteration.setGene(gene);
+                    alteration.setAlterationType(null);
+                    if (transcriptConsequence.getHgvspShort() != null) {
+                        alteration.setAlteration(transcriptConsequence.getHgvspShort());
+                    }
+                    if (transcriptConsequence.getProteinStart() != null) {
+                        alteration.setProteinStart(Integer.parseInt(transcriptConsequence.getProteinStart()));
+                    }
+                    if (transcriptConsequence.getProteinEnd() != null) {
+                        alteration.setProteinEnd(Integer.parseInt(transcriptConsequence.getProteinEnd()));
+                    }
+                    if (transcriptConsequence.getConsequence() != null) {
+                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequence.getConsequence()));
+                    }
+                    return alteration;
+                }
+            }
+        }
+        return alteration;
     }
 
     public static String getOncogenic(List<Alteration> alterations) {
