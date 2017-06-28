@@ -8,7 +8,7 @@
  * Factory in the oncokb.
  */
 angular.module('oncokbApp')
-    .factory('FindRegex', function(_, S) {
+    .factory('FindRegex', function(_, S, DatabaseConnector, $q) {
         var allRegex = {
             pmid: {
                 regex: /PMID:?\s*([0-9]+,?\s*)+/ig,
@@ -131,17 +131,15 @@ angular.module('oncokbApp')
                                         var match = myRegexp.exec(item);
                                         var text;
                                         var link;
-                                        if (match === null) {
-                                            text = item;
-                                        } else {
+                                        if (match !== null) {
                                             text = match[1];
                                             link = match[2];
+                                            uniqueResultA.push({
+                                                type: 'abstract',
+                                                id: text,
+                                                link: link
+                                            });
                                         }
-                                        uniqueResultA.push({
-                                            type: 'abstract',
-                                            id: text,
-                                            link: link
-                                        });
                                     });
                                 }
                                 break;
@@ -156,6 +154,84 @@ angular.module('oncokbApp')
             return _.uniq(uniqueResultA, 'id');
         }
 
+        function validation(articles) {
+            var deferred = $q.defer();
+            var pubmedArticles = [];
+            var trials = [];
+            var abstracts = [];
+            _.each(articles, function(article) {
+                switch(article.type) {
+                case 'pmid':
+                    pubmedArticles.push(article);
+                    break;
+                case 'nct':
+                    trials.push(article);
+                    break;
+                case 'abstract':
+                    abstracts.push(article);
+                    break;
+                }
+            });
+            var apiCalls = [];
+            if(pubmedArticles.length > 0) {
+                apiCalls.push(validatePubmed(pubmedArticles));
+            }
+            if(trials.length > 0) {
+                apiCalls.push(validateTrials(trials));
+            }
+            $q.all(apiCalls)
+                .then(function(result) {
+                    deferred.resolve(_.union(pubmedArticles, trials, abstracts));
+                }, function(error) {
+                    deferred.reject(error);
+                });
+            return deferred.promise;
+        }
+        function validatePubmed(pubmedArticles) {
+            var deferred = $q.defer();
+            var pmids = _.map(pubmedArticles, function(item) {
+                return item.id;
+            });
+            DatabaseConnector.getPubMedArticle(pmids, function(data) {
+                var invalidPmids = [];
+                var articleData = data.result;
+                if (articleData && articleData.uids) {
+                    _.each(articleData.uids, function(pmid) {
+                        if (!articleData[pmid] || articleData[pmid].error) {
+                            invalidPmids.push(pmid);
+                        }
+                    });
+                    if (invalidPmids.length > 0) {
+                        _.each(pubmedArticles, function(item) {
+                            if (invalidPmids.indexOf(item.id) !== -1) {
+                                item.invalid = true;
+                            }
+                        });
+                    }
+                }
+                deferred.resolve(pubmedArticles);
+            }, function(error) {
+                deferred.reject(error);
+            });
+            return deferred.promise;
+        }
+        function validateTrials(trials) {
+            var deferred = $q.defer();
+            var nctIds = _.map(trials, function(item) {
+                return item.id;
+            });
+            DatabaseConnector.getClinicalTrial(nctIds, function(result) {
+                _.each(trials, function(trial) {
+                    if (result[trial.id] === false) {
+                        trial.invalid = true;
+                    }
+                });
+                deferred.resolve(trials);
+            }, function(error) {
+                deferred.reject(error);
+            });
+            return deferred.promise;
+        }
         function createTag(type, link, content) {
             var str = '';
             switch (type) {
@@ -181,6 +257,7 @@ angular.module('oncokbApp')
             },
             result: function(str) {
                 return result(str);
-            }
+            },
+            validation: validation
         };
     });

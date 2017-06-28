@@ -8,9 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.*;
-
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -133,6 +135,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
 
         return new ResponseEntity<>(genes, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
+        return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
     }
 
 }
