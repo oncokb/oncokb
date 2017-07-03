@@ -241,7 +241,7 @@ public class SummaryUtils {
 
     public static String unknownOncogenicSummary(Gene gene) {
         String str = gene == null ? "variant" : (gene.getHugoSymbol() + " alteration");
-        return "The oncogenic activity of this " + str + " is unknown as it has not specifically been investigated by the OncoKB team.";
+        return "The oncogenic activity of this " + str + " is unknown as it has not specifically been reviewed by the OncoKB team.";
     }
 
     public static String synonymousSummary() {
