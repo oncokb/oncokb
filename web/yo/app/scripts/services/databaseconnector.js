@@ -585,9 +585,9 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
-            function getIsoforms() {
+            function getIsoforms(type) {
                 var deferred = $q.defer();
-                ApiUtils.getIsoforms()
+                ApiUtils.getIsoforms(type)
                     .success(function(data) {
                         deferred.resolve(data);
                     })

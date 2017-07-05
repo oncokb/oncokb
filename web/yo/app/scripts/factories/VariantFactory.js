@@ -400,8 +400,11 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
 angular.module('oncokbApp').factory('ApiUtils', ['$http', function($http) {
     'use strict';
 
-    function getIsoforms() {
-        return $http.get('data/isoformMskcc.json');
+    function getIsoforms(type) {
+        if (type === 'msk') {
+            return $http.get('data/isoformMskcc.json');
+        }
+        return $http.get('data/isoformUniport.json');
     }
 
     function getOncogeneTSG() {
