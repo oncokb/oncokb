@@ -848,7 +848,7 @@ angular.module('oncokbApp')
             return vusData;
         }
 
-        // Return all info
+        // get curation queue data
         function getQueueData(queue) {
             var queueData = [];
             if (queue) {
@@ -869,6 +869,15 @@ angular.module('oncokbApp')
                 });
             }
             return queueData;
+        }
+
+        // get history data
+        function getHistoryData(history) {
+            var result = {};
+            _.each(history.keys(), function(key) {
+                result[key] = history.get(key);
+            });
+            return result;
         }
 
         // Only return last edit info
@@ -1252,6 +1261,7 @@ angular.module('oncokbApp')
             getVUSFullData: getVUSFullData,
             getTextString: OncoKB.utils.getString,
             mostRecentItem: mostRecentItem,
-            getQueueData: getQueueData
+            getQueueData: getQueueData,
+            getHistoryData: getHistoryData
         };
     });
