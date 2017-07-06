@@ -293,7 +293,7 @@ angular.module('oncokbApp')
                 function rejectItem(arr) {
                     _.each(arr, function(item) {
                         if($rootScope.geneMetaData.get(item.uuid.getText()) && $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
-                            if(item.obj) {
+                            if(item.obj && item.reviewObj.has('lastReviewed')) {
                                 item.obj.setText(item.reviewObj.get('lastReviewed'));
                             }
                             var tempTime = $scope.lastUpdateTime;
@@ -385,8 +385,8 @@ angular.module('oncokbApp')
                                     rejectItem(items);
                                 }
                             } else {
-                                if(oncogenicChange) uuid = oncogenicUUID;
-                                if(effectChange) uuid = effectUUID;
+                                if(oncogenicChange) uuid = $scope.mutation.oncogenic_uuid;
+                                if(effectChange) uuid = $scope.mutation.effect_uuid;
                             }
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
@@ -503,7 +503,9 @@ angular.module('oncokbApp')
                         break;
                     case 'CLINICAL_TRIAL':
                         $scope.tumor.trials.clear();
-                        $scope.tumor.trials.pushAll($scope.tumor.trials_review.get('lastReviewed'));
+                        if ($scope.tumor.trials_review.has('lastReviewed')) {
+                            $scope.tumor.trials.pushAll($scope.tumor.trials_review.get('lastReviewed'));
+                        }
                         break;
                     case 'TUMOR_NAME_CHANGE':
                         var lastReviewed = $rootScope.model.createList();

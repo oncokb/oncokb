@@ -558,6 +558,7 @@ angular.module('oncokbApp')
                             if(mainUtils.needReview(item.uuid)) {
                                 tumorChanged = true;
                                 userNames.push(item.review.get('updatedBy'));
+                                item.review.set('review', true);
                             }
                         });
                         if (tumorChanged) {
@@ -1977,11 +1978,12 @@ angular.module('oncokbApp')
                         if (newTrial.match(/NCT[0-9]+/ig)) {
                             if (trialsReview && !trialsReview.get('lastReviewed')) {
                                 trialsReview.set('lastReviewed', trials.asArray().slice(0));
-                                setReview(trialsUuid, true);
                             }
+                            setReview(trialsUuid, true);
                             trialsReview.set('updatedBy', User.name);
                             trialsReview.set('updateTime', new Date().getTime());
                             trials.push(newTrial);
+                            trialsRollBackCheck(trialsReview, trials, trialsUuid);
                         } else {
                             dialogs.notify('Warning', 'Please check your trial ID format. (e.g. NCT01562899)');
                         }
@@ -1993,12 +1995,22 @@ angular.module('oncokbApp')
             $scope.removeTrial = function(trials, index, trialsReview, trialsUuid) {
                 if(trialsReview && !trialsReview.get('lastReviewed')) {
                     trialsReview.set('lastReviewed', trials.asArray().slice(0));
-                    setReview(trialsUuid, true);
                 }
+                setReview(trialsUuid, true);
                 trialsReview.set('updatedBy', User.name);
                 trialsReview.set('updateTime', new Date().getTime());
                 trials.remove(index);
+                trialsRollBackCheck(trialsReview, trials, trialsUuid);
             };
+
+            function trialsRollBackCheck(trialsReview, trials, trialsUuid) {
+                if (trialsReview && trials.asArray().slice(0).sort().join() === trialsReview.get('lastReviewed').slice(0).sort().join()) {
+                    trialsReview.delete('lastReviewed');
+                    trialsReview.delete('review');
+                    trialsReview.delete('updatedBy');
+                    setReview(trialsUuid, false);
+                }
+            }
 
             $scope.addVUSItem = function(newVUSName, newVUSTime) {
                 if (newVUSName) {
