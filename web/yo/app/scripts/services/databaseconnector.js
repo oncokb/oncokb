@@ -358,7 +358,7 @@ angular.module('oncokbApp')
                         fail();
                     });
             }
-            function deleteEvidences(data, success, fail) {
+
             function deleteEvidences(data, historyData, success, fail) {
                 if (dataFromFile) {
                     success('');

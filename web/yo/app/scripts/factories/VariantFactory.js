@@ -227,6 +227,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 }
             });
     }
+
     function updateEvidenceBatch(data) {
         return $http.post(
             OncoKB.config.apiLink + 'evidences/update',
@@ -237,6 +238,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 }
             });
     }
+
     function getEvidencesByUUID(uuid) {
         return $http.get(
             OncoKB.config.publicApiLink + 'evidences/' + uuid,
@@ -246,6 +248,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 }
             });
     }
+
     function getEvidencesByUUIDs(uuids) {
         return $http.post(
             OncoKB.config.publicApiLink + 'evidences',
@@ -256,6 +259,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
                 }
             });
     }
+
     function getPubMedArticle(pubMedIDs) {
         var validPubMedIDs = [];
         _.each(pubMedIDs, function(pubMedID) {
@@ -265,13 +269,15 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
         });
         return $http.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=' + validPubMedIDs.join(','));
     }
+
     function getClinicalTrial(nctIds) {
         if (!nctIds || !_.isArray(nctIds) || nctIds.length === 0) {
             return {};
         } else {
-            return $http.get(OncoKB.config.privateApiLink  + 'utils/validation/trials?nctIds=' + nctIds.join());
+            return $http.get(OncoKB.config.privateApiLink + 'utils/validation/trials?nctIds=' + nctIds.join());
         }
     }
+
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
@@ -355,12 +361,12 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
     'use strict';
 
     function getMainType() {
-        return $http.get(OncoKB.config.oncoTreeLink + 'mainTypes?version=oncokb');
+        return $http.get(OncoKB.config.oncoTreeLink + 'mainTypes?version=' + OncoKB.config.oncoTreeVersion);
     }
 
     function getTumorTypeByMainType(mainType) {
         return $http.get(OncoKB.config.oncoTreeLink +
-            'tumorTypes/search/maintype/' + mainType + '?exactMatch=true&version=oncokb');
+            'tumorTypes/search/maintype/' + mainType + '?exactMatch=true&version=' + OncoKB.config.oncoTreeVersion);
     }
 
     function getTumorType(type, query, exactMatch) {
@@ -369,7 +375,7 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
         }
         exactMatch = _.isBoolean(exactMatch) ? exactMatch : true;
         return $http.get(OncoKB.config.oncoTreeLink +
-            'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch + '&version=oncokb');
+            'tumorTypes/search/' + type + '/' + query + '?exactMatch=' + exactMatch + '&version=' + OncoKB.config.oncoTreeVersion);
     }
 
     function getTumorTypesByMainTypes(mainTypes) {
@@ -383,7 +389,7 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
         return $http.post(OncoKB.config.oncoTreeLink + 'tumorTypes/search',
             {
                 queries: queries,
-                version: 'oncokb'
+                version: OncoKB.config.oncoTreeVersion
             }, {
                 headers: {'Content-Type': 'application/json'}
             });
