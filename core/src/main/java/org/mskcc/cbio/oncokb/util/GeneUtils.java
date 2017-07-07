@@ -86,27 +86,49 @@ public class GeneUtils {
         return null;
     }
 
-    public static Set<Gene> searchGene(String keywords) {
+    public static Set<Gene> searchGene(String keyword, Boolean exactSearch) {
         Set<Gene> genes = new HashSet<>();
-        if (keywords != null && keywords != "") {
+        if (exactSearch == null)
+            exactSearch = false;
+        if (keyword != null && keyword != "") {
             Set<Gene> allGenes = GeneUtils.getAllGenes();
-            if (org.apache.commons.lang3.math.NumberUtils.isNumber(keywords)) {
+            if (org.apache.commons.lang3.math.NumberUtils.isNumber(keyword)) {
                 for (Gene gene : allGenes) {
                     String entrezId = Integer.toString(gene.getEntrezGeneId());
-                    if (entrezId.contains(keywords)) {
-                        genes.add(gene);
+                    if (exactSearch) {
+                        if (entrezId.equals(keyword)) {
+                            genes.add(gene);
+                        }
+                    } else {
+                        if (entrezId.contains(keyword)) {
+                            genes.add(gene);
+                        }
                     }
                 }
             } else {
+                keyword = keyword.toLowerCase();
                 for (Gene gene : allGenes) {
                     String hugoSymbol = gene.getHugoSymbol();
-                    if (StringUtils.containsIgnoreCase(hugoSymbol, keywords)) {
-                        genes.add(gene);
+                    if (exactSearch) {
+                        if (hugoSymbol.equalsIgnoreCase(keyword)) {
+                            genes.add(gene);
+                        } else {
+                            for (String alias : gene.getGeneAliases()) {
+                                if (alias.toLowerCase().equals(keyword)) {
+                                    genes.add(gene);
+                                    break;
+                                }
+                            }
+                        }
                     } else {
-                        for (String alias : gene.getGeneAliases()) {
-                            if (StringUtils.containsIgnoreCase(alias, keywords)) {
-                                genes.add(gene);
-                                break;
+                        if (StringUtils.containsIgnoreCase(hugoSymbol, keyword)) {
+                            genes.add(gene);
+                        } else {
+                            for (String alias : gene.getGeneAliases()) {
+                                if (StringUtils.containsIgnoreCase(alias, keyword)) {
+                                    genes.add(gene);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -142,5 +164,76 @@ public class GeneUtils {
             flag = true;
         }
         return flag;
+    }
+
+    public static Integer compareGenesByKeyword(Gene g1, Gene g2, String keyword) {
+        if (g1 == null) {
+            return 1;
+        }
+        if (g2 == null) {
+            return -1;
+        }
+        String s1 = "";
+        String s2 = "";
+        Integer i1 = -1;
+        Integer i2 = -1;
+
+        if (StringUtils.isNumeric(keyword)) {
+            s1 = Integer.toString(g1.getEntrezGeneId());
+            s2 = Integer.toString(g2.getEntrezGeneId());
+        } else {
+            s1 = g1.getHugoSymbol().toLowerCase();
+            s2 = g2.getHugoSymbol().toLowerCase();
+        }
+        if (s1.equals(keyword)) {
+            return -1;
+        }
+        if (s2.equals(keyword)) {
+            return 1;
+        }
+
+        i1 = s1.indexOf(keyword);
+        i2 = s2.indexOf(keyword);
+
+        if (i1.equals(i2) && i1.equals(-1)) {
+            Integer i1Alias = 100;
+            Integer i2Alias = 100;
+            Integer index = -1;
+            for (String geneAlias : g1.getGeneAliases()) {
+                index = geneAlias.toLowerCase().indexOf(keyword);
+                if (index > -1 && index < i1Alias) {
+                    i1Alias = index;
+                }
+            }
+
+            index = -1;
+            for (String geneAlias : g2.getGeneAliases()) {
+                index = geneAlias.toLowerCase().indexOf(keyword);
+                if (index > -1 && index < i2Alias) {
+                    i2Alias = index;
+                }
+            }
+            if (i1Alias.equals(-1))
+                return 1;
+            if (i2Alias.equals(-1))
+                return -1;
+            return i1Alias - i2Alias;
+        } else {
+            if (i1.equals(-1))
+                return 1;
+            if (i2.equals(-1))
+                return -1;
+            if (i1.equals(i2)) {
+                Integer result = s1.compareTo(s2);
+                if (result == 0) {
+                    // Never returns 0, 0 may filter out record from list.
+                    return -1;
+                } else {
+                    return result;
+                }
+            } else {
+                return i1 - i2;
+            }
+        }
     }
 }

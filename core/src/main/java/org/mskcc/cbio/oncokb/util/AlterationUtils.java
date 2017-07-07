@@ -238,6 +238,10 @@ public final class AlterationUtils {
                 alteration.setAlteration("Deletion");
             }
         }
+
+        if (alteration.getName() == null && alteration.getAlteration() != null) {
+            alteration.setName(alteration.getAlteration());
+        }
     }
 
     public static Boolean isFusion(String variant) {
@@ -519,6 +523,43 @@ public final class AlterationUtils {
         return alleles;
     }
 
+    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Set<Alteration> alterations) {
+        List<Alteration> alterationList = new ArrayList<>();
+        // Only support columns(alteration/name) blur search.
+        query = query.toLowerCase().trim();
+        if (exactMatch == null)
+            exactMatch = false;
+        if (com.mysql.jdbc.StringUtils.isNullOrEmpty(query))
+            return alterationList;
+        query = query.trim().toLowerCase();
+        for (Alteration alteration : alterations) {
+            if(isMatch(exactMatch, query, alteration.getAlteration())) {
+                alterationList.add(alteration);
+                continue;
+            }
+
+            if(isMatch(exactMatch, query, alteration.getName())) {
+                alterationList.add(alteration);
+                continue;
+            }
+        }
+        return alterationList;
+    }
+
+    private static Boolean isMatch(Boolean exactMatch, String query, String string) {
+        if (string != null) {
+            if (exactMatch) {
+                if (StringUtils.containsIgnoreCase(string, query)) {
+                    return true;
+                }
+            } else {
+                if (StringUtils.containsIgnoreCase(string, query)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     // Sort the alternative alleles alphabetically
     private static void sortAlternativeAlleles(List<Alteration> alternativeAlleles) {
         Collections.sort(alternativeAlleles, new Comparator<Alteration>() {

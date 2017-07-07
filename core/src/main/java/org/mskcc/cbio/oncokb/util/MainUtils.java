@@ -12,11 +12,30 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 /**
- * Created by hongxinzhang on 4/5/16.
+ * Created by Hongxin Zhang on 4/5/16.
  */
 public class MainUtils {
     static String DataVersion = null;
     static String DataVersionDate = null;
+    private static final List<Oncogenicity> PRIORITIZED_ONCOGENICITY = Collections.unmodifiableList(
+        Arrays.asList(
+            Oncogenicity.INCONCLUSIVE,
+            Oncogenicity.LIKELY_NEUTRAL,
+            Oncogenicity.PREDICTED,
+            Oncogenicity.LIKELY,
+            Oncogenicity.YES)
+    );
+    private static final List<MutationEffect> PRIORITIZED_MUTATION_EFFECTS = Collections.unmodifiableList(
+        Arrays.asList(MutationEffect.GAIN_OF_FUNCTION,
+            MutationEffect.LIKELY_GAIN_OF_FUNCTION,
+            MutationEffect.INCONCLUSIVE,
+            MutationEffect.LIKELY_NEUTRAL,
+            MutationEffect.NEUTRAL,
+            MutationEffect.LIKELY_SWITCH_OF_FUNCTION,
+            MutationEffect.SWITCH_OF_FUNCTION,
+            MutationEffect.LIKELY_LOSS_OF_FUNCTION,
+            MutationEffect.LOSS_OF_FUNCTION)
+    );
 
     public static Map<String, Object> GetRequestQueries(
         String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
@@ -108,47 +127,41 @@ public class MainUtils {
     }
 
     public static MutationEffect findHighestMutationEffect(Set<MutationEffect> mutationEffect) {
-        MutationEffect[] effects = {
-            MutationEffect.GAIN_OF_FUNCTION,
-            MutationEffect.LIKELY_GAIN_OF_FUNCTION,
-            MutationEffect.INCONCLUSIVE,
-            MutationEffect.LIKELY_NEUTRAL,
-            MutationEffect.NEUTRAL,
-            MutationEffect.LIKELY_SWITCH_OF_FUNCTION,
-            MutationEffect.SWITCH_OF_FUNCTION,
-            MutationEffect.LIKELY_LOSS_OF_FUNCTION,
-            MutationEffect.LOSS_OF_FUNCTION
-        };
-        List<MutationEffect> list = Arrays.asList(effects);
         Integer index = 100;
         for (MutationEffect effect : mutationEffect) {
-            if (list.indexOf(effect) < index) {
-                index = list.indexOf(effect);
+            if (PRIORITIZED_MUTATION_EFFECTS.indexOf(effect) < index) {
+                index = PRIORITIZED_MUTATION_EFFECTS.indexOf(effect);
             }
         }
-        return index == 100 ? null : list.get(index);
+        return index == 100 ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
     }
 
     public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
-        Oncogenicity[] effects = {
-            Oncogenicity.INCONCLUSIVE,
-            Oncogenicity.LIKELY_NEUTRAL,
-            Oncogenicity.LIKELY,
-            Oncogenicity.YES
-        };
-        List<Oncogenicity> list = Arrays.asList(effects);
         Integer index = -1;
 
         for (Oncogenicity datum : oncogenicitySet) {
             if (datum != null) {
-                Integer oncogenicIndex = list.indexOf(datum);
+                Integer oncogenicIndex = PRIORITIZED_ONCOGENICITY.indexOf(datum);
                 if (index < oncogenicIndex) {
                     index = oncogenicIndex;
                 }
             }
         }
+        return index == -1 ? null : PRIORITIZED_ONCOGENICITY.get(index);
+    }
 
-        return index == -1 ? null : list.get(index);
+    public static Integer compareOncogenicity(Oncogenicity o1, Oncogenicity o2, Boolean asc) {
+        if (asc == null) {
+            asc = true;
+        }
+        if (o1 == null) {
+            if (o2 == null)
+                return 0;
+            return asc ? 1 : -1;
+        }
+        if (o2 == null)
+            return asc ? -1 : 1;
+        return (PRIORITIZED_ONCOGENICITY.indexOf(o2) - PRIORITIZED_ONCOGENICITY.indexOf(o1)) * (asc ? 1 : -1);
     }
 
     public static Oncogenicity idealOncogenicityByMutationEffect(MutationEffect mutationEffect) {

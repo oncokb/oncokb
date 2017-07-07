@@ -1,9 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -21,8 +21,10 @@ public class NumberUtils {
 
             geneNumber.setGene(pair.getKey());
 
-            LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidence(pair.getValue());
-            geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
+            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getPublicSensitiveLevels());
+            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getPublicResistanceLevels());
+            geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
+            geneNumber.setHighestResistenceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 
             Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));
@@ -47,8 +49,10 @@ public class NumberUtils {
 
             geneNumber.setGene(pair.getKey());
 
-            LevelOfEvidence highestLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), levels);
-            geneNumber.setHighestLevel(highestLevel != null ? highestLevel.name() : null);
+            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicSensitiveLevels())));
+            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicResistanceLevels())));
+            geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
+            geneNumber.setHighestResistenceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 
             Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));

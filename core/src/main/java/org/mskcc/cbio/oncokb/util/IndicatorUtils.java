@@ -392,4 +392,9 @@ public class IndicatorUtils {
         levels.put("resistant", levelRIndex > -1 ? LevelUtils.RESISTANCE_LEVELS.get(levelRIndex) : null);
         return levels;
     }
+
+    public static Map<String, LevelOfEvidence> findHighestLevelByEvidences(Set<Evidence> treatmentEvidences) {
+        List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
+        return findHighestLevel(new HashSet<>(treatments));
+    }
 }
