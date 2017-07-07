@@ -42,6 +42,7 @@ OncoKB.config = {
     apiLink: 'legacy-api/',
     curationLink: 'legacy-api/',
     oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
+    oncoTreeVersion: 'oncotree_2017_06_21',
     testing: true
 };
 OncoKB.backingUp = false;

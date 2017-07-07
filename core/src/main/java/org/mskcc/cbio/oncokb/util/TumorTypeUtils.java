@@ -20,6 +20,7 @@ import java.util.*;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
+    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2017_06_21";
     private static String ONCO_TREE_API_URL = null;
     private static List<TumorType> allOncoTreeCancerTypes = new ArrayList<TumorType>() {{
         addAll(getOncoTreeCancerTypesFromSource());
@@ -529,7 +530,7 @@ public class TumorTypeUtils {
     }
 
     private static List<TumorType> getOncoTreeCancerTypesFromSource() {
-        String url = getOncoTreeApiUrl() + "mainTypes?version=oncokb";
+        String url = getOncoTreeApiUrl() + "mainTypes?version=" + ONCO_TREE_ONCOKB_VERSION;
         List<TumorType> cancerTypes = new ArrayList<>();
 
         try {
@@ -553,7 +554,7 @@ public class TumorTypeUtils {
     }
 
     private static Map<String, TumorType> getAllNestedOncoTreeSubtypesFromSource() {
-        String url = getOncoTreeApiUrl() + "tumorTypes?version=oncokb&flat=false&deprecated=false";
+        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false&deprecated=false";
 
         try {
             String json = FileUtils.readRemote(url);
@@ -569,7 +570,7 @@ public class TumorTypeUtils {
     }
 
     private static List<TumorType> getAllOncoTreeSubtypesFromSource() {
-        String url = getOncoTreeApiUrl() + "tumorTypes?version=oncokb&flat=true&deprecated=false";
+        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true&deprecated=false";
 
         try {
             String json = FileUtils.readRemote(url);
@@ -586,7 +587,7 @@ public class TumorTypeUtils {
         try {
             String url = getOncoTreeApiUrl() + "tumorTypes/search";
             JSONObject postData = new JSONObject();
-            postData.put("version", "oncokb");
+            postData.put("version", ONCO_TREE_ONCOKB_VERSION);
 
             JSONArray queries = new JSONArray();
             for (TumorType cancerType : cancerTypes) {
