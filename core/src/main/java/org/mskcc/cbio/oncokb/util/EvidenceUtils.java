@@ -785,11 +785,9 @@ public class EvidenceUtils {
             for (Query requestQuery : requestQueries) {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
-                query.setQuery(requestQuery);
+                requestQuery.enrich();
 
-                if (requestQuery.getHugoSymbol() == null && requestQuery.getEntrezGeneId() == null) {
-                    requestQuery.setEntrezGeneId(-2);
-                }
+                query.setQuery(requestQuery);
 
                 query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
