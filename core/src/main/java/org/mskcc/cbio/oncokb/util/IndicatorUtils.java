@@ -175,16 +175,23 @@ public class IndicatorUtils {
                 }
 
                 // Find Oncogenicity from alternative alleles
-                if (oncogenicity == null && indicatorQuery.getAlleleExist()) {
-                    oncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
+                if ((oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE))
+                    && indicatorQuery.getAlleleExist()) {
+                    Oncogenicity tmpOncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
+                    if (tmpOncogenicity != null) {
+                        oncogenicity = tmpOncogenicity;
+                    }
                 }
 
                 // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
-                if (oncogenicity == null) {
-                    oncogenicity = MainUtils.findHighestOncogenicByEvidences(
+                if (oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
+                    Oncogenicity tmpOncogenicity = MainUtils.findHighestOncogenicByEvidences(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
                             Collections.singleton(EvidenceType.ONCOGENIC), null)
                     );
+                    if (tmpOncogenicity != null) {
+                        oncogenicity = tmpOncogenicity;
+                    }
                 }
 
                 // Only set oncogenicity if no previous data assigned.
