@@ -30,14 +30,7 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
-        if(query.getEntrezGeneId() == null && query.getHugoSymbol() == null) {
-            query.setEntrezGeneId(-2);
-        }
-
-        // Set the alteration to empty string in order to get relevant variants.
-        if (query.getAlteration() == null) {
-            query.setAlteration("");
-        }
+        query.enrich();
 
         source = source == null ? "oncokb" : source;
 
@@ -48,12 +41,6 @@ public class IndicatorUtils {
             query.getAlterationType().equalsIgnoreCase("fusion")) {
             List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
             Set<String> geneStrsSet = new HashSet<>();
-
-            // If the query only indicates this is a fusion event with associated genes but no alteration specified,
-            // need to attach Fusions to the query.
-            if (query.getAlteration() == null || query.getAlteration().isEmpty()) {
-                query.setAlteration("Fusions");
-            }
 
             if (geneStrsList != null) {
                 geneStrsSet = new HashSet<>(geneStrsList);

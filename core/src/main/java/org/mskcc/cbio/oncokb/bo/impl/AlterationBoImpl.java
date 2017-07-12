@@ -101,7 +101,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             // TODO: match fusion partner
 
             //the alteration 'fusions' should be injected into alteration list
-            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), "fusions");
+            Alteration alt = findAlteration(alteration.getGene(), AlterationType.MUTATION, "fusions");
             if (alt != null) {
                 alterations.add(alt);
             } else {

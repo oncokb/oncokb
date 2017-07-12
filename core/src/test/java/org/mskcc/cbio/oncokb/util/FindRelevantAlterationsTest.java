@@ -36,6 +36,10 @@ public class FindRelevantAlterationsTest {
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations"},
+                {"CTCF", "CTCF-intragenic", null, "Truncating Mutations"},
+                {"CTCF", "CTCF intragenic", null, "Truncating Mutations"},
+                {"CTCF", "Intragenic", null, "Truncating Mutations"},
+                {"NOTCH1", "NOTCH1-intragenic", null, "Fusions"},
 
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)

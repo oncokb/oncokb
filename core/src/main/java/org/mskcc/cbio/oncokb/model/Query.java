@@ -157,6 +157,26 @@ public class Query implements java.io.Serializable {
         this.proteinEnd = proteinEnd;
     }
 
+    public void enrich() {
+        if(this.getEntrezGeneId() == null && this.getHugoSymbol() == null) {
+            this.setEntrezGeneId(-2);
+        }
+
+        // Set the alteration to empty string in order to get relevant variants.
+        if (this.getAlteration() == null) {
+            this.setAlteration("");
+        }
+
+        // If the query only indicates this is a fusion event with associated genes but no alteration specified,
+        // need to attach Fusions to the query.
+        if (this.getHugoSymbol() != null
+            && this.getAlterationType() != null &&
+            this.getAlterationType().equalsIgnoreCase("fusion")
+            && this.getAlteration().isEmpty()) {
+            this.setAlteration("Fusions");
+        }
+    }
+
     @JsonIgnore
     public String getQueryId() {
 

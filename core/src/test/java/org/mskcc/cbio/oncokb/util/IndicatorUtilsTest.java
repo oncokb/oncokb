@@ -50,6 +50,11 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level of CUL1-BRAF fusion should be Level 3A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The oncogenicity of CUL1-BRAF fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
+        // Test Intragenic Mutation
+        query = new Query(null, null, null, "CTCF", "CTCF-intragenic", null, "Ovarian Cancer", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("The oncogenicity of CTCF-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+
         // Check other significant level
         query = new Query(null, null, null, "BRAF", "V600E", null, "Colorectal Cancer", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
