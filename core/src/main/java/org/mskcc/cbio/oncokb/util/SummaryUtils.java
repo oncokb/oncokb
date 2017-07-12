@@ -322,7 +322,7 @@ public class SummaryUtils {
 
         isHotspot = HotspotUtils.isHotspot(alteration);
 
-        if (oncogenic == null) {
+        if (oncogenic == null || oncogenic.equals(Oncogenicity.INCONCLUSIVE)) {
             // Get oncogenic summary from alternative alleles
             List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
             List<Alteration> alternativeAllelesWithoutVUS = AlterationUtils.excludeVUS(gene, alternativeAlleles);
@@ -347,7 +347,10 @@ public class SummaryUtils {
             }
 
             // Rank oncogenicities from relevant variants
-            oncogenic = MainUtils.findHighestOncogenicity(oncogenicities);
+            Oncogenicity tmpOncogenicity = MainUtils.findHighestOncogenicity(oncogenicities);
+            if (tmpOncogenicity != null) {
+                oncogenic = tmpOncogenicity;
+            }
         }
 
         if (oncogenic != null) {

@@ -125,6 +125,14 @@ public class IndicatorUtilsTest {
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
+        // Oncogenicity of Alternative Allele overwrites Inconclusive
+        // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
+        query = new Query(null, null, null, "BRCA1", "C24Y", null, "Colon Adenocarcinoma", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("Summary is not expected.", "The BRCA1 C24Y mutation has not been functionally or clinically validated. However, BRCA1 C24R is likely oncogenic, and therefore BRCA1 C24Y is considered likely oncogenic.", indicatorQueryResp.getVariantSummary());
+
         /**
          * Comparing between two queries
          */
