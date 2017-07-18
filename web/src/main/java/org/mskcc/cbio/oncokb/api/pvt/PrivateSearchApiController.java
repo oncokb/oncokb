@@ -182,7 +182,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
                 typeaheadSearchResp.setGene(gene);
                 typeaheadSearchResp.setVariantExist(false);
-                typeaheadSearchResp.setLink("/genes/" + gene.getHugoSymbol());
+                typeaheadSearchResp.setLink("/gene/" + gene.getHugoSymbol());
                 typeaheadSearchResp.setQueryType("gene");
 
                 if (evidences.containsKey(gene)) {
@@ -237,7 +237,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setQueryType("variant");
 
         // TODO: switch to variant page once it's ready.
-        typeaheadSearchResp.setLink("/genes/" + alteration.getGene().getHugoSymbol());
+        typeaheadSearchResp.setLink("/gene/" + alteration.getGene().getHugoSymbol() + "/variant/" + alteration.getAlteration());
         return typeaheadSearchResp;
     }
 
