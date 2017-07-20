@@ -71,6 +71,14 @@ public class VariantsApiController implements VariantsApi {
                         } else {
                             AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
                             List<Alteration> alterations = AlterationUtils.lookupVariant(query.getVariant(), true, allAlterations);
+
+                            // If this variant is not annotated
+                            if (alterations == null || alterations.isEmpty()) {
+                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), query.getVariantType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                                if (alteration != null) {
+                                    alterations.add(alteration);
+                                }
+                            }
                             for (Alteration alteration : alterations) {
                                 alterationSet.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
                             }
