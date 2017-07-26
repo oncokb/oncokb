@@ -283,6 +283,7 @@ angular.module('oncokbApp')
                             break;
                         }
                     }
+                    if (!email) return;
                     var content = 'Dear ' + item.get('curator').split(' ')[0] + ',\n\n';
                     content += item.get('addedBy') + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
                     var tempArr = [item.get('article')];
@@ -305,9 +306,8 @@ angular.module('oncokbApp')
                     var subject = 'OncoKB Curation Assignment';
                     mainUtils.sendEmail(email, subject, content)
                         .then(function() {
-                            console.log('email sent');
                         }, function(error) {
-                            console.log('error happened');
+                            dialogs.error('Error', 'Failed to notify curator automatically. Please send curator email manually.');
                         });
                 };
 
