@@ -181,4 +181,49 @@ angular.module('oncokbApp')
                     });
                 }
             };
+            var historyResults;
+            $scope.disableHistoryButton = true;
+            $scope.checkHistoryInputStatus = function() {
+                if (!_.isUndefined($scope.genesForHistory) && $scope.genesForHistory.length > 0) {
+                    $scope.disableHistoryButton = false;
+                } else {
+                    $scope.disableHistoryButton = true;
+                }
+            };
+            $scope.searchHistory = function(genesForHistory, index) {
+                $scope.loading = true;
+                if (index === 0) {
+                    historyResults = [];
+                }
+                var documents = Documents.get({title: genesForHistory[index]});
+                var document = _.isArray(documents) && documents.length === 1 ? documents[0] : null;
+                if (document) {
+                    storage.getRealtimeDocument(document.id).then(function(realtime) {
+                        if (realtime && realtime.error) {
+                            console.log('did not get realtime document.');
+                        } else {
+                            var model = realtime.getModel();
+                            var historyModel = model.getRoot().get('history');
+                            if (historyModel) {
+                                var historyData = stringUtils.getHistoryData(historyModel).api;
+                                if (historyData.length > 0) {
+                                    _.each(historyData, function(item) {
+                                        historyResults.push({gene: genesForHistory[index], admin: item.admin, timeStamp: item.timeStamp, records: item.records});
+                                    });
+                                }
+                            }
+                            if (index === genesForHistory.length - 1) {
+                                $scope.historySearchResults = historyResults;
+                                $scope.historyResultTable = true;
+                                $scope.loading = false;
+                            } else {
+                                $timeout(function() {
+                                    index++;
+                                    $scope.searchHistory(genesForHistory, index);
+                                }, 200);
+                            }
+                        }
+                    });
+                }
+            };
         }]);
