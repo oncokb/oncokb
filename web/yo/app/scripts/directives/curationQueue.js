@@ -49,7 +49,6 @@ angular.module('oncokbApp')
                             curator: item.get('curator')
                         });
                     });
-                    scope.getCuratorsList();
                     scope.getArticleList();
                     scope.dtOptions = {
                         hasBootstrap: true,
@@ -90,15 +89,6 @@ angular.module('oncokbApp')
                     }
                 });
                 $scope.userRole = users.getMe().role;
-                $scope.getCuratorsList = function() {
-                    var tempArr = [];
-                    _.each($scope.queue, function(item) {
-                        if (!item.curated && item.curator) {
-                            tempArr.push(item.curator);
-                        }
-                    });
-                    $scope.data.curatorNotificationList = _.uniq(tempArr);
-                };
                 $scope.getArticleList = function() {
                     var tempArr = [];
                     _.each($scope.queue, function(item) {
@@ -161,9 +151,11 @@ angular.module('oncokbApp')
                     $scope.curator = '';
                     $scope.predictedArticle = '';
                     $scope.validPMID = false;
-                    $scope.getCuratorsList();
                     $scope.getArticleList();
                     setArticlesNumberInMeta();
+                    if (item.get('curator')) {
+                        $scope.sendEmail(item);
+                    }
                 }
 
                 $scope.editCuration = function(index) {
@@ -215,11 +207,18 @@ angular.module('oncokbApp')
                         queueModelItem.set('article', x.article);
                         $scope.getArticleList();
                     }
+                    var sendEmailFlag = false;
+                    if ($scope.queue[index].curator && (queueModelItem.get('variant') !== x.variant || queueModelItem.get('tumorType') !== x.tumorType
+                        || queueModelItem.get('section') !== $scope.queue[index].section || queueModelItem.get('curator') !== $scope.queue[index].curator)) {
+                        sendEmailFlag = true;
+                    }
                     queueModelItem.set('variant', x.variant);
                     queueModelItem.set('tumorType', x.tumorType);
                     queueModelItem.set('section', $scope.queue[index].section);
                     queueModelItem.set('curator', $scope.queue[index].curator);
-                    $scope.getCuratorsList();
+                    if (sendEmailFlag) {
+                        $scope.sendEmail(queueModelItem);
+                    }
                 }
                 $scope.completeCuration = function(index) {
                     var queueModelItem = $scope.queueModel.get(index);
@@ -234,7 +233,6 @@ angular.module('oncokbApp')
                     if ($scope.queueModel.get(index).get('addedAt') === $scope.queue[index].addedAt) {
                         $scope.queueModel.remove(index);
                         $scope.queue.splice(index, 1);
-                        $scope.getCuratorsList();
                         $scope.getArticleList();
                         setArticlesNumberInMeta();
                     }
@@ -277,98 +275,42 @@ angular.module('oncokbApp')
                         console.log('error');
                     });
                 };
-                $scope.sendEmail = function() {
-                    if (_.isArray($scope.data.curatorsToNotify) && $scope.data.curatorsToNotify.length > 0) {
-                        $scope.email.status.sending = true;
-                        sendIndividualEmail(0);
-                    } else {
-                        $scope.data.curatorsToNotify = [];
+                $scope.sendEmail = function(item) {
+                    var email = '';
+                    for (var i = 0; i < $scope.curators.length; i++) {
+                        if (item.get('curator') === $scope.curators[i].name) {
+                            email = $scope.curators[i].email;
+                            break;
+                        }
                     }
-                };
-
-                /**
-                 * Notify curator individually.
-                 * @param {number} curatorIndex The current index of data.curatorsToNotify.
-                 */
-                function sendIndividualEmail(curatorIndex) {
-                    if (curatorIndex < $scope.data.curatorsToNotify.length) {
-                        var _email = '';
-                        var _curator = $scope.data.curatorsToNotify[curatorIndex];
-                        for (var i = 0; i < $scope.curators.length; i++) {
-                            if (_curator === $scope.curators[i].name) {
-                                _email = $scope.curators[i].email;
-                                break;
-                            }
-                        }
-                        if (_email) {
-                            var _articles = [];
-                            _.each($scope.queue, function(item) {
-                                if (_curator === item.curator && !item.curated) {
-                                    _articles.push({
-                                        link: item.link,
-                                        article: item.article,
-                                        variant: item.variant,
-                                        tumorType: item.tumorType,
-                                        section: item.section
-                                    });
-                                }
-                            });
-                            if (_articles.length > 0) {
-                                generateEmail(_email, _curator, user.name, _articles, new Date().getTime())
-                                    .then(function() {
-                                        $scope.email.returnMessage += _curator + ' has been notified' + '.<br/>';
-                                        sendIndividualEmail(++curatorIndex);
-                                    }, function(error) {
-                                        $scope.email.returnMessage += '<span style="color: red;">Failed to send Email. Please mention following message to developer: ' + error + '.</span><br/>';
-                                        sendIndividualEmail(++curatorIndex);
-                                    });
-                            }
-                        } else {
-                            $scope.email.returnMessage += '<span style="color: red;">Can not find email for ' + _curator + '.</span><br/>';
-                            sendIndividualEmail(++curatorIndex);
-                        }
-                    } else {
-                        $scope.email.status.sending = false;
-                        $scope.data.curatorsToNotify = [];
+                    if (!email) return;
+                    var content = 'Dear ' + item.get('curator').split(' ')[0] + ',\n\n';
+                    content += item.get('addedBy') + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
+                    var tempArr = [item.get('article')];
+                    if (item.get('link')) {
+                        tempArr = tempArr.concat(['(', item.get('link'), ')']);
                     }
-                }
-
-                function generateEmail(email, curatorName, adminName, articles, time) {
-                    var deferred = $q.defer();
-                    var content = 'Dear ' + curatorName.split(' ')[0] + ',\n\n';
-                    content += adminName + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
-                    _.each(articles, function(article, index) {
-                        var tempArr = [index + 1 + ')', article.article];
-                        if (article.link) {
-                            tempArr = tempArr.concat(['(', article.link, ')']);
-                        }
-                        if (article.variant) {
-                            tempArr = tempArr.concat(['Alteration:', article.variant + ',']);
-                        }
-                        if (article.tumorType) {
-                            tempArr = tempArr.concat(['Tumor type:', article.tumorType + ',']);
-                        }
-                        if (article.section) {
-                            tempArr = tempArr.concat(['Section:', article.section]);
-                        }
-                        content += tempArr.join(' ') + '\n';
-                    });
-                    content += '\nPlease try to curate this literature within two weeks (' + new Date(time + 12096e5).toDateString() + ') and remember to log your hours for curating this data.\n\n';
-                    content += 'If you have any questions or concerns please email or slack ' + adminName + '.\n\n';
+                    if (item.get('variant')) {
+                        tempArr = tempArr.concat(['Alteration:', item.get('variant') + ',']);
+                    }
+                    if (item.get('tumorType')) {
+                        tempArr = tempArr.concat(['Tumor type:', item.get('tumorType') + ',']);
+                    }
+                    if (item.get('section')) {
+                        tempArr = tempArr.concat(['Section:', item.get('section')]);
+                    }
+                    content += tempArr.join(' ') + '\n';
+                    content += '\nPlease try to curate this literature within two weeks (' + new Date(item.get('addedAt') + 12096e5).toDateString() + ') and remember to log your hours for curating this data.\n\n';
+                    content += 'If you have any questions or concerns please email or slack ' + item.get('addedBy') + '.\n\n';
                     content += 'Thank you, \nOncoKB Admin';
                     var subject = 'OncoKB Curation Assignment';
                     mainUtils.sendEmail(email, subject, content)
                         .then(function() {
-                            deferred.resolve();
                         }, function(error) {
-                            deferred.reject(error);
+                            dialogs.error('Error', 'Failed to notify curator automatically. Please send curator email manually.');
                         });
-                    return deferred.promise;
-                }
-
-                $scope.prepareSendEmail = function() {
-                    $scope.email.returnMessage = '';
                 };
+
                 $scope.toggleCompletedCuration = function() {
                     return function(item) {
                         if ($scope.allCuration) {
