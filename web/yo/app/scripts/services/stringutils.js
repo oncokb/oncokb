@@ -874,13 +874,15 @@ angular.module('oncokbApp')
         // get history data
         function getHistoryData(history) {
             var result = {};
-            _.each(history.keys(), function(key) {
-                if (['api'].indexOf(key) !== -1) {
-                    result[key] = Array.from(history.get(key));
-                } else {
-                    result[key] = history.get(key);
-                }
-            });
+            if (history && _.isArray(history.keys())) {
+                _.each(history.keys(), function(key) {
+                    if (['api'].indexOf(key) !== -1) {
+                        result[key] = Array.from(history.get(key));
+                    } else {
+                        result[key] = history.get(key);
+                    }
+                });
+            }
             return result;
         }
 

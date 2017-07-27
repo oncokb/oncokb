@@ -184,7 +184,7 @@ angular.module('oncokbApp')
             var historyResults;
             $scope.disableHistoryButton = true;
             $scope.checkHistoryInputStatus = function() {
-                if (!_.isUndefined($scope.genesForHistory) && $scope.genesForHistory.length > 0) {
+                if (_.isArray($scope.genesForHistory) && $scope.genesForHistory.length > 0) {
                     $scope.disableHistoryButton = false;
                 } else {
                     $scope.disableHistoryButton = true;
@@ -200,21 +200,19 @@ angular.module('oncokbApp')
                 if (document) {
                     storage.getRealtimeDocument(document.id).then(function(realtime) {
                         if (realtime && realtime.error) {
-                            console.log('did not get realtime document.');
+                            dialogs.error('Error', 'Fail to load ' + genesForHistory[index] + ' document. Please contact the developer.');
                         } else {
                             var model = realtime.getModel();
                             var historyModel = model.getRoot().get('history');
                             if (historyModel) {
                                 var historyData = stringUtils.getHistoryData(historyModel).api;
-                                if (historyData.length > 0) {
-                                    _.each(historyData, function(item) {
-                                        historyResults.push({gene: genesForHistory[index], admin: item.admin, timeStamp: item.timeStamp, records: item.records});
-                                    });
-                                }
+                                _.each(historyData, function(item) {
+                                    historyResults.push({gene: genesForHistory[index], admin: item.admin, timeStamp: item.timeStamp, records: item.records});
+                                });
                             }
                             if (index === genesForHistory.length - 1) {
                                 $scope.historySearchResults = historyResults;
-                                $scope.historyResultTable = true;
+                                $scope.showHistoryResultTable = true;
                                 $scope.loading = false;
                             } else {
                                 $timeout(function() {
