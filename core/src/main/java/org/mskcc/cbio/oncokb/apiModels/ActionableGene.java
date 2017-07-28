@@ -79,4 +79,7 @@ public class ActionableGene {
         this.pmids = pmids;
         this.abstracts = abstracts;
     }
+
+    public ActionableGene() {
+    }
 }

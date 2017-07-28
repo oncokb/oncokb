@@ -26,6 +26,7 @@ public class Article implements java.io.Serializable {
     private String elocationId;
     private String abstractContent;
     private String link;
+    private String reference;
 
     @JsonProperty("abstract")
     public String getAbstractContent() {
