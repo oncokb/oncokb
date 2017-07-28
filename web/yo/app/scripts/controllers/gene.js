@@ -1404,11 +1404,13 @@ angular.module('oncokbApp')
                 switch (type) {
                 case 'mutation':
                     historyData.location = mutation.name.getText();
+                    historyData.lastEditBy = mutation.name_review.get('updatedBy');
                     formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                     break;
                 case 'tumor':
                     if(isObsoleted(mutation)) return {};
                     historyData.location = historyStr(mutation, tumor);
+                    historyData.lastEditBy = tumor.name_review.get('updatedBy');
                     formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                     break;
                 case 'TI':
@@ -1418,6 +1420,7 @@ angular.module('oncokbApp')
                 case 'treatment':
                     if(isObsoleted(mutation) || isObsoleted(tumor) || isObsoleted(TI)) return {};
                     historyData.location = historyStr(mutation, tumor) + ', ' + TI.name.getText() + ', ' + treatment.name.getText();
+                    historyData.lastEditBy = treatment.name_review.get('updatedBy');
                     formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                     break;
                 case 'GENE_SUMMARY':
