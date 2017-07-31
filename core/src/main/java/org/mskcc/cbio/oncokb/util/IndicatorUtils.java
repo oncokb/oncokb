@@ -2,7 +2,6 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
@@ -125,8 +124,7 @@ public class IndicatorUtils {
             List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
             List<TumorType> oncoTreeTypes = new ArrayList<>();
 
-            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            Alteration matchedAlt = alterationBo.findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
+            Alteration matchedAlt = AlterationUtils.findAlteration(alteration.getGene(), alteration.getAlteration());
             indicatorQuery.setVariantExist(matchedAlt != null);
 
             // Whether alteration is hotpot from Matt's list
