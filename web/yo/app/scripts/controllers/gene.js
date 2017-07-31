@@ -583,8 +583,15 @@ angular.module('oncokbApp')
                 }
 
                 if($scope.status.hasReviewContent === false) {
+                    var articlesToCurate = 0;
+                    if ($rootScope.geneMetaData.has('CurationQueueArticles')) {
+                        articlesToCurate = $rootScope.geneMetaData.get('CurationQueueArticles');
+                    }
                     $rootScope.geneMetaData.clear();
                     $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
+                    if (articlesToCurate > 0) {
+                        $rootScope.geneMetaData.set('CurationQueueArticles', articlesToCurate);
+                    }
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
                     $rootScope.geneMetaData.get('currentReviewer').setText(User.name);
