@@ -64,6 +64,8 @@ public class VariantsApiController implements VariantsApi {
                 if (gene != null) {
                     if (AlterationUtils.isInferredAlterations(query.getVariant())) {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
+                    } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
+                        alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
                     } else {
                         Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
                         if (query.getVariant() == null && query.getProteinStart() == null && query.getProteinEnd() == null) {
@@ -89,6 +91,10 @@ public class VariantsApiController implements VariantsApi {
                 if (AlterationUtils.isInferredAlterations(query.getVariant())) {
                     for (Gene gene : GeneUtils.getAllGenes()) {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
+                    }
+                } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
+                    for (Gene gene : GeneUtils.getAllGenes()) {
+                        alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
                     }
                 } else {
                     alterationList = AlterationUtils.lookupVariant(query.getVariant(), false, AlterationUtils.getAllAlterations());

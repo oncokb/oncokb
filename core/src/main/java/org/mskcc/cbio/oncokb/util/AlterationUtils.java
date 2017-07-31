@@ -458,6 +458,23 @@ public final class AlterationUtils {
         return isInferredAlt;
     }
 
+    public static Boolean isLikelyInferredAlterations(String alteration) {
+        Boolean isLikelyInferredAlt = false;
+        if (alteration != null) {
+            String lowerCaseAlteration = alteration.trim().toLowerCase();
+            if (lowerCaseAlteration.startsWith("likely")) {
+                alteration = alteration.replaceAll("(?i)likely", "").trim();
+                for (String alt : inferredAlterations) {
+                    if (alteration.equalsIgnoreCase(alt)) {
+                        isLikelyInferredAlt = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return isLikelyInferredAlt;
+    }
+
     public static Set<Alteration> getAlterationsByKnownEffectInGene(Gene gene, String knownEffect, Boolean includeLikely) {
         Set<Alteration> alterations = new HashSet<>();
         if (includeLikely == null) {
