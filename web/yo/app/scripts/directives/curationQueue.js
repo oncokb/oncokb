@@ -50,6 +50,7 @@ angular.module('oncokbApp')
                         });
                     });
                     scope.getArticleList();
+                    scope.setArticlesNumberInMeta();
                     scope.dtOptions = {
                         hasBootstrap: true,
                         paging: false,
@@ -152,7 +153,7 @@ angular.module('oncokbApp')
                     $scope.predictedArticle = '';
                     $scope.validPMID = false;
                     $scope.getArticleList();
-                    setArticlesNumberInMeta();
+                    $scope.setArticlesNumberInMeta();
                     if (item.get('curator')) {
                         $scope.sendEmail(item);
                     }
@@ -226,7 +227,7 @@ angular.module('oncokbApp')
                     if (queueModelItem.get('addedAt') === queueItem.addedAt) {
                         queueModelItem.set('curated', true);
                         queueItem.curated = true;
-                        setArticlesNumberInMeta();
+                        $scope.setArticlesNumberInMeta();
                     }
                 };
                 $scope.deleteCuration = function(index) {
@@ -234,7 +235,7 @@ angular.module('oncokbApp')
                         $scope.queueModel.remove(index);
                         $scope.queue.splice(index, 1);
                         $scope.getArticleList();
-                        setArticlesNumberInMeta();
+                        $scope.setArticlesNumberInMeta();
                     }
                 };
                 $scope.getArticle = function(pmid) {
@@ -327,7 +328,7 @@ angular.module('oncokbApp')
                         return annotationLocation[x.article].join('; ');
                     }
                 };
-                function setArticlesNumberInMeta() {
+                $scope.setArticlesNumberInMeta = function() {
                     var count = 0;
                     _.each($scope.queue, function(item) {
                         if (!item.curated) {
