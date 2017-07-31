@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationType;
 
 import java.util.*;
 
@@ -78,7 +79,7 @@ public class FindRelevantAlterationsTest {
     @Test
     public void testAnnotateAlteration() throws Exception {
         // Particularly test consequence
-        Alteration alt = AlterationUtils.getAlteration(hugoSymbol, alteration, alterationType, null, null, null);
+        Alteration alt = AlterationUtils.getAlteration(hugoSymbol, alteration, AlterationType.getByName(alterationType), null, null, null);
         AlterationUtils.annotateAlteration(alt, alteration);
 
         LinkedHashSet<Alteration> relevantAlterations =

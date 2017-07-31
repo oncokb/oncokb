@@ -1,10 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
@@ -29,6 +26,7 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant
+        , @ApiParam(value = "Structural Variant Type.") @RequestParam(value = "svType", required = false) StructuralVariantType svType
         , @ApiParam(value = "Consequence") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "Protein Start") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "Protein End") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
@@ -45,7 +43,7 @@ public class SearchApiController implements SearchApi {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, null, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+            Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, null, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
             source = source == null ? "oncokb" : source;
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);

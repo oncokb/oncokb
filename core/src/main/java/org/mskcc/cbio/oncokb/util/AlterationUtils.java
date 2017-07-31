@@ -300,7 +300,7 @@ public final class AlterationUtils {
         return alteration;
     }
 
-    public static Alteration getAlteration(String hugoSymbol, String alteration, String alterationType,
+    public static Alteration getAlteration(String hugoSymbol, String alteration, AlterationType alterationType,
                                            String consequence, Integer proteinStart, Integer proteinEnd) {
         Alteration alt = new Alteration();
 
@@ -317,9 +317,8 @@ public final class AlterationUtils {
 
         AlterationType type = AlterationType.MUTATION;
         if (alterationType != null) {
-            AlterationType t = AlterationType.valueOf(alterationType.toUpperCase());
-            if (t != null) {
-                type = t;
+            if (alterationType != null) {
+                type = alterationType;
             }
         }
         alt.setAlterationType(type);
@@ -540,7 +539,7 @@ public final class AlterationUtils {
         return knownEffect;
     }
 
-    private static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
+    private static List<Alteration> getAlterations(Gene gene, String alteration, AlterationType alterationType, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
         VariantConsequence variantConsequence = null;
 
@@ -553,7 +552,7 @@ public final class AlterationUtils {
                     variantConsequence = new VariantConsequence(consequence, null, false);
                 }
                 alt.setConsequence(variantConsequence);
-                alt.setAlterationType(AlterationType.MUTATION);
+                alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
                 alt.setGene(gene);
                 alt.setProteinStart(proteinStart);
                 alt.setProteinEnd(proteinEnd);
@@ -567,7 +566,7 @@ public final class AlterationUtils {
             } else {
                 Alteration alt = new Alteration();
                 alt.setAlteration(alteration);
-                alt.setAlterationType(AlterationType.MUTATION);
+                alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
                 alt.setGene(gene);
                 alt.setProteinStart(proteinStart);
                 alt.setProteinEnd(proteinEnd);
@@ -584,7 +583,7 @@ public final class AlterationUtils {
         if (isFusion(alteration)) {
             Alteration alt = new Alteration();
             alt.setAlteration(alteration);
-            alt.setAlterationType(AlterationType.MUTATION);
+            alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
             alt.setGene(gene);
 
             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
@@ -723,7 +722,7 @@ public final class AlterationUtils {
         Integer proteinEnd = alteration.getProteinEnd();
 
         return getAlterations(
-            gene, alteration.getAlteration(), term,
+            gene, alteration.getAlteration(), alteration.getAlterationType(), term,
             proteinStart, proteinEnd,
             getAllAlterations(gene));
     }

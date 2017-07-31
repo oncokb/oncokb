@@ -110,7 +110,7 @@ public class SummaryUtils {
         if (exactMatchedAlt != null) {
             alteration = exactMatchedAlt;
         } else {
-            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), query.getAlterationType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             AlterationUtils.annotateAlteration(alteration, query.getAlteration());
         }
 
@@ -295,7 +295,7 @@ public class SummaryUtils {
             alteration = exactMatchAlteration;
         } else {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                query.getAlterationType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
 
