@@ -290,7 +290,7 @@ angular.module('oncokbApp')
                         return $scope.treatmentMessages[mutationName][tumorName][tiName][treatmentName];
                     }
 
-                }
+                };
             }
         };
     })

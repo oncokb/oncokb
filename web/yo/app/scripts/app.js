@@ -87,10 +87,6 @@ OncoKB.curateInfo = {
         name: {
             type: 'string'
         },
-        summary: {
-            type: 'string',
-            display: 'Description of summary'
-        },
         shortSummary: {
             type: 'string',
             display: 'Description of oncogenicity'
@@ -134,14 +130,6 @@ OncoKB.curateInfo = {
         version: {
             type: 'string',
             display: 'Version'
-        },
-        pages: {
-            type: 'string',
-            display: 'Pages'
-        },
-        category: {
-            type: 'string',
-            display: 'NCCN category of evidence and consensus'
         },
         short: {
             type: 'string',
@@ -202,13 +190,11 @@ OncoKB.curateInfo = {
             type: 'string',
             display: 'Short prevalence'
         },
-        progImp: {
-            type: 'string',
-            display: 'Prognostic implications'
+        prognostic: {
+            type: 'Prognostic'
         },
-        shortProgImp: {
-            type: 'string',
-            display: 'Short prognostic implications'
+        diagnostic: {
+            type: 'Diagnostic'
         },
         trials: {
             type: 'list'
@@ -221,6 +207,28 @@ OncoKB.curateInfo = {
         },
         interactAlts: {
             type: 'InteractAlts'
+        }
+    },
+    Prognostic: {
+        level: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        },
+        short: {
+            type: 'string'
+        }
+    },
+    Diagnostic: {
+        level: {
+            type: 'string'
+        },
+        description: {
+            type: 'string'
+        },
+        short: {
+            type: 'string'
         }
     },
     TI: {
@@ -262,9 +270,6 @@ OncoKB.curateInfo = {
         description: {
             type: 'string',
             display: 'Description of evidence'
-        },
-        trials: {
-            type: 'string'
         }
     },
     // Mutation effect

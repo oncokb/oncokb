@@ -931,7 +931,7 @@ angular.module('oncokbApp')
                     var _mutation = {};
                     _mutation.tumors = [];
                     _mutation.effect = {};
-                    _mutation = combineData(_mutation, e, ['name', 'summary'], excludeObsolete, excludeComments, onlyReviewedContent);
+                    _mutation = combineData(_mutation, e, ['name'], excludeObsolete, excludeComments, onlyReviewedContent);
                     // This is a weird way to do, but due to time constraint, this has to be implemented in this way.
                     // I assigned shortSummary estatus for oncogenic and oncogenic estatus to mutation effect,
                     // so there is no need to check excludeObsolete since I did outside of combinedata.
@@ -960,9 +960,6 @@ angular.module('oncokbApp')
                                 selectedAttrs.push('prevalence', 'shortPrevalence');
                             }
 
-                            if (!(excludeObsolete && e1.progImp_eStatus && e1.progImp_eStatus.has('obsolete') && e1.progImp_eStatus.get('obsolete') === 'true')) {
-                                selectedAttrs.push('progImp', 'shortProgImp');
-                            }
                             __tumor = combineData(__tumor, e1, selectedAttrs, excludeObsolete, excludeComments, onlyReviewedContent);
 
                             // __tumor.cancerTypes =  __tumor.name.split(',').map(function(item) {
@@ -977,15 +974,39 @@ angular.module('oncokbApp')
                             __tumor.nccn = {};
                             __tumor.nccn_uuid = '';
                             __tumor.interactAlts = {};
+                            __tumor.prognostic = {};
+                            __tumor.prognostic_uuid = '';
+                            __tumor.diagnostic = {};
+                            __tumor.diagnostic_uuid = '';
 
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
-                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
+                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
                                 if (e1.nccn_uuid) {
                                     __tumor.nccn_uuid = validUUID(e1.nccn_uuid);
                                 }
                                 __tumor.nccn_review = getReview(e1.nccn_review);
                                 var nccnReviewItems = [e1.nccn_review, e1.nccn.therapy_review, e1.nccn.disease_review, e1.nccn.version_review, e1.nccn.description_review];
                                 __tumor.nccn_review.updateTime = nccnReviewItems[mostRecentItem(nccnReviewItems, true)].get('updateTime');
+                            }
+
+                            if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
+                                __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
+                                if (e1.prognostic_uuid) {
+                                    __tumor.prognostic_uuid = validUUID(e1.prognostic_uuid);
+                                }
+                                __tumor.prognostic_review = getReview(e1.prognostic_review);
+                                var prognosticReviewItems = [e1.prognostic_review, e1.prognostic.description_review, e1.prognostic.level_review];
+                                __tumor.prognostic_review.updateTime = prognosticReviewItems[mostRecentItem(prognosticReviewItems, true)].get('updateTime');
+                            }
+
+                            if (!(excludeObsolete && e1.diagnostic_eStatus && e1.diagnostic_eStatus.has('obsolete') && e1.diagnostic_eStatus.get('obsolete') === 'true')) {
+                                __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
+                                if (e1.diagnostic_uuid) {
+                                    __tumor.diagnostic_uuid = validUUID(e1.diagnostic_uuid);
+                                }
+                                __tumor.diagnostic_review = getReview(e1.diagnostic_review);
+                                var diagnosticReviewItems = [e1.diagnostic_review, e1.diagnostic.description_review, e1.diagnostic.level_review];
+                                __tumor.diagnostic_review.updateTime = diagnosticReviewItems[mostRecentItem(diagnosticReviewItems, true)].get('updateTime');
                             }
 
                             if (!(excludeObsolete && e1.trials_eStatus && e1.trials_eStatus.has('obsolete') && e1.trials_eStatus.get('obsolete') === 'true')) {
@@ -1036,7 +1057,13 @@ angular.module('oncokbApp')
                             });
 
                             if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
-                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'pages', 'category', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
+                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
+                            }
+                            if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
+                                __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level'], excludeObsolete, excludeComments, onlyReviewedContent);
+                            }
+                            if (!(excludeObsolete && e1.diagnostic_eStatus && e1.diagnostic_eStatus.has('obsolete') && e1.diagnostic_eStatus.get('obsolete') === 'true')) {
+                                __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level'], excludeObsolete, excludeComments, onlyReviewedContent);
                             }
 
                             __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeObsolete, excludeComments, onlyReviewedContent);
