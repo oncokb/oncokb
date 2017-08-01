@@ -2,12 +2,15 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
@@ -35,10 +38,18 @@ public interface VariantsApi {
         , @ApiParam(value = "variant name.") @RequestParam(value = "variant", required = false) String variant
         , @ApiParam(value = "") @RequestParam(value = "variantType", required = false) String variantType
         , @ApiParam(value = "") @RequestParam(value = "consequence", required = false) String consequence
-//        , @ApiParam(value = "") @RequestParam(value = "refResidues", required = false) String refResidues
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
-//        , @ApiParam(value = "") @RequestParam(value = "variantResidues", required = false) String variantResidues
+    );
+
+    @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List", tags = {"Variants", "Search",})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = List.class, responseContainer = "List")})
+    @RequestMapping(value = "/variants/lookup",
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<List<Alteration>>> variantsLookupPost(
+        @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
     );
 
 //    @ApiOperation(value = "", notes = "Get list of evidences for specific variant.", response = Evidence.class, responseContainer = "List", tags = {"Evidence",})

@@ -434,6 +434,66 @@ public final class AlterationUtils {
         return result;
     }
 
+    public static Boolean isInferredAlterations(String alteration) {
+        Boolean isInferredAlt = false;
+        if (alteration != null) {
+            for (String alt : inferredAlterations) {
+                if (alteration.equalsIgnoreCase(alt)) {
+                    isInferredAlt = true;
+                    break;
+                }
+            }
+        }
+        return isInferredAlt;
+    }
+
+    public static Boolean isLikelyInferredAlterations(String alteration) {
+        Boolean isLikelyInferredAlt = false;
+        if (alteration != null) {
+            String lowerCaseAlteration = alteration.trim().toLowerCase();
+            if (lowerCaseAlteration.startsWith("likely")) {
+                alteration = alteration.replaceAll("(?i)likely", "").trim();
+                for (String alt : inferredAlterations) {
+                    if (alteration.equalsIgnoreCase(alt)) {
+                        isLikelyInferredAlt = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return isLikelyInferredAlt;
+    }
+
+    public static Set<Alteration> getAlterationsByKnownEffectInGene(Gene gene, String knownEffect, Boolean includeLikely) {
+        Set<Alteration> alterations = new HashSet<>();
+        if (includeLikely == null) {
+            includeLikely = false;
+        }
+        if (gene != null && knownEffect != null) {
+            Set<Evidence> evidences = EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene);
+            for (Evidence evidence : evidences) {
+                if (knownEffect.equalsIgnoreCase(evidence.getKnownEffect())) {
+                    alterations.addAll(evidence.getAlterations());
+                }
+                if (includeLikely) {
+                    String likely = "likely " + knownEffect;
+                    if (likely.equalsIgnoreCase(evidence.getKnownEffect())) {
+                        alterations.addAll(evidence.getAlterations());
+                    }
+                }
+            }
+        }
+        return alterations;
+    }
+
+    public static String getInferredAlterationsKnownEffect(String inferredAlt) {
+        String knownEffect = null;
+        if (inferredAlt != null) {
+            knownEffect = inferredAlt.replaceAll("(?i)\\s+mutations", "");
+        }
+        return knownEffect;
+    }
+
     private static List<Alteration> getAlterations(Gene gene, String alteration, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
         VariantConsequence variantConsequence = null;
@@ -526,12 +586,12 @@ public final class AlterationUtils {
             return alterationList;
         query = query.trim().toLowerCase();
         for (Alteration alteration : alterations) {
-            if(isMatch(exactMatch, query, alteration.getAlteration())) {
+            if (isMatch(exactMatch, query, alteration.getAlteration())) {
                 alterationList.add(alteration);
                 continue;
             }
 
-            if(isMatch(exactMatch, query, alteration.getName())) {
+            if (isMatch(exactMatch, query, alteration.getName())) {
                 alterationList.add(alteration);
                 continue;
             }
@@ -553,6 +613,7 @@ public final class AlterationUtils {
         }
         return false;
     }
+
     // Sort the alternative alleles alphabetically
     private static void sortAlternativeAlleles(List<Alteration> alternativeAlleles) {
         Collections.sort(alternativeAlleles, new Comparator<Alteration>() {

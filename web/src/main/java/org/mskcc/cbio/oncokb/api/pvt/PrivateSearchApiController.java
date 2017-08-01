@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
@@ -97,10 +98,14 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 // Assume one of the keyword is gene
                 Map<String, Set<Gene>> map = new HashedMap();
                 for (String keyword : keywords) {
-                    map.put(keyword, GeneUtils.searchGene(keyword, true));
+                    map.put(keyword, GeneUtils.searchGene(keyword, false));
                 }
 
                 result.addAll(getMatch(map, keywords, false));
+
+                // If there is no match, the key words could referring to a variant, try to do a blur variant search
+                String fullKeywords = StringUtils.join(keywords, " ");
+                result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, AlterationUtils.getAllAlterations()), fullKeywords));
 
                 // If there is no match in OncoKB database, still try to annotate variant
                 // Only when the oncogenicity is not empty
@@ -182,7 +187,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
                 typeaheadSearchResp.setGene(gene);
                 typeaheadSearchResp.setVariantExist(false);
-                typeaheadSearchResp.setLink("/genes/" + gene.getHugoSymbol());
+                typeaheadSearchResp.setLink("/gene/" + gene.getHugoSymbol());
                 typeaheadSearchResp.setQueryType("gene");
 
                 if (evidences.containsKey(gene)) {
@@ -234,10 +239,14 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel.getLevel());
         }
 
+        if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("oncogenic mutations")) {
+            typeaheadSearchResp.setOncogenicity(Oncogenicity.YES.getOncogenic());
+        }
+
         typeaheadSearchResp.setQueryType("variant");
 
         // TODO: switch to variant page once it's ready.
-        typeaheadSearchResp.setLink("/genes/" + alteration.getGene().getHugoSymbol());
+        typeaheadSearchResp.setLink("/gene/" + alteration.getGene().getHugoSymbol() + "/variant/" + alteration.getAlteration());
         return typeaheadSearchResp;
     }
 

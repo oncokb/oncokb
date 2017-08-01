@@ -4,15 +4,18 @@ import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,67 +37,73 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "variant name.") @RequestParam(value = "variant", required = false) String variant
         , @ApiParam(value = "") @RequestParam(value = "variantType", required = false) String variantType
         , @ApiParam(value = "") @RequestParam(value = "consequence", required = false) String consequence
-//        , @ApiParam(value = "") @RequestParam(value = "refResidues", required = false) String refResidues
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
-//        , @ApiParam(value = "") @RequestParam(value = "variantResidues", required = false) String variantResidues
     ) {
-        HttpStatus httpStatus = HttpStatus.OK;
-        List<Alteration> alterationList = new ArrayList<>();
-        if (hugoSymbol != null || entrezGeneId != null) {
-            Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-            if (gene != null) {
-                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
-                if (variant == null && proteinStart == null && proteinEnd == null) {
-                    alterationList.addAll(allAlterations);
-                } else {
-                    AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
-                    Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), variant, variantType, consequence, proteinStart, proteinEnd);
-                    alterationList.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
-                }
-            }
-        } else if (variant != null) {
-            alterationList = AlterationUtils.lookupVariant(variant, false, AlterationUtils.getAllAlterations());
-        }
-
-        return new ResponseEntity<>(alterationList, HttpStatus.OK);
+        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd);
+        return new ResponseEntity<>(getVariants(query), HttpStatus.OK);
     }
 
-//    public ResponseEntity<ApiListResp> variantsVariantIdEvidencesGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//        , @ApiParam(value = "Separate by comma. Evidence type includes MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
-//    ) {
-//        // do some magic!
-//        return new ResponseEntity<ApiListResp>(HttpStatus.OK);
-//    }
-//
-//    public ResponseEntity<ApiObjectResp> variantsVariantIdGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//    ) {
-//        // do some magic!
-//        return new ResponseEntity<ApiObjectResp>(HttpStatus.OK);
-//    }
-//
-//    public ResponseEntity<ApiObjectResp> variantsVariantIdTreatmentsGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//    ) {
-//        // do some magic!
-//        return new ResponseEntity<ApiObjectResp>(HttpStatus.OK);
-//    }
-//
-//    public ResponseEntity<ApiListResp> variantsVariantIdTumorTypesGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//    ) {
-//        // do some magic!
-//        return new ResponseEntity<ApiListResp>(HttpStatus.OK);
-//    }
-//
-//    public ResponseEntity<ApiListResp> variantsVariantIdTumorTypesOncoTreeCodeTreatmentsGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//        , @ApiParam(value = "OncoTree tumor types unique code.", required = true) @PathVariable("oncoTreeCode") String oncoTreeCode
-//    ) {
-//        // do some magic!
-//        return new ResponseEntity<ApiListResp>(HttpStatus.OK);
-//    }
+    @Override
+    public ResponseEntity<List<List<Alteration>>> variantsLookupPost(@ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body) {
+        List<List<Alteration>> result = new ArrayList<>();
+        if (body != null) {
+            for (VariantSearchQuery query : body) {
+                result.add(getVariants(query));
+            }
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    private List<Alteration> getVariants(VariantSearchQuery query) {
+        LinkedHashSet<Alteration> alterationSet = new LinkedHashSet<>();
+        List<Alteration> alterationList = new ArrayList<>();
+        if (query != null) {
+            if (query.getHugoSymbol() != null || query.getEntrezGeneId() != null) {
+                Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
+                if (gene != null) {
+                    if (AlterationUtils.isInferredAlterations(query.getVariant())) {
+                        alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
+                    } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
+                        alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
+                    } else {
+                        Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
+                        if (query.getVariant() == null && query.getProteinStart() == null && query.getProteinEnd() == null) {
+                            alterationSet.addAll(allAlterations);
+                        } else {
+                            AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
+                            List<Alteration> alterations = AlterationUtils.lookupVariant(query.getVariant(), true, allAlterations);
+
+                            // If this variant is not annotated
+                            if (alterations == null || alterations.isEmpty()) {
+                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), query.getVariantType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                                if (alteration != null) {
+                                    alterations.add(alteration);
+                                }
+                            }
+                            for (Alteration alteration : alterations) {
+                                alterationSet.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
+                            }
+                        }
+                    }
+                }
+            } else if (query.getVariant() != null) {
+                if (AlterationUtils.isInferredAlterations(query.getVariant())) {
+                    for (Gene gene : GeneUtils.getAllGenes()) {
+                        alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
+                    }
+                } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
+                    for (Gene gene : GeneUtils.getAllGenes()) {
+                        alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
+                    }
+                } else {
+                    alterationList = AlterationUtils.lookupVariant(query.getVariant(), false, AlterationUtils.getAllAlterations());
+                }
+            }
+        }
+
+        alterationList.addAll(alterationSet);
+        return alterationList;
+    }
 
 }
