@@ -467,6 +467,12 @@ angular.module('oncokbApp')
                 case 'nccn':
                     _datum = rootModel.create('NCCN');
                     break;
+                case 'diagnostic':
+                    _datum = rootModel.create('Diagnostic');
+                    break;
+                case 'prognostic':
+                    _datum = rootModel.create('Prognostic');
+                    break;
                 case 'effect':
                     _datum = rootModel.create('ME');
                     break;

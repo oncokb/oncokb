@@ -335,7 +335,7 @@ angular.module('oncokbApp')
                     }
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                     dlg.result.then(function() {
-                        var uuid;
+                        var uuid; // uuid that is used as evidence identifier in the database
                         var items = [];
                         $scope.bothChanged = false;
                         switch ($scope.adjustedEvidenceType) {
@@ -398,8 +398,14 @@ angular.module('oncokbApp')
                             items = [{obj: $scope.tumor.prevalence, reviewObj: $scope.tumor.prevalence_review, uuid: $scope.tumor.prevalence_uuid}];
                             break;
                         case 'PROGNOSTIC_IMPLICATION':
-                            uuid = $scope.tumor.progImp_uuid;
-                            items = [{obj: $scope.tumor.progImp, reviewObj: $scope.tumor.progImp_review, uuid: $scope.tumor.progImp_uuid}];
+                            uuid = $scope.tumor.prognostic_uuid;
+                            items = [{obj: $scope.tumor.prognostic.description, reviewObj: $scope.tumor.prognostic.description_review, uuid: $scope.tumor.prognostic.description_uuid},
+                                {obj: $scope.tumor.prognostic.level, reviewObj: $scope.tumor.prognostic.level_review, uuid: $scope.tumor.prognostic.level_uuid}];
+                            break;
+                        case 'DIAGNOSTIC_IMPLICATION':
+                            uuid = $scope.tumor.diagnostic_uuid;
+                            items = [{obj: $scope.tumor.diagnostic.description, reviewObj: $scope.tumor.diagnostic.description_review, uuid: $scope.tumor.diagnostic.description_uuid},
+                                {obj: $scope.tumor.diagnostic.level, reviewObj: $scope.tumor.diagnostic.level_review, uuid: $scope.tumor.diagnostic.level_uuid}];
                             break;
                         case 'NCCN_GUIDELINES':
                             uuid = $scope.tumor.nccn_uuid;

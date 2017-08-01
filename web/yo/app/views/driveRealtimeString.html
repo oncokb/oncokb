@@ -53,6 +53,12 @@
                         </div>
                     </div>
                 </div>
+                <div ng-switch-when="implication" class="chosen-full-width">
+                    <select ng-disabled="!fe"
+                            ng-model="content.stringO"
+                            ng-options="opt.value as opt.label for opt in o">
+                    </select>
+                </div>
                 <div ng-switch-when="select-chosen" class="chosen-full-width">
                     <select ng-disabled="!fe"
                             chosen allow-single-deselect="true" ng-model="content.stringO"
@@ -165,7 +171,21 @@
                             </div>
                         </div>
                     </div>
-
+                </div>
+                <div ng-switch-when="implication" class="treatment-select">
+                    <div>
+                        <h4 ng-if="reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">New Content:</h4>
+                        <div>
+                            <select ng-disabled="reviewObj.get('review') === false ? true : false"
+                                    ng-model="content.stringO"
+                                    ng-options="opt.value as opt.label for opt in o">
+                            </select>
+                        </div>
+                        <div ng-if="reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">
+                            <h4>Old Content:</h4>
+                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.has('lastReviewed') ? reviewObj.get('lastReviewed') : content.stringO}}</p>
+                        </div>
+                    </div>
                 </div>
                 <div ng-switch-when="select-chosen" class="chosen-full-width">
                     <h4 ng-if="reviewObj.get('review') !== false && !reviewObj.get('removedItem') && !reviewObj.get('addedItem') && !reviewObj.get('unobsoleted')">New Content:</h4>

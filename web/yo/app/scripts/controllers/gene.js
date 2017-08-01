@@ -489,12 +489,21 @@ angular.module('oncokbApp')
                             tumorChanged = true;
                             userNames.push(tumor.prevalence_review.get('updatedBy'));
                         }
-                        tempArr = [tumor.progImp_review];
+                        tempArr = [tumor.prognostic_review, tumor.prognostic.description_review, tumor.prognostic.level_review];
                         setOriginalStatus(tempArr);
-                        if (mainUtils.needReview(tumor.progImp_uuid)) {
-                            tumor.progImp_review.set('review', true);
+                        if (mainUtils.needReview(tumor.prognostic.description_uuid) || mainUtils.needReview(tumor.prognostic.level_uuid)) {
+                            tumor.prognostic_review.set('review', true);
                             tumorChanged = true;
-                            userNames.push(tumor.progImp_review.get('updatedBy'));
+                            setUpdatedSignature(tempArr, tumor.prognostic_review);
+                            userNames.push(tumor.prognostic_review.get('mostRecent').by.getText());
+                        }
+                        tempArr = [tumor.diagnostic_review, tumor.diagnostic.description_review, tumor.diagnostic.level_review];
+                        setOriginalStatus(tempArr);
+                        if (mainUtils.needReview(tumor.diagnostic.description_uuid) || mainUtils.needReview(tumor.diagnostic.level_uuid)) {
+                            tumor.diagnostic_review.set('review', true);
+                            tumorChanged = true;
+                            setUpdatedSignature(tempArr, tumor.diagnostic_review);
+                            userNames.push(tumor.diagnostic_review.get('mostRecent').by.getText());
                         }
                         tempArr = [tumor.nccn_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review];
                         setOriginalStatus(tempArr);
@@ -637,8 +646,11 @@ angular.module('oncokbApp')
                         if(tumor.prevalence_review.get('review')) {
                             $scope.geneStatus[i][j].prevalence.isOpen = true;
                         }
-                        if(tumor.progImp_review.get('review')) {
-                            $scope.geneStatus[i][j].progImp.isOpen = true;
+                        if(tumor.prognostic_review.get('review')) {
+                            $scope.geneStatus[i][j].prognostic.isOpen = true;
+                        }
+                        if(tumor.diagnostic_review.get('review')) {
+                            $scope.geneStatus[i][j].diagnostic.isOpen = true;
                         }
                         if(tumor.nccn_review.get('review')) {
                             $scope.geneStatus[i][j].nccn.isOpen = true;
@@ -791,8 +803,11 @@ angular.module('oncokbApp')
                         if (tumor.prevalence_review.get('updatedBy') === userName) {
                             formEvidencesPerUser(userName, 'PREVALENCE', mutation, tumor, null, null);
                         }
-                        if (tumor.progImp_review.get('updatedBy') === userName) {
+                        if (tumor.prognostic_review.get('mostRecent') && tumor.prognostic_review.get('mostRecent').by.getText() === userName) {
                             formEvidencesPerUser(userName, 'PROGNOSTIC_IMPLICATION', mutation, tumor, null, null);
+                        }
+                        if (tumor.diagnostic_review.get('mostRecent') && tumor.diagnostic_review.get('mostRecent').by.getText() === userName) {
+                            formEvidencesPerUser(userName, 'DIAGNOSTIC_IMPLICATION', mutation, tumor, null, null);
                         }
                         if (tumor.nccn_review.get('mostRecent') && tumor.nccn_review.get('mostRecent').by.getText() === userName) {
                             formEvidencesPerUser(userName, 'NCCN_GUIDELINES', mutation, tumor, null, null);
@@ -953,7 +968,14 @@ angular.module('oncokbApp')
                     'R1': 'LEVEL_R1',
                     'R2': 'LEVEL_R2',
                     'R3': 'LEVEL_R3',
-                    'no': 'NO'
+                    'no': 'NO',
+                    'P1': 'LEVEL_P1',
+                    'P2': 'LEVEL_P2',
+                    'P3': 'LEVEL_P3',
+                    'P4': 'LEVEL_P4',
+                    'D1': 'LEVEL_D1',
+                    'D2': 'LEVEL_D2',
+                    'D3': 'LEVEL_D3'
                 };
                 var extraData = _.clone(data);
                 var i = 0;
@@ -1022,12 +1044,35 @@ angular.module('oncokbApp')
                     }
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
-                    if (mainUtils.needReview(tumor.progImp_uuid)) {
-                        data.description = tumor.progImp.text;
-                        dataUUID = tumor.progImp_uuid.getText();
-                        data.lastEdit = tumor.progImp_review.get('updateTime');
-                        reviewObj = tumor.progImp_review;
+                    if (mainUtils.needReview(tumor.prognostic.description_uuid) || mainUtils.needReview(tumor.prognostic.level_uuid)) {
+                        data.description = tumor.prognostic.description.text;
+                        data.levelOfEvidence = levelMapping[tumor.prognostic.level.getText()];
+                        dataUUID = tumor.prognostic_uuid.getText();
+                        if (tumor.prognostic_review.has('mostRecent')) {
+                            data.lastEdit = tumor.prognostic_review.get('mostRecent').value.getText();
+                        } else {
+                            tempReviewObjArr = [tumor.prognostic.description_review, tumor.prognostic.level_review];
+                            tempRecentIndex = stringUtils.mostRecentItem(tempReviewObjArr, true);
+                            data.lastEdit = tempReviewObjArr[tempRecentIndex].get('updateTime');
+                        }
+                        reviewObj = tumor.prognostic_review;
                         historyData.location = historyStr(mutation, tumor) + ', Prognostic';
+                    }
+                    break;
+                case 'DIAGNOSTIC_IMPLICATION':
+                    if (mainUtils.needReview(tumor.diagnostic.description_uuid) || mainUtils.needReview(tumor.diagnostic.level_uuid)) {
+                        data.description = tumor.diagnostic.description.text;
+                        data.levelOfEvidence = levelMapping[tumor.diagnostic.level.getText()];
+                        dataUUID = tumor.diagnostic_uuid.getText();
+                        if (tumor.diagnostic_review.has('mostRecent')) {
+                            data.lastEdit = tumor.diagnostic_review.get('mostRecent').value.getText();
+                        } else {
+                            tempReviewObjArr = [tumor.diagnostic.description_review, tumor.diagnostic.level_review];
+                            tempRecentIndex = stringUtils.mostRecentItem(tempReviewObjArr, true);
+                            data.lastEdit = tempReviewObjArr[tempRecentIndex].get('updateTime');
+                        }
+                        reviewObj = tumor.diagnostic_review;
+                        historyData.location = historyStr(mutation, tumor) + ', Diagnostic';
                     }
                     break;
                 case 'NCCN_GUIDELINES':
@@ -1319,7 +1364,12 @@ angular.module('oncokbApp')
                     acceptItem([{reviewObj: tumor.prevalence_review, uuid: tumor.prevalence_uuid}], tumor.prevalence_review);
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
-                    acceptItem([{reviewObj: tumor.progImp_review, uuid: tumor.progImp_uuid}], tumor.progImp_review);
+                    acceptItem([{reviewObj: tumor.prognostic.description_review, uuid: tumor.prognostic.description_uuid},
+                        {reviewObj: tumor.prognostic.level_review, uuid: tumor.prognostic.level_uuid}], tumor.prognostic_review);
+                    break;
+                case 'DIAGNOSTIC_IMPLICATION':
+                    acceptItem([{reviewObj: tumor.diagnostic.description_review, uuid: tumor.diagnostic.description_uuid},
+                        {reviewObj: tumor.diagnostic.level_review, uuid: tumor.diagnostic.level_uuid}], tumor.diagnostic_review);
                     break;
                 case 'NCCN_GUIDELINES':
                     tumor.nccn_review.clear();
@@ -1394,7 +1444,9 @@ angular.module('oncokbApp')
                 case 'PREVALENCE':
                     return [tumor.prevalence_uuid.getText()];
                 case 'PROGNOSTIC_IMPLICATION':
-                    return [tumor.progImp_uuid.getText()];
+                    return [tumor.prognostic_uuid.getText()];
+                case 'DIAGNOSTIC_IMPLICATION':
+                    return [tumor.diagnostic_uuid.getText()];
                 case 'NCCN_GUIDELINES':
                     return [tumor.nccn_uuid.getText()];
                 case 'CLINICAL_TRIAL':
@@ -1437,6 +1489,7 @@ angular.module('oncokbApp')
                 case 'ONCOGENIC':
                 case 'PREVALENCE':
                 case 'PROGNOSTIC_IMPLICATION':
+                case 'DIAGNOSTIC_IMPLICATION':
                 case 'NCCN_GUIDELINES':
                 case 'CLINICAL_TRIAL':
                     formEvidencesByType([type], mutation, tumor, TI, treatment, evidences, historyData);
@@ -1454,7 +1507,7 @@ angular.module('oncokbApp')
                     tempType = 'tumor';
                 }
                 if (type === 'tumor') {
-                    typeArr = ['TUMOR_TYPE_SUMMARY', 'PREVALENCE', 'PROGNOSTIC_IMPLICATION', 'NCCN_GUIDELINES', 'CLINICAL_TRIAL'];
+                    typeArr = ['TUMOR_TYPE_SUMMARY', 'PREVALENCE', 'PROGNOSTIC_IMPLICATION', 'DIAGNOSTIC_IMPLICATION', 'NCCN_GUIDELINES', 'CLINICAL_TRIAL'];
                     dataArr = tumor.TI.asArray();
                     tempType = 'TI';
                 }
@@ -1570,9 +1623,9 @@ angular.module('oncokbApp')
                     }
                     break;
                 case 'PROGNOSTIC_IMPLICATION':
-                    if (tumor.progImp.text) {
-                        reviewObjs = [tumor.progImp_review];
-                        uuids = [tumor.progImp_uuid];
+                    if (tumor.prognostic.description.text) {
+                        reviewObjs = [tumor.prognostic_review];
+                        uuids = [tumor.prognostic_uuid];
                     }
                     break;
                 case 'NCCN_GUIDELINES':
@@ -1682,7 +1735,8 @@ angular.module('oncokbApp')
                     }
                     tumor.summary_review.clear();
                     tumor.prevalence_review.clear();
-                    tumor.progImp_review.clear();
+                    tumor.prognostic_review.clear();
+                    tumor.diagnostic_review.clear();
                     tumor.nccn_review.clear();
                     tumor.nccn.therapy_review.clear();
                     tumor.nccn.disease_review.clear();
@@ -1753,7 +1807,7 @@ angular.module('oncokbApp')
                     clearRollbackLastReview([mutation.name_review, mutation.oncogenic_review, mutation.effect_review, mutation.description_review]);
                     for (var j = 0; j < mutation.tumors.length; j++) {
                         var tumor = mutation.tumors.get(j);
-                        clearRollbackLastReview([tumor.summary_review, tumor.prevalence_review, tumor.progImp_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review]);
+                        clearRollbackLastReview([tumor.summary_review, tumor.prevalence_review, tumor.diagnostic_review, tumor.prognostic_review, tumor.nccn.therapy_review, tumor.nccn.disease_review, tumor.nccn.version_review, tumor.nccn.description_review]);
                         for (var k = 0; k < tumor.TI.length; k++) {
                             var ti = tumor.TI.get(k);
                             clearRollbackLastReview([ti.description_review]);
@@ -2219,7 +2273,8 @@ angular.module('oncokbApp')
                     uuids.push(obj.name_uuid.getText());
                     uuids.push(obj.summary_uuid.getText());
                     uuids.push(obj.prevalence_uuid.getText());
-                    uuids.push(obj.progImp_uuid.getText());
+                    uuids.push(obj.prognostic_uuid.getText());
+                    uuids.push(obj.diagnostic_uuid.getText());
                     uuids.push(obj.trials_uuid.getText());
                     uuids.push(obj.nccn_uuid.getText());
                     uuids.push(obj.nccn.therapy_uuid.getText());
@@ -2384,7 +2439,8 @@ angular.module('oncokbApp')
                             geneStatus[strIndex].oncogenic = new GeneStatusSingleton(true, $scope.status.hideAllEmpty);
                         } else if (index === 1) {
                             geneStatus[strIndex].prevalence = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
-                            geneStatus[strIndex].progImp = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].prognostic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].diagnostic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                             geneStatus[strIndex].nccn = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                             geneStatus[strIndex].trials = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
                         }
@@ -2791,7 +2847,7 @@ angular.module('oncokbApp')
             function regenerateGeneStatus() {
                 var geneStatus = {};
                 var mutationKeys = ['oncogenic'];
-                var tumorKeys = ['prevalence', 'progImp', 'nccn', 'trials'];
+                var tumorKeys = ['prevalence', 'prognostic', 'diagnostic', 'nccn', 'trials'];
 
                 var changeMutation = false;
 
@@ -3346,6 +3402,29 @@ angular.module('oncokbApp')
                         levels[key].push(__datum);
                     }
                 });
+                levels.prognostic = [{
+                    value: 'P1',
+                    label: 'Px1 - WHO included criteria'
+                }, {
+                    value: 'P2',
+                    label: 'Px2 - ELN included criteria (only for AML, may be combined with Px1)'
+                }, {
+                    value: 'P3',
+                    label: 'Px3 - NCCN included criteria'
+                }, {
+                    value: 'P4',
+                    label: 'Px4 - Compelling peer reviewed literature included criteria'
+                }];
+                levels.diagnostic = [{
+                    value: 'D1',
+                    label: 'Dx1 - WHO included criteria'
+                }, {
+                    value: 'D2',
+                    label: 'Dx2 - NCCN included criteria'
+                }, {
+                    value: 'D3',
+                    label: 'Dx3 - Compelling peer reviewed literature included criteria'
+                }];
                 return levels;
             }
 
