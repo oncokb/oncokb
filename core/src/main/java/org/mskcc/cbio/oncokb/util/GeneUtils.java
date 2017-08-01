@@ -133,6 +133,13 @@ public class GeneUtils {
                         }
                     }
                 }
+
+                // If the keyword contains dash and exact search is false, then we should return both fusion genes
+                if (keyword.contains("-") && exactSearch == false) {
+                    for (String subKeyword : keyword.split("-")) {
+                        genes.addAll(searchGene(subKeyword, false));
+                    }
+                }
             }
         }
 
@@ -216,6 +223,8 @@ public class GeneUtils {
             if (i1Alias.equals(-1))
                 return 1;
             if (i2Alias.equals(-1))
+                return -1;
+            if (i1Alias.equals(i2Alias))
                 return -1;
             return i1Alias - i2Alias;
         } else {
