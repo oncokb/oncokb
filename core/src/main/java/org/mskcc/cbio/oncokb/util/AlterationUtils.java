@@ -381,26 +381,15 @@ public final class AlterationUtils {
 
     public static List<Alteration> excludeVUS(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
-        Set<Alteration> VUS = new HashSet<>();
-        Set<Gene> allGenes = new HashSet<>();
-        if (CacheUtils.isEnabled()) {
-            allGenes = CacheUtils.getAllGenes();
-        } else {
-            allGenes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
-        }
-        for (Gene gene : allGenes) {
-            Set<Alteration> alts = new HashSet<>();
-            if (CacheUtils.isEnabled()) {
-                alts = CacheUtils.getVUS(gene.getEntrezGeneId());
-            } else {
-                alts = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
-            }
-            if (alts != null) {
-                VUS.addAll(alts);
-            }
-        }
 
         for (Alteration alteration : alterations) {
+            Set<Alteration> VUS = new HashSet<>();
+            Gene gene = alteration.getGene();
+            if (CacheUtils.isEnabled()) {
+                VUS = CacheUtils.getVUS(gene.getEntrezGeneId());
+            } else {
+                VUS = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
+            }
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
             }
