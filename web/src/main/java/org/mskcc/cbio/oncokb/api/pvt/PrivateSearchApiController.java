@@ -120,9 +120,14 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                                         AlterationUtils.annotateAlteration(alteration, keyword);
                                         TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                         typeaheadSearchResp.setVariantExist(false);
-                                        if (typeaheadSearchResp.getOncogenicity() != null
-                                            && !typeaheadSearchResp.getOncogenicity().isEmpty()) {
-                                            result.add(typeaheadSearchResp);
+                                        result.add(typeaheadSearchResp);
+                                        if (typeaheadSearchResp.getOncogenicity() == null
+                                            || typeaheadSearchResp.getOncogenicity().isEmpty()) {
+                                            String annotation = "Please make sure your query is valid.";
+                                            if (typeaheadSearchResp.getAnnotation() != null) {
+                                                annotation = typeaheadSearchResp.getAnnotation() + " " + annotation;
+                                            }
+                                            typeaheadSearchResp.setAnnotation(annotation);
                                         }
                                     }
                                 }
