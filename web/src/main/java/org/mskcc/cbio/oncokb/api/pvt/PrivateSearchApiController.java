@@ -94,11 +94,26 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
                 // Blur search variant
                 result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
+
+                // If the keyword contains dash and result is empty, then we should return both fusion genes
+                if (keywords.get(0).contains("-") && result.isEmpty()) {
+                    for (String subKeyword : keywords.get(0).split("-")) {
+                        result.addAll(convertGene(GeneUtils.searchGene(subKeyword, false), subKeyword));
+                    }
+                }
             } else {
                 // Assume one of the keyword is gene
                 Map<String, Set<Gene>> map = new HashedMap();
                 for (String keyword : keywords) {
-                    map.put(keyword, GeneUtils.searchGene(keyword, false));
+                    if (keyword.contains("-")) {
+                        Set<Gene> subGenes = new HashSet<>();
+                        for (String subKeyword : keyword.split("-")) {
+                            subGenes.addAll(GeneUtils.searchGene(subKeyword, false));
+                        }
+                        map.put(keyword, subGenes);
+                    } else {
+                        map.put(keyword, GeneUtils.searchGene(keyword, false));
+                    }
                 }
 
                 result.addAll(getMatch(map, keywords, false));
