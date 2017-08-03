@@ -70,6 +70,11 @@ public class VariantsApiController implements VariantsApi {
                 Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
                 if (gene != null) {
                     if (AlterationUtils.isInferredAlterations(query.getVariant())) {
+                        // If inferred alteration has been manually curated, it should be returned in the list
+                        Alteration alteration = AlterationUtils.findAlteration(gene, query.getVariant());
+                        if (alteration != null) {
+                            alterationSet.add(alteration);
+                        }
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
                     } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
@@ -97,6 +102,12 @@ public class VariantsApiController implements VariantsApi {
             } else if (query.getVariant() != null) {
                 if (AlterationUtils.isInferredAlterations(query.getVariant())) {
                     for (Gene gene : GeneUtils.getAllGenes()) {
+                        // If inferred alteration has been manually curated, it should be returned in the list
+                        Alteration alteration = AlterationUtils.findAlteration(gene, query.getVariant());
+                        if (alteration != null) {
+                            alterationSet.add(alteration);
+                        }
+
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
                     }
                 } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
