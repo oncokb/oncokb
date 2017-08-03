@@ -386,6 +386,64 @@ angular.module('oncokbApp')
             }
             return false;
         }
+        /**
+         * Get Onco tree
+         * **/
+
+        function getOncoTreeMainTypes() {
+            var deferred = $q.defer();
+            DatabaseConnector.getOncoTreeMainTypes()
+                .then(function(result) {
+                    if (result.data) {
+                        result.data.push({
+                            id: -1,
+                            name: 'All Liquid Tumors'
+                        });
+                        result.data.push({
+                            id: -2,
+                            name: 'All Solid Tumors'
+                        });
+                        result.data.push({
+                            id: -3,
+                            name: 'All Tumors'
+                        });
+                        result.data.push({
+                            id: -4,
+                            name: 'Germline Disposition'
+                        });
+                        result.data.push({
+                            id: -5,
+                            name: 'All Pediatric Tumors'
+                        });
+                        result.data.push({
+                            id: -6,
+                            name: 'Other Tumor Types'
+                        });
+                        var mainTypeList = _.map(result.data, function(mainType) {
+                            return mainType.name;
+                        });
+                        DatabaseConnector.getOncoTreeTumorTypesByMainTypes(mainTypeList).then(function(tumorTypesResult) {
+                            deferred.resolve({
+                                mainTypes:result.data,
+                                tumorTypes: tumorTypesResult.data
+                            });
+                        }, function() {
+                            // TODO: if OncoTree server returns error.
+                        });
+                    }
+                }, function(error) {
+                    deferred.reject(error);
+                });
+            return deferred.promise;
+        }
+
+        function isExpiredCuration(timeStamp) {
+            if (timeStamp && (new Date(timeStamp).getTime() + 8.64e+7) < new Date().getTime()) {
+                return true;
+            } else {
+                return false;
+            }
+        };
 
         return {
             getCancerTypesName: getCancerTypesName,
@@ -400,6 +458,8 @@ angular.module('oncokbApp')
             getLastReviewedCancerTypesName: getLastReviewedCancerTypesName,
             sendEmail: sendEmail,
             needReview: needReview,
-            developerCheck: developerCheck
+            developerCheck: developerCheck,
+            getOncoTreeMainTypes: getOncoTreeMainTypes,
+            isExpiredCuration: isExpiredCuration
         };
     });

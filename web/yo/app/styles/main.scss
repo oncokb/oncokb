@@ -823,7 +823,8 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 
 .curationQueue {
     display: inline-block;
-    width: 100%;
+    margin-left: 2%;
+    width: 95%;
     .headerStyle {
         margin-top: 50px;
         margin-bottom: 30px;
@@ -846,9 +847,6 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .operationStyle {
         min-width: 90px;
     }
-    .article {
-        width: 30%;
-    }
     .displayAll {
         font-size: 14px;
         margin-left: 20px
@@ -858,6 +856,22 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     }
     table > tbody > tr > td, table > thead > tr > th {
         padding: 5px;
+    }
+    .cellStyle {
+        padding-left: 0px;
+        padding-right: 5px
+    }
+    .labelAlign{
+      display: inline-block;
+      width: 150px;
+      float: left;
+    }
+    .inputStyle{
+      width: 80%;
+      display: inline-block;
+    }
+    .attention{
+      color: red;
     }
 }
 

@@ -120,6 +120,8 @@ angular.module('oncokbApp')
                                                             uuidMapping.set(uuid, record);
                                                         } else if (uuid === 'CurationQueueArticles') {
                                                             uuidMapping.set('CurationQueueArticles', originalMeta.get(hugoSymbol).get('CurationQueueArticles'));
+                                                        } else if (uuid === 'AllArticles') {
+                                                            uuidMapping.set('AllArticles', originalMeta.get(hugoSymbol).get('AllArticles'));
                                                         }
                                                     });
                                                     newReview.set(hugoSymbol, uuidMapping);
