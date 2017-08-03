@@ -37,6 +37,7 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "Level of evidences.") @RequestParam(value = "levels", required = false) String levels
         , @ApiParam(value = "Only show treatments of highest level") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.") @RequestParam(value = "queryType", required = false, defaultValue = "regular") String queryType
+        , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -44,24 +45,7 @@ public class SearchApiController implements SearchApi {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query();
-            query.setId(id);
-
-            if (entrezGeneId != null) {
-                query.setEntrezGeneId(entrezGeneId);
-            }
-            query.setHugoSymbol(hugoSymbol);
-            query.setAlteration(variant);
-            query.setTumorType(tumorType);
-            query.setConsequence(consequence);
-            query.setType(queryType);
-            if (proteinStart != null) {
-                query.setProteinStart(proteinStart);
-            }
-            if (proteinEnd != null) {
-                query.setProteinEnd(proteinEnd);
-            }
-
+            Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, null, tumorType, consequence, proteinStart, proteinEnd, hgvs);
             source = source == null ? "oncokb" : source;
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);

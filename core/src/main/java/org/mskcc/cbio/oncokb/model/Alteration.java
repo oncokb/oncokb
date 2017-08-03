@@ -3,6 +3,10 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
+import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -172,7 +176,7 @@ public class Alteration implements java.io.Serializable {
     @JsonIgnore
     public String getUniqueId() {
         List<String> content = new ArrayList<>();
-        if(this.gene != null) {
+        if (this.gene != null) {
             if (this.gene.getHugoSymbol() != null) {
                 content.add(this.gene.getHugoSymbol());
             } else {
