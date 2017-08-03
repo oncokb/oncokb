@@ -10,51 +10,66 @@
  * # curationQueue
  */
 angular.module('oncokbApp')
-    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, user, DatabaseConnector, $rootScope, $timeout, users, mainUtils, dialogs, _, $q) {
+    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, users, mainUtils, dialogs, _, storage, $q) {
         return {
             templateUrl: 'views/curationQueue.html',
             restrict: 'E',
             scope: {
+                location: '=',
+                queue: '=?', // the '?' makes it optional to assign value, otherwise it will throw Non_assignable expression
+                docs: '=',
+                metaFlags: '=',
+                hugoSymbols: '=',
                 specifyAnnotationInGene: '&specifyAnnotation'
             },
             replace: true,
             link: {
                 pre: function preLink(scope) {
-                    scope.queue = [];
                     scope.data = {
-                        curatorsToNotify: [],
-                        curatorNotificationList: [],
+                        allCurations: false,
+                        curators: [],
                         modifiedCurator: {},
+                        modifiedMainType: '',
+                        modifiedSubType: {},
                         sectionList: ['Mutation Effect', 'Prevalence', 'Prognostic implications', 'NCCN guidelines', 'Standard sensitivity', 'Standard resistance', 'Investigational sensitivity', 'Investigational resistance'],
-                        modifiedSection: ''
+                        modifiedSection: '',
+                        metaModel: '',
+                        geneModel: '',
+                        queueModel: '',
+                        geneMetaData: '',
+                        mainTypes: [],
+                        subTypes: [],
+                        formExpanded: false,
+                        editing: false,
+                        hugoVariantMapping: {},
+                        resendEmail: false,
+                        queueItemInEditing: '',
+                        invalidData: false,
+                        loading: false
                     };
-                    scope.curators = [];
-                    scope.email = {
-                        status: {sending: false},
-                        returnMessage: ''
+                    scope.loading = {
+                        add: false,
+                        complete: {},
+                        update: {},
+                        delete: {}
                     };
-                    scope.queueModel = $rootScope.model.getRoot().get('queue');
-                    _.each(scope.queueModel.asArray(), function(item) {
-                        scope.queue.push({
-                            article: item.get('article'),
-                            pmid: item.get('pmid'),
-                            pmidString: 'PMID: ' + item.get('pmid'),
-                            link: item.get('link'),
-                            variant: item.get('variant'),
-                            tumorType: item.get('tumorType'),
-                            section: item.get('section'),
-                            addedBy: item.get('addedBy'),
-                            addedAt: item.get('addedAt'),
-                            curated: item.get('curated'),
-                            curator: item.get('curator')
-                        });
-                    });
-                    scope.getArticleList();
-                    scope.setArticlesNumberInMeta();
+                    scope.input = {
+                        article: '',
+                        link: '',
+                        hugoSymbols: '',
+                        variant: '',
+                        mainType: '',
+                        subType: '',
+                        section: '',
+                        curator: '',
+                        dueDay: '',
+                        comment: ''
+                    };
                     scope.dtOptions = {
                         hasBootstrap: true,
                         paging: false,
                         scrollCollapse: true,
+                        scrollY: 500,
                         aaSorting: [[0, 'asc']]
                     };
                     scope.dtColumns = [
@@ -66,16 +81,47 @@ angular.module('oncokbApp')
                         DTColumnDefBuilder.newColumnDef(5).withOption('sType', 'date'),
                         DTColumnDefBuilder.newColumnDef(6),
                         DTColumnDefBuilder.newColumnDef(7),
-                        DTColumnDefBuilder.newColumnDef(8)
+                        DTColumnDefBuilder.newColumnDef(8),
+                        DTColumnDefBuilder.newColumnDef(9),
+                        DTColumnDefBuilder.newColumnDef(10)
                     ];
+                    if (scope.location === 'gene') {
+                        scope.data.geneModel = $rootScope.model;
+                        scope.data.queueModel = $rootScope.model.getRoot().get('queue');
+                        scope.data.geneMetaData = $rootScope.geneMetaData;
+                        scope.queue = [];
+                        _.each(scope.data.queueModel.asArray(), function(item) {
+                            scope.queue.push({
+                                article: item.get('article'),
+                                pmid: item.get('pmid'),
+                                pmidString: 'PMID: ' + item.get('pmid'),
+                                link: item.get('link'),
+                                variant: item.get('variant'),
+                                mainType: item.get('mainType'),
+                                subType: item.get('subType'),
+                                section: item.get('section'),
+                                addedBy: item.get('addedBy'),
+                                addedAt: item.get('addedAt'),
+                                curated: item.get('curated'),
+                                curator: item.get('curator'),
+                                comment: item.get('comment'),
+                                dueDay: item.get('dueDay'),
+                                notified: item.get('notified')
+                            });
+                        });
+                        scope.setArticlesNumberInMeta();
+                    } else if (scope.location === 'genes') {
+                        scope.data.metaModel = $rootScope.metaData;
+                    }
+                    scope.secondTimeAutoNotify();
                 },
                 post: function postLink(scope) {
-                    scope.$watch('article', function(n, o) {
+                    scope.$watch('input.article', function(n, o) {
                         if (n !== o) {
                             $timeout.cancel(scope.articleTimeoutPromise);
                             scope.articleTimeoutPromise = $timeout(function() {
-                                if (/^[\d]*$/.test(scope.article)) {
-                                    scope.getArticle(scope.article);
+                                if (/^[\d]*$/.test(scope.input.article)) {
+                                    scope.getArticle(scope.input.article);
                                 }
                             }, 500);
                         }
@@ -83,166 +129,339 @@ angular.module('oncokbApp')
                 }
             },
             controller: function($scope) {
-                $scope.allCuration = false;
                 DatabaseConnector.getOncokbInfo(function(oncokbInfo) {
                     if (oncokbInfo && oncokbInfo.users) {
-                        $scope.curators = oncokbInfo.users;
+                        $scope.data.curators = oncokbInfo.users;
                     }
                 });
                 $scope.userRole = users.getMe().role;
-                $scope.getArticleList = function() {
-                    var tempArr = [];
-                    _.each($scope.queue, function(item) {
-                        if (item.pmid) {
-                            tempArr.push(item.pmid);
-                        } else if (item.article) {
-                            tempArr.push(item.article);
+                $scope.getButtonHtml = function (type, addedAt) {
+                    var result = '';
+                    switch(type) {
+                    case 'add':
+                        if ($scope.loading.add) {
+                            result = '<i class="fa fa-spinner" aria-hidden="true"></i>';
+                        } else if ($scope.data.editing) {
+                            result = 'Save modified curation';
+                        } else {
+                            result = 'Add';
                         }
-                    });
-                    $scope.articleList = _.uniq(tempArr);
+                        break;
+                    case 'complete':
+                        if ($scope.loading.complete[addedAt]) {
+                            $scope.data.loading = true;
+                            result = '<i class="fa fa-spinner" aria-hidden="true"></i>';
+                        } else {
+                            result = '<i class="fa fa-check"></i>';
+                        }
+                        break;
+                    case 'update':
+                        if ($scope.loading.update[addedAt]) {
+                            $scope.data.loading = true;
+                            result = '<i class="fa fa-spinner" aria-hidden="true"></i>';
+                        } else {
+                            result = '<i class="fa fa-check"></i>';
+                        }
+                        break;
+                    case 'delete':
+                        if ($scope.loading.delete[addedAt]) {
+                            $scope.data.loading = true;
+                            result = '<i class="fa fa-spinner" aria-hidden="true"></i>';
+                        } else {
+                            result = '<i class="fa fa-trash-o"></i>';
+                        }
+                        break;
+                    }
+                    return result;
                 };
-                $scope.addCuration = function() {
-                    if ($scope.articleList.indexOf($scope.article) === -1) {
-                        addConfirmedCuration();
-                    } else {
-                        var dlg = dialogs.confirm('Confirmation', $scope.article + ' has already been curated or added. Are you sure you want to add this?');
-                        dlg.result.then(function() {
-                            addConfirmedCuration();
-                        }, function() {
-                            console.log('canceled');
+                function searchQueueModel(hugoSymbol) {
+                    var fileId;
+                    for (var i = 0; i < $scope.docs.length; i++) {
+                        if ($scope.docs[i].title === hugoSymbol) {
+                            fileId = $scope.docs[i].id;
+                            break;
+                        }
+                    }
+                    var deferred = $q.defer();
+                    if (fileId) {
+                        storage.getRealtimeDocument(fileId).then(function(realtime) {
+                            if (realtime && realtime.error) {
+                                deferred.error();
+                            } else {
+                                $scope.data.geneModel = realtime.getModel();
+                                $scope.data.queueModel = realtime.getModel().getRoot().get('queue');
+                                $scope.data.geneMetaData = $scope.data.metaModel.get(hugoSymbol);
+                                deferred.resolve();
+                            }
                         });
+                    } else {
+                        deferred.error('Can not find the gene document');
+                    }
+                    return deferred.promise;
+                }
+                $scope.addCuration = function() {
+                    if ($scope.data.editing) {
+                        var queueItem;
+                        for (var i = 0; i < $scope.queue.length; i++) {
+                            if ($scope.queue[i].addedAt === $scope.data.queueItemInEditing.addedAt) {
+                                queueItem = $scope.queue[i];
+                                break;
+                            }
+                        }
+                        if ($scope.location === 'genes') {
+                            var promise = searchQueueModel(queueItem.hugoSymbol);
+                            promise.then(function() {
+                                saveConfirmedCuration(queueItem);
+                            }, function(error) {
+                            });
+                        } else {
+                            saveConfirmedCuration(queueItem);
+                        }
+                    } else {
+                        if ($scope.location === 'genes') {
+                            $scope.loading.add = true;
+                            $scope.data.loading = true;
+                            var tempArr = $scope.input.variant.split(';');
+                            _.each(tempArr, function(pair) {
+                                if (pair) {
+                                    var tempIndex = pair.indexOf(':');
+                                    var hugoSymbol = pair.substring(0, tempIndex);
+                                    var variant = pair.substring(tempIndex+1);
+                                    if (hugoSymbol && variant) {
+                                        $scope.data.hugoVariantMapping[hugoSymbol.trim()] = variant.trim();
+                                    }
+                                }
+                            });
+                            addConfirmedCurationInGenes(0);
+                        } else if ($scope.location === 'gene') {
+                            addConfirmedCuration();
+                            $scope.clearInput();
+                        }
                     }
                 };
-                function addConfirmedCuration() {
-                    var item = $rootScope.model.createMap({
-                        link: $scope.link,
-                        variant: $scope.variant,
-                        tumorType: $scope.tumorType,
-                        section: $scope.section,
-                        curator: $scope.curator ? $scope.curator.name : '',
+                function addConfirmedCurationInGenes(index) {
+                    var hugoSymbol = $scope.input.hugoSymbols[index];
+                    var promise = searchQueueModel(hugoSymbol);
+                    promise.then(function() {
+                        if ($scope.data.geneModel) {
+                            addConfirmedCuration(hugoSymbol);
+                        }
+                        if (index === $scope.input.hugoSymbols.length-1) {
+                            $scope.loading.add = false;
+                            $scope.data.loading = false;
+                            $scope.clearInput();
+                        } else {
+                            $timeout(function() {
+                                addConfirmedCurationInGenes(++index);
+                            }, 200);
+                        }
+                    }, function(error) {
+                    });
+                }
+
+                function addConfirmedCuration(hugoSymbol) {
+                    $scope.data.geneModel.beginCompoundOperation();
+                    var item = $scope.data.geneModel.createMap({
+                        link: $scope.input.link,
+                        variant: $scope.data.hugoVariantMapping[hugoSymbol] ? $scope.data.hugoVariantMapping[hugoSymbol] : $scope.input.variant,
+                        mainType: $scope.input.mainType,
+                        subType: $scope.input.subType ? $scope.input.subType.name : '',
+                        section: $scope.input.section ? $scope.input.section.join() : '',
+                        curator: $scope.input.curator ? $scope.input.curator.name : '',
                         curated: false,
-                        addedBy: user.name,
-                        addedAt: new Date().getTime()
+                        addedBy: users.getMe().name,
+                        addedAt: new Date().getTime(),
+                        dueDay: $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '',
+                        comment: $scope.input.comment,
+                        notified: false
                     });
                     if ($scope.predictedArticle && $scope.validPMID) {
                         item.set('article', $scope.predictedArticle);
-                        item.set('pmid', $scope.article);
+                        item.set('pmid', $scope.input.article);
                     } else {
-                        item.set('article', $scope.article);
+                        item.set('article', $scope.input.article);
                     }
-                    $scope.queueModel.push(item);
-                    $scope.queue.push({
+                    $scope.data.queueModel.push(item);
+                    var queueItem = {
                         article: item.get('article'),
                         pmid: item.get('pmid'),
                         pmidString: 'PMID: ' + item.get('pmid'),
                         link: item.get('link'),
                         variant: item.get('variant'),
-                        tumorType: item.get('tumorType'),
+                        mainType: item.get('mainType'),
+                        subType: item.get('subType'),
                         section: item.get('section'),
                         addedBy: item.get('addedBy'),
                         addedAt: item.get('addedAt'),
                         curated: item.get('curated'),
-                        curator: item.get('curator')
-                    });
-                    $scope.article = '';
-                    $scope.link = '';
-                    $scope.variant = '';
-                    $scope.tumorType = '';
-                    $scope.section = '';
-                    $scope.curator = '';
-                    $scope.predictedArticle = '';
-                    $scope.validPMID = false;
-                    $scope.getArticleList();
-                    $scope.setArticlesNumberInMeta();
+                        curator: item.get('curator'),
+                        dueDay: item.get('dueDay'),
+                        comment: item.get('comment'),
+                        notified: item.get('notified')
+                    };
+                    if ($scope.location === 'genes' && hugoSymbol) {
+                        queueItem.hugoSymbol = hugoSymbol;
+                    }
+                    $scope.queue.push(queueItem);
+                    $scope.setArticlesNumberInMeta(hugoSymbol);
                     if (item.get('curator')) {
-                        $scope.sendEmail(item);
+                        $scope.sendEmail(queueItem);
                     }
+                    $scope.data.geneModel.endCompoundOperation();
                 }
-
-                $scope.editCuration = function(index) {
-                    if (!$scope.queue[index]) {
-                        return;
+                $scope.initialProcess = function(x, type) {
+                    if ($scope.location === 'genes' && x.hugoSymbol) {
+                        var hugoSymbol = x.hugoSymbol;
+                        if (type !== 'edit') {
+                            $scope.loading[type][x.addedAt] = true;
+                            var promise = searchQueueModel(hugoSymbol);
+                            promise.then(function(result) {
+                                processByType(x, type);
+                                $scope.loading[type][x.addedAt] = false;
+                                $scope.data.loading = false;
+                            }, function(error) {
+                            });
+                        } else {
+                            processByType(x, type);
+                        }
+                    } else {
+                        processByType(x, type);
                     }
-                    $scope.queue[index].editable = true;
-                    $scope.data.modifiedCurator = {};
-                    if ($scope.queue[index].curator) {
-                        for (var i = 0; i < $scope.curators.length; i++) {
-                            if ($scope.curators[i].name === $scope.queue[index].curator) {
-                                $scope.data.modifiedCurator = $scope.curators[i];
+                };
+                function processByType(x, type) {
+                    var queueModelItem, queueItem;
+                    if (type !== 'edit') {
+                        for (var i = 0; i < $scope.data.queueModel.length; i++) {
+                            if ($scope.data.queueModel.get(i).get('addedAt') === x.addedAt) {
+                                queueModelItem = $scope.data.queueModel.get(i);
                                 break;
                             }
                         }
                     }
-                    $scope.data.modifiedSection = $scope.queue[index].section;
-                };
-                $scope.updateCuration = function(index, x) {
-                    if (!$scope.queue[index]) {
-                        return;
-                    }
-                    var queueModelItem = $scope.queueModel.get(index);
-                    var queueItem = $scope.queue[index];
-                    if (queueModelItem.get('addedAt') === queueItem.addedAt) {
-                        if (x.article !== queueModelItem.get('article') && $scope.articleList.indexOf(x.article) !== -1) {
-                            var dlg = dialogs.confirm('Confirmation', x.article + ' has already been curated or added. Are you sure you want to modify to this?');
-                            dlg.result.then(function() {
-                                updateConfirmedCuration(index, x);
-                            }, function() {
-                                $scope.queue[index].editable = false;
-                                x.article = queueModelItem.get('article');
-                                x.variant = queueModelItem.get('variant');
-                                x.tumorType = queueModelItem.get('tumorType');
-                                x.section = queueModelItem.get('section');
-                                x.curator = queueModelItem.get('curator');
-                            });
-                        } else {
-                            updateConfirmedCuration(index, x);
+                    for (var i = 0; i < $scope.queue.length; i++) {
+                        if ($scope.queue[i].addedAt === x.addedAt) {
+                            queueItem = $scope.queue[i];
+                            break;
                         }
                     }
-                };
-                function updateConfirmedCuration(index, x) {
-                    var queueModelItem = $scope.queueModel.get(index);
-                    $scope.queue[index].editable = false;
-                    $scope.queue[index].curator = !_.isEmpty($scope.data.modifiedCurator) ? $scope.data.modifiedCurator.name : '';
-                    $scope.queue[index].section = $scope.data.modifiedSection;
-                    if (!x.pmid) {
-                        queueModelItem.set('article', x.article);
-                        $scope.getArticleList();
-                    }
-                    var sendEmailFlag = false;
-                    if ($scope.queue[index].curator && (queueModelItem.get('variant') !== x.variant || queueModelItem.get('tumorType') !== x.tumorType
-                        || queueModelItem.get('section') !== $scope.queue[index].section || queueModelItem.get('curator') !== $scope.queue[index].curator)) {
-                        sendEmailFlag = true;
-                    }
-                    queueModelItem.set('variant', x.variant);
-                    queueModelItem.set('tumorType', x.tumorType);
-                    queueModelItem.set('section', $scope.queue[index].section);
-                    queueModelItem.set('curator', $scope.queue[index].curator);
-                    if (sendEmailFlag) {
-                        $scope.sendEmail(queueModelItem);
+                    switch (type) {
+                    case 'edit':
+                        editCuration(queueItem);
+                        break;
+                    case 'delete':
+                        deleteCuration(queueItem, queueModelItem);
+                        break;
+                    case 'complete':
+                        completeCuration(queueItem, queueModelItem);
+                        break;
                     }
                 }
-                $scope.completeCuration = function(index) {
-                    var queueModelItem = $scope.queueModel.get(index);
-                    var queueItem = $scope.queue[index];
-                    if (queueModelItem.get('addedAt') === queueItem.addedAt) {
-                        queueModelItem.set('curated', true);
-                        queueItem.curated = true;
-                        $scope.setArticlesNumberInMeta();
+
+                function editCuration(queueItem) {
+                    $scope.data.editing = true;
+                    $scope.data.queueItemInEditing = queueItem;
+                    $scope.data.modifiedCurator = {};
+                    if (queueItem.curator) {
+                        for (var i = 0; i < $scope.data.curators.length; i++) {
+                            if ($scope.data.curators[i].name === queueItem.curator) {
+                                $scope.data.modifiedCurator = $scope.data.curators[i];
+                                break;
+                            }
+                        }
                     }
+                    $scope.data.modifiedMainType = '';
+                    $scope.data.modifiedSubType = {};
+                    if (queueItem.mainType) {
+                        for (var i = 0;i < $scope.data.mainTypes.length; i++) {
+                            if ($scope.data.mainTypes[i] === queueItem.mainType) {
+                                $scope.data.modifiedMainType = $scope.data.mainTypes[i];
+                                break;
+                            }
+                        }
+                    }
+                    if ($scope.data.modifiedMainType && queueItem.subType) {
+                        for (var i = 0;i < $scope.data.subTypes[$scope.data.modifiedMainType].length; i++) {
+                            if ($scope.data.subTypes[$scope.data.modifiedMainType][i].name === queueItem.subType) {
+                                $scope.data.modifiedSubType = $scope.data.subTypes[$scope.data.modifiedMainType][i];
+                                break;
+                            }
+                        }
+                    }
+                    $scope.data.formExpanded = true;
+                    $scope.input = {
+                        article: queueItem.article,
+                        link: queueItem.link,
+                        variant: queueItem.variant,
+                        mainType: $scope.data.modifiedMainType,
+                        subType: $scope.data.modifiedSubType,
+                        section: queueItem.section.split(','),
+                        curator: $scope.data.modifiedCurator,
+                        dueDay: $scope.getFormattedDate(queueItem.dueDay),
+                        comment: queueItem.comment
+                    };
+                    if ($scope.location === 'genes') {
+                        $scope.input.hugoSymbols = [queueItem.hugoSymbol];
+                    }
+                    $timeout(function() {
+                        var dueDay = angular.element(document.querySelector('#datepicker'));
+                        dueDay.datepicker();
+                    }, 1000);
+                }
+                $scope.getFormattedDate = function(timeStamp) {
+                    var tempTime = new Date(timeStamp);
+                    var month = tempTime.getMonth() + 1;
+                    var day = tempTime.getDate();
+                    var year = tempTime.getFullYear();
+                    return month + "/" + day + "/" + year;
+                }
+                function saveConfirmedCuration(queueItem) {
+                    var queueModelItem;
+                    for (var i = 0; i < $scope.data.queueModel.length; i++) {
+                        if ($scope.data.queueModel.get(i).get('addedAt') === $scope.data.queueItemInEditing.addedAt) {
+                            queueModelItem = $scope.data.queueModel.get(i);
+                            break;
+                        }
+                    }
+                    queueModelItem.set('article', $scope.input.article);
+                    queueModelItem.set('link', $scope.input.link);
+                    queueModelItem.set('variant', $scope.input.variant);
+                    queueModelItem.set('mainType', $scope.input.mainType);
+                    queueModelItem.set('subType', $scope.input.subType ? $scope.input.subType.name : '');
+                    queueModelItem.set('section', $scope.input.section ? $scope.input.section.join() : '');
+                    queueModelItem.set('curator', $scope.input.curator ? $scope.input.curator.name : '');
+                    queueModelItem.set('dueDay', $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '');
+                    queueModelItem.set('comment', $scope.input.comment);
+
+                    queueItem.article = queueModelItem.get('article');
+                    queueItem.link = queueModelItem.get('link');
+                    queueItem.variant = queueModelItem.get('variant');
+                    queueItem.mainType = queueModelItem.get('mainType');
+                    queueItem.subType = queueModelItem.get('subType');
+                    queueItem.section = queueModelItem.get('section');
+                    queueItem.curator = queueModelItem.get('curator');
+                    queueItem.dueDay = queueModelItem.get('dueDay');
+                    queueItem.comment = queueModelItem.get('comment');
+                    $scope.clearInput();
+                    if ($scope.data.resendEmail) {
+                        $scope.sendEmail(queueItem, queueModelItem);
+                    }
+                }
+                function completeCuration(queueItem, queueModelItem) {
+                    queueModelItem.set('curated', true);
+                    queueItem.curated = true;
+                    $scope.setArticlesNumberInMeta(queueItem.hugoSymbol);
                 };
-                $scope.deleteCuration = function(index) {
-                    if ($scope.queueModel.get(index).get('addedAt') === $scope.queue[index].addedAt) {
-                        $scope.queueModel.remove(index);
-                        $scope.queue.splice(index, 1);
-                        $scope.getArticleList();
-                        $scope.setArticlesNumberInMeta();
-                    }
+                function deleteCuration(queueItem, queueModelItem) {
+                    $scope.data.queueModel.removeValue(queueModelItem);
+                    var index = $scope.queue.indexOf(queueItem);
+                    $scope.queue.splice(index, 1);
+                    $scope.setArticlesNumberInMeta(queueItem.hugoSymbol);
                 };
                 $scope.getArticle = function(pmid) {
                     if (!pmid) {
                         $scope.predictedArticle = '';
                         $scope.validPMID = false;
-                        $scope.link = '';
+                        $scope.input.link = '';
                         return;
                     }
                     DatabaseConnector.getPubMedArticle([pmid], function(data) {
@@ -250,7 +469,7 @@ angular.module('oncokbApp')
                         if (!articleData || articleData.error) {
                             $scope.predictedArticle = '<p style="color: red">Invalid PMID</p>';
                             $scope.validPMID = false;
-                            $scope.link = '';
+                            $scope.input.link = '';
                         } else {
                             var tempArticle = articleData.title.trim();
                             // for some articles, the tile start with '[', and end with '].' we need to trim it in such cases
@@ -270,56 +489,70 @@ angular.module('oncokbApp')
                             $scope.pmid = pmid;
                             $scope.predictedArticle = articleStr;
                             $scope.validPMID = true;
-                            $scope.link = 'https://www.ncbi.nlm.nih.gov/pubmed/' + pmid;
+                            $scope.input.link = 'https://www.ncbi.nlm.nih.gov/pubmed/' + pmid;
                         }
                     }, function() {
                         console.log('error');
                     });
                 };
-                $scope.sendEmail = function(item) {
+                $scope.sendEmail = function(queueItem, queueModelItem) {
+                    var expiredCuration = false;
+                    if ($scope.isExpiredCuration(queueItem.dueDay)) {
+                        expiredCuration = true;
+                    }
                     var email = '';
-                    for (var i = 0; i < $scope.curators.length; i++) {
-                        if (item.get('curator') === $scope.curators[i].name) {
-                            email = $scope.curators[i].email;
+                    for (var i = 0; i < $scope.data.curators.length; i++) {
+                        if (queueItem.curator === $scope.data.curators[i].name) {
+                            email = $scope.data.curators[i].email;
                             break;
                         }
                     }
                     if (!email) return;
-                    var content = 'Dear ' + item.get('curator').split(' ')[0] + ',\n\n';
-                    content += item.get('addedBy') + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
-                    var tempArr = [item.get('article')];
-                    if (item.get('link')) {
-                        tempArr = tempArr.concat(['(', item.get('link'), ')']);
+                    var content = 'Dear ' + queueItem.curator.split(' ')[0] + ',\n\n';
+                    if (expiredCuration) {
+                        content += 'You have not completed curation of the assigned publication: ' + queueItem.article;
+                        if (queueItem.link) {
+                            content += '(' + queueItem.link + ')';
+                        }
+                        content += ' which was due on ' + $scope.getFormattedDate(queueItem.dueDay) + '. Please complete this assignment as soon as possible and let us know when you have done this. \n\nIf you have already completed this task, please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the genes or gene page (this will let us know the task is complete). If you have any questions or concerns please email or slack us as needed.';
+                        content += 'Thank you, \nOncoKB Admin';
+                    } else {
+                        content += queueItem.addedBy + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
+                        var tempArr = [queueItem.article];
+                        if (queueItem.link) {
+                            tempArr = tempArr.concat(['(', queueItem.link, ')']);
+                        }
+                        if (queueItem.variant) {
+                            tempArr = tempArr.concat(['Alteration:', queueItem.variant + ',']);
+                        }
+                        if (queueItem.subType) {
+                            tempArr = tempArr.concat(['Tumor type:', queueItem.subType + ',']);
+                        } else if (queueItem.mainType) {
+                            tempArr = tempArr.concat(['Tumor type:', queueItem.mainType + ',']);
+                        }
+                        if (queueItem.section) {
+                            tempArr = tempArr.concat(['Section:', queueItem.section]);
+                        }
+                        content += tempArr.join(' ') + '\n';
+                        if (queueItem.comment) {
+                            content += queueItem.comment + '\n';
+                        }
+                        content += '\nPlease try to curate this literature before ' + $scope.getFormattedDate(queueItem.dueDay) + ' and remember to log your hours for curating this data.\n\n';
+                        content += 'IMPORTANT: Please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the genes or gene page (this will let us know the task is complete).\n\n';
+                        content += 'If you have any questions or concerns please email or slack ' + queueItem.addedBy + '.\n\n';
+                        content += 'Thank you, \nOncoKB Admin';
                     }
-                    if (item.get('variant')) {
-                        tempArr = tempArr.concat(['Alteration:', item.get('variant') + ',']);
-                    }
-                    if (item.get('tumorType')) {
-                        tempArr = tempArr.concat(['Tumor type:', item.get('tumorType') + ',']);
-                    }
-                    if (item.get('section')) {
-                        tempArr = tempArr.concat(['Section:', item.get('section')]);
-                    }
-                    content += tempArr.join(' ') + '\n';
-                    content += '\nPlease try to curate this literature within two weeks (' + new Date(item.get('addedAt') + 12096e5).toDateString() + ') and remember to log your hours for curating this data.\n\n';
-                    content += 'If you have any questions or concerns please email or slack ' + item.get('addedBy') + '.\n\n';
-                    content += 'Thank you, \nOncoKB Admin';
                     var subject = 'OncoKB Curation Assignment';
-                    mainUtils.sendEmail(email, subject, content)
-                        .then(function() {
-                        }, function(error) {
-                            dialogs.error('Error', 'Failed to notify curator automatically. Please send curator email manually.');
-                        });
+                    mainUtils.sendEmail(email, subject, content).then(function() {
+                        if (expiredCuration) {
+                            queueModelItem.set('notified', new Date().getTime());
+                            queueItem.notified = new Date().getTime();
+                        }
+                    }, function(error) {
+                        dialogs.error('Error', 'Failed to notify curator automatically. Please send curator email manually.');
+                    });
                 };
 
-                $scope.toggleCompletedCuration = function() {
-                    return function(item) {
-                        if ($scope.allCuration) {
-                            return true;
-                        }
-                        return !item.curated;
-                    };
-                };
                 var annotationLocation = $scope.specifyAnnotationInGene();
                 $scope.getAnnotationLocation = function(x) {
                     if (x.pmid && annotationLocation[x.pmid]) {
@@ -328,17 +561,119 @@ angular.module('oncokbApp')
                         return annotationLocation[x.article].join('; ');
                     }
                 };
-                $scope.setArticlesNumberInMeta = function() {
-                    var count = 0;
-                    _.each($scope.queue, function(item) {
-                        if (!item.curated) {
-                            count++;
+                $scope.setArticlesNumberInMeta = function(hugoSymbol) {
+                    var incompleteCount = 0, allCount = 0;
+                    if ($scope.location === 'genes' && hugoSymbol) {
+                        _.each($scope.queue, function(item) {
+                            if (item.hugoSymbol === hugoSymbol) {
+                                if (!item.curated) {
+                                    incompleteCount++;
+                                }
+                                allCount++;
+                            }
+                        });
+                    } else if ($scope.location === 'gene') {
+                        _.each($scope.queue, function(item) {
+                            if (!item.curated) {
+                                incompleteCount++;
+                            }
+                            allCount++;
+                        });
+                    }
+                    if ($scope.data.geneMetaData) {
+                        $scope.data.geneMetaData.set('CurationQueueArticles', incompleteCount);
+                        $scope.data.geneMetaData.set('AllArticles', allCount);
+                        if ($scope.location === 'genes') {
+                            // CurationQueueArticles is set again to synchronize newly added curations with last column in genes table
+                            $scope.metaFlags[hugoSymbol].CurationQueueArticles = incompleteCount;
+                        }
+                    }
+                };
+                function getOncoTreeMainTypes() {
+                    mainUtils.getOncoTreeMainTypes().then(function(result) {
+                        var mainTypesReturned = result.mainTypes,
+                            tumorTypesReturned = result.tumorTypes;
+                        if (mainTypesReturned) {
+                            $scope.data.mainTypes = _.map(mainTypesReturned, function(item) {
+                                return item.name;
+                            });
+                            if (_.isArray(tumorTypesReturned)) {
+                                if (tumorTypesReturned.length === mainTypesReturned.length) {
+                                    var tumorTypes = {};
+                                    var allTumorTypes = [];
+                                    _.each(mainTypesReturned, function(mainType, i) {
+                                        tumorTypes[mainType.name] = tumorTypesReturned[i];
+                                    });
+                                    $scope.data.subTypes = tumorTypes;
+                                } else {
+                                    console.error('The number of returned tumor types is not matched with number of main types.');
+                                }
+                            }
+                        }
+                    }, function(error) {
+                    });
+                }
+                getOncoTreeMainTypes();
+                $scope.toggleForm = function() {
+                    $scope.data.formExpanded = !$scope.data.formExpanded;
+                    $timeout(function() {
+                        var dueDay = angular.element(document.querySelector('#datepicker'));
+                        // set 2 weeks as the default due day
+                        $scope.input.dueDay = $scope.getFormattedDate(new Date().getTime() + 14*8.64e+7);
+                        dueDay.datepicker();
+                    }, 1000);
+                };
+                $scope.clearInput = function() {
+                    $scope.input = {
+                        article: '',
+                        link: '',
+                        hugoSymbols: '',
+                        variant: '',
+                        mainType: '',
+                        subType: '',
+                        section: '',
+                        curator: '',
+                        dueDay: '',
+                        comment: ''
+                    };
+                    $scope.data.formExpanded = false;
+                    $scope.data.editing = false;
+                    $scope.predictedArticle = '';
+                    $scope.validPMID = false;
+                };
+                $scope.isExpiredCuration = mainUtils.isExpiredCuration;
+                $scope.validateInput = function() {
+                    var queueItem = $scope.data.queueItemInEditing;
+                    if ($scope.data.editing) {
+                        if ($scope.input.curator && (queueItem.curator !== $scope.input.curator.name || queueItem.dueDay !== new Date($scope.input.dueDay).getTime())) {
+                            $scope.data.resendEmail = true;
+                        } else {
+                            $scope.data.resendEmail = false;
+                        }
+                    } else {
+                        if ($scope.input.dueDay && $scope.isExpiredCuration(new Date($scope.input.dueDay).getTime())) {
+                            $scope.data.invalidData = true;
+                        } else {
+                            $scope.data.invalidData = false;
+                        }
+                    }
+                };
+                $scope.secondTimeAutoNotify = function() {
+                    _.each($scope.queue, function (queueItem) {
+                        if (queueItem.curator && mainUtils.isExpiredCuration(queueItem.dueDay) && !queueItem.notified) {
+                            $scope.sendEmail(queueItem);
+                            queueItem.notified = new Date().getTime();
                         }
                     });
-                    if ($rootScope.geneMetaData) {
-                        $rootScope.geneMetaData.set('CurationQueueArticles', count);
+                    //In genes page, expired queueModelItem already got set in genes.js
+                    if ($scope.location === 'gene') {
+                        _.each($scope.data.queueModel.asArray(), function(queueModelItem) {
+                            if (queueModelItem.get('curator') && mainUtils.isExpiredCuration(queueModelItem.get('dueDay')) && !queueModelItem.get('notified')) {
+                                queueModelItem.set('notified', new Date().getTime());
+                            }
+                        });
                     }
-                }
+                };
             }
         };
     })

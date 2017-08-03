@@ -592,14 +592,15 @@ angular.module('oncokbApp')
                 }
 
                 if($scope.status.hasReviewContent === false) {
-                    var articlesToCurate = 0;
-                    if ($rootScope.geneMetaData.has('CurationQueueArticles')) {
-                        articlesToCurate = $rootScope.geneMetaData.get('CurationQueueArticles');
-                    }
+                    var incompleteCount = $rootScope.geneMetaData.get('CurationQueueArticles'),
+                        allCount = $rootScope.geneMetaData.get('AllArticles');
                     $rootScope.geneMetaData.clear();
                     $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
-                    if (articlesToCurate > 0) {
-                        $rootScope.geneMetaData.set('CurationQueueArticles', articlesToCurate);
+                    if (incompleteCount) {
+                        $scope.data.geneMetaData.set('CurationQueueArticles', incompleteCount);
+                    }
+                    if (allCount) {
+                        $scope.data.geneMetaData.set('AllArticles', allCount);
                     }
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
@@ -3301,67 +3302,36 @@ angular.module('oncokbApp')
             }
 
             function getOncoTreeMainTypes() {
-                DatabaseConnector.getOncoTreeMainTypes()
-                    .then(function(result) {
-                        if (result.data) {
-                            $scope.oncoTree.mainTypes = result.data;
-                            $scope.oncoTree.mainTypes.push({
-                                id: -1,
-                                name: 'All Liquid Tumors'
-                            });
-                            $scope.oncoTree.mainTypes.push({
-                                id: -2,
-                                name: 'All Solid Tumors'
-                            });
-                            $scope.oncoTree.mainTypes.push({
-                                id: -3,
-                                name: 'All Tumors'
-                            });
-                            $scope.oncoTree.mainTypes.push({
-                                id: -4,
-                                name: 'Germline Disposition'
-                            });
-                            $scope.oncoTree.mainTypes.push({
-                                id: -5,
-                                name: 'All Pediatric Tumors'
-                            });
-                            $scope.oncoTree.mainTypes.push({
-                                id: -6,
-                                name: 'Other Tumor Types'
-                            });
-                            DatabaseConnector.getOncoTreeTumorTypesByMainTypes(_.map(result.data, function(mainType) {
-                                return mainType.name;
-                            })).then(function(data) {
-                                if (_.isObject(data) && _.isArray(data.data)) {
-                                    if (data.data.length === result.data.length) {
-                                        var tumorTypes = {};
-                                        var allTumorTypes = [];
-                                        _.each(result.data, function(mainType, i) {
-                                            tumorTypes[mainType.name] = data.data[i];
-                                            allTumorTypes = _.union(allTumorTypes, data.data[i]);
-                                        });
-                                        $scope.oncoTree.tumorTypes = tumorTypes;
-                                        $scope.oncoTree.allTumorTypes = allTumorTypes;
-                                        $scope.meta = {
-                                            newCancerTypes: [{
-                                                mainType: '',
-                                                subtype: '',
-                                                oncoTreeTumorTypes: allTumorTypes
-                                            }]
-                                        };
-                                    } else {
-                                        console.error('The number of returned tumor types is not matched with number of main types.');
-                                    }
-                                }
-                            }, function() {
-                                // TODO: if OncoTree server returns error.
-                            });
+                mainUtils.getOncoTreeMainTypes().then(function(result) {
+                    var mainTypesReturned = result.mainTypes,
+                        tumorTypesReturned = result.tumorTypes;
+                    if (mainTypesReturned) {
+                        $scope.oncoTree.mainTypes = mainTypesReturned;
+                        if (_.isArray(tumorTypesReturned)) {
+                            if (tumorTypesReturned.length === mainTypesReturned.length) {
+                                var tumorTypes = {};
+                                var allTumorTypes = [];
+                                _.each(mainTypesReturned, function(mainType, i) {
+                                    tumorTypes[mainType.name] = tumorTypesReturned[i];
+                                    allTumorTypes = _.union(allTumorTypes, tumorTypesReturned[i]);
+                                });
+                                $scope.oncoTree.tumorTypes = tumorTypes;
+                                $scope.oncoTree.allTumorTypes = allTumorTypes;
+                                $scope.meta = {
+                                    newCancerTypes: [{
+                                        mainType: '',
+                                        subtype: '',
+                                        oncoTreeTumorTypes: allTumorTypes
+                                    }]
+                                };
+                            } else {
+                                console.error('The number of returned tumor types is not matched with number of main types.');
+                            }
                         }
-                    }, function(error) {
-                        console.log(error);
-                    });
+                    }
+                }, function(error) {
+                });
             }
-
             function getLevels() {
                 var desS = {
                     '': '',

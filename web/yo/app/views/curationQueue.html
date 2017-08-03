@@ -3,163 +3,162 @@
         <span class="displayAll">
             <input id="displaySwitch"
                    type="checkbox"
-                   ng-model="allCuration"
-                   ng-value="allCuration">
+                   ng-model="data.allCurations"
+                   ng-value="data.allCurations">
             <label for="displaySwitch">Include Completed Curations</label>
+            <button class="btn btn-success" style="margin-left:20px;" ng-click="toggleForm()">{{data.formExpanded ? 'Hide Curation Form' : 'Add Curation'}}</button>
         </span>
     </h3>
-    <form ng-submit="addCuration()">
-        <div class="row">
-            <div class="col-sm-2">
-                <input type="text" class="form-control" ng-model="article" placeholder="PMID or Abstract" size="25">
-                <span ng-bind-html="predictedArticle"></span>
+    <form ng-if="data.formExpanded">
+        <div>
+            <div class="form-group">
+                <label for="article" class="labelAlign">PMID or Abstract: <span style="color:red">*</span></label>
+                <input type="text" id="article" class="form-control inputStyle" ng-model="input.article" placeholder="PMID or Abstract"/>
+                <span style="display: inline-block" ng-bind-html="predictedArticle"></span>
             </div>
-            <div class="col-sm-1"><input type="text" class="form-control" ng-model="link" placeholder="Link" size="10">
+            <div class="form-group">
+                <label for="link" class="labelAlign">Link:</label>
+                <input type="text" id="link" class="form-control inputStyle" ng-model="input.link" placeholder="Link" size="10"/>
             </div>
-            <div class="col-sm-2"><input type="text" class="form-control" ng-model="variant" placeholder="Variant"
-                                         size="10"></div>
-            <div class="col-sm-2"><input type="text" class="form-control" ng-model="tumorType" placeholder="Tumor Type"
-                                         size="10"></div>
-            <div class="col-sm-2">
-                <select chosen
-                        ng-model="section"
-                        ng-options="m for m in data.sectionList"
+            <div ng-if="location === 'genes'" class="form-group">
+                <label for="genes" class="labelAlign">Gene(s): <span style="color:red">*</span></label>
+                <select chosen multiple
+                        ng-model="input.hugoSymbols"
+                        id="genes"
+                        ng-options="m for m in hugoSymbols"
                         allow-single-deselect="true"
-                        class="chosen-select">
+                        ng-disabled="data.editing"
+                        placeholder="Gene" style="width:80%">
                 </select>
             </div>
-            <div class="col-sm-2">
+            <div class="form-group">
+                <label for="variant" class="labelAlign">Variant(s): </label>
+                <input type="text" class="form-control inputStyle" id="variant" ng-model="input.variant" placeholder="{{location === 'genes' ? 'Gene A: Variant A;Gene B: Variant B' : 'Variant'}}" size="10">
+            </div>
+            <div class="form-group">
+                <label for="cancerType" class="labelAlign">Cancer Type:</label>
+                 <select chosen
+                         ng-if="data.mainTypes.length > 0"
+                         id="cancerType"
+                         allow-single-deselect="true"
+                         ng-model="input.mainType"
+                         ng-options="m for m in data.mainTypes | orderBy: m">
+                </select>
+                <div ng-if="data.subTypes[input.mainType].length > 0" style="display:inline-block;margin-left:20px;min-width:400px">
+                    <label for="subType">Subtype:</label>
+                    <select chosen
+                            allow-single-deselect="true"
+                            id="subType"
+                            ng-model="input.subType"
+                            ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name">
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="section" class="labelAlign">Section(s):</label>
+                <select chosen multiple
+                        ng-model="input.section"
+                        id="section"
+                        ng-options="m for m in data.sectionList"
+                        allow-single-deselect="true" style="width:80%">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="curator" class="labelAlign">Curator:</label>
                 <select chosen
                         data-placeholder="Choose A Curator"
-                        ng-model="curator"
-                        ng-options="m.name for m in curators"
-                        allow-single-deselect="true"
-                        class="chosen-select">
-                    <option value=""></option>
+                        id="curator"
+                        ng-model="input.curator"
+                        ng-options="m.name for m in data.curators"
+                        ng-change="validateInput()"
+                        allow-single-deselect="true" style="width:80%">
                 </select>
             </div>
-            <div class="col-sm-1">
-                <button tyle="submit" class="btn btn-success" ng-disabled="!article">Add</button>
+            <div class="form-group">
+                <label for="datepicker" class="labelAlign">Due Date:</label>
+                <p>Date: <input type="text" id="datepicker" ng-model="input.dueDay" ng-change="validateInput()">
+                    <span class="attention" ng-show="data.invalidData">Invalid due date</span></p>
+            </div>
+            <div class="form-group">
+                <label for="comments" class="labelAlign">Comment:</label>
+                <textarea class="form-control" rows="2" id="comments" placeholder="Comment" ng-model="input.comment"></textarea>
+            </div>
+            <div ng-if="data.resendEmail">
+                <p class="attention">Email will be resent after saving modified curation because of changes in Curator or Due date.</p>
+            </div>
+            <div class="form-group">
+                <button tyle="submit" class="btn btn-success" ng-disabled="!input.article || data.invalidData || (location === 'genes' && (!input.hugoSymbols || input.hugoSymbols.length === 0))" ng-bind-html="getButtonHtml('add')" ng-click="addCuration()"></button>
+                <button class="btn btn-default" ng-click="clearInput()">Cancel</button>
             </div>
         </div>
     </form>
-    <div ng-if="queue.length > 0">
-        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" style="width:100%">
+    <div ng-show="queue.length > 0" style="margin-top:20px">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" style="width:90%">
             <thead>
             <tr>
+                <th ng-if="location === 'genes'">Gene</th>
                 <th>Article</th>
                 <th>Variant</th>
                 <th>Tumor Type</th>
                 <th>Section</th>
                 <th>Added by</th>
                 <th>Added at</th>
+                <th>Due Day</th>
                 <th>Curator</th>
-                <th>Previously Curated in</th>
+                <th ng-if="location === 'gene'">Previously Curated in</th>
+                <th>Comment</th>
                 <th>Operation</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="x in queue" ng-show="allCuration || !x.curated">
-                <td class=" article">
-                    <div ng-switch on="x.editable">
-                        <div ng-switch-when="true">
-                            <a href="{{x.link}}" target="_blank" ng-if="x.pmid">{{x.article}}</a>
-                            <input type="text" class="form-control" ng-model="x.article" ng-if="!x.pmid"/>
-                        </div>
-                        <div ng-switch-default>
-                            <a href="{{x.link}}" target="_blank">{{x.article}}</a>
-                        </div>
-                    </div>
+            <tr ng-repeat="x in queue" ng-show="data.allCurations || !x.curated">
+                <td ng-if="location === 'genes'"><strong><a ng-href="#/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
+                <td>
+                    <a href="{{x.link}}" target="_blank">{{x.article}}</a>
                     <pub-iframe
                             ng-model="x.pmidString"
                             ng-if="x.pmid">
                     </pub-iframe>
                 </td>
                 <td>
-                    <div ng-switch on="x.editable">
-                        <div ng-switch-when="true">
-                            <input type="text" class="form-control" ng-model="x.variant"/>
-                        </div>
-                        <div ng-switch-default>
-                            <span>{{x.variant}}</span>
-                        </div>
-                    </div>
+                    <span>{{x.variant}}</span>
                 </td>
                 <td>
-                    <div ng-switch on="x.editable">
-                        <div ng-switch-when="true">
-                            <input type="text" class="form-control" ng-model="x.tumorType"/>
-                        </div>
-                        <div ng-switch-default>
-                            <span>{{x.tumorType}}</span>
-                        </div>
-                    </div>
+                    <span>{{x.subType ? x.subType : x.mainType}}</span>
                 </td>
                 <td>
-                    <div ng-switch on="x.editable">
-                        <div ng-switch-when="true" class="chosenStyle">
-                            <select chosen
-                                    ng-model="data.modifiedSection"
-                                    ng-options="m for m in data.sectionList"
-                                    allow-single-deselect="true"
-                                    class="chosen-select">
-                                <option value=""></option>
-                            </select>
-                        </div>
-                        <div ng-switch-default>
-                            <span>{{x.section}}</span>
-                        </div>
-                    </div>
+                    <span>{{::x.section}}</span>
                 </td>
                 <td>{{::x.addedBy}}</td>
-                <td>{{::x.addedAt | date : 'MMM d, h:mm a yyyy'}}</td>
+                <td>{{::x.addedAt | date : 'M/d/yyyy'}}</td>
                 <td>
-                    <div ng-switch on="x.editable">
-                        <div ng-switch-when="true" class="chosenStyle">
-                            <select chosen
-                                    ng-model="data.modifiedCurator"
-                                    ng-options="m.name for m in curators"
-                                    allow-single-deselect="true"
-                                    class="chosen-select">
-                                <option value=""></option>
-                            </select>
-                        </div>
-                        <div ng-switch-default>
-                            <span>{{x.curator}}</span>
-                        </div>
-                    </div>
+                    <span ng-class="{'attention': isExpiredCuration(x.dueDay) && !x.curated}" uib-tooltip-placement="top" uib-tooltip="{{isExpiredCuration(x.dueDay) && x.notified ? 'Second notification sent on ' + getFormattedDate(x.notified) : ''}}">{{x.dueDay | date : 'M/d/yyyy'}}</span>
                 </td>
                 <td>
+                    <span>{{x.curator}}</span>
+                </td>
+                <td ng-if="location === 'gene'">
                     {{::getAnnotationLocation(x)}}
                 </td>
+                <td>{{x.comment}}</td>
                 <td>
                     <span ng-show="!x.curated">
-                        <div ng-switch on="x.editable">
-                                <div ng-switch-when="true">
-                                    <button type="button" class="btn btn-warning warningButton" ng-click="updateCuration($index, x)"
-                                            uib-tooltip-placement="top" uib-tooltip="Save curation modification"><i class="fa fa-check"></i>
-                                    </button>
-                                </div>
-                                <div ng-switch-default class="operationStyle">
-                                    <button type="button" class="btn btn-success successButton" ng-click="completeCuration($index)"
-                                            uib-tooltip-placement="top" uib-tooltip="Complete curation"><i
-                                            class="fa fa-check"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-warning warningButton" ng-click="editCuration($index)"
-                                            uib-tooltip-placement="top" uib-tooltip="Modify curation"><i
-                                            class="fa fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger dangerButton" ng-click="deleteCuration($index)"
-                                            ng-show="userRole === 8" uib-tooltip-placement="top"
-                                            uib-tooltip="Delete curation"><i class="fa fa-trash-o"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="operationStyle">
+                            <button type="button" class="btn btn-success successButton" ng-click="initialProcess(x, 'complete')" ng-disabled="data.loading"
+                                    uib-tooltip-placement="top" uib-tooltip="Complete curation" ng-bind-html="getButtonHtml('complete', x.addedAt)">
+                            </button>
+                            <button type="button" class="btn btn-warning warningButton" ng-click="initialProcess(x, 'edit')" ng-disabled="data.loading"
+                                    ng-show="userRole === 8" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger dangerButton" ng-click="initialProcess(x, 'delete')" ng-disabled="data.loading"
+                                    ng-show="userRole === 8" uib-tooltip-placement="top"
+                                    uib-tooltip="Delete curation" ng-bind-html="getButtonHtml('delete', x.addedAt)">
+                            </button>
+                        </div>
                     </span>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
-
 </div>
