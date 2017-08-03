@@ -62,7 +62,7 @@ public class VariantsApiController implements VariantsApi {
         if (query != null) {
             if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
                 Alteration alteration = AlterationUtils.getAlterationByHGVS(query.getHgvs());
-                if (alteration.getGene() != null) {
+                if (alteration != null && alteration.getGene() != null) {
                     Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(alteration.getGene());
                     alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
                 }
