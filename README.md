@@ -80,7 +80,6 @@ File is located under web/yo/app/data
     "genes":null, 
     "role": 8, // follow the userRoles in config.json to specify role value
     "email":"your gmail address", // required
-    "mskccEmail":"your mskcc email", // optional
     "phases":null
 }
 ```
