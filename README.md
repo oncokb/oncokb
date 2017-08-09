@@ -73,19 +73,18 @@ File is located under web/yo/app/data
     
 ## Use curation website without back-end
 1. Set configuration 'testing' to true in config.json
-2. Under web/yo/, run 'grunt serve'
-
-## Show error in console
-Uncomment the $delegate
+2. In web/yo/app/data/oncokbInfo.json, add an element as below with your account information to the `users array`. 
 ```
-$provide.decorator('$exceptionHandler', function($delegate, $injector){
-    return function(exception, cause){
-        var $rootScope = $injector.get('$rootScope');
-        $rootScope.addError({message: 'Exception', reason: exception, case: cause});
-        //$delegate(exception, cause);
-    };
-});
+{
+    "name":"Your Name",
+    "genes":null, 
+    "role": 8, // follow the userRoles in config.json to specify role value
+    "email":"your gmail address", // required
+    "mskccEmail":"your mskcc email", // optional
+    "phases":null
+}
 ```
+3. Under web/yo/, run 'grunt serve'
 
 ## Coding Rules
 Because of the similarity of the project, we follow jhipster requirement.
