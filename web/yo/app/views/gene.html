@@ -363,38 +363,40 @@
                                                 get-evidence="getEvidence(type, mutation, tumor, ti, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                             </span>
                             </uib-accordion-heading>
-                            <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.level_uuid, treatment.level_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
-                              <strong>{{::treatment.level.display}}:</strong><br/>
-                              <span ng-if="checkTI(ti, 1, 1)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SS"></drive-realtime-string>
-                              </span>
-                              <span ng-if="checkTI(ti, 1, 0)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SR" class="floatLeft"></drive-realtime-string>
-                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i>
-                              </span>
-                              <span ng-if="checkTI(ti, 0, 1)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IS"></drive-realtime-string>
-                              </span>
-                              <span ng-if="checkTI(ti, 0, 0)">
-                                <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IR" class="floatLeft"></drive-realtime-string>
-                                <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
-                              </span>
-                            </p>
-                            <div ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.indication_uuid, treatment.indication_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
-                                <strong>{{::treatment.indication.display}}:</strong>
-                                <br/>
-                                <drive-realtime-string review-obj="treatment.indication_review" uuid="::treatment.indication_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                            <div ng-if="tmpGeneStatus.isOpen">
+                                <p ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.level_uuid, treatment.level_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
+                                    <strong>{{::treatment.level.display}}:</strong><br/>
+                                  <span ng-if="checkTI(ti, 1, 1)">
+                                    <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SS"></drive-realtime-string>
+                                  </span>
+                                  <span ng-if="checkTI(ti, 1, 0)">
+                                    <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SR" class="floatLeft"></drive-realtime-string>
+                                    <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i>
+                                  </span>
+                                   <span ng-if="checkTI(ti, 0, 1)">
+                                    <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IS"></drive-realtime-string>
+                                  </span>
+                                   <span ng-if="checkTI(ti, 0, 0)">
+                                    <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.IR" class="floatLeft"></drive-realtime-string>
+                                    <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
+                                  </span>
+                                </p>
+                                <div ng-class="{'seperationLine': reviewMode}" ng-if="displayCheck(treatment.indication_uuid, treatment.indication_review, mutation.name_review, tumor.name_review, treatment.name_review, true)">
+                                    <strong>{{::treatment.indication.display}}:</strong>
+                                    <br/>
+                                    <drive-realtime-string review-obj="treatment.indication_review" uuid="::treatment.indication_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                                </div>
+                                <span ng-if="displayCheck(treatment.description_uuid, treatment.description_review, mutation.name_review, tumor.name_review, treatment.name_review, true)" style="float:left">
+                                  <strong>Description of Evidence:</strong>
+                                  <br/>
+                                  <drive-realtime-string review-obj="treatment.description_review" uuid="::treatment.description_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                                </span>
+                                <span ng-if="!reviewMode">
+                                  <strong>Additional Information (Optional):</strong>
+                                  <br/>
+                                  <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
+                                </span>
                             </div>
-                            <span ng-if="displayCheck(treatment.description_uuid, treatment.description_review, mutation.name_review, tumor.name_review, treatment.name_review, true)" style="float:left">
-                              <strong>Description of Evidence:</strong>
-                              <br/>
-                              <drive-realtime-string review-obj="treatment.description_review" uuid="::treatment.description_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                            </span>
-                            <span ng-if="!reviewMode">
-                              <strong>Additional Information (Optional):</strong>
-                              <br/>
-                              <drive-realtime-string es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                            </span>
                           </uib-accordion-group>
                         </div>
                         <div ng-if="!reviewMode" class="input-group input-group-sm accordionMarginTop">
