@@ -1664,8 +1664,10 @@ angular.module('oncokbApp')
                     mutation.name_review.clear();
                     if (firstLayer) {
                         mutation.name_review.set('action', 'ADD_ACCEPTED');
-                        mutation.oncogenic_review.clear();
                     }
+                    mutation.oncogenic_review.clear();
+                    mutation.effect_review.clear();
+                    mutation.description_review.clear();
                     _.each(mutation.tumors.asArray(), function(tumor) {
                         if (!isObsoleted(tumor)) {
                             acceptSectionItems('tumor', mutation, tumor, ti, treatment);
@@ -1677,12 +1679,16 @@ angular.module('oncokbApp')
                     tumor.cancerTypes_review.clear();
                     if (firstLayer) {
                         tumor.cancerTypes_review.set('action', 'ADD_ACCEPTED');
-                        tumor.summary_review.clear();
-                        tumor.prevalence_review.clear();
-                        tumor.progImp_review.clear();
-                        tumor.nccn_review.clear();
-                        tumor.trials_review.clear();
                     }
+                    tumor.summary_review.clear();
+                    tumor.prevalence_review.clear();
+                    tumor.progImp_review.clear();
+                    tumor.nccn_review.clear();
+                    tumor.nccn.therapy_review.clear();
+                    tumor.nccn.disease_review.clear();
+                    tumor.nccn.version_review.clear();
+                    tumor.nccn.description_review.clear();
+                    tumor.trials_review.clear();
                     _.each(tumor.TI.asArray(), function(ti) {
                         ti.description_review.clear();
                         _.each(ti.treatments.asArray(), function(treatment) {
@@ -1697,6 +1703,9 @@ angular.module('oncokbApp')
                     if (firstLayer) {
                         treatment.name_review.set('action', 'ADD_ACCEPTED');
                     }
+                    treatment.level_review.clear();
+                    treatment.indication_review.clear();
+                    treatment.description_review.clear();
                     break;
                 }
             }
