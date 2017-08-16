@@ -41,7 +41,7 @@ angular.module('oncokbApp')
                 scope.reviewMode = $rootScope.reviewMode;
                 scope.addOnTimeoutPromise = '';
                 scope.stringTimeoutPromise = '';
-
+                scope.changedBy = 'self';
                 if (scope.objecttype === 'object' && scope.objectkey) {
                     if (scope.object.has(scope.objectkey)) {
                         scope.content.stringO = scope.object.get(scope.objectkey);
@@ -77,6 +77,7 @@ angular.module('oncokbApp')
                         }
                         if (scope.content.stringO !== scope.object.getText()) {
                             scope.content.stringO = scope.object.text;
+                            scope.changedBy = 'others';
                         }
                     }
                 });
@@ -84,7 +85,8 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
-                            if (scope.es && scope.es.get('obsolete') === 'true') {
+                            if (scope.es && scope.es.get('obsolete') === 'true' || scope.changedBy === 'others') {
+                                // If item is obsoleted, or the change is made by others, we only update the object.text value without tracking data for review mode
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
                                 } else {
@@ -139,6 +141,7 @@ angular.module('oncokbApp')
                                 $rootScope.geneMetaData.set(uuid, tempMapping);
                             }
                             scope.valueChanged();
+                            scope.changedBy = 'self';
                         }
                     }, 1000);
                 });
