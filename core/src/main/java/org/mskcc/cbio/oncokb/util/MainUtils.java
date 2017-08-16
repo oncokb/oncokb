@@ -58,7 +58,11 @@ public class MainUtils {
         } else if (hugoSymbol != null) {
             for (String symbol : hugoSymbol.trim().split("\\s*,\\s*")) {
                 Query requestQuery = new Query();
-                requestQuery.setHugoSymbol(symbol.toUpperCase());
+                if (symbol.equals(SpecialStrings.OTHERBIOMARKERS)) {
+                    requestQuery.setHugoSymbol(symbol);
+                } else {
+                    requestQuery.setHugoSymbol(symbol.toUpperCase());
+                }
                 queries.add(requestQuery);
             }
         }

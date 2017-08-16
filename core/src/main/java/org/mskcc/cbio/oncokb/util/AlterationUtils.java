@@ -724,6 +724,13 @@ public final class AlterationUtils {
                     return al;
                 }
             }
+
+            // If no alteration find, search for name
+            for (Alteration al : alterations) {
+                if (al.getName().equalsIgnoreCase(alteration)) {
+                    return al;
+                }
+            }
             return null;
         } else {
             return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);

@@ -385,7 +385,7 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery){
+    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
         if (evidenceQuery.getGene() != null) {
@@ -798,9 +798,12 @@ public class EvidenceUtils {
                     }
 
                     if (requestQuery.getAlteration() != null) {
-                        Alteration alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
-                            requestQuery.getAlteration(), null, requestQuery.getConsequence(),
-                            requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                        Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getAlteration());
+
+                        if (alt == null)
+                            alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
+                                requestQuery.getAlteration(), null, requestQuery.getConsequence(),
+                                requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
 
                         // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
@@ -971,7 +974,7 @@ public class EvidenceUtils {
 
         evidence.setGene(gene);
         Set<Alteration> queryAlterations = evidence.getAlterations();
-        if(queryAlterations != null && !queryAlterations.isEmpty()) {
+        if (queryAlterations != null && !queryAlterations.isEmpty()) {
             AlterationType type = AlterationType.MUTATION;
             Set<Alteration> alterations = new HashSet<Alteration>();
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
