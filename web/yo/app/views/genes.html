@@ -64,13 +64,15 @@
             </tbody>
         </table>
     </div>
-    <loading ng-model="status.rendering" content="Please wait, we are loading genes information."></loading>
-    <div style="margin-bottom:50px">
-        <hr/>
-        <curation-queue ng-if="!status.queueRendering" location="'genes'" queue="queue" hugo-symbols="geneNames" docs="documents" meta-flags="metaFlags"></curation-queue>
-        <div ng-if="!status.rendering && status.queueRendering" style="margin-left:40%">
-            <span>Loading Curation Queue </span>
-            <img src="images/ajax-loader.gif"/>
+    <div ng-if="userRole === 8">
+        <loading ng-model="status.rendering" content="Please wait, we are loading genes information."></loading>
+        <div style="margin-bottom:50px">
+            <hr/>
+            <curation-queue ng-if="!status.queueRendering" location="'genes'" queue="queue" hugo-symbols="geneNames" docs="documents" meta-flags="metaFlags"></curation-queue>
+            <div ng-if="!status.rendering && status.queueRendering" style="margin-left:40%">
+                <span>Loading Curation Queue </span>
+                <img src="images/ajax-loader.gif"/>
+            </div>
         </div>
     </div>
 </div>

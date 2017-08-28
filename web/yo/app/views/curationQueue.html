@@ -6,29 +6,29 @@
                    ng-model="data.allCurations"
                    ng-value="data.allCurations">
             <label for="displaySwitch">Include Completed Curations</label>
-            <button class="btn btn-success" style="margin-left:20px;" ng-click="toggleForm()">{{data.formExpanded ? 'Hide Curation Form' : 'Add Curation'}}</button>
+            <button class="btn btn-success" style="margin-left: 20px" ng-click="toggleForm()">{{data.formExpanded ? 'Hide Curation Form' : 'Add Curation'}}</button>
         </span>
     </h3>
     <form ng-if="data.formExpanded">
         <div>
             <div class="form-group">
-                <label for="article" class="labelAlign">PMID or Abstract: <span style="color:red">*</span></label>
+                <label for="article" class="labelAlign">PMID or Abstract: <span class="attention">*</span></label>
                 <input type="text" id="article" class="form-control inputStyle" ng-model="input.article" placeholder="PMID or Abstract"/>
-                <span style="display: inline-block" ng-bind-html="predictedArticle"></span>
+                <span style="display: inline-block;" ng-bind-html="predictedArticle"></span>
             </div>
             <div class="form-group">
                 <label for="link" class="labelAlign">Link:</label>
                 <input type="text" id="link" class="form-control inputStyle" ng-model="input.link" placeholder="Link" size="10"/>
             </div>
             <div ng-if="location === 'genes'" class="form-group">
-                <label for="genes" class="labelAlign">Gene(s): <span style="color:red">*</span></label>
+                <label for="genes" class="labelAlign">Gene(s): <span class="attention">*</span></label>
                 <select chosen multiple
                         ng-model="input.hugoSymbols"
                         id="genes"
                         ng-options="m for m in hugoSymbols"
                         allow-single-deselect="true"
                         ng-disabled="data.editing"
-                        placeholder="Gene" style="width:80%">
+                        placeholder="Gene" class="inputStyle">
                 </select>
             </div>
             <div class="form-group">
@@ -44,13 +44,13 @@
                          ng-model="input.mainType"
                          ng-options="m for m in data.mainTypes | orderBy: m">
                 </select>
-                <div ng-if="data.subTypes[input.mainType].length > 0" style="display:inline-block;margin-left:20px;min-width:400px">
+                <div ng-if="data.subTypes[input.mainType].length > 0" class="subType">
                     <label for="subType">Subtype:</label>
                     <select chosen
                             allow-single-deselect="true"
                             id="subType"
                             ng-model="input.subType"
-                            ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name">
+                            ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name" class="subTypeSelect">
                     </select>
                 </div>
             </div>
@@ -60,7 +60,7 @@
                         ng-model="input.section"
                         id="section"
                         ng-options="m for m in data.sectionList"
-                        allow-single-deselect="true" style="width:80%">
+                        allow-single-deselect="true" class="inputStyle">
                 </select>
             </div>
             <div class="form-group">
@@ -70,13 +70,13 @@
                         id="curator"
                         ng-model="input.curator"
                         ng-options="m.name for m in data.curators"
-                        ng-change="validateInput()"
-                        allow-single-deselect="true" style="width:80%">
+                        ng-change="checkInput()"
+                        allow-single-deselect="true" class="inputStyle">
                 </select>
             </div>
             <div class="form-group">
                 <label for="datepicker" class="labelAlign">Due Date:</label>
-                <p>Date: <input type="text" id="datepicker" ng-model="input.dueDay" ng-change="validateInput()">
+                <p>Date: <input type="text" id="datepicker" ng-model="input.dueDay" ng-change="checkInput()">
                     <span class="attention" ng-show="data.invalidData">Invalid due date</span></p>
             </div>
             <div class="form-group">
@@ -92,8 +92,8 @@
             </div>
         </div>
     </form>
-    <div ng-show="queue.length > 0" style="margin-top:20px">
-        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" style="width:90%">
+    <div ng-show="queue.length > 0">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
             <thead>
             <tr>
                 <th ng-if="location === 'genes'">Gene</th>
@@ -127,7 +127,7 @@
                     <span>{{x.subType ? x.subType : x.mainType}}</span>
                 </td>
                 <td>
-                    <span>{{::x.section}}</span>
+                    <span>{{x.section}}</span>
                 </td>
                 <td>{{::x.addedBy}}</td>
                 <td>{{::x.addedAt | date : 'M/d/yyyy'}}</td>
@@ -138,19 +138,19 @@
                     <span>{{x.curator}}</span>
                 </td>
                 <td ng-if="location === 'gene'">
-                    {{::getAnnotationLocation(x)}}
+                    {{getAnnotationLocation(x)}}
                 </td>
                 <td>{{x.comment}}</td>
                 <td>
                     <span ng-show="!x.curated">
                         <div class="operationStyle">
-                            <button type="button" class="btn btn-success successButton" ng-click="initialProcess(x, 'complete')" ng-disabled="data.loading"
+                            <button type="button" class="btn btn-success buttonStyle" ng-click="initialProcess(x, 'complete')" ng-disabled="data.loading"
                                     uib-tooltip-placement="top" uib-tooltip="Complete curation" ng-bind-html="getButtonHtml('complete', x.addedAt)">
                             </button>
-                            <button type="button" class="btn btn-warning warningButton" ng-click="initialProcess(x, 'edit')" ng-disabled="data.loading"
+                            <button type="button" class="btn btn-warning buttonStyle" ng-click="initialProcess(x, 'edit')" ng-disabled="data.loading"
                                     ng-show="userRole === 8" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i>
                             </button>
-                            <button type="button" class="btn btn-danger dangerButton" ng-click="initialProcess(x, 'delete')" ng-disabled="data.loading"
+                            <button type="button" class="btn btn-danger buttonStyle" ng-click="initialProcess(x, 'delete')" ng-disabled="data.loading"
                                     ng-show="userRole === 8" uib-tooltip-placement="top"
                                     uib-tooltip="Delete curation" ng-bind-html="getButtonHtml('delete', x.addedAt)">
                             </button>
