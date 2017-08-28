@@ -78,14 +78,15 @@ angular.module('oncokbApp')
                         DTColumnDefBuilder.newColumnDef(2),
                         DTColumnDefBuilder.newColumnDef(3),
                         DTColumnDefBuilder.newColumnDef(4),
-                        DTColumnDefBuilder.newColumnDef(5).withOption('sType', 'date'),
-                        DTColumnDefBuilder.newColumnDef(6),
-                        DTColumnDefBuilder.newColumnDef(7),
+                        null,null,null,
                         DTColumnDefBuilder.newColumnDef(8),
                         DTColumnDefBuilder.newColumnDef(9),
                         DTColumnDefBuilder.newColumnDef(10)
                     ];
                     if (scope.location === 'gene') {
+                        scope.dtColumns[5] = DTColumnDefBuilder.newColumnDef(5).withOption('sType', 'date');
+                        scope.dtColumns[6] = DTColumnDefBuilder.newColumnDef(6).withOption('sType', 'date-html');
+                        scope.dtColumns[7] = DTColumnDefBuilder.newColumnDef(7);
                         scope.data.geneModel = $rootScope.model;
                         scope.data.queueModel = $rootScope.model.getRoot().get('queue');
                         scope.data.geneMetaData = $rootScope.geneMetaData;
@@ -106,11 +107,14 @@ angular.module('oncokbApp')
                                 curator: item.get('curator'),
                                 comment: item.get('comment'),
                                 dueDay: item.get('dueDay'),
-                                notified: item.get('notified')
+                                notified: item.get('notified') // when the curation expired, we sent an email automatically. notified is used to track when this automated get sent.
                             });
                         });
                         scope.setArticlesNumberInMeta();
                     } else if (scope.location === 'genes') {
+                        scope.dtColumns[5] = DTColumnDefBuilder.newColumnDef(5);
+                        scope.dtColumns[6] = DTColumnDefBuilder.newColumnDef(6).withOption('sType', 'date');
+                        scope.dtColumns[7] = DTColumnDefBuilder.newColumnDef(7).withOption('sType', 'date-html');
                         scope.data.metaModel = $rootScope.metaData;
                     }
                     scope.secondTimeAutoNotify();
@@ -358,6 +362,7 @@ angular.module('oncokbApp')
                 }
 
                 function editCuration(queueItem) {
+                    $scope.data.resendEmail = false;
                     $scope.data.editing = true;
                     $scope.data.queueItemInEditing = queueItem;
                     $scope.data.modifiedCurator = {};
@@ -394,11 +399,15 @@ angular.module('oncokbApp')
                         variant: queueItem.variant,
                         mainType: $scope.data.modifiedMainType,
                         subType: $scope.data.modifiedSubType,
-                        section: queueItem.section.split(','),
                         curator: $scope.data.modifiedCurator,
-                        dueDay: $scope.getFormattedDate(queueItem.dueDay),
                         comment: queueItem.comment
                     };
+                    if (queueItem.section) {
+                        $scope.input.section = queueItem.section.split(',');
+                    }
+                    if (queueItem.dueDay) {
+                        $scope.input.dueDay = $scope.getFormattedDate(queueItem.dueDay);
+                    }
                     if ($scope.location === 'genes') {
                         $scope.input.hugoSymbols = [queueItem.hugoSymbol];
                     }
@@ -429,9 +438,10 @@ angular.module('oncokbApp')
                     queueModelItem.set('subType', $scope.input.subType ? $scope.input.subType.name : '');
                     queueModelItem.set('section', $scope.input.section ? $scope.input.section.join() : '');
                     queueModelItem.set('curator', $scope.input.curator ? $scope.input.curator.name : '');
-                    queueModelItem.set('dueDay', $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '');
                     queueModelItem.set('comment', $scope.input.comment);
-
+                    if ($scope.input.dueDay) {
+                        queueModelItem.set('dueDay', new Date($scope.input.dueDay).getTime());
+                    }
                     queueItem.article = queueModelItem.get('article');
                     queueItem.link = queueModelItem.get('link');
                     queueItem.variant = queueModelItem.get('variant');
@@ -441,10 +451,10 @@ angular.module('oncokbApp')
                     queueItem.curator = queueModelItem.get('curator');
                     queueItem.dueDay = queueModelItem.get('dueDay');
                     queueItem.comment = queueModelItem.get('comment');
-                    $scope.clearInput();
                     if ($scope.data.resendEmail) {
                         $scope.sendEmail(queueItem, queueModelItem);
                     }
+                    $scope.clearInput();
                 }
                 function completeCuration(queueItem, queueModelItem) {
                     queueModelItem.set('curated', true);
@@ -514,7 +524,7 @@ angular.module('oncokbApp')
                         if (queueItem.link) {
                             content += '(' + queueItem.link + ')';
                         }
-                        content += ' which was due on ' + $scope.getFormattedDate(queueItem.dueDay) + '. Please complete this assignment as soon as possible and let us know when you have done this. \n\nIf you have already completed this task, please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the genes or gene page (this will let us know the task is complete). If you have any questions or concerns please email or slack us as needed.';
+                        content += ' which was due on ' + $scope.getFormattedDate(queueItem.dueDay) + '. Please complete this assignment as soon as possible and let us know when you have done this. \n\nIf you have already completed this task, please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the gene page (this will let us know the task is complete). If you have any questions or concerns please email or slack us as needed.';
                         content += 'Thank you, \nOncoKB Admin';
                     } else {
                         content += queueItem.addedBy + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
@@ -538,7 +548,7 @@ angular.module('oncokbApp')
                             content += queueItem.comment + '\n';
                         }
                         content += '\nPlease try to curate this literature before ' + $scope.getFormattedDate(queueItem.dueDay) + ' and remember to log your hours for curating this data.\n\n';
-                        content += 'IMPORTANT: Please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the genes or gene page (this will let us know the task is complete).\n\n';
+                        content += 'IMPORTANT: Please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the gene page (this will let us know the task is complete).\n\n';
                         content += 'If you have any questions or concerns please email or slack ' + queueItem.addedBy + '.\n\n';
                         content += 'Thank you, \nOncoKB Admin';
                     }
@@ -640,12 +650,14 @@ angular.module('oncokbApp')
                     $scope.data.editing = false;
                     $scope.predictedArticle = '';
                     $scope.validPMID = false;
+                    $scope.data.resendEmail = false;
                 };
                 $scope.isExpiredCuration = mainUtils.isExpiredCuration;
-                $scope.validateInput = function() {
+                $scope.checkInput = function() {
                     var queueItem = $scope.data.queueItemInEditing;
                     if ($scope.data.editing) {
-                        if ($scope.input.curator && (queueItem.curator !== $scope.input.curator.name || queueItem.dueDay !== new Date($scope.input.dueDay).getTime())) {
+                        if ($scope.input.curator && queueItem.curator !== $scope.input.curator.name ||
+                            $scope.input.dueDay && queueItem.dueDay !== new Date($scope.input.dueDay).getTime()) {
                             $scope.data.resendEmail = true;
                         } else {
                             $scope.data.resendEmail = false;
@@ -674,6 +686,26 @@ angular.module('oncokbApp')
                         });
                     }
                 };
+                function getTimeStamp(str) {
+                    var date = new Date(str);
+                    if(date instanceof Date && !isNaN(date.getTime())) {
+                        return date.getTime();
+                    } else {
+                        return 0;
+                    }
+                }
+                jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                    'date-html-asc': function(a, b) {
+                        a = $(a).text();
+                        b = $(b).text();
+                        return getTimeStamp(a) - getTimeStamp(b);
+                    },
+                    'date-html-desc': function(a, b) {
+                        a = $(a).text();
+                        b = $(b).text();
+                        return getTimeStamp(b) - getTimeStamp(a);
+                    }
+                });
             }
         };
     })

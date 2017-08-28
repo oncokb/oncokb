@@ -596,10 +596,10 @@ angular.module('oncokbApp')
                         allCount = $rootScope.geneMetaData.get('AllArticles');
                     $rootScope.geneMetaData.clear();
                     $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
-                    if (incompleteCount) {
+                    if (_.isNumber(incompleteCount)) {
                         $scope.data.geneMetaData.set('CurationQueueArticles', incompleteCount);
                     }
-                    if (allCount) {
+                    if (_.isNumber(allCount)) {
                         $scope.data.geneMetaData.set('AllArticles', allCount);
                     }
                     dialogs.notify('Warning', 'No changes need to be reviewed');
@@ -3308,25 +3308,21 @@ angular.module('oncokbApp')
                     if (mainTypesReturned) {
                         $scope.oncoTree.mainTypes = mainTypesReturned;
                         if (_.isArray(tumorTypesReturned)) {
-                            if (tumorTypesReturned.length === mainTypesReturned.length) {
-                                var tumorTypes = {};
-                                var allTumorTypes = [];
-                                _.each(mainTypesReturned, function(mainType, i) {
-                                    tumorTypes[mainType.name] = tumorTypesReturned[i];
-                                    allTumorTypes = _.union(allTumorTypes, tumorTypesReturned[i]);
-                                });
-                                $scope.oncoTree.tumorTypes = tumorTypes;
-                                $scope.oncoTree.allTumorTypes = allTumorTypes;
-                                $scope.meta = {
-                                    newCancerTypes: [{
-                                        mainType: '',
-                                        subtype: '',
-                                        oncoTreeTumorTypes: allTumorTypes
-                                    }]
-                                };
-                            } else {
-                                console.error('The number of returned tumor types is not matched with number of main types.');
-                            }
+                            var tumorTypes = {};
+                            var allTumorTypes = [];
+                            _.each(mainTypesReturned, function(mainType, i) {
+                                tumorTypes[mainType.name] = tumorTypesReturned[i];
+                                allTumorTypes = _.union(allTumorTypes, tumorTypesReturned[i]);
+                            });
+                            $scope.oncoTree.tumorTypes = tumorTypes;
+                            $scope.oncoTree.allTumorTypes = allTumorTypes;
+                            $scope.meta = {
+                                newCancerTypes: [{
+                                    mainType: '',
+                                    subtype: '',
+                                    oncoTreeTumorTypes: allTumorTypes
+                                }]
+                            };
                         }
                     }
                 }, function(error) {

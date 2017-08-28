@@ -386,10 +386,11 @@ angular.module('oncokbApp')
             }
             return false;
         }
-        /**
-         * Get Onco tree
-         * **/
 
+        /**
+         * Get Oncotree main types and sub tumor types.
+         * return {mainTypes: mainTypes, tumorTypes: tumorTypes}
+         * **/
         function getOncoTreeMainTypes() {
             var deferred = $q.defer();
             DatabaseConnector.getOncoTreeMainTypes()
@@ -423,10 +424,14 @@ angular.module('oncokbApp')
                             return mainType.name;
                         });
                         DatabaseConnector.getOncoTreeTumorTypesByMainTypes(mainTypeList).then(function(tumorTypesResult) {
-                            deferred.resolve({
-                                mainTypes:result.data,
-                                tumorTypes: tumorTypesResult.data
-                            });
+                            if (result.data.length !== tumorTypesResult.data.length) {
+                                deferred.reject('The number of returned tumor types is not matched with number of main types.');
+                            } else {
+                                deferred.resolve({
+                                    mainTypes:result.data,
+                                    tumorTypes: tumorTypesResult.data
+                                });
+                            }
                         }, function() {
                             // TODO: if OncoTree server returns error.
                         });
@@ -437,6 +442,11 @@ angular.module('oncokbApp')
             return deferred.promise;
         }
 
+        /*
+        * Check if the timeStamp passed in is at least one day behind or not, which means if it is 24 hours later than the current time stamp.
+        * @param {string} userName The user name
+        * @return {boolean} whether timeStamp expired
+        * */
         function isExpiredCuration(timeStamp) {
             if (timeStamp && (new Date(timeStamp).getTime() + 8.64e+7) < new Date().getTime()) {
                 return true;

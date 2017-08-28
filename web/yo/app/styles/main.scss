@@ -830,19 +830,13 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
         margin-bottom: 30px;
     }
     .buttonStyle {
-        color: white !important
-    }
-    .successButton, .warningButton, .dangerButton {
-        padding: 5px;
-        font-size: 14px;
-        line-height: 14px;
-        i {
-            width: 14px;
-            height: 14px;
-        }
-    }
-    .chosenStyle {
-        min-width: 150px;
+      padding: 5px;
+      font-size: 14px;
+      line-height: 14px;
+      i {
+        width: 14px;
+        height: 14px;
+      }
     }
     .operationStyle {
         min-width: 90px;
@@ -850,9 +844,6 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .displayAll {
         font-size: 14px;
         margin-left: 20px
-    }
-    .pub-iframe {
-        margin-bottom: 0;
     }
     table > tbody > tr > td, table > thead > tr > th {
         padding: 5px;
@@ -872,6 +863,20 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     }
     .attention{
       color: red;
+    }
+    .subType {
+      display: inline-block;
+      margin-left: 20px;
+    }
+    .subTypeSelect {
+      min-width: 350px;
+    }
+    .predictedArticle {
+      display: inline-block;
+    }
+    .tableStyle {
+      margin-top:20px;
+      width:90%;
     }
 }
 
