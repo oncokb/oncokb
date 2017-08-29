@@ -169,7 +169,7 @@ public class EvidenceController {
                     new ArrayList<>(AlterationUtils.getAllAlterations(gene)),
                     Collections.singleton(EvidenceType.VUS), null);
                 deleteEvidencesAndAlts(evidences);
-                DriveAnnotationParser.parseVUS(gene, new JSONArray(vus));
+                DriveAnnotationParser.parseVUS(gene, new JSONArray(vus), 1);
                 updateCacheBasedOnGenes(Collections.singleton(gene));
                 status = HttpStatus.OK;
             }
