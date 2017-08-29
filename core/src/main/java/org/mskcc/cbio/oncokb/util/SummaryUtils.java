@@ -525,7 +525,7 @@ public class SummaryUtils {
         sb.append(getVUSOncogenicSummary(alteration));
 
         if (isHotspot) {
-            sb.append(" But it is predicted to be oncogenic as it was identified " +
+            sb.append(" However it is predicted to be oncogenic as it was identified " +
                 "as a statistically significant hotspot");
             sb.append(hotspotLink(query));
             sb.append(".");
