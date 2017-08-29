@@ -19,6 +19,7 @@ import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -117,7 +118,7 @@ public class PortalAlterationImporter {
 
                     String genetic_profile_id = cancerStudy + "_mutations";
                     String sample_list_id = cancerStudy + "_sequenced";
-                    String profileDataUrl = "http://www.cbioportal.org/api-legacy/geneticprofiledata?genetic_profile_ids=" + genetic_profile_id + "&genes=" + joinedGenes + "&sample_list_id=" + sample_list_id;
+                    String profileDataUrl = "http://www.cbioportal.org/api-legacy/geneticprofiledata?genetic_profile_ids=" + genetic_profile_id + "&genes=" + URLEncoder.encode(joinedGenes, "UTF-8") + "&sample_list_id=" + sample_list_id;
                     String alterationResult = FileUtils.readRemote(profileDataUrl);
                     JSONArray alterationJSONResult = new JSONArray(alterationResult);
 
