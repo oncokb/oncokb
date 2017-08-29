@@ -15,10 +15,6 @@
     </properties>
     <repositories>
         <repository>
-            <id>oncotree-mvn-repo</id>
-            <url>https://raw.github.com/cBioPortal/oncotree/mvn-repo</url>
-        </repository>
-        <repository>
             <id>cancerhotspots-mvn-repo</id>
             <url>https://raw.github.com/cBioPortal/cancerhotspots/mvn-repo</url>
         </repository>
