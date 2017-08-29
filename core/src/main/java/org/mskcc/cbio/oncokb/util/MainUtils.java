@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 /**
  * Created by Hongxin Zhang on 4/5/16.
  */
@@ -523,11 +524,24 @@ public class MainUtils {
         return getCurrentTime(null);
     }
 
-    public static String getCurrentTime(String timeformat) {
-        if (timeformat == null) {
-            timeformat = "MM/dd/yyy hh:mm:ss";
+    public static String getCurrentTime(String timeFormat) {
+        if (timeFormat == null) {
+            timeFormat = "MM/dd/yyy hh:mm:ss";
         }
-        return new SimpleDateFormat(timeformat).format(new Date());
+        return new SimpleDateFormat(timeFormat).format(new Date());
+    }
+
+    public static String getTimeByDate(Date date) {
+        return getTimeByDate(date, null);
+    }
+
+    public static String getTimeByDate(Date date, String timeFormat) {
+        if (date == null)
+            return null;
+        if (timeFormat == null) {
+            timeFormat = "MM/dd/yyy hh:mm:ss";
+        }
+        return new SimpleDateFormat(timeFormat).format(date);
     }
 
     public static Boolean isVUS(Alteration alteration) {
