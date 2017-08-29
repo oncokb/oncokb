@@ -10,6 +10,7 @@ import java.util.Map;
  * @author jgao
  */
 public enum LevelOfEvidence {
+    // Levels for therapeutic implications
     LEVEL_0 ("0", "FDA-approved drug in this indication irrespective of gene/variant biomarker"),
     LEVEL_1 ("1", "FDA-approved biomarker and drug in this indication"),
     LEVEL_2A ("2A", "Standard of care biomarker predictive of response to an FDA-approved drug in this indication"),
@@ -20,9 +21,20 @@ public enum LevelOfEvidence {
     LEVEL_4 ("4", "Compelling biological evidence supports the biomarker as being predictive of response to a drug but neither biomarker and drug are standard of care"),
     LEVEL_R1 ("R1", "Standard of care biomarker predictive of resistance to an FDA-approved drug in this indication"),
     LEVEL_R2 ("R2", "Compelling clinical evidence supports the biomarker as being predictive of resistance to a drug, but neither biomarker nor drug are standard care"),
-    LEVEL_R3 ("R3", "Compelling biological evidence supports the biomarker as being predictive of resistance to a drug, but neither biomarker nor drug are standard care");
+    LEVEL_R3 ("R3", "Compelling biological evidence supports the biomarker as being predictive of resistance to a drug, but neither biomarker nor drug are standard care"),
 
-    private LevelOfEvidence(String level, String description) {
+    // Levels for prognostic implications
+    LEVEL_P1("P1", "WHO included criteria"),
+    LEVEL_P2("P2", "ELN included criteria (only for AML, may be combined with Px1)"),
+    LEVEL_P3("P3", "NCCN included criteria"),
+    LEVEL_P4("P4", "Compelling peer reviewed literature included criteria"),
+
+    // Levels for diagnostic implications
+    LEVEL_D1("D1", "WHO included criteria"),
+    LEVEL_D2("D2", "NCCN included criteria"),
+    LEVEL_D3("D3", "Compelling peer reviewed literature included criteria");
+
+    LevelOfEvidence(String level, String description) {
         this.level = level;
         this.description = description;
     }
