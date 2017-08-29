@@ -15,6 +15,7 @@ public enum EvidenceType {
     //    DRUG_SENSITIVITY("Drug sensivity"),
     PREVALENCE("Prevalence"),
     PROGNOSTIC_IMPLICATION("Prognostic implications"),
+    DIAGNOSTIC_IMPLICATION("Diagnostic implications"),
     NCCN_GUIDELINES("NCCN Guidelines"),
     STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY("Standard therapeutic implications for drug sensitivity"),
     STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE("Standard therapeutic implications for drug resistance"),
@@ -22,7 +23,7 @@ public enum EvidenceType {
     INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE("Investigational therapeutic implications for drug resistance"),
     CLINICAL_TRIAL("clinical trial");
 
-    private EvidenceType(String label) {
+    EvidenceType(String label) {
         this.label = label;
     }
 
