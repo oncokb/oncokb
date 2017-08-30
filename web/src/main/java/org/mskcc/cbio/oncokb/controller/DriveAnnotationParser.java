@@ -90,9 +90,6 @@ public class DriveAnnotationParser {
                     }
                     if (evidence.getLastEdit() == null) {
                         System.out.println(spaceStrByNestLevel(nestLevel + 1) + "WARNING: " + mutationStr + " do not have last update.");
-                    } else {
-                        System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-                            mutationStr + ": " + MainUtils.getTimeByDate(evidence.getLastEdit()));
                     }
                     if (nameComments != null) {
                         for (int j = 0; j < nameComments.length(); j++) {
@@ -281,8 +278,11 @@ public class DriveAnnotationParser {
             Oncogenicity oncogenic = getOncogenicity(mutationObj);
             String oncogenic_uuid = mutationObj.has("oncogenic_uuid") ? mutationObj.getString("oncogenic_uuid") : "";
             Date oncogenic_lastEdit = mutationObj.has("oncogenic_review") ? getUpdateTime(mutationObj.get("oncogenic_review")) : null;
-            Date effect_lastEdit = mutationObj.has("effect_review") ? getUpdateTime(mutationObj.get("effect_review")) : null;
+
+            Set<Date> lastEditDatesEffect = new HashSet<>();
+
             String effect = getMutationEffect(mutationObj);
+            addDateToSetFromObject(lastEditDatesEffect, mutationObj, "effect_review");
             String effect_uuid = mutationObj.has("effect_uuid") ? mutationObj.getString("effect_uuid") : "";
             // If both mutation effect and oncogenicity both unknown, ignore variant.
             if (oncogenic != null && oncogenic.equals(Oncogenicity.INCONCLUSIVE)
@@ -314,6 +314,7 @@ public class DriveAnnotationParser {
                 (mutationObj.getString("description").trim().isEmpty() ? null :
                     mutationObj.getString("description").trim())
                 : null;
+            addDateToSetFromObject(lastEditDatesEffect, mutationObj, "description_review");
 //            String additionalME = mutationObj.has("short") ?
 //                (mutationObj.getString("short").trim().isEmpty() ? null : mutationObj.getString("short").trim())
 //                : null;
@@ -336,6 +337,8 @@ public class DriveAnnotationParser {
 
                 evidence.setKnownEffect(effect);
                 evidence.setUuid(effect_uuid);
+
+                Date effect_lastEdit = getMostRecentDate(lastEditDatesEffect);
                 evidence.setLastEdit(effect_lastEdit);
                 EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
                 evidenceBo.save(evidence);
@@ -344,7 +347,9 @@ public class DriveAnnotationParser {
             // cancers
             if (mutationObj.has("tumors")) {
                 JSONArray cancers = mutationObj.getJSONArray("tumors");
-                System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor Types");
+                if(cancers != null && cancers.length() > 0) {
+                    System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor Types");
+                }
                 for (int i = 0; i < cancers.length(); i++) {
                     JSONArray subTumorTypes = cancers.getJSONObject(i).getJSONArray("cancerTypes");
                     for (int j = 0; j < subTumorTypes.length(); j++) {
@@ -540,15 +545,13 @@ public class DriveAnnotationParser {
         // Prognostic implications
         parseImplication(gene, alterations, oncoTreeType,
             cancerObj.has("prognostic") ? cancerObj.getJSONObject("prognostic") : null,
-            cancerObj.has("progImp_uuid") ? cancerObj.getString("progImp_uuid") : "",
-            cancerObj.has("progImp_review") ? getUpdateTime(cancerObj.get("progImp_review")) : null,
+            cancerObj.has("prognostic_uuid") ? cancerObj.getString("prognostic_uuid") : "",
             EvidenceType.PROGNOSTIC_IMPLICATION, nestLevel + 1);
 
         // Diagnostic implications
         parseImplication(gene, alterations, oncoTreeType,
             cancerObj.has("diagnostic") ? cancerObj.getJSONObject("diagnostic") : null,
-            cancerObj.has("diagImp_uuid") ? cancerObj.getString("diagImp_uuid") : "",
-            cancerObj.has("diagImp_review") ? getUpdateTime(cancerObj.get("diagImp_review")) : null,
+            cancerObj.has("diagnostic_uuid") ? cancerObj.getString("diagnostic_uuid") : "",
             EvidenceType.DIAGNOSTIC_IMPLICATION, nestLevel + 1);
 
         JSONArray implications = cancerObj.getJSONArray("TI");
@@ -584,7 +587,7 @@ public class DriveAnnotationParser {
         // NCCN
         if (cancerObj.has("nccn") && cancerObj.getJSONObject("nccn").has("disease") && !cancerObj.getJSONObject("nccn").getString("disease").isEmpty()) {
             System.out.println(spaceStrByNestLevel(nestLevel + 1) + "NCCN for " + alterations.toString());
-            parseNCCN(gene, alterations, oncoTreeType, cancerObj.getJSONObject("nccn"), cancerObj.has("nccn_uuid") ? cancerObj.getString("nccn_uuid") : "", (cancerObj.has("nccn_review") ? getUpdateTime(cancerObj.get("nccn_review")) : null), nestLevel + 2);
+            parseNCCN(gene, alterations, oncoTreeType, cancerObj.getJSONObject("nccn"), cancerObj.has("nccn_uuid") ? cancerObj.getString("nccn_uuid") : "", nestLevel + 2);
         }
 
         if (cancerObj.has("trials") && cancerObj.getJSONArray("trials").length() > 0) {
@@ -691,7 +694,10 @@ public class DriveAnnotationParser {
 
             String drugNameStr = drugObj.getString("name").trim();
             System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug(s): " + drugNameStr);
-            Date lastEdit = drugObj.has("name_review") ? getUpdateTime(drugObj.get("name_review")) : null;
+
+            Set<Date> lastEditDates = new HashSet<>();
+            addDateToSetFromObject(lastEditDates, drugObj, "name_review");
+
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
@@ -702,16 +708,12 @@ public class DriveAnnotationParser {
             evidence.setSubtype(oncoTreeType.getCode());
             evidence.setKnownEffect(knownEffectOfEvidence);
             evidence.setUuid(drugObj.has("name_uuid") ? drugObj.getString("name_uuid") : "");
-            evidence.setLastEdit(lastEdit);
 
-            if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
-            }
             // approved indications
             Set<String> approvedIndications = new HashSet<>();
             if (drugObj.has("indication") && !drugObj.getString("indication").trim().isEmpty()) {
                 approvedIndications = new HashSet<>(Arrays.asList(drugObj.getString("indication").split(";")));
+                addDateToSetFromObject(lastEditDates, drugObj, "indication_review");
             }
 
             String[] drugTxts = drugNameStr.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "").split(",");
@@ -748,6 +750,7 @@ public class DriveAnnotationParser {
                 //throw new RuntimeException("no level of evidence");
             } else {
                 String level = drugObj.getString("level").trim();
+                addDateToSetFromObject(lastEditDates, drugObj, "level_review");
                 if (level.equals("2")) {
 
                     if (evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE
@@ -809,21 +812,32 @@ public class DriveAnnotationParser {
 //            }
             if (drugObj.has("description") && !drugObj.getString("description").trim().isEmpty()) {
                 String desc = drugObj.getString("description").trim();
+                addDateToSetFromObject(lastEditDates, drugObj, "description_review");
                 evidence.setDescription(desc);
                 System.out.println(spaceStrByNestLevel(nestLevel + 2) +
                     "Has description.");
                 setDocuments(desc, evidence);
             }
 
+            Date lastEdit = getMostRecentDate(lastEditDates);
+            if (lastEdit != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+            }
+            evidence.setLastEdit(lastEdit);
+
             evidenceBo.save(evidence);
         }
     }
 
-    private static void parseNCCN(Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, JSONObject nccnObj, String uuid, Date lastEdit, Integer nestLevel) {
+    private static void parseNCCN(Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, JSONObject nccnObj, String uuid, Integer nestLevel) {
         // disease
+        Set<Date> lastEditDates = new HashSet<>();
+
         String therapy = null;
         if (nccnObj.has("therapy") && !nccnObj.getString("therapy").trim().isEmpty()) {
             therapy = nccnObj.getString("therapy").trim();
+            addDateToSetFromObject(lastEditDates, nccnObj, "therapy_review");
             System.out.println(spaceStrByNestLevel(nestLevel) + "Has therapy " + therapy);
         }
 
@@ -831,6 +845,7 @@ public class DriveAnnotationParser {
         String disease = null;
         if (nccnObj.has("disease") && !nccnObj.getString("disease").trim().isEmpty()) {
             disease = nccnObj.getString("disease").trim();
+            addDateToSetFromObject(lastEditDates, nccnObj, "disease_review");
             System.out.println(spaceStrByNestLevel(nestLevel) + "Has disease " + disease);
         }
 
@@ -838,6 +853,7 @@ public class DriveAnnotationParser {
         String version = null;
         if (nccnObj.has("version") && !nccnObj.getString("version").trim().isEmpty()) {
             version = nccnObj.getString("version").trim();
+            addDateToSetFromObject(lastEditDates, nccnObj, "version_review");
             System.out.println(spaceStrByNestLevel(nestLevel) + "Has version " + version);
         }
 
@@ -845,6 +861,7 @@ public class DriveAnnotationParser {
         String pages = null;
         if (nccnObj.has("pages") && !nccnObj.getString("pages").trim().isEmpty()) {
             pages = nccnObj.getString("pages").trim();
+            addDateToSetFromObject(lastEditDates, nccnObj, "pages_review");
             System.out.println(spaceStrByNestLevel(nestLevel) + "Has pages " + pages);
         }
 
@@ -852,6 +869,7 @@ public class DriveAnnotationParser {
         String category = null;
         if (nccnObj.has("category") && !nccnObj.getString("category").trim().isEmpty()) {
             category = nccnObj.getString("category").trim();
+            addDateToSetFromObject(lastEditDates, nccnObj, "category_review");
             System.out.println(spaceStrByNestLevel(nestLevel) + "Has category " + category);
         }
 
@@ -859,9 +877,11 @@ public class DriveAnnotationParser {
         String nccnDescription = null;
         if (nccnObj.has("description") && !nccnObj.getString("description").trim().isEmpty()) {
             nccnDescription = nccnObj.getString("description").trim();
+            addDateToSetFromObject(lastEditDates, nccnObj, "description_review");
             System.out.println(spaceStrByNestLevel(nestLevel) + "Has description.");
         }
 
+        Date lastEdit = getMostRecentDate(lastEditDates);
         Evidence evidence = new Evidence();
         evidence.setEvidenceType(EvidenceType.NCCN_GUIDELINES);
         evidence.setAlterations(alterations);
@@ -901,12 +921,12 @@ public class DriveAnnotationParser {
         evidenceBo.save(evidence);
     }
 
-    private static void parseImplication(Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, JSONObject implication, String uuid, Date lastEdit, EvidenceType evidenceType, Integer nestLevel) {
+    private static void parseImplication(Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) {
         if (evidenceType != null && implication != null &&
             ((implication.has("description") && !implication.getString("description").trim().isEmpty())
                 || (implication.has("level") && !implication.getString("level").trim().isEmpty()))) {
             System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType.name() + ":");
-
+            Set<Date> lastEditDates = new HashSet<>();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             Evidence evidence = new Evidence();
 
@@ -921,23 +941,26 @@ public class DriveAnnotationParser {
                 }
                 evidence.setSubtype(oncoTreeType.getCode());
             }
-
-            evidence.setLastEdit(lastEdit);
-            if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
-            }
             if (implication.has("level") && !implication.getString("level").trim().isEmpty()) {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(implication.getString("level").trim());
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Level of the implication: " + level);
                 evidence.setLevelOfEvidence(level);
+                addDateToSetFromObject(lastEditDates, implication, "level_review");
             }
 
             if (implication.has("description") && !implication.getString("description").trim().isEmpty()) {
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Has description.");
                 String desc = implication.getString("description").trim();
                 evidence.setDescription(desc);
+                addDateToSetFromObject(lastEditDates, implication, "description_review");
                 setDocuments(desc, evidence);
+            }
+
+            Date lastEdit = getMostRecentDate(lastEditDates);
+            evidence.setLastEdit(lastEdit);
+            if (lastEdit != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
+                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
             }
             evidenceBo.save(evidence);
         }
@@ -1021,5 +1044,20 @@ public class DriveAnnotationParser {
 
         evidence.addArticles(docs);
         evidence.addClinicalTrials(clinicalTrials);
+    }
+
+    private static void addDateToSetFromObject(Set<Date> set, JSONObject object, String key) {
+        if (object.has(key)) {
+            Date tmpDate = getUpdateTime(object.get(key));
+            if (tmpDate != null) {
+                set.add(tmpDate);
+            }
+        }
+    }
+
+    private static Date getMostRecentDate(Set<Date> dates) {
+        if (dates == null || dates.size() == 0)
+            return null;
+        return Collections.max(dates);
     }
 }
