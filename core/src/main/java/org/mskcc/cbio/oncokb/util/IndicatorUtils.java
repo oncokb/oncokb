@@ -56,17 +56,28 @@ public class IndicatorUtils {
                 }
                 if (tmpGenes.size() > 0) {
                     query.setAlteration(query.getHugoSymbol() + " fusion");
+                    Set<Gene> hasRelevantAltsGenes = new HashSet<>();
                     for (Gene tmpGene : tmpGenes) {
-                        Alteration alt = AlterationUtils.getAlteration(tmpGene.getHugoSymbol(), query.getAlteration(),
-                            null, null, null, null);
-                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-                        List<Alteration> tmpRelevantAlts = AlterationUtils.getRelevantAlterations(alt);
+                        List<Alteration> tmpRelevantAlts = findRelevantAlts(tmpGene, query.getAlteration());
                         if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
-                            gene = tmpGene;
-                            relevantAlterations = tmpRelevantAlts;
-                            break;
+                            hasRelevantAltsGenes.add(tmpGene);
                         }
+                    }
+
+                    if (hasRelevantAltsGenes.size() > 1) {
+                        // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
+                        TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
+                        for (Gene tmpGene : hasRelevantAltsGenes) {
+                            Query tmpQuery = new Query(query.getId(), query.getType(), tmpGene.getEntrezGeneId(),
+                                tmpGene.getHugoSymbol(), query.getAlteration(), query.getAlterationType(),
+                                query.getTumorType(), query.getConsequence(), query.getProteinStart(),
+                                query.getProteinEnd(), query.getHgvs());
+                            result.add(IndicatorUtils.processQuery(tmpQuery, geneStatus, levels, source, highestLevelOnly));
+                        }
+                        return result.iterator().next();
+                    } else if (hasRelevantAltsGenes.size() == 1) {
+                        gene = hasRelevantAltsGenes.iterator().next();
+                        relevantAlterations = findRelevantAlts(gene, query.getAlteration());
                     }
                     // None of relevant alterations found in both genes.
                     if (gene == null) {
@@ -388,5 +399,46 @@ public class IndicatorUtils {
     public static Map<String, LevelOfEvidence> findHighestLevelByEvidences(Set<Evidence> treatmentEvidences) {
         List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
         return findHighestLevel(new HashSet<>(treatments));
+    }
+
+    private static List<Alteration> findRelevantAlts(Gene gene, String alteration) {
+        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration,
+            null, null, null, null);
+        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+        return AlterationUtils.getRelevantAlterations(alt);
+    }
+}
+
+class IndicatorQueryRespComp implements Comparator<IndicatorQueryResp> {
+
+    public IndicatorQueryRespComp() {
+    }
+
+    @Override
+    public int compare(IndicatorQueryResp e1, IndicatorQueryResp e2) {
+        Integer result = LevelUtils.compareLevel(e1.getHighestSensitiveLevel(), e2.getHighestSensitiveLevel());
+        if (result != 0) {
+            return result;
+        }
+
+        result = LevelUtils.compareLevel(e1.getHighestResistanceLevel(), e2.getHighestResistanceLevel());
+        if (result != 0) {
+            return result;
+        }
+
+        result = MainUtils.compareOncogenicity(Oncogenicity.getByEffect(e1.getOncogenic()), Oncogenicity.getByEffect(e2.getOncogenic()), true);
+
+        if (result != 0) {
+            return result;
+        }
+
+        if (e1.getGeneExist() == null || !e1.getGeneExist()) {
+            return 1;
+        }
+
+        if (e2.getGeneExist() == null || !e2.getGeneExist()) {
+            return -1;
+        }
+        return -1;
     }
 }
