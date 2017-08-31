@@ -1081,10 +1081,8 @@ angular.module('oncokbApp')
                         data.nccnGuidelines = [
                             {
                                 therapy: tumor.nccn.therapy.text,
-                                category: '',
                                 description: tumor.nccn.description.text,
                                 disease: tumor.nccn.disease.text,
-                                pages: '',
                                 version: tumor.nccn.version.text
                             }
                         ];
@@ -1931,7 +1929,6 @@ angular.module('oncokbApp')
                                 _tumorType.cancerTypes.push(cancerType);
                             }
                         });
-                        _tumorType.nccn.category.setText('2A');
                         for (var i = 0; i < 4; i++) {
                             var __ti = model.create(OncoKB.TI);
                             var __status = i < 2 ? 1 : 0; // 1: Standard, 0: Investigational
