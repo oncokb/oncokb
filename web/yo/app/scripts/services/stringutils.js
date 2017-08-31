@@ -1152,10 +1152,10 @@ angular.module('oncokbApp')
                 if (model.get(e)) {
                     if (model.get(e).type === 'Map') {
                         reviewObj[e] = getReview(model[e]);
-                    } else if(_.isNumber(model.get(e))) {
-                        reviewObj[e] = model.get(e);
                     } else if (_.isString(model.get(e))) {
                         reviewObj[e] = OncoKB.utils.getString(model.get(e));
+                    } else {
+                        reviewObj[e] = model.get(e);
                     }
                 }
             });
