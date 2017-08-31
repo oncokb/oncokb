@@ -36,9 +36,9 @@ public class GenomeNexusUtilsTest extends TestCase {
         // Test frame shift variant
         consequence = GenomeNexusUtils.getTranscriptConsequence("22:g.41574678_41574679insC");
         assertEquals("Picked transcript protein change is not tH2324Pfs*55, but it should.",
-            "H2324Pfs*55", consequence.getHgvspShort());
+            "p.H2324Pfs*55", consequence.getHgvspShort());
         assertEquals("Picked transcript protein change is not tH2324Pfs*55, but it should.",
-            "frameshift_variant", VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.getConsequence()));
+            VariantConsequenceUtils.findVariantConsequenceByTerm("frameshift_variant"), VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.getConsequence()));
     }
 
 }
