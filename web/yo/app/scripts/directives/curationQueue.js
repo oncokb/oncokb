@@ -335,7 +335,9 @@ angular.module('oncokbApp')
                             count++;
                         }
                     });
-                    $rootScope.geneMetaData.set('CurationQueueArticles', count);
+                    if ($rootScope.geneMetaData) {
+                        $rootScope.geneMetaData.set('CurationQueueArticles', count);
+                    }
                 }
             }
         };
