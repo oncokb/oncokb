@@ -3410,7 +3410,7 @@ angular.module('oncokbApp')
                     label: 'Px3 - NCCN included criteria'
                 }, {
                     value: 'P4',
-                    label: 'Px4 - Compelling peer reviewed literature included criteria'
+                    label: 'Px4 - Compelling peer reviewed literature'
                 }];
                 levels.diagnostic = [{
                     value: 'D1',
@@ -3420,7 +3420,7 @@ angular.module('oncokbApp')
                     label: 'Dx2 - NCCN included criteria'
                 }, {
                     value: 'D3',
-                    label: 'Dx3 - Compelling peer reviewed literature included criteria'
+                    label: 'Dx3 - Compelling peer reviewed literature'
                 }];
                 return levels;
             }
