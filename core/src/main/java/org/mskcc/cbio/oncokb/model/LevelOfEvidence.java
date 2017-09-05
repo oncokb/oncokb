@@ -27,12 +27,12 @@ public enum LevelOfEvidence {
     LEVEL_P1("P1", "WHO included criteria"),
     LEVEL_P2("P2", "ELN included criteria (only for AML, may be combined with Px1)"),
     LEVEL_P3("P3", "NCCN included criteria"),
-    LEVEL_P4("P4", "Compelling peer reviewed literature included criteria"),
+    LEVEL_P4("P4", "Compelling peer reviewed literature"),
 
     // Levels for diagnostic implications
     LEVEL_D1("D1", "WHO included criteria"),
     LEVEL_D2("D2", "NCCN included criteria"),
-    LEVEL_D3("D3", "Compelling peer reviewed literature included criteria");
+    LEVEL_D3("D3", "Compelling peer reviewed literature");
 
     LevelOfEvidence(String level, String description) {
         this.level = level;
