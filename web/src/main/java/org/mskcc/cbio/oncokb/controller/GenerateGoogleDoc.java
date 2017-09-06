@@ -66,7 +66,7 @@ public class GenerateGoogleDoc {
         
     @RequestMapping(value="/legacy-api/generateGoogleDoc", method = POST)
     public @ResponseBody Boolean generateGoogleDoc(
-            @RequestParam(value="reportParams", required=true) String reportParams) throws MalformedURLException, ServiceException, URISyntaxException{
+            @RequestParam(value="reportParams", required=true) String reportParams) throws MalformedURLException, ServiceException, URISyntaxException, JSONException {
         try {
             
             if(reportParams == null) {
@@ -142,7 +142,7 @@ public class GenerateGoogleDoc {
         return false;
     }
     
-    private static String getFileName(JSONObject content, JSONArray items){
+    private static String getFileName(JSONObject content, JSONArray items) throws JSONException {
         String fileName = "";
         
         if(content.has("items")) {
@@ -190,7 +190,7 @@ public class GenerateGoogleDoc {
         service.insert(listFeedUrl, row);
     }
     
-    private static void changeFileContent(String fileId, String fileName, JSONObject content, JSONArray records) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException {
+    private static void changeFileContent(String fileId, String fileName, JSONObject content, JSONArray records) throws MalformedURLException, GeneralSecurityException, IOException, ServiceException, JSONException {
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
 
         SpreadsheetService service = GoogleAuth.getSpreadSheetService();

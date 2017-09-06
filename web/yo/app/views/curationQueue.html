@@ -143,7 +143,7 @@
                 <td>{{x.comment}}</td>
                 <td>
                     <span ng-show="!x.curated">
-                        <div class="operationStyle">
+                        <div style="min-width: 90px;">
                             <button type="button" class="btn btn-success buttonStyle" ng-click="initialProcess(x, 'complete')" ng-disabled="data.loading"
                                     uib-tooltip-placement="top" uib-tooltip="Complete curation" ng-bind-html="getButtonHtml('complete', x.addedAt)">
                             </button>
