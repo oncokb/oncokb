@@ -7,6 +7,7 @@ package org.mskcc.cbio.oncokb.controller;
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
@@ -159,7 +160,7 @@ public class EvidenceController {
     public
     @ResponseBody
     synchronized ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
-                             @RequestBody String vus) {
+                             @RequestBody String vus) throws JSONException {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
         if (hugoSymbol != null && vus != null) {
