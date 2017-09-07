@@ -597,10 +597,10 @@ angular.module('oncokbApp')
                     $rootScope.geneMetaData.clear();
                     $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
                     if (_.isNumber(incompleteCount)) {
-                        $scope.data.geneMetaData.set('CurationQueueArticles', incompleteCount);
+                        $rootScope.geneMetaData.set('CurationQueueArticles', incompleteCount);
                     }
                     if (_.isNumber(allCount)) {
-                        $scope.data.geneMetaData.set('AllArticles', allCount);
+                        $rootScope.geneMetaData.set('AllArticles', allCount);
                     }
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
