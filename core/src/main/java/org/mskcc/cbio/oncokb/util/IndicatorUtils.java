@@ -238,7 +238,7 @@ public class IndicatorUtils {
                 Set<Evidence> evidencesToRemove = new HashSet<>();
                 for (Evidence tempEvidence : treatmentEvidences) {
                     for (Alteration tempAlteration : tempEvidence.getAlterations()) {
-                        if (tempEvidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R1) && alleles.contains(tempAlteration)) {
+                        if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence()) && alleles.contains(tempAlteration)) {
                             evidencesToRemove.add(tempEvidence);
                             break;
                         }
