@@ -1,8 +1,8 @@
 <span>
   <status style="position: relative">
-    <i class="fa {{vetted.icon}}" ng-style="{color: obsolete==='true' && $root.userRole === 8 ?'red':vetted.color}"></i>
+    <i class="fa {{vetted.icon}}" ng-style="{color: obsolete==='true' && $root.obsoletePermission ?'red':vetted.color}"></i>
     <statusBody class="eStatusComments">
-        <span ng-if="obsolete === 'true' && $root.userRole === 8" >
+        <span ng-if="obsolete === 'true' && $root.obsoletePermission" >
             <input
                 id="::({{id}}-obsolete)"
                 type="checkbox"

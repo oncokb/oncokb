@@ -3636,8 +3636,8 @@ angular.module('oncokbApp')
                     callback(index, '', 'subtype');
                 }
             }
-
-            if ($scope.userRole === 8) {
+            $rootScope.obsoletePermission = ($scope.userRole === 8 || Users.getMe().name.trim().toLowerCase() === 'philip jonsson') ? true : false;
+            if ($rootScope.obsoletePermission) {
                 $scope.status.hideAllObsolete = false;
             } else {
                 $scope.status.hideAllObsolete = true;
