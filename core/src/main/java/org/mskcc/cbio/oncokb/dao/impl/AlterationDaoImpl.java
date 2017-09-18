@@ -20,10 +20,10 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
     public List<Alteration> findAlterationsByGene(Gene gene) {
         return findByNamedQuery("findAlterationsByGene", gene);
     }
-    
+
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
-        List<Alteration> alterations = findByNamedQuery("findAlteration", gene, alterationType, alteration);
+        List<Alteration> alterations = findByNamedQuery("findAlteration", gene, alteration);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 
