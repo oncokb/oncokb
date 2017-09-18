@@ -36,15 +36,15 @@
                <param name="useNamed">true</param>
             </type>
         </property>
-        
+
         <many-to-one name="consequence" class="org.mskcc.cbio.oncokb.model.VariantConsequence" lazy="false" fetch="join">
             <column name="consequence"/>
         </many-to-one>
-        
+
         <property name="refResidues" type="string">
           <column name="ref_residues"/>
         </property>
-        
+
         <property name="proteinStart" type="int">
           <column name="protein_start"/>
         </property>
@@ -71,12 +71,12 @@
         <![CDATA[from Alteration a where a.gene=?]]>
     </query>
     <query name="findAlteration">
-        <![CDATA[from Alteration a where a.gene=? and a.alterationType=? and a.alteration=?]]>
+        <![CDATA[from Alteration a where a.gene=? and a.alteration=?]]>
     </query>
     <query name="findMutationsByConsequence">
-        <![CDATA[from Alteration a where a.gene=? and a.alterationType='MUTATION' and a.consequence=?]]>
+        <![CDATA[from Alteration a where a.gene=? and a.consequence=?]]>
     </query>
     <query name="findMutationsByConsequenceAndPosition">
-        <![CDATA[from Alteration a where a.gene=? and a.alterationType='MUTATION' and a.consequence=? and a.proteinStart<=? and a.proteinEnd>=?]]>
+        <![CDATA[from Alteration a where a.gene=? and a.consequence=? and a.proteinStart<=? and a.proteinEnd>=?]]>
     </query>
 </hibernate-mapping>
