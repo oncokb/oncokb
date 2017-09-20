@@ -119,6 +119,19 @@ public class IndicatorUtilsTest {
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
+
+        // Test special cases
+        query = new Query(null, null, null, "PDGFRA", "D842Y", null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
+        assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 2A, but it is not.",
+            LevelOfEvidence.LEVEL_2A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level should be null, but it is not.",
+            null, indicatorQueryResp.getHighestResistanceLevel());
+        assertEquals("The number of treatments should be two",
+            2, indicatorQueryResp.getTreatments().size());
+
         // Oncogenicity of Alternative Allele overwrites Inconclusive
         // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
 //        query = new Query(null, null, null, "BRCA1", "C24Y", null, "Colon Adenocarcinoma", null, null, null, null);
@@ -204,7 +217,7 @@ public class IndicatorUtilsTest {
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
         //Other Biomarker tests
-        query = new Query(null, null, null,  null, "MSI-H", null, "Colorectal Cancer", null, null, null, null);
+        query = new Query(null, null, null, null, "MSI-H", null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
