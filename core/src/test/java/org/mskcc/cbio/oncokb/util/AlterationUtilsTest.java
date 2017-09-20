@@ -43,6 +43,7 @@ public class AlterationUtilsTest {
                 {"V600E", "600", "600", "V", "E", "missense_variant"},
                 {"F53_Q53delinsL", "53", "53", null, null, "missense_variant"},
                 {"D842_I843delinsIM", "842", "843", null, null, "missense_variant"},
+                {"IK744KI", "744", "745", "IK", "KI", "missense_variant"},
 
                 // feature_truncating variant
                 {"D286_L292trunc", "286", "292", null, null, "feature_truncation"},
@@ -58,6 +59,9 @@ public class AlterationUtilsTest {
                 {"I744_K745delinsKIPVAI", "744", "745", null, null, "inframe_insertion"},
                 {"762_823ins", "762", "823", null, null, "inframe_insertion"},
                 {"V561_I562insER", "561", "562", null, null, "inframe_insertion"},
+                {"IK744KIPVAI", "744", "745", "IK", "KIPVAI", "inframe_insertion"},
+                {"IK744K", "744", "745", "IK", "K", "inframe_deletion"},
+                {"IKG744KIPVAI", "744", "746", "IKG", "KIPVAI", "inframe_insertion"},
 
                 // start_lost,
                 {"M1I", "1", "1", "M", "I", "start_lost"},

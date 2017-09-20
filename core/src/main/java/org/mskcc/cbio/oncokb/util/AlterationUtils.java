@@ -64,13 +64,16 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("([A-Z\\*])([0-9]+)([A-Z\\*\\?]?)");
+        Pattern p = Pattern.compile("^([A-Z\\*]+)([0-9]+)([A-Z\\*\\?]*)$");
         Matcher m = p.matcher(proteinChange);
         if (m.matches()) {
             ref = m.group(1);
             start = Integer.valueOf(m.group(2));
             end = start;
             var = m.group(3);
+
+            Integer refL = ref.length();
+            Integer varL = var.length();
 
             if (ref.equals(var)) {
                 consequence = "synonymous_variant";
@@ -83,7 +86,19 @@ public final class AlterationUtils {
             } else if (var.equals("?")) {
                 consequence = "any";
             } else {
-                consequence = "missense_variant";
+                end = start + refL - 1;
+                if (refL > 1 || varL > 1) {
+                    // Handle inframe insertion/deletion event. Exp: IK744K
+                    if (refL > varL) {
+                        consequence = "inframe_deletion";
+                    } else if (refL < varL) {
+                        consequence = "inframe_insertion";
+                    } else {
+                        consequence = "missense_variant";
+                    }
+                } else {
+                    consequence = "missense_variant";
+                }
             }
         } else {
             p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z]+)");
