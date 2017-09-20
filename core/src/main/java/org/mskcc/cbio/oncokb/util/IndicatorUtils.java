@@ -235,16 +235,6 @@ public class IndicatorUtils {
 
                     treatmentEvidences = filteredEvis;
                 }
-                Set<Evidence> evidencesToRemove = new HashSet<>();
-                for (Evidence tempEvidence : treatmentEvidences) {
-                    for (Alteration tempAlteration : tempEvidence.getAlterations()) {
-                        if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence()) && alleles.contains(tempAlteration)) {
-                            evidencesToRemove.add(tempEvidence);
-                            break;
-                        }
-                    }
-                }
-                treatmentEvidences.removeAll(evidencesToRemove);
                 if (!treatmentEvidences.isEmpty()) {
                     List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
 

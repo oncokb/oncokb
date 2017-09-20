@@ -63,7 +63,9 @@ public class EvidenceUtils {
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                 null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alt);
 
             Set<Evidence> relevantEvidences;
             List<TumorType> relevantTumorTypes = new ArrayList<>();
@@ -83,6 +85,18 @@ public class EvidenceUtils {
                 relevantEvidences = CacheUtils.getRelevantEvidences(gene.getEntrezGeneId(), variantId);
             } else {
                 relevantEvidences = getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences);
+
+                Set<Evidence> evidencesToRemove = new HashSet<>();
+                for (Evidence tempEvidence : relevantEvidences) {
+                    for (Alteration tempAlteration : tempEvidence.getAlterations()) {
+                        if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence()) && alleles.contains(tempAlteration)) {
+                            evidencesToRemove.add(tempEvidence);
+                            break;
+                        }
+                    }
+                }
+                relevantEvidences.removeAll(evidencesToRemove);
+
                 if (CacheUtils.isEnabled()) {
                     CacheUtils.setRelevantEvidences(gene.getEntrezGeneId(), variantId, relevantEvidences);
                 }
