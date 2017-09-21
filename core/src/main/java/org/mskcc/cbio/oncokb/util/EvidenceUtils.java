@@ -828,10 +828,12 @@ public class EvidenceUtils {
                                 relevantAlts.add(oncogenicMutations);
                             }
                         }
-                        query.setAlterations(relevantAlts);
 
                         Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
+                        relevantAlts.removeAll(allelesAlts);
+                        query.setAlterations(relevantAlts);
+
                         query.setAlleles(new ArrayList<>(allelesAlts));
                     } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
                         // if no alteration assigned, but has tumor type
@@ -858,8 +860,8 @@ public class EvidenceUtils {
                 new ArrayList<>(
                     EvidenceUtils.keepHighestLevelForSameTreatments(EvidenceUtils.filterEvidence(evidences, query))));
 
-            // Attach evidence if query doesn't contain any alteration and has alleles.
-            if ((query.getAlterations() == null || query.getAlterations().isEmpty() || AlterationUtils.excludeVUS(query.getGene(), query.getAlterations()).size() == 0) && (query.getAlleles() != null && !query.getAlleles().isEmpty())) {
+            // Attach alleles evidences.
+            if (query.getAlleles() != null && !query.getAlleles().isEmpty()) {
                 // Get oncogenic and mutation effect evidences
                 List<Alteration> alleles = query.getAlleles();
                 List<Alteration> allelesAndRelevantAlterations = new ArrayList<>();

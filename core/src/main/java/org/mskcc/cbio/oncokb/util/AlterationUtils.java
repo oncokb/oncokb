@@ -755,14 +755,24 @@ public final class AlterationUtils {
     public static Boolean isOncogenicAlteration(Alteration alteration) {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
-        boolean isOncogenic = false;
+        Boolean isOncogenic = null;
         for (Evidence evidence : oncogenicEvs) {
             Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
             if (oncogenicity != null
                 && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY))) {
                 isOncogenic = true;
                 break;
+            } else if (oncogenicity != null && oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL)) {
+                isOncogenic = false;
             }
+            if (isOncogenic != null) {
+                break;
+            }
+        }
+
+        // If there is no oncogenicity specified by the system and it is hotspot, then this alteration should be oncogenic.
+        if (isOncogenic == null && HotspotUtils.isHotspot(alteration)) {
+            isOncogenic = true;
         }
         return isOncogenic;
     }
