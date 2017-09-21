@@ -154,6 +154,13 @@ public class IndicatorUtils {
 
             indicatorQuery.setVUS(isVUS(matchedAlt == null ? alteration : matchedAlt));
 
+            if (indicatorQuery.getVUS()) {
+                List<Evidence> vusEvidences = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VUS), null);
+                if (vusEvidences != null) {
+                    allQueryRelatedEvidences.addAll(vusEvidences);
+                }
+            }
+
             if (alleles == null || alleles.size() == 0) {
                 indicatorQuery.setAlleleExist(false);
             } else {
