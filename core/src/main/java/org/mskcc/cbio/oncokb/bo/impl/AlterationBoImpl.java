@@ -173,7 +173,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Looking for oncogenic mutations
         if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
             for (Alteration alt : alterations) {
-                if (AlterationUtils.isOncogenicAlteration(alt)) {
+                Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
+                if (isOncogenic != null && isOncogenic) {
                     addOncogenicMutations = true;
                     break;
                 }
