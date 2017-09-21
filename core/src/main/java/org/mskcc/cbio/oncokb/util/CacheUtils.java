@@ -29,7 +29,7 @@ import com.mysql.jdbc.StringUtils;
 
 public class CacheUtils {
     private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
-    private static Map<Integer, Map<String, String>> variantTumorTypeSummary = new HashMap<>();
+    private static Map<Integer, Map<String, Map<String, Object>>> variantTumorTypeSummary = new HashMap<>();
     private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
@@ -422,7 +422,7 @@ public class CacheUtils {
         variantSummary.get(entrezGeneId).put(variant, summary);
     }
 
-    public static String getVariantTumorTypeSummary(Integer entrezGeneId, String key) {
+    public static Map<String, Object> getVariantTumorTypeSummary(Integer entrezGeneId, String key) {
         if (variantTumorTypeSummary.containsKey(entrezGeneId)
             && variantTumorTypeSummary.get(entrezGeneId).containsKey(key)) {
             return variantTumorTypeSummary.get(entrezGeneId).get(key);
@@ -436,9 +436,9 @@ public class CacheUtils {
             && variantTumorTypeSummary.get(entrezGeneId).containsKey(key);
     }
 
-    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String key, String summary) {
+    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String key, Map<String, Object> summary) {
         if (!variantTumorTypeSummary.containsKey(entrezGeneId)) {
-            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, String>());
+            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, Map<String, Object>>());
         }
         variantTumorTypeSummary.get(entrezGeneId).put(key, summary);
     }

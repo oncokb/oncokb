@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -21,6 +22,8 @@ public class IndicatorUtils {
 
         Gene gene = null;
         List<Alteration> relevantAlterations = new ArrayList<>();
+
+        Set<Evidence> allQueryRelatedEvidences = new HashSet<>();
 
         // Queried alteration
         Alteration alteration;
@@ -125,7 +128,7 @@ public class IndicatorUtils {
 
             // Gene summary
             indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene));
-
+            allQueryRelatedEvidences.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                 null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
@@ -161,33 +164,46 @@ public class IndicatorUtils {
 
             if (nonVUSRelevantAlts.size() > 0) {
                 Oncogenicity oncogenicity = null;
+                Evidence oncogenicityEvidence = null;
 
 
                 // Find alteration specific oncogenicity
                 List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
                     Collections.singleton(EvidenceType.ONCOGENIC), null);
                 if (selfAltOncogenicEvis != null) {
-                    oncogenicity = MainUtils.findHighestOncogenicByEvidences(new HashSet<>(selfAltOncogenicEvis));
+                    oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(selfAltOncogenicEvis));
+                    if (oncogenicityEvidence != null) {
+                        oncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
+                    }
                 }
 
                 // Find Oncogenicity from alternative alleles
                 if ((oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE))
                     && indicatorQuery.getAlleleExist()) {
-                    Oncogenicity tmpOncogenicity = MainUtils.setToAlleleOncogenicity(MainUtils.findHighestOncogenicByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null))));
-                    if (tmpOncogenicity != null) {
-                        oncogenicity = tmpOncogenicity;
+                    oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alleles), Collections.singleton(EvidenceType.ONCOGENIC), null)));
+                    if (oncogenicityEvidence != null) {
+                        Oncogenicity tmpOncogenicity = MainUtils.setToAlleleOncogenicity(Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect()));
+                        if (tmpOncogenicity != null) {
+                            oncogenicity = tmpOncogenicity;
+                        }
                     }
                 }
 
                 // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
                 if (oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
-                    Oncogenicity tmpOncogenicity = MainUtils.findHighestOncogenicByEvidences(
+                    oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
-                            Collections.singleton(EvidenceType.ONCOGENIC), null)
-                    );
-                    if (tmpOncogenicity != null) {
-                        oncogenicity = tmpOncogenicity;
+                            Collections.singleton(EvidenceType.ONCOGENIC), null));
+                    if (oncogenicityEvidence != null) {
+                        Oncogenicity tmpOncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
+                        if (tmpOncogenicity != null) {
+                            oncogenicity = tmpOncogenicity;
+                        }
                     }
+                }
+
+                if (oncogenicityEvidence != null) {
+                    allQueryRelatedEvidences.add(oncogenicityEvidence);
                 }
 
                 // Only set oncogenicity if no previous data assigned.
@@ -244,14 +260,25 @@ public class IndicatorUtils {
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
                     indicatorQuery.setOtherSignificantSensitiveLevels(getOtherSignificantLevels(indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences));
                     indicatorQuery.setOtherSignificantResistanceLevels(getOtherSignificantLevels(indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences));
+
+                    allQueryRelatedEvidences.addAll(treatmentEvidences);
                 }
             }
 
             // Tumor type summary
             if (query.getTumorType() != null) {
-                indicatorQuery.setTumorTypeSummary(SummaryUtils.tumorTypeSummary(gene, query, matchedAlt,
+                Map<String, Object> tumorTypeSummary = SummaryUtils.tumorTypeSummary(gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
-                    oncoTreeTypes));
+                    oncoTreeTypes);
+                if (tumorTypeSummary != null) {
+                    indicatorQuery.setTumorTypeSummary((String) tumorTypeSummary.get("summary"));
+                    Date lateEdit = tumorTypeSummary.get("lastEdit") == null ? null : (Date) tumorTypeSummary.get("lastEdit");
+                    if (lateEdit != null) {
+                        Evidence lastEditTTSummary = new Evidence();
+                        lastEditTTSummary.setLastEdit(lateEdit);
+                        allQueryRelatedEvidences.add(lastEditTTSummary);
+                    }
+                }
             }
 
             // Mutation summary
@@ -278,13 +305,32 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(false);
         }
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
-        indicatorQuery.setLastUpdate(MainUtils.getDataVersionDate());
+
+        Date lastUpdate = getLatestDateFromEvidences(allQueryRelatedEvidences);
+        indicatorQuery.setLastUpdate(lastUpdate == null ? null :
+            new SimpleDateFormat("MM/dd/yyy hh:mm:ss").format(lastUpdate));
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
             indicatorQuery.setOncogenic("");
         }
         return indicatorQuery;
+    }
+
+    private static Date getLatestDateFromEvidences(Set<Evidence> evidences) {
+        Date date = null;
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getLastEdit() != null) {
+                    if (date == null) {
+                        date = evidence.getLastEdit();
+                    } else if (date.before(evidence.getLastEdit())) {
+                        date = evidence.getLastEdit();
+                    }
+                }
+            }
+        }
+        return date;
     }
 
     private static List<LevelOfEvidence> getOtherSignificantLevels(LevelOfEvidence highestLevel, String type, Set<Evidence> evidences) {

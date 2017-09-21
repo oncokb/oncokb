@@ -10,10 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Summary APIs
@@ -103,7 +100,10 @@ public class SummaryController {
                     summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(variantQuery.getGene()), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "tumorType":
-                    summary = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), variantQuery.getTumorTypes());
+                    Map<String, Object> summaryMap = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), variantQuery.getTumorTypes());
+                    if (summaryMap != null) {
+                        summary = (String) summaryMap.get("summary");
+                    }
                     break;
                 default:
                     summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
