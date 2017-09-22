@@ -49,6 +49,7 @@ public class Query implements java.io.Serializable {
                 this.entrezGeneId = variantQuery.getGene().getEntrezGeneId();
             }
             setAlteration(variantQuery.getQueryAlteration());
+            this.setTumorType(variantQuery.getQueryTumorType());
             this.consequence = variantQuery.getConsequence();
             this.proteinStart = variantQuery.getProteinStart();
             this.proteinEnd = variantQuery.getProteinEnd();
