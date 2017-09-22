@@ -243,7 +243,7 @@ public class SummaryUtils {
 
     public static String unknownOncogenicSummary(Gene gene, String queryAlteration) {
         String str = gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, queryAlteration);
-        return "This " + str +
+        return "The " + str +
             " has not specifically been reviewed by the OncoKB team, and its oncogenic function is considered unknown.";
     }
 
@@ -373,7 +373,7 @@ public class SummaryUtils {
 
     private static String getVUSOncogenicSummary(Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        String summary = "no functional data about this alteration was available.";
+        String summary = "no functional data about the " + getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration()) + " was available.";
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
             if (evidence.getLastEdit() == null) {
