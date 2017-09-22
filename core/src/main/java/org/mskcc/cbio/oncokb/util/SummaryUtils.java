@@ -56,7 +56,7 @@ public class SummaryUtils {
 
         Map<String, Object> ts = tumorTypeSummary(gene, query, exactMatchAlteration, alterations, relevantTumorTypes);
         if (ts != null && ts.get("summary") != null && !((String) ts.get("summary")).isEmpty()) {
-            sb.append(" " + ts);
+            sb.append(" " + ts.get("summary"));
         }
 
         if (CacheUtils.isEnabled()) {
