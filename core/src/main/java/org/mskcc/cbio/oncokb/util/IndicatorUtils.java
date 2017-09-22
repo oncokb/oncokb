@@ -315,7 +315,7 @@ public class IndicatorUtils {
 
         Date lastUpdate = getLatestDateFromEvidences(allQueryRelatedEvidences);
         indicatorQuery.setLastUpdate(lastUpdate == null ? null :
-            new SimpleDateFormat("MM/dd/yyy hh:mm:ss").format(lastUpdate));
+            new SimpleDateFormat("MM/dd/yyy").format(lastUpdate));
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
