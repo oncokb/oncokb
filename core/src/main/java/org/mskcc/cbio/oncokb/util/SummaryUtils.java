@@ -365,7 +365,7 @@ public class SummaryUtils {
         }
 
         if (isHotspot) {
-            return hotspotSummary(query);
+            return hotspotSummary(alteration, query);
         }
 
         return unknownOncogenicSummary(gene, query.getAlteration());
@@ -502,9 +502,9 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String hotspotSummary(Query query) {
+    public static String hotspotSummary(Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
-        sb.append("This alteration has been identified " +
+        sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getAlteration()) + " has been identified " +
             "as a statistically significant hotspot and is predicted to be oncogenic");
         sb.append(hotspotLink(query));
         sb.append(".");
