@@ -277,7 +277,7 @@ angular.module('oncokbApp')
             }
 
             $rootScope.reviewMode = false;
-            $scope.displayCheck = function(uuid, reviewObj, mutationReview, tumorReview, treatmentReview, precise) {
+            $scope.displayCheck = function(reviewObj, mutationReview, tumorReview, treatmentReview) {
                 // regular mode check
                 if (!$rootScope.reviewMode) {
                     if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8 && !mutationReview) {
@@ -315,18 +315,17 @@ angular.module('oncokbApp')
                 } else if(reviewObj && reviewObj.get('addedItem')) {
                     reviewObj.delete('addedItem');
                 }
-                // precisely check for this element
-                if(_.isBoolean(precise) && precise) {
-                    return mainUtils.needReview(uuid) || reviewObj.get('review') === false || reviewObj.get('rollback');
+                // check elements in a section
+                if (reviewObj === tumorReview) {
+                    // in this case, treatmentReview is tumor.cancerTypes_review
+                    return reviewObj.get('review') || treatmentReview.get('action');
                 } else {
-                    // check elements in a section
-                    if (reviewObj === tumorReview) {
-                        // in this case, treatmentReview is tumor.cancerTypes_review
-                        return reviewObj.get('review') || treatmentReview.get('action');
-                    } else {
-                        return reviewObj.get('review') || reviewObj.get('action');
-                    }
+                    return reviewObj.get('review') || reviewObj.get('action');
                 }
+            };
+            $scope.displayPrecisely = function(uuid, reviewObj) {
+                if (!$rootScope.reviewMode) return true;
+                else return mainUtils.needReview(uuid) || reviewObj.get('review') === false || reviewObj.get('rollback');
             };
             function resetReview(reviewObj) {
                 if (reviewObj.get('rollback') === true) {
