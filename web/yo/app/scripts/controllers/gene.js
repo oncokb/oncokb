@@ -280,9 +280,6 @@ angular.module('oncokbApp')
             $scope.displayCheck = function(reviewObj, mutationReview, tumorReview, treatmentReview) {
                 // regular mode check
                 if (!$rootScope.reviewMode) {
-                    if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8 && !mutationReview) {
-                        $scope.geneEditable = false;
-                    }
                     if (mutationReview && mutationReview.get('removed') || tumorReview && tumorReview.get('removed') || treatmentReview && treatmentReview.get('removed')) {
                         return false;
                     }
@@ -3100,6 +3097,9 @@ angular.module('oncokbApp')
                     timeStamp.by.setText(Users.getMe().name);
                     $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
+                }
+                if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8) {
+                    $scope.geneEditable = false;
                 }
                 $scope.document = file;
                 $scope.fileEditable = file.editable;
