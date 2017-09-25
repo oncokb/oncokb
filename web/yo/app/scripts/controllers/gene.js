@@ -277,6 +277,10 @@ angular.module('oncokbApp')
             }
 
             $rootScope.reviewMode = false;
+            /**
+             * Check if a section needs to be displayed or not.
+             * For instance, would be used to check if Mutation Effect section needs to be displayed
+             * ***/
             $scope.displayCheck = function(reviewObj, mutationReview, tumorReview, treatmentReview) {
                 // regular mode check
                 if (!$rootScope.reviewMode) {
@@ -320,6 +324,11 @@ angular.module('oncokbApp')
                     return reviewObj.get('review') || reviewObj.get('action');
                 }
             };
+            /**
+             * Check if each item inside a section needs to be displayed or not
+             * For instance, there are three items Oncogenic, Effect and Description inside Mutation Effect section.
+             * And this function will be used to check each item needs to be displayed or not.
+             * ***/
             $scope.displayPrecisely = function(uuid, reviewObj) {
                 if (!$rootScope.reviewMode) return true;
                 else return mainUtils.needReview(uuid) || reviewObj.get('review') === false || reviewObj.get('rollback');
@@ -3098,6 +3107,7 @@ angular.module('oncokbApp')
                     $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
                     $scope.realtimeDocument.getModel().endCompoundOperation();
                 }
+                // Only allow admins to edit Other Biomarkers Gene Sumarry, Background and Gene Type
                 if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8) {
                     $scope.geneEditable = false;
                 }
