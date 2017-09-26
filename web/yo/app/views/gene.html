@@ -64,20 +64,20 @@
           </span>
       </div>
 
-    <div ng-if="displayPrecisely(gene.summary_uuid, gene.summary_review)">
+    <div ng-if="displayPrecisely(gene.summary_uuid)">
         <h3>{{::gene.summary.display}}:
           <comments-dict file-editable="fileEditable" comments="gene.summary_comments" object="gene" key="summary" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
           <e-status ng-show="!reviewMode && fileEditable" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.summary_eStatus" id="'gene-summary'" apply-obsolete="applyObsolete(gene.summary_eStatus, 'GENE_SUMMARY')"></e-status>
-          <review-panel ng-if="reviewMode" review-obj="gene.summary_review" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
+          <review-panel uuid="gene.summary_uuid" ng-if="reviewMode" review-obj="gene.summary_review" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
         <drive-realtime-string review-obj="gene.summary_review" uuid="::gene.summary_uuid" es="gene.summary_eStatus" fe="geneEditable" t="'p'" object="gene.summary"></drive-realtime-string>
     </div>
-    <div ng-if="displayPrecisely(gene.type_uuid, gene.type_review)">
+    <div ng-if="displayPrecisely(gene.type_uuid)">
         <h3 ng-if="reviewMode">Gene Type:
-            <review-panel ng-if="reviewMode" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
+            <review-panel uuid="gene.type_uuid" ng-if="reviewMode" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
-        <span><h4 style="margin-bottom:-10px" ng-if="reviewMode && !gene.type_review.get('action')">New Content:</h4></span>
-        <div>
+        <span><h4 style="margin-bottom:-10px" ng-if="reviewContentDisplay(gene.type_uuid)">New Content:</h4></span>
+        <div ng-if="!reviewMode || notDecisedYet(gene.type_uuid)">
             <span style="float:left">
             <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
             </span>
@@ -85,33 +85,33 @@
                 <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
             </span>
         </div>
-        <div ng-if="reviewMode">
-            <span ng-if="!gene.type_review.get('action')">
+        <div>
+            <span ng-if="reviewContentDisplay(gene.type_uuid)">
                 <br/><br/>
                 <h4>Old Content:</h4>
             </span>
-            <div>
+            <div ng-if="reviewMode">
                 <input
                     id="TSG-review"
                     type="radio"
-                    ng-checked="(!gene.type_review.get('action') ?  gene.type_review.get('lastReviewed')['TSG'] : gene.type.get('TSG'))  === 'Tumor Suppressor' ? true : false"
+                    ng-checked="(notDecisedYet(gene.type_uuid) ?  gene.type_review.get('lastReviewed')['TSG'] : gene.type.get('TSG'))  === 'Tumor Suppressor' ? true : false"
                     ng-disabled="true">
                 <label for="TSG-review">Tumor Suppressor</label>
                 <input
                     id="OCG-review"
                     type="radio"
-                    ng-checked="(!gene.type_review.get('action') ? gene.type_review.get('lastReviewed')['OCG'] : gene.type.get('OCG')) === 'Oncogene' ? true : false"
+                    ng-checked="(notDecisedYet(gene.type_uuid) ? gene.type_review.get('lastReviewed')['OCG'] : gene.type.get('OCG')) === 'Oncogene' ? true : false"
                     ng-disabled="true">
                 <label for="OCG-review">Oncogene</label>
             </div>
         </div>
     </div>
-    <div ng-if="displayPrecisely(gene.background_uuid, gene.background_review)">
+    <div ng-if="displayPrecisely(gene.background_uuid)">
         <br/><br/>
         <h3>{{::gene.background.display}}:
             <comments-dict file-editable="fileEditable" comments="gene.background_comments" object="gene" key="background" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             <e-status ng-show="!reviewMode && fileEditable" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="gene.background_eStatus" id="'gene-background'" apply-obsolete="applyObsolete(gene.background_eStatus, 'GENE_BACKGROUND')"></e-status>
-            <review-panel ng-if="reviewMode" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
+            <review-panel uuid="gene.background_uuid" ng-if="reviewMode" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
         </h3>
         <drive-realtime-string review-obj="gene.background_review" uuid="::gene.background_uuid"  es="gene.background_eStatus" fe="geneEditable" t="'p'" object="gene.background"></drive-realtime-string>
     </div>
@@ -133,7 +133,7 @@
   <div id="mutation">
     <uib-accordion close-others="false">
       <div ng-repeat="mutation in gene.mutations.asArray()" ng-init="initGeneStatus(mutation);tmpGeneStatus=getGeneStatusItem(mutation)" class="accordionMarginTop" ng-hide="status.hideAllObsolete && mutation.name_eStatus.get('obsolete') === 'true'">
-        <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader" ng-if="displayCheck(mutation.name_review, mutation.name_review)">
+        <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader" ng-if="displayCheck(mutation.name_uuid, mutation.name_review)">
           <uib-accordion-heading>
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
             <span>Mutation: </span>
@@ -156,34 +156,34 @@
               <i ng-click="remove($event, 'mutation', mutation)" class="fa fa-trash-o"></i>
             </span>
               <span class="pull-right">
-                  <review-panel ng-if="reviewMode" review-obj="mutation.name_review" evidence-type="'mutation'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"
+                  <review-panel uuid="mutation.name_uuid" ng-if="reviewMode" review-obj="mutation.name_review" evidence-type="'mutation'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"
                                 accept-added="acceptAdded(event, type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(event, type, mutation, tumor, ti, treatment)"
                                 confirm-delete="confirmDelete(event, type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(event, type, mutation, tumor, ti, treatment)"></review-panel>
               </span>
           </uib-accordion-heading>
           <uib-accordion ng-if="tmpGeneStatus.isOpen" close-others="false">
             <!-- Mutation Effect -->
-            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic')" ng-if="displayCheck(mutation.oncogenic_review, mutation.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
+            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic')" ng-if="displayCheck(mutation.oncogenic_uuid)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
               <uib-accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="tmpGeneStatus.isOpen"></i>
                 <span>Mutation Effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict file-editable="fileEditable" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
                 <span class="pull-right" ng-show="!reviewMode && fileEditable">
                    <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.shortSummary_eStatus" id="mutation.name.text  + '-shortSummary'"  apply-obsolete="applyObsolete(mutation.shortSummary_eStatus, 'ONCOGENIC', mutation)"></e-status>
                 </span>
-                <review-panel ng-if="reviewMode" review-obj="mutation.oncogenic_review" evidence-type="'ONCOGENIC'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"></review-panel>
+                <review-panel uuid="mutation.oncogenic_uuid" ng-if="reviewMode" review-obj="mutation.oncogenic_review" evidence-type="'ONCOGENIC'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"></review-panel>
               </uib-accordion-heading>
-                <p ng-class="{'seperationLine': reviewMode}" ng-if="displayPrecisely(mutation.oncogenic_uuid, mutation.oncogenic_review)">
+                <p  ng-if="displayPrecisely(mutation.oncogenic_uuid)">
                     <strong style="float: left">{{::mutation.oncogenic.display}}:</strong>
                     <drive-realtime-string review-obj="mutation.oncogenic_review" uuid="::mutation.oncogenic_uuid" es="mutation.shortSummary_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.oncogenic" checkboxes="checkboxes['oncogenic']" checkboxid="mutation.name.text + '-shortSummary-box-'"></drive-realtime-string>
                 </p>
-                <div class="mutationEffect" ng-if="displayPrecisely(mutation.effect_uuid, mutation.effect_review)">
+                <div class="mutationEffect" ng-if="displayPrecisely(mutation.effect_uuid)">
                     <strong class="header">Mutation effect:</strong>
                     <div>
                         <drive-realtime-string review-obj="mutation.effect_review" uuid="::mutation.effect_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'checkbox'" object="mutation.effect.value" checkboxes="checkboxes['mutationEffect']" checkboxid="mutation.name.text + '-mutation-effect-box-'" addon="mutation.effect.addOn" ph="' Optional text'"></drive-realtime-string>
                     </div>
                 </div>
                 <br/>
-                <span ng-if="displayPrecisely(mutation.description_uuid, mutation.description_review)">
+                <span ng-if="displayPrecisely(mutation.description_uuid)">
                     <strong>Description of Evidence:</strong>
                     <br/>
                     <drive-realtime-string review-obj="mutation.description_review" uuid="::mutation.description_uuid" es="mutation.oncogenic_eStatus" fe="fileEditable" t="'p'" object="mutation.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
@@ -196,11 +196,11 @@
             </uib-accordion-group>
             <!-- tumor types -->
             <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="initGeneStatus(mutation, tumor); getTumorMessages(mutation)" class="accordionMarginTop" ng-hide="status.hideAllObsolete && tumor.name_eStatus.get('obsolete') === 'true'">
-              <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor)" ng-if="displayCheck(tumor.name_review, mutation.name_review, tumor.name_review, tumor.cancerTypes_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader">
+              <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor)" ng-if="displayCheck(tumor.name_uuid, tumor.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader">
                 <uib-accordion-heading >
                   <i class="fa  " ng-class="{'fa-chevron-down':tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}"></i>
                   <span>Tumor type: </span>
-                    <span ng-if="reviewMode && tumor.cancerTypes_review.get('lastReviewed') !== null && !tumor.name_review.get('added')">
+                    <span ng-if="reviewContentDisplay(tumor.name_uuid, true)">
                         <br/>
                         <p>New Content: </p>
                     </span>
@@ -221,13 +221,13 @@
                     </span>
                     <i ng-click="remove($event, 'tumor', mutation, tumor)" class="fa fa-trash-o pull-right"></i>
                   </span>
-                    <span ng-if="reviewMode && tumor.cancerTypes_review.get('lastReviewed') !== null && !tumor.name_review.get('added')">
+                    <span ng-if="reviewContentDisplay(tumor.name_uuid, true)">
                         <br/>
                         <p>Old Content: </p>
                         <span>{{getLastReviewedCancerTypesName(tumor.cancerTypes_review.get('lastReviewed'))}}</span>
                     </span>
                     <span class="pull-right">
-                        <review-panel ng-if="reviewMode" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
+                        <review-panel uuid="tumor.name_uuid" ng-if="reviewMode" review-obj="tumor.name_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
                                       confirm-delete="confirmDelete(event, type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(event, type, mutation, tumor, ti, treatment)"
                                       accept-added="acceptAdded(event, type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(event, type, mutation, tumor, ti, treatment)"></review-panel>
                     </span>
@@ -235,14 +235,14 @@
                 <uib-accordion close-others="false" ng-if="tmpGeneStatus.isOpen">
                   <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short tumor type summary" ng-model="tumor.shortSummary.text"></p></span>-->
                   <!--<pub-iframe ng-model="tumor.shortSummary.text"></pub-iframe>-->
-                <div ng-if="displayPrecisely(tumor.summary_uuid, tumor.summary_review)">
+                <div ng-if="displayPrecisely(tumor.summary_uuid)">
                     <h5><b>Tumor Type Summary (Optional): </b>
-                        <review-panel ng-if="reviewMode" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                        <review-panel uuid="tumor.summary_uuid" ng-if="reviewMode" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </h5>
                     <drive-realtime-string review-obj="tumor.summary_review" uuid="::tumor.summary_uuid" es="tumor.summary_eStatus" fe="fileEditable" t="'p'" object="tumor.summary"></drive-realtime-string>
                 </div>
                 <!-- Prevalence -->
-                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prevalence')" ng-if="displayCheck(tumor.prevalence_review, mutation.name_review, tumor.name_review)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prevalence.text && !tumor.shortPrevalence.text) || (status.hideAllObsolete && tumor.prevalence_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prevalence')" ng-if="displayCheck(tumor.prevalence_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prevalence.text && !tumor.shortPrevalence.text) || (status.hideAllObsolete && tumor.prevalence_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>{{::tumor.prevalence.display}}: </span>
@@ -250,14 +250,14 @@
                       <span class="pull-right" ng-show="!reviewMode && fileEditable">
                          <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prevalence_eStatus" id="mutation.name.text + tumor.name.text + '-prevalence'" apply-obsolete="applyObsolete(tumor.prevalence_eStatus, 'PREVALENCE', mutation, tumor)"></e-status>
                       </span>
-                      <review-panel ng-if="reviewMode" review-obj="tumor.prevalence_review" evidence-type="'PREVALENCE'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                      <review-panel uuid="tumor.prevalence_uuid" ng-if="reviewMode" review-obj="tumor.prevalence_review" evidence-type="'PREVALENCE'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </uib-accordion-heading>
                     <drive-realtime-string review-obj="tumor.prevalence_review" uuid="::tumor.prevalence_uuid" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
                     <drive-realtime-string ng-if="!reviewMode" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
                 </uib-accordion-group>
 
                 <!--Diagnostic-->
-                <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'diagnostic')" ng-if="displayCheck(tumor.diagnostic_review, mutation.name_review, tumor.name_review)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.diagnostic.description.text && !tumor.diagnostic.level.text && !tumor.diagnostic.short.text) || (status.hideAllObsolete && tumor.diagnostic_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'diagnostic')" ng-if="displayCheck(tumor.diagnostic_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.diagnostic.description.text && !tumor.diagnostic.level.text && !tumor.diagnostic.short.text) || (status.hideAllObsolete && tumor.diagnostic_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
                     <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                         <span>Diagnostic implications: </span>
@@ -265,13 +265,13 @@
                         <span class="pull-right" ng-show="!reviewMode && fileEditable">
                          <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.diagnostic_eStatus" id="mutation.name.text + tumor.name.text + '-diagnostic'" apply-obsolete="applyObsolete(tumor.diagnostic_eStatus, 'DIAGNOSTIC', mutation, tumor)"></e-status>
                       </span>
-                        <review-panel ng-if="reviewMode" review-obj="tumor.diagnostic_review" evidence-type="'DIAGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                        <review-panel uuid="tumor.diagnostic_uuid" ng-if="reviewMode" review-obj="tumor.diagnostic_review" evidence-type="'DIAGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </uib-accordion-heading>
-                    <div ng-if="displayPrecisely(tumor.diagnostic.level_uuid, tumor.diagnostic.level_review)" ng-class="{'seperationLine': reviewMode}">
+                    <div ng-if="displayPrecisely(tumor.diagnostic.level_uuid)" >
                         <strong>Level of Evidence:</strong><br/>
                         <drive-realtime-string review-obj="tumor.diagnostic.level_review" uuid="::tumor.diagnostic.level_uuid" es="tumor.diagnostic_eStatus" fe="fileEditable" object="tumor.diagnostic.level" t="'implication'" o="levels.diagnostic"></drive-realtime-string><br/>
                     </div>
-                    <div ng-if="displayPrecisely(tumor.diagnostic.description_uuid, tumor.diagnostic.description_review)">
+                    <div ng-if="displayPrecisely(tumor.diagnostic.description_uuid)">
                         <strong>Description of Evidence:</strong>
                         <br/>
                         <drive-realtime-string review-obj="tumor.diagnostic.description_review" uuid="::tumor.diagnostic.description_uuid" es="tumor.diagnostic_eStatus" fe="fileEditable" t="'p'" object="tumor.diagnostic.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
@@ -284,7 +284,7 @@
                 </uib-accordion-group>
 
                   <!-- Prognostic implications -->
-                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prognostic')" ng-if="displayCheck(tumor.prognostic_review, mutation.name_review, tumor.name_review)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prognostic.description.text && !tumor.prognostic.level.text && !tumor.prognostic.short.text) || (status.hideAllObsolete && tumor.prognostic_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prognostic')" ng-if="displayCheck(tumor.prognostic_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prognostic.description.text && !tumor.prognostic.level.text && !tumor.prognostic.short.text) || (status.hideAllObsolete && tumor.prognostic_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
                         <uib-accordion-heading>
                             <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                             <span>Prognostic implications: </span>
@@ -292,13 +292,13 @@
                             <span class="pull-right" ng-show="!reviewMode && fileEditable">
                                  <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.prognostic_eStatus" id="mutation.name.text + tumor.name.text + '-prognostic'" apply-obsolete="applyObsolete(tumor.prognostic_eStatus, 'PROGNOSTIC', mutation, tumor)"></e-status>
                             </span>
-                            <review-panel ng-if="reviewMode" review-obj="tumor.prognostic_review" evidence-type="'PROGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                            <review-panel uuid="tumor.prognostic_uuid" ng-if="reviewMode" review-obj="tumor.prognostic_review" evidence-type="'PROGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                         </uib-accordion-heading>
-                        <div ng-if="displayPrecisely(tumor.prognostic.level_uuid, tumor.prognostic.level_review)" ng-class="{'seperationLine': reviewMode}">
+                        <div ng-if="displayPrecisely(tumor.prognostic.level_uuid)" >
                             <strong>Level of Evidence:</strong><br/>
                             <drive-realtime-string review-obj="tumor.prognostic.level_review" uuid="::tumor.prognostic.level_uuid" es="tumor.prognostic_eStatus" fe="fileEditable" object="tumor.prognostic.level" t="'implication'" o="levels.prognostic"></drive-realtime-string><br/>
                         </div>
-                        <div ng-if="displayPrecisely(tumor.prognostic.description_uuid, tumor.prognostic.description_review)">
+                        <div ng-if="displayPrecisely(tumor.prognostic.description_uuid)">
                             <strong>Description of Evidence:</strong>
                             <br/>
                             <drive-realtime-string review-obj="tumor.prognostic.description_review" uuid="::tumor.prognostic.description_uuid" es="tumor.prognostic_eStatus" fe="fileEditable" t="'p'" object="tumor.prognostic.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
@@ -312,7 +312,7 @@
 
 
                     <!-- NCCN guidelines -->
-                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'nccn')" ng-if="displayCheck(tumor.nccn_review, mutation.name_review, tumor.name_review)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.nccn.disease.text) || (status.hideAllObsolete && tumor.nccn_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'nccn')" ng-if="displayCheck(tumor.nccn_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.nccn.disease.text) || (status.hideAllObsolete && tumor.nccn_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>NCCN guidelines: </span>
@@ -320,21 +320,21 @@
                       <span class="pull-right" ng-show="!reviewMode && fileEditable">
                          <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.nccn_eStatus" id="mutation.name.text + tumor.name.text + '-nccn'" apply-obsolete="applyObsolete(tumor.nccn_eStatus, 'NCCN_GUIDELINES', mutation, tumor)"></e-status>
                       </span>
-                      <review-panel ng-if="reviewMode" review-obj="tumor.nccn_review" evidence-type="'NCCN_GUIDELINES'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                      <review-panel uuid="tumor.nccn_uuid" ng-if="reviewMode" review-obj="tumor.nccn_review" evidence-type="'NCCN_GUIDELINES'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </uib-accordion-heading>
-                    <p ng-class="{'seperationLine': reviewMode}" ng-if="displayPrecisely(tumor.nccn.therapy_uuid, tumor.nccn.therapy_review)">
+                    <p  ng-if="displayPrecisely(tumor.nccn.therapy_uuid)">
                         <strong>{{::tumor.nccn.therapy.display}}:</strong>
                         <drive-realtime-string review-obj="tumor.nccn.therapy_review" uuid="::tumor.nccn.therapy_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
                     </p>
-                    <p ng-class="{'seperationLine': reviewMode}" ng-if="displayPrecisely(tumor.nccn.disease_uuid, tumor.nccn.disease_review)">
+                    <p  ng-if="displayPrecisely(tumor.nccn.disease_uuid)">
                       <strong>{{::tumor.nccn.disease.display}}:</strong>
                       <drive-realtime-string review-obj="tumor.nccn.disease_review" uuid="::tumor.nccn.disease_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'select-chosen'" object="tumor.nccn.disease" o="nccnDiseaseTypes" chosenid="'CurationNCCNDropDown'"></drive-realtime-string>
                     </p>
-                    <p ng-class="{'seperationLine': reviewMode}" ng-if="displayPrecisely(tumor.nccn.version_uuid, tumor.nccn.version_review)">
+                    <p  ng-if="displayPrecisely(tumor.nccn.version_uuid)">
                       <strong>{{::tumor.nccn.version.display}}:</strong>
                       <drive-realtime-string review-obj="tumor.nccn.version_review" uuid="::tumor.nccn.version_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.version"></drive-realtime-string>
                     </p>
-                    <span ng-if="displayPrecisely(tumor.nccn.description_uuid, tumor.nccn.description_review)">
+                    <span ng-if="displayPrecisely(tumor.nccn.description_uuid)">
                         <strong>Description of Evidence:</strong>
                         <br/>
                         <drive-realtime-string review-obj="tumor.nccn.description_review" uuid="::tumor.nccn.description_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
@@ -348,7 +348,7 @@
 
                   <!-- Theraputic implications -->
                   <div ng-repeat="ti in tumor.TI.asArray()" class="accordionMarginTop" ng-init="initGeneStatus(mutation, tumor, ti)" ng-hide="status.hideAllObsolete && ti.name_eStatus.get('obsolete') === 'true'">
-                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti); getTreatmentMessages(mutation, tumor, ti)" ng-if="displayCheck(ti.name_review, mutation.name_review, tumor.name_review)" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader" ng-hide="(!!tmpGeneStatus.hideEmpty) && !ti.short.text && !ti.description.text && ti.treatments.length === 0">
+                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti); getTreatmentMessages(mutation, tumor, ti)" ng-if="displayCheck(ti.name_uuid)" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader" ng-hide="(!!tmpGeneStatus.hideEmpty) && !ti.short.text && !ti.description.text && ti.treatments.length === 0">
                       <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                         <span>{{::ti.name.text}}: </span>
@@ -360,15 +360,15 @@
                       </uib-accordion-heading>
                       <!--<span><p ng-class="{editableBox:fileEditable, unEditableBox:!fileEditable}" contenteditable="{{fileEditable}}" placeholder="Optional short general summary" ng-model="ti.short.text"></p></span>-->
                       <!--<pub-iframe ng-model="ti.short.text" ng-if="tmpGeneStatus.isOpen"></pub-iframe>-->
-                        <div ng-if="displayPrecisely(ti.description_uuid, ti.description_review)">
+                        <div ng-if="displayPrecisely(ti.description_uuid)">
                             <h5><b>General Summary (Optional): </b>
-                                <review-panel ng-if="reviewMode" review-obj="ti.description_review" evidence-type="ti.name.getText()" mutation="mutation" tumor="tumor" therapy-category="ti" get-evidence="getEvidence(type, mutation, tumor, ti)" model-update="modelUpdate(type, mutation, tumor, ti)"></review-panel>
+                                <review-panel uuid="ti.description_uuid" ng-if="reviewMode" review-obj="ti.description_review" evidence-type="ti.name.getText()" mutation="mutation" tumor="tumor" therapy-category="ti" get-evidence="getEvidence(type, mutation, tumor, ti)" model-update="modelUpdate(type, mutation, tumor, ti)"></review-panel>
                             </h5>
                             <drive-realtime-string review-obj="ti.description_review" uuid="::ti.description_uuid" es="ti.description_eStatus" fe="fileEditable" t="'p'" object="ti.description"></drive-realtime-string>
                         </div>
                       <uib-accordion close-others="false" ng-if="tmpGeneStatus.isOpen">
                         <div ng-repeat="treatment in ti.treatments.asArray()" ng-init="initGeneStatus(mutation, tumor, ti, treatment)" class="accordionMarginTop">
-                            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti, treatment)" ng-if="displayCheck(treatment.name_review, mutation.name_review, tumor.name_review, treatment.name_review) && showEntry(treatment)" is-open="tmpGeneStatus.isOpen" class="levelFourHeader">
+                            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti, treatment)" ng-if="displayCheck(treatment.name_uuid, treatment.name_review) && showEntry(treatment)" is-open="tmpGeneStatus.isOpen" class="levelFourHeader">
                             <uib-accordion-heading>
                               <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}"></i>
                               <span>{{::treatment.type.text}}: </span>
@@ -389,14 +389,14 @@
                                 <i ng-click="remove($event, 'treatment', mutation, tumor, ti, treatment)" class="fa fa-trash-o"></i>
                               </span>
                               <span class="pull-right">
-                                  <review-panel ng-if="reviewMode" review-obj="treatment.name_review" evidence-type="'treatment'" mutation="mutation" tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"
+                                  <review-panel uuid="treatment.name_uuid" ng-if="reviewMode" review-obj="treatment.name_review" evidence-type="ti.name.getText()" mutation="mutation" tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"
                                                 confirm-delete="confirmDelete(event, type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(event, type, mutation, tumor, ti, treatment)"
                                                 accept-added="acceptAdded(event, type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(event, type, mutation, tumor, ti, treatment)"
                                                 get-evidence="getEvidence(type, mutation, tumor, ti, treatment)" model-update="modelUpdate(type, mutation, tumor, ti, treatment)"></review-panel>
                             </span>
                             </uib-accordion-heading>
                             <div ng-if="tmpGeneStatus.isOpen">
-                                <p ng-class="{'seperationLine': reviewMode}" ng-if="displayPrecisely(treatment.level_uuid, treatment.level_review)">
+                                <p  ng-if="displayPrecisely(treatment.level_uuid)">
                                     <strong>{{::treatment.level.display}}:</strong><br/>
                                   <span ng-if="checkTI(ti, 1, 1)">
                                     <drive-realtime-string review-obj="treatment.level_review" uuid="::treatment.level_uuid" es="treatment.name_eStatus" fe="fileEditable" object="treatment.level" t="'treatment-select'" o="levels.SS"></drive-realtime-string>
@@ -413,12 +413,12 @@
                                     <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
                                   </span>
                                 </p>
-                                <div ng-class="{'seperationLine': reviewMode}" ng-if="displayPrecisely(treatment.indication_uuid, treatment.indication_review)">
+                                <div ng-if="displayPrecisely(treatment.indication_uuid)">
                                     <strong>{{::treatment.indication.display}}:</strong>
                                     <br/>
                                     <drive-realtime-string review-obj="treatment.indication_review" uuid="::treatment.indication_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'short'" object="treatment.indication" io="tmpGeneStatus.isOpen"></drive-realtime-string>
                                 </div>
-                                <div ng-if="displayPrecisely(treatment.description_uuid, treatment.description_review)">
+                                <div ng-if="displayPrecisely(treatment.description_uuid)">
                                   <strong>Description of Evidence:</strong>
                                   <br/>
                                   <drive-realtime-string review-obj="treatment.description_review" uuid="::treatment.description_uuid" es="treatment.name_eStatus" fe="fileEditable" t="'p'" object="treatment.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
@@ -444,7 +444,7 @@
                   </div>
 
                   <!-- Trials -->
-                  <div class="accordionMarginTop" ng-if="displayPrecisely(tumor.trials_uuid, tumor.trials_review)">
+                  <div class="accordionMarginTop" ng-if="displayCheck(tumor.trials_uuid)">
                     <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'trials')" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && tumor.trials.length === 0) || status.hideAllObsolete && tumor.trials_eStatus.get('obsolete') === 'true'">
                       <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
@@ -453,16 +453,16 @@
                         <span class="pull-right" ng-show="!reviewMode && fileEditable">
                             <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="tumor.trials_eStatus" id="ti.name.text  + '-trials'" apply-obsolete="applyObsolete(tumor.trials_eStatus, 'CLINICAL_TRIAL', mutation, tumor)"></e-status>
                         </span>
-                        <review-panel ng-if="reviewMode" review-obj="tumor.trials_review" evidence-type="'CLINICAL_TRIAL'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                        <review-panel uuid="tumor.trials_uuid" ng-if="reviewMode" review-obj="tumor.trials_review" evidence-type="'CLINICAL_TRIAL'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                       </uib-accordion-heading>
 
-                      <h4 ng-if="reviewMode && !tumor.trials_review.get('action') && !tumor.trials_review.get('removedItem')">New Content:</h4>
-                      <div ng-if="!reviewMode || !tumor.trials_review.get('action')">
+                      <h4 ng-if="reviewContentDisplay(tumor.trials_uuid)">New Content:</h4>
+                      <div>
                           <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">
                             <a ng-href="https://clinicaltrials.gov/show/{{::trial}}" target="_blank">{{::trial}}</a>
-                            <i ng-show="fileEditable" ng-click="removeTrial(tumor.trials, $index, tumor.trials_review, tumor.trials_uuid)" class="fa fa-trash-o"></i>
+                            <i ng-show="fileEditable && (!reviewMode || reviewContentDisplay(tumor.trials_uuid))" ng-click="removeTrial(tumor.trials, $index, tumor.trials_review, tumor.trials_uuid)" class="fa fa-trash-o"></i>
                           </span>
-                          <div class="input-group input-group-sm trialsInputGroup">
+                          <div class="input-group input-group-sm trialsInputGroup" ng-if="!reviewMode || reviewContentDisplay(tumor.trials_uuid)">
                                 <input type="text" class="form-control" ng-model="newTrial" placeholder="Trial ID" />
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials, newTrial, tumor.trials_review, tumor.trials_uuid); newTrial=''">
@@ -475,20 +475,20 @@
                           </div>
                       </div>
                       <br/><br/>
-                      <div style="float:left" ng-if="reviewMode">
-                          <h4 ng-if="!tumor.trials_review.get('action') && !tumor.trials_review.get('removedItem')">Old Content:</h4>
-                          <div ng-if="!tumor.trials_review.get('action') && !tumor.trials_review.get('removedItem')">
+                      <div style="float:left" ng-if="reviewContentDisplay(tumor.trials_uuid)">
+                          <h4>Old Content:</h4>
+                          <div>
                               <span ng-if="tumor.trials_review.get('lastReviewed').length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials_review.get('lastReviewed')">
                                 <a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>
                               </span>
-                              <p class="reviewedBG" ng-if="!tumor.trials_review.get('lastReviewed') || tumor.trials_review.get('lastReviewed').length === 0">No Entry</p>
+                              <p class="reviewedBG" ng-if="!tumor.trials_review.has('lastReviewed') || tumor.trials_review.get('lastReviewed').length === 0">No Entry</p>
                           </div>
-                          <div ng-if="tumor.trials_review.get('action')">
-                              <span ng-if="tumor.trials.length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials.asArray()">
-                                <a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>
-                              </span>
-                              <p class="reviewedBG" ng-if="tumor.trials.length === 0">No Entry</p>
-                          </div>
+                          <!--<div>-->
+                              <!--<span ng-if="tumor.trials.length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials.asArray()">-->
+                                <!--<a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>-->
+                              <!--</span>-->
+                              <!--<p class="reviewedBG" ng-if="tumor.trials.length === 0">No Entry</p>-->
+                          <!--</div>-->
                       </div>
                     </uib-accordion-group>
                   </div>

@@ -8,7 +8,7 @@
  * This directive is designed specifically for review mode, which cotains change info text, accept icon, reject icon and loading bar
  */
 angular.module('oncokbApp')
-    .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs, _, OncoKB, mainUtils) {
+    .directive('reviewPanel', function($rootScope, DatabaseConnector, dialogs, _, OncoKB, mainUtils, ReviewResource) {
         return {
             templateUrl: 'views/reviewPanel.html',
             restrict: 'AE',
@@ -19,6 +19,7 @@ angular.module('oncokbApp')
                 tumor: '=', // tumor
                 therapyCategory: '=', // therapy category
                 treatment: '=', // treatment
+                uuid: '=',
                 obj: '=', // temporary object
                 confirmDeleteInGene: '&confirmDelete',
                 cancelDeleteInGene: '&cancelDelete',
@@ -26,6 +27,8 @@ angular.module('oncokbApp')
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
                 rejectAddedInGene: '&rejectAdded'
+            },
+            link: function(scope, element, attrs) {
             },
             replace: true,
             controller: function($scope) {
@@ -44,7 +47,6 @@ angular.module('oncokbApp')
                         $scope.confirmDelete(event, $scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                         break;
                     case 'add':
-                        $scope.reviewObj.set('loading', true);
                         $scope.acceptAdded(event, $scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                         break;
                     }
@@ -66,174 +68,99 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.panelExist = function() {
-                    if ($scope.reviewObj.get('removed') !== true && $scope.reviewObj.get('removedItem') ||
-                        $scope.reviewObj.get('added') !== true && $scope.reviewObj.get('addedItem')) {
+                    if (mainUtils.isProcessed('inside', $scope.uuid) || mainUtils.isProcessed('rollback', $scope.uuid) || !$scope.panelType) {
                         return false;
-                    }
-                    var sectionResult = {
-                        mutationDeleted: false,
-                        tumorDeleted: false,
-                        treatmentDeleted: false,
-                        mutationAdded: false,
-                        tumorAdded: false,
-                        treatmentAdded: false
-                    };
-                    var result = {
-                        delete: false,
-                        add: false,
-                        name: false,
-                        update: false
-                    };
-                    if ($scope.mutation && ($scope.mutation.name_review.get('removed') || $scope.mutation.name_review.get('action') === 'DELETION_REJECTED')) {
-                        sectionResult.mutationDeleted = true;
-                    }
-                    if (!sectionResult.mutationDeleted && $scope.mutation && ($scope.mutation.name_review.get('added') || $scope.mutation.name_review.get('action') === 'ADD_ACCEPTED')) {
-                        sectionResult.mutationAdded = true;
-                    }
-                    if (!sectionResult.mutationDeleted && !sectionResult.mutationAdded
-                        && $scope.tumor && ($scope.tumor.name_review.get('removed') || $scope.tumor.cancerTypes_review.get('action') === 'DELETION_REJECTED')) {
-                        sectionResult.tumorDeleted = true;
-                    }
-                    if (!sectionResult.mutationDeleted && !sectionResult.mutationAdded
-                        && !sectionResult.tumorDeleted && $scope.tumor && ($scope.tumor.name_review.get('added') || $scope.tumor.cancerTypes_review.get('action') === 'ADD_ACCEPTED')) {
-                        sectionResult.tumorAdded = true;
-                    }
-                    if (!sectionResult.mutationDeleted && !sectionResult.mutationAdded && !sectionResult.tumorDeleted && !sectionResult.tumorAdded
-                        && $scope.treatment && ($scope.treatment.name_review.get('removed') || $scope.treatment.name_review.get('action') === 'DELETION_REJECTED')) {
-                        sectionResult.treatmentDeleted = true;
-                    }
-                    if (!sectionResult.mutationDeleted && !sectionResult.mutationAdded && !sectionResult.tumorDeleted && !sectionResult.tumorAdded
-                        && !sectionResult.treatmentDeleted && $scope.treatment && ($scope.treatment.name_review.get('added') || $scope.treatment.name_review.get('action') === 'ADD_ACCEPTED')) {
-                        sectionResult.treatmentAdded = true;
-                    }
-                    result.delete = $scope.evidenceType === 'mutation' ? sectionResult.mutationDeleted : ($scope.evidenceType === 'tumor' ? sectionResult.tumorDeleted : ($scope.evidenceType === 'treatment' ? sectionResult.treatmentDeleted : false));
-                    if (result.delete) {
-                        $scope.panelType = 'delete';
                     } else {
-                        result.add = $scope.evidenceType === 'mutation' ? sectionResult.mutationAdded : ($scope.evidenceType === 'tumor' ? sectionResult.tumorAdded : ($scope.evidenceType === 'treatment' ? sectionResult.treatmentAdded : false));
-                        if (result.add) {
-                            $scope.panelType = 'add';
-                        } else {
-                            switch($scope.evidenceType) {
-                            case 'mutation':
-                                result.name = $scope.reviewObj.has('lastReviewed') || $scope.reviewObj.get('action') === 'NAME_ACCEPTED' || $scope.reviewObj.get('action') === 'NAME_REJECTED';
-                                if (result.name) {
-                                    $scope.adjustedEvidenceType = 'MUTATION_NAME_CHANGE';
-                                }
-                                break;
-                            case 'tumor':
-                                result.name = $scope.tumor.cancerTypes_review.has('lastReviewed') || $scope.reviewObj.get('action') === 'NAME_ACCEPTED' || $scope.reviewObj.get('action') === 'NAME_REJECTED';
-                                if (result.name) {
-                                    $scope.adjustedEvidenceType = 'TUMOR_NAME_CHANGE';
-                                }
-                                break;
-                            case 'treatment':
-                                result.name = $scope.reviewObj.get('specialCase') === 'TREATMENT_NAME_CHANGE' || $scope.reviewObj.get('action') === 'NAME_ACCEPTED' || $scope.reviewObj.get('action') === 'NAME_REJECTED';
-                                if (result.name) {
-                                    $scope.adjustedEvidenceType = 'TREATMENT_NAME_CHANGE';
-                                }
-                                break;
-                            }
-                            if (result.name) {
-                                $scope.panelType = 'name';
-                            } else if ($scope.evidenceType === 'treatment') {
-                                $scope.panelType = 'update';
-                                $scope.adjustedEvidenceType = $scope.therapyCategory.name.getText();
-                            } else if (['mutation', 'tumor', 'MUTATION_NAME_CHANGE', 'TUMOR_NAME_CHANGE', 'TREATMENT_NAME_CHANGE'].indexOf($scope.evidenceType) === -1) {
-                                $scope.panelType = 'update';
-                            } else {
-                                $scope.panelType = '';
-                            }
-                        }
-                    }
-                    if ($scope.panelType) {
                         return true;
-                    } else {
-                        return false;
+                    }
+                };
+                function isTreatmentType() {
+                    return $scope.therapyCategory && $scope.evidenceType === $scope.therapyCategory.name.getText();
+                }
+                $scope.assignPanelType = function() {
+                    // The panel type is assigned in the priority of remove, add, name change and update. Caution should be exercised when adjusting the order, which is reflected in the following if else statements
+                    if (mainUtils.isProcessed('remove', $scope.uuid)) {
+                        $scope.panelType = 'delete';
+                        if (isTreatmentType()) {
+                            $scope.adjustedEvidenceType = 'treatment';
+                        }
+                    } else if (mainUtils.isProcessed('add', $scope.uuid)) {
+                        $scope.panelType = 'add';
+                        if (isTreatmentType()) {
+                            $scope.adjustedEvidenceType = 'treatment';
+                        }
+                    } else if (mainUtils.isProcessed('name', $scope.uuid)) {
+                        $scope.panelType = 'name';
+                        if ($scope.evidenceType === 'mutation') {
+                            $scope.adjustedEvidenceType = 'MUTATION_NAME_CHANGE';
+                        } else if ($scope.evidenceType === 'tumor') {
+                            $scope.adjustedEvidenceType = 'TUMOR_NAME_CHANGE';
+                        } else if (isTreatmentType()) {
+                            $scope.adjustedEvidenceType = 'TREATMENT_NAME_CHANGE';
+                        }
+                    } else if (mainUtils.isProcessed('update', $scope.uuid)) {
+                        $scope.panelType = 'update';
                     }
                 };
                 $scope.signatureCheck = function() {
-                    if ($scope.reviewObj.has('mostRecent')) {
-                        $scope.updatedBy = $scope.reviewObj.get('mostRecent').by.getText();
-                        $scope.updateTime = $scope.reviewObj.get('mostRecent').value.getText();
-                    } else if ($scope.adjustedEvidenceType === 'tumor') {
-                        $scope.updatedBy = $scope.tumor.name_review.get('updatedBy');
-                        $scope.updateTime = $scope.tumor.name_review.get('updateTime');
+                    // Prepare values for panel signature text
+                    if ($scope.uuid && ReviewResource.mostRecent[$scope.uuid.getText()]) {
+                        // If there are mutiple items inside one section, we use the most recent one, which is calculated in prepareReviewItems() in gene.js and stored in ReviewResource.mostRecent
+                        $scope.updatedBy = ReviewResource.mostRecent[$scope.uuid.getText()].updatedBy;
+                        $scope.updateTime = ReviewResource.mostRecent[$scope.uuid.getText()].updateTime;
+                    } else if ($scope.adjustedEvidenceType === 'TUMOR_NAME_CHANGE') {
+                        // For tumor name change, the review info is stored in cancerTypes_review
+                        $scope.updatedBy = $scope.tumor.cancerTypes_review.get('updatedBy');
+                        $scope.updateTime = $scope.tumor.cancerTypes_review.get('updateTime');
                     } else {
                         $scope.updatedBy = $scope.reviewObj.get('updatedBy');
                         $scope.updateTime = $scope.reviewObj.get('updateTime');
                     }
-
-                    if ($scope.reviewObj.get('action') || $scope.loading || $scope.reviewObj.get('loading') || $scope.reviewObj.get('rollback')) {
-                        return false;
-                    } else {
+                    // If any decision hasn't been made yet, we display the panel signature which is a text describing what kind of change is made by who at what time
+                    // on the other hand, if the evidence already got accepted or rejected, we hide the panel signature
+                    if (!mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('reject', $scope.uuid)) {
                         return true;
+                    } else {
+                        return false;
                     }
                 };
                 $scope.iconClass = function(type) {
-                    // before any decision is made
-                    if (!$scope.reviewObj.get('action')) {
-                        if (type === 'accept') {
-                            return 'fa-comments-red';
-                        }
-                        if (type === 'reject') {
-                            return 'fa-comments-grey';
-                        }
-                    }
-                    // after they accept or reject an evidence
-                    if ($scope.panelType === 'update' || $scope.panelType === 'name') {
-                        if (type === 'accept' && ($scope.reviewObj.get('action') === 'accepted' || $scope.reviewObj.get('action') === 'NAME_ACCEPTED')
-                            || type === 'reject' && $scope.reviewObj.get('action') === 'rejected' || $scope.reviewObj.get('action') === 'NAME_REJECTED') return 'reviewed';
-                    } else if ($scope.panelType === 'delete') {
-                        if (type === 'reject' && $scope.reviewObj.get('action') === 'DELETION_REJECTED') return 'reviewed';
-                    } else if ($scope.panelType === 'add') {
-                        if (type === 'accept' && $scope.reviewObj.get('action') === 'ADD_ACCEPTED') return 'reviewed';
+                    if (mainUtils.isProcessed('accept', $scope.uuid) || mainUtils.isProcessed('reject', $scope.uuid)) {
+                        return 'reviewed';
+                    } else if (type === 'accept') {
+                        return 'fa-comments-red';
+                    } else if (type === 'reject') {
+                        return 'fa-comments-grey';
                     }
                 };
                 $scope.iconExist = function(type) {
-                    if (type === 'loading') {
-                        return $scope.loading || $scope.reviewObj.get('loading');
-                    }
-                    if ($scope.loading || $scope.reviewObj.get('loading')) {
-                        return false;
-                    }
-                    if (type === 'accept') {
-                        switch ($scope.panelType) {
-                        case 'update':
-                            return $scope.reviewObj.get('action') !== 'rejected' && !$scope.reviewObj.get('rollback');
-                        case 'name':
-                            return $scope.reviewObj.get('action') !== 'rejected' && $scope.reviewObj.get('action') !== 'NAME_REJECTED' && !$scope.reviewObj.get('rollback');
-                        case 'delete':
-                            return $scope.reviewObj.get('action') !== 'DELETION_REJECTED';
-                        case 'add':
-                            return true;
-                        }
-                    } else if (type === 'reject') {
-                        switch ($scope.panelType) {
-                        case 'update':
-                            return $scope.reviewObj.get('action') !== 'accepted' && !$scope.reviewObj.get('rollback');
-                        case 'name':
-                            return $scope.reviewObj.get('action') !== 'accepted' && $scope.reviewObj.get('action') !== 'NAME_ACCEPTED' && !$scope.reviewObj.get('rollback');
-                        case 'delete':
-                            return true;
-                        case 'add':
-                            return $scope.reviewObj.get('action') !== 'ADD_ACCEPTED';
-                        }
+                    switch(type) {
+                    case 'accept':
+                        return !mainUtils.isProcessed('reject', $scope.uuid) && !mainUtils.isProcessed('loading', $scope.uuid);
+                    case 'reject':
+                        return !mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('loading', $scope.uuid);
+                    case 'loading':
+                        return mainUtils.isProcessed('loading', $scope.uuid);
                     }
                 };
                 $scope.panelClass = function(type) {
-                    if ($scope.panelType === 'update') {
-                        return type === 'text' ? 'updateText' : ($scope.treatment ? 'panelMargin' : '');
-                    } else if ($scope.panelType === 'name') {
-                        return type === 'text' ? 'updateText' : ($scope.treatment || $scope.reviewObj.get('action') ? 'panelMargin' : '');
-                    } else if ($scope.panelType === 'add') {
-                        if (type === 'text') return 'updateText';
-                        else if (type === 'panel') return 'panelMargin';
-                    } if ($scope.panelType === 'delete') {
-                        if (type === 'text') return 'sectionText';
-                        else if (type === 'panel') return 'panelMargin';
+                    if (type === 'text') {
+                        // only deleted evidence signature are in red, otherwise regular style text
+                        if ($scope.panelType === 'delete') {
+                            return 'sectionText';
+                        } else {
+                            return 'updateText';
+                        }
                     }
-                }
+                    // If the panel type is add, remove or name changed, or treatment level update, we need to add 'panelMargin' class to shift it down
+                    if (type === 'panel') {
+                        if ($scope.panelType !== 'update' || isTreatmentType()) {
+                            return 'panelMargin';
+                        } else {
+                            return '';
+                        }
+                    }
+                };
                 $scope.getEvidence = function(type, mutation, tumor, therapyCategory, treatment) {
                     return $scope.getEvidenceInGene({
                         type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
@@ -244,10 +171,9 @@ angular.module('oncokbApp')
                     if (event !== null) {
                         $scope.$parent.stopCollopse(event);
                     }
-                    if ($scope.reviewObj.get('action')) {
+                    if (mainUtils.isProcessed('accept', $scope.uuid) || mainUtils.isProcessed('reject', $scope.uuid)) {
                         return;
                     }
-
                     if ($scope.adjustedEvidenceType === 'GENE_TYPE') {
                         var params = {
                             hugoSymbol: $scope.obj.name.getText(),
@@ -260,30 +186,31 @@ angular.module('oncokbApp')
                             uuids: $scope.obj.type_uuid.getText()
                         }];
                         if ($rootScope.isDesiredGene) {
-                            $scope.loading = true;
+                            ReviewResource.loading.push($scope.uuid.getText());
                             DatabaseConnector.updateGeneType($scope.obj.name.getText(), params, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                                $scope.loading = false;
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
                             }, function(error) {
                                 console.log('fail to update to database', error);
                                 dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                                $scope.loading = false;
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
                             });
                         } else {
                             $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                         }
                     } else {
                         if($rootScope.isDesiredGene) {
+                            ReviewResource.loading.push($scope.uuid.getText());
                             var getEvidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                             var evidences = getEvidenceResult.evidences;
                             var historyData = [getEvidenceResult.historyData];
-                            $scope.loading = true;
                             DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                                $scope.loading = false;
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
                             }, function(error) {
                                 console.log('fail to update to database', error);
                                 dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
                             });
                         } else {
                             $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
@@ -292,7 +219,7 @@ angular.module('oncokbApp')
                 };
                 function rejectItem(arr) {
                     _.each(arr, function(item) {
-                        if($rootScope.geneMetaData.get(item.uuid.getText()) && $rootScope.geneMetaData.get(item.uuid.getText()).get('review')) {
+                        if(mainUtils.needReview(item.uuid)) {
                             if(item.obj && item.reviewObj.has('lastReviewed')) {
                                 item.obj.setText(item.reviewObj.get('lastReviewed'));
                             }
@@ -300,24 +227,13 @@ angular.module('oncokbApp')
                             if(!tempTime) {
                                 tempTime = new Date().getTime();
                             }
-                            item.reviewObj.clear();
-                            item.reviewObj.set('review', false);
+                            item.reviewObj.delete('lastReviewed');
+                            // use the updateTime fetched from database to update reviewObj
                             item.reviewObj.set('updateTime', tempTime);
-                            // This check is for the case of Mutation/Tumor/Treatment Name change. Since they share the same uuid with deletion.
-                            // We need to make sure not set review to false in meta if it also been removed.
-                            var currentReviewObj = item.tumorNameReview ? item.tumorNameReview : item.reviewObj;
-                            if(!currentReviewObj.get('removed')) {
-                                $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
-                            }
+                            $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
+                            ReviewResource.rejected.push(item.uuid.getText());
                         }
                     });
-                    if($scope.reviewObj) {
-                        if ($scope.adjustedEvidenceType === 'MUTATION_NAME_CHANGE' || $scope.adjustedEvidenceType === 'TUMOR_NAME_CHANGE' || $scope.adjustedEvidenceType === 'TREATMENT_NAME_CHANGE') {
-                            $scope.reviewObj.set('action', 'NAME_REJECTED');
-                        } else {
-                            $scope.reviewObj.set('action', 'rejected');
-                        }
-                    }
                     if($scope.bothChanged) {
                         effectSection();
                     }
@@ -330,7 +246,7 @@ angular.module('oncokbApp')
                     if (event !== null) {
                         $scope.$parent.stopCollopse(event);
                     }
-                    if ($scope.reviewObj.get('action')) {
+                    if (mainUtils.isProcessed('accept', $scope.uuid) || mainUtils.isProcessed('reject', $scope.uuid)) {
                         return;
                     }
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
@@ -447,8 +363,11 @@ angular.module('oncokbApp')
                         default:
                             break;
                         }
-                        if ($rootScope.isDesiredGene && uuid) {
+                        if (uuid) {
                             uuid = uuid.getText();
+                            ReviewResource.rejected.push(uuid);
+                        }
+                        if ($rootScope.isDesiredGene && uuid) {
                             DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
                                 if (result && result.status) {
                                     var resultJSON = JSON.parse(result.status);
@@ -483,17 +402,13 @@ angular.module('oncokbApp')
                         $scope.obj.type.set('TSG', $scope.obj.type_review.get('lastReviewed').TSG);
                         $scope.obj.type.set('OCG', $scope.obj.type_review.get('lastReviewed').OCG);
                         break;
-                    case 'NCCN_GUIDELINES':
-                        $scope.tumor.nccn_review.clear();
-                        $scope.tumor.nccn_review.set('review', false);
-                        break;
                     case 'Standard implications for sensitivity to therapy':
                     case 'Standard implications for resistance to therapy':
                     case 'Investigational implications for sensitivity to therapy':
                     case 'Investigational implications for resistance to therapy':
                         if ($scope.treatment) {
                             // handle level specifically because level and propagation share the same uuid and review object
-                            var levelChanged = $rootScope.geneMetaData.get($scope.treatment.level_uuid.getText()) && $rootScope.geneMetaData.get($scope.treatment.level_uuid.getText()).get('review');
+                            var levelChanged =  mainUtils.isProcessed('precise', $scope.treatment.level_uuid);
                             if(levelChanged) {
                                 var lastReviewedLevel = $scope.treatment.level_review.get('lastReviewed');
                                 var lastReviewedPropagation = $scope.treatment.level_review.get('lastReviewedPropagation');
@@ -501,9 +416,9 @@ angular.module('oncokbApp')
                                     $scope.treatment.level.setText(lastReviewedLevel);
                                 }
                                 $scope.treatment.name_eStatus.set('propagation', lastReviewedPropagation);
-                                $scope.treatment.level_review.clear();
-                                $scope.treatment.level_review.set('review', false);
                                 $rootScope.geneMetaData.get($scope.treatment.level_uuid.getText()).set('review', false);
+                                ReviewResource.rejected.push($scope.treatment.level_uuid.getText());
+                                $scope.treatment.level_review.delete('lastReviewed');
                             }
                         }
                         break;
@@ -520,9 +435,6 @@ angular.module('oncokbApp')
                             cancerType.cancerType.setText(ct.cancerType);
                             cancerType.subtype.setText(ct.subtype);
                             cancerType.oncoTreeCode.setText(ct.oncoTreeCode);
-                            cancerType.cancerType_eStatus.set('obsolete', 'false');
-                            cancerType.subtype_eStatus.set('obsolete', 'false');
-                            cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
                             lastReviewed.push(cancerType);
                         });
                         $scope.tumor.cancerTypes = lastReviewed;

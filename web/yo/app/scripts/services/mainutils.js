@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope) {
+    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope, ReviewResource) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -454,7 +454,36 @@ angular.module('oncokbApp')
                 return false;
             }
         };
-
+        function isProcessed(type, uuid) {
+            if (!type || !uuid) {
+                return false;
+            }
+            uuid = uuid.getText();
+            switch(type) {
+            case 'accept':
+                return ReviewResource.accepted.indexOf(uuid) !== -1;
+            case 'reject':
+                return ReviewResource.rejected.indexOf(uuid) !== -1;
+            case 'rollback':
+                return ReviewResource.rollback.indexOf(uuid) !== -1;
+            case 'inside':
+                return ReviewResource.inside.indexOf(uuid) !== -1;
+            case 'update':
+                return ReviewResource.updated.indexOf(uuid) !== -1;
+            case 'name':
+                return ReviewResource.nameChanged.indexOf(uuid) !== -1;
+            case 'add':
+                return ReviewResource.added.indexOf(uuid) !== -1;
+            case 'remove':
+                return ReviewResource.removed.indexOf(uuid) !== -1;
+            case 'loading':
+                return ReviewResource.loading.indexOf(uuid) !== -1;
+            case 'precise':
+                return ReviewResource.precise.indexOf(uuid) !== -1;
+            default:
+                return false;
+            }
+        }
         return {
             getCancerTypesName: getCancerTypesName,
             containMainType: containMainType,
@@ -470,6 +499,7 @@ angular.module('oncokbApp')
             needReview: needReview,
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
-            isExpiredCuration: isExpiredCuration
+            isExpiredCuration: isExpiredCuration,
+            isProcessed: isProcessed
         };
     });
