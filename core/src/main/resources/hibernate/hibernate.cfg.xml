@@ -18,15 +18,15 @@
     <!--2nd level caching-->
     <property name="hibernate.cache.use_second_level_cache">false</property>
     <property name="hibernate.cache.use_query_cache">false</property>
-    <mapping resource="hibernate/Drug.hbm.xml"/>
-    <mapping resource="hibernate/Alteration.hbm.xml"/>
-    <mapping resource="hibernate/Article.hbm.xml"/>
-    <mapping resource="hibernate/ClinicalTrial.hbm.xml"/>
-    <mapping resource="hibernate/NccnGuideline.hbm.xml"/>
-    <mapping resource="hibernate/PortalAlteration.hbm.xml"/>
-    <mapping resource="hibernate/Evidence.hbm.xml"/>
-    <mapping resource="hibernate/Treatment.hbm.xml"/>
-    <mapping resource="hibernate/Gene.hbm.xml"/>
-    <mapping resource="hibernate/VariantConsequence.hbm.xml"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Drug"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Alteration"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Article"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.ClinicalTrial"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.NccnGuideline"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.PortalAlteration"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Evidence"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Treatment"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Gene"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.VariantConsequence"/>
   </session-factory>
 </hibernate-configuration>

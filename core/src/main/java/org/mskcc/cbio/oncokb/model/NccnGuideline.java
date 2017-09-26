@@ -5,22 +5,40 @@ package org.mskcc.cbio.oncokb.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mysql.jdbc.StringUtils;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * @author jgao
  */
+@NamedQueries({
+    @NamedQuery(
+        name = "findNccnGuideline",
+        query = "select n from NccnGuideline n where n.therapy=? and n.disease=? and n.version=? and n.pages=?"
+    )
+})
+
+@Entity
+@Table(name = "nccn_guideline")
 public class NccnGuideline implements java.io.Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
+
     @JsonIgnore
+    @Column(length = 40)
     private String uuid;
     private String therapy;
     private String disease;
     private String version;
     private String pages;
     private String category;
+
+    @Column(length = 65535)
     private String description;
+
+    @Column(name = "additional_info", length = 65535)
     private String additionalInfo;
 
     public NccnGuideline() {
@@ -119,10 +137,10 @@ public class NccnGuideline implements java.io.Serializable {
         }
         return true;
     }
-    
+
     public boolean isEmpty() {
-        if (StringUtils.isNullOrEmpty(this.therapy) && StringUtils.isNullOrEmpty(this.disease) && StringUtils.isNullOrEmpty(this.version) 
-                && StringUtils.isNullOrEmpty(this.pages) && StringUtils.isNullOrEmpty(this.category) && StringUtils.isNullOrEmpty(this.description))
+        if (StringUtils.isNullOrEmpty(this.therapy) && StringUtils.isNullOrEmpty(this.disease) && StringUtils.isNullOrEmpty(this.version)
+            && StringUtils.isNullOrEmpty(this.pages) && StringUtils.isNullOrEmpty(this.category) && StringUtils.isNullOrEmpty(this.description))
             return true;
         else return false;
     }
