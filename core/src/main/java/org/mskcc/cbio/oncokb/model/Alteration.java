@@ -3,11 +3,10 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
-import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,23 +15,75 @@ import java.util.Set;
 /**
  * @author jgao
  */
+
+@NamedQueries({
+    @NamedQuery(
+        name = "findAlterationsByGene",
+        query = "select a from Alteration a where a.gene=?"
+    ),
+    @NamedQuery(
+        name = "findAlteration",
+        query = "select a from Alteration a where a.gene=? and a.alteration=?"
+    ),
+    @NamedQuery(
+        name = "findMutationsByConsequence",
+        query = "select a from Alteration a where a.gene=? and a.consequence=?"
+    ),
+    @NamedQuery(
+        name = "findMutationsByConsequenceAndPosition",
+        query = "select a from Alteration a where a.gene=? and a.consequence=? and a.proteinStart<=? and a.proteinEnd>=?"
+    )
+})
+
+@Entity
+@Table(name = "alteration")
 public class Alteration implements java.io.Serializable {
 
+    @Id
     @JsonIgnore
     private Integer id;
+
+    @Column(length = 40)
     @JsonIgnore
     private String uuid;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @JoinColumn(name = "entrez_gene_id")
     private Gene gene;
+
+    @Column(name = "alteration_type")
+    @Enumerated(EnumType.STRING)
     @JsonIgnore
     private AlterationType alterationType;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @JoinColumn(name = "consequence")
     private VariantConsequence consequence;
 
     private String alteration;
+
+    @Column(length = 300, nullable = false)
     private String name;
+
+    @Column(name = "ref_residues")
     private String refResidues;
+
+    @Column(name = "protein_start")
     private Integer proteinStart;
+
+    @Column(name = "protein_end")
     private Integer proteinEnd;
+
+    @Column(name = "variant_residues")
     private String variantResidues;
+
+    @ManyToMany
+    @JoinTable(name = "portalAlt_oncoKBAlt", joinColumns = {
+        @JoinColumn(name = "alteration_id", nullable = false, updatable = false)},
+        inverseJoinColumns = {@JoinColumn(name = "portalAlteration_id",
+            nullable = false, updatable = false)})
     @JsonIgnore
     private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);
 
