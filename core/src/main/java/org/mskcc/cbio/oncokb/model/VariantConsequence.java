@@ -6,15 +6,29 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
- *
  * @author jgao
  */
+@NamedQueries({
+    @NamedQuery(
+        name = "findVariantConsequenceByTerm",
+        query = "select v from VariantConsequence v where v.term=?"
+    )
+})
+
+@Entity
+@Table(name = "variant_consequence")
 public class VariantConsequence implements java.io.Serializable {
+    @Id
     private String term;
+
+    @Column(name = "is_generally_truncating", nullable = false)
     private Boolean isGenerallyTruncating;
+
+    @Column(nullable = false)
     private String description;
 
     public VariantConsequence() {
@@ -43,7 +57,7 @@ public class VariantConsequence implements java.io.Serializable {
     }
 
     public Boolean getIsGenerallyTruncating() {
-        if(this.isGenerallyTruncating == null) {
+        if (this.isGenerallyTruncating == null) {
             return false;
         }
         return this.isGenerallyTruncating;

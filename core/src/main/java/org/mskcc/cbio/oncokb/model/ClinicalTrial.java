@@ -4,27 +4,66 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 
 /**
- * @author jgao
+ * @author jgao, Hongxin Zhang
  */
+@NamedQueries({
+    @NamedQuery(
+        name = "findClinicalTrialByNctId",
+        query = "select c from ClinicalTrial c where c.nctId=?"
+    )
+})
+
+@Entity
+@Table(name = "clinical_trial")
 public class ClinicalTrial implements java.io.Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
+
+    @Column(name = "nct_id", nullable = false)
     private String nctId;
+
+    @Column(name = "cdr_id")
     private String cdrId;
+
+    @Column(length = 2000)
     private String title;
+
+    @Column(length = 65535)
     private String purpose;
+
+    @Column(name = "recruiting_status")
     private String recruitingStatus;
+
+    @Column(name = "eligibility_criteria", length = 65535)
     private String eligibilityCriteria;
     private String phase;
+
+    @Column(name = "disease_condition")
     private String diseaseCondition;
+
+    @Column(name = "last_changed_date")
     private String lastChangedDate;
+
+    @ElementCollection()
+    @CollectionTable(name = "clinical_trial_country", joinColumns = @JoinColumn(name = "trial_id", nullable = false))
+    @Column(name = "country")
     private Set<String> countries = new HashSet<String>(0);
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "clinical_trial_drug", joinColumns = {
+        @JoinColumn(name = "trial_id", nullable = false, updatable = false)},
+        inverseJoinColumns = {@JoinColumn(name = "drug_id",
+            nullable = false, updatable = false)})
     private Set<Drug> drugs = new HashSet<Drug>(0);
 
     public ClinicalTrial() {

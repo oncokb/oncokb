@@ -3,21 +3,41 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 
 /**
- * @author jgao
+ * @author jgao, Hongxin Zhang
  */
+
+@Entity
+@Table(name = "treatment")
 public class Treatment implements java.io.Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
+
     @JsonIgnore
+    @Column(length = 40)
     private String uuid;
-    private Set<Drug> drugs = new HashSet<Drug>(0);
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "treatment_drug", joinColumns = {
+        @JoinColumn(name = "treatment_id", nullable = false, updatable = false)},
+        inverseJoinColumns = {@JoinColumn(name = "drug_id",
+            nullable = false, updatable = false)})
+    private Set<Drug> drugs = new HashSet<>(0);
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "treatment_approved_indications",
+        joinColumns = @JoinColumn(name = "treatment_id", nullable = false))
+    @Column(name = "approved_indications")
     private Set<String> approvedIndications = new HashSet<String>(0);
 
     public Treatment() {
