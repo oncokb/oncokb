@@ -3,23 +3,55 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 
 /**
- * @author jgao
+ * @author jgao, Hongxin Zhang
  */
+
+@NamedQueries({
+    @NamedQuery(
+        name = "findDrugByName",
+        query = "select d from Drug d where d.drugName=?"
+    ),
+    @NamedQuery(
+        name = "findDrugBySynonym",
+        query = "select d from Drug d join d.synonyms s where s=?"
+    ),
+    @NamedQuery(
+        name = "findDrugByAtcCode",
+        query = "select d from Drug d join d.atcCodes a where a=?"
+    )
+})
+
+@Entity
+@Table(name = "drug")
 public class Drug implements java.io.Serializable {
 
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
+
     @JsonIgnore
+    @Column(length = 40)
     private String uuid;
+
+    @Column(name = "drug_name", nullable = false)
     private String drugName;
+
+    @ElementCollection()
+    @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     private Set<String> synonyms = new HashSet<String>(0);
+
+    @ElementCollection()
+    @CollectionTable(name = "drug_atccode", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
+    @Column(name = "atccode")
     private Set<String> atcCodes;
+
     @JsonIgnore
     private String description;
 
@@ -100,8 +132,6 @@ public class Drug implements java.io.Serializable {
         }
         return true;
     }
-
-
 }
 
 

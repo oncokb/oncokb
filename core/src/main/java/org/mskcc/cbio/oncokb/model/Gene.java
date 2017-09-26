@@ -3,25 +3,57 @@ package org.mskcc.cbio.oncokb.model;
 
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author jgao
+ * @author jgao, Hongxin ZHang
  */
+
+@NamedQueries({
+    @NamedQuery(
+        name = "findGeneByHugoSymbol",
+        query = "select g from Gene g where g.hugoSymbol=?"
+    ),
+    @NamedQuery(
+        name = "findGenesByAlias",
+        query = "select g from Gene g join g.geneAliases ga where ga=?"
+    )
+})
+
+@Entity
+@Table(name = "gene")
 public class Gene implements Serializable {
 
+    @Id
+    @Column(name = "entrez_gene_id")
     private int entrezGeneId;
+
+    @Column(name = "hugo_symbol", length = 50, nullable = true, unique = true)
     private String hugoSymbol;
+
+    @Column(length = 500)
     private String name;
+
+    @Column()
     @ApiModelProperty(value = "tumorSuppressorGene")
     private Boolean TSG;
     private Boolean oncogene;
+
+    @Column(length = 100, nullable = false)
     private String curatedIsoform;
+
+    @Column(length = 100, nullable = false)
     private String curatedRefSeq;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "gene_alias", joinColumns = @JoinColumn(name = "entrez_gene_id", nullable = false))
+    @Column(name = "alias")
     private Set<String> geneAliases = new HashSet<String>(0);
 
     public Gene() {
