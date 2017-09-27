@@ -2093,7 +2093,7 @@ angular.module('oncokbApp')
                     var notExist = true;
                     newVUSName = newVUSName.trim();
                     $scope.gene.mutations.asArray().forEach(function(e, i) {
-                        if (e.name.getText().trim().toLowerCase() === newVUSName.toLowerCase()) {
+                        if (!e.name_review.get('removed') && e.name.getText().trim().toLowerCase() === newVUSName.toLowerCase()) {
                             notExist = false;
                         }
                     });
