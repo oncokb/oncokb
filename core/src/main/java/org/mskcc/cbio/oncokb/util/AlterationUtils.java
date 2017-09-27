@@ -612,12 +612,17 @@ public final class AlterationUtils {
             alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
         }
 
-        List<Alteration> alleles = alterationBo.findMutationsByConsequenceAndPosition(
+        List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
             alteration.getProteinEnd(), alterations);
 
-        // Remove alteration itself
-        alleles.remove(alteration);
+        List<Alteration> alleles = new ArrayList<>();
+        for (Alteration alt : missenseVariants) {
+            if (alt.getProteinStart() != null && alt.getProteinEnd() != null && alt.getProteinStart().equals(alt.getProteinEnd()) && !alt.equals(alteration)) {
+                alleles.add(alt);
+            }
+        }
+
         sortAlternativeAlleles(alleles);
         return alleles;
     }
