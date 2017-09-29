@@ -54,12 +54,12 @@ public class ClinicalTrial implements java.io.Serializable {
     @Column(name = "last_changed_date")
     private String lastChangedDate;
 
-    @ElementCollection()
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "clinical_trial_country", joinColumns = @JoinColumn(name = "trial_id", nullable = false))
     @Column(name = "country")
     private Set<String> countries = new HashSet<String>(0);
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "clinical_trial_drug", joinColumns = {
         @JoinColumn(name = "trial_id", nullable = false, updatable = false)},
         inverseJoinColumns = {@JoinColumn(name = "drug_id",
