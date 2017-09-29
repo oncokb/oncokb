@@ -79,7 +79,7 @@ public class Alteration implements java.io.Serializable {
     @Column(name = "variant_residues")
     private String variantResidues;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "portalAlt_oncoKBAlt", joinColumns = {
         @JoinColumn(name = "alteration_id", nullable = false, updatable = false)},
         inverseJoinColumns = {@JoinColumn(name = "portalAlteration_id",
