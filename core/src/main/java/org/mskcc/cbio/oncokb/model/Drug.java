@@ -43,11 +43,11 @@ public class Drug implements java.io.Serializable {
     @Column(name = "drug_name", nullable = false)
     private String drugName;
 
-    @ElementCollection()
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     private Set<String> synonyms = new HashSet<String>(0);
 
-    @ElementCollection()
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_atccode", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     @Column(name = "atccode")
     private Set<String> atcCodes;
