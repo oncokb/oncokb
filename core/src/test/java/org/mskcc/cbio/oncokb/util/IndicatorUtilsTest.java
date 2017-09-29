@@ -3,6 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -17,11 +20,21 @@ public class IndicatorUtilsTest {
         // We do not check gene/variant/tumor type summaries here. The test will be done in SummaryUtilsTest.
 
         // Gene not exists
-        Query query = new Query(null, null, null, "FGF6", "V123M", null, "Pancreatic Adenocarcinoma", null, null, null, null);
+        Query query = new Query(null, null, null, "TEST", "V123M", null, "Pancreatic Adenocarcinoma", null, null, null, null);
         IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
         assertTrue("The geneExist in the response is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
+
+        // The last update should be a date even if we don't have any annotation for the gene/varaint
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+
+            Date date = formatter.parse(indicatorQueryResp.getLastUpdate());
+            assertTrue("The last update should be a valid date format MM/dd/yyyy, but it is not.", date != null);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         // Oncogenic should always match with oncogenic summary, similar to likely oncogenic
         query = new Query(null, null, null, "TP53", "R248Q", null, "Pancreatic Adenocarcinoma", null, null, null, null);
