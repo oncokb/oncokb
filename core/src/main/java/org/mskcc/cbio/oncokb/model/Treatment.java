@@ -26,12 +26,8 @@ public class Treatment implements java.io.Serializable {
     @Column(length = 40)
     private String uuid;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "treatment_drug", joinColumns = {
-        @JoinColumn(name = "treatment_id", nullable = false, updatable = false)},
-        inverseJoinColumns = {@JoinColumn(name = "drug_id",
-            nullable = false, updatable = false)})
-    private Set<Drug> drugs = new HashSet<>(0);
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "treatmentDrugId.treatment", cascade = CascadeType.ALL)
+    private Set<TreatmentDrug> treatmentDrugs = new HashSet<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
@@ -59,12 +55,40 @@ public class Treatment implements java.io.Serializable {
         this.uuid = uuid;
     }
 
+    public Set<TreatmentDrug> getTreatmentDrugs() {
+        return treatmentDrugs;
+    }
+
+    public void setTreatmentDrugs(Set<TreatmentDrug> treatmentDrugs) {
+        this.treatmentDrugs = treatmentDrugs;
+    }
+
+    @Transient
     public Set<Drug> getDrugs() {
-        return drugs;
+        if (this.treatmentDrugs == null) {
+            return null;
+        } else {
+            Set<Drug> drugs = new HashSet<>();
+            for (TreatmentDrug treatmentDrug : treatmentDrugs) {
+                drugs.add(treatmentDrug.getDrug());
+            }
+            return drugs;
+        }
     }
 
     public void setDrugs(Set<Drug> drugs) {
-        this.drugs = drugs;
+        if (drugs == null) {
+            this.treatmentDrugs = null;
+        } else {
+            Set<TreatmentDrug> treatmentDrugs = new HashSet<>();
+            for (Drug drug : drugs) {
+                TreatmentDrug treatmentDrug = new TreatmentDrug();
+                treatmentDrug.setTreatment(this);
+                treatmentDrug.setDrug(drug);
+                treatmentDrugs.add(treatmentDrug);
+            }
+            this.treatmentDrugs = treatmentDrugs;
+        }
     }
 
     public Set<String> getApprovedIndications() {
@@ -74,30 +98,6 @@ public class Treatment implements java.io.Serializable {
     public void setApprovedIndications(Set<String> approvedIndications) {
         this.approvedIndications = approvedIndications;
     }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 83 * hash + Objects.hashCode(this.drugs);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Treatment other = (Treatment) obj;
-        if (!Objects.equals(this.drugs, other.drugs)) {
-            return false;
-        }
-        return true;
-    }
-
-
 }
 
 

@@ -45,10 +45,10 @@ public class Gene implements Serializable {
     private Boolean TSG;
     private Boolean oncogene;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
     private String curatedIsoform;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
     private String curatedRefSeq;
 
     @ElementCollection(fetch = FetchType.EAGER)
