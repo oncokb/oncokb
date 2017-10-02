@@ -40,6 +40,7 @@ import java.util.Set;
 public class Alteration implements java.io.Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
 

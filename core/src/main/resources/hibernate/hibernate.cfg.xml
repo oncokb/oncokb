@@ -8,6 +8,7 @@
     <property name="hibernate.connection.username">root</property>
     <property name="hibernate.dialect">org.mskcc.cbio.oncokb.util.UTF8MySQLDialect</property>
     <property name="hibernate.show_sql">false</property>
+    <property name="hibernate.format_sql">false</property>
     <property name="hibernate.connection.useUnicode">true</property>
     <property name="hibernate.connection.characterEncoding">utf8</property>
     <property name="hibernate.connection.charSet">utf8</property>
@@ -28,5 +29,7 @@
     <mapping class="org.mskcc.cbio.oncokb.model.Treatment"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Gene"/>
     <mapping class="org.mskcc.cbio.oncokb.model.VariantConsequence"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.EvidenceTreatment"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.TreatmentDrug"/>
   </session-factory>
 </hibernate-configuration>
