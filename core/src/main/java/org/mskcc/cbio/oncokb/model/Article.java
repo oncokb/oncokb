@@ -27,6 +27,7 @@ import java.util.Objects;
 @Table(name = "article")
 public class Article implements java.io.Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
 
