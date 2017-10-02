@@ -227,13 +227,8 @@ public class Evidence implements java.io.Serializable {
     @Column(name = "additional_info", length = 65535)
     private String additionalInfo;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "evidence_treatment", joinColumns = {
-        @JoinColumn(name = "evidence_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-        @JoinColumn(name = "treatment_id", nullable = false, updatable = false)
-    })
-    private Set<Treatment> treatments;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "evidenceTreatmentId.evidence", cascade = CascadeType.ALL)
+    private Set<EvidenceTreatment> evidenceTreatments = new HashSet<>(0);
 
     @Column(name = "known_effect")
     private String knownEffect;
@@ -366,12 +361,38 @@ public class Evidence implements java.io.Serializable {
         this.additionalInfo = additionalInfo;
     }
 
+    @Transient
     public Set<Treatment> getTreatments() {
-        return treatments;
+        if (this.evidenceTreatments != null) {
+            Set<Treatment> treatments = new HashSet<>();
+            for (EvidenceTreatment evidenceTreatment : this.evidenceTreatments) {
+                treatments.add(evidenceTreatment.getTreatment());
+            }
+            return treatments;
+        } else {
+            return null;
+        }
     }
 
     public void setTreatments(Set<Treatment> treatments) {
-        this.treatments = treatments;
+        if (treatments != null) {
+            Set<EvidenceTreatment> evidenceTreatments = new HashSet<>();
+            for (Treatment treatment : treatments) {
+                EvidenceTreatment evidenceTreatment = new EvidenceTreatment();
+                evidenceTreatment.setEvidence(this);
+                evidenceTreatment.setTreatment(treatment);
+                evidenceTreatments.add(evidenceTreatment);
+            }
+            this.evidenceTreatments = evidenceTreatments;
+        }
+    }
+
+    public Set<EvidenceTreatment> getEvidenceTreatments() {
+        return evidenceTreatments;
+    }
+
+    public void setEvidenceTreatments(Set<EvidenceTreatment> evidenceTreatments) {
+        this.evidenceTreatments = evidenceTreatments;
     }
 
     public String getKnownEffect() {
@@ -495,7 +516,7 @@ public class Evidence implements java.io.Serializable {
         this.propagation = e.propagation;
         // make deep copy of sets
         this.alterations = new HashSet<>(e.alterations);
-        this.treatments = new HashSet<>(e.treatments);
+        this.evidenceTreatments = new HashSet<>(e.evidenceTreatments);
         this.articles = new HashSet<>(e.articles);
         this.nccnGuidelines = new HashSet<>(e.nccnGuidelines);
         this.clinicalTrials = new HashSet<>(e.clinicalTrials);
@@ -511,7 +532,6 @@ public class Evidence implements java.io.Serializable {
         this.alterations = alterations;
         this.description = description;
         this.additionalInfo = additionalInfo;
-        this.treatments = treatments;
         this.knownEffect = knownEffect;
         this.lastEdit = lastEdit;
         this.levelOfEvidence = levelOfEvidence;
@@ -519,6 +539,9 @@ public class Evidence implements java.io.Serializable {
         this.articles = articles;
         this.nccnGuidelines = nccnGuidelines;
         this.clinicalTrials = clinicalTrials;
+        if (treatments != null) {
+            this.setTreatments(treatments);
+        }
     }
 }
 
