@@ -687,7 +687,8 @@ public final class AlterationUtils {
 
     public static Alteration findOncogenicAllele(List<Alteration> alleles) {
         for (Alteration allele : alleles) {
-            if (isOncogenicAlteration(allele)) {
+            Boolean isOncogenicAlt = isOncogenicAlteration(allele);
+            if (isOncogenicAlt != null && isOncogenicAlt) {
                 return allele;
             }
         }
