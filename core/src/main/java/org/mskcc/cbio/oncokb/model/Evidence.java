@@ -387,6 +387,12 @@ public class Evidence implements java.io.Serializable {
         }
     }
 
+    public void setPriority(Integer priority) {
+        for (EvidenceTreatment evidenceTreatment : this.getEvidenceTreatments()) {
+            evidenceTreatment.setPriority(priority);
+        }
+    }
+
     public Set<EvidenceTreatment> getEvidenceTreatments() {
         return evidenceTreatments;
     }
