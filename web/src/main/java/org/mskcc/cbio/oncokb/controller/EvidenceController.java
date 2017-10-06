@@ -213,6 +213,7 @@ public class EvidenceController {
         EvidenceType evidenceType = queryEvidence.getEvidenceType();
         String knownEffect = queryEvidence.getKnownEffect();
         String description = queryEvidence.getDescription();
+        LevelOfEvidence level = queryEvidence.getLevelOfEvidence();
         Set<Treatment> treatments = queryEvidence.getTreatments();
         Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
         Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
@@ -234,6 +235,8 @@ public class EvidenceController {
            if(clinicalTrials == null || clinicalTrials.isEmpty()) isEmpty = true;
         } else if(MainUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
             if(treatments == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
+        } else if (evidenceType.equals(EvidenceType.DIAGNOSTIC_IMPLICATION) || evidenceType.equals(EvidenceType.PROGNOSTIC_IMPLICATION)) {
+           if (level == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if(StringUtils.isNullOrEmpty(description)) {
             isEmpty = true;
         }
