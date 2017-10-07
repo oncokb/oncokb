@@ -26,9 +26,6 @@ public class SummaryUtils {
         }
         String geneId = Integer.toString(gene.getEntrezGeneId());
         String key = geneId + "&&" + query.getQueryId();
-        if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
-            return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
-        }
 
         StringBuilder sb = new StringBuilder();
 
@@ -57,10 +54,6 @@ public class SummaryUtils {
         Map<String, Object> ts = tumorTypeSummary(gene, query, exactMatchAlteration, alterations, relevantTumorTypes);
         if (ts != null && ts.get("summary") != null && !((String) ts.get("summary")).isEmpty()) {
             sb.append(" " + ts.get("summary"));
-        }
-
-        if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, sb.toString().trim());
         }
         return sb.toString().trim();
     }
@@ -99,16 +92,8 @@ public class SummaryUtils {
             return map;
         }
 
-        if (CacheUtils.isEnabled() && CacheUtils.containVariantTumorTypeSummary(gene.getEntrezGeneId(), key)) {
-            return CacheUtils.getVariantTumorTypeSummary(gene.getEntrezGeneId(), key);
-        }
-
         query.setTumorType(queryTumorType);
         tumorTypeSummary = getTumorTypeSummarySubFunc(gene, query, exactMatchedAlt, alterations, relevantTumorTypes);
-
-        if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantTumorTypeSummary(gene.getEntrezGeneId(), key, tumorTypeSummary);
-        }
 
         return tumorTypeSummary;
     }
@@ -253,15 +238,8 @@ public class SummaryUtils {
 
     public static String oncogenicSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
         String key = query.getQueryId();
-        if (CacheUtils.isEnabled() && CacheUtils.containVariantSummary(gene.getEntrezGeneId(), key)) {
-            return CacheUtils.getVariantSummary(gene.getEntrezGeneId(), key);
-        }
 
         String summary = getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
-
-        if (CacheUtils.isEnabled()) {
-            CacheUtils.setVariantSummary(gene.getEntrezGeneId(), key, summary.trim());
-        }
 
         return summary;
     }
