@@ -1,15 +1,12 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
 import java.io.IOException;
 import java.util.*;
-import com.mysql.jdbc.StringUtils;
 
 
 /**
@@ -186,7 +183,7 @@ public class CacheUtils {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 for (String service : otherServices) {
-                    if(!StringUtils.isNullOrEmpty(service)) {
+                    if (!StringUtils.isNullOrEmpty(service)) {
                         HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
                             gene.getHugoSymbol(), "", true);
                     }
@@ -489,6 +486,18 @@ public class CacheUtils {
         return result;
     }
 
+    public static Set<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end) {
+        Set<Alteration> alterations = new HashSet<>();
+        for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
+            if (alteration.getConsequence().equals(consequence)
+                && alteration.getProteinStart() <= start
+                && alteration.getProteinEnd() >= end) {
+                alterations.add(alteration);
+            }
+        }
+        return alterations;
+    }
+
     public static Boolean containAlterations(Integer entrezGeneId) {
         synAlterations();
         return alterations.containsKey(entrezGeneId) ? true : false;
@@ -556,6 +565,14 @@ public class CacheUtils {
         return drugs;
     }
 
+    public static Set<Evidence> getAllEvidences() {
+        Set<Evidence> evis = new HashSet<>();
+        for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+            evis.addAll(map.getValue());
+        }
+        return evis;
+    }
+
     public static Set<Evidence> getEvidences(Gene gene) {
         if (gene == null) {
             return new HashSet<>();
@@ -581,6 +598,24 @@ public class CacheUtils {
                     if (ids.contains(evidence.getId())) {
                         mappedEvis.add(evidence);
                     }
+                }
+            }
+        }
+        return mappedEvis;
+    }
+
+    public static Set<Evidence> getEvidencesByGenesAndIds(Set<Gene> genes, Set<Integer> ids) {
+        synEvidences();
+
+        Set<Evidence> mappedEvis = new HashSet<>();
+        if (ids != null) {
+            Set<Evidence> evidences = new HashSet<>();
+            for (Gene gene : genes) {
+                evidences.addAll(getEvidences(gene));
+            }
+            for (Evidence evidence : evidences) {
+                if (ids.contains(evidence.getId())) {
+                    mappedEvis.add(evidence);
                 }
             }
         }

@@ -8,9 +8,7 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
+import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
 
@@ -30,7 +28,22 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
-        return getDao().findAlteration(gene, alterationType, alteration);
+        if (CacheUtils.isEnabled()) {
+            List<Alteration> alterations = new ArrayList<>(CacheUtils.getAlterations(gene.getEntrezGeneId()));
+
+            if (alteration == null) {
+                return null;
+            }
+            // Implement the data access logic
+            for (Alteration alt : alterations) {
+                if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
+                    return alt;
+                }
+            }
+            return null;
+        } else {
+            return getDao().findAlteration(gene, alterationType, alteration);
+        }
     }
 
     @Override
@@ -55,7 +68,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     }
                 }
             } else {
-                List<Alteration> queryResult = getDao().findMutationsByConsequenceAndPosition(gene, consequence, start, end);
+                Collection<Alteration> queryResult;
+                if (CacheUtils.isEnabled()) {
+                    queryResult = CacheUtils.findMutationsByConsequenceAndPosition(gene, consequence, start, end);
+                } else {
+                    queryResult = getDao().findMutationsByConsequenceAndPosition(gene, consequence, start, end);
+                }
                 if (queryResult != null) {
                     result.addAll(queryResult);
                 }

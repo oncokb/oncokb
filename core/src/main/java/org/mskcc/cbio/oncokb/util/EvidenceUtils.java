@@ -667,10 +667,15 @@ public class EvidenceUtils {
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
                 if (checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
                     Set<Integer> evidenceIds = new HashSet<>();
+                    Set<Gene> genes = new HashSet<>();
+
                     for (Evidence evidence : highestEvis) {
                         evidenceIds.add(evidence.getId());
+                        genes.add(evidence.getGene());
                     }
-                    Set<Evidence> originalEvis = EvidenceUtils.getEvidenceByEvidenceIds(evidenceIds);
+
+                    Set<Evidence> originalEvis = EvidenceUtils.getEvidencesByGenesAndIds(genes, evidenceIds);
+
                     Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis);
                     Set<Integer> filteredIds = new HashSet<>();
                     for (Evidence evidence : highestOriginalEvis) {
@@ -736,6 +741,17 @@ public class EvidenceUtils {
         return evidences.iterator().next();
     }
 
+    public static Set<Evidence> getEvidencesByGenesAndIds(Set<Gene> genes, Set<Integer> ids) {
+        if (ids == null) {
+            return new HashSet<>();
+        }
+        if (CacheUtils.isEnabled()) {
+            return CacheUtils.getEvidencesByGenesAndIds(genes, ids);
+        } else {
+            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<>(ids)));
+        }
+    }
+
     public static Set<Evidence> getEvidenceByEvidenceIds(Set<Integer> ids) {
         if (ids == null) {
             return new HashSet<>();
@@ -743,7 +759,7 @@ public class EvidenceUtils {
         if (CacheUtils.isEnabled()) {
             return CacheUtils.getEvidencesByIds(ids);
         } else {
-            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<Integer>(ids)));
+            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<>(ids)));
         }
     }
 
