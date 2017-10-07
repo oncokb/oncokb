@@ -25,8 +25,6 @@ import java.util.*;
 
 
 public class CacheUtils {
-    private static Map<Integer, Map<String, String>> variantSummary = new HashMap<>();
-    private static Map<Integer, Map<String, Map<String, Object>>> variantTumorTypeSummary = new HashMap<>();
     private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
@@ -49,32 +47,6 @@ public class CacheUtils {
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
     private static List<String> otherServices = new ArrayList<>();
-
-    private static Observer variantSummaryObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                variantSummary.remove(entrezGeneId);
-            } else if (operation.get("cmd") == "reset") {
-                variantSummary.clear();
-            }
-        }
-    };
-
-    private static Observer variantTumorTypeSummaryObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                variantTumorTypeSummary.remove(entrezGeneId);
-            } else if (operation.get("cmd") == "reset") {
-                variantTumorTypeSummary.clear();
-            }
-        }
-    };
 
     private static Observer relevantAlterationsObserver = new Observer() {
         @Override
@@ -201,8 +173,6 @@ public class CacheUtils {
     static {
         try {
             Long current = MainUtils.getCurrentTimestamp();
-            GeneObservable.getInstance().addObserver(variantSummaryObserver);
-            GeneObservable.getInstance().addObserver(variantTumorTypeSummaryObserver);
             GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
             GeneObservable.getInstance().addObserver(alterationsObserver);
             GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
@@ -397,47 +367,6 @@ public class CacheUtils {
             mappedEvidenceIds.add(evidence.getId());
         }
         relevantEvidences.get(entrezGeneId).put(variant, mappedEvidenceIds);
-    }
-
-    public static String getVariantSummary(Integer entrezGeneId, String variant) {
-        if (variantSummary.containsKey(entrezGeneId) && variantSummary.get(entrezGeneId).containsKey(variant)) {
-            return variantSummary.get(entrezGeneId).get(variant);
-        } else {
-            return null;
-        }
-    }
-
-    public static Boolean containVariantSummary(Integer entrezGeneId, String variant) {
-        return (variantSummary.containsKey(entrezGeneId) &&
-            variantSummary.get(entrezGeneId).containsKey(variant)) ? true : false;
-    }
-
-    public static void setVariantSummary(Integer entrezGeneId, String variant, String summary) {
-        if (!variantSummary.containsKey(entrezGeneId)) {
-            variantSummary.put(entrezGeneId, new HashMap<String, String>());
-        }
-        variantSummary.get(entrezGeneId).put(variant, summary);
-    }
-
-    public static Map<String, Object> getVariantTumorTypeSummary(Integer entrezGeneId, String key) {
-        if (variantTumorTypeSummary.containsKey(entrezGeneId)
-            && variantTumorTypeSummary.get(entrezGeneId).containsKey(key)) {
-            return variantTumorTypeSummary.get(entrezGeneId).get(key);
-        } else {
-            return null;
-        }
-    }
-
-    public static Boolean containVariantTumorTypeSummary(Integer entrezGeneId, String key) {
-        return variantTumorTypeSummary.containsKey(entrezGeneId)
-            && variantTumorTypeSummary.get(entrezGeneId).containsKey(key);
-    }
-
-    public static void setVariantTumorTypeSummary(Integer entrezGeneId, String key, Map<String, Object> summary) {
-        if (!variantTumorTypeSummary.containsKey(entrezGeneId)) {
-            variantTumorTypeSummary.put(entrezGeneId, new HashMap<String, Map<String, Object>>());
-        }
-        variantTumorTypeSummary.get(entrezGeneId).put(key, summary);
     }
 
     public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
