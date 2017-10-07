@@ -25,11 +25,8 @@ import java.util.*;
 
 
 public class CacheUtils {
-    private static Map<Integer, Map<String, List<Integer>>> relevantAlterations = new HashMap<>();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
-    // The key would be entrezGeneId, variant name and evidence ID. -1 will be used to store gene irrelevant evidences.
-    private static Map<Integer, Map<String, Set<Integer>>> relevantEvidences = new HashMap<>();
 
     private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
     private static Map<String, List<TumorType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
@@ -48,18 +45,7 @@ public class CacheUtils {
     // Every time the observer is triggered, all other services will be triggered as well
     private static List<String> otherServices = new ArrayList<>();
 
-    private static Observer relevantAlterationsObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                relevantAlterations.remove(entrezGeneId);
-            } else if (operation.get("cmd") == "reset") {
-                relevantAlterations.clear();
-            }
-        }
-    };
+    private static Map<String, Long> recordTime = new HashedMap();
 
     private static Observer numbersObserver = new Observer() {
         @Override
@@ -106,21 +92,6 @@ public class CacheUtils {
         @Override
         public void update(Observable o, Object arg) {
             drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-        }
-    };
-
-    private static Observer relevantEvidencesObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                relevantEvidences.remove(entrezGeneId);
-                //Remove gene irrelevant evidences
-                relevantEvidences.remove(-1);
-            } else if (operation.get("cmd") == "reset") {
-                relevantEvidences.clear();
-            }
         }
     };
 
@@ -173,9 +144,7 @@ public class CacheUtils {
     static {
         try {
             Long current = MainUtils.getCurrentTimestamp();
-            GeneObservable.getInstance().addObserver(relevantAlterationsObserver);
             GeneObservable.getInstance().addObserver(alterationsObserver);
-            GeneObservable.getInstance().addObserver(relevantEvidencesObserver);
             GeneObservable.getInstance().addObserver(allCancerTypesObserver);
             GeneObservable.getInstance().addObserver(genesObserver);
             GeneObservable.getInstance().addObserver(evidencesObserver);
@@ -299,35 +268,6 @@ public class CacheUtils {
         }
     }
 
-    public static Set<Evidence> getRelevantEvidences(Integer entrezGeneId, String variant) {
-        if (relevantEvidences.containsKey(entrezGeneId) && relevantEvidences.get(entrezGeneId).containsKey(variant)) {
-            Set<Integer> mappedEntrez = relevantEvidences.get(entrezGeneId).get(variant);
-            Set<Evidence> geneEvidences = new HashSet<>();
-            Set<Evidence> mappedEvidences = new HashSet<>();
-
-            if (entrezGeneId == -1) {
-                for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
-                    geneEvidences.addAll(map.getValue());
-                }
-            } else {
-                geneEvidences = getEvidences(genesByEntrezId.get(entrezGeneId));
-            }
-            for (Evidence evidence : geneEvidences) {
-                if (mappedEntrez.contains(evidence.getId())) {
-                    mappedEvidences.add(evidence);
-                }
-            }
-            return mappedEvidences;
-        } else {
-            return new HashSet<>();
-        }
-    }
-
-    public static Boolean containRelevantEvidences(Integer entrezGeneId, String variant) {
-        return (relevantEvidences.containsKey(entrezGeneId) &&
-            relevantEvidences.get(entrezGeneId).containsKey(variant)) ? true : false;
-    }
-
     private static void setVUS(Integer entrezGeneId, Set<Evidence> evidences) {
         if (!VUS.containsKey(entrezGeneId)) {
             VUS.put(entrezGeneId, new HashSet<Alteration>());
@@ -356,54 +296,6 @@ public class CacheUtils {
 
     public static Object getNumbers(String type) {
         return numbers.get(type);
-    }
-
-    public static void setRelevantEvidences(Integer entrezGeneId, String variant, Set<Evidence> evidences) {
-        if (!relevantEvidences.containsKey(entrezGeneId)) {
-            relevantEvidences.put(entrezGeneId, new HashMap<String, Set<Integer>>());
-        }
-        Set<Integer> mappedEvidenceIds = new HashSet<>();
-        for (Evidence evidence : evidences) {
-            mappedEvidenceIds.add(evidence.getId());
-        }
-        relevantEvidences.get(entrezGeneId).put(variant, mappedEvidenceIds);
-    }
-
-    public static List<Alteration> getRelevantAlterations(Integer entrezGeneId, String variant) {
-        if (relevantAlterations.containsKey(entrezGeneId) && relevantAlterations.get(entrezGeneId).containsKey(variant)) {
-            List<Integer> mappedAltsIds = relevantAlterations.get(entrezGeneId).get(variant);
-            List<Alteration> mappedAlts = new ArrayList<>();
-            Set<Alteration> geneAlts = getAlterations(entrezGeneId);
-
-            // Need to keep the order of mappedAltsIds
-            for (Integer mappedAlt : mappedAltsIds) {
-                for (Alteration alteration : geneAlts) {
-                    if (mappedAlt.equals(alteration.getId())) {
-                        mappedAlts.add(alteration);
-                    }
-                }
-            }
-
-            return mappedAlts;
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    public static Boolean containRelevantAlterations(Integer entrezGeneId, String variant) {
-        return (relevantAlterations.containsKey(entrezGeneId) &&
-            relevantAlterations.get(entrezGeneId).containsKey(variant)) ? true : false;
-    }
-
-    public static void setRelevantAlterations(Integer entrezGeneId, String variant, List<Alteration> alts) {
-        if (!relevantAlterations.containsKey(entrezGeneId)) {
-            relevantAlterations.put(entrezGeneId, new HashMap<String, List<Integer>>());
-        }
-        List<Integer> mappedAltsIds = new ArrayList<>();
-        for (Alteration alteration : alts) {
-            mappedAltsIds.add(alteration.getId());
-        }
-        relevantAlterations.get(entrezGeneId).put(variant, mappedAltsIds);
     }
 
     public static Set<Alteration> getAlterations(Integer entrezGeneId) {
@@ -708,5 +600,19 @@ public class CacheUtils {
             evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
         }
         System.out.println("Cache all evidences by gene: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+    }
+
+    public static Map<String, Long> getRecordTime() {
+        return recordTime;
+    }
+
+    public static void emptyRecordTime() {
+        recordTime = new HashedMap();
+    }
+
+    public static void addRecordTime(String key, Long time) {
+        if (!recordTime.containsKey(key))
+            recordTime.put(key, (long) 0);
+        recordTime.put(key, recordTime.get(key) + time);
     }
 }

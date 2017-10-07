@@ -705,25 +705,10 @@ public final class AlterationUtils {
         Integer proteinStart = alteration.getProteinStart();
         Integer proteinEnd = alteration.getProteinEnd();
 
-        String id = alteration.getUniqueId();
-
-        if (CacheUtils.isEnabled()) {
-            if (!CacheUtils.containRelevantAlterations(gene.getEntrezGeneId(), id)) {
-                CacheUtils.setRelevantAlterations(
-                    gene.getEntrezGeneId(), id,
-                    getAlterations(
-                        gene, alteration.getAlteration(), term,
-                        proteinStart, proteinEnd,
-                        getAllAlterations(gene)));
-            }
-
-            return CacheUtils.getRelevantAlterations(gene.getEntrezGeneId(), id);
-        } else {
-            return getAlterations(
-                gene, alteration.getAlteration(), term,
-                proteinStart, proteinEnd,
-                getAllAlterations(gene));
-        }
+        return getAlterations(
+            gene, alteration.getAlteration(), term,
+            proteinStart, proteinEnd,
+            getAllAlterations(gene));
     }
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {
