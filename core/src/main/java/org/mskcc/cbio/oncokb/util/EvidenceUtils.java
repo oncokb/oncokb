@@ -81,26 +81,18 @@ public class EvidenceUtils {
             List<EvidenceQueryRes> evidenceQueryResList = new ArrayList<>();
             evidenceQueryResList.add(evidenceQueryRes);
 
-            if (CacheUtils.isEnabled() && CacheUtils.containRelevantEvidences(gene.getEntrezGeneId(), variantId)) {
-                relevantEvidences = CacheUtils.getRelevantEvidences(gene.getEntrezGeneId(), variantId);
-            } else {
-                relevantEvidences = getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences);
+            relevantEvidences = getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences);
 
-                Set<Evidence> evidencesToRemove = new HashSet<>();
-                for (Evidence tempEvidence : relevantEvidences) {
-                    for (Alteration tempAlteration : tempEvidence.getAlterations()) {
-                        if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence()) && alleles.contains(tempAlteration)) {
-                            evidencesToRemove.add(tempEvidence);
-                            break;
-                        }
+            Set<Evidence> evidencesToRemove = new HashSet<>();
+            for (Evidence tempEvidence : relevantEvidences) {
+                for (Alteration tempAlteration : tempEvidence.getAlterations()) {
+                    if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence()) && alleles.contains(tempAlteration)) {
+                        evidencesToRemove.add(tempEvidence);
+                        break;
                     }
                 }
-                relevantEvidences.removeAll(evidencesToRemove);
-
-                if (CacheUtils.isEnabled()) {
-                    CacheUtils.setRelevantEvidences(gene.getEntrezGeneId(), variantId, relevantEvidences);
-                }
             }
+            relevantEvidences.removeAll(evidencesToRemove);
 
             return filterEvidence(relevantEvidences, evidenceQueryRes);
         } else {
@@ -109,30 +101,9 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getEvidenceByEvidenceTypesAndLevels(Set<EvidenceType> types, Set<LevelOfEvidence> levels) {
-        if (CacheUtils.isEnabled()) {
-            String levelStr = levels.toString();
-            String typeStr = types.toString();
-            StringBuilder sb = new StringBuilder();
-
-            if (types != null) {
-                sb.append(typeStr);
-            }
-            if (levelStr != null) {
-                sb.append(levelStr);
-            }
-            String variantId = sb.toString();
-
-            if (!CacheUtils.containRelevantEvidences(-1, variantId)) {
-                Set<Alteration> alterations = AlterationUtils.getAllAlterations();
-                List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<>(alterations), types, levels);
-                CacheUtils.setRelevantEvidences(-1, variantId, new HashSet<>(evidences));
-            }
-            return CacheUtils.getRelevantEvidences(-1, variantId);
-        } else {
-            Set<Alteration> alterations = AlterationUtils.getAllAlterations();
-            List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<>(alterations), types, levels);
-            return new HashSet<>(evidences);
-        }
+        Set<Alteration> alterations = AlterationUtils.getAllAlterations();
+        List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<>(alterations), types, levels);
+        return new HashSet<>(evidences);
     }
 
     private static List<Evidence> getEvidence(List<Alteration> alterations) {
