@@ -21,17 +21,15 @@ public class GeneUtils {
 
     // EntrezGeneId always has higher priority then HugoSymbol
     public static Gene getGene(Integer entrezGeneId, String hugoSymbol) {
-        Gene gene = getGeneByEntrezId(entrezGeneId);
-        if (gene != null) {
-            return gene;
+        if (entrezGeneId != null) {
+            return getGeneByEntrezId(entrezGeneId);
+        } else {
+            return getGeneByHugoSymbol(hugoSymbol);
         }
-        gene = getGeneByHugoSymbol(hugoSymbol);
-        return gene;
     }
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
         if (hugoSymbol != null) {
-            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
                 Gene gene = CacheUtils.getGeneByHugoSymbol(hugoSymbol);
                 if (gene == null) {
@@ -39,6 +37,7 @@ public class GeneUtils {
                 }
                 return gene;
             } else {
+                GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
                 return geneBo.findGeneByHugoSymbol(hugoSymbol);
             }
         }
@@ -49,9 +48,6 @@ public class GeneUtils {
         if (entrezId != null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
-                if (CacheUtils.getGeneByEntrezId(entrezId) == null) {
-                    CacheUtils.setGeneByEntrezId(geneBo.findGeneByEntrezGeneId(entrezId));
-                }
                 return CacheUtils.getGeneByEntrezId(entrezId);
             } else {
                 return geneBo.findGeneByEntrezGeneId(entrezId);
@@ -62,16 +58,15 @@ public class GeneUtils {
 
     public static Gene getGeneByAlias(String geneAlias) {
         if (geneAlias != null) {
-            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             if (CacheUtils.isEnabled()) {
                 Set<Gene> genes = getAllGenes();
                 Set<Gene> matches = new HashSet<>();
                 for (Gene gene : genes) {
-                    for (String alias : gene.getGeneAliases()) {
-                        if (alias.equals(geneAlias)) {
-                            matches.add(gene);
-                            break;
-                        }
+                    if (gene.getGeneAliases().contains(geneAlias)) {
+                        matches.add(gene);
+                    }
+                    if (matches.size() > 0) {
+                        break;
                     }
                 }
                 if (matches.isEmpty() || matches.size() > 1) {
@@ -80,7 +75,7 @@ public class GeneUtils {
                     return matches.iterator().next();
                 }
             } else {
-                return geneBo.findGeneByAlias(geneAlias);
+                return ApplicationContextSingleton.getGeneBo().findGeneByAlias(geneAlias);
             }
         }
         return null;
