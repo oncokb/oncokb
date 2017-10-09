@@ -345,7 +345,7 @@ public class EvidenceUtils {
         for (Evidence evidence : evidences) {
             Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
             Boolean flag = true;
-            if (CollectionUtils.intersection(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes).isEmpty()) {
+            if (Collections.disjoint(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes)) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
                     if (tmpEvidence.getPropagation() != null) {
                         LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tmpEvidence.getPropagation());
@@ -381,7 +381,7 @@ public class EvidenceUtils {
                     if (tempEvidence.getAlterations().isEmpty()) {
                         filtered.add(tempEvidence);
                     } else {
-                        if (!CollectionUtils.intersection(tempEvidence.getAlterations(), evidenceQuery.getAlterations()).isEmpty()) {
+                        if (!Collections.disjoint(tempEvidence.getAlterations(), evidenceQuery.getAlterations())) {
                             if (tempEvidence.getOncoTreeType() == null) {
                                 if (tempEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                                     if (tempEvidence.getDescription() == null) {
@@ -926,7 +926,7 @@ public class EvidenceUtils {
                 if (alleleEvidences != null) {
                     for (Evidence evidence : alleleEvidences) {
                         Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
-                        LevelOfEvidence levelOfEvidence = LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), CollectionUtils.intersection(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()).size() > 0);
+                        LevelOfEvidence levelOfEvidence = LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), !Collections.disjoint(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()));
                         if (levelOfEvidence != null) {
                             tmpEvidence.setLevelOfEvidence(levelOfEvidence);
                             alleleEvidencesCopy.add(tmpEvidence);
