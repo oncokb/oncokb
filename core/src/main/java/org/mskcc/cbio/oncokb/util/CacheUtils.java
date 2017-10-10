@@ -476,7 +476,7 @@ public class CacheUtils {
     }
 
     private static void setEvidences(Gene gene) {
-        evidences.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGene(Collections.singleton(gene))));
+        evidences.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGeneFromDB(Collections.singleton(gene))));
     }
 
     private static void synEvidences() {

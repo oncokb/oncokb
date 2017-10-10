@@ -67,6 +67,14 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      */
     List<Evidence> findEvidencesByGene(Collection<Gene> genes);
 
+
+    /**
+     * Find Evidences by Entrez Gene ID
+     * @param genes
+     * @return
+     */
+    List<Evidence> findEvidencesByGeneFromDB(Collection<Gene> genes);
+
     /**
      *
      * @param genes
