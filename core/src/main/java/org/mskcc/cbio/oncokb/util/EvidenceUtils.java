@@ -1,6 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.collections.CollectionUtils;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.*;
@@ -84,12 +84,16 @@ public class EvidenceUtils {
             relevantEvidences = getEvidence(evidenceQueryResList, evidenceTypes, geneStatus, levelOfEvidences);
 
             Set<Evidence> evidencesToRemove = new HashSet<>();
+            Set<Alteration> excludeAlternativeAlleles = new HashSet<>();
             for (Evidence tempEvidence : relevantEvidences) {
-                for (Alteration tempAlteration : tempEvidence.getAlterations()) {
-                    if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence()) && alleles.contains(tempAlteration)) {
-                        evidencesToRemove.add(tempEvidence);
-                        break;
-                    }
+                if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence())) {
+                    excludeAlternativeAlleles.addAll(Sets.intersection(tempEvidence.getAlterations(), new HashSet<>(alleles)));
+                }
+            }
+
+            for (Evidence tempEvidence : relevantEvidences) {
+                if (!Collections.disjoint(excludeAlternativeAlleles, tempEvidence.getAlterations())) {
+                    evidencesToRemove.add(tempEvidence);
                 }
             }
             relevantEvidences.removeAll(evidencesToRemove);
