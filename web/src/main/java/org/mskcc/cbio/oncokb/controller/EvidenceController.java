@@ -244,7 +244,11 @@ public class EvidenceController {
     }
     private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) throws ParserConfigurationException {
         EvidenceUtils.annotateEvidence(queryEvidence);
-        Gene gene = queryEvidence.getGene();
+        Gene gene = null;
+
+        if (queryEvidence.getGene() != null) {
+            gene = GeneUtils.getGene(queryEvidence.getGene().getEntrezGeneId(), queryEvidence.getGene().getHugoSymbol());
+        }
         Set<Alteration> alterations = queryEvidence.getAlterations();
         String subType = queryEvidence.getSubtype();
         String cancerType = queryEvidence.getCancerType();
