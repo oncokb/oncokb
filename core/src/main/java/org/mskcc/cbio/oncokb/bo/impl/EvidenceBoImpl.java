@@ -5,7 +5,6 @@
 package org.mskcc.cbio.oncokb.bo.impl;
 
 import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
@@ -245,15 +244,24 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
 
     @Override
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes) {
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-        for (Gene gene : genes) {
-            if (CacheUtils.isEnabled()) {
+        if (CacheUtils.isEnabled()) {
+            Set<Evidence> set = new LinkedHashSet<Evidence>();
+            for (Gene gene : genes) {
                 set.addAll(CacheUtils.getEvidences(gene));
-            } else {
-                set.addAll(getDao().findEvidencesByGene(gene));
             }
+            return new ArrayList<Evidence>(set);
+        } else {
+            return findEvidencesByGeneFromDB(genes);
         }
-        return new ArrayList<Evidence>(set);
+    }
+
+    @Override
+    public List<Evidence> findEvidencesByGeneFromDB(Collection<Gene> genes) {
+        Set<Evidence> set = new LinkedHashSet<>();
+        for (Gene gene : genes) {
+            set.addAll(getDao().findEvidencesByGene(gene));
+        }
+        return new ArrayList<>(set);
     }
 
     @Override
