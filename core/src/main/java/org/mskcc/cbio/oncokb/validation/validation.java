@@ -322,10 +322,15 @@ public class validation {
                 setValue(row, "Variants", MainUtils.listToString(alterationNames, ", "));
 
                 setValue(row, "Disease", getCancerType(evidence.getOncoTreeType()));
-                setValue(row, "Drugs", org.apache.commons.lang3.StringUtils.join(EvidenceUtils.getDrugs(Collections.singleton(evidence)), ", "));
+                Set<String> drugs = EvidenceUtils.getDrugs(Collections.singleton(evidence));
+                List<String> drugList = new ArrayList<>(drugs);
+                Collections.sort(drugList);
+                setValue(row, "Drugs", org.apache.commons.lang3.StringUtils.join(drugList, ", "));
                 Set<String> articles = EvidenceUtils.getPmids(Collections.singleton(evidence));
-                setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(articles, ", "));
-                setValue(row, "NumberOfPMIDs", Integer.toString(articles.size()));
+                List<String> articleList = new ArrayList<>(articles);
+                Collections.sort(articleList);
+                setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(articleList, ", "));
+                setValue(row, "NumberOfPMIDs", Integer.toString(articleList.size()));
 
                 Set<ArticleAbstract> articleAbstracts = EvidenceUtils.getAbstracts(Collections.singleton(evidence));
                 Set<String> abstractContent = new HashSet<>();
@@ -347,7 +352,7 @@ public class validation {
                 setValue(row, "Gene", evidence.getGene().getHugoSymbol());
 
                 List<String> alterationNames = getAlterationNameByEvidence(evidence);
-                
+
                 setValue(row, "Variants", MainUtils.listToString(alterationNames, ", "));
 
                 setValue(row, "CancerType", getCancerType(evidence.getOncoTreeType()));
@@ -368,6 +373,7 @@ public class validation {
                 }
             }
         }
+        Collections.sort(alterationNames);
         return alterationNames;
     }
 
