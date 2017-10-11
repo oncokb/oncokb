@@ -35,37 +35,46 @@ angular.module('oncokbApp')
                 $scope.operationsName = {'update': 'Updated', 'name': 'Name Changed', 'add': 'Added', 'delete': 'Deleted'};
                 $scope.adjustedEvidenceType = $scope.evidenceType;
                 $scope.panelType = '';
-                $scope.acceptChanges = function(event) {
-                    switch($scope.panelType) {
-                    case 'update':
-                        $scope.accept(event);
-                        break;
-                    case 'name':
-                        $scope.accept(event);
-                        break;
-                    case 'delete':
-                        $scope.confirmDelete(event, $scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                        break;
-                    case 'add':
-                        $scope.acceptAdded(event, $scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                        break;
+                $scope.processDecision = function(event, type) {
+                    if (event !== null) {
+                        $scope.$parent.stopCollopse(event);
                     }
-                };
-                $scope.rejectChanges = function(event) {
-                    switch($scope.panelType) {
-                    case 'update':
-                        $scope.reject(event);
-                        break;
-                    case 'name':
-                        $scope.reject(event);
-                        break;
-                    case 'delete':
-                        $scope.cancelDelete(event, $scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                        break;
-                    case 'add':
-                        $scope.rejectAdded(event, $scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                        break;
+                    // Do nothing if the change has already been accepted or rejected
+                    if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
+                        return;
                     }
+                    if (type === 'accept') {
+                        switch($scope.panelType) {
+                        case 'update':
+                            $scope.accept();
+                            break;
+                        case 'name':
+                            $scope.accept();
+                            break;
+                        case 'delete':
+                            $scope.confirmDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+                            break;
+                        case 'add':
+                            $scope.acceptAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+                            break;
+                        }
+                    } else if (type === 'reject') {
+                        switch($scope.panelType) {
+                        case 'update':
+                            $scope.reject();
+                            break;
+                        case 'name':
+                            $scope.reject();
+                            break;
+                        case 'delete':
+                            $scope.cancelDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+                            break;
+                        case 'add':
+                            $scope.rejectAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+                            break;
+                        }
+                    }
+
                 };
                 $scope.panelExist = function() {
                     if (mainUtils.processedInReview('inside', $scope.uuid) || mainUtils.processedInReview('rollback', $scope.uuid) || !$scope.panelType) {
@@ -167,13 +176,7 @@ angular.module('oncokbApp')
                     });
                 };
 
-                $scope.accept = function(event) {
-                    if (event !== null) {
-                        $scope.$parent.stopCollopse(event);
-                    }
-                    if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
-                        return;
-                    }
+                $scope.accept = function() {
                     if ($scope.adjustedEvidenceType === 'GENE_TYPE') {
                         var params = {
                             hugoSymbol: $scope.obj.name.getText(),
@@ -242,13 +245,7 @@ angular.module('oncokbApp')
                     $scope.mutation.oncogenic_review.set('updateTime', $scope.oncogenicLastUpdateTime);
                     $scope.mutation.effect_review.set('updateTime', $scope.effectLastUpdateTime);
                 }
-                $scope.reject = function(event) {
-                    if (event !== null) {
-                        $scope.$parent.stopCollopse(event);
-                    }
-                    if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
-                        return;
-                    }
+                $scope.reject = function() {
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                     dlg.result.then(function() {
                         var uuid; // uuid that is used as evidence identifier in the database
@@ -443,24 +440,24 @@ angular.module('oncokbApp')
                         break;
                     }
                 }
-                $scope.confirmDelete = function(event, type, mutation, tumor, therapyCategory, treatment) {
+                $scope.confirmDelete = function(type, mutation, tumor, therapyCategory, treatment) {
                     $scope.confirmDeleteInGene({
-                        event: event, type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
+                        type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
                     });
                 };
-                $scope.cancelDelete = function(event, type, mutation, tumor, therapyCategory, treatment) {
+                $scope.cancelDelete = function(type, mutation, tumor, therapyCategory, treatment) {
                     $scope.cancelDeleteInGene({
-                        event: event, type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
+                        type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
                     });
                 };
-                $scope.acceptAdded = function(event, type, mutation, tumor, therapyCategory, treatment) {
+                $scope.acceptAdded = function(type, mutation, tumor, therapyCategory, treatment) {
                     $scope.acceptAddedInGene({
-                        event: event, type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
+                        type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
                     });
                 };
-                $scope.rejectAdded = function(event, type, mutation, tumor, therapyCategory, treatment) {
+                $scope.rejectAdded = function(type, mutation, tumor, therapyCategory, treatment) {
                     $scope.rejectAddedInGene({
-                        event: event, type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
+                        type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
                     });
                 };
                 $scope.modelUpdate = function(type, mutation, tumor, therapyCategory, treatment) {
@@ -468,6 +465,9 @@ angular.module('oncokbApp')
                         type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
                     });
                 };
+                $scope.getReviewModeValue = function () {
+                    return ReviewResource.reviewMode;
+                }
             }
         };
     });

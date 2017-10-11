@@ -1727,6 +1727,7 @@ angular.module('oncokbApp')
             };
             function acceptSection(type, mutation, tumor, ti, treatment) {
                 var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
+                ReviewResource.accepted = _.union(ReviewResource.accepted, tempUUIDs);
                 removeUUIDs(tempUUIDs);
                 acceptSectionItems(type, mutation, tumor, ti, treatment, true);
             }
@@ -1770,8 +1771,7 @@ angular.module('oncokbApp')
             }
 
 
-            $scope.acceptAdded = function(event, type, mutation, tumor, ti, treatment) {
-                $scope.stopCollopse(event);
+            $scope.acceptAdded = function(type, mutation, tumor, ti, treatment) {
                 if (!$scope.status.isDesiredGene) {
                     acceptSection(type, mutation, tumor, ti, treatment);
                     return;
@@ -1789,8 +1789,7 @@ angular.module('oncokbApp')
                     dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                 });
             };
-            $scope.rejectAdded = function (event, type, mutation, tumor, ti, treatment) {
-                $scope.stopCollopse(event);
+            $scope.rejectAdded = function (type, mutation, tumor, ti, treatment) {
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function() {
                     removeModel(type, mutation, tumor, ti, treatment);
@@ -2336,8 +2335,7 @@ angular.module('oncokbApp')
                 }
                 return uuids;
             }
-            $scope.confirmDelete = function(event, type, mutation, tumor, ti, treatment) {
-                $scope.stopCollopse(event);
+            $scope.confirmDelete = function(type, mutation, tumor, ti, treatment) {
                 var location = '';
                 var obj;
                 switch(type) {
@@ -2487,10 +2485,11 @@ angular.module('oncokbApp')
                 return geneStatus;
             }
 
-            $scope.cancelDelete = function(event, type, mutation, tumor, ti, treatment) {
-                $scope.stopCollopse(event);
+            $scope.cancelDelete = function(type, mutation, tumor, ti, treatment) {
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function() {
+                    var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
+                    ReviewResource.rejected = _.union(ReviewResource.rejected, tempUUIDs);
                     cancelDelteSection(type, mutation, tumor, ti, treatment);
                 });
             };
@@ -2522,7 +2521,6 @@ angular.module('oncokbApp')
             function cancelDeleteItem(obj) {
                 obj.name_review.delete('removed');
                 setReview(obj.name_uuid, false);
-                ReviewResource.rejected.push(obj.name_uuid.getText());
             }
 
             $scope.commentClick = function(event) {
