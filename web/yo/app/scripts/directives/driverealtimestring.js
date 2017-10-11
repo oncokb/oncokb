@@ -221,7 +221,7 @@ angular.module('oncokbApp')
                     }
                 }
                 $scope.valueChanged = function() {
-                    if ($scope.t === 'treatment-select' && (!ReviewResource.reviewMode || !mainUtils.isProcessed('reject', $scope.treatment.level_uuid))) {
+                    if ($scope.t === 'treatment-select' && (!ReviewResource.reviewMode || !mainUtils.processedInReview('reject', $scope.treatment.level_uuid))) {
                         $scope.changePropagation();
                     }
                     if (!_.isUndefined($scope.es)) {
@@ -289,19 +289,19 @@ angular.module('oncokbApp')
                 $scope.reviewLayout = function(type) {
                     if (type === 'regular') {
                         // display the new header, and difference header and content only when the item is not inside an added/deleted sections, and haven't accepted or rejected yet
-                        return !mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('reject', $scope.uuid) && !mainUtils.isProcessed('inside', $scope.uuid);
+                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
                     } else if (type === 'name') {
-                        return mainUtils.isProcessed('name', $scope.uuid) && !mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('reject', $scope.uuid) && !mainUtils.isProcessed('add', $scope.uuid) && !mainUtils.isProcessed('inside', $scope.uuid);
+                        return mainUtils.processedInReview('name', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
                     }
                 };
                 $scope.rejectedAction = function() {
-                    return mainUtils.isProcessed('reject', $scope.uuid);
+                    return mainUtils.processedInReview('reject', $scope.uuid);
                 };
                 $scope.reviewContentEditable = function(type) {
                     if (type === 'regular') {
-                        return !mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('reject', $scope.uuid);
+                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid);
                     } else if (type === 'name') {
-                        return !mainUtils.isProcessed('inside', $scope.uuid) && !mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('reject', $scope.uuid) && !mainUtils.isProcessed('add', $scope.uuid);
+                        return !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid);
                     }
                 };
                 $scope.getReviewModeValue = function () {

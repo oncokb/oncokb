@@ -68,7 +68,7 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.panelExist = function() {
-                    if (mainUtils.isProcessed('inside', $scope.uuid) || mainUtils.isProcessed('rollback', $scope.uuid) || !$scope.panelType) {
+                    if (mainUtils.processedInReview('inside', $scope.uuid) || mainUtils.processedInReview('rollback', $scope.uuid) || !$scope.panelType) {
                         return false;
                     } else {
                         return true;
@@ -79,17 +79,17 @@ angular.module('oncokbApp')
                 }
                 $scope.assignPanelType = function() {
                     // The panel type is assigned in the priority of remove, add, name change and update. Caution should be exercised when adjusting the order, which is reflected in the following if else statements
-                    if (mainUtils.isProcessed('remove', $scope.uuid)) {
+                    if (mainUtils.processedInReview('remove', $scope.uuid)) {
                         $scope.panelType = 'delete';
                         if (isTreatmentType()) {
                             $scope.adjustedEvidenceType = 'treatment';
                         }
-                    } else if (mainUtils.isProcessed('add', $scope.uuid)) {
+                    } else if (mainUtils.processedInReview('add', $scope.uuid)) {
                         $scope.panelType = 'add';
                         if (isTreatmentType()) {
                             $scope.adjustedEvidenceType = 'treatment';
                         }
-                    } else if (mainUtils.isProcessed('name', $scope.uuid)) {
+                    } else if (mainUtils.processedInReview('name', $scope.uuid)) {
                         $scope.panelType = 'name';
                         if ($scope.evidenceType === 'mutation') {
                             $scope.adjustedEvidenceType = 'MUTATION_NAME_CHANGE';
@@ -98,7 +98,7 @@ angular.module('oncokbApp')
                         } else if (isTreatmentType()) {
                             $scope.adjustedEvidenceType = 'TREATMENT_NAME_CHANGE';
                         }
-                    } else if (mainUtils.isProcessed('update', $scope.uuid)) {
+                    } else if (mainUtils.processedInReview('update', $scope.uuid)) {
                         $scope.panelType = 'update';
                     }
                 };
@@ -118,14 +118,14 @@ angular.module('oncokbApp')
                     }
                     // If any decision hasn't been made yet, we display the panel signature which is a text describing what kind of change is made by who at what time
                     // on the other hand, if the evidence already got accepted or rejected, we hide the panel signature
-                    if (!mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('reject', $scope.uuid)) {
+                    if (!mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid)) {
                         return true;
                     } else {
                         return false;
                     }
                 };
                 $scope.iconClass = function(type) {
-                    if (mainUtils.isProcessed('accept', $scope.uuid) || mainUtils.isProcessed('reject', $scope.uuid)) {
+                    if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
                         return 'reviewed';
                     } else if (type === 'accept') {
                         return 'fa-comments-red';
@@ -136,11 +136,11 @@ angular.module('oncokbApp')
                 $scope.iconExist = function(type) {
                     switch(type) {
                     case 'accept':
-                        return !mainUtils.isProcessed('reject', $scope.uuid) && !mainUtils.isProcessed('loading', $scope.uuid);
+                        return !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('loading', $scope.uuid);
                     case 'reject':
-                        return !mainUtils.isProcessed('accept', $scope.uuid) && !mainUtils.isProcessed('loading', $scope.uuid);
+                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('loading', $scope.uuid);
                     case 'loading':
-                        return mainUtils.isProcessed('loading', $scope.uuid);
+                        return mainUtils.processedInReview('loading', $scope.uuid);
                     }
                 };
                 $scope.panelClass = function(type) {
@@ -171,7 +171,7 @@ angular.module('oncokbApp')
                     if (event !== null) {
                         $scope.$parent.stopCollopse(event);
                     }
-                    if (mainUtils.isProcessed('accept', $scope.uuid) || mainUtils.isProcessed('reject', $scope.uuid)) {
+                    if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
                         return;
                     }
                     if ($scope.adjustedEvidenceType === 'GENE_TYPE') {
@@ -246,7 +246,7 @@ angular.module('oncokbApp')
                     if (event !== null) {
                         $scope.$parent.stopCollopse(event);
                     }
-                    if (mainUtils.isProcessed('accept', $scope.uuid) || mainUtils.isProcessed('reject', $scope.uuid)) {
+                    if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
                         return;
                     }
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
@@ -408,7 +408,7 @@ angular.module('oncokbApp')
                     case 'Investigational implications for resistance to therapy':
                         if ($scope.treatment) {
                             // handle level specifically because level and propagation share the same uuid and review object
-                            var levelChanged =  mainUtils.isProcessed('precise', $scope.treatment.level_uuid);
+                            var levelChanged =  mainUtils.processedInReview('precise', $scope.treatment.level_uuid);
                             if(levelChanged) {
                                 var lastReviewedLevel = $scope.treatment.level_review.get('lastReviewed');
                                 var lastReviewedPropagation = $scope.treatment.level_review.get('lastReviewedPropagation');

@@ -454,7 +454,7 @@ angular.module('oncokbApp')
                 return false;
             }
         };
-        function isProcessed(type, uuid) {
+        function processedInReview(type, uuid) {
             if (!type || !uuid) {
                 return false;
             }
@@ -500,6 +500,6 @@ angular.module('oncokbApp')
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,
-            isProcessed: isProcessed
+            processedInReview: processedInReview
         };
     });
