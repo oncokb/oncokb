@@ -446,3 +446,22 @@ angular.module('oncokbApp')
             isHotspot: isHotspot
         };
     }]);
+angular.module('oncokbApp')
+    .factory('ReviewResource', ['$http', 'OncoKB', function() {
+        'use strict';
+        return {
+            reviewMode: false, // reviewMode is tracked in the factory to avoid watchers in directives
+            mostRecent: {}, // uuid string is the key, and value is an object with updateTime and updatedBy
+            // the following attributes will be arrays with uuids as content
+            accepted: [], // accepted section
+            rejected: [], // rejected section
+            rollback: [], // rolledback items
+            loading: [], // loading section
+            inside: [], // the items that is inside an added or removed section
+            updated: [], // content updated sections
+            nameChanged: [], // name changed sections
+            added: [], // newly added sections
+            removed: [], // deleted sections
+            precise: [] // the exact item that has been changed
+        };
+    }]);
