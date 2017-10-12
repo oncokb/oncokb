@@ -304,7 +304,7 @@ angular.module('oncokbApp')
                         return !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid);
                     }
                 };
-                $scope.getReviewModeValue = function () {
+                $scope.inReviewMode = function () {
                     return ReviewResource.reviewMode;
                 }
             }

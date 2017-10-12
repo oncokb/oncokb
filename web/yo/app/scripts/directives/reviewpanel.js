@@ -109,6 +109,8 @@ angular.module('oncokbApp')
                         }
                     } else if (mainUtils.processedInReview('update', $scope.uuid)) {
                         $scope.panelType = 'update';
+                    } else {
+                        $scope.panelType = '';
                     }
                 };
                 $scope.signatureCheck = function() {
@@ -465,7 +467,7 @@ angular.module('oncokbApp')
                         type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
                     });
                 };
-                $scope.getReviewModeValue = function () {
+                $scope.inReviewMode = function () {
                     return ReviewResource.reviewMode;
                 }
             }
