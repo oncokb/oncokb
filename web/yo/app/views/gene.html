@@ -133,7 +133,7 @@
   <div id="mutation">
     <uib-accordion close-others="false">
       <div ng-repeat="mutation in gene.mutations.asArray()" ng-init="initGeneStatus(mutation);tmpGeneStatus=getGeneStatusItem(mutation)" class="accordionMarginTop" ng-hide="status.hideAllObsolete && mutation.name_eStatus.get('obsolete') === 'true'">
-        <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader" ng-if="displayCheck(mutation.name_uuid, mutation.name_review)">
+        <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader" ng-show="displayCheck(mutation.name_uuid, mutation.name_review)">
           <uib-accordion-heading>
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
             <span>Mutation: </span>

@@ -8,7 +8,7 @@
  * Factory in the oncokb.
  */
 angular.module('oncokbApp')
-    .factory('FindRegex', function(_, S, DatabaseConnector, $q) {
+    .factory('FindRegex', function(_, S, DatabaseConnector, $q, ReviewResource) {
         var allRegex = {
             pmid: {
                 regex: /PMID:?\s*([0-9]+,?\s*)+/ig,
@@ -172,19 +172,23 @@ angular.module('oncokbApp')
                     break;
                 }
             });
-            var apiCalls = [];
-            if(pubmedArticles.length > 0) {
-                apiCalls.push(validatePubmed(pubmedArticles));
+            if (ReviewResource.reviewMode === true) {
+                deferred.resolve(_.union(pubmedArticles, trials, abstracts));
+            } else {
+                var apiCalls = [];
+                if(pubmedArticles.length > 0) {
+                    apiCalls.push(validatePubmed(pubmedArticles));
+                }
+                if(trials.length > 0) {
+                    apiCalls.push(validateTrials(trials));
+                }
+                $q.all(apiCalls)
+                    .then(function(result) {
+                        deferred.resolve(_.union(pubmedArticles, trials, abstracts));
+                    }, function(error) {
+                        deferred.reject(error);
+                    });
             }
-            if(trials.length > 0) {
-                apiCalls.push(validateTrials(trials));
-            }
-            $q.all(apiCalls)
-                .then(function(result) {
-                    deferred.resolve(_.union(pubmedArticles, trials, abstracts));
-                }, function(error) {
-                    deferred.reject(error);
-                });
             return deferred.promise;
         }
         function validatePubmed(pubmedArticles) {

@@ -1,5 +1,5 @@
 <div>
-    <div ng-if="getReviewModeValue()" class="reviewPanel" ng-init="assignPanelType()">
+    <div ng-if="inReviewMode()" class="reviewPanel" ng-init="assignPanelType()">
         <div ng-class="panelClass('panel')" ng-if="panelExist()">
             <p ng-class="panelClass('text')" ng-if="signatureCheck()">{{::operationsName[panelType]}} by {{::updatedBy}} at {{::updateTime | date : 'MMM d, h:mm a yyyy'}}</p>
             <i class="fa fa-check" ng-class="iconClass('accept')" ng-if="iconExist('accept')" ng-click="processDecision($event, 'accept')"></i>
