@@ -530,8 +530,8 @@
                     </select>
                 </div>
                 <button type="button" class="btn btn-default btn-sm"
-                        ng-disabled="meta.newMainType.length === 0"
-                        ng-click="addTumorType(mutation); meta.newTumorType=''">
+                        ng-disabled="emptyTT()"
+                        ng-click="addTumorType(mutation)">
                     Add Tumor Type(s)
                 </button>
             </div>
