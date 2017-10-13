@@ -1916,7 +1916,21 @@ angular.module('oncokbApp')
                     return $scope.tumorMessages[mutationName][tumorName];
                 } else return '';
             };
-
+            /**
+             * check the to be added cancer types are empty or not.
+             * It is used to disable Add Tumor Types button if applicable
+             * **/
+            $scope.emptyTT = function() {
+                var result = true;
+                for (var i = 0; i < $scope.meta.newCancerTypes.length; i++) {
+                    var ct = $scope.meta.newCancerTypes[i];
+                    if (ct.mainType && ct.mainType.name || ct.subtype && ct.subtype.name) {
+                        result = false;
+                        break;
+                    }
+                }
+                return result;
+            };
             $scope.addTumorType = function(mutation) {
                 if (mutation) {
                     if ($scope.validateTumor(mutation)) {
