@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
 
 
@@ -76,15 +76,16 @@ public class Treatment implements java.io.Serializable {
         }
     }
 
-    public void setDrugs(Set<Drug> drugs) {
+    public void setDrugs(List<Drug> drugs) {
         if (drugs == null) {
             this.treatmentDrugs = null;
         } else {
             Set<TreatmentDrug> treatmentDrugs = new HashSet<>();
-            for (Drug drug : drugs) {
+            for (int i = 0; i < drugs.size(); i++) {
                 TreatmentDrug treatmentDrug = new TreatmentDrug();
                 treatmentDrug.setTreatment(this);
-                treatmentDrug.setDrug(drug);
+                treatmentDrug.setPriority(i + 1);
+                treatmentDrug.setDrug(drugs.get(i));
                 treatmentDrugs.add(treatmentDrug);
             }
             this.treatmentDrugs = treatmentDrugs;

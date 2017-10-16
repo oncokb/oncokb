@@ -8,10 +8,7 @@ import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.mskcc.oncotree.model.TumorType;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -384,6 +381,13 @@ public class Evidence implements java.io.Serializable {
                 evidenceTreatments.add(evidenceTreatment);
             }
             this.evidenceTreatments = evidenceTreatments;
+        }
+    }
+
+    // In current setup, one evidence only has one treatment, then we could set priority to all
+    public void setTreatmentsPriority(int priority) {
+        for (EvidenceTreatment evidenceTreatment : this.getEvidenceTreatments()) {
+            evidenceTreatment.setPriority(priority);
         }
     }
 
