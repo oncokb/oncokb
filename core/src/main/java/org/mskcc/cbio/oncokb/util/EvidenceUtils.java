@@ -981,7 +981,7 @@ public class EvidenceUtils {
             for (Treatment treatment : treatments) {
                 Set<Drug> drugs = treatment.getDrugs();
                 if (drugs != null && !drugs.isEmpty()) {
-                    Set<Drug> drugsFromDB = new HashSet<>();
+                    List<Drug> drugsFromDB = new ArrayList<>();
                     for (Drug drug : drugs) {
                         Drug tempDrug = drugBo.findDrugByName(drug.getDrugName());
                         if (tempDrug == null) {
