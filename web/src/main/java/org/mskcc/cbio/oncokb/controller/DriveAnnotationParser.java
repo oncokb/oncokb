@@ -353,7 +353,7 @@ public class DriveAnnotationParser {
             // cancers
             if (mutationObj.has("tumors")) {
                 JSONArray cancers = mutationObj.getJSONArray("tumors");
-                if(cancers != null && cancers.length() > 0) {
+                if (cancers != null && cancers.length() > 0) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor Types");
                 }
                 for (int i = 0; i < cancers.length(); i++) {
@@ -728,7 +728,7 @@ public class DriveAnnotationParser {
             for (String drugTxt : drugTxts) {
                 String[] drugNames = drugTxt.split(" ?\\+ ?");
 
-                Set<Drug> drugs = new HashSet<>();
+                List<Drug> drugs = new ArrayList<>();
                 for (String drugName : drugNames) {
                     drugName = drugName.trim();
                     Drug drug = drugBo.guessUnambiguousDrug(drugName);
@@ -748,6 +748,7 @@ public class DriveAnnotationParser {
                 treatments.add(treatment);
             }
             evidence.setTreatments(treatments);
+            evidence.setPriority(i + 1);
 
             // highest level of evidence
             if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
