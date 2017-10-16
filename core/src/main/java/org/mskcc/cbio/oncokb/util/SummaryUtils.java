@@ -365,7 +365,7 @@ public class SummaryUtils {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             summary = "as of " + sdf.format(lastEdit) + ", " + summary;
         }
-        return summary.substring(0, 1).toUpperCase() + summary.substring(1);
+        return StringUtils.capitalize(summary);
     }
 
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, Boolean isHotspot) {
@@ -492,8 +492,7 @@ public class SummaryUtils {
         sb.append(inconclusiveSummary(alteration.getGene(), query.getAlteration()));
         sb.append(" However, ");
         String hotspotSummary = hotspotSummary(alteration, query, true);
-        sb.append(hotspotSummary.substring(0, 1).toLowerCase());
-        sb.append(hotspotSummary.substring(1));
+        sb.append(StringUtils.uncapitalize(hotspotSummary));
         return sb.toString();
     }
 
