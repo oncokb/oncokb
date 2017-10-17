@@ -1217,7 +1217,7 @@ angular.module('oncokbApp')
                             var drugList = [];
                             for (var j = 0; j < drugs.length; j++) {
                                 drugList.push({
-                                    drugName: drugs[j]
+                                    drugName: drugs[j].trim()
                                 });
                             }
                             data.treatments.push({
