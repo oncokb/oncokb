@@ -19,7 +19,8 @@ angular.module('oncokbApp')
                 link: 'https://clinicaltrials.gov/show/'
             },
             abstract: {
-                regex: /\(\s*Abstract\s*:([^\)]*\s*);?\s*\)/ig
+                regex: /\(\s*Abstract\s*:([^\)]*\s*);?\s*\)/ig,
+                localRegex: /\(\s*Abstract\s*:([^\)]*\s*);?\s*\)/i
             }
         };
 
@@ -121,7 +122,7 @@ angular.module('oncokbApp')
                                 uniqueResultA.push({type: 'nct', id: _datum});
                                 break;
                             case 2:
-                                var abstractPattern = regex[2];
+                                var abstractPattern = allRegex.abstract.localRegex;
                                 var match = abstractPattern.exec(_datum);
                                 if (_.isArray(match) && match.length > 1) {
                                     _datum = match[1];
