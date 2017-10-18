@@ -1159,17 +1159,17 @@ angular.module('oncokbApp')
                     }
                     break;
                 case 'MUTATION_NAME_CHANGE':
-                    uuids = collectNameChangesEvidencesUUID('mutation', mutation, []);
+                    uuids = collectUUIDs('mutation', mutation, [], true, true);
                     data.evidenceType = null;
                     historyData.location = mutation.name.getText();
                     break;
                 case 'TUMOR_NAME_CHANGE':
-                    uuids = collectNameChangesEvidencesUUID('tumor', tumor, []);
+                    uuids = collectUUIDs('tumor', tumor, [], true, true);
                     data.evidenceType = null;
                     historyData.location = historyStr(mutation, tumor);
                     break;
                 case 'TREATMENT_NAME_CHANGE':
-                    uuids = collectNameChangesEvidencesUUID('treatment', treatment, []);
+                    uuids = collectUUIDs('treatment', treatment, [], true, true);
                     data.evidenceType = null;
                     historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', ' + treatment.name.getText();
                     break;
@@ -2306,15 +2306,18 @@ angular.module('oncokbApp')
              * @param obj: corresponding object
              * @param uuids: the array that you want to append uuids to. usually, pass in a empty array
              * @param inside: boolean value, set it to true to exclude its own uuid from getting collected. Otherwise this function will collect all of the uuids
+             * @param evidenceUUIDsOnly: boolean value, set it to true to indicate only want to collect evidences uuid inside one section. If not specified, will return all UUIDs besides evidences UUIDs
              * */
-            function collectUUIDs(type, obj, uuids, inside) {
+            function collectUUIDs(type, obj, uuids, inside, evidenceUUIDsOnly) {
                 if (type === 'mutation') {
                     if (!inside) {
                         uuids.push(obj.name_uuid.getText());
                     }
                     uuids.push(obj.oncogenic_uuid.getText());
                     uuids.push(obj.effect_uuid.getText());
-                    uuids.push(obj.description_uuid.getText());
+                    if (!evidenceUUIDsOnly) {
+                        uuids.push(obj.description_uuid.getText());
+                    }
                     _.each(obj.tumors.asArray(), function(tumor) {
                         collectUUIDs('tumor', tumor, uuids);
                     });
@@ -2326,23 +2329,27 @@ angular.module('oncokbApp')
                     uuids.push(obj.summary_uuid.getText());
                     uuids.push(obj.prevalence_uuid.getText());
                     uuids.push(obj.prognostic_uuid.getText());
-                    uuids.push(obj.prognostic.level_uuid.getText());
-                    uuids.push(obj.prognostic.description_uuid.getText());
                     uuids.push(obj.diagnostic_uuid.getText());
-                    uuids.push(obj.diagnostic.level_uuid.getText());
-                    uuids.push(obj.diagnostic.description_uuid.getText());
                     uuids.push(obj.trials_uuid.getText());
                     uuids.push(obj.nccn_uuid.getText());
-                    uuids.push(obj.nccn.therapy_uuid.getText());
-                    uuids.push(obj.nccn.disease_uuid.getText());
-                    uuids.push(obj.nccn.version_uuid.getText());
-                    uuids.push(obj.nccn.description_uuid.getText());
+                    if (!evidenceUUIDsOnly) {
+                        uuids.push(obj.prognostic.level_uuid.getText());
+                        uuids.push(obj.prognostic.description_uuid.getText());
+                        uuids.push(obj.diagnostic.level_uuid.getText());
+                        uuids.push(obj.diagnostic.description_uuid.getText());
+                        uuids.push(obj.nccn.therapy_uuid.getText());
+                        uuids.push(obj.nccn.disease_uuid.getText());
+                        uuids.push(obj.nccn.version_uuid.getText());
+                        uuids.push(obj.nccn.description_uuid.getText());
+                    }
                     _.each(obj.TI.asArray(), function(ti) {
                         collectUUIDs('TI', ti, uuids);
                     });
                 }
                 if(type === 'TI') {
-                    uuids.push(obj.name_uuid.getText());
+                    if (!evidenceUUIDsOnly) {
+                        uuids.push(obj.name_uuid.getText());
+                    }
                     uuids.push(obj.description_uuid.getText());
                     _.each(obj.treatments.asArray(), function(treatment) {
                         collectUUIDs('treatment', treatment, uuids);
@@ -2355,42 +2362,6 @@ angular.module('oncokbApp')
                     uuids.push(obj.level_uuid.getText());
                     uuids.push(obj.indication_uuid.getText());
                     uuids.push(obj.description_uuid.getText());
-                }
-                return uuids;
-            }
-            /**
-             * This function is desgined to collect evidence uuids from a section with name changed
-             * @param type: one of the three: mutation, tumor or treatment
-             * @param obj: corresponding object
-             * @param uuids: the array that you want to append uuids to. usually, pass in a empty array
-             * */
-            function collectNameChangesEvidencesUUID(type, obj, uuids) {
-                if (type === 'mutation') {
-                    uuids.push(obj.oncogenic_uuid.getText());
-                    uuids.push(obj.effect_uuid.getText());
-                    _.each(obj.tumors.asArray(), function(tumor) {
-                        collectNameChangesEvidencesUUID('tumor', tumor, uuids);
-                    });
-                }
-                if (type === 'tumor') {
-                    uuids.push(obj.summary_uuid.getText());
-                    uuids.push(obj.prevalence_uuid.getText());
-                    uuids.push(obj.prognostic_uuid.getText());
-                    uuids.push(obj.diagnostic_uuid.getText());
-                    uuids.push(obj.trials_uuid.getText());
-                    uuids.push(obj.nccn_uuid.getText());
-                    _.each(obj.TI.asArray(), function(ti) {
-                        collectNameChangesEvidencesUUID('TI', ti, uuids);
-                    });
-                }
-                if(type === 'TI') {
-                    uuids.push(obj.description_uuid.getText());
-                    _.each(obj.treatments.asArray(), function(treatment) {
-                        collectNameChangesEvidencesUUID('treatment', treatment, uuids);
-                    });
-                }
-                if (type === 'treatment') {
-                    uuids.push(obj.name_uuid.getText());
                 }
                 return uuids;
             }
