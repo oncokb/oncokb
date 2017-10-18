@@ -122,11 +122,6 @@ public class SummaryUtils {
         // Get tumor type summary from exact matched alteration
         tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alteration, new HashSet<>(relevantTumorTypes));
 
-        // Get Other Tumor Types summary within this alteration
-        if (tumorTypeSummary == null) {
-            tumorTypeSummary = getOtherTumorTypeSummaryByAlt(alteration);
-        }
-
         List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
 
         // Get all tumor type summary evidences for the alternative alleles
@@ -147,15 +142,6 @@ public class SummaryUtils {
                 }
                 if (tumorTypeSummary != null) {
                     break;
-                }
-            }
-
-            if (tumorTypeSummary == null) {
-                for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(allele);
-                    if (tumorTypeSummary != null) {
-                        break;
-                    }
                 }
             }
         }
@@ -198,7 +184,29 @@ public class SummaryUtils {
                 if (tumorTypeSummary != null) {
                     break;
                 }
+            }
+        }
+//        }
 
+        // Get Other Tumor Types summary within this alteration
+        if (tumorTypeSummary == null) {
+            tumorTypeSummary = getOtherTumorTypeSummaryByAlt(alteration);
+        }
+
+        // Get Other Tumor Types summary within alternative alleles
+        if (tumorTypeSummary == null) {
+            for (Alteration allele : alternativeAlleles) {
+                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(allele);
+                if (tumorTypeSummary != null) {
+                    break;
+                }
+            }
+        }
+
+        // Get Other Tumor Types summary within relevant alterations
+        if (tumorTypeSummary == null) {
+            // Base on the priority of relevant alterations
+            for (Alteration alt : relevantAlterations) {
                 // Get Other Tumor Types summary
                 tumorTypeSummary = getOtherTumorTypeSummaryByAlt(alt);
                 if (tumorTypeSummary != null) {
@@ -206,7 +214,6 @@ public class SummaryUtils {
                 }
             }
         }
-//        }
 
         if (tumorTypeSummary == null) {
             tumorTypeSummary = newTumorTypeSummary();
