@@ -184,6 +184,8 @@ public class DriveAnnotationParser {
                         alterationBo.delete(alteration);
                     }
 
+                    CacheUtils.updateGene(gene.getEntrezGeneId());
+
                     // summary
                     parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, geneInfo.has("summary_uuid") ? geneInfo.getString("summary_uuid") : null, (geneInfo.has("summary_review") ? getUpdateTime(geneInfo.get("summary_review")) : null), nestLevel + 1);
 
