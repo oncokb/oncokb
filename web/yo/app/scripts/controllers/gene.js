@@ -204,7 +204,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.vusUpdate = function(message) {
-                if ($scope.status.isDesiredGene) {
+                if ($scope.status.isDesiredGene && $rootScope.internal) {
                     if ($scope.status.vusUpdateTimeout) {
                         $timeout.cancel($scope.status.vusUpdateTimeout);
                     }
