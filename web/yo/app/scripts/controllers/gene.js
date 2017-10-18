@@ -235,10 +235,13 @@ angular.module('oncokbApp')
             };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
-                var parts = mutationStr.split(',');
+                var parts = _.map(mutationStr.split(','), function(item) {
+                    return item.trim();
+                });
                 var altResults = [];
                 var proteinChange = '';
                 var displayName = '';
+
                 for (var i = 0; i < parts.length; i++) {
                     if (!parts[i])continue;
                     if (parts[i].indexOf('[') === -1) {
