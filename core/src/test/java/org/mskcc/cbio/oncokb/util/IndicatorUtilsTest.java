@@ -133,7 +133,9 @@ public class IndicatorUtilsTest {
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
 
-        // Test special cases
+        // If alternative allele has resistance treatment, all sensitive treatments related to it should not be applied.
+        // PDGFRA D842Y Gastrointestinal Stromal Tumor
+        // Dasatinib should not be listed as D842V has resistance treatment
         query = new Query(null, null, null, "PDGFRA", "D842Y", null, "Gastrointestinal Stromal Tumor", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
@@ -143,7 +145,7 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level should be null, but it is not.",
             null, indicatorQueryResp.getHighestResistanceLevel());
         assertEquals("The number of treatments should be two",
-            2, indicatorQueryResp.getTreatments().size());
+            1, indicatorQueryResp.getTreatments().size());
 
         // Oncogenicity of Alternative Allele overwrites Inconclusive
         // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic

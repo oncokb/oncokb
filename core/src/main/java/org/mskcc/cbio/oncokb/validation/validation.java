@@ -200,26 +200,26 @@ public class validation {
 //                        break;
 //                    }
 //                }
-                if (oncogenicityMapping.containsKey(alt)
-                    && oncogenicityMapping.get(alt) != null
-                    && oncogenicityMapping.get(alt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
-                    && mutationEffectMapping.containsKey(alt)
-                    && mutationEffectMapping.get(alt) != null
-                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
-                    Integer relevantsSize = relevantAlts.size();
-                    Integer relevantCount = 0;
-                    for (Alteration relevantAlt : relevantAlts) {
-                        relevantCount++;
-                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt) != null && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
-                            && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
-                            ListEntry row = new ListEntry();
-                            setValue(row, "Gene", relevantAlt.getGene().getHugoSymbol());
-                            setValue(row, "Alteration", relevantAlt.getAlteration());
-                            service.insert(listFeedUrl3, row);
-
-                        }
-                    }
-                }
+//                if (oncogenicityMapping.containsKey(alt)
+//                    && oncogenicityMapping.get(alt) != null
+//                    && oncogenicityMapping.get(alt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
+//                    && mutationEffectMapping.containsKey(alt)
+//                    && mutationEffectMapping.get(alt) != null
+//                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
+//                    Integer relevantsSize = relevantAlts.size();
+//                    Integer relevantCount = 0;
+//                    for (Alteration relevantAlt : relevantAlts) {
+//                        relevantCount++;
+//                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt) != null && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
+//                            && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
+//                            ListEntry row = new ListEntry();
+//                            setValue(row, "Gene", relevantAlt.getGene().getHugoSymbol());
+//                            setValue(row, "Alteration", relevantAlt.getAlteration());
+//                            service.insert(listFeedUrl3, row);
+//
+//                        }
+//                    }
+//                }
 //                if (!oncogenicityMapping.containsKey(alt) && !mutationEffectMapping.containsKey(alt) && !VUSAlterations.contains(alt) && !specialAlterations.contains(alt.getAlteration()) && !altsWithDescriptions.contains(alt)) {
 //                    ListEntry row = new ListEntry();
 //                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
@@ -227,13 +227,13 @@ public class validation {
 //                    service.insert(listFeedUrl4, row);
 //
 //                }
-                if (oncogenicityMapping.containsKey(alt) && mutationEffectMapping.containsKey(alt) && referencesMapping.get(alt).size() == 0) {
-                    ListEntry row = new ListEntry();
-                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
-                    setValue(row, "Alteration", alt.getAlteration());
-                    service.insert(listFeedUrl5, row);
-
-                }
+//                if (oncogenicityMapping.containsKey(alt) && mutationEffectMapping.containsKey(alt) && referencesMapping.get(alt).size() == 0) {
+//                    ListEntry row = new ListEntry();
+//                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
+//                    setValue(row, "Alteration", alt.getAlteration());
+//                    service.insert(listFeedUrl5, row);
+//
+//                }
 //                if (multipleMutationEffects.containsKey(alt) && multipleMutationEffects.get(alt).size() > 1) {
 //                    ListEntry row = new ListEntry();
 //                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
@@ -322,10 +322,15 @@ public class validation {
                 setValue(row, "Variants", MainUtils.listToString(alterationNames, ", "));
 
                 setValue(row, "Disease", getCancerType(evidence.getOncoTreeType()));
-                setValue(row, "Drugs", org.apache.commons.lang3.StringUtils.join(EvidenceUtils.getDrugs(Collections.singleton(evidence)), ", "));
+                Set<String> drugs = EvidenceUtils.getDrugs(Collections.singleton(evidence));
+                List<String> drugList = new ArrayList<>(drugs);
+                Collections.sort(drugList);
+                setValue(row, "Drugs", org.apache.commons.lang3.StringUtils.join(drugList, ", "));
                 Set<String> articles = EvidenceUtils.getPmids(Collections.singleton(evidence));
-                setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(articles, ", "));
-                setValue(row, "NumberOfPMIDs", Integer.toString(articles.size()));
+                List<String> articleList = new ArrayList<>(articles);
+                Collections.sort(articleList);
+                setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(articleList, ", "));
+                setValue(row, "NumberOfPMIDs", Integer.toString(articleList.size()));
 
                 Set<ArticleAbstract> articleAbstracts = EvidenceUtils.getAbstracts(Collections.singleton(evidence));
                 Set<String> abstractContent = new HashSet<>();
@@ -347,7 +352,7 @@ public class validation {
                 setValue(row, "Gene", evidence.getGene().getHugoSymbol());
 
                 List<String> alterationNames = getAlterationNameByEvidence(evidence);
-                
+
                 setValue(row, "Variants", MainUtils.listToString(alterationNames, ", "));
 
                 setValue(row, "CancerType", getCancerType(evidence.getOncoTreeType()));
@@ -368,6 +373,7 @@ public class validation {
                 }
             }
         }
+        Collections.sort(alterationNames);
         return alterationNames;
     }
 

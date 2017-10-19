@@ -184,6 +184,8 @@ public class DriveAnnotationParser {
                         alterationBo.delete(alteration);
                     }
 
+                    CacheUtils.updateGene(gene.getEntrezGeneId());
+
                     // summary
                     parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, geneInfo.has("summary_uuid") ? geneInfo.getString("summary_uuid") : null, (geneInfo.has("summary_review") ? getUpdateTime(geneInfo.get("summary_review")) : null), nestLevel + 1);
 
@@ -259,9 +261,12 @@ public class DriveAnnotationParser {
 
     private static void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws JSONException {
         if (mutations != null) {
+            System.out.println(spaceStrByNestLevel(nestLevel) + mutations.length() + " mutations.");
             for (int i = 0; i < mutations.length(); i++) {
                 parseMutation(gene, mutations.getJSONObject(i), nestLevel + 1);
             }
+        } else {
+            System.out.println(spaceStrByNestLevel(nestLevel) + "No mutation.");
         }
     }
 
