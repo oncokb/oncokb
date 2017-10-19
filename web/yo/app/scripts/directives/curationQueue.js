@@ -91,25 +91,27 @@ angular.module('oncokbApp')
                         scope.data.queueModel = $rootScope.model.getRoot().get('queue');
                         scope.data.geneMetaData = $rootScope.geneMetaData;
                         scope.queue = [];
-                        _.each(scope.data.queueModel.asArray(), function(item) {
-                            scope.queue.push({
-                                article: item.get('article'),
-                                pmid: item.get('pmid'),
-                                pmidString: 'PMID: ' + item.get('pmid'),
-                                link: item.get('link'),
-                                variant: item.get('variant'),
-                                mainType: item.get('mainType'),
-                                subType: item.get('subType'),
-                                section: item.get('section'),
-                                addedBy: item.get('addedBy'),
-                                addedAt: item.get('addedAt'),
-                                curated: item.get('curated'),
-                                curator: item.get('curator'),
-                                comment: item.get('comment'),
-                                dueDay: item.get('dueDay'),
-                                notified: item.get('notified') // when the curation expired, we sent an email automatically. notified is used to track when this automated get sent.
+                        if (scope.data.queueModel) {
+                            _.each(scope.data.queueModel.asArray(), function(item) {
+                                scope.queue.push({
+                                    article: item.get('article'),
+                                    pmid: item.get('pmid'),
+                                    pmidString: 'PMID: ' + item.get('pmid'),
+                                    link: item.get('link'),
+                                    variant: item.get('variant'),
+                                    mainType: item.get('mainType'),
+                                    subType: item.get('subType'),
+                                    section: item.get('section'),
+                                    addedBy: item.get('addedBy'),
+                                    addedAt: item.get('addedAt'),
+                                    curated: item.get('curated'),
+                                    curator: item.get('curator'),
+                                    comment: item.get('comment'),
+                                    dueDay: item.get('dueDay'),
+                                    notified: item.get('notified') // when the curation expired, we sent an email automatically. notified is used to track when this automated get sent.
+                                });
                             });
-                        });
+                        }
                         scope.setArticlesNumberInMeta();
                     } else if (scope.location === 'genes') {
                         scope.dtColumns[5] = DTColumnDefBuilder.newColumnDef(5);
@@ -677,8 +679,8 @@ angular.module('oncokbApp')
                             queueItem.notified = new Date().getTime();
                         }
                     });
-                    //In genes page, expired queueModelItem already got set in genes.js
-                    if ($scope.location === 'gene') {
+                    // In genes page, expired queueModelItem already got set in genes.js
+                    if ($scope.location === 'gene' && $scope.data.queueModel) {
                         _.each($scope.data.queueModel.asArray(), function(queueModelItem) {
                             if (queueModelItem.get('curator') && mainUtils.isExpiredCuration(queueModelItem.get('dueDay')) && !queueModelItem.get('notified')) {
                                 queueModelItem.set('notified', new Date().getTime());
