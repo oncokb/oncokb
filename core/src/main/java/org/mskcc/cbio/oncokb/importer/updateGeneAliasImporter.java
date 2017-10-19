@@ -16,12 +16,12 @@ import java.util.Set;
 /**
  * @author Hongxin Zhang
  */
-public final class geneNamelImporter {
-    private geneNamelImporter() {
+public class updateGeneAliasImporter {
+    private updateGeneAliasImporter() {
         throw new AssertionError();
     }
 
-    private static String ALL_GENES_FILE = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json";
+    private static final String ALL_GENES_FILE = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json";
 
     public static void main(String[] args) throws IOException {
         String response = FileUtils.readRemote(ALL_GENES_FILE);
