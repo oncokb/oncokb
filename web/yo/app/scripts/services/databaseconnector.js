@@ -656,6 +656,10 @@ angular.module('oncokbApp')
             }
 
             function updateHistory(historyData) {
+                if (!$rootScope.model.getRoot().get('history')) {
+                    // TODO: if the model does not have history, we should initialize it here.
+                    return;
+                }
                 var apiHistory = $rootScope.model.getRoot().get('history').get('api');
                 if (!apiHistory || !_.isArray(Array.from(apiHistory))) {
                     apiHistory = [];
