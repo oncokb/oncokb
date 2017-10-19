@@ -1410,7 +1410,7 @@ angular.module('oncokbApp')
                         if(levelChanged) {
                             $rootScope.geneMetaData.get(treatment.level_uuid.getText()).set('review', false);
                             ReviewResource.accepted.push(treatment.level_uuid.getText());
-                            treatment.level_uuid.delete('lastReviewed');
+                            treatment.level_review.delete('lastReviewed');
                         }
                     }
                     break;
