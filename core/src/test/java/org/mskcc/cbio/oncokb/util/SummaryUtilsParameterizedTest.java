@@ -1,13 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
-import org.mskcc.cbio.oncokb.model.VariantQuery;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +12,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -55,6 +51,7 @@ public class SummaryUtilsParameterizedTest {
         String _geneSummary = resp.getGeneSummary();
         String _variantSummary = resp.getVariantSummary();
         String _tumorTypeSummary = resp.getTumorTypeSummary();
+//        System.out.println("New: " + gene + "\t" + variant + "\t" + tumorType + "\t" + _geneSummary + "\t" + _variantSummary + "\t" + _tumorTypeSummary);
         assertEquals("Gene summary, Query: " + _query, geneSummary, _geneSummary);
         assertEquals("Variant summary, Query: " + _query, variantSummary, _variantSummary);
         assertEquals("Tumor Type summary, Query: " + _query, tumorTypeSummary, _tumorTypeSummary);
