@@ -261,9 +261,12 @@ public class DriveAnnotationParser {
 
     private static void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws JSONException {
         if (mutations != null) {
+            System.out.println(spaceStrByNestLevel(nestLevel) + mutations.length() + " mutations.");
             for (int i = 0; i < mutations.length(); i++) {
                 parseMutation(gene, mutations.getJSONObject(i), nestLevel + 1);
             }
+        } else {
+            System.out.println(spaceStrByNestLevel(nestLevel) + "No mutation.");
         }
     }
 
