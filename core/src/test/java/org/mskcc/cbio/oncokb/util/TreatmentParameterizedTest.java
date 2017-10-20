@@ -3,7 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.IndicatorQueryTreatment;
 import org.mskcc.cbio.oncokb.model.Query;
 
 import java.io.BufferedReader;
@@ -20,23 +22,19 @@ import static org.junit.Assert.assertEquals;
  * Created by Hongxin on 12/5/16.
  */
 @RunWith(Parameterized.class)
-public class SummaryUtilsParameterizedTest {
-    private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.txt";
+public class TreatmentParameterizedTest {
+    private static String TREATMENT_EXAMPLES_PATH = "src/test/resources/test_treatments.txt";
 
     private String gene;
     private String variant;
     private String tumorType;
-    private String geneSummary;
-    private String variantSummary;
-    private String tumorTypeSummary;
+    private String treatmentLevel;
 
-    public SummaryUtilsParameterizedTest(String gene, String variant, String tumorType, String geneSummary, String variantSummary, String tumorTypeSummary) {
+    public TreatmentParameterizedTest(String gene, String variant, String tumorType, String treatmentLevel) {
         this.gene = gene;
         this.variant = variant;
         this.tumorType = tumorType;
-        this.geneSummary = geneSummary;
-        this.variantSummary = variantSummary;
-        this.tumorTypeSummary = tumorTypeSummary;
+        this.treatmentLevel = treatmentLevel;
     }
 
     @Test
@@ -47,27 +45,41 @@ public class SummaryUtilsParameterizedTest {
         query.setTumorType(tumorType);
 
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false);
-        String _query = gene + " " + variant + " " + tumorType;
-        String _geneSummary = resp.getGeneSummary();
-        String _variantSummary = resp.getVariantSummary();
-        String _tumorTypeSummary = resp.getTumorTypeSummary();
-//        System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + _geneSummary + "&&" + _variantSummary + "&&" + _tumorTypeSummary);
-        assertEquals("Gene summary, Query: " + _query, geneSummary, _geneSummary);
-        assertEquals("Variant summary, Query: " + _query, variantSummary, _variantSummary);
-        assertEquals("Tumor Type summary, Query: " + _query, tumorTypeSummary, _tumorTypeSummary);
+        List<IndicatorQueryTreatment> resps = resp.getTreatments();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < resps.size(); i++) {
+            IndicatorQueryTreatment treatment = resps.get(i);
+            List<String> drugNames = new ArrayList<>();
+            for (Drug drug : treatment.getDrugs()) {
+                if (drug.getDrugName() != null) {
+                    drugNames.add(drug.getDrugName().trim());
+                }
+            }
+            stringBuilder.append(treatment.getLevel().getLevel());
+            stringBuilder.append(": ");
+            stringBuilder.append(MainUtils.listToString(drugNames, "+"));
+            stringBuilder.append("; ");
+        }
+        String tl = stringBuilder.toString().trim();
+
+//        System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + tl);
+
+        assertEquals("Gene summary, Query: " + gene + " " + variant + " " + tumorType, treatmentLevel, tl);
+
     }
+
     @Parameterized.Parameters
     public static Collection<String[]> getParameters() throws IOException {
         return importer();
     }
 
     private static List<String[]> importer() throws IOException {
-        if (TUMOR_TYPE_SUMMARY_EXAMPLES_PATH == null) {
+        if (TREATMENT_EXAMPLES_PATH == null) {
             System.out.println("Please specify the testing file path");
             return null;
         }
 
-        File file = new File(TUMOR_TYPE_SUMMARY_EXAMPLES_PATH);
+        File file = new File(TREATMENT_EXAMPLES_PATH);
         FileReader reader = new FileReader(file);
         BufferedReader buf = new BufferedReader(reader);
         String line = buf.readLine();
@@ -78,16 +90,14 @@ public class SummaryUtilsParameterizedTest {
             if (!line.startsWith("#") && line.trim().length() > 0) {
                 try {
                     String parts[] = line.split("\t");
-                    if (parts.length != 6) {
-                        throw new IllegalArgumentException("Missing a tumor type summary query attribute, parts: " + parts.length);
+                    if (parts.length < 3) {
+                        throw new IllegalArgumentException("Test case should have at least gene variant and tumor type. Current case: " + line);
                     }
                     String gene = parts[0];
                     String variant = parts[1];
                     String tumorType = parts[2];
-                    String geneSummary = parts[3];
-                    String variantSummary = parts[4];
-                    String tumorTypeSummary = parts[5];
-                    String[] query = {gene, variant, tumorType, geneSummary, variantSummary, tumorTypeSummary};
+                    String treatmentLevel = parts.length > 3 ? parts[3] : "";
+                    String[] query = {gene, variant, tumorType, treatmentLevel};
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
