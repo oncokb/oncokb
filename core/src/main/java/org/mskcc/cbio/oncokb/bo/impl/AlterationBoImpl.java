@@ -8,7 +8,10 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
+import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
 import java.util.*;
 
@@ -95,7 +98,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         LinkedHashSet<Alteration> alterations = new LinkedHashSet<>();
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
-        Boolean addOncogenicMutations = false;
 
         // Alteration should always has consequence attached.
         if (alteration.getConsequence() == null) {
@@ -194,17 +196,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
         }
 
-        // Looking for oncogenic mutations
-        if (!alteration.getAlteration().trim().equalsIgnoreCase("amplification")) {
-            for (Alteration alt : alterations) {
-                Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
-                if (isOncogenic != null && isOncogenic) {
-                    addOncogenicMutations = true;
-                    break;
-                }
-            }
-        }
-        if (addOncogenicMutations) {
+        if (addOncogenicMutations(alteration, alterations)) {
             Alteration oncogenicMutations = findAlteration(alteration.getGene(), alteration.getAlterationType(), "oncogenic mutations");
             if (oncogenicMutations != null) {
                 alterations.add(oncogenicMutations);
@@ -233,6 +225,90 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 alterations.add(alt);
             }
         }
+
+        // Remove exon 17 for KIT D816
+        if (isKIT816(alteration)) {
+            Iterator<Alteration> iter = alterations.iterator();
+            while (iter.hasNext()) {
+                Alteration alt = iter.next();
+                if (alt.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))
+                    && alt.getProteinStart() != null && alt.getProteinStart().equals(788)
+                    && alt.getProteinEnd() != null && alt.getProteinEnd().equals(828)) {
+                    iter.remove();
+                }
+            }
+        }
         return alterations;
+    }
+
+    private boolean addOncogenicMutations(Alteration exactAlt, Set<Alteration> relevantAlts) {
+        boolean add = false;
+        if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
+            for (Alteration alt : relevantAlts) {
+                Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
+                if (isOncogenic != null && isOncogenic) {
+                    add = true;
+                    break;
+                }
+            }
+        }
+
+        if (isKitSpecialVariants(exactAlt)) {
+            add = false;
+        }
+
+        if (add) {
+            for (Alteration alteration : relevantAlts) {
+                if (isKitSpecialVariants(exactAlt)) {
+                    add = false;
+                }
+                if (!add) {
+                    break;
+                }
+            }
+        }
+        return add;
+    }
+
+    private boolean isKitSpecialVariants(Alteration alteration) {
+        boolean isSpecial = false;
+        if (alteration != null && alteration.getGene().getEntrezGeneId() == 3815) {
+            String[] speicalVariants = {"V654A", "T670I"};
+            VariantConsequence consequence = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
+            for (int i = 0; i < speicalVariants.length; i++) {
+                if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 3815
+                    && alteration.getAlteration() != null && alteration.getAlteration().equals(speicalVariants[i])
+                    && alteration.getConsequence().equals(consequence)) {
+                    isSpecial = true;
+                    break;
+                }
+            }
+            if(!isSpecial) {
+                isSpecial = isInExon17(alteration);
+            }
+        }
+        return isSpecial;
+    }
+
+    private boolean isVariantByLocation(Alteration alteration, int entrezGeneId, int proteinStart, int proteinEnd, VariantConsequence variantConsequence) {
+        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == entrezGeneId
+            && alteration.getProteinStart() != null && alteration.getProteinStart().equals(proteinStart)
+            && alteration.getProteinEnd() != null && alteration.getProteinEnd().equals(proteinEnd)
+            && alteration.getConsequence().equals(variantConsequence)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isKIT816(Alteration alteration) {
+        return isVariantByLocation(alteration, 3815, 816, 816, VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"));
+    }
+
+    private boolean isInExon17(Alteration alteration) {
+        if (alteration.getProteinStart() != null && alteration.getProteinStart() <= 828
+            && alteration.getProteinEnd() != null && alteration.getProteinEnd() >= 788) {
+            return true;
+        }
+        return false;
     }
 }
