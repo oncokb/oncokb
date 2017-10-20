@@ -623,6 +623,23 @@ public final class AlterationUtils {
             }
         }
 
+        // Do not map these KIT variants as alternative alleles
+        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 3815) {
+            String[] speicalVariants = {"K642E", "V654A", "T670I"};
+            VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
+            Iterator<Alteration> iter = alleles.iterator();
+            while (iter.hasNext()) {
+                Alteration altAllele = iter.next();
+                for (int i = 0; i < speicalVariants.length; i++) {
+                    if (altAllele.getGene() != null && altAllele.getGene().getEntrezGeneId() == 3815
+                        && altAllele.getAlteration() != null && altAllele.getAlteration().equals(speicalVariants[i])
+                        && altAllele.getConsequence().equals(missense)) {
+                        iter.remove();
+                    }
+                }
+            }
+        }
+
         sortAlternativeAlleles(alleles);
         return alleles;
     }
