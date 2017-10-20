@@ -252,7 +252,7 @@ angular.module('oncokbApp')
             /**
              *
              * */
-            self.retrieveMeta = function() {
+            self.retrieveAdditional = function() {
                 var deferred = $q.defer();
 
                 var retrievePageOfFiles = function(request, result) {

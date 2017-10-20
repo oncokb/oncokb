@@ -16,7 +16,8 @@ angular.module('oncokbApp')
             genes: 'Genes',
             // 'dataSummary': 'Summary',
             reportGenerator: 'Tools',
-            feedback: 'Feedback'
+            feedback: 'Feedback',
+            queues: 'Curation Queue'
         };
 
         var accessLevels = config.accessLevels;
@@ -58,7 +59,7 @@ angular.module('oncokbApp')
                 filterTabs.push({key: 'genes', value: tabs.genes});
             }
             if (access.authorize(accessLevels.admin) && $rootScope.internal) {
-                var keys = ['tree', 'variant', 'reportGenerator', 'feedback'];
+                var keys = ['tree', 'variant', 'reportGenerator', 'queues', 'feedback'];
 
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});

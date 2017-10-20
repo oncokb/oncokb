@@ -104,6 +104,31 @@ angular.module('oncokbApp')
             }
         }
 
+        function setAdditionalDocs(additionalDocs) {
+            if (!additionalDocs || !_.isArray(additionalDocs)) {
+                return;
+            }
+            for (var i = 0; i < additionalDocs.length; i++) {
+                var document = additionalDocs[i];
+                switch(document.title) {
+                case 'Queues':
+                    self.queuesDoc = document;
+                    break;
+                case 'Meta Status':
+                    self.metaDoc = document;
+                    break;
+                }
+            }
+        };
+        function getAdditionalDoc(name) {
+            switch(name) {
+            case 'queues':
+                return self.queuesDoc;
+            case 'meta':
+                return self.metaDoc;
+            }
+        };
+
         return {
             setWithPermission: function(documents) {
                 var deferred = $q.defer();
@@ -143,6 +168,8 @@ angular.module('oncokbApp')
                     return false;
                 }
                 return self.documents;
-            }
+            },
+            setAdditionalDocs: setAdditionalDocs,
+            getAdditionalDoc: getAdditionalDoc
         };
     });

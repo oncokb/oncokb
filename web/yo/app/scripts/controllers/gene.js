@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'importer', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils', 'mainUtils', 'ReviewResource',
-        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, importer, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'importer', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils', 'mainUtils', 'ReviewResource', 'additionalFile',
+        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, importer, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource, additionalFile) {
             $scope.test = function(event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
@@ -606,16 +606,8 @@ angular.module('oncokbApp')
                 }
 
                 if($scope.status.hasReviewContent === false) {
-                    var incompleteCount = $rootScope.geneMetaData.get('CurationQueueArticles'),
-                        allCount = $rootScope.geneMetaData.get('AllArticles');
                     $rootScope.geneMetaData.clear();
                     $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
-                    if (_.isNumber(incompleteCount)) {
-                        $rootScope.geneMetaData.set('CurationQueueArticles', incompleteCount);
-                    }
-                    if (_.isNumber(allCount)) {
-                        $rootScope.geneMetaData.set('AllArticles', allCount);
-                    }
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
                     $rootScope.geneMetaData.get('currentReviewer').setText(User.name);
@@ -3028,33 +3020,11 @@ angular.module('oncokbApp')
             }
             function loadMetaFile(callback) {
                 if(!$rootScope.metaData) {
-                    storage.retrieveMeta().then(function(result) {
-                        if (result && (result.error || !_.isArray(result) || result.length === 0)) {
-                            dialogs.error('Error', 'Fail to retrieve meta file! Please stop editing and contact the developer!');
-                            var sendTo = 'dev.oncokb@gmail.com';
-                            var subject = 'Fail to retrieve meta file';
-                            var content;
-                            if(_.isArray(result) && result.length === 0) {
-                                content = 'There is no meta file inside the Meta folder';
-                            } else {
-                                content = 'System error is ' + JSON.stringify(result.error);
-                            }
-                            mainUtils.sendEmail(sendTo, subject, content);
-                            callback();
-                        } else {
-                            storage.getMetaRealtimeDocument(result[0].id).then(function(metaRealtime) {
-                                if (metaRealtime && metaRealtime.error) {
-                                    dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
-                                    $scope.fileEditable = false;
-                                    callback();
-                                } else {
-                                    $rootScope.metaRealtime = metaRealtime;
-                                    $rootScope.metaModel = metaRealtime.getModel();
-                                    $rootScope.metaData = metaRealtime.getModel().getRoot().get('review');
-                                    assignMeta(callback);
-                                }
-                            });
-                        }
+                    additionalFile.load(['all']).then(function(result) {
+                        assignMeta(callback);
+                    }, function(error) {
+                        $scope.fileEditable = false;
+                        callback();
                     });
                 } else {
                     assignMeta(callback);

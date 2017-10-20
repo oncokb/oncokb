@@ -59,20 +59,12 @@
                         <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">0</span></i>
                     </td>
                     <td ng-if="userRole === 8">{{!metaFlags[gene.title].review ? 'No' : 'Yes'}}</td>
-                    <td ng-if="userRole === 8">{{!metaFlags[gene.title].CurationQueueArticles ? 0 : metaFlags[gene.title].CurationQueueArticles}}</td>
+                    <td ng-if="userRole === 8">{{!metaFlags[gene.title].queues ? 0 : metaFlags[gene.title].queues}}</td>
                 </tr>
             </tbody>
         </table>
     </div>
     <div ng-if="userRole === 8">
         <loading ng-model="status.rendering" content="Please wait, we are loading genes information."></loading>
-        <div style="margin-bottom:50px">
-            <hr/>
-            <curation-queue ng-if="!status.queueRendering" location="'genes'" queue="queue" hugo-symbols="geneNames" docs="documents" meta-flags="metaFlags"></curation-queue>
-            <div ng-if="!status.rendering && status.queueRendering" style="margin-left:40%">
-                <span>Loading Curation Queue </span>
-                <img src="images/ajax-loader.gif"/>
-            </div>
-        </div>
     </div>
 </div>

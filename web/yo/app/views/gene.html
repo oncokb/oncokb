@@ -539,7 +539,9 @@
                     </span>
             </div>
         </div>
-        <curation-queue specify-annotation="specifyAnnotation()" location="'gene'"></curation-queue>
+        <div style="margin-top:100px">
+            <curation-queue specify-annotation="specifyAnnotation()" location="'gene'" hugo-symbol="gene.name.text"></curation-queue>
+        </div>
     </div>
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
