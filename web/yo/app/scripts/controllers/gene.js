@@ -225,14 +225,6 @@ angular.module('oncokbApp')
 
             $scope.getData = function() {
             };
-            $scope.showEntry = function(obj) {
-                if (obj) {
-                    // hideAllObsolete will be changed to true if current
-                    // user permission is 4
-                    return !($scope.status.hideAllObsolete && isObsoleted(obj));
-                }
-                return true;
-            };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
                 var parts = _.map(mutationStr.split(','), function(item) {
@@ -3704,11 +3696,6 @@ angular.module('oncokbApp')
                 }
             }
             $rootScope.obsoletePermission = ($scope.userRole === 8 || Users.getMe().name.trim().toLowerCase() === 'philip jonsson') ? true : false;
-            if ($rootScope.obsoletePermission) {
-                $scope.status.hideAllObsolete = false;
-            } else {
-                $scope.status.hideAllObsolete = true;
-            }
             $scope.$watch('fileEditable', function(n, o) {
                 if (n !== o) {
                     $scope.geneEditable = n;

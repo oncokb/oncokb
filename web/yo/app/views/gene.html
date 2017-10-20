@@ -21,8 +21,6 @@
           <li ng-click="generatePDF()"><a><i class="fa fa-download"></i>Download PDF</a></li>
           <li ng-click="status.hideAllEmpty=true"><a><i class="fa fa-eye-slash"></i>Hide all empty</a></li>
           <li ng-click="status.hideAllEmpty=false"><a><i class="fa fa-eye"></i>Show all empty</a></li>
-          <li ng-click="status.hideAllObsolete=true"><a><i class="fa fa-eye-slash"></i>Hide all obsolete</a></li>
-          <li ng-click="status.hideAllObsolete=false"><a><i class="fa fa-eye"></i>Show all obsolete</a></li>
           <li ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" ng-click="status.expandAll=true"><a><i class="fa fa-expand"></i>Expand all</a></li>
           <li ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)" ng-click="status.expandAll=false"><a><i class="fa fa-compress"></i>Collapse all</a></li>
         </ul>
@@ -132,7 +130,7 @@
   </div>
   <div id="mutation">
     <uib-accordion close-others="false">
-      <div ng-repeat="mutation in gene.mutations.asArray()" ng-init="initGeneStatus(mutation);tmpGeneStatus=getGeneStatusItem(mutation)" class="accordionMarginTop" ng-hide="status.hideAllObsolete && mutation.name_eStatus.get('obsolete') === 'true'">
+      <div ng-repeat="mutation in gene.mutations.asArray()" ng-init="initGeneStatus(mutation);tmpGeneStatus=getGeneStatusItem(mutation)" class="accordionMarginTop">
         <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader" ng-show="displayCheck(mutation.name_uuid, mutation.name_review)">
           <uib-accordion-heading>
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
@@ -143,7 +141,6 @@
               </div>
             <div style="display:inline-block">
                 <comments-dict ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
-                <i class="fa fa-hand-o-left" uib-tooltip-placement="top" uib-tooltip="Red: needs to be curated" ng-show="mutation.oncogenic_eStatus.get('curated')===false || userRole === 8" ng-click="curatedIconClick($event, mutation.oncogenic_eStatus)" ng-class="{'fa-comments-red':mutation.oncogenic_eStatus.get('curated')===false}"></i>
             </div>
             <span class="pull-right" ng-show="!reviewMode && fileEditable">
                 <e-status ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" object="mutation.name_eStatus" id="mutation.name.text  + '-name'" apply-obsolete="applyObsolete(mutation.name_eStatus, 'mutation', mutation)"></e-status>
@@ -163,7 +160,7 @@
           </uib-accordion-heading>
           <uib-accordion ng-if="tmpGeneStatus.isOpen" close-others="false">
             <!-- Mutation Effect -->
-            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic');getTumorMessages(mutation)" ng-if="displayCheck(mutation.oncogenic_uuid)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')) || (status.hideAllObsolete && mutation.shortSummary_eStatus.get('obsolete') === 'true')">
+            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, null, null, null, 'oncogenic');getTumorMessages(mutation)" ng-if="displayCheck(mutation.oncogenic_uuid)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader" ng-hide="(!!tmpGeneStatus.hideEmpty) && checkEmpty(mutation, 'oncogenicity')">
               <uib-accordion-heading>
                 <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="tmpGeneStatus.isOpen"></i>
                 <span>Mutation Effect</span><span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="checkEmpty(mutation, 'oncogenicity')">No Entry</span><comments-dict file-editable="fileEditable" comments="mutation.shortSummary_comments" object="mutation" key="shortSummary" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
@@ -197,7 +194,7 @@
                 </div>
             </uib-accordion-group>
             <!-- tumor types -->
-            <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="initGeneStatus(mutation, tumor);" class="accordionMarginTop" ng-hide="status.hideAllObsolete && tumor.name_eStatus.get('obsolete') === 'true'">
+            <div ng-repeat="tumor in mutation.tumors.asArray()" ng-init="initGeneStatus(mutation, tumor);" class="accordionMarginTop">
               <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor)" ng-if="displayCheck(tumor.name_uuid, tumor.name_review)" is-open="tmpGeneStatus.isOpen" class="levelTwoHeader">
                 <uib-accordion-heading >
                   <i class="fa  " ng-class="{'fa-chevron-down':tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}"></i>
@@ -244,7 +241,7 @@
                     <drive-realtime-string review-obj="tumor.summary_review" uuid="::tumor.summary_uuid" es="tumor.summary_eStatus" fe="fileEditable" t="'p'" object="tumor.summary"></drive-realtime-string>
                 </div>
                 <!-- Prevalence -->
-                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prevalence')" ng-if="displayCheck(tumor.prevalence_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prevalence.text && !tumor.shortPrevalence.text) || (status.hideAllObsolete && tumor.prevalence_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prevalence')" ng-if="displayCheck(tumor.prevalence_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prevalence.text && !tumor.shortPrevalence.text)" class="levelThreeHeader">
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>{{::tumor.prevalence.display}}: </span>
@@ -261,7 +258,7 @@
                 </uib-accordion-group>
 
                 <!--Diagnostic-->
-                <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'diagnostic')" ng-if="displayCheck(tumor.diagnostic_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.diagnostic.description.text && !tumor.diagnostic.level.text && !tumor.diagnostic.short.text) || (status.hideAllObsolete && tumor.diagnostic_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'diagnostic')" ng-if="displayCheck(tumor.diagnostic_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.diagnostic.description.text && !tumor.diagnostic.level.text && !tumor.diagnostic.short.text)" class="levelThreeHeader">
                     <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                         <span>Diagnostic implications: </span>
@@ -290,7 +287,7 @@
                 </uib-accordion-group>
 
                   <!-- Prognostic implications -->
-                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prognostic')" ng-if="displayCheck(tumor.prognostic_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prognostic.description.text && !tumor.prognostic.level.text && !tumor.prognostic.short.text) || (status.hideAllObsolete && tumor.prognostic_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prognostic')" ng-if="displayCheck(tumor.prognostic_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.prognostic.description.text && !tumor.prognostic.level.text && !tumor.prognostic.short.text)" class="levelThreeHeader">
                         <uib-accordion-heading>
                             <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                             <span>Prognostic implications: </span>
@@ -320,7 +317,7 @@
 
 
                     <!-- NCCN guidelines -->
-                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'nccn')" ng-if="displayCheck(tumor.nccn_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.nccn.disease.text) || (status.hideAllObsolete && tumor.nccn_eStatus.get('obsolete') === 'true')" class="levelThreeHeader">
+                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'nccn')" ng-if="displayCheck(tumor.nccn_uuid)" is-open="tmpGeneStatus.isOpen" ng-hide="((!!tmpGeneStatus.hideEmpty) && !tumor.nccn.disease.text)" class="levelThreeHeader">
                     <uib-accordion-heading>
                       <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                       <span>NCCN guidelines: </span>
@@ -357,7 +354,7 @@
                   </uib-accordion-group>
 
                   <!-- Theraputic implications -->
-                  <div ng-repeat="ti in tumor.TI.asArray()" class="accordionMarginTop" ng-init="initGeneStatus(mutation, tumor, ti)" ng-hide="status.hideAllObsolete && ti.name_eStatus.get('obsolete') === 'true'">
+                  <div ng-repeat="ti in tumor.TI.asArray()" class="accordionMarginTop" ng-init="initGeneStatus(mutation, tumor, ti)">
                     <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti); getTreatmentMessages(mutation, tumor, ti)" ng-if="displayCheck(ti.name_uuid)" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader" ng-hide="(!!tmpGeneStatus.hideEmpty) && !ti.short.text && !ti.description.text && ti.treatments.length === 0">
                       <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
@@ -378,7 +375,7 @@
                             <drive-realtime-string review-obj="ti.description_review" uuid="::ti.description_uuid" es="ti.description_eStatus" fe="fileEditable" t="'p'" object="ti.description"></drive-realtime-string>
                         </div>
                         <div ng-repeat="treatment in ti.treatments.asArray()" ng-init="initGeneStatus(mutation, tumor, ti, treatment)" class="accordionMarginTop">
-                            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti, treatment)" ng-if="displayCheck(treatment.name_uuid, treatment.name_review) && showEntry(treatment)" is-open="tmpGeneStatus.isOpen" class="levelFourHeader">
+                            <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, ti, treatment)" ng-if="displayCheck(treatment.name_uuid, treatment.name_review)" is-open="tmpGeneStatus.isOpen" class="levelFourHeader">
                             <uib-accordion-heading>
                               <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}"></i>
                               <span>{{::treatment.type.text}}: </span>
@@ -455,7 +452,7 @@
 
                   <!-- Trials -->
                   <div class="accordionMarginTop" ng-if="displayCheck(tumor.trials_uuid)">
-                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'trials')" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && tumor.trials.length === 0) || status.hideAllObsolete && tumor.trials_eStatus.get('obsolete') === 'true'">
+                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'trials')" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader" ng-hide="((!!tmpGeneStatus.hideEmpty) && tumor.trials.length === 0)">
                       <uib-accordion-heading>
                         <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
                         <span>Ongoing clinical trials: </span>
@@ -587,12 +584,6 @@
   </button>
   <button type="button" class="btn btn-default" ng-click="status.hideAllEmpty=false">
     <i class="fa fa-eye"></i>Show all empty
-  </button>
-  <button ng-if="::(userRole === 8)" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=true">
-    <i class="fa fa-eye-slash"></i>Hide all obsolete
-  </button>
-  <button ng-if="::(userRole === 8)" type="button" class="btn btn-default" ng-click="status.hideAllObsolete=false">
-    <i class="fa fa-eye-slash"></i>Show all obsolete
   </button>
     <button type="button" class="btn btn-default" ng-click="status.expandAll=true"
             ng-if="(status.numAccordion < 100 && gene.mutations.length < 20) || (status.numAccordion < 200 && gene.mutations.length < 6)">
