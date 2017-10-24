@@ -2497,15 +2497,15 @@ angular.module('oncokbApp')
                 if (index < indices.length && indices[index] !== -1) {
                     var strIndex = indices[index].toString();
                     if (!geneStatus.hasOwnProperty(strIndex)) {
-                        geneStatus[strIndex] = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                        geneStatus[strIndex] = new GeneStatusSingleton(defaultIsOpen);
                         if (index === 0) {
-                            geneStatus[strIndex].oncogenic = new GeneStatusSingleton(true, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].oncogenic = new GeneStatusSingleton(true);
                         } else if (index === 1) {
-                            geneStatus[strIndex].prevalence = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
-                            geneStatus[strIndex].prognostic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
-                            geneStatus[strIndex].diagnostic = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
-                            geneStatus[strIndex].nccn = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
-                            geneStatus[strIndex].trials = new GeneStatusSingleton(defaultIsOpen, $scope.status.hideAllEmpty);
+                            geneStatus[strIndex].prevalence = new GeneStatusSingleton(defaultIsOpen);
+                            geneStatus[strIndex].prognostic = new GeneStatusSingleton(defaultIsOpen);
+                            geneStatus[strIndex].diagnostic = new GeneStatusSingleton(defaultIsOpen);
+                            geneStatus[strIndex].nccn = new GeneStatusSingleton(defaultIsOpen);
+                            geneStatus[strIndex].trials = new GeneStatusSingleton(defaultIsOpen);
                         }
                     }
                     geneStatus[strIndex] = loopInitGeneStatus(objects, geneStatus[strIndex], indices, ++index);
@@ -3450,15 +3450,11 @@ angular.module('oncokbApp')
                 return levels;
             }
 
-            function GeneStatusSingleton(isOpen, hideEmpty) {
+            function GeneStatusSingleton(isOpen) {
                 if (!_.isBoolean(isOpen)) {
                     isOpen = false;
                 }
-                if (!_.isBoolean(hideEmpty)) {
-                    hideEmpty = false;
-                }
                 this.isOpen = isOpen;
-                this.hideEmpty = hideEmpty;
             }
 
             function containVariantInVUS(variantName) {
@@ -3606,7 +3602,6 @@ angular.module('oncokbApp')
             };
             $scope.status = {
                 expandAll: false,
-                hideAllEmpty: false,
                 rendering: true,
                 numAccordion: 0,
                 isDesiredGene: false,
@@ -3699,16 +3694,6 @@ angular.module('oncokbApp')
             $scope.$watch('fileEditable', function(n, o) {
                 if (n !== o) {
                     $scope.geneEditable = n;
-                }
-            });
-
-            $scope.$watch('status.hideAllEmpty', function(n, o) {
-                if (n !== o) {
-                    if (n) {
-                        $scope.isOpenFunc('hideEmpty');
-                    } else {
-                        $scope.isOpenFunc('showEmpty');
-                    }
                 }
             });
 
