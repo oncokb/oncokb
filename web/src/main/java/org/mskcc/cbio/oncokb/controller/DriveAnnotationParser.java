@@ -688,7 +688,6 @@ public class DriveAnnotationParser {
 
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-        TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
         JSONArray drugsArray = implicationObj.getJSONArray("treatments");
 
         for (int i = 0; i < drugsArray.length(); i++) {
@@ -741,14 +740,13 @@ public class DriveAnnotationParser {
 
                 Treatment treatment = new Treatment();
                 treatment.setDrugs(drugs);
+                treatment.setPriority(i + 1);
                 treatment.setApprovedIndications(approvedIndications);
-
-                treatmentBo.save(treatment);
+                treatment.setEvidence(evidence);
 
                 treatments.add(treatment);
             }
             evidence.setTreatments(treatments);
-            evidence.setPriority(i + 1);
 
             // highest level of evidence
             if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {

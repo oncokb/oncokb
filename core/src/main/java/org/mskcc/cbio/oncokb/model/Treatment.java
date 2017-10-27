@@ -1,9 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -17,11 +16,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "treatment")
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Treatment implements java.io.Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Integer id;
 
     @JsonIgnore
@@ -29,6 +28,7 @@ public class Treatment implements java.io.Serializable {
     private String uuid;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "treatmentDrugId.treatment", cascade = CascadeType.ALL)
+    @JsonProperty(value = "drugs")
     private Set<TreatmentDrug> treatmentDrugs = new HashSet<>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -37,6 +37,13 @@ public class Treatment implements java.io.Serializable {
         joinColumns = @JoinColumn(name = "treatment_id", nullable = false))
     @Column(name = "approved_indications")
     private Set<String> approvedIndications = new HashSet<String>(0);
+
+    private Integer priority;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "evidence_id", nullable = false)
+    @JsonIgnore
+    private Evidence evidence;
 
     public Treatment() {
     }
@@ -66,6 +73,7 @@ public class Treatment implements java.io.Serializable {
     }
 
     @Transient
+    @JsonIgnore
     public Set<Drug> getDrugs() {
         if (this.treatmentDrugs == null) {
             return null;
@@ -100,6 +108,22 @@ public class Treatment implements java.io.Serializable {
 
     public void setApprovedIndications(Set<String> approvedIndications) {
         this.approvedIndications = approvedIndications;
+    }
+
+    public Evidence getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(Evidence evidence) {
+        this.evidence = evidence;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 }
 
