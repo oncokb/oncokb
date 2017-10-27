@@ -689,7 +689,7 @@ public class DriveAnnotationParser {
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         JSONArray drugsArray = implicationObj.getJSONArray("treatments");
-
+        int priorityCount = 1;
         for (int i = 0; i < drugsArray.length(); i++) {
             JSONObject drugObj = drugsArray.getJSONObject(i);
             if (!drugObj.has("name") || drugObj.getString("name").trim().isEmpty()) {
@@ -724,8 +724,8 @@ public class DriveAnnotationParser {
             String[] drugTxts = drugNameStr.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "").split(",");
 
             Set<Treatment> treatments = new HashSet<>();
-            for (String drugTxt : drugTxts) {
-                String[] drugNames = drugTxt.split(" ?\\+ ?");
+            for (int j = 0; j < drugTxts.length; j++) {
+                String[] drugNames = drugTxts[j].split(" ?\\+ ?");
 
                 List<Drug> drugs = new ArrayList<>();
                 for (String drugName : drugNames) {
@@ -740,11 +740,12 @@ public class DriveAnnotationParser {
 
                 Treatment treatment = new Treatment();
                 treatment.setDrugs(drugs);
-                treatment.setPriority(i + 1);
+                treatment.setPriority(priorityCount);
                 treatment.setApprovedIndications(approvedIndications);
                 treatment.setEvidence(evidence);
 
                 treatments.add(treatment);
+                priorityCount++;
             }
             evidence.setTreatments(treatments);
 

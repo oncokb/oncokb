@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
@@ -18,6 +19,7 @@ public class TreatmentDrugId implements Serializable {
     private Treatment treatment;
 
     @ManyToOne
+    @JsonUnwrapped
     private Drug drug;
 
     public Treatment getTreatment() {
