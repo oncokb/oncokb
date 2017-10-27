@@ -52,6 +52,7 @@ public class TreatmentDrug implements Serializable {
     }
 
     @Transient
+    @JsonIgnore
     public Drug getDrug() {
         return this.treatmentDrugId.getDrug();
     }
