@@ -221,13 +221,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- jackson -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.4.2</version>
-        </dependency>
-
         <!-- CGLib for @Configuration -->
         <dependency>
             <groupId>cglib</groupId>
