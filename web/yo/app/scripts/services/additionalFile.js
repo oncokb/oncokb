@@ -16,7 +16,7 @@ angular.module('oncokbApp')
             function loadMeta() {
                 var metaDefer = $q.defer();
                 var meta = documents.getAdditionalDoc('meta');
-                storage.getMetaRealtimeDocument(meta.id).then(function(metaRealtime) {
+                storage.getAdditionalRealtimeDocument(meta.id).then(function(metaRealtime) {
                     if (metaRealtime && metaRealtime.error) {
                         dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
                         metaDefer.reject('Fail to load meta file');
@@ -33,7 +33,7 @@ angular.module('oncokbApp')
             function loadQueues() {
                 var queuesDefer = $q.defer();
                 var queuesDoc = documents.getAdditionalDoc('queues');
-                storage.getMetaRealtimeDocument(queuesDoc.id).then(function(queuesRealtime) {
+                storage.getAdditionalRealtimeDocument(queuesDoc.id).then(function(queuesRealtime) {
                     if (queuesRealtime && queuesRealtime.error) {
                         dialogs.error('Error', 'Fail to get queues document! Please stop editing and contact the developer!');
                         queuesDefer.reject('Fail to load queues file');

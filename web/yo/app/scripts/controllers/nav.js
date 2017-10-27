@@ -57,9 +57,10 @@ angular.module('oncokbApp')
             $scope.user = $rootScope.user;
             if (access.authorize(accessLevels.curator)) {
                 filterTabs.push({key: 'genes', value: tabs.genes});
+                filterTabs.push({key: 'queues', value: tabs.queues});
             }
             if (access.authorize(accessLevels.admin) && $rootScope.internal) {
-                var keys = ['tree', 'variant', 'reportGenerator', 'queues', 'feedback'];
+                var keys = ['tree', 'variant', 'reportGenerator', 'feedback'];
 
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});

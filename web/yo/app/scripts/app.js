@@ -569,7 +569,8 @@ var oncokbApp = angular.module('oncokbApp', [
                 internalUse: true
             })
             .when('/queues', {
-                templateUrl: 'views/queues.html'
+                templateUrl: 'views/queues.html',
+                access: access.curator
             })
             // .when('/vus', {
             //    templateUrl: 'views/vus.html',

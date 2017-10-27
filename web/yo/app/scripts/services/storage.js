@@ -200,7 +200,7 @@ angular.module('oncokbApp')
              * Retrive meta file
              * @param {string} id realtime document id
              * */
-            self.getMetaRealtimeDocument = function(id) {
+            self.getAdditionalRealtimeDocument = function(id) {
                 var deferred = $q.defer();
                 var initialize = function() {
                 };
@@ -261,7 +261,7 @@ angular.module('oncokbApp')
                         var nextPageToken = resp.nextPageToken;
                         if (nextPageToken) {
                             request = gapi.client.drive.files.list({
-                                q: '"' + config.metaFolderId + '" in parents',
+                                q: '"' + config.additionalsFolderId + '" in parents',
                                 pageToken: nextPageToken
                             });
                             retrievePageOfFiles(request, result);
@@ -274,7 +274,7 @@ angular.module('oncokbApp')
 
                 gapi.client.load('drive', 'v2', function() {
                     var initialRequest = gapi.client.drive.files.list({
-                        q: '"' + config.metaFolderId + '" in parents'
+                        q: '"' + config.additionalsFolderId + '" in parents'
                     });
                     retrievePageOfFiles(initialRequest, []);
                 });

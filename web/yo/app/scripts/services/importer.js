@@ -10,7 +10,7 @@
 angular.module('oncokbApp')
     .service('importer', function importer($timeout, documents, S,
                                            storage, OncoKB, $q, _,
-                                           stringUtils) {
+                                           stringUtils, $rootScope, additionalFile) {
         var self = {};
         self.docs = [];
         self.docsL = 0;
@@ -34,7 +34,7 @@ angular.module('oncokbApp')
                             callback();
                         }
                     } else {
-                        backupMeta(result.id, callback);
+                        backupAdditionals(result.id, callback);
                     }
                 });
         }
@@ -73,73 +73,103 @@ angular.module('oncokbApp')
             }
         }
 
-        function backupMeta(parentFolderId, callback) {
+        function backupAdditionals(parentFolderId, callback) {
             if (!parentFolderId) {
                 parentFolderId = self.parentFolder;
             }
             storage.requireAuth(true).then(function() {
-                // create Meta folder
-                storage.createFolder(parentFolderId, 'Meta').then(function(folderResult) {
-                    // create Meta document inside the new Meta folder
-                    storage.createDocument('Meta Status', folderResult.id).then(function(file) {
-                        console.log('Created meta file');
-                        storage.getMetaRealtimeDocument(file.id).then(function(metaRealtime) {
-                            if (metaRealtime && metaRealtime.error) {
-                                console.log('Failed to get new meta realtime document');
-                                if (angular.isFunction(callback)) {
-                                    callback();
-                                }
-                            } else {
-                                var newMetaModel = metaRealtime.getModel();
-                                var newReview = newMetaModel.createMap();
-                                // get the original meta file that we want to copy from
-                                storage.retrieveMeta().then(function(result) {
-                                    if (result && result.error) {
-                                        console.log('Failed to get original meta file');
-                                        if (angular.isFunction(callback)) {
-                                            callback();
-                                        }
-                                    } else {
-                                        storage.getMetaRealtimeDocument(result[0].id).then(function(originalMetaRealtime) {
-                                            if (originalMetaRealtime && originalMetaRealtime.error) {
-                                                console.log('Failed to get original meta realtime document');
-                                                if (angular.isFunction(callback)) {
-                                                    callback();
-                                                }
-                                            } else {
-                                                var originalMeta = originalMetaRealtime.getModel().getRoot().get('review');
-                                                var hugoSymbols = originalMeta.keys();
-                                                _.each(hugoSymbols, function(hugoSymbol) {
-                                                    var uuidMapping = newMetaModel.createMap();
-                                                    var uuids = originalMeta.get(hugoSymbol).keys();
-                                                    _.each(uuids, function(uuid) {
-                                                        // currentReviewer is a collaborative string, which shouldn't be in the meta file. And also no need to import
-                                                        if (originalMeta.get(hugoSymbol).get(uuid).type === 'Map') {
-                                                            var record = newMetaModel.createMap();
-                                                            record.set('review', originalMeta.get(hugoSymbol).get(uuid).get('review'));
-                                                            uuidMapping.set(uuid, record);
-                                                        } else if (uuid === 'CurationQueueArticles') {
-                                                            uuidMapping.set('CurationQueueArticles', originalMeta.get(hugoSymbol).get('CurationQueueArticles'));
-                                                        } else if (uuid === 'AllArticles') {
-                                                            uuidMapping.set('AllArticles', originalMeta.get(hugoSymbol).get('AllArticles'));
-                                                        }
-                                                    });
-                                                    newReview.set(hugoSymbol, uuidMapping);
-                                                });
-                                                newMetaModel.getRoot().set('review', newReview);
-                                                console.log('Completed back up meta file');
-                                                backupGene(parentFolderId, callback);
-                                            }
-                                        });
-                                    }
-                                });
-                            }
+                // create additional data folder
+                storage.createFolder(parentFolderId, 'Additionals').then(function(folderResult) {
+                    // open up the original additional files for copying purpose
+                    additionalFile.load(['all']).then(function(result) {
+                        var newFolderId = folderResult.id;
+                        var apiCalls = [backupMeta(newFolderId), backupQueues(newFolderId)];
+                        $q.all(apiCalls).then(function(result) {
+                            backupGene(parentFolderId, callback);
+                        }, function(error) {
+                            console.log(error);
                         });
                     });
                 });
-
             });
         };
+        function backupMeta(parentFolderId) {
+            var deferred = $q.defer();
+            storage.createDocument('Meta', parentFolderId).then(function(file) {
+                console.log('Created meta file');
+                storage.getAdditionalRealtimeDocument(file.id).then(function(metaRealtime) {
+                    if (metaRealtime && metaRealtime.error) {
+                        deferred.reject('Failed to get new meta realtime document');
+                    } else {
+                        var newMetaModel = metaRealtime.getModel();
+                        var newReview = newMetaModel.createMap();
+                        // backup meta file
+                        var originalMeta = $rootScope.metaData;
+                        var hugoSymbols = originalMeta.keys();
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            var uuidMapping = newMetaModel.createMap();
+                            var uuids = originalMeta.get(hugoSymbol).keys();
+                            _.each(uuids, function(uuid) {
+                                if (originalMeta.get(hugoSymbol).get(uuid).type === 'Map') {
+                                    var record = newMetaModel.createMap();
+                                    record.set('review', originalMeta.get(hugoSymbol).get(uuid).get('review'));
+                                    uuidMapping.set(uuid, record);
+                                }
+                            });
+                            newReview.set(hugoSymbol, uuidMapping);
+                        });
+                        newMetaModel.getRoot().set('review', newReview);
+                        console.log('Completed back up meta file');
+                        deferred.resolve('success');
+                    }
+                });
+            });
+            return deferred.promise;
+        }
+        function backupQueues(parentFolderId) {
+            var deferred = $q.defer();
+            storage.createDocument('Queues', parentFolderId).then(function(file) {
+                console.log('Created queues file');
+                storage.getAdditionalRealtimeDocument(file.id).then(function(queuesRealtime) {
+                    if (queuesRealtime && queuesRealtime.error) {
+                        deferred.reject('Failed to get new queues realtime document');
+                    } else {
+                        var newQueuesModel = queuesRealtime.getModel();
+                        var newQueues = newQueuesModel.createMap();
+                        // backup queues file
+                        var originalQueues = $rootScope.queuesData;
+                        var hugoSymbols = originalQueues.keys();
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            var queuesByGene = newQueuesModel.createList();
+                            _.each(originalQueues.get(hugoSymbol).asArray(), function(item) {
+                                var newItem = newQueuesModel.createMap({
+                                    link: item.get('link'),
+                                    variant: item.get('variant'),
+                                    mainType: item.get('mainType'),
+                                    subType: item.get('subType'),
+                                    section: item.get('section'),
+                                    curator: item.get('curator'),
+                                    curated: item.get('curated'),
+                                    addedBy: item.get('addedBy'),
+                                    addedAt: item.get('addedAt'),
+                                    dueDay: item.get('dueDay'),
+                                    comment: item.get('comment'),
+                                    notified: item.get('notified'),
+                                    article: item.get('article'),
+                                    pmid: item.get('pmid'),
+                                });
+                                queuesByGene.push(newItem);
+                            });
+                            newQueues.set(hugoSymbol, queuesByGene);
+                        });
+                        newQueuesModel.getRoot().set('queues', newQueues);
+                        console.log('Completed back up queues file');
+                        deferred.resolve('success');
+                    }
+                });
+            });
+            return deferred.promise;
+        }
 
         function createFolder(parentFolderId, folderName) {
             var deferred = $q.defer();
@@ -322,21 +352,6 @@ angular.module('oncokbApp')
             }
             vusModel.push(vus);
         }
-        function createQueueItem(queueItem, queueModel, model) {
-            var queue = model.createMap({
-                link: queueItem.link,
-                variant: queueItem.variant,
-                curator: queueItem.curator,
-                curated: queueItem.curated,
-                addedBy: queueItem.addedBy,
-                addedAt: queueItem.addedAt,
-                article: queueItem.article
-            });
-            if (queueItem.pmid) {
-                queue.set('pmid', queueItem.pmid);
-            }
-            queueModel.push(queue);
-        }
         function copyFileData(folderId, fileId, fileTitle, docIndex) {
             var deferred = $q.defer();
             storage.requireAuth(true).then(function() {
@@ -349,18 +364,15 @@ angular.module('oncokbApp')
                             console.log('\t Copying');
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
-                            var queue = realtime.getModel().getRoot().get('queue');
                             var history = realtime.getModel().getRoot().get('history');
                             if (gene) {
                                 var geneData = stringUtils.getGeneData(gene);
                                 var vusData = stringUtils.getVUSFullData(vus);
-                                var queueData = stringUtils.getQueueData(queue);
                                 var historyData = stringUtils.getHistoryData(history);
                                 storage.getRealtimeDocument(file.id).then(function(newRealtime) {
                                     var model = createModel(newRealtime.getModel());
                                     var geneModel = model.getRoot().get('gene');
                                     var vusModel = model.getRoot().get('vus');
-                                    var queueModel = model.getRoot().get('queue');
                                     var historyModel = model.getRoot().get('history');
                                     model.beginCompoundOperation();
                                     for (var key in geneData) {
@@ -372,12 +384,6 @@ angular.module('oncokbApp')
                                     if (vusData) {
                                         _.each(vusData, function(vusItem) {
                                             createVUSItem(vusItem, vusModel, newRealtime.getModel());
-                                        });
-                                    }
-
-                                    if (queueData) {
-                                        _.each(queueData, function(queueItem) {
-                                            createQueueItem(queueItem, queueModel, newRealtime.getModel());
                                         });
                                     }
 
@@ -532,7 +538,6 @@ angular.module('oncokbApp')
         function createModel(model) {
             model = createGeneModel(model);
             model = createVUSModel(model);
-            model = createQueueModel(model);
             model = createHistoryModel(model);
             return model;
         }
@@ -549,14 +554,6 @@ angular.module('oncokbApp')
             if (!model.getRoot().get('vus')) {
                 var vus = model.createList();
                 model.getRoot().set('vus', vus);
-            }
-            return model;
-        }
-
-        function createQueueModel(model) {
-            if (!model.getRoot().get('queue')) {
-                var queue = model.createList();
-                model.getRoot().set('queue', queue);
             }
             return model;
         }
