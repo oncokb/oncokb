@@ -154,10 +154,12 @@ public class validation {
                         multipleMutationEffects.get(alterationItem).add(evidenceItem);
                     }
                     if (referencesMapping.containsKey(alterationItem)) {
-                        Set<String> oldPMIDs = referencesMapping.get(alterationItem);
-                        Set<String> newPMIDs = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
-                        newPMIDs.addAll(oldPMIDs);
-                        referencesMapping.put(alterationItem, newPMIDs);
+                        Set<String> oldRefs = referencesMapping.get(alterationItem);
+                        Set<String> pmids = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
+                        Set<String> abstracts = getAbstractContentFromEvidence(evidenceItem);
+                        oldRefs.addAll(pmids);
+                        oldRefs.addAll(abstracts);
+                        referencesMapping.put(alterationItem, oldRefs);
                     } else {
                         referencesMapping.put(alterationItem, EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem))));
                     }
@@ -332,16 +334,21 @@ public class validation {
                 setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(articleList, ", "));
                 setValue(row, "NumberOfPMIDs", Integer.toString(articleList.size()));
 
-                Set<ArticleAbstract> articleAbstracts = EvidenceUtils.getAbstracts(Collections.singleton(evidence));
-                Set<String> abstractContent = new HashSet<>();
-                for (ArticleAbstract aa : articleAbstracts) {
-                    abstractContent.add(aa.getAbstractContent());
-                }
+                Set<String> abstractContent = getAbstractContentFromEvidence(evidence);
                 setValue(row, "Abstracts", org.apache.commons.lang3.StringUtils.join(abstractContent, ", "));
 
                 service.insert(feedUrl, row);
             }
         }
+    }
+
+    private static Set<String> getAbstractContentFromEvidence(Evidence evidence) {
+        Set<ArticleAbstract> articleAbstracts = EvidenceUtils.getAbstracts(Collections.singleton(evidence));
+        Set<String> abstractContent = new HashSet<>();
+        for (ArticleAbstract aa : articleAbstracts) {
+            abstractContent.add(aa.getAbstractContent());
+        }
+        return abstractContent;
     }
 
     private static void printTumorTypeSummary(Set<Evidence> evidences, SpreadsheetService service, WorksheetEntry entry) throws IOException, ServiceException {
