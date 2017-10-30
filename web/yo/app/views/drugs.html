@@ -1,0 +1,33 @@
+<div id="drugs" ng-init="init()">
+    <div ng-hide="rendering">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+            <thead>
+            <tr class="dashedHeader">
+                <th>Drug</th>
+                <th>Description</th>
+                <th ng-if="userRole === 8">Operations</th>
+            </tr>
+            </thead>
+            <tbody >
+            <tr data-ng-repeat="drug in allDrugs">
+                <td><strong>{{drug.drugName}}</strong></td>
+                <td></td>
+                <td>
+                    <span>
+                        <div style="min-width: 90px;">
+                            <button type="button" class="btn btn-warning buttonStyle" ng-click="initialProcess(x, 'edit')" ng-disabled="data.loading"
+                                    ng-show="userRole === 8" uib-tooltip-placement="top" uib-tooltip="Modify Drug"><i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger buttonStyle" ng-click="initialProcess(x, 'delete')" ng-disabled="data.loading"
+                                    ng-show="userRole === 8" uib-tooltip-placement="top" uib-tooltip="Delete Drug"><i class="fa fa-trash-o"></i>
+                            </button>
+                        </div>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <loading ng-model="rendering" content="Please wait, we are loading drugs."></loading>
+</div>
