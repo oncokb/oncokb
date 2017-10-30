@@ -7,6 +7,7 @@ angular.module('oncokbApp')
         '$rootScope',
         'config',
         'Gene',
+        'Drugs',
         'Alteration',
         'TumorType',
         'Evidence',
@@ -27,6 +28,7 @@ angular.module('oncokbApp')
                  $rootScope,
                  config,
                  Gene,
+                 Drugs,
                  Alteration,
                  TumorType,
                  Evidence,
@@ -402,6 +404,27 @@ angular.module('oncokbApp')
                 }
             }
 
+            function getAllDrugs(callback, success, fail) {
+                if (dataFromFile) {
+                    Drugs.getFromFile()
+                        .success(function(data) {
+                            callback(data);
+                        })
+                        .error(function() {
+                            callback();
+                        });
+                } else {
+                    DriveAnnotation
+                        .getAllDrugs()
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
+            }
+
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
@@ -761,6 +784,7 @@ angular.module('oncokbApp')
                 getEvidencesByUUID: getEvidencesByUUID,
                 getEvidencesByUUIDs: getEvidencesByUUIDs,
                 getPubMedArticle: getPubMedArticle,
-                getClinicalTrial: getClinicalTrial
+                getClinicalTrial: getClinicalTrial,
+                getAllDrugs: getAllDrugs
             };
         }]);
