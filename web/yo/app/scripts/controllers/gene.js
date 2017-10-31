@@ -217,7 +217,7 @@ angular.module('oncokbApp')
                             console.log('error happened when saving VUS to DB', error);
                             var subject = 'VUS update Error for ' + $scope.gene.name.getText();
                             var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                            mainUtils.sendEmail('dev.oncokb@gmail.com', subject, content);
+                            mainUtils.notifyDeveloper(subject, content);
                         });
                     }, 2000);
                 }

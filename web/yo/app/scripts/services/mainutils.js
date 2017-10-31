@@ -352,7 +352,15 @@ angular.module('oncokbApp')
             );
             return deferred.promise;
         }
-
+        /**
+         * Util to send email to developer account
+         * @param {string} subject The email subject
+         * @param {string} content The email content
+         * @return Promise
+         * */
+        function notifyDeveloper(subject, content) {
+            sendEmail('dev.oncokb@gmail.com', subject, content);
+        }
         /*
          *  Check if item needs to be reviewed or not
          *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
@@ -496,6 +504,7 @@ angular.module('oncokbApp')
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,
-            processedInReview: processedInReview
+            processedInReview: processedInReview,
+            notifyDeveloper: notifyDeveloper
         };
     });

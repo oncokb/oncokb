@@ -76,7 +76,7 @@ angular.module('oncokbApp')
                         _.each(result, function(doc) {
                             scope.data.hugoSymbols.push(doc.title);
                         });
-                    });
+                    }, function() {});
                     scope.queue = [];
                     additionalFile.load(['queues']).then(function(result) {
                         if (scope.location === 'gene') {

@@ -246,6 +246,9 @@ angular.module('oncokbApp')
                         q: '"' + config.folderId + '" in parents'
                     });
                     retrievePageOfFiles(initialRequest, []);
+                }, function(error) {
+                    dialogs.error('Error', 'Failed to load all documents. Please contact the developer.');
+                    deferred.reject(error);
                 });
                 return deferred.promise;
             };
@@ -266,7 +269,6 @@ angular.module('oncokbApp')
                             });
                             retrievePageOfFiles(request, result);
                         } else {
-                            // console.log('get all files', result);
                             deferred.resolve(result);
                         }
                     });
