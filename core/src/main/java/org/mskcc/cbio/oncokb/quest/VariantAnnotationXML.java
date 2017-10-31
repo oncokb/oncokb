@@ -89,7 +89,7 @@ public final class VariantAnnotationXML {
             Evidence ev = geneBgEvs.get(0);
             sb.append("<gene_annotation>\n");
             sb.append("    <description>");
-            sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+            sb.append(StringEscapeUtils.escapeXml10(ev.getDescription()).trim());
             sb.append("</description>\n");
             exportRefereces(ev, sb, "    ");
             sb.append("</gene_annotation>\n");
@@ -110,7 +110,7 @@ public final class VariantAnnotationXML {
             sb.append("</effect>\n");
             if (ev.getDescription() != null) {
                 sb.append("    <description>");
-                sb.append(StringEscapeUtils.escapeXml(ev.getDescription()).trim());
+                sb.append(StringEscapeUtils.escapeXml10(ev.getDescription()).trim());
                 sb.append("</description>\n");
             }
             if (ev != null) {
@@ -136,7 +136,7 @@ public final class VariantAnnotationXML {
                 for (Evidence ev : prevalanceEbs) {
                     String description = ev.getDescription();
                     if (description != null) {
-                        sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
+                        sbTumorType.append("        ").append(StringEscapeUtils.escapeXml10(description).trim()).append("\n");
                     }
                 }
 
@@ -156,7 +156,7 @@ public final class VariantAnnotationXML {
                 for (Evidence ev : prognosticEbs) {
                     String description = ev.getDescription();
                     if (description != null) {
-                        sbTumorType.append("        ").append(StringEscapeUtils.escapeXml(description).trim()).append("\n");
+                        sbTumorType.append("        ").append(StringEscapeUtils.escapeXml10(description).trim()).append("\n");
                     }
                 }
                 sbTumorType.append("</description>\n");
@@ -210,7 +210,7 @@ public final class VariantAnnotationXML {
                 sbTumorType.append("</recommendation_category>\n");
                 sbTumorType.append("        <description>");
                 if (nccnGuideline.getDescription() != null) {
-                    sbTumorType.append(StringEscapeUtils.escapeXml(nccnGuideline.getDescription()));
+                    sbTumorType.append(StringEscapeUtils.escapeXml10(nccnGuideline.getDescription()));
                 }
                 sbTumorType.append("</description>\n");
                 sbTumorType.append("    </nccn_guidelines>\n");
@@ -411,37 +411,37 @@ public final class VariantAnnotationXML {
 
         sb.append(indent).append("    <title>");
         if (trial.getTitle() != null) {
-            sb.append(StringEscapeUtils.escapeXml(trial.getTitle()));
+            sb.append(StringEscapeUtils.escapeXml10(trial.getTitle()));
         }
         sb.append("</title>\n");
 
         sb.append(indent).append("    <purpose>");
         if (trial.getPurpose() != null) {
-            sb.append(StringEscapeUtils.escapeXml(trial.getPurpose()));
+            sb.append(StringEscapeUtils.escapeXml10(trial.getPurpose()));
         }
         sb.append("</purpose>\n");
 
         sb.append(indent).append("    <recruiting_status>");
         if (trial.getRecruitingStatus() != null) {
-            sb.append(StringEscapeUtils.escapeXml(trial.getRecruitingStatus()));
+            sb.append(StringEscapeUtils.escapeXml10(trial.getRecruitingStatus()));
         }
         sb.append("</recruiting_status>\n");
 
         sb.append(indent).append("    <eligibility_criteria>");
         if (trial.getEligibilityCriteria() != null) {
-            sb.append(StringEscapeUtils.escapeXml(trial.getEligibilityCriteria()));
+            sb.append(StringEscapeUtils.escapeXml10(trial.getEligibilityCriteria()));
         }
         sb.append("</eligibility_criteria>\n");
 
         sb.append(indent).append("    <phase>");
         if (trial.getPhase() != null) {
-            sb.append(StringEscapeUtils.escapeXml(trial.getPhase()));
+            sb.append(StringEscapeUtils.escapeXml10(trial.getPhase()));
         }
         sb.append("</phase>\n");
 
         for (Drug drug : trial.getDrugs()) {
             sb.append(indent).append("    <intervention>");
-            sb.append(StringEscapeUtils.escapeXml(drug.getDrugName()));
+            sb.append(StringEscapeUtils.escapeXml10(drug.getDrugName()));
             sb.append("</intervention>\n");
         }
 
@@ -464,7 +464,7 @@ public final class VariantAnnotationXML {
             sb.append(levelOfEvidence.getLevel());
             sb.append("</level>\n");
             sb.append(indent).append("    <description>");
-            sb.append(StringEscapeUtils.escapeXml(levelOfEvidence.getDescription()).trim());
+            sb.append(StringEscapeUtils.escapeXml10(levelOfEvidence.getDescription()).trim());
             sb.append("</description>\n");
             if (levelOfEvidence == LevelOfEvidence.LEVEL_1 ||
                 levelOfEvidence == LevelOfEvidence.LEVEL_2A ||
@@ -477,7 +477,7 @@ public final class VariantAnnotationXML {
 
         sb.append(indent).append("<description>");
         if (evidence.getDescription() != null) {
-            sb.append(StringEscapeUtils.escapeXml(evidence.getDescription()).trim());
+            sb.append(StringEscapeUtils.escapeXml10(evidence.getDescription()).trim());
         }
         sb.append("</description>\n");
 
@@ -492,7 +492,7 @@ public final class VariantAnnotationXML {
             sb.append(indent).append("    <name>");
             String name = drug.getDrugName();
             if (name != null) {
-                sb.append(StringEscapeUtils.escapeXml(name));
+                sb.append(StringEscapeUtils.escapeXml10(name));
             }
             sb.append("</name>\n");
 
@@ -520,7 +520,7 @@ public final class VariantAnnotationXML {
 //            sb.append(indent).append("    <description>");
 //            String desc = drug.getDescription();
 //            if (desc != null) {
-//                sb.append(StringEscapeUtils.escapeXml(desc));
+//                sb.append(StringEscapeUtils.escapeXml10(desc));
 //            }
 //            sb.append("</description>\n");
 
