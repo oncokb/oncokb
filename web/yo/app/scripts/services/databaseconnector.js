@@ -431,6 +431,21 @@ angular.module('oncokbApp')
                 }
             }
 
+            function updateEvidenceTreatmentPriorityBatch(data, success, fail) {
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .updateEvidenceTreatmentPriorityBatch(data)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
+            }
+
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
@@ -764,6 +779,7 @@ angular.module('oncokbApp')
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,
+                updateEvidenceTreatmentPriorityBatch: updateEvidenceTreatmentPriorityBatch,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {

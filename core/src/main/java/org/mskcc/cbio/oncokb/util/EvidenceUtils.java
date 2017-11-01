@@ -993,8 +993,8 @@ public class EvidenceUtils {
                     }
                     treatment.setDrugs(drugsFromDB);
                 }
-                treatmentBo.saveOrUpdate(treatment);
             }
+            evidence.setTreatments(treatments);
         }
         if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
             NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
