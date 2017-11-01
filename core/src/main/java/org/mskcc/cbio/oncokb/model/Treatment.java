@@ -3,11 +3,11 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.mskcc.cbio.oncokb.util.DrugUtils;
+import org.mskcc.cbio.oncokb.util.TreatmentUtils;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -40,7 +40,7 @@ public class Treatment implements java.io.Serializable {
 
     private Integer priority;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "evidence_id", nullable = false)
     @JsonIgnore
     private Evidence evidence;
@@ -124,6 +124,11 @@ public class Treatment implements java.io.Serializable {
 
     public void setPriority(Integer priority) {
         this.priority = priority;
+    }
+
+    @JsonIgnore
+    public String getName() {
+        return TreatmentUtils.getTreatmentName(Collections.singleton(this), false);
     }
 }
 

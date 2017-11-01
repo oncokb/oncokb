@@ -1215,17 +1215,22 @@ angular.module('oncokbApp')
                         data.propagation = levelMapping[treatment.name_eStatus.get('propagation')];
                         data.treatments = [];
                         var treatments = treatment.name.text.split(',');
+                        var priorities = getNewPriorities(TI.treatments, [dataUUID]);
                         for (i = 0; i < treatments.length; i++) {
                             var drugs = treatments[i].split('+');
                             var drugList = [];
                             for (var j = 0; j < drugs.length; j++) {
                                 drugList.push({
-                                    drugName: drugs[j].trim()
+                                    drugName: drugs[j].trim(),
+                                    priority: j + 1
                                 });
                             }
                             data.treatments.push({
                                 approvedIndications: [treatment.indication.text],
-                                drugs: drugList
+                                drugs: drugList,
+                                priority: priorities[dataUUID][drugList.map(function(drug) {
+                                    return drug.drugName;
+                                }).join(' + ')]
                             });
                         }
                         historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', ' + treatment.name.getText();
@@ -1758,6 +1763,7 @@ angular.module('oncokbApp')
                     treatment.name_review.delete('added');
                     ReviewResource.accepted = _.union(ReviewResource.accepted, [treatment.name_uuid.getText(), treatment.level_uuid.getText(), treatment.indication_uuid.getText(), treatment.description_uuid.getText()]);
                     clearReview([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review]);
+                    updatePriority(ti.treatments);
                     break;
                 }
             }
@@ -2392,6 +2398,11 @@ angular.module('oncokbApp')
                     }
                     DatabaseConnector.deleteEvidences(uuids, historyData, function(result) {
                         removeModel(type, mutation, tumor, ti, treatment, uuids);
+
+                        // Update all priority if one of treatments is deleted.
+                        if (type || type === 'treatment') {
+                            updatePriority(ti.treatments);
+                        }
                         ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
                     }, function(error) {
                         dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
@@ -2762,6 +2773,10 @@ angular.module('oncokbApp')
                 $scope.geneStatus = geneStatus;
 
                 driveList.move(index, moveIndex);
+
+                if (driveList.get(0).attr === 'Treatment') {
+                    updatePriority(driveList, index, moveStatusIndex);
+                }
             };
 
             $scope.stopCollopse = function(event) {
@@ -2892,6 +2907,88 @@ angular.module('oncokbApp')
                     $scope.suggestedMutations.indexOf(mutationName) !== -1);
             };
 
+            /**
+             * Get priorities based on uuid and treatment name.
+             *
+             * @param Array list Google drive collaborative list
+             * @param Object unapprovedUuids List of uuids that even unapproved, when calculate the priority should be incldued. This will be used when user approves the section.
+             * @return Object
+             */
+            function getNewPriorities(list, unapprovedUuids) {
+                var priorities = {};
+                var count = 1;
+
+                if (!_.isArray(unapprovedUuids)) {
+                    unapprovedUuids = [];
+                }
+                _.each(list.asArray(), function(treatmentSec, index) {
+                    var name = treatmentSec.name.text;
+                    var uuid = treatmentSec.name_uuid.text;
+                    var isApproved = !treatmentSec.name_review.has('lastReviewed') && !treatmentSec.name_review.get('added');
+                    if (isApproved || unapprovedUuids.indexOf(uuid) !== -1) {
+                        priorities[uuid] = {};
+                        _.each(name.split(','), function(t) {
+                            var treatment = t.trim();
+                            priorities[uuid][treatment] = count;
+                            count++;
+                        });
+                    }
+                });
+                return priorities;
+            }
+
+            /**
+             * Update treatment priority
+             * @param list list Google drive collaborative list
+             * @param integer index Original index
+             * @param integer moveIndex Index is about move before that index
+             * @return Promise
+             */
+            function updatePriority(list, index, moveIndex) {
+                var deferred = $q.defer();
+
+                // if treatment is only moved one position,
+                // only two sections will be affected.
+                // Otherwise, all treatments should be updated.
+                // Update priorities
+                var priorities = getNewPriorities(list);
+                var postData = {};
+
+                index = Number.isInteger(index) ? index : -1;
+                moveIndex = Number.isInteger(moveIndex) ? moveIndex : -1;
+
+                if (Math.abs(index - moveIndex) === 1) {
+                    var indexUUid = list.get(index).name_uuid.text;
+                    var moveIndexUUid = list.get(moveIndex).name_uuid.text;
+
+                    // If one of the section is not approved yet,
+                    // no need to trigger update.
+                    if (priorities[indexUUid] && priorities[moveIndexUUid]) {
+                        postData[indexUUid] = priorities[indexUUid];
+                        postData[moveIndexUUid] = priorities[moveIndexUUid];
+                    }
+                } else {
+                    postData = priorities;
+                }
+
+                if (Object.keys(postData).length > 0) {
+                    DatabaseConnector
+                        .updateEvidenceTreatmentPriorityBatch(
+                            postData
+                            , function() {
+                                // Nothing needs to be done here
+                                console.log('Succeed to update priority.');
+                                deferred.resolve();
+                            }, function(error) {
+                                // Something goes wrong, this needs to be stored into meta file for future update.
+                                console.log('Failed to update priority.');
+                                deferred.rejected(error);
+                            });
+                }else {
+                    deferred.resolve();
+                }
+                return deferred.promise;
+            }
             // Calculate number of 'number' elements within the object
             function getNoNKeys(object) {
                 var count = 0;

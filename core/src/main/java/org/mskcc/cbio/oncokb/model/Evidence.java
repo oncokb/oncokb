@@ -186,7 +186,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "evidence")
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Evidence implements java.io.Serializable {
 
     @Id
@@ -368,6 +368,11 @@ public class Evidence implements java.io.Serializable {
     }
 
     public void setTreatments(Set<Treatment> treatments) {
+        if (treatments != null) {
+            for (Treatment treatment : treatments) {
+                treatment.setEvidence(this);
+            }
+        }
         this.treatments = treatments;
     }
 
@@ -498,7 +503,7 @@ public class Evidence implements java.io.Serializable {
         this.propagation = e.propagation;
         // make deep copy of sets
         this.alterations = new HashSet<>(e.alterations);
-        this.treatments = new HashSet<>(e.treatments);
+        this.setTreatments(new HashSet<>(e.treatments));
         this.articles = new HashSet<>(e.articles);
         this.nccnGuidelines = new HashSet<>(e.nccnGuidelines);
         this.clinicalTrials = new HashSet<>(e.clinicalTrials);
