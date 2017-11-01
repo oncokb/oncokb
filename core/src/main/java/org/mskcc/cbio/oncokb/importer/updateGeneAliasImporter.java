@@ -44,8 +44,7 @@ public class updateGeneAliasImporter {
                     System.out.println("Alias of " + gene.getHugoSymbol() + " has been removed: " + alias);
                 }
             }
+            ApplicationContextSingleton.getGeneBo().saveOrUpdate(gene);
         }
-
-        ApplicationContextSingleton.getGeneBo().saveOrUpdateAll(new ArrayList<>(genes));
     }
 }
