@@ -568,6 +568,10 @@ var oncokbApp = angular.module('oncokbApp', [
                 access: access.admin,
                 internalUse: true
             })
+            .when('/queues', {
+                templateUrl: 'views/queues.html',
+                access: access.curator
+            })
             // .when('/vus', {
             //    templateUrl: 'views/vus.html',
             //    controller: 'VUSCtrl',
@@ -632,8 +636,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils',
-        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils', 'mainUtils',
+        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils, mainUtils) {
             $rootScope.errors = [];
 
             // If data is loaded, the watch in nav controller should be triggered.
@@ -719,16 +723,11 @@ angular.module('oncokbApp').run(
                     $location.path('/genes');
                 }
             });
-
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
-                DatabaseConnector.sendEmail({
-                    sendTo: 'dev.oncokb@gmail.com',
-                    subject: 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason,
-                    content: 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message
-                }, function() {
-                }, function() {
-                });
+                var subject = 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason;
+                var content = 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message;
+                mainUtils.notifyDeveloper(subject, content);
             });
 
             //$rootScope.$watch('internal', function(n) {

@@ -46,10 +46,6 @@ angular.module('oncokbApp')
                                             var history = model.createMap();
                                             model.getRoot().set('history', history);
                                         }
-                                        if (!model.getRoot().get('queue')) {
-                                            var queue = model.createList();
-                                            model.getRoot().set('queue', queue);
-                                        }
                                         $q.all([getIsoform(hugoSymbol),
                                             getOncogeneTSG(hugoSymbol)])
                                             .then(function(result) {
@@ -356,7 +352,15 @@ angular.module('oncokbApp')
             );
             return deferred.promise;
         }
-
+        /**
+         * Util to send email to developer account
+         * @param {string} subject The email subject
+         * @param {string} content The email content
+         * @return Promise
+         * */
+        function notifyDeveloper(subject, content) {
+            sendEmail('dev.oncokb@gmail.com', subject, content);
+        }
         /*
          *  Check if item needs to be reviewed or not
          *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
@@ -500,6 +504,7 @@ angular.module('oncokbApp')
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,
-            processedInReview: processedInReview
+            processedInReview: processedInReview,
+            notifyDeveloper: notifyDeveloper
         };
     });
