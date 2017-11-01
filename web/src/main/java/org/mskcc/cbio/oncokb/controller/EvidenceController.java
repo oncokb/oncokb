@@ -135,10 +135,10 @@ public class EvidenceController {
     public
     @ResponseBody
     synchronized ResponseEntity updateEvidencePriority(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
-                                                       @ApiParam(value = "newPriority", required = true) @PathVariable("newPriority") Integer newPriority
+                                                       @ApiParam(value = "newPriority", required = true) @PathVariable("newPriority") Map<String, Integer> newPriority
     ) throws ParserConfigurationException {
 
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Map<String, Integer>> map = new HashMap<>();
         map.put(uuid, newPriority);
         Set<Evidence> updatedEvidences = updateEvidencePriorityBasedOnUuid(map);
 
@@ -152,7 +152,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/priority/update", method = RequestMethod.POST)
     public
     @ResponseBody
-    synchronized ResponseEntity updateEvidencesPriority(@RequestBody Map<String, Integer> priorities
+    synchronized ResponseEntity updateEvidencesPriority(@RequestBody Map<String, Map<String, Integer>> priorities
     ) throws ParserConfigurationException {
         Set<Evidence> updatedEvidences = updateEvidencePriorityBasedOnUuid(priorities);
 
@@ -270,7 +270,7 @@ public class EvidenceController {
         } else if (MainUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
             if (treatments == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if (evidenceType.equals(EvidenceType.DIAGNOSTIC_IMPLICATION) || evidenceType.equals(EvidenceType.PROGNOSTIC_IMPLICATION)) {
-           if (level == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
+            if (level == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if (StringUtils.isNullOrEmpty(description)) {
             isEmpty = true;
         }
@@ -441,17 +441,25 @@ public class EvidenceController {
         return evidences;
     }
 
-    private Set<Evidence> updateEvidencePriorityBasedOnUuid(Map<String, Integer> newPriorities) {
+    private Set<Evidence> updateEvidencePriorityBasedOnUuid(Map<String, Map<String, Integer>> newPriorities) {
         Set<Evidence> evidences = new HashSet<>();
         if (newPriorities != null) {
-            for (Map.Entry<String, Integer> map : newPriorities.entrySet()) {
+            for (Map.Entry<String, Map<String, Integer>> map : newPriorities.entrySet()) {
                 Set<Evidence> evidenceSet = EvidenceUtils.getEvidencesByUUID(map.getKey());
                 for (Evidence evidence : evidenceSet) {
-                    evidence.setPriority(map.getValue());
+                    for (Treatment treatment : evidence.getTreatments()) {
+                        String name = treatment.getName();
+                        if (map.getValue().containsKey(name)) {
+                            Integer newPriority = map.getValue().get(name);
+                            if (!newPriority.equals(treatment.getPriority())) {
+                                treatment.setPriority(newPriority);
+                            }
+                        }
+                    }
+                    ApplicationContextSingleton.getEvidenceBo().saveOrUpdate(evidence);
                 }
                 evidences.addAll(evidenceSet);
             }
-            ApplicationContextSingleton.getEvidenceBo().saveOrUpdateAll(new ArrayList<>(evidences));
         }
         return evidences;
     }
