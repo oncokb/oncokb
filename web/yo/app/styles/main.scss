@@ -823,10 +823,12 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 
 .curationQueue {
     display: inline-block;
-    margin-left: 2%;
-    width: 95%;
+    width:100%;
     .headerStyle {
         margin-bottom: 30px;
+    }
+    .inputMargin {
+      margin-top: 20px;
     }
     .buttonStyle {
       padding: 5px;

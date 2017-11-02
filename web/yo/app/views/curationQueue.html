@@ -1,5 +1,5 @@
 <div class="curationQueue">
-    <div ng-if="data.loading" style="margin-left:40%">
+    <div ng-if="data.loading" style="margin-left:40%;margin-top:40%">
         <span>Loading Curation Queue </span>
         <img src="images/ajax-loader.gif"/>
     </div>
@@ -14,92 +14,89 @@
             <button class="btn btn-success" style="margin-left: 20px" ng-click="toggleForm()">{{data.formExpanded ? 'Hide Curation Form' : 'Add Curation'}}</button>
         </span>
         </h3>
-        <form ng-if="data.formExpanded">
+        <div ng-if="data.formExpanded">
             <div>
-                <div class="form-group">
-                    <label for="article" class="labelAlign">PMID or Abstract: <span class="attention">*</span></label>
-                    <input type="text" id="article" class="form-control inputStyle" ng-model="input.article" placeholder="PMID or Abstract"/>
-                    <span style="display: inline-block;" ng-bind-html="predictedArticle"></span>
-                </div>
-                <div class="form-group">
-                    <label for="link" class="labelAlign">Link:</label>
-                    <input type="text" id="link" class="form-control inputStyle" ng-model="input.link" placeholder="Link" size="10"/>
-                </div>
-                <div ng-if="location === 'queues'" class="form-group">
-                    <label for="genes" class="labelAlign">Gene(s): <span class="attention">*</span></label>
-                    <select chosen multiple
-                            ng-model="input.hugoSymbols"
-                            id="genes"
-                            ng-options="m for m in data.hugoSymbols"
-                            allow-single-deselect="true"
-                            ng-disabled="data.editing"
-                            placeholder="Gene" class="inputStyle">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="variant" class="labelAlign">Variant(s): </label>
-                    <input type="text" class="form-control inputStyle" id="variant" ng-model="input.variant" placeholder="{{location === 'queues' ? 'Gene A: Variant A;Gene B: Variant B' : 'Variant'}}" size="10">
-                </div>
-                <div class="form-group">
-                    <label for="cancerType" class="labelAlign">Cancer Type:</label>
+                <label for="article" class="labelAlign">PMID or Abstract: <span class="attention">*</span></label>
+                <input type="text" id="article" class="inputStyle" ng-model="input.article" placeholder="PMID or Abstract"/>
+                <span style="display: inline-block;" ng-bind-html="predictedArticle"></span>
+            </div>
+            <div class="inputMargin">
+                <label for="link" class="labelAlign">Link:</label>
+                <input type="text" id="link" class="inputStyle" ng-model="input.link" placeholder="Link" size="10"/>
+            </div>
+            <div ng-if="location === 'queues'" class="inputMargin">
+                <label for="genes" class="labelAlign">Gene(s): <span class="attention">*</span></label>
+                <select chosen multiple
+                        ng-model="input.hugoSymbols"
+                        id="genes"
+                        ng-options="m for m in data.hugoSymbols"
+                        allow-single-deselect="true"
+                        ng-disabled="data.editing"
+                        placeholder="Gene" class="inputStyle">
+                </select>
+            </div>
+            <div class="inputMargin">
+                <label for="variant" class="labelAlign">Variant(s): </label>
+                <input type="text" class="inputStyle" id="variant" ng-model="input.variant" placeholder="{{location === 'queues' ? 'Gene A: Variant A;Gene B: Variant B' : 'Variant'}}" size="10">
+            </div>
+            <div class="inputMargin">
+                <label for="cancerType" class="labelAlign">Cancer Type:</label>
+                <select chosen
+                        ng-if="data.mainTypes.length > 0"
+                        id="cancerType"
+                        allow-single-deselect="true"
+                        ng-model="input.mainType"
+                        ng-options="m for m in data.mainTypes | orderBy: m">
+                </select>
+                <div ng-if="data.subTypes[input.mainType].length > 0" class="subType">
+                    <label for="subType">Subtype:</label>
                     <select chosen
-                            ng-if="data.mainTypes.length > 0"
-                            id="cancerType"
                             allow-single-deselect="true"
-                            ng-model="input.mainType"
-                            ng-options="m for m in data.mainTypes | orderBy: m">
+                            id="subType"
+                            ng-model="input.subType"
+                            ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name" class="subTypeSelect">
                     </select>
-                    <div ng-if="data.subTypes[input.mainType].length > 0" class="subType">
-                        <label for="subType">Subtype:</label>
-                        <select chosen
-                                allow-single-deselect="true"
-                                id="subType"
-                                ng-model="input.subType"
-                                ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name" class="subTypeSelect">
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="section" class="labelAlign">Section(s):</label>
-                    <select chosen multiple
-                            ng-model="input.section"
-                            id="section"
-                            ng-options="m for m in data.sectionList"
-                            allow-single-deselect="true" class="inputStyle">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="curator" class="labelAlign">Curator:</label>
-                    <select chosen
-                            data-placeholder="Choose A Curator"
-                            id="curator"
-                            ng-model="input.curator"
-                            ng-options="m.name for m in data.curators"
-                            ng-change="checkInput()"
-                            allow-single-deselect="true" class="inputStyle">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="datepicker" class="labelAlign">Due Date:</label>
-                    <p>Date: <input type="text" id="datepicker" ng-model="input.dueDay" ng-change="checkInput()">
-                        <span class="attention" ng-show="data.invalidData">Invalid due date</span></p>
-                </div>
-                <div class="form-group">
-                    <label for="comments" class="labelAlign">Comment:</label>
-                    <textarea class="form-control" rows="2" id="comments" placeholder="Comment" ng-model="input.comment"></textarea>
-                </div>
-                <div ng-if="data.resendEmail">
-                    <p class="attention">Email will be resent after saving modified curation because of changes in Curator or Due date.</p>
-                </div>
-                <div class="form-group">
-                    <button tyle="submit" class="btn btn-success" ng-disabled="!input.article || data.invalidData || (location === 'queues' && (!input.hugoSymbols || input.hugoSymbols.length === 0))" ng-bind-html="getButtonHtml('add')" ng-click="processCuration()"></button>
-                    <button class="btn btn-default" ng-click="clearInput()">Cancel</button>
                 </div>
             </div>
-        </form>
-        <div ng-if="queue.length > 0">
-            <table class="table" id="queues" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
-                <thead>
+            <div class="inputMargin">
+                <label for="section" class="labelAlign">Section(s):</label>
+                <select chosen multiple
+                        ng-model="input.section"
+                        id="section"
+                        ng-options="m for m in data.sectionList"
+                        allow-single-deselect="true" class="inputStyle">
+                </select>
+            </div>
+            <div class="inputMargin">
+                <label for="curator" class="labelAlign">Curator:</label>
+                <select chosen
+                        data-placeholder="Choose A Curator"
+                        id="curator"
+                        ng-model="input.curator"
+                        ng-options="m.name for m in data.curators"
+                        ng-change="checkInput()"
+                        allow-single-deselect="true" class="inputStyle">
+                </select>
+            </div>
+            <div class="inputMargin">
+                <label for="datepicker" class="labelAlign">Due Date:</label>
+                <p>Date: <input type="text" id="datepicker" ng-model="input.dueDay" ng-change="checkInput()">
+                    <span class="attention" ng-show="data.invalidData">Invalid due date</span></p>
+            </div>
+            <div class="inputMargin">
+                <label for="comments" class="labelAlign">Comment:</label>
+                <textarea rows="2" cols="100" id="comments" placeholder="Comment" ng-model="input.comment"></textarea>
+            </div>
+            <div ng-if="data.resendEmail" class="inputMargin">
+                <p class="attention">Email will be resent after saving modified curation because of changes in Curator or Due date.</p>
+            </div>
+            <div class="inputMargin">
+                <button class="btn btn-success" ng-disabled="!input.article || data.invalidData || (location === 'queues' && (!input.hugoSymbols || input.hugoSymbols.length === 0))" ng-bind-html="getButtonHtml('add')" ng-click="processCuration()"></button>
+                <button class="btn btn-default" ng-click="clearInput()">Cancel</button>
+            </div>
+        </div>
+        <table class="table" id="queues" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
+            <thead>
                 <tr>
                     <th ng-if="location === 'queues'">Gene</th>
                     <th>Article</th>
@@ -114,8 +111,8 @@
                     <th>Comment</th>
                     <th>Operation</th>
                 </tr>
-                </thead>
-                <tbody>
+            </thead>
+            <tbody>
                 <tr ng-repeat="x in queue" ng-show="data.allCurations || !x.curated">
                     <td ng-if="location === 'queues'"><strong><a ng-href="#/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
                     <td>
@@ -164,8 +161,7 @@
                     </span>
                     </td>
                 </tr>
-                </tbody>
-            </table>
-        </div>
+            </tbody>
+        </table>
     </div>
 </div>
