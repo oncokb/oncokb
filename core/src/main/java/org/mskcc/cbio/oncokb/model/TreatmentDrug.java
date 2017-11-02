@@ -1,5 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -17,6 +20,7 @@ import java.io.Serializable;
 public class TreatmentDrug implements Serializable {
 
     @EmbeddedId
+    @JsonUnwrapped
     private TreatmentDrugId treatmentDrugId = new TreatmentDrugId();
 
     private Integer priority;
@@ -38,6 +42,7 @@ public class TreatmentDrug implements Serializable {
     }
 
     @Transient
+    @JsonIgnore
     public Treatment getTreatment() {
         return this.treatmentDrugId.getTreatment();
     }
@@ -47,6 +52,7 @@ public class TreatmentDrug implements Serializable {
     }
 
     @Transient
+    @JsonIgnore
     public Drug getDrug() {
         return this.treatmentDrugId.getDrug();
     }

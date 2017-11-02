@@ -1,7 +1,9 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
@@ -184,11 +186,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "evidence")
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Evidence implements java.io.Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Integer id;
 
     @Column(length = 40)
@@ -227,8 +229,8 @@ public class Evidence implements java.io.Serializable {
     @Column(name = "additional_info", length = 65535)
     private String additionalInfo;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "evidenceTreatmentId.evidence", cascade = CascadeType.ALL)
-    private Set<EvidenceTreatment> evidenceTreatments = new HashSet<>(0);
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "evidence", cascade = CascadeType.ALL)
+    private Set<Treatment> treatments = new HashSet<>(0);
 
     @Column(name = "known_effect")
     private String knownEffect;
@@ -361,38 +363,18 @@ public class Evidence implements java.io.Serializable {
         this.additionalInfo = additionalInfo;
     }
 
-    @Transient
     public Set<Treatment> getTreatments() {
-        if (this.evidenceTreatments != null) {
-            Set<Treatment> treatments = new HashSet<>();
-            for (EvidenceTreatment evidenceTreatment : this.evidenceTreatments) {
-                treatments.add(evidenceTreatment.getTreatment());
-            }
-            return treatments;
-        } else {
-            return null;
-        }
+        return treatments;
     }
 
     public void setTreatments(Set<Treatment> treatments) {
-        if (treatments != null) {
-            Set<EvidenceTreatment> evidenceTreatments = new HashSet<>();
-            for (Treatment treatment : treatments) {
-                EvidenceTreatment evidenceTreatment = new EvidenceTreatment();
-                evidenceTreatment.setEvidence(this);
-                evidenceTreatment.setTreatment(treatment);
-                evidenceTreatments.add(evidenceTreatment);
-            }
-            this.evidenceTreatments = evidenceTreatments;
+        this.treatments = treatments;
+    }
+
+    public void setPriority(Integer priority) {
+        for (Treatment treatment : this.getTreatments()) {
+            treatment.setPriority(priority);
         }
-    }
-
-    public Set<EvidenceTreatment> getEvidenceTreatments() {
-        return evidenceTreatments;
-    }
-
-    public void setEvidenceTreatments(Set<EvidenceTreatment> evidenceTreatments) {
-        this.evidenceTreatments = evidenceTreatments;
     }
 
     public String getKnownEffect() {
@@ -516,7 +498,7 @@ public class Evidence implements java.io.Serializable {
         this.propagation = e.propagation;
         // make deep copy of sets
         this.alterations = new HashSet<>(e.alterations);
-        this.evidenceTreatments = new HashSet<>(e.evidenceTreatments);
+        this.treatments = new HashSet<>(e.treatments);
         this.articles = new HashSet<>(e.articles);
         this.nccnGuidelines = new HashSet<>(e.nccnGuidelines);
         this.clinicalTrials = new HashSet<>(e.clinicalTrials);

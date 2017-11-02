@@ -29,7 +29,6 @@
     <mapping class="org.mskcc.cbio.oncokb.model.Treatment"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Gene"/>
     <mapping class="org.mskcc.cbio.oncokb.model.VariantConsequence"/>
-    <mapping class="org.mskcc.cbio.oncokb.model.EvidenceTreatment"/>
     <mapping class="org.mskcc.cbio.oncokb.model.TreatmentDrug"/>
   </session-factory>
 </hibernate-configuration>
