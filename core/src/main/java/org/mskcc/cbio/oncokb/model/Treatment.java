@@ -79,6 +79,26 @@ public class Treatment implements java.io.Serializable {
             return null;
         } else {
             Set<Drug> drugs = new HashSet<>();
+            for (TreatmentDrug treatmentDrug : this.treatmentDrugs) {
+                drugs.add(treatmentDrug.getDrug());
+            }
+            return drugs;
+        }
+    }
+
+    @Transient
+    @JsonIgnore
+    public List<Drug> getSortedDrugs() {
+        if (this.treatmentDrugs == null) {
+            return null;
+        } else {
+            List<TreatmentDrug> treatmentDrugs = new ArrayList<>(this.getTreatmentDrugs());
+            Collections.sort(treatmentDrugs, new Comparator<TreatmentDrug>() {
+                public int compare(TreatmentDrug td1, TreatmentDrug td2) {
+                    return td1.getPriority() - td2.getPriority();
+                }
+            });
+            List<Drug> drugs = new ArrayList<>();
             for (TreatmentDrug treatmentDrug : treatmentDrugs) {
                 drugs.add(treatmentDrug.getDrug());
             }
