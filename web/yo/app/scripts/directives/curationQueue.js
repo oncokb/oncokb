@@ -59,6 +59,7 @@ angular.module('oncokbApp')
                         paging: false,
                         scrollCollapse: true,
                         scrollY: 800,
+                        scrollX: true,
                         aaSorting: [[0, 'asc']]
                     };
                     scope.dtColumns = [
@@ -184,11 +185,17 @@ angular.module('oncokbApp')
                             }
                         });
                         _.each($scope.input.hugoSymbols, function(hugoSymbol) {
+                            if (tempArr.length === 1) {
+                                // This is the case where variants are not entered following the format of GeneA:VariantA;GeneB:VariantB
+                                // In this case, we will use the input variant string for all genes directly
+                                $scope.data.hugoVariantMapping[hugoSymbol] = $scope.input.variant.trim();
+                            }
                             addCuration(hugoSymbol);
                         });
                     } else if ($scope.location === 'gene') {
                         addCuration($scope.hugoSymbol);
                     }
+                    $scope.clearInput();
                 };
                 function addCuration(hugoSymbol) {
                     if (!$rootScope.queuesData.has(hugoSymbol)) {
@@ -196,7 +203,6 @@ angular.module('oncokbApp')
                     }
                     var item = $rootScope.queuesModel.createMap({
                         link: $scope.input.link,
-                        variant: $scope.data.hugoVariantMapping[hugoSymbol] ? $scope.data.hugoVariantMapping[hugoSymbol] : $scope.input.variant,
                         mainType: $scope.input.mainType,
                         subType: $scope.input.subType ? $scope.input.subType.name : '',
                         section: $scope.input.section ? $scope.input.section.join() : '',
@@ -208,6 +214,15 @@ angular.module('oncokbApp')
                         comment: $scope.input.comment,
                         notified: false
                     });
+                    if ($scope.location === 'gene') {
+                        item.set('variant', $scope.input.variant);
+                    } else if ($scope.location === 'queues') {
+                        if ($scope.data.hugoVariantMapping[hugoSymbol]) {
+                            item.set('variant', $scope.data.hugoVariantMapping[hugoSymbol]);
+                        } else {
+                            item.set('variant', '');
+                        }
+                    }
                     if ($scope.predictedArticle && $scope.validPMID) {
                         item.set('article', $scope.predictedArticle);
                         item.set('pmid', $scope.input.article);
@@ -237,7 +252,6 @@ angular.module('oncokbApp')
                     if (item.get('curator')) {
                         $scope.sendEmail(queueItem);
                     }
-                    $scope.clearInput();
                 }
                 $scope.initialProcess = function(x, type) {
                     var hugoSymbol;
@@ -363,7 +377,6 @@ angular.module('oncokbApp')
                     if ($scope.data.resendEmail) {
                         $scope.sendEmail(queueItem, queueModelItem);
                     }
-                    $scope.clearInput();
                 }
                 function completeCuration(queueItem, queueModelItem) {
                     queueModelItem.set('curated', true);
