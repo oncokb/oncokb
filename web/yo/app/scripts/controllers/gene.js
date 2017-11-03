@@ -1815,7 +1815,9 @@ angular.module('oncokbApp')
                     treatment.name_review.delete('added');
                     ReviewResource.accepted = _.union(ReviewResource.accepted, [treatment.name_uuid.getText(), treatment.level_uuid.getText(), treatment.indication_uuid.getText(), treatment.description_uuid.getText()]);
                     clearReview([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review]);
-                    updatePriority(ti.treatments);
+                    if (firstLayer) {
+                        updatePriority(ti.treatments);
+                    }
                     break;
                 }
             }
@@ -3012,7 +3014,7 @@ angular.module('oncokbApp')
                     postData = priorities;
                 }
 
-                if (Object.keys(postData).length > 0) {
+                if ($scope.status.isDesiredGene && Object.keys(postData).length > 0) {
                     DatabaseConnector
                         .updateEvidenceTreatmentPriorityBatch(
                             postData
