@@ -173,7 +173,7 @@ angular.module('oncokbApp').factory('SendEmail', ['$http', 'OncoKB', function($h
     };
 }]);
 
-angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', function($http, OncoKB) {
+angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', function($http, OncoKB, _) {
     'use strict';
     var transform = function(data) {
         return $.param(data);
@@ -239,6 +239,17 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
             });
     }
 
+    function updateEvidenceTreatmentPriorityBatch(data) {
+        return $http.post(
+            OncoKB.config.apiLink + 'evidences/priority/update',
+            data,
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
+
     function getEvidencesByUUID(uuid) {
         return $http.get(
             OncoKB.config.publicApiLink + 'evidences/' + uuid,
@@ -285,6 +296,7 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', funct
         deleteEvidences: deleteEvidences,
         updateVUS: updateVUS,
         updateEvidenceBatch: updateEvidenceBatch,
+        updateEvidenceTreatmentPriorityBatch: updateEvidenceTreatmentPriorityBatch,
         getEvidencesByUUID: getEvidencesByUUID,
         getEvidencesByUUIDs: getEvidencesByUUIDs,
         getPubMedArticle: getPubMedArticle,
