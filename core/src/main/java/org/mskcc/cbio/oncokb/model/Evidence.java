@@ -10,10 +10,7 @@ import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.mskcc.oncotree.model.TumorType;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -365,6 +362,29 @@ public class Evidence implements java.io.Serializable {
 
     public Set<Treatment> getTreatments() {
         return treatments;
+    }
+
+    @JsonIgnore
+    public List<Treatment> getSortedTreatment() {
+        List<Treatment> treatments = new ArrayList<>(this.getTreatments());
+        Collections.sort(treatments, new Comparator<Treatment>() {
+            public int compare(Treatment t1, Treatment t2) {
+                return t1.getPriority() - t2.getPriority();
+            }
+        });
+        return treatments;
+    }
+
+    @JsonIgnore
+    public Integer getHighestTreatmentPriority() {
+        Integer highestPriority = 1000;
+
+        for (Treatment treatment : this.getTreatments()) {
+            if (treatment.getPriority() < highestPriority) {
+                highestPriority = treatment.getPriority();
+            }
+        }
+        return highestPriority;
     }
 
     public void setTreatments(Set<Treatment> treatments) {
