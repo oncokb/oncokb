@@ -2916,10 +2916,10 @@ angular.module('oncokbApp')
                     unapprovedUuids = [];
                 }
                 _.each(list.asArray(), function(treatmentSec, index) {
-                    var name = treatmentSec.name.text;
+                    var name = treatmentSec.name_review.has('lastReviewed') ? treatmentSec.name_review.get('lastReviewed') : treatmentSec.name.text;
                     var uuid = treatmentSec.name_uuid.text;
-                    var isApproved = !treatmentSec.name_review.has('lastReviewed') && !treatmentSec.name_review.get('added');
-                    if (isApproved || unapprovedUuids.indexOf(uuid) !== -1) {
+                    var isNewlyAdded = !treatmentSec.name_review.get('added');
+                    if (isNewlyAdded || unapprovedUuids.indexOf(uuid) !== -1) {
                         priorities[uuid] = {};
                         _.each(name.split(','), function(t) {
                             var treatment = t.trim();
@@ -2978,7 +2978,7 @@ angular.module('oncokbApp')
                                 console.log('Failed to update priority.');
                                 deferred.rejected(error);
                             });
-                }else {
+                } else {
                     deferred.resolve();
                 }
                 return deferred.promise;
