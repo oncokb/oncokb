@@ -35,7 +35,7 @@ File is located under web/yo/app/data
         'https://www.googleapis.com/auth/drive.file'
     ],
     folderId: '', // The folder ID where you put all google realtime documents. By default, we will point you to an example folder.
-    metaFolderId: '', // The folder ID where all meta data of all google realtime documents stored. By default, we will point you to an example folder.
+    additionalsFolderId: '', // The folder ID where additional files are stored, including meta data file and curation queues file. By default, we will point you to an example folder.
     userRoles: {
         'public': 1, // 0001
         'user':   2, // 0010
