@@ -54,6 +54,11 @@ public class CacheUtils {
         }
     };
 
+    private static Set<Integer> genesToBeUpdated = new HashSet();
+    private static Timer updateCacheTimer = new Timer();
+    private static long UPDATE_CACHE_TIMER_DELAY = 10000L; // delay in milliseconds before task is to be executed.
+    private static long UPDATE_CACHE_TIMER_PERIOD = 10000L; //  time in milliseconds between successive task executions.
+
     private static Observer VUSObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
@@ -203,6 +208,20 @@ public class CacheUtils {
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
+
+            // Add timer task to check whether there are genes' cache need to be updated
+            updateCacheTimer.scheduleAtFixedRate(new TimerTask() {
+                public void run() {
+                    if (genesToBeUpdated.size() > 0) {
+                        for (Iterator<Integer> i = genesToBeUpdated.iterator(); i.hasNext();) {
+                            Integer entrezGeneId = i.next();
+                            System.out.println("Updating " + entrezGeneId.toString() + " cache...");
+                            GeneObservable.getInstance().update("update", entrezGeneId.toString());
+                            i.remove();
+                        }
+                    }
+                }
+            }, UPDATE_CACHE_TIMER_DELAY, UPDATE_CACHE_TIMER_PERIOD);
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
         }
@@ -516,7 +535,9 @@ public class CacheUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        GeneObservable.getInstance().update("update", entrezGeneId.toString());
+
+        System.out.println(entrezGeneId.toString() + " is queued.");
+        genesToBeUpdated.add(entrezGeneId);
         notifyOtherServices("update", entrezGeneId);
     }
 
@@ -529,7 +550,9 @@ public class CacheUtils {
         if (propagate == null) {
             propagate = false;
         }
-        GeneObservable.getInstance().update("update", entrezGeneId.toString());
+
+        System.out.println(entrezGeneId.toString() + " is queued.");
+        genesToBeUpdated.add(entrezGeneId);
         if (propagate) {
             notifyOtherServices("update", entrezGeneId);
         }
