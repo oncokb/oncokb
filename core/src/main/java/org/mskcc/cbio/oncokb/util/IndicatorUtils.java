@@ -414,7 +414,7 @@ public class IndicatorUtils {
     }
 
     private static List<Alteration> findRelevantAlts(Gene gene, String alteration) {
-        Set<Alteration> relevantAlts = new TreeSet<>();
+        Set<Alteration> relevantAlts = new LinkedHashSet<>();
         Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration,
             null, null, null, null);
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
