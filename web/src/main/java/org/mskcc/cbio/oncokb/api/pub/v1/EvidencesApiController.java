@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.springframework.http.HttpStatus;
@@ -21,28 +22,30 @@ public class EvidencesApiController implements EvidencesApi {
 
     public ResponseEntity<Set<Evidence>> evidencesUUIDGet(
         @ApiParam(value = "Unique identifier.", required = true) @PathVariable("uuid") String uuid
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
         Set<Evidence> evidences = null;
         if (uuid == null) {
             status = HttpStatus.BAD_REQUEST;
-        }else{
+        } else {
             evidences = EvidenceUtils.getEvidencesByUUID(uuid);
         }
-        return new ResponseEntity<>(evidences, status);
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getEvidence(evidences, fields));
     }
 
     public ResponseEntity<Set<Evidence>> evidencesUUIDsGet(
         @ApiParam(value = "Unique identifier list.", required = true) @RequestBody(required = true) Set<String> uuids
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
         Set<Evidence> evidences = null;
         if (uuids == null) {
             status = HttpStatus.BAD_REQUEST;
-        }else{
+        } else {
             evidences = EvidenceUtils.getEvidencesByUUIDs(uuids);
         }
-        return new ResponseEntity<>(evidences, status);
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getEvidence(evidences, fields));
     }
 
     public ResponseEntity<List<Evidence>> evidencesLookupGet(
@@ -57,6 +60,7 @@ public class EvidencesApiController implements EvidencesApi {
         , @ApiParam(value = "Only show highest level evidences") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Separate by comma. LEVEL_1, LEVEL_2A, LEVEL_2B, LEVEL_3A, LEVEL_3B, LEVEL_4, LEVEL_R1, LEVEL_R2, LEVEL_R3") @RequestParam(value = "levelOfEvidence", required = false) String levels
         , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND, MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS, PREVALENCE, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, TUMOR_TYPE_SUMMARY, NCCN_GUIDELINES, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE, CLINICAL_TRIAL") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
         List<Evidence> evidences = new ArrayList<>();
@@ -79,10 +83,13 @@ public class EvidencesApiController implements EvidencesApi {
             }
         }
 
-        return new ResponseEntity<>(evidences, HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getEvidence(evidences, fields));
     }
 
-    public ResponseEntity<List<EvidenceQueryRes>> evidencesLookupPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body) {
+    public ResponseEntity<List<EvidenceQueryRes>> evidencesLookupPost(
+        @ApiParam(value = "List of queries. Please see swagger.json for request body format. Please use JSON string.", required = true) @RequestBody(required = true) EvidenceQueries body
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    ) {
         HttpStatus status = HttpStatus.OK;
         List<EvidenceQueryRes> result = new ArrayList<>();
         if (body.getQueries().size() > 0) {
@@ -103,10 +110,12 @@ public class EvidencesApiController implements EvidencesApi {
                 body.getLevels(), body.getHighestLevelOnly());
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getEvidenceQueryRes(result, fields));
     }
 
-    public ResponseEntity<List<Evidence>> evidencesPost(@ApiParam(value = "List of unique identifier for each model. Separated by comma.", required = true) @RequestParam(value = "ids", required = true) String ids
+    public ResponseEntity<List<Evidence>> evidencesPost(
+        @ApiParam(value = "List of unique identifier for each model. Separated by comma.", required = true) @RequestParam(value = "ids", required = true) String ids
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
         List<Evidence> evidenceList = new ArrayList<>();
@@ -121,6 +130,6 @@ public class EvidencesApiController implements EvidencesApi {
                 }
             }
         }
-        return new ResponseEntity<>(evidenceList, status);
+        return ResponseEntity.ok().body(JsonResultFactory.getEvidence(evidenceList, fields));
     }
 }
