@@ -57,7 +57,9 @@ public interface GenesApi {
     @RequestMapping(value = "/genes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<Gene>> genesGet();
+    ResponseEntity<List<Gene>> genesGet(
+        @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    );
 
 
     @ApiOperation(value = "", notes = "Search gene.", response = Gene.class, responseContainer = "List", tags = {"Genes", "Search",})
