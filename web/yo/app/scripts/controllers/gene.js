@@ -211,7 +211,7 @@ angular.module('oncokbApp')
                     $scope.status.vusUpdateTimeout = $timeout(function() {
                         var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
                         var vusData = stringUtils.getVUSData(vus);
-                        DatabaseConnector.updateVUS($scope.gene.name, JSON.stringify(vusData), function(result) {
+                        DatabaseConnector.updateVUS($scope.gene.name.text, JSON.stringify(vusData), function(result) {
                             console.log('success saving vus to database');
                         }, function(error) {
                             console.log('error happened when saving VUS to DB', error);
