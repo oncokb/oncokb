@@ -5,10 +5,10 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,10 +25,12 @@ import java.util.Set;
 @Controller
 public class VariantsApiController implements VariantsApi {
 
-    public ResponseEntity<List<Alteration>> variantsGet() {
+    public ResponseEntity<List<Alteration>> variantsGet(
+        @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    ) {
         List<Alteration> alterations = new ArrayList(AlterationUtils.getAllAlterations());
 
-        return new ResponseEntity<>(alterations, HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(alterations, fields));
     }
 
     public ResponseEntity<List<Alteration>> variantsLookupGet(
@@ -40,20 +42,24 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs);
-        return new ResponseEntity<>(getVariants(query), HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(getVariants(query), fields));
     }
 
     @Override
-    public ResponseEntity<List<List<Alteration>>> variantsLookupPost(@ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body) {
+    public ResponseEntity<List<List<Alteration>>> variantsLookupPost(
+        @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    ) {
         List<List<Alteration>> result = new ArrayList<>();
         if (body != null) {
             for (VariantSearchQuery query : body) {
                 result.add(getVariants(query));
             }
         }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getAlteration2D(result, fields));
     }
 
     private List<Alteration> getVariants(VariantSearchQuery query) {

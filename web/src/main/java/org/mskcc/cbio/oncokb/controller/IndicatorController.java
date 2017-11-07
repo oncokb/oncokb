@@ -58,7 +58,9 @@ public class IndicatorController {
     public
     @ResponseBody
     List<IndicatorQueryResp> getResult(
-        @RequestBody EvidenceQueries body) {
+        @RequestBody EvidenceQueries body,
+        @RequestParam(value = "fields", required = false) String fields
+    ) {
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -74,7 +76,7 @@ public class IndicatorController {
                 source, body.getHighestLevelOnly()));
         }
 
-        return JsonResultFactory.getIndicatorQueryResp(result, body.getFields());
+        return JsonResultFactory.getIndicatorQueryResp(result, fields);
     }
 
 
