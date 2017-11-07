@@ -66,6 +66,7 @@ public class GenesApiController implements GenesApi {
 
     public ResponseEntity<Gene> genesEntrezGeneIdGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         Gene gene = null;
         if (entrezGeneId == null) {
@@ -78,11 +79,12 @@ public class GenesApiController implements GenesApi {
             return new ResponseEntity<>(gene, HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(gene, HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getGene(gene, fields));
     }
 
     public ResponseEntity<List<Alteration>> genesEntrezGeneIdVariantsGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         List<Alteration> alterationList = new ArrayList<>();
         if (entrezGeneId == null) {
@@ -101,7 +103,7 @@ public class GenesApiController implements GenesApi {
             alterations = new HashSet<>();
         }
         alterationList.addAll(alterations);
-        return new ResponseEntity<>(alterationList, HttpStatus.OK);
+        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(alterationList, fields));
     }
 
     public ResponseEntity<List<Gene>> genesGet(
@@ -119,12 +121,11 @@ public class GenesApiController implements GenesApi {
         @ApiParam(value = "The gene symbol used in Human Genome Organisation. (Deprecated, use query instead)") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID. (Deprecated, use query instead)") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         Set<Gene> genes = GeneUtils.searchGene(query, false);
-        HttpStatus status = HttpStatus.OK;
-
         List<Gene> geneList = new ArrayList<>(genes);
-        return new ResponseEntity<>(geneList, status);
+        return ResponseEntity.ok().body(JsonResultFactory.getGene(geneList, fields));
     }
 
 }

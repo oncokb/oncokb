@@ -5,6 +5,7 @@ import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
@@ -38,6 +39,7 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "Only show treatments of highest level") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.") @RequestParam(value = "queryType", required = false, defaultValue = "regular") String queryType
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -51,10 +53,13 @@ public class SearchApiController implements SearchApi {
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, source, highestLevelOnly);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(indicatorQueryResp, fields));
     }
 
-    public ResponseEntity<List<IndicatorQueryResp>> searchPost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body) {
+    public ResponseEntity<List<IndicatorQueryResp>> searchPost(
+        @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    ) {
         HttpStatus status = HttpStatus.OK;
 
         List<IndicatorQueryResp> result = new ArrayList<>();
@@ -71,6 +76,6 @@ public class SearchApiController implements SearchApi {
                     source, body.getHighestLevelOnly()));
             }
         }
-        return new ResponseEntity<>(result, status);
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(result, fields));
     }
 }
