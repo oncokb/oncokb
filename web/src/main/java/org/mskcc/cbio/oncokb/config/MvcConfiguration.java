@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.config;
 
+import com.monitorjbl.json.JsonViewSupportFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +50,11 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
         multipartResolver.setDefaultEncoding("utf-8");
         multipartResolver.setMaxUploadSize(50000000);
         return multipartResolver;
+    }
+
+    @Bean
+    public JsonViewSupportFactoryBean views() {
+        return new JsonViewSupportFactoryBean();
     }
 
     protected ApiInfo apiInfo() {

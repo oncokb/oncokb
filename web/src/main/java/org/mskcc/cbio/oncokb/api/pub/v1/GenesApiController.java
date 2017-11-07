@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
@@ -103,13 +104,15 @@ public class GenesApiController implements GenesApi {
         return new ResponseEntity<>(alterationList, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<Gene>> genesGet() {
+    public ResponseEntity<List<Gene>> genesGet(
+        @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    ) {
         Set<Gene> genes = GeneUtils.getAllGenes();
         if (genes == null) {
             genes = new HashSet<>();
         }
         List<Gene> geneList = new ArrayList<>(genes);
-        return new ResponseEntity<>(geneList, HttpStatus.OK);
+        return ResponseEntity.ok(JsonResultFactory.getGene(geneList, fields));
     }
 
     public ResponseEntity genesLookupGet(
