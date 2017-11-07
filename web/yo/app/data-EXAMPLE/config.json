@@ -5,7 +5,7 @@
         "https://www.googleapis.com/auth/drive.file"
     ],
     "folderId": "0BzBfo69g8fP6NkgtWGZxd0NjcWs",
-    "metaFolderId": "0BzBfo69g8fP6WkstN2FERlVwaFE",
+    "additionalsFolderId": "0BzBfo69g8fP6WkstN2FERlVwaFE",
     "userRoles": {
         "public": 1,
         "user": 2,
