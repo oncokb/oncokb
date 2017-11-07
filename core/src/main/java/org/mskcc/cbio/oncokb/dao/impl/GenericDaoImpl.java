@@ -50,12 +50,12 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
 
     @Override
     public List<T> find(String queryString) {
-        return getHibernateTemplate().find(queryString);
+        return (List<T>) getHibernateTemplate().find(queryString);
     }
 
     @Override
     public List<T> find(String queryString, Object... values) {
-        return getHibernateTemplate().find(queryString, values);
+        return (List<T>) getHibernateTemplate().find(queryString, values);
     }
 
     public List<T> findByParamValue(String param, Object value) {
@@ -72,22 +72,22 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
 
     @Override
     public List<T> findByNamedQuery(String queryName) {
-        return getHibernateTemplate().findByNamedQuery(queryName);
+        return (List<T>) getHibernateTemplate().findByNamedQuery(queryName);
     }
 
     @Override
     public List<T> findByNamedQuery(String queryName, Object value) {
-        return getHibernateTemplate().findByNamedQuery(queryName, value);
+        return (List<T>) getHibernateTemplate().findByNamedQuery(queryName, value);
     }
 
     @Override
     public List<T> findByNamedQuery(String queryName, Object... values) {
-        return getHibernateTemplate().findByNamedQuery(queryName, values);
+        return (List<T>) getHibernateTemplate().findByNamedQuery(queryName, values);
     }
 
     @Override
     public List<T> findByNamedQueryAndNamedParam(String queryName, String[] params, List[] values) {
-        return getHibernateTemplate().findByNamedQueryAndNamedParam(queryName, params, values);
+        return (List<T>) getHibernateTemplate().findByNamedQueryAndNamedParam(queryName, params, values);
     }
 
     @Override
@@ -114,13 +114,6 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     public void saveOrUpdate(T t) {
         if (t!=null) {
             getHibernateTemplate().saveOrUpdate(t);
-        }
-    }
-
-    @Override
-    public void saveOrUpdateAll(List<T> ts) {
-        if (ts != null) {
-            getHibernateTemplate().saveOrUpdateAll(ts);
         }
     }
 

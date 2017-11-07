@@ -230,7 +230,7 @@ public class EvidenceDaoImpl
         if (ids == null) return new ArrayList<>();
         String[] params = {"ids"};
         List[] values = {ids};
-        return getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidencesByIds", params, values);
+        return (List<Evidence>) getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidencesByIds", params, values);
     }
 
     @Override
@@ -241,7 +241,7 @@ public class EvidenceDaoImpl
         }
         String[] params = {"alts"};
         List[] values = {alts};
-        return getHibernateTemplate().findByNamedQueryAndNamedParam("findTumorTypesWithEvidencesForAlterations", params, values);
+        return (List<Object>) getHibernateTemplate().findByNamedQueryAndNamedParam("findTumorTypesWithEvidencesForAlterations", params, values);
     }
 
     @Override
@@ -252,7 +252,7 @@ public class EvidenceDaoImpl
         }
         String[] params = {"alts"};
         List[] values = {alts};
-        return getHibernateTemplate().findByNamedQueryAndNamedParam("findCancerTypesWithEvidencesForAlterations", params, values);
+        return (List<Object>) getHibernateTemplate().findByNamedQueryAndNamedParam("findCancerTypesWithEvidencesForAlterations", params, values);
     }
 
     @Override
@@ -263,23 +263,23 @@ public class EvidenceDaoImpl
         }
         String[] params = {"alts"};
         List[] values = {alts};
-        return getHibernateTemplate().findByNamedQueryAndNamedParam("findSubtypesWithEvidencesForAlterations", params, values);
+        return (List<Object>) getHibernateTemplate().findByNamedQueryAndNamedParam("findSubtypesWithEvidencesForAlterations", params, values);
     }
 
     @Override
     public List<String> findAllCancerTypes() {
-        return getHibernateTemplate().findByNamedQuery("findAllCancerTypes");
+        return (List<String>) getHibernateTemplate().findByNamedQuery("findAllCancerTypes");
     }
 
     @Override
     public List<String> findAllSubtypes() {
-        return getHibernateTemplate().findByNamedQuery("findAllSubtypes");
+        return (List<String>) getHibernateTemplate().findByNamedQuery("findAllSubtypes");
     }
 
     @Override
     public List<Evidence> findEvidenceByUUIDs(List<String> uuids) {
         String[] params = {"uuids"};
         List[] values = {uuids};
-        return getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidenceByUUIDs", params, values);
+        return (List<Evidence>) getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidenceByUUIDs", params, values);
     }
 }
