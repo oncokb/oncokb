@@ -408,7 +408,7 @@ angular.module('oncokbApp')
                     $rootScope.apiData.set(hugoSymbol, $rootScope.metaModel.createMap());
                 }
                 if (type === 'vus') {
-                    $rootScope.apiData.get(hugoSymbol).set('vus', $rootScope.metaModel.createString(data));
+                    $rootScope.apiData.get(hugoSymbol).set('vus', $rootScope.metaModel.createMap({data: data}));
                 } else if (type === 'priority' || type === 'drug') {
                     // TODO
                     // $rootScope.apiData.get(hugoSymbol).set(type, $rootScope.metaModel.createList(''));

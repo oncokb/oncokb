@@ -126,7 +126,9 @@ angular.module('oncokbApp')
                         _.each(hugoSymbols, function(hugoSymbol) {
                             var apiMapping = newMetaModel.createMap();
                             if (originalAPI.get(hugoSymbol).has('vus')) {
-                                apiMapping.set('vus', newMetaModel.createString(originalAPI.get(hugoSymbol).get('vus').getText()));
+                                apiMapping.set('vus', newMetaModel.createMap({
+                                    data: originalAPI.get(hugoSymbol).get('vus').get('data')
+                                }));
                             }
                             // TODO
                             // if (originalAPI.has('priority')) {}

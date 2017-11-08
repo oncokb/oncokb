@@ -64,7 +64,7 @@ angular.module('oncokbApp')
                 var hugoSymbols = $rootScope.apiData.keys();
                 _.each(hugoSymbols, function(hugoSymbol) {
                     if ($rootScope.apiData.get(hugoSymbol).has('vus')) {
-                        updateByType('vus', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('vus').getText());
+                        updateByType('vus', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('vus').get('data'));
                     }
                     // TODO
                     // updateByType('priority', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('priority'));
