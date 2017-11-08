@@ -103,7 +103,7 @@ angular.module('oncokbApp')
                     } else {
                         var newMetaModel = metaRealtime.getModel();
                         var newReview = newMetaModel.createMap();
-                        // backup meta file
+                        // backup meta model
                         var originalMeta = $rootScope.metaData;
                         var hugoSymbols = originalMeta.keys();
                         _.each(hugoSymbols, function(hugoSymbol) {
@@ -119,6 +119,19 @@ angular.module('oncokbApp')
                             newReview.set(hugoSymbol, uuidMapping);
                         });
                         newMetaModel.getRoot().set('review', newReview);
+                        // backup timestamp model
+                        var newTimeStamp = newMetaModel.createMap();
+                        var originalTimeStamp = $rootScope.timeStamp;
+                        var hugoSymbols = originalTimeStamp.keys();
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            var timeStampMapping = newMetaModel.createMap();
+                            var timeStampKeys = originalTimeStamp.get(hugoSymbol).keys();
+                            _.each(timeStampKeys, function(timeStampKey) {
+                                timeStampMapping.set(timeStampKey, originalTimeStamp.get(hugoSymbol).get(timeStampKey));
+                            });
+                            newTimeStamp.set(hugoSymbol, timeStampMapping);
+                        });
+                        newMetaModel.getRoot().set('timeStamp', newTimeStamp);
                         console.log('Completed back up meta file');
                         deferred.resolve('success');
                     }
