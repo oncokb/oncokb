@@ -88,6 +88,7 @@ angular.module('oncokbApp')
                             });
                         }
                         scope.data.loading = false;
+                        scope.secondTimeAutoNotify();
                     });
                     // The column difference in terms of curation queue location in queues page or gene page it that,
                     // gene page has an unique column 'Previously curated in', and queues page has an unique column 'Gene'
@@ -100,7 +101,6 @@ angular.module('oncokbApp')
                         scope.dtColumns[6] = DTColumnDefBuilder.newColumnDef(6).withOption('sType', 'date');
                         scope.dtColumns[7] = DTColumnDefBuilder.newColumnDef(7).withOption('sType', 'date-html');
                     }
-                    scope.secondTimeAutoNotify();
                 },
                 post: function postLink(scope) {
                     scope.$watch('input.article', function(n, o) {
@@ -564,7 +564,7 @@ angular.module('oncokbApp')
                 $scope.secondTimeAutoNotify = function() {
                     _.each($scope.queue, function (queueItem) {
                         var hugoSymbol = queueItem[hugoSymbol];
-                        if (hugoSymbol && queueItem.curator && mainUtils.isExpiredCuration(queueItem.dueDay) && !queueItem.notified) {
+                        if (hugoSymbol && queueItem.curator && !queueItem.curated && mainUtils.isExpiredCuration(queueItem.dueDay) && !queueItem.notified) {
                             $scope.sendEmail(queueItem);
                             var currentTimeStamp = new Date().getTime();
                             queueItem.notified = currentTimeStamp;
