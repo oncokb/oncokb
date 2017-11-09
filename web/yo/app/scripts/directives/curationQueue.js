@@ -444,7 +444,7 @@ angular.module('oncokbApp')
                         if (queueItem.link) {
                             content += '(' + queueItem.link + ')';
                         }
-                        content += ' which was due on ' + $scope.getFormattedDate(queueItem.dueDay) + '. Please complete this assignment as soon as possible and let us know when you have done this. \n\nIf you have already completed this task, please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the gene page (this will let us know the task is complete). If you have any questions or concerns please email or slack us as needed.';
+                        content += ' which was due on ' + $scope.getFormattedDate(queueItem.dueDay) + '. Please complete this assignment as soon as possible and let us know when you have done this. \n\nIf you have already completed this task, please remember to CLICK THE GREEN CHECK BOX BUTTON at the Curation Queue page or the bottom of the gene page (this will let us know the task is complete). If you have any questions or concerns please email or slack us as needed.';
                         content += 'Thank you, \nOncoKB Admin';
                     } else {
                         content += queueItem.addedBy + ' of OncoKB would like you curate the following publications in the indicated alteration, tumor type and section:\n\n';
@@ -468,15 +468,16 @@ angular.module('oncokbApp')
                             content += queueItem.comment + '\n';
                         }
                         content += '\nPlease try to curate this literature before ' + $scope.getFormattedDate(queueItem.dueDay) + ' and remember to log your hours for curating this data.\n\n';
-                        content += 'IMPORTANT: Please remember to CLICK THE GREEN CHECK BOX BUTTON at the bottom of the gene page (this will let us know the task is complete).\n\n';
+                        content += 'IMPORTANT: Please remember to CLICK THE GREEN CHECK BOX BUTTON at the Curation Queue page or the bottom of the gene page (this will let us know the task is complete).\n\n';
                         content += 'If you have any questions or concerns please email or slack ' + queueItem.addedBy + '.\n\n';
                         content += 'Thank you, \nOncoKB Admin';
                     }
                     var subject = 'OncoKB Curation Assignment';
                     mainUtils.sendEmail(email, subject, content).then(function() {
                         if (expiredCuration) {
-                            queueModelItem.set('notified', new Date().getTime());
-                            queueItem.notified = new Date().getTime();
+                            var currentTimeStamp = new Date().getTime();
+                            queueModelItem.set('notified', currentTimeStamp);
+                            queueItem.notified = currentTimeStamp;
                         }
                     }, function(error) {
                         dialogs.error('Error', 'Failed to notify curator automatically. Please send curator email manually.');
@@ -565,13 +566,10 @@ angular.module('oncokbApp')
                     _.each($scope.queue, function (queueItem) {
                         var hugoSymbol = queueItem[hugoSymbol];
                         if (hugoSymbol && queueItem.curator && !queueItem.curated && mainUtils.isExpiredCuration(queueItem.dueDay) && !queueItem.notified) {
-                            $scope.sendEmail(queueItem);
-                            var currentTimeStamp = new Date().getTime();
-                            queueItem.notified = currentTimeStamp;
                             for (var i = 0; i < $rootScope.queuesData.get(hugoSymbol).length; i++) {
-                                var tempQueueItem = $rootScope.queuesData.get(hugoSymbol).get(i);
-                                if (tempQueueItem.get('addedAt') === queueItem.addedAt) {
-                                    tempQueueItem.set('notified', currentTimeStamp);
+                                var queueModelItem = $rootScope.queuesData.get(hugoSymbol).get(i);
+                                if (queueModelItem.get('addedAt') === queueItem.addedAt) {
+                                    $scope.sendEmail(queueItem, queueModelItem);
                                     break;
                                 }
                             }
