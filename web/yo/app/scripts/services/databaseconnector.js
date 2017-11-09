@@ -397,6 +397,7 @@ angular.module('oncokbApp')
                                     }
                                 );
                                 fail(error);
+                                setAPIData('vus', hugoSymbol, data);
                             });
                     }
                 } else {
