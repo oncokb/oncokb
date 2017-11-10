@@ -48,8 +48,25 @@ angular.module('oncokbApp')
                     }
                 }
             };
+            var colorsByLeve = {
+                Level_1: '#33A02C',
+                Level_2A: '#1F78B4',
+                Level_2B: '#80B1D3',
+                Level_3A: '#984EA3',
+                Level_3B: '#BE98CE',
+                Level_4: '#424242',
+                Level_R1: '#EE3424',
+                Level_R2: '#F79A92',
+                Level_R3: '#FCD6D3'
+            };
+            /**
+             * This function is used to calculate 2 types of mutation messages we want to indicate in the mutation section header.
+             * The first one is about the mutation name validation result such as duplicated mutation or existed in VUS section. The result is stored in mutationMessages, and updated in real time as editing.
+             * The other one is about the detailed mutation content inside when first loaded the gene page, and the result is stored in mutationContent.
+             * **/
             $scope.getMutationMessages = function() {
                 $scope.mutationMessages = {};
+                $scope.mutationContent = {};
                 var vusList = [];
                 $scope.vus.asArray().forEach(function(e) {
                     vusList.push(e.name.getText().trim().toLowerCase());
@@ -63,7 +80,9 @@ angular.module('oncokbApp')
 
                 var tempNameList = [];
                 for (var i = 0; i < $scope.gene.mutations.length; i++) {
-                    var mutationName = $scope.gene.mutations.get(i).name.getText().trim().toLowerCase();
+                    var mutation = $scope.gene.mutations.get(i);
+                    var mutationName = mutation.name.getText().trim().toLowerCase();
+                    var uuid = mutation.name_uuid.getText();
                     if (mutationNameBlackList.indexOf(mutationName) !== -1) {
                         $scope.mutationMessages[mutationName] = 'This mutation name is not allowed';
                     } else if (vusList.indexOf(mutationName) !== -1) {
@@ -74,23 +93,83 @@ angular.module('oncokbApp')
                         tempNameList.push(mutationName);
                         $scope.mutationMessages[mutationName] = '';
                     }
+                    $scope.mutationContent[uuid] = {
+                        TT: 0,
+                        levels: []
+                    };
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors.get(j);
+                        if (!tumor.name_review.get('removed')) {
+                            $scope.mutationContent[uuid].TT++;
+                            for (var m = 0; m < tumor.TI.length; m++) {
+                                var ti = tumor.TI.get(m);
+                                for (var n = 0; n < ti.treatments.length; n++) {
+                                    var treatment = ti.treatments.get(n);
+                                    if (!treatment.name_review.get('removed')) {
+                                        $scope.mutationContent[uuid].levels.push(treatment.level.text);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if ($scope.mutationContent[uuid].TT > 0) {
+                        $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
+                        if ($scope.mutationContent[uuid].levels.length > 0) {
+                            $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function(level) {
+                                return '<span style="color: ' + colorsByLeve['Level_' + level] + '">' + level + '</span>';
+                            });
+                            $scope.mutationContent[uuid].result += ', Levels: ' + $scope.mutationContent[uuid].levels.join(', ') + '</span>';
+                        }
+                    }
                 }
-            }
+            };
+            /**
+             * This function is used to calculate 2 types of tumor messages we want to indicate in the tumor section header.
+             * The first one is about the tumor name validation result such as duplicated tumor. The result is stored in tumorMessages, and updated in real time as editing.
+             * The other one is about the detailed treatment info inside when first open the tumor section, and the result is stored in tumorContent.
+             * **/
             $rootScope.getTumorMessages = function(mutation) {
                 var mutationName = mutation.name.text.toLowerCase();
                 if (!$scope.tumorMessages) {
                     $scope.tumorMessages = {};
                 }
                 $scope.tumorMessages[mutationName] = {};
+                $scope.tumorContent = {};
                 var tempNameList = [];
                 for (var j = 0; j < mutation.tumors.length; j++) {
                     var tumor = mutation.tumors.get(j);
+                    var uuid = tumor.name_uuid.getText();
                     var tumorName = $scope.getCancerTypesName(tumor.cancerTypes).toLowerCase();
                     if (tempNameList.indexOf(tumorName) === -1) {
                         tempNameList.push(tumorName);
                         $scope.tumorMessages[mutationName][tumorName] = '';
                     } else {
                         $scope.tumorMessages[mutationName][tumorName] = 'Tumor exists';
+                    }
+                    for (var m = 0; m < tumor.TI.length; m++) {
+                        var ti = tumor.TI.get(m);
+                        for (var n = 0; n < ti.treatments.length; n++) {
+                            var treatment = ti.treatments.get(n);
+                            if (!treatment.name_review.get('removed')) {
+                                if (!$scope.tumorContent[uuid]) {
+                                    $scope.tumorContent[uuid] = {};
+                                }
+                                var tempLevel = treatment.level.text;
+                                if ($scope.tumorContent[uuid][tempLevel]) {
+                                    $scope.tumorContent[uuid][tempLevel]++;
+                                } else {
+                                    $scope.tumorContent[uuid][tempLevel] = 1;
+                                }
+                            }
+                        }
+                    }
+                    var levels = _.keys($scope.tumorContent[uuid]);
+                    if (levels.length > 0) {
+                        var result = [];
+                        _.each(levels, function(level) {
+                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + colorsByLeve['Level_' + level] + '">Level ' + level + '</span>');
+                        });
+                        $scope.tumorContent[uuid].result = result.join('; ');
                     }
                 }
             }
