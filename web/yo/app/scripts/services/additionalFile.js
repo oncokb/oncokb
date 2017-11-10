@@ -11,7 +11,7 @@
  * Service in the oncokb.
  */
 angular.module('oncokbApp')
-    .service('additionalFile', function additionalFile($rootScope, $q, storage, mainUtils, documents, dialogs) {
+    .service('additionalFile', function additionalFile($rootScope, $q, storage, mainUtils, documents, dialogs, $timeout, DatabaseConnector) {
         function load(types) {
             function loadMeta() {
                 var metaDefer = $q.defer();
@@ -27,13 +27,16 @@ angular.module('oncokbApp')
                             $rootScope.metaRealtime = metaRealtime;
                             $rootScope.metaModel = metaRealtime.getModel();
                             $rootScope.metaData = metaRealtime.getModel().getRoot().get('review');
+                            $rootScope.apiData = metaRealtime.getModel().getRoot().get('api');
                             metaDefer.resolve('success');
+                            if ($rootScope.internal) {
+                                synchronizeData();
+                            }
                         }
                     });
                 }
                 return metaDefer.promise;
             }
-
             function loadQueues() {
                 var queuesDefer = $q.defer();
                 if ($rootScope.queuesData) {
@@ -53,6 +56,34 @@ angular.module('oncokbApp')
                     });
                 }
                 return queuesDefer.promise;
+            }
+            /**
+             * Loop through api calls recorded in the meta file and update it to database every 5 mins
+             * **/
+            function synchronizeData() {
+                var hugoSymbols = $rootScope.apiData.keys();
+                _.each(hugoSymbols, function(hugoSymbol) {
+                    if ($rootScope.apiData.get(hugoSymbol).has('vus')) {
+                        updateByType('vus', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('vus').get('data'));
+                    }
+                    // TODO
+                    // updateByType('priority', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('priority'));
+                    // updateByType('drug', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('drug'));
+                });
+                $timeout(function() {
+                    synchronizeData();
+                }, 300000);
+            }
+            function updateByType(type, hugoSymbol, data) {
+                if (type === 'vus') {
+                    DatabaseConnector.updateVUS(hugoSymbol, data, function() {
+                        $rootScope.apiData.get(hugoSymbol).delete('vus');
+                    });
+                } else if (type === 'priority') {
+                    // TODO
+                } else if (type === 'drug') {
+                    // TODO
+                }
             }
             var deferred = $q.defer();
             storage.retrieveAdditional().then(function(result) {

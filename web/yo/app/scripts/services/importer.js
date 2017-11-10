@@ -103,7 +103,7 @@ angular.module('oncokbApp')
                     } else {
                         var newMetaModel = metaRealtime.getModel();
                         var newReview = newMetaModel.createMap();
-                        // backup meta file
+                        // backup meta model
                         var originalMeta = $rootScope.metaData;
                         var hugoSymbols = originalMeta.keys();
                         _.each(hugoSymbols, function(hugoSymbol) {
@@ -119,6 +119,23 @@ angular.module('oncokbApp')
                             newReview.set(hugoSymbol, uuidMapping);
                         });
                         newMetaModel.getRoot().set('review', newReview);
+                        // backup api model
+                        var newAPI = newMetaModel.createMap();
+                        var originalAPI = $rootScope.apiData;
+                        var hugoSymbols = originalAPI.keys();
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            var apiMapping = newMetaModel.createMap();
+                            if (originalAPI.get(hugoSymbol).has('vus')) {
+                                apiMapping.set('vus', newMetaModel.createMap({
+                                    data: originalAPI.get(hugoSymbol).get('vus').get('data')
+                                }));
+                            }
+                            // TODO
+                            // if (originalAPI.has('priority')) {}
+                            // if (originalAPI.has('drug')) {}
+                            newAPI.set(hugoSymbol, apiMapping);
+                        });
+                        newMetaModel.getRoot().set('api', newAPI);
                         console.log('Completed back up meta file');
                         deferred.resolve('success');
                     }
