@@ -205,7 +205,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.vusUpdate = function(message) {
-                if ($scope.status.isDesiredGene && $rootScope.internal) {
+                if ($scope.status.isDesiredGene) {
                     if ($scope.status.vusUpdateTimeout) {
                         $timeout.cancel($scope.status.vusUpdateTimeout);
                     }
@@ -216,9 +216,6 @@ angular.module('oncokbApp')
                             console.log('success saving vus to database');
                         }, function(error) {
                             console.log('error happened when saving VUS to DB', error);
-                            var subject = 'VUS update Error for ' + $scope.gene.name.getText();
-                            var content = 'Error happened when ' + message + '. The system error returned is ' + error;
-                            mainUtils.notifyDeveloper(subject, content);
                         });
                     }, 2000);
                 }

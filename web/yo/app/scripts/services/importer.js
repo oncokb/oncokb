@@ -132,6 +132,23 @@ angular.module('oncokbApp')
                             newTimeStamp.set(hugoSymbol, timeStampMapping);
                         });
                         newMetaModel.getRoot().set('timeStamp', newTimeStamp);
+                        // backup api model
+                        var newAPI = newMetaModel.createMap();
+                        var originalAPI = $rootScope.apiData;
+                        var hugoSymbols = originalAPI.keys();
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            var apiMapping = newMetaModel.createMap();
+                            if (originalAPI.get(hugoSymbol).has('vus')) {
+                                apiMapping.set('vus', newMetaModel.createMap({
+                                    data: originalAPI.get(hugoSymbol).get('vus').get('data')
+                                }));
+                            }
+                            // TODO
+                            // if (originalAPI.has('priority')) {}
+                            // if (originalAPI.has('drug')) {}
+                            newAPI.set(hugoSymbol, apiMapping);
+                        });
+                        newMetaModel.getRoot().set('api', newAPI);
                         console.log('Completed back up meta file');
                         deferred.resolve('success');
                     }

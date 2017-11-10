@@ -456,7 +456,6 @@ angular.module('oncokbApp')
                         $rootScope.$emit('realtimeDoc.client_error');
                     } else if (error.type === gapi.drive.realtime.ErrorType.NOT_FOUND) {
                         console.log('error: realtimeDoc.not_found');
-                        deferred.reject(error);
                         $rootScope.$emit('realtimeDoc.not_found', id);
                     } else {
                         console.log(error, id);
@@ -477,6 +476,7 @@ angular.module('oncokbApp')
                         });
                     }
                     $rootScope.$digest();
+                    deferred.reject(error);
                 };
                 gapi.drive.realtime.load(id, onLoad, initialize, onError);
                 return deferred.promise;
