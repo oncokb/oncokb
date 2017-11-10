@@ -44,6 +44,7 @@ angular.module('oncokbApp')
                         this.gene.mutations.push(_mutation);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
                         $scope.initGeneStatus(_mutation);
+                        mainUtils.updateLastModified();
                     }
                 }
             };
@@ -218,6 +219,7 @@ angular.module('oncokbApp')
                         });
                     }, 2000);
                 }
+                mainUtils.updateLastModified();
             };
 
             $scope.getData = function() {
@@ -1415,6 +1417,7 @@ angular.module('oncokbApp')
                 default:
                     break;
                 }
+                mainUtils.updateLastSavedToDB();
             };
             /*
             * This function is used to collect uuids for obsoleted section.
@@ -1830,7 +1833,7 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.updateGene(params, function(result) {
                     $scope.docStatus.savedGene = true;
-                    changeLastUpdate();
+                    mainUtils.updateLastSavedToDB();
                 }, function(result) {
                     $scope.docStatus.savedGene = true;
                     var errorMessage = 'An error has occurred when saving ' +
@@ -1843,25 +1846,9 @@ angular.module('oncokbApp')
                             'Gene: ' + $scope.gene.name.getText(),
                             reason: JSON.stringify(result)
                         });
-                    changeLastUpdate();
+                    mainUtils.updateLastSavedToDB();
                 });
             };
-
-            function changeLastUpdate() {
-                if ($scope.gene.status_timeStamp.has('lastUpdate')) {
-                    $scope.gene.status_timeStamp.get('lastUpdate').value.setText(new Date().getTime().toString());
-                    $scope.gene.status_timeStamp.get('lastUpdate').by.setText(Users.getMe().name);
-                } else {
-                    var timeStamp;
-                    $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                    timeStamp.value.setText(new Date().getTime().toString());
-                    timeStamp.by.setText(Users.getMe().name);
-                    $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
-                    $scope.realtimeDocument.getModel().endCompoundOperation();
-                }
-                $scope.docStatus.updateGene = true;
-            }
             $scope.validateTumor = function(mutation, tumor) {
                 var exists = false;
                 var removed = false;
@@ -1964,6 +1951,7 @@ angular.module('oncokbApp')
                         }];
                         var mutationIndex = this.gene.mutations.indexOf(mutation);
                         $scope.initGeneStatus(mutation, _tumorType);
+                        mainUtils.updateLastModified();
                     }
                 }
             };
@@ -2042,6 +2030,7 @@ angular.module('oncokbApp')
                         ti.treatments.push(_treatment);
                         $scope.realtimeDocument.getModel().endCompoundOperation();
                         $scope.initGeneStatus(mutation, tumor, ti, _treatment);
+                        mainUtils.updateLastModified();
                     }
                 }
             };
@@ -2066,6 +2055,7 @@ angular.module('oncokbApp')
                             trialsReview.set('updateTime', new Date().getTime());
                             trials.push(newTrial);
                             trialsRollBackCheck(trialsReview, trials, trialsUuid);
+                            mainUtils.updateLastModified();
                         } else {
                             dialogs.notify('Warning', 'Please check your trial ID format. (e.g. NCT01562899)');
                         }
@@ -2096,6 +2086,7 @@ angular.module('oncokbApp')
                 trialsReview.set('updateTime', new Date().getTime());
                 trials.remove(index);
                 trialsRollBackCheck(trialsReview, trials, trialsUuid);
+                mainUtils.updateLastModified();
             };
 
             function trialsRollBackCheck(trialsReview, trials, trialsUuid) {
@@ -2178,7 +2169,7 @@ angular.module('oncokbApp')
                 console.log($scope.geneStatus);
 
                 console.log('Num of watchers: ' + checkNumWatchers());
-                console.log($scope.gene.status_timeStamp.get('lastUpdate').value);
+                console.log($rootScope.geneTimeStamp.get('lastSavedAt'));
 
                 $scope.gene.mutations.asArray().forEach(function(e) {
                     console.log('------------------');
@@ -2235,7 +2226,7 @@ angular.module('oncokbApp')
 
             $scope.updateGeneColor = function() {
                 if ($scope.gene && $scope.document && $scope.document.hasOwnProperty('modifiedDate')) {
-                    if (new Date($scope.document.modifiedDate).getTime() > Number($scope.gene.status_timeStamp.get('lastUpdate').value.text)) {
+                    if (new Date($scope.document.modifiedDate).getTime() > Number($rootScope.geneTimeStamp.get('lastSavedAt'))) {
                         return 'red';
                     }
                     return 'black';
@@ -2280,6 +2271,7 @@ angular.module('oncokbApp')
                     }
                 }, function() {
                 });
+                mainUtils.updateLastModified();
             };
             /**
              * This function is desgined to collect uuid list from a section
@@ -3037,6 +3029,10 @@ angular.module('oncokbApp')
                 if(!$rootScope.geneMetaData.has('currentReviewer') || $rootScope.geneMetaData.get('currentReviewer').type !== 'EditableString') {
                     $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
                 }
+                if (!$rootScope.timeStamp.has($scope.fileTitle)) {
+                    $rootScope.timeStamp.set($scope.fileTitle, $rootScope.metaModel.createMap());
+                }
+                $rootScope.geneTimeStamp = $rootScope.timeStamp.get($scope.fileTitle);
                 var tempReviewer = $rootScope.geneMetaData.get('currentReviewer');
                 tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_INSERTED, reviewerChange);
                 tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_DELETED, reviewerChange);
@@ -3106,24 +3102,7 @@ angular.module('oncokbApp')
 
             function afterCreateGeneModel() {
                 var file = Documents.get({title: $scope.fileTitle});
-                var timeStamp;
                 file = file[0];
-                if (!$scope.gene.status_timeStamp.has('lastEdit')) {
-                    $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                    timeStamp.value.setText(new Date().getTime().toString());
-                    timeStamp.by.setText(Users.getMe().name);
-                    $scope.gene.status_timeStamp.set('lastEdit', timeStamp);
-                    $scope.realtimeDocument.getModel().endCompoundOperation();
-                }
-                if (!$scope.gene.status_timeStamp.has('lastUpdate')) {
-                    $scope.realtimeDocument.getModel().beginCompoundOperation();
-                    timeStamp = $scope.realtimeDocument.getModel().create('TimeStamp');
-                    timeStamp.value.setText(new Date().getTime().toString());
-                    timeStamp.by.setText(Users.getMe().name);
-                    $scope.gene.status_timeStamp.set('lastUpdate', timeStamp);
-                    $scope.realtimeDocument.getModel().endCompoundOperation();
-                }
                 // Only allow admins to edit Other Biomarkers Gene Sumarry, Background and Gene Type
                 if ($scope.gene.name.getText().trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8) {
                     $scope.geneEditable = false;
@@ -3302,10 +3281,6 @@ angular.module('oncokbApp')
             }
 
             function documentSaved(type) {
-                if (!$scope.docStatus.updateGene && type !== 'meta') {
-                    $scope.gene.status_timeStamp.get('lastEdit').value.setText(new Date().getTime().toString());
-                    $scope.gene.status_timeStamp.get('lastEdit').by.setText(Users.getMe().name);
-                }
                 $scope.docStatus.saving = false;
                 $scope.docStatus.saved = true;
                 $scope.docStatus.closed = false;
@@ -3839,7 +3814,7 @@ angular.module('oncokbApp')
             };
         }]
     )
-    .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, _, OncoKB, $rootScope, user) {
+    .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, _, OncoKB, $rootScope, user, mainUtils) {
         $scope.meta = {
             model: data.model,
             mutation: data.mutation,
@@ -3899,6 +3874,7 @@ angular.module('oncokbApp')
                 $rootScope.geneMetaData.set(uuid, temp);
             }
             $rootScope.getTumorMessages($scope.meta.mutation);
+            mainUtils.updateLastModified();
         }; // end save
 
         $scope.$watch('meta.newCancerTypes', function(n) {

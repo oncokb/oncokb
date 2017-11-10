@@ -27,6 +27,7 @@ angular.module('oncokbApp')
                             $rootScope.metaRealtime = metaRealtime;
                             $rootScope.metaModel = metaRealtime.getModel();
                             $rootScope.metaData = metaRealtime.getModel().getRoot().get('review');
+                            $rootScope.timeStamp = metaRealtime.getModel().getRoot().get('timeStamp');
                             $rootScope.apiData = metaRealtime.getModel().getRoot().get('api');
                             metaDefer.resolve('success');
                             if ($rootScope.internal) {

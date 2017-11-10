@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope, ReviewResource) {
+    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope, ReviewResource, user) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -488,6 +488,14 @@ angular.module('oncokbApp')
                 return false;
             }
         }
+        function updateLastModified() {
+            $rootScope.geneTimeStamp.set('lastModifiedBy', user.name);
+            $rootScope.geneTimeStamp.set('lastModifiedAt', new Date().getTime());
+        }
+        function updateLastSavedToDB() {
+            $rootScope.geneTimeStamp.set('lastSavedBy', user.name);
+            $rootScope.geneTimeStamp.set('lastSavedAt', new Date().getTime());
+        }
         return {
             getCancerTypesName: getCancerTypesName,
             containMainType: containMainType,
@@ -505,6 +513,8 @@ angular.module('oncokbApp')
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,
             processedInReview: processedInReview,
-            notifyDeveloper: notifyDeveloper
+            notifyDeveloper: notifyDeveloper,
+            updateLastModified: updateLastModified,
+            updateLastSavedToDB: updateLastSavedToDB
         };
     });

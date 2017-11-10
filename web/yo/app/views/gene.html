@@ -6,8 +6,8 @@
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.displayName}}">
       </span>
-      <span ng-if="::(document && gene.status_timeStamp.has('lastEdit'))" class="geneLastModify">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
-      <span ng-if="::(document && userRole === 8 && gene.status_timeStamp.has('lastUpdate'))" class="geneLastModify">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
+      <span ng-if="::(document && geneTimeStamp.get('lastModifiedAt'))" class="geneLastModify">Last edit was made on {{geneTimeStamp.get('lastModifiedAt') | date : 'MMM d, h:mm a yyyy'}} by {{geneTimeStamp.get('lastModifiedBy')}}</span>
+      <span ng-if="::(document && userRole === 8 && geneTimeStamp.get('lastSavedAt'))" class="geneLastModify">Last update to database was made on {{geneTimeStamp.get('lastSavedAt')  | date : 'MMM d, h:mm a'}} by {{geneTimeStamp.get('lastSavedBy')}}</span>
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>

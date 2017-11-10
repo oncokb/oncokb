@@ -119,6 +119,19 @@ angular.module('oncokbApp')
                             newReview.set(hugoSymbol, uuidMapping);
                         });
                         newMetaModel.getRoot().set('review', newReview);
+                        // backup timestamp model
+                        var newTimeStamp = newMetaModel.createMap();
+                        var originalTimeStamp = $rootScope.timeStamp;
+                        var hugoSymbols = originalTimeStamp.keys();
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            var timeStampMapping = newMetaModel.createMap();
+                            var timeStampKeys = originalTimeStamp.get(hugoSymbol).keys();
+                            _.each(timeStampKeys, function(timeStampKey) {
+                                timeStampMapping.set(timeStampKey, originalTimeStamp.get(hugoSymbol).get(timeStampKey));
+                            });
+                            newTimeStamp.set(hugoSymbol, timeStampMapping);
+                        });
+                        newMetaModel.getRoot().set('timeStamp', newTimeStamp);
                         // backup api model
                         var newAPI = newMetaModel.createMap();
                         var originalAPI = $rootScope.apiData;

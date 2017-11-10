@@ -105,19 +105,24 @@ angular.module('oncokbApp')
             function processMeta() {
                 var genesToReview = $rootScope.metaData.keys();
                 for (var i = 0; i < genesToReview.length; i++) {
-                    $scope.metaFlags[genesToReview[i]] = {};
-                    var geneMetaData = $rootScope.metaData.get(genesToReview[i]);
+                    var hugoSymbol = genesToReview[i];
+                    $scope.metaFlags[hugoSymbol] = {};
+                    var geneMetaData = $rootScope.metaData.get(hugoSymbol);
                     var uuids = geneMetaData.keys();
                     var flag = true;
                     for (var j = 0; j < uuids.length; j++) {
                         if (geneMetaData.get(uuids[j]).type === 'Map' && geneMetaData.get(uuids[j]).get('review')) {
-                            $scope.metaFlags[genesToReview[i]].review = true;
+                            $scope.metaFlags[hugoSymbol].review = true;
                             flag = false;
                             break;
                         }
                     }
                     if (flag) {
-                        $scope.metaFlags[genesToReview[i]].review = false;
+                        $scope.metaFlags[hugoSymbol].review = false;
+                    }
+                    if ($rootScope.timeStamp.get(hugoSymbol)) {
+                        $scope.metaFlags[hugoSymbol].lastModifiedBy = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy');
+                        $scope.metaFlags[hugoSymbol].lastModifiedAt = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt');
                     }
                 }
                 var genesInQueues = $rootScope.queuesData.keys();
