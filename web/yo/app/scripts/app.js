@@ -673,6 +673,17 @@ angular.module('oncokbApp').run(
                     'R1': '<span><b>Standard of care</b> biomarker predictive of <b>resistance</b> to an <b>FDA-approved</b> drug <b>in this indication</b></span>',
                     'R2': '<span>Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance</span>',
                     'R3': '<span>Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance</span>'
+                },
+                colorsByLeve: {
+                    Level_1: '#33A02C',
+                    Level_2A: '#1F78B4',
+                    Level_2B: '#80B1D3',
+                    Level_3A: '#984EA3',
+                    Level_3B: '#BE98CE',
+                    Level_4: '#424242',
+                    Level_R1: '#EE3424',
+                    Level_R2: '#F79A92',
+                    Level_R3: '#FCD6D3'
                 }
             };
 

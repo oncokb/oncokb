@@ -48,17 +48,6 @@ angular.module('oncokbApp')
                     }
                 }
             };
-            var colorsByLeve = {
-                Level_1: '#33A02C',
-                Level_2A: '#1F78B4',
-                Level_2B: '#80B1D3',
-                Level_3A: '#984EA3',
-                Level_3B: '#BE98CE',
-                Level_4: '#424242',
-                Level_R1: '#EE3424',
-                Level_R2: '#F79A92',
-                Level_R3: '#FCD6D3'
-            };
             /**
              * This function is used to calculate 2 types of mutation messages we want to indicate in the mutation section header.
              * The first one is about the mutation name validation result such as duplicated mutation or existed in VUS section. The result is stored in mutationMessages, and updated in real time as editing.
@@ -116,7 +105,7 @@ angular.module('oncokbApp')
                         $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
                         if ($scope.mutationContent[uuid].levels.length > 0) {
                             $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function(level) {
-                                return '<span style="color: ' + colorsByLeve['Level_' + level] + '">' + level + '</span>';
+                                return '<span style="color: ' + $rootScope.meta.colorsByLeve['Level_' + level] + '">' + level + '</span>';
                             });
                             $scope.mutationContent[uuid].result += ', Levels: ' + $scope.mutationContent[uuid].levels.join(', ') + '</span>';
                         }
@@ -167,7 +156,7 @@ angular.module('oncokbApp')
                     if (levels.length > 0) {
                         var result = [];
                         _.each(levels, function(level) {
-                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + colorsByLeve['Level_' + level] + '">Level ' + level + '</span>');
+                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLeve['Level_' + level] + '">Level ' + level + '</span>');
                         });
                         $scope.tumorContent[uuid].result = result.join('; ');
                     }
