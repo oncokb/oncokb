@@ -674,7 +674,7 @@ angular.module('oncokbApp').run(
                     'R2': '<span>Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance</span>',
                     'R3': '<span>Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance</span>'
                 },
-                colorsByLeve: {
+                colorsByLevel: {
                     Level_1: '#33A02C',
                     Level_2A: '#1F78B4',
                     Level_2B: '#80B1D3',

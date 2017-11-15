@@ -105,7 +105,7 @@ angular.module('oncokbApp')
                         $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
                         if ($scope.mutationContent[uuid].levels.length > 0) {
                             $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function(level) {
-                                return '<span style="color: ' + $rootScope.meta.colorsByLeve['Level_' + level] + '">' + level + '</span>';
+                                return '<span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">' + level + '</span>';
                             });
                             $scope.mutationContent[uuid].result += ', Levels: ' + $scope.mutationContent[uuid].levels.join(', ') + '</span>';
                         }
@@ -156,7 +156,7 @@ angular.module('oncokbApp')
                     if (levels.length > 0) {
                         var result = [];
                         _.each(levels, function(level) {
-                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLeve['Level_' + level] + '">Level ' + level + '</span>');
+                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">Level ' + level + '</span>');
                         });
                         $scope.tumorContent[uuid].result = result.join('; ');
                     }
