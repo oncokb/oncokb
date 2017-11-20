@@ -120,10 +120,6 @@ angular.module('oncokbApp')
                     if (flag) {
                         $scope.metaFlags[hugoSymbol].review = false;
                     }
-                    if ($rootScope.timeStamp.get(hugoSymbol)) {
-                        $scope.metaFlags[hugoSymbol].lastModifiedBy = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy');
-                        $scope.metaFlags[hugoSymbol].lastModifiedAt = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt');
-                    }
                 }
                 var genesInQueues = $rootScope.queuesData.keys();
                 for (var i = 0; i < genesInQueues.length; i++) {
@@ -141,6 +137,19 @@ angular.module('oncokbApp')
                                 queues: tempCount
                             };
                         }
+                    }
+                }
+                var genesWithTimeStamp = $rootScope.timeStamp.keys();
+                for (var i = 0; i < genesWithTimeStamp.length; i++) {
+                    var hugoSymbol = genesWithTimeStamp[i];
+                    if (!$scope.metaFlags[hugoSymbol]) {
+                        $scope.metaFlags[hugoSymbol] = {
+                            lastModifiedBy: $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy'),
+                            lastModifiedAt: $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt')
+                        };
+                    } else {
+                        $scope.metaFlags[hugoSymbol].lastModifiedBy = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy');
+                        $scope.metaFlags[hugoSymbol].lastModifiedAt = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt');
                     }
                 }
                 $scope.documents = Documents.get();
