@@ -143,14 +143,10 @@ angular.module('oncokbApp')
                 for (var i = 0; i < genesWithTimeStamp.length; i++) {
                     var hugoSymbol = genesWithTimeStamp[i];
                     if (!$scope.metaFlags[hugoSymbol]) {
-                        $scope.metaFlags[hugoSymbol] = {
-                            lastModifiedBy: $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy'),
-                            lastModifiedAt: $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt')
-                        };
-                    } else {
-                        $scope.metaFlags[hugoSymbol].lastModifiedBy = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy');
-                        $scope.metaFlags[hugoSymbol].lastModifiedAt = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt');
+                        $scope.metaFlags[hugoSymbol] = {};
                     }
+                    $scope.metaFlags[hugoSymbol].lastModifiedBy = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedBy');
+                    $scope.metaFlags[hugoSymbol].lastModifiedAt = $rootScope.timeStamp.get(hugoSymbol).get('lastModifiedAt');
                 }
                 $scope.documents = Documents.get();
                 $scope.status.rendering = false;
