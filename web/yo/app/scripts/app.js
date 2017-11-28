@@ -571,13 +571,13 @@ var oncokbApp = angular.module('oncokbApp', [
             .when('/queues', {
                 templateUrl: 'views/queues.html',
                 access: access.curator
-            })
-            .when('/drugs', {
-                templateUrl: 'views/drugs.html',
-                controller: 'DrugsCtrl',
-                access: access.admin,
-                internalUse: false
-            })
+            });
+            // .when('/drugs', {
+            //     templateUrl: 'views/drugs.html',
+            //     controller: 'DrugsCtrl',
+            //     access: access.admin,
+            //     internalUse: false
+            // })
             // .when('/vus', {
             //    templateUrl: 'views/vus.html',
             //    controller: 'VUSCtrl',
@@ -591,9 +591,9 @@ var oncokbApp = angular.module('oncokbApp', [
             //    internalUse: true
             //
             // })
-            .otherwise({
-                redirectTo: '/'
-            });
+            // .otherwise({
+            //     redirectTo: '/'
+            // });
 
         dialogsProvider.useBackdrop(true);
         dialogsProvider.useEscClose(true);
