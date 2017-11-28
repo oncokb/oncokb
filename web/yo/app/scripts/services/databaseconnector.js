@@ -432,7 +432,7 @@ angular.module('oncokbApp')
                         });
                 }
             }
-
+          
             function getAllDrugs(callback, success, fail) {
                 if (dataFromFile) {
                     Drugs.getFromFile()
@@ -445,6 +445,21 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .getAllDrugs()
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
+            }
+
+            function updateEvidenceTreatmentPriorityBatch(data, success, fail) {
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .updateEvidenceTreatmentPriorityBatch(data)
                         .success(function(data) {
                             success(data);
                         })
@@ -787,6 +802,7 @@ angular.module('oncokbApp')
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,
+                updateEvidenceTreatmentPriorityBatch: updateEvidenceTreatmentPriorityBatch,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {

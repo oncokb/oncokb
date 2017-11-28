@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.http.HttpMethod;
@@ -43,18 +44,23 @@ public class IndicatorController {
         @RequestParam(value = "levels", required = false) String levels,
         @RequestParam(value = "queryType", required = false) String queryType,
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly,
+        @RequestParam(value = "fields", required = false) String fields,
         @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
         Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
-        return IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
+
+        return JsonResultFactory.getIndicatorQueryResp(resp, fields);
     }
 
     @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     List<IndicatorQueryResp> getResult(
-        @RequestBody EvidenceQueries body) {
+        @RequestBody EvidenceQueries body,
+        @RequestParam(value = "fields", required = false) String fields
+    ) {
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -69,7 +75,8 @@ public class IndicatorController {
                 body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
                 source, body.getHighestLevelOnly()));
         }
-        return result;
+
+        return JsonResultFactory.getIndicatorQueryResp(result, fields);
     }
 
 

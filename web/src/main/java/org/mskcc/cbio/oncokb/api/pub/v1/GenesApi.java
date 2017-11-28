@@ -37,6 +37,7 @@ public interface GenesApi {
         method = RequestMethod.GET)
     ResponseEntity<Gene> genesEntrezGeneIdGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
+        ,@ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
 
@@ -48,6 +49,7 @@ public interface GenesApi {
         method = RequestMethod.GET)
     ResponseEntity<List<Alteration>> genesEntrezGeneIdVariantsGet(
         @ApiParam(value = "The entrez gene ID.", required = true) @PathVariable("entrezGeneId") Integer entrezGeneId
+        ,@ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
 
@@ -57,7 +59,9 @@ public interface GenesApi {
     @RequestMapping(value = "/genes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<Gene>> genesGet();
+    ResponseEntity<List<Gene>> genesGet(
+        @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    );
 
 
     @ApiOperation(value = "", notes = "Search gene.", response = Gene.class, responseContainer = "List", tags = {"Genes", "Search",})
@@ -70,6 +74,7 @@ public interface GenesApi {
         @ApiParam(value = "The gene symbol used in Human Genome Organisation. (Deprecated, use query instead)") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID. (Deprecated, use query instead)") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
+        ,@ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
 }

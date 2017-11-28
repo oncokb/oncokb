@@ -2,7 +2,9 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -10,7 +12,7 @@ import java.util.Set;
  */
 
 public class IndicatorQueryTreatment implements java.io.Serializable {
-    private Set<Drug> drugs = new HashSet<Drug>(0);
+    private List<Drug> drugs = new ArrayList<>(0);
     private Set<String> approvedIndications = new HashSet<String>(0);
     private Boolean fdaApproved;
     private LevelOfEvidence level;
@@ -20,11 +22,11 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     public IndicatorQueryTreatment() {
     }
 
-    public Set<Drug> getDrugs() {
+    public List<Drug> getDrugs() {
         return drugs;
     }
 
-    public void setDrugs(Set<Drug> drugs) {
+    public void setDrugs(List<Drug> drugs) {
         this.drugs = drugs;
     }
 

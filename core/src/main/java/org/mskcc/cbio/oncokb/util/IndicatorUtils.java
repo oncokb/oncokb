@@ -370,6 +370,13 @@ public class IndicatorUtils {
                         return comparison;
                     }
 
+                    // Compare the highest priority of each evidence
+                    comparison = e1.getHighestTreatmentPriority() - e2.getHighestTreatmentPriority();
+
+                    if (comparison != 0) {
+                        return comparison;
+                    }
+
                     if (e1.getId() == null) {
                         if (e2.getId() == null) {
                             return 0;
@@ -397,9 +404,9 @@ public class IndicatorUtils {
                         abstracts.add(articleAbstract);
                     }
                 }
-                for (Treatment treatment : evidence.getTreatments()) {
+                for (Treatment treatment : evidence.getSortedTreatment()) {
                     IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
-                    indicatorQueryTreatment.setDrugs(treatment.getDrugs());
+                    indicatorQueryTreatment.setDrugs(treatment.getSortedDrugs());
                     indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
                     indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
                     indicatorQueryTreatment.setPmids(pmids);
