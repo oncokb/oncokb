@@ -1,16 +1,17 @@
 <div id="drugs" class="container oncokbMainView">
     <div [hidden]="!rendering">
-        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+        <table class="table" [mfData]="allDrugs" #mf="mfDataTable" [mfRowsOnPage]="rowsOnPage" [(mfSortBy)]="sortBy" [(mfSortOrder)]="sortOrder">
             <thead>
             <tr class="dashedHeader">
-                <th>Drug</th>
-                <th *ngIf="userRole === 8">Operations</th>
+                <th style="width: 60%">
+                    <mfDefaultSorter by="drugName">Drug</mfDefaultSorter>
+                </th>
+                <th style="width: 40%" *ngIf="userRole === 8">Operations</th>
             </tr>
             </thead>
             <tbody >
-            <tr *ngFor="let drug of allDrugs">
+            <tr *ngFor="let drug of mf.data">
                 <td><strong>{{drug.drugName}}</strong></td>
-                <td></td>
                 <td>
                     <span>
                         <div style="min-width: 90px;">
@@ -25,6 +26,14 @@
                 </td>
             </tr>
             </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="4">
+                    <mfBootstrapPaginator [rowsOnPageSet]="[5,10,25]"></mfBootstrapPaginator>
+                </td>
+            </tr>
+            </tfoot>
+
         </table>
     </div>
 

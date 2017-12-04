@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Http, Response} from '@angular/http';
 import 'rxjs/Rx';
 import 'rxjs/add/operator/map';
@@ -12,10 +12,17 @@ export class DrugsComponent implements OnInit {
     userRole: number;
     allDrugs: object;
     rendering: boolean;
+    rowsOnPage: number;
+    sortBy: string;
+    sortOrder: string;
+
 
     constructor(private http: Http) {
         this.userRole = 8;
         this.rendering = false;
+        this.rowsOnPage = 10;
+        this.sortBy = 'drugName'
+        this.sortOrder = "asc";
     }
 
     ngOnInit(): void {
@@ -33,10 +40,6 @@ export class DrugsComponent implements OnInit {
                 console.log('error happened when loading all drugs information', error)
             });
     }
-
-    // public getUserRole(): void {
-    //
-    // }
 }
 
 

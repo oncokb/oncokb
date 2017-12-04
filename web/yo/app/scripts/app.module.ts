@@ -4,6 +4,7 @@ import { UpgradeModule } from '@angular/upgrade/static';
 import { RouterModule, Routes, UrlHandlingStrategy, UrlTree } from '@angular/router';
 import { HashLocationStrategy, LocationStrategy, CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { DataTableModule } from 'angular2-datatable';
 
 import { AppComponent } from './app.component.js';
 import { DrugsModule } from './controllers/drugs.module.js';
@@ -24,6 +25,7 @@ class HybridUrlHandlingStrategy implements UrlHandlingStrategy {
         UpgradeModule,
         HttpClientModule,
         RouterModule.forRoot([], { initialNavigation: false }),
+        DataTableModule,
         DrugsModule
     ],
     providers: [
@@ -34,5 +36,5 @@ class HybridUrlHandlingStrategy implements UrlHandlingStrategy {
     bootstrap: [ AppComponent ]
 })
 export class AppModule {
-    ngDoBootstrap() {}
+    // ngDoBootstrap() {}
 }
