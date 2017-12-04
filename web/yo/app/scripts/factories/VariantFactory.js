@@ -34,6 +34,23 @@ angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, 
     };
 }]);
 
+angular.module('oncokbApp').factory('Drugs', ['$http', function($http) {
+    'use strict';
+
+    function getFromServer() {
+        return $http.get('data/drugs.json');
+    }
+
+    function getFromFile() {
+        return $http.get('data/drugs.json');
+    }
+
+    return {
+        getFromServer: getFromServer,
+        getFromFile: getFromFile
+    };
+}]);
+
 angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     'use strict';
 
@@ -289,6 +306,16 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', 
         }
     }
 
+    function getAllDrugs() {
+        return $http.get(
+            OncoKB.config.publicApiLink + 'drugs',
+            {
+                transformResponse: function(result) {
+                    return {status: result};
+                }
+            });
+    }
+
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
@@ -300,7 +327,8 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', 
         getEvidencesByUUID: getEvidencesByUUID,
         getEvidencesByUUIDs: getEvidencesByUUIDs,
         getPubMedArticle: getPubMedArticle,
-        getClinicalTrial: getClinicalTrial
+        getClinicalTrial: getClinicalTrial,
+        getAllDrugs: getAllDrugs
     };
 }]);
 

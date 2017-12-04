@@ -59,6 +59,18 @@
         loadingHtml: "<div class='sk-spinner sk-spinner-wave white margin'><div class='sk-rect1'></div><div class='sk-rect2'></div><div class='sk-rect3'></div><div class='sk-rect4'></div><div class='sk-rect5'></div></div>"
     });
     </script>
+
+    <!-- Polyfill(s) for older browsers -->
+    <script src="../node_modules/core-js/client/shim.min.js"></script>
+
+    <script src="../node_modules/zone.js/dist/zone.js"></script>
+    <script src="../node_modules/systemjs/dist/system.src.js"></script>
+    <!-- Configure SystemJS (bootstrap Angular 4 app) -->
+    <script src="systemjs.config.js"></script>
+    <script>
+        System.import('scripts/main.js').catch(function(err){ console.error(err); });
+    </script>
+
     <div id="displayTabs">
         <nav class="navbar navbar-default fixedNavbar" role="navigation" ng-controller="NavCtrl">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -109,7 +121,8 @@
         </nav>
 
         <ie-warning></ie-warning>
-        <div ng-view="" class="container oncokbMainView"></div>
+        <app-root></app-root>
+        <!--<div ng-view="" class="container oncokbMainView"></div>-->
     </div>
 
     <!-- build:js scripts/common.js -->
@@ -193,6 +206,7 @@
     <script src="scripts/factories/VariantFactory.js"></script>
     <script src="scripts/controllers/TreeCtrl.js"></script>
     <script src="scripts/controllers/VariantCtrl.js"></script>
+    <script src="scripts/controllers/DrugsCtrl.js"></script>
     <script src="scripts/controllers/emailDialogCtrl.js"></script>
     <script src="scripts/controllers/VUSCtrl.js"></script>
     <script src="scripts/filters/Filter.js"></script>
@@ -212,6 +226,7 @@
     <script src="scripts/services/users.js"></script>
     <script src="scripts/services/documents.js"></script>
     <script src="scripts/services/loadfile.js"></script>
+    <script src="scripts/services/additionalFile.js"></script>
     <script src="scripts/services/access.js"></script>
     <script src="scripts/directives/comments.js"></script>
     <script src="scripts/directives/typeaheadfocus.js"></script>

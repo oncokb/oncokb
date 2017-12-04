@@ -39,7 +39,7 @@ public class SummaryUtils {
 //                    mutationSummary = ev.getDescription();
 //                }
 //                if (mutationSummary != null) {
-//                    mutationSummary = StringEscapeUtils.escapeXml(mutationSummary).trim();
+//                    mutationSummary = StringEscapeUtils.escapeXml10(mutationSummary).trim();
 //                    sb.append(mutationSummary)
 //                            .append(" ");
 //                }
@@ -427,7 +427,7 @@ public class SummaryUtils {
                 summary = ev.getDescription();
 
                 if (summary != null) {
-                    summary = StringEscapeUtils.escapeXml(summary).trim();
+                    summary = StringEscapeUtils.escapeXml10(summary).trim();
                 }
             }
         }
@@ -936,7 +936,7 @@ public class SummaryUtils {
             String tumorTypeSummary = ev.getDescription();
             if (tumorTypeSummary != null) {
                 summary = newTumorTypeSummary();
-                summary.put("summary", StringEscapeUtils.escapeXml(tumorTypeSummary).trim());
+                summary.put("summary", StringEscapeUtils.escapeXml10(tumorTypeSummary).trim());
                 summary.put("lastEdit", ev.getLastEdit());
             }
         }

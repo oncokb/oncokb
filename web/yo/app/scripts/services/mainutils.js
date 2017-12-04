@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope, ReviewResource) {
+    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope, ReviewResource, user) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -45,10 +45,6 @@ angular.module('oncokbApp')
                                         if (!model.getRoot().get('history')) {
                                             var history = model.createMap();
                                             model.getRoot().set('history', history);
-                                        }
-                                        if (!model.getRoot().get('queue')) {
-                                            var queue = model.createList();
-                                            model.getRoot().set('queue', queue);
                                         }
                                         $q.all([getIsoform(hugoSymbol),
                                             getOncogeneTSG(hugoSymbol)])
@@ -356,7 +352,15 @@ angular.module('oncokbApp')
             );
             return deferred.promise;
         }
-
+        /**
+         * Util to send email to developer account
+         * @param {string} subject The email subject
+         * @param {string} content The email content
+         * @return Promise
+         * */
+        function notifyDeveloper(subject, content) {
+            sendEmail('dev.oncokb@gmail.com', subject, content);
+        }
         /*
          *  Check if item needs to be reviewed or not
          *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
@@ -484,6 +488,14 @@ angular.module('oncokbApp')
                 return false;
             }
         }
+        function updateLastModified() {
+            $rootScope.geneTimeStamp.set('lastModifiedBy', user.name);
+            $rootScope.geneTimeStamp.set('lastModifiedAt', new Date().getTime());
+        }
+        function updateLastSavedToDB() {
+            $rootScope.geneTimeStamp.set('lastSavedBy', user.name);
+            $rootScope.geneTimeStamp.set('lastSavedAt', new Date().getTime());
+        }
         return {
             getCancerTypesName: getCancerTypesName,
             containMainType: containMainType,
@@ -500,6 +512,9 @@ angular.module('oncokbApp')
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,
-            processedInReview: processedInReview
+            processedInReview: processedInReview,
+            notifyDeveloper: notifyDeveloper,
+            updateLastModified: updateLastModified,
+            updateLastSavedToDB: updateLastSavedToDB
         };
     });
