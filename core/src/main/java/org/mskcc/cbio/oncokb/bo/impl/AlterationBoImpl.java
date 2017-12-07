@@ -4,14 +4,12 @@
  */
 package org.mskcc.cbio.oncokb.bo.impl;
 
+import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
+import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
 
@@ -40,6 +38,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             // Implement the data access logic
             for (Alteration alt : alterations) {
                 if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
+                    return alt;
+                }
+            }
+            for (Alteration alt : alterations) {
+                if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
                     return alt;
                 }
             }
@@ -112,6 +115,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Alteration matchedAlt = findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
         if (matchedAlt != null) {
             alterations.add(matchedAlt);
+        }
+
+        if (addEGFRCTD(alteration)) {
+            Alteration alt = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("EGFR"), "EGFR CTD");
+            if (alt != null) {
+                alterations.add(alt);
+            }
         }
 
         // Find fusion variant
@@ -239,6 +249,18 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
         return alterations;
+    }
+
+
+    private boolean addEGFRCTD(Alteration exactAlt) {
+        boolean add = false;
+        if (exactAlt != null && exactAlt.getGene() != null
+            && exactAlt.getGene().equals(GeneUtils.getGeneByHugoSymbol("EGFR"))
+            && !StringUtils.isNullOrEmpty(exactAlt.getAlteration())
+            && exactAlt.getAlteration().trim().matches("^EGFR\\svIV(a|b)$")) {
+            add = true;
+        }
+        return add;
     }
 
     private boolean addOncogenicMutations(Alteration exactAlt, Set<Alteration> relevantAlts) {
