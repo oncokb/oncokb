@@ -251,6 +251,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return alterations;
     }
 
+    @Override
+    public void save(Alteration alteration) {
+        super.save(alteration);
+        if (CacheUtils.isEnabled()) {
+            CacheUtils.forceUpdateGeneAlterations(alteration.getGene().getEntrezGeneId());
+        }
+    }
+
 
     private boolean addEGFRCTD(Alteration exactAlt) {
         boolean add = false;
@@ -305,7 +313,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     break;
                 }
             }
-            if(!isSpecial) {
+            if (!isSpecial) {
                 isSpecial = isInExon17(alteration);
             }
         }
