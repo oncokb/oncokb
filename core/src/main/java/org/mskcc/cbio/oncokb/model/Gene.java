@@ -3,8 +3,6 @@ package org.mskcc.cbio.oncokb.model;
 
 
 import io.swagger.annotations.ApiModelProperty;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -32,7 +30,7 @@ public class Gene implements Serializable {
 
     @Id
     @Column(name = "entrez_gene_id")
-    private int entrezGeneId;
+    private Integer entrezGeneId;
 
     @Column(name = "hugo_symbol", length = 50, nullable = true, unique = true)
     private String hugoSymbol;
@@ -74,12 +72,12 @@ public class Gene implements Serializable {
     }
 
 
-    public int getEntrezGeneId() {
+    public Integer getEntrezGeneId() {
         return this.entrezGeneId;
     }
 
 
-    public void setEntrezGeneId(int entrezGeneId) {
+    public void setEntrezGeneId(Integer entrezGeneId) {
         this.entrezGeneId = entrezGeneId;
     }
 
@@ -168,7 +166,5 @@ public class Gene implements Serializable {
         return hugoSymbol;
     }
 
-
 }
-
 
