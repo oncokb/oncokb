@@ -177,7 +177,7 @@ public class EvidenceUtils {
         }
     }
 
-    public static Set<Evidence> getEvidence(List<EvidenceQueryRes> queries, Set<EvidenceType> evidenceTypes, String geneStatus, Set<LevelOfEvidence> levelOfEvidences) {
+    private static Set<Evidence> getEvidence(List<EvidenceQueryRes> queries, Set<EvidenceType> evidenceTypes, String geneStatus, Set<LevelOfEvidence> levelOfEvidences) {
         Set<Evidence> evidences = new HashSet<>();
         List<EvidenceType> filteredETs = new ArrayList<>();
 
@@ -193,12 +193,19 @@ public class EvidenceUtils {
                     genes.put(entrezGeneId, query.getGene());
                 }
 
+
+                Set<Alteration> allAlts = new HashSet<>();
                 if (query.getAlterations() != null) {
-                    for (Alteration alt : query.getAlterations()) {
-                        int altId = alt.getId();
-                        if (!alterations.containsKey(altId)) {
-                            alterations.put(altId, alt);
-                        }
+                    allAlts.addAll(query.getAlterations());
+                }
+                if (query.getAlleles() != null) {
+                    allAlts.addAll(query.getAlleles());
+                }
+
+                for (Alteration alt : allAlts) {
+                    int altId = alt.getId();
+                    if (!alterations.containsKey(altId)) {
+                        alterations.put(altId, alt);
                     }
                 }
 
@@ -374,7 +381,7 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
+    private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
         if (evidenceQuery.getGene() != null) {
@@ -838,7 +845,7 @@ public class EvidenceUtils {
             }
         }
 
-        return assignEvidence(EvidenceUtils.getEvidence(evidenceQueries, evidenceTypes, geneStatus, levelOfEvidences),
+        return assignEvidence(getEvidence(evidenceQueries, evidenceTypes, geneStatus, levelOfEvidences),
             evidenceQueries, highestLevelOnly);
     }
 
@@ -847,100 +854,6 @@ public class EvidenceUtils {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         for (EvidenceQueryRes query : evidenceQueries) {
-            query.setEvidences(
-                new ArrayList<>(
-                    EvidenceUtils.keepHighestLevelForSameTreatments(EvidenceUtils.filterEvidence(evidences, query))));
-
-            // Attach alleles evidences.
-            if (query.getAlleles() != null && !query.getAlleles().isEmpty()) {
-                // Get oncogenic and mutation effect evidences
-                List<Alteration> alleles = query.getAlleles();
-                List<Alteration> allelesAndRelevantAlterations = new ArrayList<>();
-                Set<Alteration> oncogenicMutations = new HashSet<>();
-
-                allelesAndRelevantAlterations.addAll(alleles);
-
-                Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
-
-                if (oncogenicAllele != null) {
-                    oncogenicMutations = AlterationUtils.getOncogenicMutations(oncogenicAllele);
-                    allelesAndRelevantAlterations.addAll(oncogenicMutations);
-                }
-
-                List<Evidence> oncogenics = EvidenceUtils.getEvidence(allelesAndRelevantAlterations, Collections.singleton(EvidenceType.ONCOGENIC), null);
-                Oncogenicity highestOncogenic = MainUtils.findHighestOncogenicByEvidences(new HashSet<>(oncogenics));
-                if (highestOncogenic != null) {
-                    Evidence recordMatchHighestOncogenicity = null;
-
-                    for (Evidence evidence : oncogenics) {
-                        if (evidence.getKnownEffect() != null) {
-                            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
-                            if (oncogenicity != null && oncogenicity.equals(highestOncogenic)) {
-                                recordMatchHighestOncogenicity = evidence;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (recordMatchHighestOncogenicity != null) {
-                        Oncogenicity alleleOncogenicity = MainUtils.setToAlleleOncogenicity(highestOncogenic);
-                        Evidence evidence = new Evidence();
-                        evidence.setId(recordMatchHighestOncogenicity.getId());
-                        evidence.setGene(recordMatchHighestOncogenicity.getGene());
-                        evidence.setEvidenceType(EvidenceType.ONCOGENIC);
-                        evidence.setKnownEffect(alleleOncogenicity == null ? "" : alleleOncogenicity.getOncogenic());
-                        query.getEvidences().add(evidence);
-                    }
-                }
-
-                Set<Alteration> altsWithHighestOncogenicity = new HashSet<>();
-
-                for (Evidence evidence : EvidenceUtils.getEvidenceBasedOnHighestOncogenicity(new HashSet<Evidence>(oncogenics))) {
-                    for (Alteration alt : evidence.getAlterations()) {
-                        if (allelesAndRelevantAlterations.contains(alt)) {
-                            altsWithHighestOncogenicity.add(alt);
-                        }
-                    }
-                }
-
-                List<Evidence> mutationEffectsEvis = EvidenceUtils.getEvidence(new ArrayList<>(altsWithHighestOncogenicity), Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
-                if (mutationEffectsEvis != null && mutationEffectsEvis.size() > 0) {
-                    Set<String> effects = new HashSet<>();
-
-                    for (Evidence mutationEffectEvi : mutationEffectsEvis) {
-                        effects.add(mutationEffectEvi.getKnownEffect());
-                    }
-
-                    Evidence mutationEffect = new Evidence();
-                    Evidence example = mutationEffectsEvis.iterator().next();
-                    mutationEffect.setId(example.getId());
-                    mutationEffect.setGene(example.getGene());
-                    mutationEffect.setEvidenceType(EvidenceType.MUTATION_EFFECT);
-                    mutationEffect.setKnownEffect(MainUtils.getAlleleConflictsMutationEffect(effects));
-                    query.getEvidences().add(mutationEffect);
-                }
-
-                // Get alternate allele treatment evidences, only match sensitive treatments
-                List<Evidence> alleleEvidences = EvidenceUtils.getEvidence(new ArrayList<>(alleles), MainUtils.getSensitiveTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
-                if (oncogenicMutations != null) {
-                    alleleEvidences.addAll(EvidenceUtils.getEvidence(new ArrayList<>(oncogenicMutations), MainUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels()));
-                }
-
-                List<Evidence> alleleEvidencesCopy = new ArrayList<>();
-                if (alleleEvidences != null) {
-                    for (Evidence evidence : alleleEvidences) {
-                        Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
-                        LevelOfEvidence levelOfEvidence = LevelUtils.setToAlleleLevel(evidence.getLevelOfEvidence(), !Collections.disjoint(Collections.singleton(evidence.getOncoTreeType()), query.getOncoTreeTypes()));
-                        if (levelOfEvidence != null) {
-                            tmpEvidence.setLevelOfEvidence(levelOfEvidence);
-                            alleleEvidencesCopy.add(tmpEvidence);
-                        }
-                    }
-
-                    query.getEvidences().addAll(convertEvidenceLevel(alleleEvidencesCopy, new HashSet<>(query.getOncoTreeTypes())));
-                }
-            }
-
             if (highestLevelOnly) {
                 Set<Evidence> allEvidences = new HashSet<>(query.getEvidences());
                 List<Evidence> filteredEvidences = new ArrayList<>();
@@ -962,6 +875,9 @@ public class EvidenceUtils {
                 }
 
                 query.setEvidences(filteredEvidences);
+            } else {
+                query.setEvidences(
+                    new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
             }
         }
         return evidenceQueries;

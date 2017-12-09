@@ -200,7 +200,7 @@ angular.module('oncokbApp')
              * Retrive meta file
              * @param {string} id realtime document id
              * */
-            self.getMetaRealtimeDocument = function(id) {
+            self.getAdditionalRealtimeDocument = function(id) {
                 var deferred = $q.defer();
                 var initialize = function() {
                 };
@@ -246,13 +246,16 @@ angular.module('oncokbApp')
                         q: '"' + config.folderId + '" in parents'
                     });
                     retrievePageOfFiles(initialRequest, []);
+                }, function(error) {
+                    dialogs.error('Error', 'Failed to load all documents. Please contact the developer.');
+                    deferred.reject(error);
                 });
                 return deferred.promise;
             };
             /**
              *
              * */
-            self.retrieveMeta = function() {
+            self.retrieveAdditional = function() {
                 var deferred = $q.defer();
 
                 var retrievePageOfFiles = function(request, result) {
@@ -261,12 +264,11 @@ angular.module('oncokbApp')
                         var nextPageToken = resp.nextPageToken;
                         if (nextPageToken) {
                             request = gapi.client.drive.files.list({
-                                q: '"' + config.metaFolderId + '" in parents',
+                                q: '"' + config.additionalsFolderId + '" in parents',
                                 pageToken: nextPageToken
                             });
                             retrievePageOfFiles(request, result);
                         } else {
-                            // console.log('get all files', result);
                             deferred.resolve(result);
                         }
                     });
@@ -274,7 +276,7 @@ angular.module('oncokbApp')
 
                 gapi.client.load('drive', 'v2', function() {
                     var initialRequest = gapi.client.drive.files.list({
-                        q: '"' + config.metaFolderId + '" in parents'
+                        q: '"' + config.additionalsFolderId + '" in parents'
                     });
                     retrievePageOfFiles(initialRequest, []);
                 });
@@ -454,7 +456,6 @@ angular.module('oncokbApp')
                         $rootScope.$emit('realtimeDoc.client_error');
                     } else if (error.type === gapi.drive.realtime.ErrorType.NOT_FOUND) {
                         console.log('error: realtimeDoc.not_found');
-                        deferred.reject(error);
                         $rootScope.$emit('realtimeDoc.not_found', id);
                     } else {
                         console.log(error, id);
@@ -475,6 +476,7 @@ angular.module('oncokbApp')
                         });
                     }
                     $rootScope.$digest();
+                    deferred.reject(error);
                 };
                 gapi.drive.realtime.load(id, onLoad, initialize, onError);
                 return deferred.promise;

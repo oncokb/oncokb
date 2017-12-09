@@ -568,6 +568,10 @@ var oncokbApp = angular.module('oncokbApp', [
                 access: access.admin,
                 internalUse: true
             })
+            .when('/queues', {
+                templateUrl: 'views/queues.html',
+                access: access.curator
+            })
             // .when('/vus', {
             //    templateUrl: 'views/vus.html',
             //    controller: 'VUSCtrl',
@@ -632,8 +636,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils',
-        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils', 'mainUtils',
+        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils, mainUtils) {
             $rootScope.errors = [];
 
             // If data is loaded, the watch in nav controller should be triggered.
@@ -669,6 +673,17 @@ angular.module('oncokbApp').run(
                     'R1': '<span><b>Standard of care</b> biomarker predictive of <b>resistance</b> to an <b>FDA-approved</b> drug <b>in this indication</b></span>',
                     'R2': '<span>Not NCCN compendium-listed biomarker, but clinical evidence linking this biomarker to drug resistance</span>',
                     'R3': '<span>Not NCCN compendium-listed biomarker, but preclinical evidence potentially linking this biomarker to drug resistance</span>'
+                },
+                colorsByLevel: {
+                    Level_1: '#33A02C',
+                    Level_2A: '#1F78B4',
+                    Level_2B: '#80B1D3',
+                    Level_3A: '#984EA3',
+                    Level_3B: '#BE98CE',
+                    Level_4: '#424242',
+                    Level_R1: '#EE3424',
+                    Level_R2: '#F79A92',
+                    Level_R3: '#FCD6D3'
                 }
             };
 
@@ -719,16 +734,11 @@ angular.module('oncokbApp').run(
                     $location.path('/genes');
                 }
             });
-
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
-                DatabaseConnector.sendEmail({
-                    sendTo: 'dev.oncokb@gmail.com',
-                    subject: 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason,
-                    content: 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message
-                }, function() {
-                }, function() {
-                });
+                var subject = 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason;
+                var content = 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message;
+                mainUtils.notifyDeveloper(subject, content);
             });
 
             //$rootScope.$watch('internal', function(n) {

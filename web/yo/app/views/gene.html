@@ -6,8 +6,8 @@
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.displayName}}">
       </span>
-      <span ng-if="::(document && gene.status_timeStamp.has('lastEdit'))" class="geneLastModify">Last edit was made on {{gene.status_timeStamp.get('lastEdit').value.text | date : 'MMM d, h:mm a yyyy'}} by {{gene.status_timeStamp.get('lastEdit').by.text }}</span>
-      <span ng-if="::(document && userRole === 8 && gene.status_timeStamp.has('lastUpdate'))" class="geneLastModify">Last update to database was made on {{gene.status_timeStamp.get('lastUpdate').value.text  | date : 'MMM d, h:mm a'}} by {{gene.status_timeStamp.get('lastUpdate').by.text }}</span>
+      <span ng-if="::(document && geneTimeStamp.get('lastModifiedAt'))" class="geneLastModify">Last edit was made on {{geneTimeStamp.get('lastModifiedAt') | date : 'MMM d, h:mm a yyyy'}} by {{geneTimeStamp.get('lastModifiedBy')}}</span>
+      <span ng-if="::(document && userRole === 8 && geneTimeStamp.get('lastSavedAt'))" class="geneLastModify">Last update to database was made on {{geneTimeStamp.get('lastSavedAt')  | date : 'MMM d, h:mm a'}} by {{geneTimeStamp.get('lastSavedBy')}}</span>
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable || !metaDocStatus.saved" ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
@@ -124,7 +124,7 @@
         <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader">
           <uib-accordion-heading>
             <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
-            <span>Mutation: </span>
+              <span>Mutation: </span>
               <!--<span ng-click="stopCollopse($event)" ng-class="{editableBox:mutationNameEditable(mutation.name.text), unEditableBox:!mutationNameEditable(mutation.name.text)}" contenteditable="{{mutationNameEditable(mutation.name.text)}}" ng-model="mutation.name.text"/></span>-->
               <div style="display:inline-block">
                  <drive-realtime-string review-obj="mutation.name_review" mutation-messages="mutationMessages" uuid="::mutation.name_uuid"  es="mutation.name_eStatus" fe="fileEditable" t="'MUTATION_NAME'" object="mutation.name" mutation="mutation" get-mutation-messages="getMutationMessages()" ng-click="stopCollopse($event)"></drive-realtime-string>
@@ -132,6 +132,7 @@
             <div style="display:inline-block">
                 <comments-dict ng-click="commentClick($event)" ng-keypress="stopCollopse($event)" file-editable="fileEditable" comments="mutation.name_comments" object="mutation" key="name" add-comment="addComment(arg1,arg2,arg3)"></comments-dict>
             </div>
+              <span ng-bind-html="mutationContent[mutation.name_uuid.getText()].result"></span>
             <span class="pull-right" ng-show="!reviewMode && fileEditable">
               <span style="margin-right: 20px">
                 <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(gene.mutations, $index, $index, $event)"></i>
@@ -195,6 +196,7 @@
                     <span class="original-tumor-type"
                           ng-if="getCancerTypesName(tumor.cancerTypes).toLowerCase() !== tumor.name.text.toLowerCase() && tumor.name.text">Original Tumor Type: {{tumor.name.text}}</span>
                     <comments-dict file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
+                    <span ng-bind-html="tumorContent[tumor.name_uuid.getText()].result"></span>
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="!reviewMode && fileEditable">
                     <span style="margin-right: 20px">
@@ -539,7 +541,9 @@
                     </span>
             </div>
         </div>
-        <curation-queue specify-annotation="specifyAnnotation()" location="'gene'"></curation-queue>
+        <div style="margin-top:100px">
+            <curation-queue specify-annotation="specifyAnnotation()" location="'gene'" hugo-symbol="gene.name.text"></curation-queue>
+        </div>
     </div>
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">

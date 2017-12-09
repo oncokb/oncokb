@@ -130,6 +130,7 @@ angular.module('oncokbApp')
                                     }
                                 }
                                 $rootScope.geneMetaData.set(uuid, tempMapping);
+                                mainUtils.updateLastModified();
                             }
                             scope.valueChanged();
                             scope.changedBy = 'self';
@@ -157,7 +158,8 @@ angular.module('oncokbApp')
                                 tempMapping = $rootScope.metaModel.createMap();
                             }
                             tempMapping.set('review', true);
-                             $rootScope.geneMetaData.set(uuid, tempMapping);
+                            $rootScope.geneMetaData.set(uuid, tempMapping);
+                            mainUtils.updateLastModified();
                             scope.reviewObj.set('updatedBy', user.name);
                             scope.reviewObj.set('updateTime', new Date().getTime());
                         }
