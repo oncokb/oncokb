@@ -257,7 +257,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (exactAlt != null && exactAlt.getGene() != null
             && exactAlt.getGene().equals(GeneUtils.getGeneByHugoSymbol("EGFR"))
             && !StringUtils.isNullOrEmpty(exactAlt.getAlteration())
-            && exactAlt.getAlteration().trim().matches("^EGFR\\svIV(a|b)$")) {
+            && exactAlt.getAlteration().trim().matches("^EGFR(\\s)*vIV(a|b)$")) {
             add = true;
         }
         return add;
