@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.util.MainUtils.stringToEvidenceTypes;
+
 /**
  * @author jgao
  */
@@ -78,10 +80,7 @@ public class EvidenceController {
             Set<EvidenceType> evidenceTypes = new HashSet<>();
 
             if (body.getEvidenceTypes() != null) {
-                for (String type : body.getEvidenceTypes().split("\\s*,\\s*")) {
-                    EvidenceType et = EvidenceType.valueOf(type);
-                    evidenceTypes.add(et);
-                }
+                evidenceTypes = new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","));
             } else if (body.getEvidenceTypes().isEmpty()) {
                 // If the evidenceTypes has been defined but is empty, no result should be returned.
                 return result;

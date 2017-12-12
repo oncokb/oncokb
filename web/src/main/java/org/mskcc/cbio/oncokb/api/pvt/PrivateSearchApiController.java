@@ -242,7 +242,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
         query.setAlteration(alteration.getAlteration());
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false, null);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());

@@ -13,8 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.mskcc.cbio.oncokb.util.MainUtils.stringToEvidenceTypes;
 
 /**
  * @author jgao
@@ -47,7 +50,7 @@ public class IndicatorController {
     ) {
         Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly, null);
 
         return JsonResultFactory.getIndicatorQueryResp(resp, fields);
     }
@@ -71,7 +74,7 @@ public class IndicatorController {
         for (Query query : body.getQueries()) {
             result.add(IndicatorUtils.processQuery(query, null,
                 body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
-                source, body.getHighestLevelOnly()));
+                source, body.getHighestLevelOnly(),  new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
         }
 
         return JsonResultFactory.getIndicatorQueryResp(result, fields);

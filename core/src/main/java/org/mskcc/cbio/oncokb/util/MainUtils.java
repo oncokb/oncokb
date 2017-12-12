@@ -399,8 +399,6 @@ public class MainUtils {
                 EvidenceType et = EvidenceType.valueOf(type);
                 evidenceTypes.add(et);
             }
-        } else {
-            return null;
         }
         return evidenceTypes;
     }
