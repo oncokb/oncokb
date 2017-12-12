@@ -147,6 +147,12 @@ public class IndicatorUtilsTest {
         assertEquals("The number of treatments should be two",
             1, indicatorQueryResp.getTreatments().size());
 
+        // Hotspot manually curated as Likely Neutral should be converted to Predicted Oncogenic
+        // EGFR A289D is manually curated as likely neutral.
+        query = new Query(null, null, null, "EGFR", "A289D", null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("The Oncogenicity is not Predicted Oncogenic, but it should be.", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+
         // Oncogenicity of Alternative Allele overwrites Inconclusive
         // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
 //        query = new Query(null, null, null, "BRCA1", "C24Y", null, "Colon Adenocarcinoma", null, null, null, null);
