@@ -227,8 +227,7 @@ public class IndicatorUtils {
             }
 
             // Set hotspot oncogenicity to Predicted Oncogenic
-            if (indicatorQuery.getOncogenic() == null
-                && indicatorQuery.getHotspot()) {
+            if (indicatorQuery.getHotspot() && !MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()))) {
                 indicatorQuery.setOncogenic(Oncogenicity.PREDICTED.getOncogenic());
 
                 // Check whether the gene has Oncogenic Mutations annotated
