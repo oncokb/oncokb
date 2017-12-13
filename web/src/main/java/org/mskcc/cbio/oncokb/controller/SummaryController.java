@@ -27,26 +27,24 @@ public class SummaryController {
     @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
-    List<String> getSummary(
+    String getSummary(
         HttpMethod method,
         @RequestParam(value = "type", required = false) String type,
-        @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
+        @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,
         @RequestParam(value = "tumorType", required = false) String tumorType,
         @RequestParam(value = "consequence", required = false) String consequence,
-        @RequestParam(value = "proteinStart", required = false) String proteinStart,
-        @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
+        @RequestParam(value = "proteinStart", required = false) Integer proteinStart,
+        @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd,
         @RequestParam(value = "source", required = false) String source) {
 
-        List<String> summaryList = new ArrayList<>();
         List<VariantQuery> variantQueries = VariantPairUtils.getGeneAlterationTumorTypeConsequence(entrezGeneId, hugoSymbol, alteration, tumorType, consequence, proteinStart, proteinEnd, source);
         if (type == null) {
             type = "full";
         }
 
-        summaryList = getSummary(variantQueries, type);
-        return summaryList;
+        return getSummary(variantQueries.get(0), type);
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -69,8 +67,8 @@ public class SummaryController {
             queryRes.setId(query.getId());
             VariantQuery variantQuery = VariantPairUtils.getGeneAlterationTumorTypeConsequence(null,
                 query.getHugoSymbol(), query.getAlteration(), query.getTumorType(), query.getConsequence(),
-                query.getProteinStart() != null ? Integer.toString(query.getProteinStart()) : null,
-                query.getProteinEnd() != null ? Integer.toString(query.getProteinEnd()) : null,
+                query.getProteinStart(),
+                query.getProteinEnd(),
                 body.getSource()).get(0);
             queryRes.setSummary(getSummary(variantQuery, body.getType()));
             res.add(queryRes);
@@ -111,15 +109,6 @@ public class SummaryController {
             }
         }
         return summary;
-    }
-
-    private List<String> getSummary(List<VariantQuery> queries, String summaryType) {
-        List<String> summaries = new ArrayList<>();
-        for (VariantQuery variantQuery : queries) {
-            String test = getSummary(variantQuery, summaryType);
-            summaries.add(test);
-        }
-        return summaries;
     }
 }
 
