@@ -69,17 +69,6 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level of CUL1-BRAF fusion should be Level 3A", LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The oncogenicity of BRAF-TMPRSS2 fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
-        // Check structural variant fusion
-        query = new Query(null, null, null, "BRAF-BRAF", null, "structural_variant", StructuralVariantType.INSERTION, "Ovarian Cancer", "fusion", null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
-        assertEquals("The highest sensitive level of BRAF insertion should be Level 3A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
-        assertEquals("The oncogenicity of BRAF insertion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
-
-        query = new Query(null, null, null, "BRAF-BRAF", null, "structural_variant", StructuralVariantType.INSERTION, "Ovarian Cancer", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
-        assertEquals("The highest sensitive level of BRAF insertion should be null", null, indicatorQueryResp.getHighestSensitiveLevel());
-        assertEquals("The oncogenicity of BRAF insertion should be empty", "", indicatorQueryResp.getOncogenic());
-
         // Test Intragenic Mutation
         query = new Query(null, null, null, "CTCF", "CTCF-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
@@ -131,7 +120,7 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level should be 1",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query = new Query(null, null, null, "TMPRSS2-ERG", null, "Fusion", null, "Prostate Adenocarcinoma", "missense_variant", null, null, null);
+        query = new Query(null, null, null, "TMPRSS2-ERG", null, "Fusion", null, "Prostate Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not YES, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
@@ -280,6 +269,26 @@ public class IndicatorUtilsTest {
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        // Check structural variant fusion
+        // a) BRAF is oncogenic gene. No Truncating Mutations is curated.
+        query = new Query(null, null, null, "BRAF-BRAF", null, "structural_variant", StructuralVariantType.INSERTION, "Ovarian Cancer", "fusion", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("The highest sensitive level of BRAF insertion should be Level 3A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The oncogenicity of BRAF insertion functional fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+
+        query = new Query(null, null, null, "BRAF-BRAF", null, "structural_variant", StructuralVariantType.INSERTION, "Ovarian Cancer", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("The highest sensitive level of BRAF insertion should be null", null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The oncogenicity of BRAF insertion non-functional fusion should be empty", "", indicatorQueryResp.getOncogenic());
+
+        // b)  KMT2A is tumor suppressor gene, it has both fusions and Truncating Mutations curated. Functional fusion should have fusions mapped, non-functional genes should have Truncating Mutations mapped. And both of them are likely oncogenic.
+        query = new Query(null, null, null, "KMT2A-MLLT3", null, "structural_variant", StructuralVariantType.TRANSLOCATION, "Acute Myeloid Leukemia", "fusion", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("The oncogenicity of KMT2A translocation functional fusion should be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        query = new Query(null, null, null, "KMT2A-MLLT3", null, "structural_variant", StructuralVariantType.TRANSLOCATION, "Acute Myeloid Leukemia", "fusion", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("The oncogenicity of KMT2A translocation non-functional fusion should be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // Test Structural Variants
         // Fusion as alteration type should have same result from structural variant as alteration type and fusion as consequence
