@@ -39,6 +39,7 @@ public class UtilsApiController implements UtilsApi {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
                 annotatedVariants.add(new AnnotatedVariant(
+                    gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(),
                     gene.getHugoSymbol(), biologicalVariant.getVariant().getName(), biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
                     MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "),
@@ -65,6 +66,9 @@ public class UtilsApiController implements UtilsApi {
 
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
+        header.add("Isoform");
+        header.add("RefSeq");
+        header.add("Entrez Gene ID");
         header.add("Gene");
         header.add("Alteration");
         header.add("Oncogenicity");
@@ -78,6 +82,9 @@ public class UtilsApiController implements UtilsApi {
             Gene gene = entry.getKey();
             for (BiologicalVariant biologicalVariant : entry.getValue()) {
                 List<String> row = new ArrayList<>();
+                row.add(gene.getCuratedIsoform());
+                row.add(gene.getCuratedRefSeq());
+                row.add(String.valueOf(gene.getEntrezGeneId()));
                 row.add(gene.getHugoSymbol());
                 row.add(biologicalVariant.getVariant().getName());
                 row.add(biologicalVariant.getOncogenic());
@@ -118,6 +125,7 @@ public class UtilsApiController implements UtilsApi {
                 }
 
                 actionableGenes.add(new ActionableGene(
+                    gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(),
                     gene.getHugoSymbol(), clinicalVariant.getVariant().getName(),
                     getCancerType(clinicalVariant.getOncoTreeType()),
                     clinicalVariant.getLevel(),
@@ -144,6 +152,9 @@ public class UtilsApiController implements UtilsApi {
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
+        header.add("Isoform");
+        header.add("RefSeq");
+        header.add("Entrez Gene ID");
         header.add("Gene");
         header.add("Alteration");
         header.add("Cancer Type");
@@ -158,6 +169,9 @@ public class UtilsApiController implements UtilsApi {
             Gene gene = entry.getKey();
             for (ClinicalVariant clinicalVariant : entry.getValue()) {
                 List<String> row = new ArrayList<>();
+                row.add(gene.getCuratedIsoform());
+                row.add(gene.getCuratedRefSeq());
+                row.add(String.valueOf(gene.getEntrezGeneId()));
                 row.add(gene.getHugoSymbol());
                 row.add(clinicalVariant.getVariant().getName());
                 row.add(getCancerType(clinicalVariant.getOncoTreeType()));

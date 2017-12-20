@@ -6,6 +6,9 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Hongxin on 10/28/16.
  */
 public class ActionableGene {
+    String isoform;
+    String refSeq;
+    Integer entrezGeneId;
     String gene;
     String variant;
     String cancerType;
@@ -13,6 +16,30 @@ public class ActionableGene {
     String drugs;
     String pmids;
     String abstracts;
+
+    public String getIsoform() {
+        return isoform;
+    }
+
+    public void setIsoform(String isoform) {
+        this.isoform = isoform;
+    }
+
+    public String getRefSeq() {
+        return refSeq;
+    }
+
+    public void setRefSeq(String refSeq) {
+        this.refSeq = refSeq;
+    }
+
+    public Integer getEntrezGeneId() {
+        return entrezGeneId;
+    }
+
+    public void setEntrezGeneId(Integer entrezGeneId) {
+        this.entrezGeneId = entrezGeneId;
+    }
 
     public String getGene() {
         return gene;
@@ -70,7 +97,10 @@ public class ActionableGene {
         this.abstracts = abstracts;
     }
 
-    public ActionableGene(String gene, String variant, String cancerType, String level, String drugs, String pmids, String abstracts) {
+    public ActionableGene(String isoform, String refSeq, Integer entrezGeneId, String gene, String variant, String cancerType, String level, String drugs, String pmids, String abstracts) {
+        this.isoform = isoform;
+        this.refSeq = refSeq;
+        this.entrezGeneId = entrezGeneId;
         this.gene = gene;
         this.variant = variant;
         this.cancerType = cancerType;
