@@ -59,12 +59,13 @@ public class IndicatorUtils {
                 gene = (Gene) fusionGeneAltsMap.get("pickedGene");
                 relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
             }else {
-                query.setAlteration("Truncating Mutations");
+                query.setAlteration("truncating mutation");
+                query.setConsequence("feature_truncation");
 
                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
                 gene = (Gene) fusionGeneAltsMap.get("pickedGene");
                 fusionGeneAltsMap = new HashMap<>();
-                // As long as this is a structural variant event, we need to attach the Truncating Mutations
+                // As long as this is a structural variant event, we need to attach the Truncating Mutation
                 Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
                 if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
                     relevantAlterations.add(truncatingMutations);
