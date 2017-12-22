@@ -60,7 +60,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
                 for (Alteration alteration : alterations) {
-                    if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
+                    if ((alteration.getGene().getEntrezGeneId() != null && alteration.getGene().getEntrezGeneId().equals(gene.getEntrezGeneId()) || alteration.getGene().getHugoSymbol() != null && alteration.getGene().getHugoSymbol().equals(gene.getHugoSymbol())) 
+                            && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
 
                         //For missense variant, as long as they are overlapped to each, return the alteration
                         if (consequence.equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
