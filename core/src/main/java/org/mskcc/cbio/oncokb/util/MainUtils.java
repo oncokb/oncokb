@@ -412,6 +412,7 @@ public class MainUtils {
         oncogenicities.add(Oncogenicity.YES);
         oncogenicities.add(Oncogenicity.LIKELY);
         oncogenicities.add(Oncogenicity.PREDICTED);
+        oncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
 
         return oncogenicities.contains(oncogenicity);
     }
