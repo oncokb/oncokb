@@ -1,0 +1,78 @@
+#
+# List of functional/non-functional fusions
+#
+# Fusion Pair   Structural Variant Type TumorType   Is Functional Fusion Event
+#
+
+ERG-TMPRSS2	DELETION	Prostate Adenocarcinoma	TRUE
+TMPRSS2-PRDM15	DELETION	Prostate Adenocarcinoma	TRUE
+KIF5B-RET	INVERSION	Lung Adenocarcinoma	TRUE
+FGFR2-TACC2	INVERSION	Intrahepatic Cholangiocarcinoma	TRUE
+KMT2A-MLLT3	TRANSLOCATION	Acute Myeloid Leukemia	TRUE
+LMNA-NTRK1	DELETION	Breast Invasive Carcinoma, NOS	TRUE
+ALK-EML4	INVERSION	Adenocarcinoma, NOS	TRUE
+TFE3-SFPQ	TRANSLOCATION	Perivascular Epithelioid Cell Tumor	TRUE
+PRKACA-DNAJB1	DELETION	Fibrolamellar Carcinoma	TRUE
+ERG-TMPRSS2	DELETION	Prostate Adenocarcinoma	TRUE
+ELF3-ELF3	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+GATA2-GATA2	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+ROS1-ROS1	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+PTPRD-PTPRD	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+BRCA2-BRCA2	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+MGA-MGA	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+NF1-NF1	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+STAT3-STAT3	DELETION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+RET-RET	INVERSION	Breast Mixed Ductal and Lobular Carcinoma	FALSE
+RB1-LINC00378	DELETION	Uterine Leiomyosarcoma	FALSE
+BAP1-BAP1	DELETION	Pleural Mesothelioma, Epithelioid Type	FALSE
+ZFHX3-LOC101928035	INVERSION	Hepatocellular Carcinoma	FALSE
+PDGFRA-PDGFRA	INVERSION	Lung Adenocarcinoma	FALSE
+SPINT2-AXL	INVERSION	Lung Adenocarcinoma	FALSE
+EWSR1-EWSR1	INVERSION	Lung Squamous Cell Carcinoma	FALSE
+ETV6-RASSF8-AS1	INVERSION	High-Grade Serous Ovarian Cancer	FALSE
+CDK6-CDK6	INVERSION	Prostate Adenocarcinoma	FALSE
+BRCA2-NBEA	INVERSION	Prostate Adenocarcinoma	FALSE
+KMT2D-TMBIM6	INVERSION	Prostate Adenocarcinoma	FALSE
+KMT2D-DIP2B	INVERSION	Prostate Adenocarcinoma	FALSE
+DROSHA-DROSHA	INVERSION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+FGFR2-FGFR2	INVERSION	Poorly Differentiated Carcinoma of the Stomach	FALSE
+KDM6A-KANTR	INVERSION	Sarcoma, NOS	FALSE
+DOT1L-DOT1L	INVERSION	Sarcoma, NOS	FALSE
+BRCA1-NGFR	INVERSION	Breast Invasive Carcinoma, NOS	FALSE
+JAK3-JAK3	INVERSION	Breast Invasive Carcinoma, NOS	FALSE
+NF1-ATP6V1H	TRANSLOCATION	Clear Cell Ovarian Cancer	FALSE
+NOTCH3-GABRB2	TRANSLOCATION	High-Grade Serous Ovarian Cancer	FALSE
+NSUN6-ALK	TRANSLOCATION	Melanoma	FALSE
+MKX-ALK	TRANSLOCATION	Melanoma	FALSE
+MKX-ALK	TRANSLOCATION	Melanoma	FALSE
+BAGE2-KMT2C	TRANSLOCATION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+FAM19A2-NTRK1	TRANSLOCATION	Sarcoma, NOS	FALSE
+LINC00954-ALK	DUPLICATION	Lung Squamous Cell Carcinoma	FALSE
+RHOA-DAG1	DUPLICATION	Clear Cell Ovarian Cancer	FALSE
+ETV6-ETV6	DUPLICATION	Pancreatic Adenocarcinoma	FALSE
+ETV6-ETV6	DUPLICATION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+DGAT1-RECQL4	DUPLICATION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+EZH1-BRCA1	DUPLICATION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+CHD6-PTPRT	DUPLICATION	Uterine Carcinosarcoma/Uterine Malignant Mixed Mullerian Tumor	FALSE
+ESR1-FBXO5	DUPLICATION	Uterine Leiomyosarcoma	FALSE
+PRKACA-DNAJB1	DELETION	Hepatocellular Carcinoma	FALSE
+ALK-ARL6IP6	DELETION	Lung Adenocarcinoma	FALSE
+ROS1-ROS1	DELETION	Lung Adenocarcinoma	FALSE
+RAD52-RAD52	DELETION	Lung Adenocarcinoma	FALSE
+STAT3-STAT3	DELETION	Lung Squamous Cell Carcinoma	FALSE
+MDC1-MDC1	DELETION	Clear Cell Ovarian Cancer	FALSE
+NTRK1-NTRK1	DELETION	High-Grade Serous Ovarian Cancer	FALSE
+PAX8-PAX8	DELETION	High-Grade Serous Ovarian Cancer	FALSE
+CIC-CIC	DELETION	High-Grade Serous Ovarian Cancer	FALSE
+RAD54L-RAD54L	DELETION	Acinar Cell Carcinoma of the Pancreas	FALSE
+SETD2-SETD2	DELETION	Acinar Cell Carcinoma of the Pancreas	FALSE
+FAT1-FAT1	DELETION	Acinar Cell Carcinoma of the Pancreas	FALSE
+BRCA2-BRCA2	DELETION	Acinar Cell Carcinoma of the Pancreas	FALSE
+POLD1-POLD1	DELETION	Acinar Cell Carcinoma of the Pancreas	FALSE
+RTEL1-RTEL1	DELETION	Acinar Cell Carcinoma of the Pancreas	FALSE
+SYT6-CSDE1	DELETION	Pancreatic Adenocarcinoma	FALSE
+PDGFRB-PDGFRB	DELETION	Pancreatic Adenocarcinoma	FALSE
+ATM-ATM	DELETION	Pancreatic Adenocarcinoma	FALSE
+CDK8-CDK8	DELETION	Pancreatic Adenocarcinoma	FALSE
+BRCA2-CDC16	DELETION	Pancreatic Adenocarcinoma	FALSE
+AR-AR	DELETION	Pancreatic Adenocarcinoma	FALSE

@@ -110,7 +110,7 @@ public class SummaryUtils {
         if (exactMatchedAlt != null) {
             alteration = exactMatchedAlt;
         } else {
-            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), query.getAlterationType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             AlterationUtils.annotateAlteration(alteration, query.getAlteration());
         }
 
@@ -210,7 +210,11 @@ public class SummaryUtils {
 
         if (tumorTypeSummary == null) {
             tumorTypeSummary = newTumorTypeSummary();
-            tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].");
+            if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
+                tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring a [[gene]] truncating mutation.");
+            } else {
+                tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].");
+            }
         }
 
         tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getAlteration(), query.getTumorType()));
@@ -295,7 +299,7 @@ public class SummaryUtils {
             alteration = exactMatchAlteration;
         } else {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                query.getAlterationType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
 
@@ -329,6 +333,14 @@ public class SummaryUtils {
             Oncogenicity tmpOncogenicity = MainUtils.findHighestOncogenicity(oncogenicities);
             if (tmpOncogenicity != null) {
                 oncogenic = tmpOncogenicity;
+            }
+        }
+
+        if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
+            if (gene.getOncogene()) {
+                return gene.getHugoSymbol() + " is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.";
+            } else if (!gene.getTSG() && oncogenic == null) {
+                return "It is unknown whether a truncating mutation in " + gene.getHugoSymbol() + " is oncogenic.";
             }
         }
 
@@ -378,7 +390,7 @@ public class SummaryUtils {
         if (isHotspot == null) {
             isHotspot = false;
         }
-        if (queryAlteration.toLowerCase().contains("fusions")) {
+        if (queryAlteration.toLowerCase().contains("fusions") || queryAlteration.toLowerCase().endsWith("mutations")) {
             isPlural = true;
         }
         if (oncogenicity != null) {
@@ -975,12 +987,16 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "del")
             || StringUtils.containsIgnoreCase(queryAlteration, "ins")
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration + " alteration");
+            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+            if (!queryAlteration.endsWith("alteration")) {
+                sb.append(" alteration");
+            }
         } else {
             if (!queryAlteration.contains(gene.getHugoSymbol())) {
-                sb.append(gene.getHugoSymbol() + " ");
+                sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             }
-            sb.append(queryAlteration + " mutation");
+            if (!queryAlteration.endsWith("mutation"))
+                sb.append(" mutation");
         }
         return sb.toString();
     }
@@ -1027,7 +1043,7 @@ public class SummaryUtils {
                 || StringUtils.containsIgnoreCase(queryAlteration, "splice")
                 ) {
                 sb.append(queryAlteration + " altered");
-            } else {
+            } else if (!queryAlteration.endsWith("mutation")) {
                 sb.append(queryAlteration + " mutant");
             }
         }
