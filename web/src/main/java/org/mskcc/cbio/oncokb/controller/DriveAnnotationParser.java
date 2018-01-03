@@ -120,7 +120,7 @@ public class DriveAnnotationParser {
                 Gene gene = geneBo.findGeneByHugoSymbol(hugo);
 
                 if (gene == null) {
-                    System.out.println(spaceStrByNestLevel(nestLevel) + "Don't save gene not in 476 gene list.");
+                    System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
                     return;
 //                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
 //                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);

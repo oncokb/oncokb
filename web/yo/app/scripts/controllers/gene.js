@@ -3614,7 +3614,7 @@ angular.module('oncokbApp')
                 expandAll: false,
                 rendering: true,
                 numAccordion: 0,
-                isDesiredGene: false,
+                isDesiredGene: true,
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false // indicate there are changes in mutation section
             };
@@ -3803,11 +3803,11 @@ angular.module('oncokbApp')
                 .finally(function() {
                     getSuggestedMutations();
                     if (_.isArray(OncoKB.global.genes)) {
-                        isDesiredGene();
+                        // isDesiredGene();
                     } else {
                         DatabaseConnector.getAllGene(function(data) {
                             OncoKB.global.genes = data;
-                            isDesiredGene();
+                            // isDesiredGene();
                         });
                     }
                 });
