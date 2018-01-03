@@ -3614,11 +3614,11 @@ angular.module('oncokbApp')
                 expandAll: false,
                 rendering: true,
                 numAccordion: 0,
-                isDesiredGene: false,
+                isDesiredGene: true,
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false // indicate there are changes in mutation section
             };
-
+            $rootScope.isDesiredGene = true;
             $scope.$watch('meta.newCancerTypes', function(n) {
                 if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                     $scope.meta.newCancerTypes.push({
