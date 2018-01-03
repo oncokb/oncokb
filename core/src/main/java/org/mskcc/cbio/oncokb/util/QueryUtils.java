@@ -2,11 +2,9 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.Query;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Hongxin Zhang on 8/23/17.
@@ -24,14 +22,10 @@ public class QueryUtils {
                     (alterationType.equals(AlterationType.STRUCTURAL_VARIANT) &&
                         !StringUtils.isNullOrEmpty(query.getConsequence()) &&
                         query.getConsequence().equalsIgnoreCase("fusion"))) {
-                    List<Gene> genes = FusionUtils.getGenes(query.getHugoSymbol());
+                    LinkedHashSet<String> genes = new LinkedHashSet<>(Arrays.asList(query.getHugoSymbol().split("-")));
 
                     if (genes.size() > 1) {
-                        List<String> symbols = new ArrayList<>();
-                        for (Gene gene : genes) {
-                            symbols.add(gene.getHugoSymbol());
-                        }
-                        name = org.apache.commons.lang3.StringUtils.join(symbols, "-") + " Fusion";
+                        name = org.apache.commons.lang3.StringUtils.join(genes, "-") + " Fusion";
                     } else if (genes.size() == 1) {
                         name = "Fusions";
                     }
