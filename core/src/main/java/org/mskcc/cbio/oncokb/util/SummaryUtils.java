@@ -211,7 +211,7 @@ public class SummaryUtils {
         if (tumorTypeSummary == null) {
             tumorTypeSummary = newTumorTypeSummary();
             if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
-                tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring a [[gene]] truncating mutation.");
+                tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring " + getGeneArticle(gene) + " [[gene]] truncating mutation.");
             } else {
                 tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].");
             }
@@ -394,6 +394,10 @@ public class SummaryUtils {
             isPlural = true;
         }
         if (oncogenicity != null) {
+            if (query.getAlteration().toLowerCase().contains("truncating mutation") && query.getSvType() != null) {
+                return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " is a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity);
+            }
+
             if (oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
                 if (isHotspot) {
                     return inconclusiveHotSpotSummary(alteration, query);
@@ -423,6 +427,28 @@ public class SummaryUtils {
 
                 sb.append(" oncogenic.");
             }
+        }
+        return sb.toString();
+    }
+
+    private static String getOncogenicSubTextFromOncogenicity(Oncogenicity oncogenicity) {
+        if (oncogenicity == null)
+            return "";
+        StringBuilder sb = new StringBuilder();
+        if (oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL)) {
+            sb.append("considered likely neutral.");
+        } else {
+            if (oncogenicity.equals(Oncogenicity.LIKELY)) {
+                sb.append("considered likely");
+            } else if (oncogenicity.equals(Oncogenicity.YES)) {
+                sb.append("known to be");
+            } else if (oncogenicity.equals(Oncogenicity.PREDICTED)) {
+                sb.append("predicted to be");
+            } else {
+                // For Unknown
+                return "";
+            }
+            sb.append(" oncogenic");
         }
         return sb.toString();
     }
@@ -1237,5 +1263,19 @@ public class SummaryUtils {
         Map<String, Object> summary = new HashMap<>();
         summary.put("summary", "");
         return summary;
+    }
+
+    private static String getGeneArticle(Gene gene) {
+        String[] vowels = {"A", "E", "I", "O", "U"};
+        boolean isVowel = false;
+        if (gene != null && gene.getHugoSymbol() != null) {
+            for (int i = 0; i < vowels.length; i++) {
+                if (gene.getHugoSymbol().startsWith(vowels[i])) {
+                    isVowel = true;
+                    break;
+                }
+            }
+        }
+        return isVowel ? "an" : "a";
     }
 }

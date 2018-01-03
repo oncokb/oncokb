@@ -58,7 +58,7 @@ public class IndicatorUtils {
                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
                 gene = (Gene) fusionGeneAltsMap.get("pickedGene");
                 relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
-            }else {
+            } else {
                 query.setAlteration("truncating mutation");
                 query.setConsequence("feature_truncation");
 
@@ -487,7 +487,7 @@ public class IndicatorUtils {
                     map.put("hasRelevantAltsGenes", hasRelevantAltsGenes);
                 } else if (hasRelevantAltsGenes.size() == 1) {
                     gene = hasRelevantAltsGenes.iterator().next();
-                    relevantAlterations = findRelevantAlts(gene, query.getAlteration());
+                    relevantAlterations = findRelevantAlts(gene, query.getHugoSymbol() + " Fusion");
                 }
 
                 // None of relevant alterations found in both genes.
