@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
@@ -36,72 +37,42 @@ public class IndicatorUtils {
 
         source = source == null ? "oncokb" : source;
 
-        // Deal with fusion without primary gene
+        // Deal with fusion without primary gene, and this is only for legacy fusion event
+        // The latest fusion event has been integrated with alteration type. Please see next if-else condition
+        // for more info.
         // TODO: support entrezGeneId fusion
+        AlterationType alterationType = AlterationType.getByName(query.getAlterationType());
+        Map<String, Object> fusionGeneAltsMap = new HashMap<>();
         if (query.getHugoSymbol() != null
-            && query.getAlterationType() != null &&
-            query.getAlterationType().equalsIgnoreCase("fusion")) {
-            List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
-            Set<String> geneStrsSet = new HashSet<>();
+            && alterationType != null &&
+            alterationType.equals(AlterationType.FUSION)) {
+            fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+            gene = (Gene) fusionGeneAltsMap.get("pickedGene");
+            relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
+            List<Gene> allGenes = (List<Gene>) fusionGeneAltsMap.get("allGenes");
+        } else if (alterationType != null && alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) {
+            VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
+            Boolean isFunctionalFusion = variantConsequence != null && variantConsequence.getTerm().equals("fusion");
 
-            if (geneStrsList != null) {
-                geneStrsSet = new HashSet<>(geneStrsList);
-            }
+            if (isFunctionalFusion) {
+                fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+                gene = (Gene) fusionGeneAltsMap.get("pickedGene");
+                relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
+            } else {
+                query.setAlteration("truncating mutation");
+                query.setConsequence("feature_truncation");
 
-            // Deal with two different genes fusion event.
-            if (geneStrsSet.size() == 2) {
-                List<Gene> tmpGenes = new ArrayList<>();
-                for (String geneStr : geneStrsSet) {
-                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
-                    if (tmpGene != null) {
-                        tmpGenes.add(tmpGene);
-                    }
-                }
-                if (tmpGenes.size() > 0) {
-                    query.setAlteration(query.getHugoSymbol() + " fusion");
-                    Set<Gene> hasRelevantAltsGenes = new HashSet<>();
-                    for (Gene tmpGene : tmpGenes) {
-                        List<Alteration> tmpRelevantAlts = findRelevantAlts(tmpGene, query.getAlteration());
-                        if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
-                            hasRelevantAltsGenes.add(tmpGene);
-                        }
-                    }
-
-                    if (hasRelevantAltsGenes.size() > 1) {
-                        // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
-                        TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
-                        for (Gene tmpGene : hasRelevantAltsGenes) {
-                            Query tmpQuery = new Query(query.getId(), query.getType(), tmpGene.getEntrezGeneId(),
-                                tmpGene.getHugoSymbol(), query.getAlteration(), query.getAlterationType(),
-                                query.getTumorType(), query.getConsequence(), query.getProteinStart(),
-                                query.getProteinEnd(), query.getHgvs());
-                            result.add(IndicatorUtils.processQuery(tmpQuery, geneStatus, levels, source, highestLevelOnly));
-                        }
-                        return result.iterator().next();
-                    } else if (hasRelevantAltsGenes.size() == 1) {
-                        gene = hasRelevantAltsGenes.iterator().next();
-                        relevantAlterations = findRelevantAlts(gene, query.getAlteration());
-                    }
-                    // None of relevant alterations found in both genes.
-                    if (gene == null) {
-                        gene = tmpGenes.get(0);
-                    }
-                }
-            } else if (geneStrsSet.size() > 0) {
-                String geneStr = geneStrsSet.iterator().next();
-                if (geneStr != null) {
-                    Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
-                    if (tmpGene != null) {
-                        gene = tmpGene;
-                        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                            null, null, null, null);
-                        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                        relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
-
-                        // Map Truncating Mutations to single gene fusion event
-                        Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
-                        if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
-                            relevantAlterations.add(truncatingMutations);
+                fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+                gene = (Gene) fusionGeneAltsMap.get("pickedGene");
+                fusionGeneAltsMap = new HashMap<>();
+                // As long as this is a structural variant event, we need to attach the Truncating Mutation
+                Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
+                if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
+                    relevantAlterations.add(truncatingMutations);
+                    List<Alteration> truncMutRelevants = AlterationUtils.getRelevantAlterations(truncatingMutations);
+                    for (Alteration alt : truncMutRelevants) {
+                        if (!relevantAlterations.contains(alt)) {
+                            relevantAlterations.add(alt);
                         }
                     }
                 }
@@ -118,6 +89,19 @@ public class IndicatorUtils {
             }
         }
 
+        // For fusions
+        if (fusionGeneAltsMap.containsKey("hasRelevantAltsGenes")) {
+            // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
+            TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
+            for (Gene tmpGene : (Set<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
+                Query tmpQuery = new Query(query.getId(), query.getType(), tmpGene.getEntrezGeneId(),
+                    tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
+                    query.getTumorType(), query.getConsequence(), query.getProteinStart(),
+                    query.getProteinEnd(), query.getHgvs());
+                result.add(IndicatorUtils.processQuery(tmpQuery, geneStatus, levels, source, highestLevelOnly));
+            }
+            return result.iterator().next();
+        }
 
         if (gene != null) {
             query.setHugoSymbol(gene.getHugoSymbol());
@@ -227,8 +211,7 @@ public class IndicatorUtils {
             }
 
             // Set hotspot oncogenicity to Predicted Oncogenic
-            if (indicatorQuery.getOncogenic() == null
-                && indicatorQuery.getHotspot()) {
+            if (indicatorQuery.getHotspot() && !MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()))) {
                 indicatorQuery.setOncogenic(Oncogenicity.PREDICTED.getOncogenic());
 
                 // Check whether the gene has Oncogenic Mutations annotated
@@ -314,7 +297,7 @@ public class IndicatorUtils {
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
 
         Date lastUpdate = getLatestDateFromEvidences(allQueryRelatedEvidences);
-        indicatorQuery.setLastUpdate(lastUpdate == null ?  MainUtils.getDataVersionDate():
+        indicatorQuery.setLastUpdate(lastUpdate == null ? MainUtils.getDataVersionDate() :
             new SimpleDateFormat("MM/dd/yyy").format(lastUpdate));
 
         // Give default oncogenicity if no data has been assigned.
@@ -455,10 +438,95 @@ public class IndicatorUtils {
     }
 
     private static List<Alteration> findRelevantAlts(Gene gene, String alteration) {
+        Set<Alteration> relevantAlts = new LinkedHashSet<>();
         Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration,
             null, null, null, null);
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-        return AlterationUtils.getRelevantAlterations(alt);
+
+        relevantAlts.addAll(AlterationUtils.getRelevantAlterations(alt));
+
+        Alteration revertAlt = AlterationUtils.getRevertFusions(alt);
+        if (revertAlt != null) {
+            relevantAlts.addAll(AlterationUtils.getRelevantAlterations(revertAlt));
+        }
+        return new ArrayList<>(relevantAlts);
+    }
+
+    public static Map<String, Object> findFusionGeneAndRelevantAlts(Query query) {
+        List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
+        Set<String> geneStrsSet = new HashSet<>();
+        Gene gene = null;
+        List<Alteration> fusionPair = new ArrayList<>();
+        List<Alteration> relevantAlterations = new ArrayList<>();
+        Map<String, Object> map = new HashedMap();
+
+        if (geneStrsList != null) {
+            geneStrsSet = new HashSet<>(geneStrsList);
+        }
+
+        // Deal with two different genes fusion event.
+        if (geneStrsSet.size() >= 2) {
+            List<Gene> tmpGenes = new ArrayList<>();
+            for (String geneStr : geneStrsSet) {
+                Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
+                if (tmpGene != null) {
+                    tmpGenes.add(tmpGene);
+                }
+            }
+            if (tmpGenes.size() > 0) {
+
+                Set<Gene> hasRelevantAltsGenes = new HashSet<>();
+                for (Gene tmpGene : tmpGenes) {
+                    List<Alteration> tmpRelevantAlts = findRelevantAlts(tmpGene, query.getHugoSymbol() + " Fusion");
+                    if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
+                        hasRelevantAltsGenes.add(tmpGene);
+                    }
+                }
+
+                if (hasRelevantAltsGenes.size() > 1) {
+                    map.put("hasRelevantAltsGenes", hasRelevantAltsGenes);
+                } else if (hasRelevantAltsGenes.size() == 1) {
+                    gene = hasRelevantAltsGenes.iterator().next();
+                    relevantAlterations = findRelevantAlts(gene, query.getHugoSymbol() + " Fusion");
+                }
+
+                // None of relevant alterations found in both genes.
+                if (gene == null) {
+                    gene = tmpGenes.get(0);
+                }
+                map.put("allGenes", tmpGenes);
+            }
+        } else if (geneStrsSet.size() == 1) {
+            String geneStr = geneStrsSet.iterator().next();
+            if (geneStr != null) {
+                Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
+                if (tmpGene != null) {
+                    gene = tmpGene;
+                    Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                        AlterationType.getByName(query.getAlterationType()), query.getConsequence(), null, null);
+                    AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                    relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+
+                    // Map Truncating Mutations to single gene fusion event
+                    Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
+                    if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
+                        relevantAlterations.add(truncatingMutations);
+                    }
+                }
+            }
+            List<Gene> allGenes = new ArrayList<>();
+            for (String subGeneStr : geneStrsSet) {
+                Gene tmpGene = GeneUtils.getGeneByHugoSymbol(subGeneStr);
+                if (tmpGene != null) {
+                    allGenes.add(tmpGene);
+                }
+            }
+            map.put("allGenes", allGenes);
+        }
+
+        map.put("pickedGene", gene);
+        map.put("relevantAlts", relevantAlterations);
+        return map;
     }
 }
 

@@ -8,6 +8,7 @@ package org.mskcc.cbio.oncokb.controller;
 
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.quest.VariantAnnotationXML;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
@@ -69,7 +70,7 @@ public class VariantAnnotationXMLController {
             tumorType = cancerType;
         }
 
-        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, alterationType, consequence, proteinStart, proteinEnd);
+        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, AlterationType.getByName(alterationType), consequence, proteinStart, proteinEnd);
 
         sb.append(VariantAnnotationXML.annotate(alt, tumorType));
 

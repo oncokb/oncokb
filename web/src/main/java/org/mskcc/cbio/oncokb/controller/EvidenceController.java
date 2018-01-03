@@ -162,7 +162,7 @@ public class EvidenceController {
     synchronized ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
                              @RequestBody String vus) throws JSONException {
 
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        HttpStatus status = HttpStatus.OK;
         if (hugoSymbol != null && vus != null) {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
             if (gene != null) {
@@ -172,7 +172,6 @@ public class EvidenceController {
                 deleteEvidencesAndAlts(evidences);
                 DriveAnnotationParser.parseVUS(gene, new JSONArray(vus), 1);
                 updateCacheBasedOnGenes(Collections.singleton(gene));
-                status = HttpStatus.OK;
             }
         }
 

@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationType;
 
 import java.util.*;
 
@@ -32,7 +33,7 @@ public class FindRelevantAlterationsTest {
         return Arrays.asList(
             new String[][]{
                 // Critical cases
-                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, Oncogenic Mutations"},
+                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, Oncogenic Mutations"},
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations"},
@@ -78,7 +79,7 @@ public class FindRelevantAlterationsTest {
     @Test
     public void testAnnotateAlteration() throws Exception {
         // Particularly test consequence
-        Alteration alt = AlterationUtils.getAlteration(hugoSymbol, alteration, alterationType, null, null, null);
+        Alteration alt = AlterationUtils.getAlteration(hugoSymbol, alteration, AlterationType.getByName(alterationType), null, null, null);
         AlterationUtils.annotateAlteration(alt, alteration);
 
         LinkedHashSet<Alteration> relevantAlterations =

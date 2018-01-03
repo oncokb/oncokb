@@ -102,6 +102,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
 
+        AlterationType daoAlterationType = alteration.getAlterationType();
+
+        // DAO only support MUTATION and intragenic fusion
+        if (daoAlterationType != null && !(org.apache.commons.lang3.StringUtils.containsIgnoreCase(alteration.getAlteration(), "intragenic") && daoAlterationType.equals(AlterationType.FUSION))) {
+            daoAlterationType = AlterationType.MUTATION;
+        }
+
         // Alteration should always has consequence attached.
         if (alteration.getConsequence() == null) {
             AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
@@ -112,7 +119,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Find exact match
-        Alteration matchedAlt = findAlteration(alteration.getGene(), alteration.getAlterationType(), alteration.getAlteration());
+        Alteration matchedAlt = findAlteration(alteration.getGene(), daoAlterationType, alteration.getAlteration());
         if (matchedAlt != null) {
             alterations.add(matchedAlt);
         }
@@ -127,7 +134,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Find fusion variant
         //If alteration contains 'fusion' or alterationType is fusion
         if ((alteration.getAlteration() != null && alteration.getAlteration().toLowerCase().contains("fusion"))
-            || (alteration.getAlterationType() != null && alteration.getAlterationType().equals(AlterationType.FUSION))) {
+            || (alteration.getAlterationType() != null && alteration.getAlterationType().equals(AlterationType.FUSION))
+            || (alteration.getAlterationType() != null && alteration.getAlterationType().equals(AlterationType.STRUCTURAL_VARIANT)
+            && alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("fusion")))) {
             // TODO: match fusion partner
 
             //the alteration 'fusions' should be injected into alteration list
@@ -192,7 +201,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addDeletion) {
-            Alteration deletion = findAlteration(alteration.getGene(), alteration.getAlterationType(), "Deletion");
+            Alteration deletion = findAlteration(alteration.getGene(), daoAlterationType, "Deletion");
             if (deletion != null) {
                 alterations.add(deletion);
 
@@ -207,7 +216,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addOncogenicMutations(alteration, alterations)) {
-            Alteration oncogenicMutations = findAlteration(alteration.getGene(), alteration.getAlterationType(), "oncogenic mutations");
+            Alteration oncogenicMutations = findAlteration(alteration.getGene(), daoAlterationType, "oncogenic mutations");
             if (oncogenicMutations != null) {
                 alterations.add(oncogenicMutations);
             }
@@ -230,7 +239,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         for (String effect : effects) {
-            Alteration alt = findAlteration(alteration.getGene(), alteration.getAlterationType(), effect + " mutations");
+            Alteration alt = findAlteration(alteration.getGene(), daoAlterationType, effect + " mutations");
             if (alt != null) {
                 alterations.add(alt);
             }
@@ -265,27 +274,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     private boolean addOncogenicMutations(Alteration exactAlt, Set<Alteration> relevantAlts) {
         boolean add = false;
-        if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
-            for (Alteration alt : relevantAlts) {
-                Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
-                if (isOncogenic != null && isOncogenic) {
-                    add = true;
-                    break;
-                }
-            }
-        }
-
-        if (isKitSpecialVariants(exactAlt)) {
-            add = false;
-        }
-
-        if (add) {
-            for (Alteration alteration : relevantAlts) {
-                if (isKitSpecialVariants(exactAlt)) {
-                    add = false;
-                }
-                if (!add) {
-                    break;
+        if (!isKitSpecialVariants(exactAlt)) {
+            if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
+                for (Alteration alt : relevantAlts) {
+                    Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
+                    if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {
+                        add = true;
+                        break;
+                    }
                 }
             }
         }
