@@ -784,6 +784,26 @@ public final class AlterationUtils {
         return isOncogenic;
     }
 
+    public static Boolean hasImportantCuratedOncogenicity(Alteration alteration) {
+        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
+        curatedOncogenicities.add(Oncogenicity.YES);
+        curatedOncogenicities.add(Oncogenicity.LIKELY);
+        curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
+        Boolean isImportantCuratedOcnogenicity = false;
+
+        for (Evidence evidence : oncogenicEvs) {
+            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
+            if (oncogenicity != null && curatedOncogenicities.contains(oncogenicity)) {
+                isImportantCuratedOcnogenicity = true;
+                break;
+            }
+        }
+        return isImportantCuratedOcnogenicity;
+    }
+
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {
         Set<Alteration> oncogenicMutations = new HashSet<>();
         Alteration alt = findAlteration(alteration.getGene(), "oncogenic mutations");
