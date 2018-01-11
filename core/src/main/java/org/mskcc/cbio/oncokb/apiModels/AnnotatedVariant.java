@@ -6,12 +6,39 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Hongxin on 10/28/16.
  */
 public class AnnotatedVariant {
+    String isoform;
+    String refSeq;
+    Integer entrezGeneId;
     String gene;
     String variant;
     String oncogenicity;
     String mutationEffect;
     String mutationEffectPmids;
     String mutationEffectAbstracts;
+
+    public String getIsoform() {
+        return isoform;
+    }
+
+    public void setIsoform(String isoform) {
+        this.isoform = isoform;
+    }
+
+    public String getRefSeq() {
+        return refSeq;
+    }
+
+    public void setRefSeq(String refSeq) {
+        this.refSeq = refSeq;
+    }
+
+    public Integer getEntrezGeneId() {
+        return entrezGeneId;
+    }
+
+    public void setEntrezGeneId(Integer entrezGeneId) {
+        this.entrezGeneId = entrezGeneId;
+    }
 
     public String getGene() {
         return gene;
@@ -61,7 +88,10 @@ public class AnnotatedVariant {
         this.mutationEffectAbstracts = mutationEffectAbstracts;
     }
 
-    public AnnotatedVariant(String gene, String variant, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts) {
+    public AnnotatedVariant(String isoform, String refSeq, Integer entrezGeneId, String gene, String variant, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts) {
+        this.isoform = isoform;
+        this.refSeq = refSeq;
+        this.entrezGeneId = entrezGeneId;
         this.gene = gene;
         this.variant = variant;
         this.oncogenicity = oncogenicity;

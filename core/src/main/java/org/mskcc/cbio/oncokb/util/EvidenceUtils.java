@@ -62,8 +62,7 @@ public class EvidenceUtils {
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-
+                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
             List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alt);
 
@@ -827,7 +826,7 @@ public class EvidenceUtils {
                             }
                         }
 
-                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION.name(), requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);

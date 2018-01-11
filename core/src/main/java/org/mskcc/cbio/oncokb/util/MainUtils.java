@@ -405,6 +405,18 @@ public class MainUtils {
         return evidenceTypes;
     }
 
+    public static boolean isValidHotspotOncogenicity(Oncogenicity oncogenicity) {
+        if (oncogenicity == null)
+            return false;
+        Set<Oncogenicity> oncogenicities = new HashSet<>();
+        oncogenicities.add(Oncogenicity.YES);
+        oncogenicities.add(Oncogenicity.LIKELY);
+        oncogenicities.add(Oncogenicity.PREDICTED);
+        oncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+
+        return oncogenicities.contains(oncogenicity);
+    }
+
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {

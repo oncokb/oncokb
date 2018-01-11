@@ -5,23 +5,34 @@
 package org.mskcc.cbio.oncokb.model;
 
 /**
- *
  * @author jgao
  */
 public enum AlterationType {
-    
-     MUTATION ("Mutation"),
-     COPY_NUMBER_ALTERATION("Copy number alteration"),
-     FUSION ("Fusion");
 
-     private AlterationType(String label) {
-         this.label = label;
-     }
+    MUTATION("Mutation"),
+    COPY_NUMBER_ALTERATION("Copy number alteration"),
 
-     private String label;
+    @Deprecated
+    FUSION("Fusion"),
 
-     public String label() {
-         return label;
-     }
-    
+    STRUCTURAL_VARIANT("Structural Variant");
+
+    private AlterationType(String label) {
+        this.label = label;
+    }
+
+    private String label;
+
+    public String label() {
+        return label;
+    }
+
+    public static AlterationType getByName(String name) {
+        for (AlterationType alterationType : AlterationType.values()) {
+            if (alterationType.name().equalsIgnoreCase(name)) {
+                return alterationType;
+            }
+        }
+        return null;
+    }
 }

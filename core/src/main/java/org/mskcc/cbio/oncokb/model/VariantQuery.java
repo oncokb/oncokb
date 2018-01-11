@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class VariantQuery implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
-    private String queryGene; //HugoSymbol only
     private Gene gene;
     private String queryAlteration;
     private String queryTumorType;
@@ -31,14 +30,6 @@ public class VariantQuery implements java.io.Serializable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getQueryGene() {
-        return queryGene;
-    }
-
-    public void setQueryGene(String queryGene) {
-        this.queryGene = queryGene;
     }
 
     public Gene getGene() {

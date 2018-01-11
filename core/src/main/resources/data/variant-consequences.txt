@@ -35,4 +35,5 @@ regulatory_region_variant	no	A sequence variant located within a regulatory regi
 feature_elongation	no	A sequence variant that causes the extension of a genomic feature, with regard to the reference sequence
 feature_truncation	yes	A sequence variant that causes the reduction of a genomic feature, with regard to the reference sequence
 intergenic_variant	no	A sequence variant located in the intergenic region, between genes
+fusion	yes	Fusion
 any	no	any variant

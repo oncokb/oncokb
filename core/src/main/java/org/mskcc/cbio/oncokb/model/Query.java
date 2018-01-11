@@ -3,7 +3,9 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.QueryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ public class Query implements java.io.Serializable {
     private Integer entrezGeneId;
     private String alteration;
     private String alterationType;
+    private StructuralVariantType svType;
     private String tumorType;
     private String consequence;
     private Integer proteinStart;
@@ -62,7 +65,9 @@ public class Query implements java.io.Serializable {
         this.setTumorType(tumorType);
     }
 
-    public Query(String id, String type, Integer entrezGeneId, String hugoSymbol, String alteration, String alterationType, String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
+    public Query(String id, String type, Integer entrezGeneId, String hugoSymbol,
+                 String alteration, String alterationType, StructuralVariantType svType,
+                 String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
         this.id = id;
         this.type = type;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
@@ -71,6 +76,7 @@ public class Query implements java.io.Serializable {
         this.entrezGeneId = entrezGeneId;
         this.setAlteration(alteration);
         this.alterationType = alterationType;
+        this.svType = svType;
         this.setTumorType(tumorType);
         this.consequence = consequence;
         this.proteinStart = proteinStart;
@@ -127,6 +133,14 @@ public class Query implements java.io.Serializable {
 
     public void setAlterationType(String alterationType) {
         this.alterationType = alterationType;
+    }
+
+    public StructuralVariantType getSvType() {
+        return svType;
+    }
+
+    public void setSvType(StructuralVariantType svType) {
+        this.svType = svType;
     }
 
     public String getTumorType() {
@@ -198,14 +212,7 @@ public class Query implements java.io.Serializable {
             this.setAlteration("");
         }
 
-        // If the query only indicates this is a fusion event with associated genes but no alteration specified,
-        // need to attach Fusions to the query.
-        if (this.getHugoSymbol() != null
-            && this.getAlterationType() != null &&
-            this.getAlterationType().equalsIgnoreCase("fusion")
-            && this.getAlteration().isEmpty()) {
-            this.setAlteration("Fusions");
-        }
+        this.setAlteration(QueryUtils.getAlterationName(this));
     }
 
     @JsonIgnore
@@ -228,6 +235,11 @@ public class Query implements java.io.Serializable {
         }
         if (this.alterationType != null) {
             content.add(this.alterationType);
+        } else {
+            content.add("");
+        }
+        if (this.svType != null) {
+            content.add(this.svType.name());
         } else {
             content.add("");
         }

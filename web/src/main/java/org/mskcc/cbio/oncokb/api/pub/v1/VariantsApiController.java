@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
@@ -94,7 +95,7 @@ public class VariantsApiController implements VariantsApi {
 
                             // If this variant is not annotated
                             if (alterations == null || alterations.isEmpty()) {
-                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), query.getVariantType(), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), AlterationType.getByName(query.getVariantType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
                                 if (alteration != null) {
                                     alterations.add(alteration);
                                 }

@@ -4,10 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
@@ -35,6 +32,7 @@ public class IndicatorController {
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,
         @RequestParam(value = "alterationType", required = false) String alterationType,
+        @RequestParam(value = "svType", required = false) StructuralVariantType svType,
         @RequestParam(value = "tumorType", required = false) String tumorType,
         @RequestParam(value = "consequence", required = false) String consequence,
         @RequestParam(value = "proteinStart", required = false) Integer proteinStart,
@@ -47,7 +45,7 @@ public class IndicatorController {
         @RequestParam(value = "fields", required = false) String fields,
         @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
-        Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
 
