@@ -739,6 +739,9 @@ public final class AlterationUtils {
     }
 
     public static Alteration findAlteration(Gene gene, String alteration) {
+        if (gene == null) {
+            return null;
+        }
         if (CacheUtils.isEnabled()) {
             Set<Alteration> alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
             for (Alteration al : alterations) {
