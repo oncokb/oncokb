@@ -26,6 +26,18 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
+        query = new Query(null, null, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
+        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
+
+        query = new Query(null, null, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", "fusion", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true);
+        assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
+        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
+
         // The last update should be a date even if we don't have any annotation for the gene/varaint
         SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
         try {
