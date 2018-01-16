@@ -104,11 +104,13 @@ public class IndicatorUtilsTest {
         query = new Query(null, null, null, "PIK3R1", "K567E", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
         query = new Query(null, null, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false);
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "As of 10/06/2017, there was no available functional data about the ALK R401Q mutation. However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
         // No longer test 3A. KRAS has been downgraded to level 4
 //        assertEquals("The highest sensitive level should be null, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
@@ -179,6 +181,7 @@ public class IndicatorUtilsTest {
         query = new Query(null, null, null, "AKT1", "P68_C77dup", null, null, "Gastrointestinal Stromal Tumor", "In_Frame_Ins", 78, 78, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("The Oncogenicity is not Predicted Oncogenic, but it should be.", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
         // Oncogenicity of Alternative Allele overwrites Inconclusive
         // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
