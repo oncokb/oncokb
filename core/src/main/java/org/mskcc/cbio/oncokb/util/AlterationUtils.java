@@ -45,6 +45,7 @@ public final class AlterationUtils {
         String var = null;
         Integer start = -1;
         Integer end = 100000;
+        boolean isDup = false;
 
         if (alteration == null) {
             return;
@@ -161,6 +162,7 @@ public final class AlterationUtils {
                                 break;
                             case "dup":
                                 consequence = "inframe_insertion";
+                                isDup = true;
                                 break;
                             case "mut":
                                 consequence = "any";
@@ -187,6 +189,7 @@ public final class AlterationUtils {
                                         consequence = "inframe_insertion";
                                         break;
                                     case "dup":
+                                        isDup = true;
                                         consequence = "inframe_insertion";
                                         break;
                                     case "del":
@@ -219,11 +222,11 @@ public final class AlterationUtils {
             alteration.setVariantResidues(var);
         }
 
-        if (alteration.getProteinStart() == null && start != null) {
+        if ((alteration.getProteinStart() == null || isDup) && start != null) {
             alteration.setProteinStart(start);
         }
 
-        if (alteration.getProteinEnd() == null && end != null) {
+        if ((alteration.getProteinEnd() == null || isDup) && end != null) {
             alteration.setProteinEnd(end);
         }
 
