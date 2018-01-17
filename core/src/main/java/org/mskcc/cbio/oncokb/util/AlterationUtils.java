@@ -45,6 +45,7 @@ public final class AlterationUtils {
         String var = null;
         Integer start = -1;
         Integer end = 100000;
+        boolean isDup = false;
 
         if (alteration == null) {
             return;
@@ -161,6 +162,7 @@ public final class AlterationUtils {
                                 break;
                             case "dup":
                                 consequence = "inframe_insertion";
+                                isDup = true;
                                 break;
                             case "mut":
                                 consequence = "any";
@@ -187,6 +189,7 @@ public final class AlterationUtils {
                                         consequence = "inframe_insertion";
                                         break;
                                     case "dup":
+                                        isDup = true;
                                         consequence = "inframe_insertion";
                                         break;
                                     case "del":
@@ -219,11 +222,11 @@ public final class AlterationUtils {
             alteration.setVariantResidues(var);
         }
 
-        if (alteration.getProteinStart() == null && start != null) {
+        if ((alteration.getProteinStart() == null || isDup) && start != null) {
             alteration.setProteinStart(start);
         }
 
-        if (alteration.getProteinEnd() == null && end != null) {
+        if ((alteration.getProteinEnd() == null || isDup) && end != null) {
             alteration.setProteinEnd(end);
         }
 
@@ -739,6 +742,9 @@ public final class AlterationUtils {
     }
 
     public static Alteration findAlteration(Gene gene, String alteration) {
+        if (gene == null) {
+            return null;
+        }
         if (CacheUtils.isEnabled()) {
             Set<Alteration> alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
             for (Alteration al : alterations) {
@@ -782,6 +788,26 @@ public final class AlterationUtils {
             isOncogenic = true;
         }
         return isOncogenic;
+    }
+
+    public static Boolean hasImportantCuratedOncogenicity(Alteration alteration) {
+        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
+        curatedOncogenicities.add(Oncogenicity.YES);
+        curatedOncogenicities.add(Oncogenicity.LIKELY);
+        curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
+        Boolean isImportantCuratedOcnogenicity = false;
+
+        for (Evidence evidence : oncogenicEvs) {
+            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
+            if (oncogenicity != null && curatedOncogenicities.contains(oncogenicity)) {
+                isImportantCuratedOcnogenicity = true;
+                break;
+            }
+        }
+        return isImportantCuratedOcnogenicity;
     }
 
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {

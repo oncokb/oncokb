@@ -62,6 +62,7 @@ public class AlterationUtilsTest {
                 {"IK744KIPVAI", "744", "745", "IK", "KIPVAI", "inframe_insertion"},
                 {"IK744K", "744", "745", "IK", "K", "inframe_deletion"},
                 {"IKG744KIPVAI", "744", "746", "IKG", "KIPVAI", "inframe_insertion"},
+                {"P68_C77dup", "68", "77", null, null, "inframe_insertion"},
 
                 // start_lost,
                 {"M1I", "1", "1", "M", "I", "start_lost"},

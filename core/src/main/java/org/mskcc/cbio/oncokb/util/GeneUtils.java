@@ -21,7 +21,7 @@ public class GeneUtils {
 
     // EntrezGeneId always has higher priority then HugoSymbol
     public static Gene getGene(Integer entrezGeneId, String hugoSymbol) {
-        if (entrezGeneId != null) {
+        if (entrezGeneId != null && !entrezGeneId.equals(0)) {
             return getGeneByEntrezId(entrezGeneId);
         } else {
             return getGeneByHugoSymbol(hugoSymbol);
