@@ -54,7 +54,7 @@ public class IndicatorUtils {
             VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
             Boolean isFunctionalFusion = variantConsequence != null && variantConsequence.getTerm().equals("fusion");
 
-            if (isFunctionalFusion) {
+            if (isFunctionalFusion || !com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
                 gene = (Gene) fusionGeneAltsMap.get("pickedGene");
                 relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
@@ -487,7 +487,11 @@ public class IndicatorUtils {
                     map.put("hasRelevantAltsGenes", hasRelevantAltsGenes);
                 } else if (hasRelevantAltsGenes.size() == 1) {
                     gene = hasRelevantAltsGenes.iterator().next();
-                    relevantAlterations = findRelevantAlts(gene, query.getHugoSymbol() + " Fusion");
+                    if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
+                        relevantAlterations = findRelevantAlts(gene, query.getAlteration());
+                    } else {
+                        relevantAlterations = findRelevantAlts(gene, query.getHugoSymbol() + " Fusion");
+                    }
                 }
 
                 // None of relevant alterations found in both genes.
@@ -505,12 +509,16 @@ public class IndicatorUtils {
                     Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                         AlterationType.getByName(query.getAlterationType()), query.getConsequence(), null, null);
                     AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                    relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
+                    if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
+                        relevantAlterations = findRelevantAlts(gene, query.getAlteration());
+                    } else {
+                        relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
 
-                    // Map Truncating Mutations to single gene fusion event
-                    Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
-                    if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
-                        relevantAlterations.add(truncatingMutations);
+                        // Map Truncating Mutations to single gene fusion event
+                        Alteration truncatingMutations = AlterationUtils.getTruncatingMutations(gene);
+                        if (truncatingMutations != null && !relevantAlterations.contains(truncatingMutations)) {
+                            relevantAlterations.add(truncatingMutations);
+                        }
                     }
                 }
             }
