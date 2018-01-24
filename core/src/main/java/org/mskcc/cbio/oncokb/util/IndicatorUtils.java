@@ -20,7 +20,7 @@ public class IndicatorUtils {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         if (evidenceTypes == null || evidenceTypes.isEmpty()) {
-            evidenceTypes.addAll(MainUtils.getAllEvidenceTypes());
+            evidenceTypes = new HashSet<>(MainUtils.getAllEvidenceTypes());
         }
 
         Set<EvidenceType> selectedTreatmentEvidence = new HashSet<>(CollectionUtils.intersection(evidenceTypes, MainUtils.getTreatmentEvidenceTypes()));
