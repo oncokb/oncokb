@@ -1018,7 +1018,9 @@ public class SummaryUtils {
                 sb.append(" alteration");
             }
         } else {
-            if (!queryAlteration.contains(gene.getHugoSymbol())) {
+            if (queryAlteration.contains(gene.getHugoSymbol())) {
+                sb.append(queryAlteration);
+            } else {
                 sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             }
             if (!queryAlteration.endsWith("mutation"))
