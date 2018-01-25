@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.dao.TreatmentDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.mskcc.oncotree.model.TumorType;
@@ -32,7 +33,7 @@ public class DriveAnnotationParser {
     @RequestMapping(value = "/legacy-api/driveAnnotation", method = POST)
     public
     @ResponseBody
-    void getEvidence(
+    synchronized void getEvidence(
         @RequestParam(value = "gene") String gene,
         @RequestParam(value = "vus", required = false) String vus
     ) throws IOException, JSONException {
@@ -183,7 +184,7 @@ public class DriveAnnotationParser {
                         alterationBo.delete(alteration);
                     }
 
-                    CacheUtils.updateGene(gene.getEntrezGeneId());
+                    CacheUtils.updateGene(gene.getEntrezGeneId(), false, true);
 
                     // summary
                     parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, geneInfo.has("summary_uuid") ? geneInfo.getString("summary_uuid") : null, (geneInfo.has("summary_review") ? getUpdateTime(geneInfo.get("summary_review")) : null), nestLevel + 1);
@@ -197,7 +198,7 @@ public class DriveAnnotationParser {
                     // Variants of unknown significance
                     parseVUS(gene, vus, nestLevel + 1);
 
-                    CacheUtils.updateGene(gene.getEntrezGeneId());
+                    CacheUtils.updateGene(gene.getEntrezGeneId(), true, true);
                 } else {
                     System.out.print(spaceStrByNestLevel(nestLevel) + "No info about " + hugo);
                 }

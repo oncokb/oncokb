@@ -108,7 +108,7 @@ public class CacheController {
                 case "updateGene":
                     Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
                     if (gene != null) {
-                        CacheUtils.updateGene(gene.getEntrezGeneId(), propagation);
+                        CacheUtils.updateGene(gene.getEntrezGeneId(), propagation, true);
                     }
                     break;
                 default:

@@ -54,7 +54,7 @@ public class CacheUtils {
         }
     };
 
-    private static Set<Integer> genesToBeUpdated = new HashSet();
+    private static Map<Integer, Boolean> genesToBeUpdated = new HashMap<>();
     private static Timer updateCacheTimer = new Timer();
     private static long UPDATE_CACHE_TIMER_DELAY = 10000L; // delay in milliseconds before task is to be executed.
     private static long UPDATE_CACHE_TIMER_PERIOD = 10000L; //  time in milliseconds between successive task executions.
@@ -213,11 +213,18 @@ public class CacheUtils {
             updateCacheTimer.scheduleAtFixedRate(new TimerTask() {
                 public void run() {
                     if (genesToBeUpdated.size() > 0) {
-                        for (Iterator<Integer> i = genesToBeUpdated.iterator(); i.hasNext();) {
-                            Integer entrezGeneId = i.next();
+                        Iterator it = genesToBeUpdated.entrySet().iterator();
+                        while (it.hasNext()) {
+                            Map.Entry pair = (Map.Entry) it.next();
+                            Integer entrezGeneId = (Integer) pair.getKey();
+                            Boolean notifyOthers = (Boolean) pair.getValue();
                             System.out.println("Updating " + entrezGeneId.toString() + " cache...");
                             GeneObservable.getInstance().update("update", entrezGeneId.toString());
-                            i.remove();
+
+                            if (notifyOthers != null && notifyOthers) {
+                                notifyOtherServices("update", entrezGeneId);
+                            }
+                            it.remove(); // avoids a ConcurrentModificationException
                         }
                     }
                 }
@@ -529,23 +536,14 @@ public class CacheUtils {
         }
     }
 
-    public static void updateGene(Integer entrezGeneId) {
-        try {
-            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println(entrezGeneId.toString() + " is queued.");
-        genesToBeUpdated.add(entrezGeneId);
-        notifyOtherServices("update", entrezGeneId);
-    }
-
     public static void forceUpdateGeneAlterations(Integer entrezGeneId) {
         alterations.remove(entrezGeneId);
     }
 
-    public static void updateGene(Integer entrezGeneId, Boolean propagate) {
+    public static void updateGene(Integer entrezGeneId, Boolean propagate, Boolean skipGeneUpdateDelay) {
+        if (skipGeneUpdateDelay == null) {
+            skipGeneUpdateDelay = false;
+        }
         try {
             System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         } catch (IOException e) {
@@ -555,10 +553,18 @@ public class CacheUtils {
             propagate = false;
         }
 
-        System.out.println(entrezGeneId.toString() + " is queued.");
-        genesToBeUpdated.add(entrezGeneId);
-        if (propagate) {
-            notifyOtherServices("update", entrezGeneId);
+        if (skipGeneUpdateDelay) {
+            GeneObservable.getInstance().update("update", entrezGeneId.toString());
+            if (propagate) {
+                notifyOtherServices("update", entrezGeneId);
+            }
+        } else {
+            System.out.println(entrezGeneId.toString() + " is queued.");
+            if (propagate) {
+                genesToBeUpdated.put(entrezGeneId, true);
+            } else {
+                genesToBeUpdated.put(entrezGeneId, false);
+            }
         }
     }
 
