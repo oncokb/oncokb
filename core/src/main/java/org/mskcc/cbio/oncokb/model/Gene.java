@@ -146,19 +146,14 @@ public class Gene implements Serializable {
         return hash;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Gene)) return false;
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Gene other = (Gene) obj;
-        if (this.entrezGeneId != other.entrezGeneId) {
-            return false;
-        }
-        return true;
+        Gene gene = (Gene) o;
+
+        return getEntrezGeneId() != null ? getEntrezGeneId().equals(gene.getEntrezGeneId()) : gene.getEntrezGeneId() == null;
     }
 
     @Override
