@@ -32,7 +32,7 @@ public class Gene implements Serializable {
     @Column(name = "entrez_gene_id")
     private Integer entrezGeneId;
 
-    @Column(name = "hugo_symbol", length = 50, nullable = true, unique = true)
+    @Column(name = "hugo_symbol", length = 50, unique = true)
     private String hugoSymbol;
 
     @Column(length = 500)
