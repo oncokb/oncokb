@@ -250,22 +250,6 @@ public class Evidence implements java.io.Serializable {
     })
     private Set<Article> articles;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "evidence_nccn_guideline", joinColumns = {
-        @JoinColumn(name = "evidence_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-        @JoinColumn(name = "nccn_guideline_id", nullable = false, updatable = false)
-    })
-    private Set<NccnGuideline> nccnGuidelines = new HashSet<NccnGuideline>(0);
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "evidence_clinical_trial", joinColumns = {
-        @JoinColumn(name = "evidence_id", nullable = false, updatable = false)
-    }, inverseJoinColumns = {
-        @JoinColumn(name = "trial_id", nullable = false, updatable = false)
-    })
-    private Set<ClinicalTrial> clinicalTrials = new HashSet<ClinicalTrial>(0);
-
     public Evidence() {
     }
 
@@ -454,34 +438,6 @@ public class Evidence implements java.io.Serializable {
         }
     }
 
-    public Set<NccnGuideline> getNccnGuidelines() {
-        return nccnGuidelines;
-    }
-
-    public void setNccnGuidelines(Set<NccnGuideline> nccnGuidelines) {
-        this.nccnGuidelines = nccnGuidelines;
-    }
-
-    public Set<ClinicalTrial> getClinicalTrials() {
-        return clinicalTrials;
-    }
-
-    public void setClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
-        this.clinicalTrials = clinicalTrials;
-    }
-
-    public void addClinicalTrials(Set<ClinicalTrial> clinicalTrials) {
-        if (this.clinicalTrials == null) {
-            this.clinicalTrials = clinicalTrials;
-        } else {
-            for (ClinicalTrial trial : clinicalTrials) {
-                if (!this.clinicalTrials.contains(trial)) {
-                    this.clinicalTrials.add(trial);
-                }
-            }
-        }
-    }
-
     @Override
     public int hashCode() {
         int hash = 7;
@@ -525,12 +481,10 @@ public class Evidence implements java.io.Serializable {
         this.alterations = new HashSet<>(e.alterations);
         this.setTreatments(new HashSet<>(e.treatments));
         this.articles = new HashSet<>(e.articles);
-        this.nccnGuidelines = new HashSet<>(e.nccnGuidelines);
-        this.clinicalTrials = new HashSet<>(e.clinicalTrials);
     }
 
     public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, Set<Treatment> treatments,
-                    String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles, Set<NccnGuideline> nccnGuidelines, Set<ClinicalTrial> clinicalTrials) {
+                    String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerType = cancerType;
@@ -544,8 +498,6 @@ public class Evidence implements java.io.Serializable {
         this.levelOfEvidence = levelOfEvidence;
         this.propagation = propagation;
         this.articles = articles;
-        this.nccnGuidelines = nccnGuidelines;
-        this.clinicalTrials = clinicalTrials;
         if (treatments != null) {
             this.setTreatments(treatments);
         }

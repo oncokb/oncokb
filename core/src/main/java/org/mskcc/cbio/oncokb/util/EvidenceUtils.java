@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.*;
-import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.oncotree.model.TumorType;
 
@@ -918,32 +917,14 @@ public class EvidenceUtils {
             evidence.setAlterations(alterations);
         }
 
-        Set<ClinicalTrial> trials = evidence.getClinicalTrials();
         Set<Article> articles = evidence.getArticles();
         Set<Treatment> treatments = evidence.getTreatments();
-        Set<NccnGuideline> nccnGuidelines = evidence.getNccnGuidelines();
 
         if (evidence.getSubtype() != null && evidence.getSubtype().isEmpty()) {
             evidence.setSubtype(null);
         }
         if (evidence.getCancerType() != null && evidence.getCancerType().isEmpty()) {
             evidence.setCancerType(null);
-        }
-        if (trials != null && !trials.isEmpty()) {
-            ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-            Set<ClinicalTrial> annotatedTrials = new HashSet<>();
-            Set<String> nctIds = new HashSet<String>();
-            for (ClinicalTrial trial : trials) {
-                String tempNctID = trial.getNctId();
-                ClinicalTrial tempCT = clinicalTrialBo.findClinicalTrialByNctId(tempNctID);
-                if (tempCT == null) {
-                    nctIds.add(tempNctID);
-                } else {
-                    annotatedTrials.add(tempCT);
-                }
-            }
-            annotatedTrials.addAll(ClinicalTrialsImporter.importTrials(nctIds));
-            evidence.setClinicalTrials(annotatedTrials);
         }
         if (articles != null && !articles.isEmpty()) {
             ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
@@ -994,20 +975,6 @@ public class EvidenceUtils {
                 }
             }
             evidence.setTreatments(treatments);
-        }
-        if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
-            NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
-            Set<NccnGuideline> nccnFromDB = new HashSet<>();
-            for (NccnGuideline nccnGuideline : nccnGuidelines) {
-                NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getTherapy(), nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
-                if (tempNccnGuideline == null) {
-                    nccnGuidelineBo.saveOrUpdate(nccnGuideline);
-                    nccnFromDB.add(nccnGuideline);
-                } else {
-                    nccnFromDB.add(tempNccnGuideline);
-                }
-            }
-            evidence.setNccnGuidelines(nccnFromDB);
         }
     }
 

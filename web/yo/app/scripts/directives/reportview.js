@@ -13,8 +13,7 @@ angular.module('oncokbApp')
             $scope.hideQuestHeader = true;
             $scope.resultSummaryInfoHeader = ['Gene Name', 'Mutation',
                 'Alteration Type', 'Mutation Frequency',
-                'Tumor Type Drugs', 'Non-Tumor Type Drugs',
-                'Clinical Trails'];
+                'Tumor Type Drugs', 'Non-Tumor Type Drugs'];
 
             $scope.resultSummaryInfoContent = ['geneName', 'mutation',
                 'alterType', 'mutationFreq', 'tumorTypeDrugs',

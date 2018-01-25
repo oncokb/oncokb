@@ -614,7 +614,6 @@ angular.module('oncokbApp')
             var key = '';
             var value = [];
             var object = {};
-            var cancerTypeInfo = relevantCancerType || {};
 
             if (annotation.gene_annotation && checkDescription(annotation.gene_annotation)) {
                 value = [];
@@ -624,43 +623,6 @@ angular.module('oncokbApp')
                 object[key] = value;
                 additionalInfo.push(object);
             }
-
-            if (cancerTypeInfo.prevalence) {
-                var targetValue = cancerTypeInfo.prevalence.description;
-
-                value = [];
-                key = 'MUTATION PREVALENCE';
-                object = {};
-
-                // Show all tumor info first
-                if (angular.isArray(cancerTypeInfo.prevalence.description)) {
-                    var alltumor = [];
-                    targetValue = [];
-
-                    for (var i = 0; i < cancerTypeInfo.prevalence.description.length; i++) {
-                        if (cancerTypeInfo.prevalence.description[i].hasOwnProperty('Cancer type') && /all tumor/ig.test(cancerTypeInfo.prevalence.description[i]['Cancer type'].toString().toLowerCase())) {
-                            alltumor.push(cancerTypeInfo.prevalence.description[i]);
-                            cancerTypeInfo.prevalence.description.splice(i, 1);
-                        }
-                    }
-
-                    _.union(cancerTypeInfo.prevalence.description, alltumor).forEach(function(e) {
-                        if (e.hasOwnProperty('value')) {
-                            targetValue.push(e.value);
-                        }
-                    });
-
-                    targetValue = targetValue.join(' ');
-                }
-
-                object[key] = addRecord({
-                    array: ['Cancer type', 'value'],
-                    object: 'description'
-                }, targetValue, value);
-
-                additionalInfo.push(object);
-            }
-
             if (annotation.variant_effect) {
                 if (angular.isObject(annotation.variant_effect)) {
                     if (angular.isArray(annotation.variant_effect)) {

@@ -24,17 +24,8 @@ angular.module('oncokbApp')
         var Y = MARGIN;
         var DOC = '';
         var tumorTypeAttrs = {
-            shortPrevalence: 'Short Prevalence',
-            prevalence: 'Prevalence',
             shortProgImp: 'Short Prognostic implications',
             progImp: 'Prognostic implications'
-        };
-        var nccnAttrs = {
-            therapy: 'Therapy',
-            disease: 'Disease',
-            version: 'Version',
-            pages: 'Pages',
-            category: 'Recommendation category'
         };
 
         function create(data) {
