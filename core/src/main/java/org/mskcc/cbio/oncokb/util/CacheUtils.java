@@ -54,11 +54,6 @@ public class CacheUtils {
         }
     };
 
-    private static Map<Integer, Boolean> genesToBeUpdated = new HashMap<>();
-    private static Timer updateCacheTimer = new Timer();
-    private static long UPDATE_CACHE_TIMER_DELAY = 10000L; // delay in milliseconds before task is to be executed.
-    private static long UPDATE_CACHE_TIMER_PERIOD = 10000L; //  time in milliseconds between successive task executions.
-
     private static Observer VUSObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
@@ -209,26 +204,6 @@ public class CacheUtils {
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            // Add timer task to check whether there are genes' cache need to be updated
-            updateCacheTimer.scheduleAtFixedRate(new TimerTask() {
-                public void run() {
-                    if (genesToBeUpdated.size() > 0) {
-                        Iterator it = genesToBeUpdated.entrySet().iterator();
-                        while (it.hasNext()) {
-                            Map.Entry pair = (Map.Entry) it.next();
-                            Integer entrezGeneId = (Integer) pair.getKey();
-                            Boolean notifyOthers = (Boolean) pair.getValue();
-                            System.out.println("Updating " + entrezGeneId.toString() + " cache...");
-                            GeneObservable.getInstance().update("update", entrezGeneId.toString());
-
-                            if (notifyOthers != null && notifyOthers) {
-                                notifyOtherServices("update", entrezGeneId);
-                            }
-                            it.remove(); // avoids a ConcurrentModificationException
-                        }
-                    }
-                }
-            }, UPDATE_CACHE_TIMER_DELAY, UPDATE_CACHE_TIMER_PERIOD);
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
         }
@@ -552,19 +527,9 @@ public class CacheUtils {
         if (propagate == null) {
             propagate = false;
         }
-
-        if (skipGeneUpdateDelay) {
-            GeneObservable.getInstance().update("update", entrezGeneId.toString());
-            if (propagate) {
-                notifyOtherServices("update", entrezGeneId);
-            }
-        } else {
-            System.out.println(entrezGeneId.toString() + " is queued.");
-            if (propagate) {
-                genesToBeUpdated.put(entrezGeneId, true);
-            } else {
-                genesToBeUpdated.put(entrezGeneId, false);
-            }
+        GeneObservable.getInstance().update("update", entrezGeneId.toString());
+        if (propagate) {
+            notifyOtherServices("update", entrezGeneId);
         }
     }
 
