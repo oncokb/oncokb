@@ -140,10 +140,11 @@ public class Gene implements Serializable {
         this.curatedRefSeq = curatedRefSeq;
     }
 
+    @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + this.entrezGeneId;
-        return hash;
+        int result = getEntrezGeneId() != null ? getEntrezGeneId().hashCode() : 0;
+        result = 31 * result + (getHugoSymbol() != null ? getHugoSymbol().hashCode() : 0);
+        return result;
     }
 
     @Override
