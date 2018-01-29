@@ -32,7 +32,7 @@ public class Gene implements Serializable {
     @Column(name = "entrez_gene_id")
     private Integer entrezGeneId;
 
-    @Column(name = "hugo_symbol", length = 50, nullable = true, unique = true)
+    @Column(name = "hugo_symbol", length = 50, unique = true)
     private String hugoSymbol;
 
     @Column(length = 500)
@@ -140,25 +140,21 @@ public class Gene implements Serializable {
         this.curatedRefSeq = curatedRefSeq;
     }
 
+    @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + this.entrezGeneId;
-        return hash;
+        int result = getEntrezGeneId() != null ? getEntrezGeneId().hashCode() : 0;
+        result = 31 * result + (getHugoSymbol() != null ? getHugoSymbol().hashCode() : 0);
+        return result;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Gene)) return false;
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Gene other = (Gene) obj;
-        if (this.entrezGeneId != other.entrezGeneId) {
-            return false;
-        }
-        return true;
+        Gene gene = (Gene) o;
+
+        return getEntrezGeneId() != null ? getEntrezGeneId().equals(gene.getEntrezGeneId()) : gene.getEntrezGeneId() == null;
     }
 
     @Override

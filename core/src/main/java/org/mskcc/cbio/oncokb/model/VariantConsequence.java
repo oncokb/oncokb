@@ -23,6 +23,7 @@ import java.util.Objects;
 @Table(name = "variant_consequence")
 public class VariantConsequence implements java.io.Serializable {
     @Id
+    @Column(length = 100)
     private String term;
 
     @Column(name = "is_generally_truncating", nullable = false)

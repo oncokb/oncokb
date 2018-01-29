@@ -53,6 +53,7 @@ public class Drug implements java.io.Serializable {
     private Set<String> atcCodes;
 
     @JsonIgnore
+    @Column(length = 65535)
     private String description;
 
     public Drug() {

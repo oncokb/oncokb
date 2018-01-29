@@ -35,7 +35,7 @@ public class Treatment implements java.io.Serializable {
     @CollectionTable(
         name = "treatment_approved_indications",
         joinColumns = @JoinColumn(name = "treatment_id", nullable = false))
-    @Column(name = "approved_indications")
+    @Column(name = "approved_indications", length = 500)
     private Set<String> approvedIndications = new HashSet<String>(0);
 
     private Integer priority;
