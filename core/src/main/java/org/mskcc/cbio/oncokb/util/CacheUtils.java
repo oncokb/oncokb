@@ -515,10 +515,7 @@ public class CacheUtils {
         alterations.remove(entrezGeneId);
     }
 
-    public static void updateGene(Integer entrezGeneId, Boolean propagate, Boolean skipGeneUpdateDelay) {
-        if (skipGeneUpdateDelay == null) {
-            skipGeneUpdateDelay = false;
-        }
+    public static void updateGene(Integer entrezGeneId, Boolean propagate) {
         try {
             System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         } catch (IOException e) {

@@ -453,14 +453,14 @@ public class EvidenceController {
             genes.add(evidence.getGene());
         }
         for (Gene gene : genes) {
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true, false);
+            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
         }
     }
 
     private void updateCacheBasedOnGenes(Set<Gene> genes) {
         // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true, false);
+            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
         }
     }
 }
