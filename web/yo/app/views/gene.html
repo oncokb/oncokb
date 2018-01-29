@@ -227,19 +227,6 @@
                     </h5>
                     <drive-realtime-string review-obj="tumor.summary_review" uuid="::tumor.summary_uuid" es="tumor.summary_eStatus" fe="fileEditable" t="'p'" object="tumor.summary"></drive-realtime-string>
                 </div>
-                <!-- Prevalence -->
-                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'prevalence')" ng-if="displayCheck(tumor.prevalence_uuid)" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader">
-                    <uib-accordion-heading>
-                      <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
-                      <span>{{::tumor.prevalence.display}}: </span>
-                      <span class="curationNoEntry" ng-click="stopCollopse($event)" ng-if="tumor.prevalence.text === '' && tumor.shortPrevalence.text === ''">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.prevalence_comments" object="tumor" key="prevalence" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
-                      <review-panel uuid="tumor.prevalence_uuid" review-obj="tumor.prevalence_review" evidence-type="'PREVALENCE'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
-                    </uib-accordion-heading>
-                  <div ng-if="tmpGeneStatus.isOpen">
-                      <drive-realtime-string review-obj="tumor.prevalence_review" uuid="::tumor.prevalence_uuid" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.prevalence" io="tmpGeneStatus.isOpen" ph="'Description of Evidence'"></drive-realtime-string>
-                      <drive-realtime-string ng-if="!reviewMode" es="tumor.prevalence_eStatus" fe="fileEditable" t="'p'" object="tumor.shortPrevalence" io="tmpGeneStatus.isOpen" ph="'Additional Information (Optional)'"></drive-realtime-string>
-                  </div>
-                </uib-accordion-group>
 
                 <!--Diagnostic-->
                 <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'diagnostic')" ng-if="displayCheck(tumor.diagnostic_uuid)" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader">
@@ -293,40 +280,6 @@
                         </div>
                     </uib-accordion-group>
 
-
-                    <!-- NCCN guidelines -->
-                  <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'nccn')" ng-if="displayCheck(tumor.nccn_uuid)" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader">
-                    <uib-accordion-heading>
-                      <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
-                      <span>NCCN guidelines: </span>
-                      <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.nccn.disease.text === '' || tumor.nccn.disease.text === 'NA'">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.nccn_comments" object="tumor" key="nccn" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
-                      <review-panel uuid="tumor.nccn_uuid" review-obj="tumor.nccn_review" evidence-type="'NCCN_GUIDELINES'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
-                    </uib-accordion-heading>
-                    <div ng-if="tmpGeneStatus.isOpen">
-                        <p  ng-if="displayPrecisely(tumor.nccn.therapy_uuid)">
-                            <strong>{{::tumor.nccn.therapy.display}}:</strong>
-                            <drive-realtime-string review-obj="tumor.nccn.therapy_review" uuid="::tumor.nccn.therapy_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.therapy"></drive-realtime-string>
-                        </p>
-                        <p  ng-if="displayPrecisely(tumor.nccn.disease_uuid)">
-                            <strong>{{::tumor.nccn.disease.display}}:</strong>
-                            <drive-realtime-string review-obj="tumor.nccn.disease_review" uuid="::tumor.nccn.disease_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'select-chosen'" object="tumor.nccn.disease" o="nccnDiseaseTypes" chosenid="'CurationNCCNDropDown'"></drive-realtime-string>
-                        </p>
-                        <p  ng-if="displayPrecisely(tumor.nccn.version_uuid)">
-                            <strong>{{::tumor.nccn.version.display}}:</strong>
-                            <drive-realtime-string review-obj="tumor.nccn.version_review" uuid="::tumor.nccn.version_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'short'" object="tumor.nccn.version"></drive-realtime-string>
-                        </p>
-                        <span ng-if="displayPrecisely(tumor.nccn.description_uuid)">
-                        <strong>Description of Evidence:</strong>
-                        <br/>
-                        <drive-realtime-string review-obj="tumor.nccn.description_review" uuid="::tumor.nccn.description_uuid" es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.description" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                    </span>
-                        <span ng-if="!reviewMode">
-                        <strong>Additional Information (Optional):</strong>
-                        <br/>
-                        <drive-realtime-string es="tumor.nccn_eStatus" fe="fileEditable" t="'p'" object="tumor.nccn.short" io="tmpGeneStatus.isOpen"></drive-realtime-string>
-                    </span>
-                    </div>
-                  </uib-accordion-group>
 
                   <!-- Theraputic implications -->
                   <div ng-repeat="ti in tumor.TI.asArray()" class="accordionMarginTop" ng-init="initGeneStatus(mutation, tumor, ti)">
@@ -418,54 +371,6 @@
                           </span>
                         </div>
                       </uib-accordion>
-                    </uib-accordion-group>
-                  </div>
-
-                  <!-- Trials -->
-                  <div class="accordionMarginTop" ng-if="displayCheck(tumor.trials_uuid)">
-                    <uib-accordion-group ng-init="tmpGeneStatus=getGeneStatusItem(mutation, tumor, null, null, 'trials')" is-open="tmpGeneStatus.isOpen" class="levelThreeHeader">
-                      <uib-accordion-heading>
-                        <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}" ng-click="changeIsOpen(tmpGeneStatus.isOpen)"></i>
-                        <span>Ongoing clinical trials: </span>
-                        <span ng-click="stopCollopse($event)" class="curationNoEntry" ng-if="tumor.trials.length === 0">No Entry</span><comments-dict file-editable="fileEditable" comments="tumor.trials_comments" object="tumor" key="trials" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
-                        <review-panel uuid="tumor.trials_uuid" review-obj="tumor.trials_review" evidence-type="'CLINICAL_TRIAL'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
-                      </uib-accordion-heading>
-                        <div ng-if="tmpGeneStatus.isOpen">
-                            <h4 ng-if="reviewContentDisplay(tumor.trials_uuid)">New Content:</h4>
-                            <div>
-                          <span class="curateTrialItem" ng-repeat="trial in tumor.trials.asArray()">
-                            <a ng-href="https://clinicaltrials.gov/show/{{::trial}}" target="_blank">{{::trial}}</a>
-                            <i ng-show="fileEditable && (!reviewMode || reviewContentDisplay(tumor.trials_uuid))" ng-click="removeTrial(tumor.trials, $index, tumor.trials_review, tumor.trials_uuid)" class="fa fa-trash-o"></i>
-                          </span>
-                                <div class="input-group input-group-sm trialsInputGroup" ng-if="!reviewMode || reviewContentDisplay(tumor.trials_uuid)">
-                                    <input type="text" class="form-control" ng-model="newTrial" placeholder="Trial ID" />
-                                    <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-disabled="!(!!newTrial)" ng-click="addTrial(tumor.trials, newTrial, tumor.trials_review, tumor.trials_uuid); newTrial=''">
-                                        <i class="fa fa-plus"></i> Add Trial
-                                    </button>
-                                        <!-- <button type="button" class="btn btn-default" ng-if="::(userRole === 8)" ng-click="cleanTrial(tumor.trials)">
-                                        <i class="fa fa-plus"></i> Clean Trial
-                                        </button> -->
-                                </span>
-                                </div>
-                            </div>
-                            <br/><br/>
-                            <div style="float:left" ng-if="reviewContentDisplay(tumor.trials_uuid)">
-                                <h4>Old Content:</h4>
-                                <div>
-                              <span ng-if="tumor.trials_review.get('lastReviewed').length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials_review.get('lastReviewed')">
-                                <a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>
-                              </span>
-                                    <p class="reviewedBG" ng-if="!tumor.trials_review.has('lastReviewed') || tumor.trials_review.get('lastReviewed').length === 0">No Entry</p>
-                                </div>
-                                <!--<div>-->
-                                <!--<span ng-if="tumor.trials.length > 0" class="curateTrialItem reviewedBG" ng-repeat="x in tumor.trials.asArray()">-->
-                                <!--<a ng-href="https://clinicaltrials.gov/show/{{::x}}" target="_blank">{{::x}}</a>-->
-                                <!--</span>-->
-                                <!--<p class="reviewedBG" ng-if="tumor.trials.length === 0">No Entry</p>-->
-                                <!--</div>-->
-                            </div>
-                        </div>
                     </uib-accordion-group>
                   </div>
                 </uib-accordion>

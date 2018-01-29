@@ -22,8 +22,6 @@
     <mapping class="org.mskcc.cbio.oncokb.model.Drug"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Alteration"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Article"/>
-    <mapping class="org.mskcc.cbio.oncokb.model.ClinicalTrial"/>
-    <mapping class="org.mskcc.cbio.oncokb.model.NccnGuideline"/>
     <mapping class="org.mskcc.cbio.oncokb.model.PortalAlteration"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Evidence"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Treatment"/>

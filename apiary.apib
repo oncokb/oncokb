@@ -3,7 +3,7 @@ HOST: http://polls.apiblueprint.org/
 
 # OncoKB
 
-OncoKB is the knowledgebase for cancer gemomic stuies. This is the 
+OncoKB is the knowledgebase for cancer gemomic stuies. This is the
 description for rendering the document for available API.
 
 # API Root [/]
@@ -73,7 +73,7 @@ to keep your client decoupled from implementation details.
 + Parameters
     + entrezGeneId (number, optional)
     + hugoSymbol (string, optional)
-    
+
 #### GET [GET]
 
 + Response 200 (application/json)
@@ -186,7 +186,7 @@ Each gene has a status associate with it. This API is used to update the gene st
 + Parameters
     + entrezGeneId (number, optional)
     + hugoSymbol (string, optional)
-    
+
 #### GET [GET]
 
 + Response 200 (application/json)
@@ -233,39 +233,39 @@ Return all tumor types
 
 + Response 200 (application/json)
 
-        [  
-           {  
+        [
+           {
                 "name":"***",
                 "tissue":null,
-                "clinicalTrialKeywords":[  
+                "clinicalTrialKeywords":[
                     "***"
                 ],
                 "tumorTypeId":"***",
                 "shortName":null
            }
-        ]    
-    
+        ]
+
 ### Specific tumor type inforamtion [/alteration.json?{&tumorTypeId}]
 
 + Parameters
     + tumorTypeId (list, optional)
-    
+
 #### GET [GET]
 
 + Response 200 (application/json)
 
-        [  
-           {  
+        [
+           {
                 "name":"***",
                 "tissue":null,
-                "clinicalTrialKeywords":[  
+                "clinicalTrialKeywords":[
                     "***"
                 ],
                 "tumorTypeId":"***",
                 "shortName":null
            }
-        ]    
-        
+        ]
+
 ## Group Evidence
 
 ### All evidence inforamtion [/evidence.json]
@@ -296,19 +296,16 @@ The query can has multiple genes, alterations and consequences but can only has 
     + evidenceType: GENE_SUMMARY (string, optional)
         Evidence types.
         + Members
-            + GENE_SUMMARY 
-            + GENE_BACKGROUND 
-            + MUTATION_SUMMARY 
-            + TUMOR_TYPE_SUMMARY 
-            + MUTATION_EFFECT 
-            + PREVALENCE 
-            + PROGNOSTIC_IMPLICATION 
-            + NCCN_GUIDELINES 
-            + STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY 
-            + STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE 
-            + INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY 
-            + INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE 
-            + CLINICAL_TRIAL 
+            + GENE_SUMMARY
+            + GENE_BACKGROUND
+            + MUTATION_SUMMARY
+            + TUMOR_TYPE_SUMMARY
+            + MUTATION_EFFECT
+            + PROGNOSTIC_IMPLICATION
+            + STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY
+            + STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE
+            + INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY
+            + INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE
     + geneStatus: Complete (string, optional)
         Only get genes under specific status.
     + source (string, optional)
@@ -316,7 +313,7 @@ The query can has multiple genes, alterations and consequences but can only has 
         + Members
             + quest - This the mapping file we used to map OncoKB tumor type to Quest tumor type
             + cbioportal - This the mapping file we used to map OncoKB tumor type to cBioPortal tumor type
-    
+
 
 + Response 200 (application/json)
 
@@ -329,7 +326,7 @@ The query can has multiple genes, alterations and consequences but can only has 
 List of evidence with specific queries. Suggest assagin each query with unique ID.
 
 + id (string) - Unique Id which used to distinguish the queries. It will be usually used in POST method.
-    
+
 + Request (application/json)
 
         {
@@ -346,7 +343,7 @@ List of evidence with specific queries. Suggest assagin each query with unique I
             }
           ]
         }
-        
+
 + Response 200 (application/json)
 
         [

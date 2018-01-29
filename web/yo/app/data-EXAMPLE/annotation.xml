@@ -8,11 +8,6 @@
     <description>mutation effect</description>
 </variant_effect>
 <cancer_type type="breast cancer" relevant_to_patient_disease="Yes">
-    <prevalence>
-        <description>
-        prevalence description
-        </description>
-    </prevalence>
     <investigational_therapeutic_implications>
         <sensitive_to>
             <treatment>

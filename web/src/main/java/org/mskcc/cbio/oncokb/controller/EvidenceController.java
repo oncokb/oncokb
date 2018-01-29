@@ -247,24 +247,12 @@ public class EvidenceController {
         String description = queryEvidence.getDescription();
         LevelOfEvidence level = queryEvidence.getLevelOfEvidence();
         Set<Treatment> treatments = queryEvidence.getTreatments();
-        Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
-        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
         if (description != null) {
             description = description.trim();
         }
         Boolean isEmpty = false;
         if (evidenceType.equals(EvidenceType.ONCOGENIC) || evidenceType.equals(EvidenceType.MUTATION_EFFECT)) {
             if (StringUtils.isNullOrEmpty(knownEffect) && StringUtils.isNullOrEmpty(description)) isEmpty = true;
-        } else if (evidenceType.equals(EvidenceType.NCCN_GUIDELINES)) {
-            Boolean validNccn = false;
-            for (NccnGuideline nccn : nccnGuidelines) {
-                if (!nccn.isEmpty()) {
-                    validNccn = true;
-                }
-            }
-            isEmpty = !validNccn;
-        } else if (evidenceType.equals(EvidenceType.CLINICAL_TRIAL)) {
-            if (clinicalTrials == null || clinicalTrials.isEmpty()) isEmpty = true;
         } else if (MainUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
             if (treatments == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if (evidenceType.equals(EvidenceType.DIAGNOSTIC_IMPLICATION) || evidenceType.equals(EvidenceType.PROGNOSTIC_IMPLICATION)) {
@@ -292,8 +280,6 @@ public class EvidenceController {
         Date lastEdit = queryEvidence.getLastEdit();
         Set<Treatment> treatments = queryEvidence.getTreatments();
         Set<Article> articles = queryEvidence.getArticles();
-        Set<NccnGuideline> nccnGuidelines = queryEvidence.getNccnGuidelines();
-        Set<ClinicalTrial> clinicalTrials = queryEvidence.getClinicalTrials();
         String propagation = queryEvidence.getPropagation();
 
         // if the gene does not exist, return null
@@ -388,17 +374,17 @@ public class EvidenceController {
             if (evidenceType.equals(EvidenceType.ONCOGENIC) && alterations.size() > 1) {
                 // save duplicated evidence record for string alteration oncogenic
                 for (Alteration alteration : alterations) {
-                    Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, Collections.singleton(alteration), description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles, nccnGuidelines, clinicalTrials);
+                    Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, Collections.singleton(alteration), description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
                     evidences.add(evidence);
                     evidenceBo.save(evidence);
                 }
             } else if (!isCancerEvidence) {
-                Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles, nccnGuidelines, clinicalTrials);
+                Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
                 evidenceBo.save(evidence);
                 evidences.add(evidence);
             } else {
                 for (int i = 0; i < cancerTypes.size(); i++) {
-                    Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles, nccnGuidelines, clinicalTrials);
+                    Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
                     evidences.add(evidence);
                     evidenceBo.save(evidence);
                 }
@@ -419,8 +405,6 @@ public class EvidenceController {
                 evidence.setLastEdit(lastEdit);
                 evidence.setTreatments(treatments);
                 evidence.setArticles(articles);
-                evidence.setNccnGuidelines(nccnGuidelines);
-                evidence.setClinicalTrials(clinicalTrials);
                 evidence.setPropagation(propagation);
                 evidenceBo.update(evidence);
             }
@@ -431,7 +415,7 @@ public class EvidenceController {
             // insert cancer type information and save it
             for (int i = 0; i < cancerTypes.size(); i++) {
                 // create a new evidence based on input passed in, and gene and alterations information from the current evidences
-                Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles, nccnGuidelines, clinicalTrials);
+                Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
                 evidenceBo.save(evidence);
                 evidences.add(evidence);
             }

@@ -933,10 +933,6 @@ angular.module('oncokbApp')
                             var __tumor = {};
                             var selectedAttrs = ['name', 'summary'];
 
-                            if (!(excludeObsolete && e1.prevalence_eStatus && e1.prevalence_eStatus.has('obsolete') && e1.prevalence_eStatus.get('obsolete') === 'true')) {
-                                selectedAttrs.push('prevalence', 'shortPrevalence');
-                            }
-
                             __tumor = combineData(__tumor, e1, selectedAttrs, excludeObsolete, excludeComments, onlyReviewedContent);
 
                             // __tumor.cancerTypes =  __tumor.name.split(',').map(function(item) {
@@ -945,26 +941,12 @@ angular.module('oncokbApp')
                             //     };
                             // });
                             __tumor.cancerTypes = [];
-                            __tumor.trials = [];
-                            __tumor.trials_uuid = '';
                             __tumor.TI = [];
-                            __tumor.nccn = {};
-                            __tumor.nccn_uuid = '';
                             __tumor.interactAlts = {};
                             __tumor.prognostic = {};
                             __tumor.prognostic_uuid = '';
                             __tumor.diagnostic = {};
                             __tumor.diagnostic_uuid = '';
-
-                            if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
-                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                if (e1.nccn_uuid) {
-                                    __tumor.nccn_uuid = validUUID(e1.nccn_uuid);
-                                }
-                                __tumor.nccn_review = getReview(e1.nccn_review);
-                                var nccnReviewItems = [e1.nccn_review, e1.nccn.therapy_review, e1.nccn.disease_review, e1.nccn.version_review, e1.nccn.description_review];
-                                __tumor.nccn_review.updateTime = nccnReviewItems[mostRecentItem(nccnReviewItems, true)].get('updateTime');
-                            }
 
                             if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
                                 __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
@@ -984,20 +966,6 @@ angular.module('oncokbApp')
                                 __tumor.diagnostic_review = getReview(e1.diagnostic_review);
                                 var diagnosticReviewItems = [e1.diagnostic_review, e1.diagnostic.description_review, e1.diagnostic.level_review];
                                 __tumor.diagnostic_review.updateTime = diagnosticReviewItems[mostRecentItem(diagnosticReviewItems, true)].get('updateTime');
-                            }
-
-                            if (!(excludeObsolete && e1.trials_eStatus && e1.trials_eStatus.has('obsolete') && e1.trials_eStatus.get('obsolete') === 'true')) {
-                                e1.trials.asArray().forEach(function(trial) {
-                                    __tumor.trials.push(trial);
-                                });
-
-                                if (!excludeComments && e1.trials_comments) {
-                                    __tumor.trials_comments = getComments(e1.trials_comments);
-                                }
-                                if (e1.trials_uuid) {
-                                    __tumor.trials_uuid = validUUID(e1.trials_uuid);
-                                }
-                                __tumor.trials_review = getReview(e1.trials_review);
                             }
 
                             e1.TI.asArray().forEach(function(e2) {
@@ -1032,10 +1000,6 @@ angular.module('oncokbApp')
                                 ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeObsolete, excludeComments, onlyReviewedContent);
                                 __tumor.cancerTypes.push(ct);
                             });
-
-                            if (!(excludeObsolete && e1.nccn_eStatus && e1.nccn_eStatus.has('obsolete') && e1.nccn_eStatus.get('obsolete') === 'true')) {
-                                __tumor.nccn = combineData(__tumor.nccn, e1.nccn, ['therapy', 'disease', 'version', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                            }
                             if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
                                 __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level'], excludeObsolete, excludeComments, onlyReviewedContent);
                             }
