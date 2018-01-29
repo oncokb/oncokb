@@ -1020,6 +1020,11 @@ public class EvidenceUtils {
             isDesc = false;
         }
 
+        final Map<Evidence, Integer> originalIndices = new HashedMap();
+        for (int i = 0; i < evidences.size(); i++) {
+            originalIndices.put(evidences.get(i), i);
+        }
+
         // Sort all tumor type summaries, the more specific tumor type summary will be picked.
         Collections.sort(evidences, new Comparator<Evidence>() {
             public int compare(Evidence x, Evidence y) {
@@ -1030,6 +1035,9 @@ public class EvidenceUtils {
                     return -1;
                 }
                 Integer result = x.getAlterations().size() - y.getAlterations().size();
+                if (result.equals(0)) {
+                    return originalIndices.get(y) - originalIndices.get(x);
+                }
                 return result;
             }
         });

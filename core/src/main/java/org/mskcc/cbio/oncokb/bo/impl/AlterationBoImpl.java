@@ -131,6 +131,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        if (alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("CTD")) {
+            Alteration alt = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("EGFR"), "EGFR CTD");
+            if (alt != null && !alterations.contains(alt)) {
+                alterations.add(alt);
+            }
+        }
+
         // Find fusion variant
         //If alteration contains 'fusion' or alterationType is fusion
         if ((alteration.getAlteration() != null && alteration.getAlteration().toLowerCase().contains("fusion"))
@@ -274,7 +281,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (exactAlt != null && exactAlt.getGene() != null
             && exactAlt.getGene().equals(GeneUtils.getGeneByHugoSymbol("EGFR"))
             && !StringUtils.isNullOrEmpty(exactAlt.getAlteration())
-            && exactAlt.getAlteration().trim().matches("^EGFR(\\s)*vIV(a|b)$")) {
+            && exactAlt.getAlteration().trim().matches("^EGFR(\\s)*vIV(a|b|c)?$")) {
             add = true;
         }
         return add;
