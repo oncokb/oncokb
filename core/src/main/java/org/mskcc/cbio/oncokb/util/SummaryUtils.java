@@ -1219,7 +1219,7 @@ public class SummaryUtils {
             Integer index = 1000;
 
             for (Evidence treatment : treatments) {
-                String treatmentName = TreatmentUtils.getTreatmentName(treatment.getTreatments(), false);
+                String treatmentName = TreatmentUtils.getTreatmentName(treatment.getTreatments());
                 if (treatmentName != null) {
                     Integer _index = TREATMENTS.indexOf(treatmentName.toLowerCase());
                     if (_index != -1 && _index < index) {

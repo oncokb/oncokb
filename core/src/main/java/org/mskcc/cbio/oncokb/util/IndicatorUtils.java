@@ -410,7 +410,7 @@ public class IndicatorUtils {
                 }
                 for (Treatment treatment : evidence.getSortedTreatment()) {
                     IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
-                    indicatorQueryTreatment.setDrugs(treatment.getSortedDrugs());
+                    indicatorQueryTreatment.setDrugs(treatment.getDrugs());
                     indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
                     indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
                     indicatorQueryTreatment.setPmids(pmids);

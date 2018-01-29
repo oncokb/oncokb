@@ -304,7 +304,7 @@ public final class VariantAnnotationXML {
     }
 
     private static void exportTreatment(Treatment treatment, StringBuilder sb, String indent, LevelOfEvidence levelOfEvidence) {
-        Set<Drug> drugs = treatment.getDrugs();
+        List<Drug> drugs = treatment.getDrugs();
         for (Drug drug : drugs) {
             sb.append(indent).append("<drug>\n");
 

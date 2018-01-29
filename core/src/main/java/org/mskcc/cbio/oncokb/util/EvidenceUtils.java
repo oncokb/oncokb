@@ -626,7 +626,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
-                String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments(), true);
+                String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments());
                 if (!maps.containsKey(treatmentsName)) {
                     maps.put(treatmentsName, new HashSet<Evidence>());
                 }
@@ -959,7 +959,7 @@ public class EvidenceUtils {
             DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
             TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
             for (Treatment treatment : treatments) {
-                Set<Drug> drugs = treatment.getDrugs();
+                List<Drug> drugs = treatment.getDrugs();
                 if (drugs != null && !drugs.isEmpty()) {
                     List<Drug> drugsFromDB = new ArrayList<>();
                     for (Drug drug : drugs) {

@@ -74,21 +74,7 @@ public class Treatment implements java.io.Serializable {
 
     @Transient
     @JsonIgnore
-    public Set<Drug> getDrugs() {
-        if (this.treatmentDrugs == null) {
-            return null;
-        } else {
-            Set<Drug> drugs = new HashSet<>();
-            for (TreatmentDrug treatmentDrug : this.treatmentDrugs) {
-                drugs.add(treatmentDrug.getDrug());
-            }
-            return drugs;
-        }
-    }
-
-    @Transient
-    @JsonIgnore
-    public List<Drug> getSortedDrugs() {
+    public List<Drug> getDrugs() {
         if (this.treatmentDrugs == null) {
             return null;
         } else {
@@ -148,7 +134,7 @@ public class Treatment implements java.io.Serializable {
 
     @JsonIgnore
     public String getName() {
-        return TreatmentUtils.getTreatmentName(Collections.singleton(this), false);
+        return TreatmentUtils.getTreatmentName(Collections.singleton(this));
     }
 }
 
