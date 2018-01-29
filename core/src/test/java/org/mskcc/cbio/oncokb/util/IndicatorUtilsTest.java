@@ -183,7 +183,7 @@ public class IndicatorUtilsTest {
 
         // Check EGFR CTD
         query = new Query(null, null, null, "EGFR", "EGFR CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR CTD mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
@@ -311,9 +311,9 @@ public class IndicatorUtilsTest {
         // Compare EGFR CTD AND EGFR, EGFR CTD
         // Check EGFR CTD
         query1 = new Query(null, null, null, "EGFR", "EGFR CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
-        resp1 = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        resp1 = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         query2 = new Query(null, null, null, "EGFR", "CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
-        resp2 = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        resp2 = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("The Oncogenicities are not the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
