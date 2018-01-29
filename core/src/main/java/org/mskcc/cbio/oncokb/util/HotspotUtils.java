@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.cmo.cancerhotspots.model.SingleResidueHotspotMutation;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 import java.io.BufferedReader;
@@ -86,12 +87,16 @@ public class HotspotUtils {
                 }
                 for (SingleResidueHotspotMutation hotspotMutation : hotspotMutations) {
                     if (hotspotMutation.getType().equals("single residue")
-                        && hotspotMutation.getHugoSymbol().equals(alteration.getGene().getHugoSymbol())
                         && hotspotMutation.getAminoAcidPosition() != null
                         && proteinStart >= hotspotMutation.getAminoAcidPosition().getStart()
                         && proteinEnd <= hotspotMutation.getAminoAcidPosition().getEnd()) {
-                        isHotspot = true;
-                        break;
+
+                        // The gene in hotspot may refer to gene alias in OncoKB
+                        Gene gene = GeneUtils.getGeneByHugoSymbol(hotspotMutation.getHugoSymbol());
+                        if (gene != null && gene.equals(alteration.getGene())) {
+                            isHotspot = true;
+                            break;
+                        }
                     }
                 }
             } else if (alteration.getConsequence().equals(insertion) || alteration.getConsequence().equals(deletion)) {
