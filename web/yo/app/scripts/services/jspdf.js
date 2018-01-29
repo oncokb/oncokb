@@ -153,10 +153,6 @@ angular.module('oncokbApp')
                 }
             }
 
-            if (tumorType.nccn && tumorType.nccn.disease) {
-                nccnFunc(tumorType.nccn);
-            }
-
             tumorType.TI.forEach(function(e) {
                 var title = '';
 
@@ -179,24 +175,6 @@ angular.module('oncokbApp')
                     }
                 }
             });
-
-            if (tumorType.trials.length) {
-                trialsFunc(tumorType.trials);
-            }
-        }
-
-        function trialsFunc(trials) {
-            drawFunc('Ongoing clinical trials', '3', 'Bold');
-            drawFunc(trials.join(', '));
-        }
-
-        function nccnFunc(nccn) {
-            drawFunc('NCCN guidelines:', '3', 'Bold');
-            for (var key in nccnAttrs) {
-                if (nccn[key]) {
-                    drawFunc(nccnAttrs[key] + ': ' + nccn[key], '4');
-                }
-            }
         }
 
         function therapyFunc(therapy, title) {

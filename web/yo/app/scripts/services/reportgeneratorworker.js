@@ -155,7 +155,7 @@ angular.module('oncokbApp')
         }
 
         function formatDatum(value, key) {
-            var changedAttr = ['cancer_type', 'nccn_guidelines', 'clinical_trial', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
+            var changedAttr = ['cancer_type', 'sensitive_to', 'resistant_to', 'treatment', 'drug'];
             if (angular.isArray(value) || (!angular.isArray(value) && isObject(value) && changedAttr.indexOf(key) !== -1)) {
                 if (!angular.isArray(value) && isObject(value) && changedAttr.indexOf(key) !== -1) {
                     value = [value];
