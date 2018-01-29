@@ -181,6 +181,12 @@ public class IndicatorUtilsTest {
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFRvIII mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
+        // Check EGFR CTD
+        query = new Query(null, null, null, "EGFR", "EGFR CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR CTD mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+
         query = new Query(null, null, null, "EGFR-EGFR", "EGFRvIII", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
@@ -301,6 +307,19 @@ public class IndicatorUtilsTest {
         assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
         assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+        // Compare EGFR CTD AND EGFR, EGFR CTD
+        // Check EGFR CTD
+        query1 = new Query(null, null, null, "EGFR", "EGFR CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        query2 = new Query(null, null, null, "EGFR", "CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        resp2 = IndicatorUtils.processQuery(query, null, null, "cbioportal", true);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("The Oncogenicities are not the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
 
         //Other Biomarker tests
         query = new Query(null, null, null, null, "MSI-H", null, null, "Colorectal Cancer", null, null, null, null);
