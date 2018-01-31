@@ -430,9 +430,16 @@ public class EvidenceController {
                 Set<Evidence> evidenceSet = EvidenceUtils.getEvidencesByUUID(map.getKey());
                 for (Evidence evidence : evidenceSet) {
                     for (Treatment treatment : evidence.getTreatments()) {
-                        String name = treatment.getName();
-                        if (map.getValue().containsKey(name)) {
-                            Integer newPriority = map.getValue().get(name);
+                        String name = treatment.getName().toLowerCase();
+                        Set<String> keys = map.getValue().keySet();
+                        String matchedKey = null;
+                        for(String key : keys) {
+                            if (key.toLowerCase().equals(name)) {
+                                matchedKey = key;
+                            }
+                        }
+                        if (matchedKey != null) {
+                            Integer newPriority = map.getValue().get(matchedKey);
                             if (!newPriority.equals(treatment.getPriority())) {
                                 treatment.setPriority(newPriority);
                             }

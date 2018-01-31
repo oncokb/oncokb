@@ -163,9 +163,10 @@ public class IndicatorUtilsTest {
 
         // Manually curated likely neutral should overwrite hotspot predicted oncogenic rule
         // EGFR A289D is manually curated as likely neutral.
-        query = new Query(null, null, null, "EGFR", "A289D", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
-        assertEquals("The Oncogenicity is not likely neutral, but it should be.", Oncogenicity.LIKELY_NEUTRAL.getOncogenic(), indicatorQueryResp.getOncogenic());
+        // Update at 01/29/2018 A289D is no longer curated as likely neutral
+//        query = new Query(null, null, null, "EGFR", "A289D", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+//        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+//        assertEquals("The Oncogenicity is not likely neutral, but it should be.", Oncogenicity.LIKELY_NEUTRAL.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // BRAF R462I is manually curated as Likely Neutral, then the oncogenic mutations shouldn't be associated.
         query = new Query(null, null, null, "BRAF", "R462I", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
