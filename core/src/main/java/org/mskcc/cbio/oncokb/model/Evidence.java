@@ -371,13 +371,14 @@ public class Evidence implements java.io.Serializable {
         return highestPriority;
     }
 
-    public void setTreatments(Set<Treatment> treatments) {
+    public void setTreatments(List<Treatment> treatments) {
         if (treatments != null) {
-            for (Treatment treatment : treatments) {
-                treatment.setEvidence(this);
+            for (int i = 0; i < treatments.size(); i++) {
+                treatments.get(i).setDrugs(treatments.get(i).getDrugs());
+                treatments.get(i).setPriority(i);
             }
+            this.treatments = new HashSet<>(treatments);
         }
-        this.treatments = treatments;
     }
 
     public void setPriority(Integer priority) {
@@ -479,11 +480,11 @@ public class Evidence implements java.io.Serializable {
         this.propagation = e.propagation;
         // make deep copy of sets
         this.alterations = new HashSet<>(e.alterations);
-        this.setTreatments(new HashSet<>(e.treatments));
+        this.setTreatments(new ArrayList<>(e.treatments));
         this.articles = new HashSet<>(e.articles);
     }
 
-    public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, Set<Treatment> treatments,
+    public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;

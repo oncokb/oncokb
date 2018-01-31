@@ -626,7 +626,7 @@ public class DriveAnnotationParser {
 
             String[] drugTxts = drugNameStr.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "").split(",");
 
-            Set<Treatment> treatments = new HashSet<>();
+            List<Treatment> treatments = new ArrayList<>();
             for (int j = 0; j < drugTxts.length; j++) {
                 String[] drugNames = drugTxts[j].split(" ?\\+ ?");
 

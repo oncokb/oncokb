@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.bo.TreatmentBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpMethod;
@@ -278,7 +279,7 @@ public class EvidenceController {
         String description = queryEvidence.getDescription();
         String additionalInfo = queryEvidence.getAdditionalInfo();
         Date lastEdit = queryEvidence.getLastEdit();
-        Set<Treatment> treatments = queryEvidence.getTreatments();
+        List<Treatment> treatments = queryEvidence.getSortedTreatment();
         Set<Article> articles = queryEvidence.getArticles();
         String propagation = queryEvidence.getPropagation();
 
@@ -312,6 +313,7 @@ public class EvidenceController {
             return new ArrayList<>();
         }
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
         EvidenceType evidenceType = queryEvidence.getEvidenceType();
@@ -321,16 +323,17 @@ public class EvidenceController {
             if (evidences.isEmpty()) return evidences;
             String specialChangeType = specialTypeCheck(queryEvidence);
             if (specialChangeType.equals("MUTATION_NAME_CHANGE")) {
-                Evidence oldEvidence = new Evidence(evidences.get(0), evidences.get(0).getId());
+                Evidence oldEvidence = new Evidence(evidences.get(0), null);
                 if (oldEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                    evidenceBo.deleteAll(evidences);
-                    evidences.clear();
+                    List<Evidence> newEvidences = new ArrayList<>();
                     for (Alteration alteration : alterations) {
                         Evidence tempEvidence = new Evidence(oldEvidence, null);
                         tempEvidence.setAlterations(Collections.singleton(alteration));
                         evidenceBo.save(tempEvidence);
-                        evidences.add(tempEvidence);
+                        newEvidences.add(tempEvidence);
                     }
+                    evidenceBo.deleteAll(evidences);
+                    evidences = newEvidences;
                 } else {
                     for (Evidence evidence : evidences) {
                         evidence.setAlterations(alterations);
@@ -345,13 +348,39 @@ public class EvidenceController {
                     Evidence tempEvidence = new Evidence(oldEvidence, null);
                     tempEvidence.setCancerType(cancerTypes.get(i));
                     tempEvidence.setSubtype(subTypes.get(i));
+                    List<Treatment> newTreatmentList = new ArrayList<>();
+                    for(Treatment treatment : tempEvidence.getTreatments()) {
+                        Treatment newTreatment = new Treatment();
+                        newTreatment.setDrugs(treatment.getDrugs());
+                        newTreatment.setPriority(treatment.getPriority());
+                        newTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                        newTreatment.setEvidence(tempEvidence);
+                        newTreatmentList.add(newTreatment);
+                    }
+                    tempEvidence.setTreatments(newTreatmentList);
+
                     evidenceBo.save(tempEvidence);
                     evidences.add(tempEvidence);
                 }
             } else if (specialChangeType.equals("TREATMENT_NAME_CHANGE")) {
                 for (Evidence evidence : evidences) {
-                    evidence.setTreatments(treatments);
+                    List<Treatment> newTreatmentList = new ArrayList<>();
+                    List<Treatment> oldTreatment = evidence.getSortedTreatment();
+                    for(Treatment treatment : treatments) {
+                        Treatment newTreatment = new Treatment();
+                        newTreatment.setDrugs(treatment.getDrugs());
+                        newTreatment.setPriority(treatment.getPriority());
+                        newTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                        newTreatment.setEvidence(evidence);
+                        newTreatmentList.add(newTreatment);
+                    }
+                    evidence.setTreatments(newTreatmentList);
                     evidenceBo.update(evidence);
+
+                    for(Treatment treatment : oldTreatment) {
+                        treatment.setEvidence(null);
+                        treatmentBo.delete(treatment);
+                    }
                 }
             }
             return evidences;
@@ -403,7 +432,7 @@ public class EvidenceController {
                 evidence.setDescription(description);
                 evidence.setAdditionalInfo(additionalInfo);
                 evidence.setLastEdit(lastEdit);
-                evidence.setTreatments(treatments);
+                evidence.setTreatments(new ArrayList<>(treatments));
                 evidence.setArticles(articles);
                 evidence.setPropagation(propagation);
                 evidenceBo.update(evidence);
@@ -433,7 +462,7 @@ public class EvidenceController {
                         String name = treatment.getName().toLowerCase();
                         Set<String> keys = map.getValue().keySet();
                         String matchedKey = null;
-                        for(String key : keys) {
+                        for (String key : keys) {
                             if (key.toLowerCase().equals(name)) {
                                 matchedKey = key;
                             }
