@@ -445,6 +445,18 @@ public class EvidenceController {
             for (int i = 0; i < cancerTypes.size(); i++) {
                 // create a new evidence based on input passed in, and gene and alterations information from the current evidences
                 Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
+
+                List<Treatment> newTreatmentList = new ArrayList<>();
+                for(Treatment treatment : evidence.getTreatments()) {
+                    Treatment newTreatment = new Treatment();
+                    newTreatment.setDrugs(treatment.getDrugs());
+                    newTreatment.setPriority(treatment.getPriority());
+                    newTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                    newTreatment.setEvidence(evidence);
+                    newTreatmentList.add(newTreatment);
+                }
+                evidence.setTreatments(newTreatmentList);
+
                 evidenceBo.save(evidence);
                 evidences.add(evidence);
             }
