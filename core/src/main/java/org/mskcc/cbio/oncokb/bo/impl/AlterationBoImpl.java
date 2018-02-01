@@ -313,7 +313,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     private boolean isKitSpecialVariants(Alteration alteration) {
         boolean isSpecial = false;
         if (alteration != null && alteration.getGene().getEntrezGeneId() == 3815) {
-            String[] speicalVariants = {"V654A", "T670I"};
+            String[] speicalVariants = {"V654A", "T670I", "K642E"};
             VariantConsequence consequence = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
             for (int i = 0; i < speicalVariants.length; i++) {
                 if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 3815

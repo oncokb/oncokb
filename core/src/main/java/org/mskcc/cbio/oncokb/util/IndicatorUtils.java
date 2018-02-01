@@ -58,7 +58,7 @@ public class IndicatorUtils {
             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
             gene = (Gene) fusionGeneAltsMap.get("pickedGene");
             relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
-            List<Gene> allGenes = (List<Gene>) fusionGeneAltsMap.get("allGenes");
+            Set<Gene> allGenes = (LinkedHashSet<Gene>) fusionGeneAltsMap.get("allGenes");
         } else if (alterationType != null && alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) {
             VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
             Boolean isFunctionalFusion = variantConsequence != null && variantConsequence.getTerm().equals("fusion");
@@ -102,7 +102,7 @@ public class IndicatorUtils {
         if (fusionGeneAltsMap.containsKey("hasRelevantAltsGenes")) {
             // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
             TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
-            for (Gene tmpGene : (Set<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
+            for (Gene tmpGene : (List<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
                 Query tmpQuery = new Query(query.getId(), query.getType(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
@@ -494,7 +494,7 @@ public class IndicatorUtils {
 
         // Deal with two different genes fusion event.
         if (geneStrsSet.size() >= 2) {
-            List<Gene> tmpGenes = new ArrayList<>();
+            Set<Gene> tmpGenes = new LinkedHashSet<>();
             for (String geneStr : geneStrsSet) {
                 Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
                 if (tmpGene != null) {
@@ -503,7 +503,7 @@ public class IndicatorUtils {
             }
             if (tmpGenes.size() > 0) {
 
-                Set<Gene> hasRelevantAltsGenes = new HashSet<>();
+                List<Gene> hasRelevantAltsGenes = new ArrayList<>();
                 for (Gene tmpGene : tmpGenes) {
                     List<Alteration> tmpRelevantAlts = findRelevantAlts(tmpGene, query.getHugoSymbol() + " Fusion");
                     if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
@@ -524,7 +524,7 @@ public class IndicatorUtils {
 
                 // None of relevant alterations found in both genes.
                 if (gene == null) {
-                    gene = tmpGenes.get(0);
+                    gene = tmpGenes.iterator().next();
                 }
                 map.put("allGenes", tmpGenes);
             }
