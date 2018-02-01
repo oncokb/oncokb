@@ -375,7 +375,7 @@ public class Evidence implements java.io.Serializable {
         if (treatments != null) {
             for (int i = 0; i < treatments.size(); i++) {
                 treatments.get(i).setDrugs(treatments.get(i).getDrugs());
-                treatments.get(i).setPriority(i);
+                treatments.get(i).setPriority(i+1);
             }
             this.treatments = new HashSet<>(treatments);
         }
