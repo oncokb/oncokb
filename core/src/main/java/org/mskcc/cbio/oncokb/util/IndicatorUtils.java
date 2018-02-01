@@ -13,6 +13,10 @@ import java.util.*;
  * Created by hongxinzhang on 4/5/16.
  */
 public class IndicatorUtils {
+    private static final List<String> KIT_TREATMENT_ORDER = Collections.unmodifiableList(
+        Arrays.asList("Imatinib", "Sunitinib", "Regorafenib", "Sorafenib")
+    );
+
     public static IndicatorQueryResp processQuery(Query query, String geneStatus,
                                                   Set<LevelOfEvidence> levels, String source, Boolean highestLevelOnly,
                                                   Set<EvidenceType> evidenceTypes) {
@@ -58,7 +62,7 @@ public class IndicatorUtils {
             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
             gene = (Gene) fusionGeneAltsMap.get("pickedGene");
             relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
-            List<Gene> allGenes = (List<Gene>) fusionGeneAltsMap.get("allGenes");
+            Set<Gene> allGenes = (LinkedHashSet<Gene>) fusionGeneAltsMap.get("allGenes");
         } else if (alterationType != null && alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) {
             VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
             Boolean isFunctionalFusion = variantConsequence != null && variantConsequence.getTerm().equals("fusion");
@@ -102,7 +106,7 @@ public class IndicatorUtils {
         if (fusionGeneAltsMap.containsKey("hasRelevantAltsGenes")) {
             // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
             TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
-            for (Gene tmpGene : (Set<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
+            for (Gene tmpGene : (List<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
                 Query tmpQuery = new Query(query.getId(), query.getType(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
@@ -263,6 +267,10 @@ public class IndicatorUtils {
                 if (!treatmentEvidences.isEmpty()) {
                     List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
 
+                    // Make sure the treatment in KIT is always sorted.
+                    if (gene.getHugoSymbol().equals("KIT")) {
+                        sortKitTreatment(treatments);
+                    }
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
@@ -359,6 +367,35 @@ public class IndicatorUtils {
             }
         }
         return otherSignificantLevels;
+    }
+
+    private static void sortKitTreatment(List<IndicatorQueryTreatment> treatments) {
+        Collections.sort(treatments, new Comparator<IndicatorQueryTreatment>() {
+            public int compare(IndicatorQueryTreatment t1, IndicatorQueryTreatment t2) {
+                if (t1.getLevel() != null
+                    && t2.getLevel() != null
+                    && t1.getLevel().equals(t2.getLevel())
+                    && t1.getDrugs() != null
+                    && t2.getDrugs() != null
+                    && t1.getDrugs().size() == 1
+                    && t2.getDrugs().size() == 1
+                    ) {
+                    String tName1 = t1.getDrugs().get(0).getDrugName();
+                    String tName2 = t2.getDrugs().get(0).getDrugName();
+                    int i1 = KIT_TREATMENT_ORDER.indexOf(tName1);
+                    int i2 = KIT_TREATMENT_ORDER.indexOf(tName2);
+                    if (i1 == i2)
+                        return 0;
+                    if (i1 == -1)
+                        return 1;
+                    if (i2 == -1)
+                        return -1;
+                    return i1 - i2;
+                } else {
+                    return 0;
+                }
+            }
+        });
     }
 
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
@@ -494,7 +531,7 @@ public class IndicatorUtils {
 
         // Deal with two different genes fusion event.
         if (geneStrsSet.size() >= 2) {
-            List<Gene> tmpGenes = new ArrayList<>();
+            Set<Gene> tmpGenes = new LinkedHashSet<>();
             for (String geneStr : geneStrsSet) {
                 Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
                 if (tmpGene != null) {
@@ -503,7 +540,7 @@ public class IndicatorUtils {
             }
             if (tmpGenes.size() > 0) {
 
-                Set<Gene> hasRelevantAltsGenes = new HashSet<>();
+                List<Gene> hasRelevantAltsGenes = new ArrayList<>();
                 for (Gene tmpGene : tmpGenes) {
                     List<Alteration> tmpRelevantAlts = findRelevantAlts(tmpGene, query.getHugoSymbol() + " Fusion");
                     if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
@@ -524,7 +561,7 @@ public class IndicatorUtils {
 
                 // None of relevant alterations found in both genes.
                 if (gene == null) {
-                    gene = tmpGenes.get(0);
+                    gene = tmpGenes.iterator().next();
                 }
                 map.put("allGenes", tmpGenes);
             }

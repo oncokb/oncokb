@@ -626,7 +626,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
-                String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments());
+                String treatmentsName = TreatmentUtils.getTreatmentName(new HashSet<>(evidence.getTreatments()));
                 if (!maps.containsKey(treatmentsName)) {
                     maps.put(treatmentsName, new HashSet<Evidence>());
                 }
@@ -918,7 +918,6 @@ public class EvidenceUtils {
         }
 
         Set<Article> articles = evidence.getArticles();
-        Set<Treatment> treatments = evidence.getTreatments();
 
         if (evidence.getSubtype() != null && evidence.getSubtype().isEmpty()) {
             evidence.setSubtype(null);
@@ -953,28 +952,6 @@ public class EvidenceUtils {
                 }
             }
             evidence.setArticles(annotatedArticles);
-        }
-
-        if (treatments != null && !treatments.isEmpty()) {
-            DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-            TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
-            for (Treatment treatment : treatments) {
-                List<Drug> drugs = treatment.getDrugs();
-                if (drugs != null && !drugs.isEmpty()) {
-                    List<Drug> drugsFromDB = new ArrayList<>();
-                    for (Drug drug : drugs) {
-                        Drug tempDrug = drugBo.findDrugByName(drug.getDrugName());
-                        if (tempDrug == null) {
-                            drugBo.save(drug);
-                            drugsFromDB.add(drug);
-                        } else {
-                            drugsFromDB.add(tempDrug);
-                        }
-                    }
-                    treatment.setDrugs(drugsFromDB);
-                }
-            }
-            evidence.setTreatments(treatments);
         }
     }
 

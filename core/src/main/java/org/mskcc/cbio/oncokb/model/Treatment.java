@@ -41,7 +41,7 @@ public class Treatment implements java.io.Serializable {
     private Integer priority;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "evidence_id", nullable = false)
+    @JoinColumn(name = "evidence_id")
     @JsonIgnore
     private Evidence evidence;
 
