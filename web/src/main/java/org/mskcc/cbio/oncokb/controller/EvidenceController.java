@@ -348,33 +348,16 @@ public class EvidenceController {
                     Evidence tempEvidence = new Evidence(oldEvidence, null);
                     tempEvidence.setCancerType(cancerTypes.get(i));
                     tempEvidence.setSubtype(subTypes.get(i));
-                    List<Treatment> newTreatmentList = new ArrayList<>();
-                    for(Treatment treatment : tempEvidence.getTreatments()) {
-                        Treatment newTreatment = new Treatment();
-                        newTreatment.setDrugs(treatment.getDrugs());
-                        newTreatment.setPriority(treatment.getPriority());
-                        newTreatment.setApprovedIndications(treatment.getApprovedIndications());
-                        newTreatment.setEvidence(tempEvidence);
-                        newTreatmentList.add(newTreatment);
-                    }
-                    tempEvidence.setTreatments(newTreatmentList);
+                    initEvidence(tempEvidence, new ArrayList<>(tempEvidence.getTreatments()));
 
                     evidenceBo.save(tempEvidence);
                     evidences.add(tempEvidence);
                 }
             } else if (specialChangeType.equals("TREATMENT_NAME_CHANGE")) {
                 for (Evidence evidence : evidences) {
-                    List<Treatment> newTreatmentList = new ArrayList<>();
                     List<Treatment> oldTreatment = evidence.getSortedTreatment();
-                    for(Treatment treatment : treatments) {
-                        Treatment newTreatment = new Treatment();
-                        newTreatment.setDrugs(treatment.getDrugs());
-                        newTreatment.setPriority(treatment.getPriority());
-                        newTreatment.setApprovedIndications(treatment.getApprovedIndications());
-                        newTreatment.setEvidence(evidence);
-                        newTreatmentList.add(newTreatment);
-                    }
-                    evidence.setTreatments(newTreatmentList);
+
+                    initEvidence(evidence, treatments);
                     evidenceBo.update(evidence);
 
                     for(Treatment treatment : oldTreatment) {
@@ -404,16 +387,19 @@ public class EvidenceController {
                 // save duplicated evidence record for string alteration oncogenic
                 for (Alteration alteration : alterations) {
                     Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, Collections.singleton(alteration), description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
+                    initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
                     evidences.add(evidence);
                     evidenceBo.save(evidence);
                 }
             } else if (!isCancerEvidence) {
                 Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
+                initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
                 evidenceBo.save(evidence);
                 evidences.add(evidence);
             } else {
                 for (int i = 0; i < cancerTypes.size(); i++) {
                     Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
+                    initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
                     evidences.add(evidence);
                     evidenceBo.save(evidence);
                 }
@@ -446,16 +432,7 @@ public class EvidenceController {
                 // create a new evidence based on input passed in, and gene and alterations information from the current evidences
                 Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, level, propagation, articles);
 
-                List<Treatment> newTreatmentList = new ArrayList<>();
-                for(Treatment treatment : evidence.getTreatments()) {
-                    Treatment newTreatment = new Treatment();
-                    newTreatment.setDrugs(treatment.getDrugs());
-                    newTreatment.setPriority(treatment.getPriority());
-                    newTreatment.setApprovedIndications(treatment.getApprovedIndications());
-                    newTreatment.setEvidence(evidence);
-                    newTreatmentList.add(newTreatment);
-                }
-                evidence.setTreatments(newTreatmentList);
+                initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
 
                 evidenceBo.save(evidence);
                 evidences.add(evidence);
@@ -510,5 +487,18 @@ public class EvidenceController {
         for (Gene gene : genes) {
             CacheUtils.updateGene(gene.getEntrezGeneId(), true);
         }
+    }
+
+    private void initEvidence(Evidence evidence, List<Treatment> treatments) {
+        List<Treatment> newTreatmentList = new ArrayList<>();
+        for(Treatment treatment : treatments) {
+            Treatment newTreatment = new Treatment();
+            newTreatment.setDrugs(treatment.getDrugs());
+            newTreatment.setPriority(treatment.getPriority());
+            newTreatment.setApprovedIndications(treatment.getApprovedIndications());
+            newTreatment.setEvidence(evidence);
+            newTreatmentList.add(newTreatment);
+        }
+        evidence.setTreatments(newTreatmentList);
     }
 }
