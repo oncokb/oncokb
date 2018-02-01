@@ -13,6 +13,10 @@ import java.util.*;
  * Created by hongxinzhang on 4/5/16.
  */
 public class IndicatorUtils {
+    private static final List<String> KIT_TREATMENT_ORDER = Collections.unmodifiableList(
+        Arrays.asList("Imatinib", "Sunitinib", "Regorafenib", "Sorafenib")
+    );
+
     public static IndicatorQueryResp processQuery(Query query, String geneStatus,
                                                   Set<LevelOfEvidence> levels, String source, Boolean highestLevelOnly,
                                                   Set<EvidenceType> evidenceTypes) {
@@ -263,6 +267,10 @@ public class IndicatorUtils {
                 if (!treatmentEvidences.isEmpty()) {
                     List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences);
 
+                    // Make sure the treatment in KIT is always sorted.
+                    if (gene.getHugoSymbol().equals("KIT")) {
+                        sortKitTreatment(treatments);
+                    }
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
@@ -359,6 +367,35 @@ public class IndicatorUtils {
             }
         }
         return otherSignificantLevels;
+    }
+
+    private static void sortKitTreatment(List<IndicatorQueryTreatment> treatments) {
+        Collections.sort(treatments, new Comparator<IndicatorQueryTreatment>() {
+            public int compare(IndicatorQueryTreatment t1, IndicatorQueryTreatment t2) {
+                if (t1.getLevel() != null
+                    && t2.getLevel() != null
+                    && t1.getLevel().equals(t2.getLevel())
+                    && t1.getDrugs() != null
+                    && t2.getDrugs() != null
+                    && t1.getDrugs().size() == 1
+                    && t2.getDrugs().size() == 1
+                    ) {
+                    String tName1 = t1.getDrugs().get(0).getDrugName();
+                    String tName2 = t2.getDrugs().get(0).getDrugName();
+                    int i1 = KIT_TREATMENT_ORDER.indexOf(tName1);
+                    int i2 = KIT_TREATMENT_ORDER.indexOf(tName2);
+                    if (i1 == i2)
+                        return 0;
+                    if (i1 == -1)
+                        return 1;
+                    if (i2 == -1)
+                        return -1;
+                    return i1 - i2;
+                } else {
+                    return 0;
+                }
+            }
+        });
     }
 
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
