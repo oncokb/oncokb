@@ -50,6 +50,7 @@ public class PortalAlteration {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
+    @JoinColumn(name = "entrez_gene_id")
     private Gene gene;
 
     @Column(name = "protein_change")
