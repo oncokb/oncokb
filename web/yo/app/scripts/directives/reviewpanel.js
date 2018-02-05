@@ -24,6 +24,7 @@ angular.module('oncokbApp')
                 confirmDeleteInGene: '&confirmDelete',
                 cancelDeleteInGene: '&cancelDelete',
                 getEvidenceInGene: '&getEvidence',
+                updatePriorityInGene: '&updatePriority',
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
                 rejectAddedInGene: '&rejectAdded'
@@ -211,7 +212,17 @@ angular.module('oncokbApp')
                             var historyData = [getEvidenceResult.historyData];
                             DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                if ($scope.adjustedEvidenceType === 'TREATMENT_NAME_CHANGE' && _.isFunction($scope.updatePriorityInGene)) {
+                                    $scope.updatePriorityInGene({
+                                        treatments: $scope.therapyCategory.treatments
+                                    }).then(function() {
+
+                                    }, function() {
+
+                                    }).finally(function() {
+                                        ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                    });
+                                }
                             }, function(error) {
                                 console.log('fail to update to database', error);
                                 dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
