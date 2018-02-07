@@ -72,6 +72,7 @@ public class FindRelevantAlterationsTest {
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, ""},
                 {"MED12", "Q1836Lfs*57", null, "Truncating Mutations"},
+                {"PIK3CA", "*1069Ffs*5", null, ""},
 
                 // 34 is in Exon 2, the Exon 2 should not be mapped.
                 {"MED12", "A34*", null, "Truncating Mutations"},

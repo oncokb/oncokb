@@ -348,11 +348,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     private void oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
-        if(alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
+        if (alteration.getGene().getOncogene() != null && alteration.getGene().getTSG() != null && alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
             Iterator<Alteration> iterator = relevantAlts.iterator();
             while (iterator.hasNext()) {
                 Alteration relevantAlt = iterator.next();
-                if(!relevantAlt.getConsequence().getIsGenerallyTruncating() && !relevantAlt.getProteinEnd().equals(relevantAlt.getProteinStart()) && !relevantAlt.getProteinStart().equals(-1)) {
+                if (!relevantAlt.getConsequence().getIsGenerallyTruncating() && !relevantAlt.getProteinEnd().equals(relevantAlt.getProteinStart()) && !relevantAlt.getProteinStart().equals(-1)) {
                     iterator.remove();
                 }
             }
