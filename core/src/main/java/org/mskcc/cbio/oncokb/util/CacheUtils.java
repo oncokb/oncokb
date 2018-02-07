@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.io.IOException;
 import java.util.*;

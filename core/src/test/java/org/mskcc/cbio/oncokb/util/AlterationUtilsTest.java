@@ -51,6 +51,7 @@ public class AlterationUtilsTest {
 
                 // frameshift event
                 {"N457Mfs*22", "457", "457", "N", null, "frameshift_variant"},
+                {"*1069Ffs*5", "1069", "1069", "*", null, "frameshift_variant"},
 
                 // inframe event
                 {"T417_D419delinsI", "417", "419", null, null, "inframe_deletion"},

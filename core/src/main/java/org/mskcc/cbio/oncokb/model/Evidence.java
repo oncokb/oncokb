@@ -3,11 +3,11 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
-import org.mskcc.oncotree.model.TumorType;
 
 import javax.persistence.*;
 import java.util.*;

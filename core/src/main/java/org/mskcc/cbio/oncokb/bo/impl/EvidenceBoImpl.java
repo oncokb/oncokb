@@ -9,7 +9,7 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 
 import java.util.*;
 

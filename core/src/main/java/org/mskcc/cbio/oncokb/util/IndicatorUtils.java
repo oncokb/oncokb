@@ -4,7 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

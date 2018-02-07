@@ -197,9 +197,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             addTruncatingMutations = true;
         }
 
-        // Match all variants with `any` as consequence. Currently, only format start_endmut is supported.
+        // Match all variants with `any` as consequence. Currently, only format start_end mut is supported.
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+
+        // Remove all range mutations as relevant for truncating mutations in oncogenes
+        oncogeneTruncMuts(alteration, alterations);
 
         // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
         if (alteration.getAlteration().toLowerCase().matches("deletion")) {
@@ -350,5 +353,17 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             return true;
         }
         return false;
+    }
+
+    private void oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
+        if (alteration.getGene().getOncogene() != null && alteration.getGene().getTSG() != null && alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
+            Iterator<Alteration> iterator = relevantAlts.iterator();
+            while (iterator.hasNext()) {
+                Alteration relevantAlt = iterator.next();
+                if (!relevantAlt.getConsequence().getIsGenerallyTruncating() && !relevantAlt.getProteinEnd().equals(relevantAlt.getProteinStart()) && !relevantAlt.getProteinStart().equals(-1)) {
+                    iterator.remove();
+                }
+            }
+        }
     }
 }

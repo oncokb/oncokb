@@ -19,7 +19,7 @@ import com.google.gdata.util.ServiceException;
 import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
