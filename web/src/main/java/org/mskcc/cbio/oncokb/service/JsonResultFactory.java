@@ -4,7 +4,7 @@ import com.monitorjbl.json.JsonResult;
 import com.monitorjbl.json.JsonView;
 import com.monitorjbl.json.Match;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.util.List;
 import java.util.Set;

@@ -7,8 +7,6 @@ import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.oncotree.model.MainType;
-import org.mskcc.oncotree.utils.MainTypesUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
