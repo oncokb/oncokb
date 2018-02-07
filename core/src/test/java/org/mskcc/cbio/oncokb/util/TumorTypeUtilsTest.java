@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
-import org.mskcc.oncotree.model.MainType;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.MainType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 
 import java.util.ArrayList;
 import java.util.HashSet;

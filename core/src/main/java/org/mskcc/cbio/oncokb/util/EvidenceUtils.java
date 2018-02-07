@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;

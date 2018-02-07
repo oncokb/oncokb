@@ -2,13 +2,13 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.oncotree.model.MainType;
-import org.mskcc.oncotree.model.TumorType;
-import org.mskcc.oncotree.utils.TumorTypesUtil;
+import org.mskcc.cbio.oncokb.model.oncotree.MainType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.io.IOException;
 import java.util.*;
@@ -336,10 +336,10 @@ public class TumorTypeUtils {
         }
 
         // Include all parent nodes
-        List<TumorType> parentIncludedMatchByCode = TumorTypesUtil.findTumorType(
+        List<TumorType> parentIncludedMatchByCode = findTumorType(
             allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
             new ArrayList<TumorType>(), "code", tumorType, true, true);
-        List<TumorType> parentIncludedMatchByName = TumorTypesUtil.findTumorType(
+        List<TumorType> parentIncludedMatchByName = findTumorType(
             allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
             new ArrayList<TumorType>(), "name", tumorType, true, true);
 
@@ -347,11 +347,11 @@ public class TumorTypeUtils {
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
 
         // Filter out tumor types that not with same main type (Example, GIST under soft tissue)
-        List<TumorType> oncoTreeTumorTypes = TumorTypesUtil.findTumorType(
+        List<TumorType> oncoTreeTumorTypes = findTumorType(
             allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
             new ArrayList<TumorType>(), "code", tumorType, true, false);
         if (oncoTreeTumorTypes == null || oncoTreeTumorTypes.size() == 0) {
-            oncoTreeTumorTypes = TumorTypesUtil.findTumorType(
+            oncoTreeTumorTypes = findTumorType(
                 allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
                 new ArrayList<TumorType>(), "name", tumorType, true, false);
         }
@@ -389,6 +389,144 @@ public class TumorTypeUtils {
             }
         }
         return filteredResult;
+    }
+
+    private static Integer convertStringToInteger(String string) {
+        if (string == null) {
+            return null;
+        }
+        try {
+            Integer integer = Integer.parseInt(string.trim());
+            return integer;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static List<TumorType> findTumorType(TumorType allTumorTypes, TumorType currentTumorType, List<TumorType> matchedTumorTypes,
+                                                String key, String keyword, Boolean exactMatch, Boolean includeParent) {
+        Map<String, TumorType> childrenTumorTypes = currentTumorType.getChildren();
+        Boolean match = false;
+        Integer keywordAsInteger = convertStringToInteger(keyword);
+
+        if (includeParent == null) {
+            includeParent = false;
+        }
+
+        if (exactMatch == null) {
+            exactMatch = true;
+        }
+
+        switch (key) {
+            case "code":
+                if (exactMatch) {
+                    match = currentTumorType.getCode() == null ? false : currentTumorType.getCode().equalsIgnoreCase(keyword);
+                } else {
+                    match = currentTumorType.getCode() == null ?
+                        false :
+                        StringUtils.containsIgnoreCase(currentTumorType.getCode(), keyword);
+                }
+                break;
+            case "color":
+                if (exactMatch) {
+                    match = currentTumorType.getColor() == null ? false : currentTumorType.getColor().equalsIgnoreCase(keyword);
+                } else {
+                    match = currentTumorType.getColor() == null ?
+                        false :
+                        StringUtils.containsIgnoreCase(currentTumorType.getColor(), keyword);
+                }
+                break;
+            case "name":
+                if (exactMatch) {
+                    match = currentTumorType.getName() == null ? false : currentTumorType.getName().equalsIgnoreCase(keyword);
+                } else {
+                    match = currentTumorType.getName() == null ?
+                        false :
+                        StringUtils.containsIgnoreCase(currentTumorType.getName(), keyword);
+                }
+                break;
+            case "nci":
+                if (exactMatch) {
+                    match = currentTumorType.getNCI() == null ? false : hasMatchingElementIgnoreCase(currentTumorType.getNCI(), keyword);
+                } else {
+                    match = currentTumorType.getNCI() == null ?
+                        false :
+                        hasElementWhichContainsStringIgnoreCase(currentTumorType.getNCI(), keyword);
+                }
+                break;
+            case "umls":
+                if (exactMatch) {
+                    match = currentTumorType.getUMLS() == null ? false : hasMatchingElementIgnoreCase(currentTumorType.getUMLS(), keyword);
+                } else {
+                    match = currentTumorType.getUMLS() == null ?
+                        false :
+                        hasElementWhichContainsStringIgnoreCase(currentTumorType.getUMLS(), keyword);
+                }
+                break;
+            case "maintype":
+                if (exactMatch) {
+                    match = currentTumorType == null ? false :
+                        (currentTumorType.getMainType() == null ? false :
+                            (currentTumorType.getMainType().getName() == null ? false :
+                                currentTumorType.getMainType().getName().equals(keyword)));
+                } else {
+                    match = currentTumorType == null ? false :
+                        (currentTumorType.getMainType() == null ? false :
+                            (currentTumorType.getMainType().getName() == null ? false :
+                                StringUtils.containsIgnoreCase(currentTumorType.getMainType().getName(), keyword)));
+                }
+                break;
+            case "level":
+                match = currentTumorType == null ? false :
+                    (currentTumorType.getLevel() == null ? false :
+                        (currentTumorType.getLevel() == null ? false :
+                            currentTumorType.getLevel().equals(keywordAsInteger)));
+                break;
+            default:
+                if (exactMatch) {
+                    match = currentTumorType.getCode() == null ? false : currentTumorType.getCode().equalsIgnoreCase(keyword);
+                } else {
+                    match = currentTumorType.getCode() == null ?
+                        false :
+                        StringUtils.containsIgnoreCase(currentTumorType.getCode(), keyword);
+                }
+        }
+
+        if (match) {
+            TumorType tumorType = new TumorType();
+            tumorType.setTissue(currentTumorType.getTissue());
+            tumorType.setCode(currentTumorType.getCode());
+            tumorType.setName(currentTumorType.getName());
+            tumorType.setUMLS(currentTumorType.getUMLS());
+            tumorType.setNCI(currentTumorType.getNCI());
+            tumorType.setMainType(currentTumorType.getMainType());
+            tumorType.setColor(currentTumorType.getColor());
+            tumorType.setLevel(currentTumorType.getLevel());
+            tumorType.setParent(currentTumorType.getParent());
+
+            matchedTumorTypes.add(tumorType);
+
+            if (includeParent) {
+                String code = currentTumorType.getParent();
+                List<TumorType> parentTumorTypes = findTumorType(allTumorTypes, allTumorTypes, new ArrayList<TumorType>(), "code", code, true, true);
+                if (parentTumorTypes != null && parentTumorTypes.size() > 0) {
+                    TumorType parentNode = parentTumorTypes.get(0);
+                    matchedTumorTypes.add(parentNode);
+                    if(parentNode.getParent() != null) {
+                        matchedTumorTypes = findTumorType(allTumorTypes, allTumorTypes, matchedTumorTypes, "code", parentNode.getParent(), true, true);
+                    }
+                }
+            }
+        }
+
+        if (childrenTumorTypes.size() > 0) {
+            Iterator it = childrenTumorTypes.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                matchedTumorTypes = findTumorType(allTumorTypes, (TumorType) pair.getValue(), matchedTumorTypes, key, keyword, exactMatch, includeParent);
+            }
+        }
+        return new ArrayList<>(new LinkedHashSet<>(matchedTumorTypes));
     }
 
     private static Set<TumorType> fromQuestTumorType(String questTumorType) {
@@ -667,5 +805,23 @@ public class TumorTypeUtils {
                 return TumorForm.SOLID;
         }
         return null;
+    }
+
+    private static boolean hasMatchingElementIgnoreCase(List<String> list, String soughtFor) {
+        for (String current : list) {
+            if (current.equalsIgnoreCase(soughtFor)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasElementWhichContainsStringIgnoreCase(List<String> list, String soughtFor) {
+        for (String current : list) {
+            if (StringUtils.containsIgnoreCase(current, soughtFor)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
