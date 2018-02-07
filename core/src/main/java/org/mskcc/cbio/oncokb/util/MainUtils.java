@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.oncotree.model.TumorType;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

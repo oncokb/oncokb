@@ -2,8 +2,8 @@ package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
-import org.mskcc.oncotree.model.TumorType;
 
 import java.util.Date;
 import java.util.HashSet;
