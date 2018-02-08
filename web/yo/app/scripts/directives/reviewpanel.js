@@ -222,6 +222,8 @@ angular.module('oncokbApp')
                                     }).finally(function() {
                                         ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
                                     });
+                                } else {
+                                    ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
                                 }
                             }, function(error) {
                                 console.log('fail to update to database', error);

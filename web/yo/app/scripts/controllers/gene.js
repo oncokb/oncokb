@@ -2778,11 +2778,9 @@ angular.module('oncokbApp')
                                         content: JSON.stringify(postData)
                                     },
                                     function(result) {
-                                        console.log('sent old history to oncokb dev account');
                                         deferred.rejected(error);
                                     },
                                     function(error) {
-                                        console.log('fail to send old history to oncokb dev account', error);
                                         deferred.rejected(error);
                                     }
                                 );
