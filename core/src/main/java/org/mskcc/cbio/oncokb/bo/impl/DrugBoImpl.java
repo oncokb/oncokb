@@ -24,6 +24,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
         } else if (drugName.length() == 1) {
             return drugName.toUpperCase();
         }
+        drugName = drugName.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "");
         return drugName.substring(0, 1).toUpperCase() + drugName.substring(1);
     }
 

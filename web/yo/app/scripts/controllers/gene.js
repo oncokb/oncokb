@@ -1672,7 +1672,7 @@ angular.module('oncokbApp')
                     ReviewResource.accepted = _.union(ReviewResource.accepted, [treatment.name_uuid.getText(), treatment.level_uuid.getText(), treatment.indication_uuid.getText(), treatment.description_uuid.getText()]);
                     clearReview([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review]);
                     if (firstLayer) {
-                        updatePriority(ti.treatments);
+                        $scope.updatePriority(ti.treatments);
                     }
                     break;
                 }
@@ -2082,16 +2082,6 @@ angular.module('oncokbApp')
                 return list.join(', ');
             }
 
-            $scope.updateGeneColor = function() {
-                if ($scope.gene && $scope.document && $scope.document.hasOwnProperty('modifiedDate')) {
-                    if (new Date($scope.document.modifiedDate).getTime() > Number($rootScope.geneTimeStamp.get('lastSavedAt'))) {
-                        return 'red';
-                    }
-                    return 'black';
-                }
-                return 'black';
-            };
-
             $scope.remove = function(event, type, mutation, tumor, ti, treatment) {
                 $scope.stopCollopse(event);
                 var directlyRemove = false;
@@ -2219,7 +2209,7 @@ angular.module('oncokbApp')
 
                         // Update all priority if one of treatments is deleted.
                         if (type || type === 'treatment') {
-                            updatePriority(ti.treatments);
+                            $scope.updatePriority(ti.treatments);
                         }
                         ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
                     }, function(error) {
@@ -2590,7 +2580,7 @@ angular.module('oncokbApp')
                 driveList.move(index, moveIndex);
 
                 if (driveList.get(0).attr === 'Treatment') {
-                    updatePriority(driveList, index, moveStatusIndex);
+                    $scope.updatePriority(driveList, index, moveStatusIndex);
                 }
             };
 
@@ -2744,7 +2734,7 @@ angular.module('oncokbApp')
              * @param integer moveIndex Index is about move before that index
              * @return Promise
              */
-            function updatePriority(list, index, moveIndex) {
+            $scope.updatePriority = function(list, index, moveIndex) {
                 var deferred = $q.defer();
 
                 // if treatment is only moved one position,
@@ -2782,7 +2772,18 @@ angular.module('oncokbApp')
                             }, function(error) {
                                 // Something goes wrong, this needs to be stored into meta file for future update.
                                 console.log('Failed to update priority.');
-                                deferred.rejected(error);
+                                DatabaseConnector.sendEmail({
+                                        sendTo: 'dev.oncokb@gmail.com',
+                                        subject: 'Error when updating treatments\' priority',
+                                        content: JSON.stringify(postData)
+                                    },
+                                    function(result) {
+                                        deferred.rejected(error);
+                                    },
+                                    function(error) {
+                                        deferred.rejected(error);
+                                    }
+                                );
                             });
                 } else {
                     deferred.resolve();
