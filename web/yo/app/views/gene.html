@@ -123,7 +123,7 @@
       <div ng-repeat="mutation in gene.mutations.asArray()" ng-init="initGeneStatus(mutation);tmpGeneStatus=getGeneStatusItem(mutation)" class="accordionMarginTop" ng-show="displayCheck(mutation.name_uuid, mutation.name_review)">
         <uib-accordion-group is-open="tmpGeneStatus.isOpen" class="levelOneHeader">
           <uib-accordion-heading>
-            <i class="fa  " ng-class="{'fa-chevron-down': geneStatus[$index].isOpen, 'fa-chevron-right': !geneStatus[$index].isOpen}"></i>
+            <i class="fa  " ng-class="{'fa-chevron-down': tmpGeneStatus.isOpen, 'fa-chevron-right': !tmpGeneStatus.isOpen}"></i>
               <span>Mutation: </span>
               <!--<span ng-click="stopCollopse($event)" ng-class="{editableBox:mutationNameEditable(mutation.name.text), unEditableBox:!mutationNameEditable(mutation.name.text)}" contenteditable="{{mutationNameEditable(mutation.name.text)}}" ng-model="mutation.name.text"/></span>-->
               <div style="display:inline-block">
@@ -135,10 +135,10 @@
               <span ng-bind-html="mutationContent[mutation.name_uuid.getText()].result"></span>
             <span class="pull-right" ng-show="!reviewMode && fileEditable">
               <span style="margin-right: 20px">
-                <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(gene.mutations, $index, $index, $event)"></i>
-                <i class="fa fa-angle-down" ng-if="$index !== gene.mutations.length-1" ng-click="move(gene.mutations, $index, $index+2, $event)"></i>
-                <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(gene.mutations, $index, 0, $event)"></i>
-                <i ng-if="$index < gene.mutations.length-2" class="fa fa-angle-double-down" ng-click="move(gene.mutations, $index, gene.mutations.length, $event)"></i>
+                <i class="fa fa-angle-up" ng-if="displayAngle(gene.mutations, mutation, 'up')" ng-click="move('up', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-down" ng-if="displayAngle(gene.mutations, mutation, 'down')" ng-click="move('down', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-double-up" ng-if="displayAngle(gene.mutations, mutation, 'top')" ng-click="move('top', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-double-down" ng-if="displayAngle(gene.mutations, mutation, 'bottom')" ng-click="move('bottom', $event, 'mutation', mutation)"></i>
               </span>
               <i ng-click="remove($event, 'mutation', mutation)" class="fa fa-trash-o"></i>
             </span>
@@ -200,10 +200,10 @@
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="!reviewMode && fileEditable">
                     <span style="margin-right: 20px">
-                      <i class="fa fa-angle-up" ng-if="$index !== 0" ng-click="move(mutation.tumors, $index, $index, $event)"></i>
-                      <i class="fa fa-angle-down" ng-if="$index !== mutation.tumors.length-1" ng-click="move(mutation.tumors, $index, $index+2, $event)"></i>
-                      <i class="fa fa-angle-double-up" ng-if="$index > 1" ng-click="move(mutation.tumors, $index, 0, $event)"></i>
-                      <i ng-if="$index < mutation.tumors.length-2" class="fa fa-angle-double-down" ng-click="move(mutation.tumors,$index, mutation.tumors.length, $event)"></i>
+                      <i class="fa fa-angle-up" ng-if="displayAngle(mutation.tumors, tumor, 'up')" ng-click="move('up', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-down" ng-if="displayAngle(mutation.tumors, tumor, 'down')" ng-click="move('down', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-double-up" ng-if="displayAngle(mutation.tumors, tumor, 'top')" ng-click="move('top', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-double-down" ng-if="displayAngle(mutation.tumors, tumor, 'bottom')" ng-click="move('bottom', $event, 'tumor', mutation, tumor)"></i>
                     </span>
                     <i ng-click="remove($event, 'tumor', mutation, tumor)" class="fa fa-trash-o pull-right"></i>
                   </span>
@@ -312,10 +312,10 @@
                               <comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                               <span class="pull-right" ng-show="!reviewMode && fileEditable">
                                 <span style="margin-right: 20px">
-                                  <i class="fa fa-angle-up" ng-if="$parent.$index !== 0" ng-click="move(ti.treatments, $parent.$index, $parent.$index, $event)"></i>
-                                  <i class="fa fa-angle-down" ng-if="$parent.$index !== ti.treatments.length-1" ng-click="move(ti.treatments, $parent.$index, $parent.$index+2, $event)"></i>
-                                  <i class="fa fa-angle-double-up" ng-if="$parent.$index > 1" ng-click="move(ti.treatments, $index, 0, $event)"></i>
-                                  <i ng-if="$parent.$index < ti.treatments.length-2" class="fa fa-angle-double-down" ng-click="move(ti.treatments, $parent.$index, ti.treatments.length, $event)"></i>
+                                  <i class="fa fa-angle-up" ng-if="displayAngle(ti.treatments, treatment, 'up')" ng-click="move('up', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-down" ng-if="displayAngle(ti.treatments, treatment, 'down')" ng-click="move('down', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-double-up" ng-if="displayAngle(ti.treatments, treatment, 'top')" ng-click="move('top', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-double-down" ng-if="displayAngle(ti.treatments, treatment, 'bottom')" ng-click="move('bottom', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
                                 </span>
                                 <i ng-click="remove($event, 'treatment', mutation, tumor, ti, treatment)" class="fa fa-trash-o"></i>
                               </span>
