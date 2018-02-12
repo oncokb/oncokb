@@ -2514,7 +2514,10 @@ angular.module('oncokbApp')
                 mutationEffect.addOn.setText('');
             };
 
-            $scope.displayAngle = function (parent, item, type) {
+            $scope.displayMoveIcon = function (parent, item, type) {
+                if (!parent || !item || ['top', 'bottom', 'up', 'down'].indexOf(type) === -1) {
+                    return false;
+                }
                 var index = parent.indexOf(item);
                 switch (type) {
                 case 'top':
@@ -2541,6 +2544,8 @@ angular.module('oncokbApp')
                     } else {
                         return true;
                     }
+                default:
+                    return false;    
                 }
             }
             $scope.move = function (angleType, event, type, mutation, tumor, ti, treatment) {

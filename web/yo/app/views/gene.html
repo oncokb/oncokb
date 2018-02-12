@@ -135,10 +135,10 @@
               <span ng-bind-html="mutationContent[mutation.name_uuid.getText()].result"></span>
             <span class="pull-right" ng-show="!reviewMode && fileEditable">
               <span style="margin-right: 20px">
-                <i class="fa fa-angle-up" ng-if="displayAngle(gene.mutations, mutation, 'up')" ng-click="move('up', $event, 'mutation', mutation)"></i>
-                <i class="fa fa-angle-down" ng-if="displayAngle(gene.mutations, mutation, 'down')" ng-click="move('down', $event, 'mutation', mutation)"></i>
-                <i class="fa fa-angle-double-up" ng-if="displayAngle(gene.mutations, mutation, 'top')" ng-click="move('top', $event, 'mutation', mutation)"></i>
-                <i class="fa fa-angle-double-down" ng-if="displayAngle(gene.mutations, mutation, 'bottom')" ng-click="move('bottom', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-up" ng-if="displayMoveIcon(gene.mutations, mutation, 'up')" ng-click="move('up', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-down" ng-if="displayMoveIcon(gene.mutations, mutation, 'down')" ng-click="move('down', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-double-up" ng-if="displayMoveIcon(gene.mutations, mutation, 'top')" ng-click="move('top', $event, 'mutation', mutation)"></i>
+                <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(gene.mutations, mutation, 'bottom')" ng-click="move('bottom', $event, 'mutation', mutation)"></i>
               </span>
               <i ng-click="remove($event, 'mutation', mutation)" class="fa fa-trash-o"></i>
             </span>
@@ -200,10 +200,10 @@
                   <!--<span ng-click="stopCollopse($event)" ng-class="{unEditableBox: true}" contenteditable="false"/>{{getCancerTypeName(tumor.cancerTypes)}}</span><comments-dict mutation="{{mutation.name.text}}" tumor-type="{{tumor.name.text}}" gene-name="{{::gene.name.text}}"file-editable="fileEditable" comments="tumor.name_comments" object="tumor" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>-->
                   <span class="pull-right" ng-show="!reviewMode && fileEditable">
                     <span style="margin-right: 20px">
-                      <i class="fa fa-angle-up" ng-if="displayAngle(mutation.tumors, tumor, 'up')" ng-click="move('up', $event, 'tumor', mutation, tumor)"></i>
-                      <i class="fa fa-angle-down" ng-if="displayAngle(mutation.tumors, tumor, 'down')" ng-click="move('down', $event, 'tumor', mutation, tumor)"></i>
-                      <i class="fa fa-angle-double-up" ng-if="displayAngle(mutation.tumors, tumor, 'top')" ng-click="move('top', $event, 'tumor', mutation, tumor)"></i>
-                      <i class="fa fa-angle-double-down" ng-if="displayAngle(mutation.tumors, tumor, 'bottom')" ng-click="move('bottom', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-up" ng-if="displayMoveIcon(mutation.tumors, tumor, 'up')" ng-click="move('up', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-down" ng-if="displayMoveIcon(mutation.tumors, tumor, 'down')" ng-click="move('down', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-double-up" ng-if="displayMoveIcon(mutation.tumors, tumor, 'top')" ng-click="move('top', $event, 'tumor', mutation, tumor)"></i>
+                      <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(mutation.tumors, tumor, 'bottom')" ng-click="move('bottom', $event, 'tumor', mutation, tumor)"></i>
                     </span>
                     <i ng-click="remove($event, 'tumor', mutation, tumor)" class="fa fa-trash-o pull-right"></i>
                   </span>
@@ -312,10 +312,10 @@
                               <comments-dict parent-event="$event" file-editable="fileEditable" comments="treatment.name_comments" object="treatment" key="name" add-comment="addComment(arg1,arg2,arg3)" ng-click="commentClick($event)" ng-keypress="stopCollopse($event)"></comments-dict>
                               <span class="pull-right" ng-show="!reviewMode && fileEditable">
                                 <span style="margin-right: 20px">
-                                  <i class="fa fa-angle-up" ng-if="displayAngle(ti.treatments, treatment, 'up')" ng-click="move('up', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
-                                  <i class="fa fa-angle-down" ng-if="displayAngle(ti.treatments, treatment, 'down')" ng-click="move('down', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
-                                  <i class="fa fa-angle-double-up" ng-if="displayAngle(ti.treatments, treatment, 'top')" ng-click="move('top', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
-                                  <i class="fa fa-angle-double-down" ng-if="displayAngle(ti.treatments, treatment, 'bottom')" ng-click="move('bottom', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-up" ng-if="displayMoveIcon(ti.treatments, treatment, 'up')" ng-click="move('up', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-down" ng-if="displayMoveIcon(ti.treatments, treatment, 'down')" ng-click="move('down', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-double-up" ng-if="displayMoveIcon(ti.treatments, treatment, 'top')" ng-click="move('top', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
+                                  <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(ti.treatments, treatment, 'bottom')" ng-click="move('bottom', $event, 'treatment', mutation, tumor, ti, treatment)"></i>
                                 </span>
                                 <i ng-click="remove($event, 'treatment', mutation, tumor, ti, treatment)" class="fa fa-trash-o"></i>
                               </span>
