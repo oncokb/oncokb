@@ -26,12 +26,9 @@ public final class AlterationUtils {
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-    private final static String[] inferredAlts = {"Oncogenic Mutations", "Gain-of-function Mutations",
-        "Loss-of-function Mutations", "Switch-of-function Mutations"};
-    private final static List<String> inferredAlterations = Arrays.asList(inferredAlts);
+    private final static List<String> inferredAlterations = new ArrayList<>(MainUtils.getInferredMutations());
 
-    private final static String[] structureAlts = {"Truncating Mutations", "Fusions", "Amplification", "Deletion"};
-    private final static List<String> structureAlterations = Arrays.asList(structureAlts);
+    private final static List<String> structureAlterations = new ArrayList<>(MainUtils.getStructuralAlterations());
 
     private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 

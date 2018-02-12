@@ -581,6 +581,29 @@ public class MainUtils {
         return !(evidenceList == null || evidenceList.isEmpty());
     }
 
+    public static Set<String> getGeneralVariants() {
+        Set<String> variants = new HashSet<>();
+        variants.addAll(getInferredMutations());
+        variants.addAll(getStructuralAlterations());
+        return variants;
+    }
+
+    public static Set<String> getInferredMutations() {
+        Set<String> variants = new HashSet<>();
+        for (InferredMutation inferredMutation : InferredMutation.values()) {
+            variants.add(inferredMutation.getVariant());
+        }
+        return variants;
+    }
+
+    public static Set<String> getStructuralAlterations() {
+        Set<String> variants = new HashSet<>();
+        for (StructuralAlteration structuralAlteration : StructuralAlteration.values()) {
+            variants.add(structuralAlteration.getVariant());
+        }
+        return variants;
+    }
+
     public static Map<String, Boolean> validateTrials(List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         Map<String, Boolean> result = new HashMap<>();
         if (nctIds == null || nctIds.size() == 0) {
