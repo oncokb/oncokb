@@ -2514,17 +2514,83 @@ angular.module('oncokbApp')
                 mutationEffect.addOn.setText('');
             };
 
-            $scope.move = function(driveList, index, moveIndex, event) {
+            $scope.displayMoveIcon = function (parent, item, type) {
+                if (!parent || !item || ['top', 'bottom', 'up', 'down'].indexOf(type) === -1) {
+                    return false;
+                }
+                var index = parent.indexOf(item);
+                switch (type) {
+                case 'top':
+                    if (index <= 1) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                case 'bottom':
+                    if (index >= parent.length - 2) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                case 'up':
+                    if (index === 0) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                case 'down':
+                    if (index === parent.length - 1) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                default:
+                    return false;    
+                }
+            }
+            $scope.move = function (angleType, event, type, mutation, tumor, ti, treatment) {
                 var tmpStatus;
                 var moveStatusIndex;
                 var indexes = [];
-                var geneStatus = angular.copy($scope.geneStatus);
+                var geneStatus;
                 var key;
                 var numKey;
+                var driveList;
+                var index;
+                var moveIndex;
                 $scope.stopCollopse(event);
 
-                index = parseInt(index, 10);
-                moveIndex = parseInt(moveIndex, 10);
+                if (type === 'mutation') {
+                    geneStatus = $scope.geneStatus;
+                    driveList = this.gene.mutations;
+                    index = driveList.indexOf(mutation);
+                } else if (type === 'tumor') {
+                    var mutationIndex = this.gene.mutations.indexOf(mutation);
+                    geneStatus = $scope.geneStatus[mutationIndex];
+                    driveList = mutation.tumors;
+                    index = driveList.indexOf(tumor);
+                } else if (type === 'treatment') {
+                    var mutationIndex = this.gene.mutations.indexOf(mutation);
+                    var tumorIndex = mutation.tumors.indexOf(tumor);
+                    var tiIndex = tumor.TI.indexOf(ti);
+                    geneStatus = $scope.geneStatus[mutationIndex][tumorIndex][tiIndex];
+                    driveList = ti.treatments;
+                    index = driveList.indexOf(treatment);
+                }
+                switch(angleType) {
+                case 'up':
+                  moveIndex = index;
+                  break;
+                case 'down':
+                  moveIndex = index+2;
+                  break;
+                case 'top':
+                  moveIndex = 0;
+                  break;
+                case 'bottom':
+                  moveIndex = driveList.length;
+                  break;
+                }
 
                 if (moveIndex <= index) {
                     if (moveIndex <= 0) {
@@ -2541,7 +2607,7 @@ angular.module('oncokbApp')
                     moveStatusIndex = moveIndex - 1;
                 }
 
-                tmpStatus = angular.copy($scope.geneStatus[index]);
+                tmpStatus = angular.copy(geneStatus[index]);
 
                 if (index < moveStatusIndex) {
                     for (key in geneStatus) {
@@ -2552,9 +2618,9 @@ angular.module('oncokbApp')
                             }
                         }
                     }
-                    indexes.sort(function(a, b) {
+                    indexes.sort(function (a, b) {
                         return a - b;
-                    }).forEach(function(e) {
+                    }).forEach(function (e) {
                         geneStatus[e - 1] = geneStatus[e];
                     });
                 } else {
@@ -2566,20 +2632,16 @@ angular.module('oncokbApp')
                             }
                         }
                     }
-                    indexes.sort(function(a, b) {
+                    indexes.sort(function (a, b) {
                         return b - a;
-                    }).forEach(function(e) {
+                    }).forEach(function (e) {
                         geneStatus[e + 1] = geneStatus[e];
                     });
                 }
-
                 geneStatus[moveStatusIndex] = tmpStatus;
-
-                $scope.geneStatus = geneStatus;
-
                 driveList.move(index, moveIndex);
 
-                if (driveList.get(0).attr === 'Treatment') {
+                if (type === 'treatment') {
                     $scope.updatePriority(driveList, index, moveStatusIndex);
                 }
             };
