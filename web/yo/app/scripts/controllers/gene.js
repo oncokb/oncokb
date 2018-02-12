@@ -2521,13 +2521,13 @@ angular.module('oncokbApp')
                 var index = parent.indexOf(item);
                 switch (type) {
                 case 'top':
-                    if (index === 0) {
+                    if (index <= 1) {
                         return false;
                     } else {
                         return true;
                     }
                 case 'bottom':
-                    if (index === parent.length - 1) {
+                    if (index >= parent.length - 2) {
                         return false;
                     } else {
                         return true;
