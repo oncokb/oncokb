@@ -994,12 +994,15 @@ angular.module('oncokbApp')
                                     __tumor.TI.push(ti);
                                 }
                             });
-
-                            e1.cancerTypes.asArray().forEach(function(e2) {
-                                var ct = {};
-                                ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                __tumor.cancerTypes.push(ct);
-                            });
+                            if (e1.cancerTypes_review && e1.cancerTypes_review.type === 'Map' && e1.cancerTypes_review.has('lastReviewed')) {
+                                __tumor.cancerTypes = e1.cancerTypes_review.get('lastReviewed');
+                            } else {
+                                e1.cancerTypes.asArray().forEach(function(e2) {
+                                    var ct = {};
+                                    ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeObsolete, excludeComments, onlyReviewedContent);
+                                    __tumor.cancerTypes.push(ct);
+                                });
+                            }
                             if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
                                 __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level'], excludeObsolete, excludeComments, onlyReviewedContent);
                             }
