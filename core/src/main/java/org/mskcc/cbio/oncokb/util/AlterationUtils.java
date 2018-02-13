@@ -559,7 +559,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, fullAlterations, true);
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -573,7 +573,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, fullAlterations, true);
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -589,7 +589,7 @@ public final class AlterationUtils {
             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
             Alteration revertFusion = getRevertFusions(alt);
             if (revertFusion != null) {
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, fullAlterations, true);
                 if (alts != null) {
                     alterations.addAll(alts);
                 }
@@ -599,17 +599,22 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
+        return getAlleleAlterationsSub(alteration, getAllAlterations(alteration.getGene()));
+    }
+
+    public static List<Alteration> getAlleleAlterations(Alteration alteration, Set<Alteration> fullAlterations) {
+        return getAlleleAlterationsSub(alteration, fullAlterations);
+    }
+
+    private static List<Alteration> getAlleleAlterationsSub(Alteration alteration, Set<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
 
         if (alteration == null || alteration.getConsequence() == null ||
             !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             return alterations;
         }
-        if (CacheUtils.isEnabled()) {
-            alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
-        } else {
-            alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
-        }
+
+        alterations = new ArrayList<>(fullAlterations);
 
         List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
@@ -821,6 +826,19 @@ public final class AlterationUtils {
         suggestedAlterations.addAll(inferredAlterations);
         suggestedAlterations.addAll(structureAlterations);
         return suggestedAlterations;
+    }
+
+
+    public static boolean isGeneralAlterations(String variant) {
+        boolean is = false;
+        List<String> generalAlterations = getGeneralAlterations();
+        for (String generalAlteration : generalAlterations) {
+            if (generalAlteration.toLowerCase().equals(variant.toLowerCase())) {
+                is = true;
+                break;
+            }
+        }
+        return is;
     }
 
     public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {

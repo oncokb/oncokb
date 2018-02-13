@@ -81,5 +81,17 @@ public interface PrivateUtilsApi {
             method = RequestMethod.GET)
     ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCT ID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
 
+    @ApiOperation(value = "", notes = "Check if clinical trials are valid or not by nctId.", response = Map.class, tags = "Utils")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/match/variant",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<Map<String, Boolean>> validateVariantExample(
+        @ApiParam(value = "Gene Hugo Symbol") @RequestParam(value = "hugoSymbol") String hugoSymbol
+        , @ApiParam(value = "The OncoKB variant") @RequestParam(value = "variant") String variant
+        , @ApiParam(value = "The genomic examples.") @RequestParam(value = "examples") String examples
+    ) throws ParserConfigurationException, SAXException, IOException;
+
 }
 

@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -140,6 +142,49 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Boolean>> validateVariantExample(String hugoSymbol, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        Map<String, Boolean> validation = new HashMap<>();
+        if (gene != null) {
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            boolean isGeneralAlteration = AlterationUtils.isGeneralAlterations(variant);
+            Alteration oncokbVariant = new Alteration();
+            if (!isGeneralAlteration) {            // Annotate OncoKB variant
+                oncokbVariant.setGene(gene);
+                oncokbVariant.setAlteration(variant);
+                oncokbVariant.setName(variant);
+                AlterationUtils.annotateAlteration(oncokbVariant, variant);
+            }
+
+            for (String example : Arrays.asList(examples.split(","))) {
+                example = example.trim();
+                Alteration exampleVariant = new Alteration();
+                exampleVariant.setGene(gene);
+                exampleVariant.setAlteration(example);
+                exampleVariant.setName(example);
+                AlterationUtils.annotateAlteration(exampleVariant, example);
+                boolean isMatched = false;
+
+                LinkedHashSet<Alteration> relevantAlterations = new LinkedHashSet<>();
+                if (isGeneralAlteration) {
+                    relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, true);
+                    for (Alteration alteration : relevantAlterations) {
+                        if (alteration.getAlteration().toLowerCase().equals(variant.toLowerCase())) {
+                            isMatched = true;
+                            break;
+                        }
+                    }
+                } else {
+                    relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, Collections.singleton(oncokbVariant), false);
+                    isMatched = relevantAlterations.size() > 0;
+                }
+                validation.put(example, isMatched);
+            }
+        }
+        return new ResponseEntity<>(validation, HttpStatus.OK);
     }
 
 }

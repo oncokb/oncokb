@@ -65,7 +65,7 @@ public class VariantsApiController implements VariantsApi {
                 Alteration alteration = AlterationUtils.getAlterationByHGVS(query.getHgvs());
                 if (alteration != null && alteration.getGene() != null) {
                     Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(alteration.getGene());
-                    alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
+                    alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, allAlterations, true));
                 }
             } else if (query.getHugoSymbol() != null || query.getEntrezGeneId() != null) {
                 Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
@@ -95,7 +95,7 @@ public class VariantsApiController implements VariantsApi {
                                 }
                             }
                             for (Alteration alteration : alterations) {
-                                alterationSet.addAll(alterationBo.findRelevantAlterations(alteration, new ArrayList<Alteration>(allAlterations)));
+                                alterationSet.addAll(alterationBo.findRelevantAlterations(alteration, allAlterations, true));
                             }
                         }
                     }

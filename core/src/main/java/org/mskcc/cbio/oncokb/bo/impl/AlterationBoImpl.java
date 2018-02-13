@@ -27,26 +27,28 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return alterations;
     }
 
+    private Alteration findAlteration(String alteration, Set<Alteration> fullAlterations) {
+        if (alteration == null) {
+            return null;
+        }
+        // Implement the data access logic
+        for (Alteration alt : fullAlterations) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
+                return alt;
+            }
+        }
+        for (Alteration alt : fullAlterations) {
+            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
+                return alt;
+            }
+        }
+        return null;
+    }
+
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
         if (CacheUtils.isEnabled()) {
-            List<Alteration> alterations = new ArrayList<>(CacheUtils.getAlterations(gene.getEntrezGeneId()));
-
-            if (alteration == null) {
-                return null;
-            }
-            // Implement the data access logic
-            for (Alteration alt : alterations) {
-                if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
-                    return alt;
-                }
-            }
-            for (Alteration alt : alterations) {
-                if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
-                    return alt;
-                }
-            }
-            return null;
+            return findAlteration(alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
         } else {
             return getDao().findAlteration(gene, alterationType, alteration);
         }
@@ -93,11 +95,36 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
      * Find all relevant alterations. The order is important. The list should be generated based on priority.
      *
      * @param alteration
+     * @return
+     */
+    @Override
+    public LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, boolean includeAlternativeAllele) {
+        return findRelevantAlterationsSub(alteration, AlterationUtils.getAllAlterations(alteration.getGene()), includeAlternativeAllele);
+    }
+
+    /**
+     * Find all relevant alterations. The order is important. The list should be generated based on priority.
+     *
+     * @param alteration
      * @param fullAlterations
      * @return
      */
     @Override
-    public LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, List<Alteration> fullAlterations) {
+    public LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, Set<Alteration> fullAlterations, boolean includeAlternativeAllele) {
+        if(fullAlterations == null) {
+            return new LinkedHashSet<>();
+        }
+        return findRelevantAlterationsSub(alteration, fullAlterations, includeAlternativeAllele);
+    }
+
+    /**
+     * Find all relevant alterations. The order is important. The list should be generated based on priority.
+     *
+     * @param alteration
+     * @param fullAlterations
+     * @return
+     */
+    private LinkedHashSet<Alteration> findRelevantAlterationsSub(Alteration alteration, Set<Alteration> fullAlterations, boolean includeAlternativeAllele) {
         LinkedHashSet<Alteration> alterations = new LinkedHashSet<>();
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
@@ -119,20 +146,20 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Find exact match
-        Alteration matchedAlt = findAlteration(alteration.getGene(), daoAlterationType, alteration.getAlteration());
+        Alteration matchedAlt = findAlteration(alteration.getAlteration(), fullAlterations);
         if (matchedAlt != null) {
             alterations.add(matchedAlt);
         }
 
         if (addEGFRCTD(alteration)) {
-            Alteration alt = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("EGFR"), "EGFR CTD");
+            Alteration alt = findAlteration("EGFR CTD", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             }
         }
 
         if (alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("CTD")) {
-            Alteration alt = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("EGFR"), "EGFR CTD");
+            Alteration alt = findAlteration("EGFR CTD", fullAlterations);
             if (alt != null && !alterations.contains(alt)) {
                 alterations.add(alt);
             }
@@ -147,7 +174,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             // TODO: match fusion partner
 
             //the alteration 'fusions' should be injected into alteration list
-            Alteration alt = findAlteration(alteration.getGene(), AlterationType.MUTATION, "fusions");
+            Alteration alt = findAlteration("fusions", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             } else {
@@ -180,16 +207,16 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 //            }
 
         //Find Alternative Alleles for missense variant
-        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
-            alterations.addAll(AlterationUtils.getAlleleAlterations(alteration));
-            List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+        if (includeAlternativeAllele && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+            alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
+            List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new ArrayList<>(fullAlterations));
             for (Alteration alt : includeRangeAlts) {
                 if (!alterations.contains(alt)) {
                     alterations.add(alt);
                 }
             }
         } else {
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new ArrayList<>(fullAlterations)));
         }
 
 
@@ -199,7 +226,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         // Match all variants with `any` as consequence. Currently, only format start_end mut is supported.
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
-        alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), new ArrayList<>(fullAlterations)));
 
         // Remove all range mutations as relevant for truncating mutations in oncogenes
         oncogeneTruncMuts(alteration, alterations);
@@ -211,7 +238,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addDeletion) {
-            Alteration deletion = findAlteration(alteration.getGene(), daoAlterationType, "Deletion");
+            Alteration deletion = findAlteration( "oncogenic mutations", fullAlterations);
             if (deletion != null) {
                 alterations.add(deletion);
 
@@ -222,11 +249,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         if (addTruncatingMutations) {
             VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), new ArrayList<>(fullAlterations)));
         }
 
         if (addOncogenicMutations(alteration, alterations)) {
-            Alteration oncogenicMutations = findAlteration(alteration.getGene(), daoAlterationType, "oncogenic mutations");
+            Alteration oncogenicMutations = findAlteration( "oncogenic mutations", fullAlterations);
             if (oncogenicMutations != null) {
                 alterations.add(oncogenicMutations);
             }
@@ -249,7 +276,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         for (String effect : effects) {
-            Alteration alt = findAlteration(alteration.getGene(), daoAlterationType, effect + " mutations");
+            Alteration alt = findAlteration( effect + " mutations", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             }
