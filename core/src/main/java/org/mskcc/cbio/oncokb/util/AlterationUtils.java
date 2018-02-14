@@ -26,10 +26,6 @@ public final class AlterationUtils {
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-    private final static List<String> inferredAlterations = new ArrayList<>(MainUtils.getInferredMutations());
-
-    private final static List<String> structureAlterations = new ArrayList<>(MainUtils.getStructuralAlterations());
-
     private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
@@ -466,7 +462,7 @@ public final class AlterationUtils {
             String name = alteration.getAlteration();
             if (name != null) {
                 Boolean contain = false;
-                for (String inferredAlt : inferredAlterations) {
+                for (String inferredAlt : getInferredMutations()) {
                     if (inferredAlt.equalsIgnoreCase(name)) {
                         contain = true;
                     }
@@ -482,7 +478,7 @@ public final class AlterationUtils {
     public static Boolean isInferredAlterations(String alteration) {
         Boolean isInferredAlt = false;
         if (alteration != null) {
-            for (String alt : inferredAlterations) {
+            for (String alt : getInferredMutations()) {
                 if (alteration.equalsIgnoreCase(alt)) {
                     isInferredAlt = true;
                     break;
@@ -498,7 +494,7 @@ public final class AlterationUtils {
             String lowerCaseAlteration = alteration.trim().toLowerCase();
             if (lowerCaseAlteration.startsWith("likely")) {
                 alteration = alteration.replaceAll("(?i)likely", "").trim();
-                for (String alt : inferredAlterations) {
+                for (String alt : getInferredMutations()) {
                     if (alteration.equalsIgnoreCase(alt)) {
                         isLikelyInferredAlt = true;
                         break;
@@ -821,17 +817,42 @@ public final class AlterationUtils {
         return oncogenicMutations;
     }
 
-    public static List<String> getGeneralAlterations() {
-        List<String> suggestedAlterations = new ArrayList<>();
-        suggestedAlterations.addAll(inferredAlterations);
-        suggestedAlterations.addAll(structureAlterations);
-        return suggestedAlterations;
+    public static Set<String> getGeneralVariants() {
+        Set<String> variants = new HashSet<>();
+        variants.addAll(getInferredMutations());
+        variants.addAll(getStructuralAlterations());
+        variants.addAll(getSpecialVariant());
+        return variants;
+    }
+
+    public static Set<String> getInferredMutations() {
+        Set<String> variants = new HashSet<>();
+        for (InferredMutation inferredMutation : InferredMutation.values()) {
+            variants.add(inferredMutation.getVariant());
+        }
+        return variants;
+    }
+
+    public static Set<String> getStructuralAlterations() {
+        Set<String> variants = new HashSet<>();
+        for (StructuralAlteration structuralAlteration : StructuralAlteration.values()) {
+            variants.add(structuralAlteration.getVariant());
+        }
+        return variants;
+    }
+
+    private static Set<String> getSpecialVariant() {
+        Set<String> variants = new HashSet<>();
+        for (SpecialVariant variant : SpecialVariant.values()) {
+            variants.add(variant.getVariant());
+        }
+        return variants;
     }
 
 
     public static boolean isGeneralAlterations(String variant) {
         boolean is = false;
-        List<String> generalAlterations = getGeneralAlterations();
+        Set<String> generalAlterations = getGeneralVariants();
         for (String generalAlteration : generalAlterations) {
             if (generalAlteration.toLowerCase().equals(variant.toLowerCase())) {
                 is = true;
@@ -844,15 +865,15 @@ public final class AlterationUtils {
     public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {
         exactMatch = exactMatch || false;
         if (exactMatch) {
-            return MainUtils.containsCaseInsensitive(mutationStr, AlterationUtils.getGeneralAlterations());
-        } else if (stringContainsItemFromList(mutationStr, getGeneralAlterations())
-            && itemFromListAtEndString(mutationStr, getGeneralAlterations())) {
+            return MainUtils.containsCaseInsensitive(mutationStr, getGeneralVariants());
+        } else if (stringContainsItemFromSet(mutationStr, getGeneralVariants())
+            && itemFromSetAtEndString(mutationStr, getGeneralVariants())) {
             return true;
         }
         return false;
     }
 
-    private static boolean stringContainsItemFromList(String inputString, List<String> items) {
+    private static boolean stringContainsItemFromSet(String inputString, Set<String> items) {
         for (String item : items) {
             if (StringUtils.containsIgnoreCase(inputString, item)) {
                 return true;
@@ -861,7 +882,7 @@ public final class AlterationUtils {
         return false;
     }
 
-    private static boolean itemFromListAtEndString(String inputString, List<String> items) {
+    private static boolean itemFromSetAtEndString(String inputString, Set<String> items) {
         for (String item : items) {
             if (StringUtils.endsWithIgnoreCase(inputString, item)) {
                 return true;

@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import org.mskcc.cbio.oncokb.model.OncoKBVariant;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,6 @@ import java.util.Set;
 public class ClassificationApiController implements ClassificationApi {
     @Override
     public ResponseEntity<Set<String>> classificationVariantsGet() {
-        return new ResponseEntity<>(MainUtils.getGeneralVariants(), HttpStatus.OK);
+        return new ResponseEntity<>(AlterationUtils.getGeneralVariants(), HttpStatus.OK);
     }
 }

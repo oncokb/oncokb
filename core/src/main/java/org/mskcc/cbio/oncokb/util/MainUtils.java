@@ -543,7 +543,7 @@ public class MainUtils {
         return variants;
     }
 
-    public static boolean containsCaseInsensitive(String s, List<String> l) {
+    public static boolean containsCaseInsensitive(String s, Set<String> l) {
         for (String string : l) {
             if (string.equalsIgnoreCase(s)) {
                 return true;
@@ -579,38 +579,6 @@ public class MainUtils {
     public static Boolean isVUS(Alteration alteration) {
         List<Evidence> evidenceList = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
         return !(evidenceList == null || evidenceList.isEmpty());
-    }
-
-    public static Set<String> getGeneralVariants() {
-        Set<String> variants = new HashSet<>();
-        variants.addAll(getInferredMutations());
-        variants.addAll(getStructuralAlterations());
-        variants.addAll(getSpecialVariant());
-        return variants;
-    }
-
-    public static Set<String> getInferredMutations() {
-        Set<String> variants = new HashSet<>();
-        for (InferredMutation inferredMutation : InferredMutation.values()) {
-            variants.add(inferredMutation.getVariant());
-        }
-        return variants;
-    }
-
-    public static Set<String> getStructuralAlterations() {
-        Set<String> variants = new HashSet<>();
-        for (StructuralAlteration structuralAlteration : StructuralAlteration.values()) {
-            variants.add(structuralAlteration.getVariant());
-        }
-        return variants;
-    }
-
-    private static Set<String> getSpecialVariant() {
-        Set<String> variants = new HashSet<>();
-        for (SpecialVariant variant : SpecialVariant.values()) {
-            variants.add(variant.getVariant());
-        }
-        return variants;
     }
 
     public static Map<String, Boolean> validateTrials(List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {

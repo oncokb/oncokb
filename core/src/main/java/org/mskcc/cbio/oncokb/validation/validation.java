@@ -95,7 +95,7 @@ public class validation {
         Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Integer count = 0;
-        List<String> specialAlterations = AlterationUtils.getGeneralAlterations();
+//        Set<String> specialAlterations = AlterationUtils.getGeneralVariants();
 
         List<LevelOfEvidence> levels = new ArrayList<>();
         levels.add(LevelOfEvidence.LEVEL_1);

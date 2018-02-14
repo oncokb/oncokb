@@ -29,7 +29,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<List<String>> utilsSuggestedVariantsGet() {
         HttpStatus status = HttpStatus.OK;
 
-        List<String> variants = AlterationUtils.getGeneralAlterations();
+        List<String> variants = new ArrayList<>(AlterationUtils.getGeneralVariants());
 
         return new ResponseEntity<>(variants, status);
     }
