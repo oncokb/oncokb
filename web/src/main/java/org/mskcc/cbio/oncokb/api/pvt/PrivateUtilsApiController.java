@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
-import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariant;
+import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -186,13 +186,13 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         if (gene != null) {
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
             boolean isGeneralAlteration = AlterationUtils.isGeneralAlterations(variant);
+
             Alteration oncokbVariant = new Alteration();
-            if (!isGeneralAlteration) {            // Annotate OncoKB variant
-                oncokbVariant.setGene(gene);
-                oncokbVariant.setAlteration(variant);
-                oncokbVariant.setName(variant);
-                AlterationUtils.annotateAlteration(oncokbVariant, variant);
-            }
+            oncokbVariant.setGene(gene);
+            oncokbVariant.setAlteration(variant);
+            oncokbVariant.setName(variant);
+            // Annotate OncoKB variant
+            AlterationUtils.annotateAlteration(oncokbVariant, variant);
 
             example = example.trim();
             Alteration exampleVariant = new Alteration();
@@ -203,7 +203,15 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
             LinkedHashSet<Alteration> relevantAlterations = new LinkedHashSet<>();
             if (isGeneralAlteration) {
-                relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, true);
+                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
+
+                // If the general alteration is not annotated system, at least we need to add
+                // it into the list for mapping.
+                Alteration exactMatch = AlterationUtils.findAlteration(gene, variant);
+                if (exactMatch == null) {
+                    allAlterations.add(oncokbVariant);
+                }
+                relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, allAlterations, true);
                 for (Alteration alteration : relevantAlterations) {
                     if (alteration.getAlteration().toLowerCase().equals(variant.toLowerCase())) {
                         isMatched = true;
