@@ -585,6 +585,7 @@ public class MainUtils {
         Set<String> variants = new HashSet<>();
         variants.addAll(getInferredMutations());
         variants.addAll(getStructuralAlterations());
+        variants.addAll(getSpecialVariant());
         return variants;
     }
 
@@ -600,6 +601,14 @@ public class MainUtils {
         Set<String> variants = new HashSet<>();
         for (StructuralAlteration structuralAlteration : StructuralAlteration.values()) {
             variants.add(structuralAlteration.getVariant());
+        }
+        return variants;
+    }
+
+    private static Set<String> getSpecialVariant() {
+        Set<String> variants = new HashSet<>();
+        for (SpecialVariant variant : SpecialVariant.values()) {
+            variants.add(variant.getVariant());
         }
         return variants;
     }
