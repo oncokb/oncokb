@@ -80,8 +80,8 @@ angular.module('oncokbApp')
                     $timeout.cancel(scope.stringTimeoutPromise);  // does nothing, if timeout already done
                     scope.stringTimeoutPromise = $timeout(function() {   // Set timeout
                         if (n !== o) {
-                            if (scope.es && scope.es.get('obsolete') === 'true' || scope.changedBy === 'others') {
-                                // If item is obsoleted, or the change is made by others, we only update the object.text value without tracking data for review mode
+                            if (scope.changedBy === 'others') {
+                                // If the change is made by others, we only update the object.text value without tracking data for review mode
                                 if (scope.objecttype === 'object' && scope.objectkey) {
                                     scope.object.set(scope.objectkey, n);
                                 } else {
@@ -150,7 +150,7 @@ angular.module('oncokbApp')
                                 scope.es.set('propagation', n);
                             }
                         }
-                        if (o && n !== o && scope.es && scope.es.get('obsolete') !== 'true') {
+                        if (o && n !== o) {
                             scope.reviewObj.set('lastReviewedPropagation', o);
                             var uuid = scope.uuid.getText();
                             var tempMapping =  $rootScope.geneMetaData.get(uuid);
