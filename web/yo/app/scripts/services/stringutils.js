@@ -879,206 +879,174 @@ angular.module('oncokbApp')
             return vusData;
         }
 
-        function getGeneData(realtime, excludeObsolete, excludeComments, excludeRedHands, onlyReviewedContent) {
+        function getGeneData(realtime, excludeComments, onlyReviewedContent) {
             var gene = {};
             var geneData = realtime;
 
-            excludeObsolete = _.isBoolean(excludeObsolete) ? excludeObsolete : false;
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
-            excludeRedHands = _.isBoolean(excludeRedHands) ? excludeRedHands : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
 
-            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeObsolete, excludeComments, onlyReviewedContent);
+            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeComments, onlyReviewedContent);
             gene.mutations = [];
             gene.curators = [];
             gene.transcripts = [];
             geneData.curators.asArray().forEach(function(e) {
                 var _curator = {};
-                _curator = combineData(_curator, e, ['name', 'email'], excludeObsolete, excludeComments, onlyReviewedContent);
+                _curator = combineData(_curator, e, ['name', 'email'], excludeComments, onlyReviewedContent);
                 gene.curators.push(_curator);
             });
             geneData.transcripts.asArray().forEach(function(e) {
                 var _transcript = {};
-                _transcript = combineData(_transcript, e, ['isoform_override', 'gene_name', 'dmp_refseq_id', 'ccds_id'], excludeObsolete, excludeComments, onlyReviewedContent);
+                _transcript = combineData(_transcript, e, ['isoform_override', 'gene_name', 'dmp_refseq_id', 'ccds_id'], excludeComments, onlyReviewedContent);
                 gene.transcripts.push(_transcript);
             });
             geneData.mutations.asArray().forEach(function(e) {
                 if (onlyReviewedContent && e.name_review.get('added') == true) return;
-                if (!(excludeObsolete && e.name_eStatus && e.name_eStatus.has('obsolete') && e.name_eStatus.get('obsolete') === 'true') && (!excludeRedHands || e.oncogenic_eStatus.get('curated') !== false)) {
-                    var _mutation = {};
-                    _mutation.tumors = [];
-                    _mutation.effect = {};
-                    _mutation = combineData(_mutation, e, ['name'], excludeObsolete, excludeComments, onlyReviewedContent);
-                    // This is a weird way to do, but due to time constraint, this has to be implemented in this way.
-                    // I assigned shortSummary estatus for oncogenic and oncogenic estatus to mutation effect,
-                    // so there is no need to check excludeObsolete since I did outside of combinedata.
-                    if (!(excludeObsolete && e.shortSummary_eStatus && e.shortSummary_eStatus.has('obsolete') && e.shortSummary_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false, excludeComments, onlyReviewedContent);
-                    }
-                    if (!(excludeObsolete && e.oncogenic_eStatus && e.oncogenic_eStatus.has('obsolete') && e.oncogenic_eStatus.get('obsolete') === 'true')) {
-                        _mutation = combineData(_mutation, e, ['description', 'short', 'effect'], excludeObsolete, excludeComments, onlyReviewedContent);
-                        if (e.effect_uuid) {
-                            _mutation.effect_uuid = validUUID(e.effect_uuid);
-                        }
-                        _mutation.effect_review = getReview(e.effect_review);
-
-                        if (!excludeComments && e.effect_comments) {
-                            _mutation.effect_comments = getComments(e.effect_comments);
-                        }
-                    }
-
-                    e.tumors.asArray().forEach(function(e1) {
-                        if (onlyReviewedContent && e1.name_review.get('added') == true) return;
-                        if (!(excludeObsolete && e1.name_eStatus && e1.name_eStatus.has('obsolete') && e1.name_eStatus.get('obsolete') === 'true')) {
-                            var __tumor = {};
-                            var selectedAttrs = ['name', 'summary'];
-
-                            __tumor = combineData(__tumor, e1, selectedAttrs, excludeObsolete, excludeComments, onlyReviewedContent);
-
-                            // __tumor.cancerTypes =  __tumor.name.split(',').map(function(item) {
-                            //     return {
-                            //         cancerType: item.toString().trim()
-                            //     };
-                            // });
-                            __tumor.cancerTypes = [];
-                            __tumor.TI = [];
-                            __tumor.interactAlts = {};
-                            __tumor.prognostic = {};
-                            __tumor.prognostic_uuid = '';
-                            __tumor.diagnostic = {};
-                            __tumor.diagnostic_uuid = '';
-
-                            if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
-                                __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                if (e1.prognostic_uuid) {
-                                    __tumor.prognostic_uuid = validUUID(e1.prognostic_uuid);
-                                }
-                                __tumor.prognostic_review = getReview(e1.prognostic_review);
-                                var prognosticReviewItems = [e1.prognostic_review, e1.prognostic.description_review, e1.prognostic.level_review];
-                                __tumor.prognostic_review.updateTime = prognosticReviewItems[mostRecentItem(prognosticReviewItems, true)].get('updateTime');
-                            }
-
-                            if (!(excludeObsolete && e1.diagnostic_eStatus && e1.diagnostic_eStatus.has('obsolete') && e1.diagnostic_eStatus.get('obsolete') === 'true')) {
-                                __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                if (e1.diagnostic_uuid) {
-                                    __tumor.diagnostic_uuid = validUUID(e1.diagnostic_uuid);
-                                }
-                                __tumor.diagnostic_review = getReview(e1.diagnostic_review);
-                                var diagnosticReviewItems = [e1.diagnostic_review, e1.diagnostic.description_review, e1.diagnostic.level_review];
-                                __tumor.diagnostic_review.updateTime = diagnosticReviewItems[mostRecentItem(diagnosticReviewItems, true)].get('updateTime');
-                            }
-
-                            e1.TI.asArray().forEach(function(e2) {
-                                if (!(excludeObsolete && e2.name_eStatus && e2.name_eStatus.has('obsolete') && e2.name_eStatus.get('obsolete') === 'true')) {
-                                    var ti = {};
-
-                                    ti = combineData(ti, e2, ['name', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                    ti.status = OncoKB.utils.getString(e2.types.get('status'));
-                                    ti.type = OncoKB.utils.getString(e2.types.get('type'));
-                                    ti.treatments = [];
-
-                                    e2.treatments.asArray().forEach(function(e3) {
-                                        var treatment = {};
-                                        if (excludeObsolete && e3.name_eStatus && e3.name_eStatus.has('obsolete') && e3.name_eStatus.get('obsolete') === 'true'
-                                        || onlyReviewedContent && e3.name_review.get('added') == true) {
-                                            return;
-                                        }
-                                        treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                        if (e3.name_eStatus.has('propagation')) {
-                                            treatment.propagation = e3.name_eStatus.get('propagation');
-                                        }
-                                        var treatmentReviewItems = [e3.name_review, e3.level_review, e3.indication_review, e3.description_review];
-                                        treatment.name_review.updateTime = treatmentReviewItems[mostRecentItem(treatmentReviewItems, true)].get('updateTime');
-                                        ti.treatments.push(treatment);
-                                    });
-                                    __tumor.TI.push(ti);
-                                }
-                            });
-                            if (e1.cancerTypes_review && e1.cancerTypes_review.type === 'Map' && e1.cancerTypes_review.has('lastReviewed')) {
-                                __tumor.cancerTypes = e1.cancerTypes_review.get('lastReviewed');
-                            } else {
-                                e1.cancerTypes.asArray().forEach(function(e2) {
-                                    var ct = {};
-                                    ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeObsolete, excludeComments, onlyReviewedContent);
-                                    __tumor.cancerTypes.push(ct);
-                                });
-                            }
-                            if (!(excludeObsolete && e1.prognostic_eStatus && e1.prognostic_eStatus.has('obsolete') && e1.prognostic_eStatus.get('obsolete') === 'true')) {
-                                __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level'], excludeObsolete, excludeComments, onlyReviewedContent);
-                            }
-                            if (!(excludeObsolete && e1.diagnostic_eStatus && e1.diagnostic_eStatus.has('obsolete') && e1.diagnostic_eStatus.get('obsolete') === 'true')) {
-                                __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level'], excludeObsolete, excludeComments, onlyReviewedContent);
-                            }
-
-                            __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeObsolete, excludeComments, onlyReviewedContent);
-                            _mutation.tumors.push(__tumor);
-                        }
-                    });
-
-                    gene.mutations.push(_mutation);
+                var _mutation = {};
+                _mutation.tumors = [];
+                _mutation.effect = {};
+                _mutation = combineData(_mutation, e, ['name'], excludeComments, onlyReviewedContent);
+                _mutation = combineData(_mutation, e, ['shortSummary', 'oncogenic'], false, excludeComments, onlyReviewedContent);
+                _mutation = combineData(_mutation, e, ['description', 'short', 'effect'], excludeComments, onlyReviewedContent);
+                if (e.effect_uuid) {
+                    _mutation.effect_uuid = validUUID(e.effect_uuid);
                 }
+                _mutation.effect_review = getReview(e.effect_review);
+
+                if (!excludeComments && e.effect_comments) {
+                    _mutation.effect_comments = getComments(e.effect_comments);
+                }
+
+                e.tumors.asArray().forEach(function(e1) {
+                    if (onlyReviewedContent && e1.name_review.get('added') == true) return;
+                    var __tumor = {};
+                    var selectedAttrs = ['name', 'summary'];
+
+                    __tumor = combineData(__tumor, e1, selectedAttrs, excludeComments, onlyReviewedContent);
+
+                    __tumor.cancerTypes = [];
+                    __tumor.TI = [];
+                    __tumor.interactAlts = {};
+                    __tumor.prognostic = {};
+                    __tumor.prognostic_uuid = '';
+                    __tumor.diagnostic = {};
+                    __tumor.diagnostic_uuid = '';
+
+                    __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level', 'short'], excludeComments, onlyReviewedContent);
+                    if (e1.prognostic_uuid) {
+                        __tumor.prognostic_uuid = validUUID(e1.prognostic_uuid);
+                    }
+                    __tumor.prognostic_review = getReview(e1.prognostic_review);
+                    var prognosticReviewItems = [e1.prognostic_review, e1.prognostic.description_review, e1.prognostic.level_review];
+                    __tumor.prognostic_review.updateTime = prognosticReviewItems[mostRecentItem(prognosticReviewItems, true)].get('updateTime');
+
+                    __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level', 'short'], excludeComments, onlyReviewedContent);
+                    if (e1.diagnostic_uuid) {
+                        __tumor.diagnostic_uuid = validUUID(e1.diagnostic_uuid);
+                    }
+                    __tumor.diagnostic_review = getReview(e1.diagnostic_review);
+                    var diagnosticReviewItems = [e1.diagnostic_review, e1.diagnostic.description_review, e1.diagnostic.level_review];
+                    __tumor.diagnostic_review.updateTime = diagnosticReviewItems[mostRecentItem(diagnosticReviewItems, true)].get('updateTime');
+
+                    e1.TI.asArray().forEach(function(e2) {
+                        var ti = {};
+
+                        ti = combineData(ti, e2, ['name', 'description', 'short'], excludeComments, onlyReviewedContent);
+                        ti.status = OncoKB.utils.getString(e2.types.get('status'));
+                        ti.type = OncoKB.utils.getString(e2.types.get('type'));
+                        ti.treatments = [];
+
+                        e2.treatments.asArray().forEach(function(e3) {
+                            var treatment = {};
+                            if (onlyReviewedContent && e3.name_review.get('added') == true) {
+                                return;
+                            }
+                            treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeComments, onlyReviewedContent);
+                            if (e3.name_eStatus.has('propagation')) {
+                                treatment.propagation = e3.name_eStatus.get('propagation');
+                            }
+                            var treatmentReviewItems = [e3.name_review, e3.level_review, e3.indication_review, e3.description_review];
+                            treatment.name_review.updateTime = treatmentReviewItems[mostRecentItem(treatmentReviewItems, true)].get('updateTime');
+                            ti.treatments.push(treatment);
+                        });
+                        __tumor.TI.push(ti);
+                    });
+                    if (e1.cancerTypes_review && e1.cancerTypes_review.type === 'Map' && e1.cancerTypes_review.has('lastReviewed')) {
+                        __tumor.cancerTypes = e1.cancerTypes_review.get('lastReviewed');
+                    } else {
+                        e1.cancerTypes.asArray().forEach(function(e2) {
+                            var ct = {};
+                            ct = combineData(ct, e2, ['cancerType', 'subtype', 'oncoTreeCode', 'operation'], excludeComments, onlyReviewedContent);
+                            __tumor.cancerTypes.push(ct);
+                        });
+                    }
+                    __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level'], excludeComments, onlyReviewedContent);
+                    __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level'], excludeComments, onlyReviewedContent);
+                    __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeComments, onlyReviewedContent);
+                    _mutation.tumors.push(__tumor);
+                });
+
+                gene.mutations.push(_mutation);
             });
             return gene;
         }
 
-        function combineData(object, model, keys, excludeObsolete, excludeComments, onlyReviewedContent) {
+        function combineData(object, model, keys, excludeComments, onlyReviewedContent) {
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
 
             keys.forEach(function(e) {
-                if (!(excludeObsolete && model[e + '_eStatus'] && model[e + '_eStatus'].has('obsolete') && model[e + '_eStatus'].get('obsolete') === 'true')) {
-                    if (model[e].type === 'Map' || model[e] instanceof OncoKB.ME) {
-                        object[e] = {};
-                        _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping) {
-                            object[e][keyMapping] = model[e].get(keyMapping);
-                        });
-                        if (model[e + '_uuid']) {
-                            object[e + '_uuid'] = validUUID(model[e + '_uuid']);
+                if (model[e].type === 'Map' || model[e] instanceof OncoKB.ME) {
+                    object[e] = {};
+                    _.each(_.keys(OncoKB.keyMappings[e]), function(keyMapping) {
+                        object[e][keyMapping] = model[e].get(keyMapping);
+                    });
+                    if (model[e + '_uuid']) {
+                        object[e + '_uuid'] = validUUID(model[e + '_uuid']);
+                    }
+                    if (model[e + '_review']) {
+                        object[e + '_review'] = getReview(model[e + '_review']);
+                        if (e === 'type' && model[e + '_review'].has('lastReviewed')) {
+                            object[e + '_review'].lastReviewed = model[e + '_review'].get('lastReviewed');
                         }
-                        if (model[e + '_review']) {
-                            object[e + '_review'] = getReview(model[e + '_review']);
-                            if (e === 'type' && model[e + '_review'].has('lastReviewed')) {
-                                object[e + '_review'].lastReviewed = model[e + '_review'].get('lastReviewed');
-                            }
-                        }
+                    }
 
-                        if (model[e] instanceof OncoKB.ME) {
-                            // Handle special case for mutation effect. Current review info has been attached on higher level instead of `value`
-                            object.effect = combineData(object.effect, model.effect, ['value', 'addOn'], excludeObsolete, excludeComments, onlyReviewedContent);
-                            if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].has('lastReviewed')) {
-                                object.effect.value = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
-                            } else {
-                                object.effect.value = model.effect.value.text;
-                            }
+                    if (model[e] instanceof OncoKB.ME) {
+                        // Handle special case for mutation effect. Current review info has been attached on higher level instead of `value`
+                        object.effect = combineData(object.effect, model.effect, ['value', 'addOn'], excludeComments, onlyReviewedContent);
+                        if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].has('lastReviewed')) {
+                            object.effect.value = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
+                        } else {
+                            object.effect.value = model.effect.value.text;
+                        }
+                    }
+                } else {
+                    if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].has('lastReviewed')) {
+                        if (model[e + '_review'].get('lastReviewed').type && model[e + '_review'].get('lastReviewed').type === 'Map') {
+                            object[e] = {};
+                            _.each(model[e + '_review'].get('lastReviewed').keys, function(keyMapping) {
+                                object[e][keyMapping] = OncoKB.utils.getString(model[e].get(keyMapping));
+                            });
+                        } else {
+                            object[e] = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
                         }
                     } else {
-                        if (onlyReviewedContent && model[e + '_review'] && model[e + '_review'].has('lastReviewed')) {
-                            if (model[e + '_review'].get('lastReviewed').type && model[e + '_review'].get('lastReviewed').type === 'Map') {
-                                object[e] = {};
-                                _.each(model[e + '_review'].get('lastReviewed').keys, function(keyMapping) {
-                                    object[e][keyMapping] = OncoKB.utils.getString(model[e].get(keyMapping));
-                                });
-                            } else {
-                                object[e] = OncoKB.utils.getString(model[e + '_review'].get('lastReviewed'));
-                            }
-                        } else {
-                            object[e] = model[e].text;
-                        }
-                        if (!excludeComments && model[e + '_comments']) {
-                            object[e + '_comments'] = getComments(model[e + '_comments']);
-                        }
-                        if (model[e + '_eStatus']) {
-                            object[e + '_eStatus'] = getEvidenceStatus(model[e + '_eStatus']);
-                        }
-                        if (model[e + '_timeStamp']) {
-                            object[e + '_timeStamp'] = getTimeStamp(model[e + '_timeStamp']);
-                        }
-                        if (model[e + '_uuid']) {
-                            object[e + '_uuid'] = validUUID(model[e + '_uuid']);
-                        }
-                        if (model[e + '_review']) {
-                            object[e + '_review'] = getReview(model[e + '_review']);
-                        }
+                        object[e] = model[e].text;
+                    }
+                    if (!excludeComments && model[e + '_comments']) {
+                        object[e + '_comments'] = getComments(model[e + '_comments']);
+                    }
+                    if (model[e + '_eStatus']) {
+                        object[e + '_eStatus'] = getEvidenceStatus(model[e + '_eStatus']);
+                    }
+                    if (model[e + '_timeStamp']) {
+                        object[e + '_timeStamp'] = getTimeStamp(model[e + '_timeStamp']);
+                    }
+                    if (model[e + '_uuid']) {
+                        object[e + '_uuid'] = validUUID(model[e + '_uuid']);
+                    }
+                    if (model[e + '_review']) {
+                        object[e + '_review'] = getReview(model[e + '_review']);
                     }
                 }
             });

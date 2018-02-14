@@ -117,7 +117,7 @@ angular.module('oncokbApp')
             var results = [];
             $scope.checkInputStatus = function() {
                 $scope.disableButton = true;
-                if (!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && ($scope.redHand || $scope.obsolete || $scope.inconclusive)) {
+                if (!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && $scope.inconclusive) {
                     $scope.disableButton = false;
                 }
             };
@@ -136,27 +136,7 @@ angular.module('oncokbApp')
                             var model = realtime.getModel();
                             var geneModel = model.getRoot().get('gene');
                             if (geneModel) {
-                                var gene = stringUtils.getGeneData(geneModel, false, false, false);
-                                if ($scope.redHand) {
-                                    _.each(gene.mutations, function(mutation) {
-                                        if (mutation.oncogenic_eStatus.curated === false) {
-                                            results.push({gene: gene.name, annotation: mutation.name, status: 'Red Hand'});
-                                        }
-                                    });
-                                }
-                                if ($scope.obsolete) {
-                                    if (gene.summary_eStatus.obsolete === 'true') {
-                                        results.push({gene: gene.name, annotation: 'summary', status: 'obsolete'});
-                                    }
-                                    if (gene.background_eStatus.obsolete === 'true') {
-                                        results.push({gene: gene.name, annotation: 'background', status: 'obsolete'});
-                                    }
-                                    _.each(gene.mutations, function(mutation) {
-                                        if (mutation.name_eStatus.obsolete === 'true') {
-                                            results.push({gene: gene.name, annotation: mutation.name, status: 'obsolete'});
-                                        }
-                                    });
-                                }
+                                var gene = stringUtils.getGeneData(geneModel, false, false);
                                 if ($scope.inconclusive) {
                                     _.each(gene.mutations, function(mutation) {
                                         if (mutation.effect.value === 'Inconclusive' && mutation.oncogenic === 'Inconclusive') {
