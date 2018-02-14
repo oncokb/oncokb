@@ -901,7 +901,7 @@ angular.module('oncokbApp')
                 gene.transcripts.push(_transcript);
             });
             geneData.mutations.asArray().forEach(function(e) {
-                if (onlyReviewedContent && e.name_review.get('added') == true) return;
+                if (onlyReviewedContent && e.name_review.get('added') == true || !onlyReviewedContent && e.name_review.get('removed') == true) return;
                 var _mutation = {};
                 _mutation.tumors = [];
                 _mutation.effect = {};
@@ -918,7 +918,7 @@ angular.module('oncokbApp')
                 }
 
                 e.tumors.asArray().forEach(function(e1) {
-                    if (onlyReviewedContent && e1.name_review.get('added') == true) return;
+                    if (onlyReviewedContent && e1.name_review.get('added') == true || !onlyReviewedContent && e1.name_review.get('removed') == true) return;
                     var __tumor = {};
                     var selectedAttrs = ['name', 'summary'];
 
@@ -958,7 +958,7 @@ angular.module('oncokbApp')
 
                         e2.treatments.asArray().forEach(function(e3) {
                             var treatment = {};
-                            if (onlyReviewedContent && e3.name_review.get('added') == true) {
+                            if (onlyReviewedContent && e3.name_review.get('added') == true || !onlyReviewedContent && e3.name_review.get('removed') == true) {
                                 return;
                             }
                             treatment = combineData(treatment, e3, ['name', 'type', 'level', 'indication', 'description', 'short'], excludeComments, onlyReviewedContent);
