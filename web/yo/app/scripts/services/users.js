@@ -11,7 +11,7 @@
  * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
-    .service('users', function user(config) {
+    .service('users', function user(config, $routeParams, $q) {
         var self = {};
 
         self.me = {};
@@ -120,6 +120,26 @@ angular.module('oncokbApp')
             return email;
         }
 
+        function isFileEditable() {
+            var defer = $q.defer();
+            firebase.database().ref('Users').on('value', function(users) {
+                var usersInfo = users.val();
+                for(var i = 0; i < _.keys(usersInfo).length; i++) {
+                    var currentUser = usersInfo[_.keys(usersInfo)[i]];
+                    if (currentUser.email === self.me.email) {
+                        var result = false;
+                        if (currentUser.admin || currentUser.genes.indexOf($routeParams.geneName) !== -1) {
+                            result = true;
+                        }
+                        defer.resolve(result);
+                    }
+                }
+            }, function(error) {
+                defer.reject(error);
+            });
+            return defer.promise;
+        }
+
         return {
             resetMe: function() {
                 self.me = {};
@@ -134,6 +154,7 @@ angular.module('oncokbApp')
                 self.users = {};
                 self.usersL = 0;
                 self.usersU = [];
-            }
+            },
+            isFileEditable: isFileEditable
         };
     });

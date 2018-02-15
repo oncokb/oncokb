@@ -1,0 +1,259 @@
+<div class="drive-realtime-string">
+    <div ng-switch on="inReviewMode()">
+        <div ng-switch-when="false">
+            <div ng-switch on="t">
+                <div ng-switch-when="p">
+                    <p contenteditable="{{fe}}"
+                       ng-class="getInputClass()"
+                       placeholder="{{::ph}}"
+                       ng-model="data[key]"
+                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
+                    </p>
+                    <!-- <pub-iframe
+                            ng-model="data[key]">
+                    </pub-iframe> -->
+                </div>
+                <div ng-switch-when="short">
+                    <p contenteditable="{{fe}}"
+                       ng-class="getInputClass()"
+                       placeholder="{{::ph}}"
+                       ng-model="content.stringO">
+                    </p>
+                    <pub-iframe
+                            ng-model="content.stringO">
+                    </pub-iframe>
+                </div>
+                <div ng-switch-when="MUTATION_NAME">
+                    <span contenteditable="{{fe}}"
+                          ng-class="editableBox"
+                          ng-model="data[key]"
+                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
+                    </span>
+                    <span style="color:red">{{getDuplicationMessage()}}</span>
+                    <br/>
+                </div>
+                <div ng-switch-when="TREATMENT_NAME">
+                    <span contenteditable="{{fe}}"
+                          ng-class="editableBox"
+                          ng-model="data[key]"
+                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
+                    </span>
+                    <span style="color:red">{{getDuplicationMessage()}}</span>
+                    <br/>
+                </div>
+                <div ng-switch-when="treatment-select" class="treatment-select">
+                    <div>
+                        <select ng-disabled="!fe"
+                                chosen allow-single-deselect="true"
+                                ng-model="data[key]"
+                                ng-options="opt.value as opt.label for opt in o">
+                            <option value="NA"></option>
+                        </select>
+                        <div class="propagation" ng-if="content.propagationOpts.length > 0">
+                            <span>Level of Evidence in other tumor types: </span>
+                            <select style="width:100px"
+                                    ng-disabled="!fe"
+                                    chosen allow-single-deselect="true"
+                                    ng-model="data.propagation"
+                                    ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                                <option value="NA"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div ng-switch-when="implication" class="chosen-full-width">
+                    <select ng-disabled="!fe"
+                            chosen allow-single-deselect="true"
+                            ng-model="data[key]"
+                            ng-options="opt.value as opt.label for opt in o">
+                        <option value="NA"></option>
+                    </select>
+                </div>
+                <div ng-switch-when="select-chosen" class="chosen-full-width">
+                    <select ng-disabled="!fe"
+                            chosen allow-single-deselect="true"
+                            ng-model="content.stringO"
+                            ng-options="opt for opt in o">
+                        <option value="NA"></option>
+                    </select>
+                </div>
+                <div ng-switch-when="checkbox">
+                    <div>
+                            <span ng-repeat="checkbox in checkboxes">
+                              <input id="::{{uuid+$index}}"
+                                      type="radio"
+                                      ng-model="data[key]"
+                                      ng-value="checkbox"
+                                      ng-disabled="!fe"
+                                      ng-click="uncheck($event)">
+                              <label for="::{{uuid+$index}}">{{checkbox}}</label>
+                            </span>
+                    </div>
+                </div>
+                <div ng-switch-default></div>
+            </div>
+        </div>
+        <div ng-switch-when="true">
+            <div ng-switch on="t">
+                <div ng-switch-when="p">
+                    <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                    <p contenteditable="{{reviewContentEditable('regular')}}"
+                       ng-class="getInputClass()"
+                       placeholder="{{::ph}}"
+                       ng-model="data[key]">
+                    </p>
+                    <div ng-if="reviewLayout('regular')">
+                        <h4>Difference comparing to the old content:</h4>
+                        <p ng-bind-html="diffHTML"></p>
+                    </div>
+                    <pub-iframe
+                            ng-model="data[key]">
+                    </pub-iframe>
+                </div>
+                <div ng-switch-when="short">
+                    <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                    <p contenteditable="{{reviewContentEditable('regular')}}"
+                       ng-class="getInputClass()"
+                       placeholder="{{::ph}}"
+                       ng-model="content.stringO">
+                    </p>
+                    <div ng-if="reviewLayout('regular')">
+                        <h4>Difference comparing to the old content:</h4>
+                        <p ng-bind-html="diffHTML"></p>
+                    </div>
+                    <pub-iframe
+                            ng-model="content.stringO">
+                    </pub-iframe>
+                </div>
+                <div ng-switch-when="MUTATION_NAME">
+                    <h4 ng-if="reviewLayout('name')">New Content:</h4>
+                    <span contenteditable="{{reviewContentEditable('regular')}}"
+                          ng-class="editableBox"
+                          ng-model="content.stringO">
+                    </span>
+                    <br/>
+                    <div ng-if="reviewLayout('name')">
+                        <h4>Old Content:</h4>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
+                    </div>
+                </div>
+                <div ng-switch-when="TREATMENT_NAME">
+                    <h4 ng-if="reviewLayout('name')">New Content:</h4>
+                    <span contenteditable="{{reviewContentEditable('regular')}}"
+                          ng-class="editableBox"
+                          ng-model="content.stringO">
+                    </span>
+                    <br/>
+                    <div ng-if="reviewLayout('name')">
+                        <h4>Old Content:</h4>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
+                    </div>
+                </div>
+                <div ng-switch-when="treatment-select" class="treatment-select">
+                    <div>
+                        <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                        <div>
+                            <select ng-disabled="!reviewContentEditable('regular')"
+                                    chosen allow-single-deselect="true"
+                                    ng-model="content.stringO"
+                                    ng-options="opt.value as opt.label for opt in o">
+                                <option value="NA"></option>
+                            </select>
+                            <div class="propagation" ng-if="!rejectedAction() && content.propagationOpts.length > 0">
+                                <span>Level of Evidence in other tumor types: </span>
+                                <select style="width:100px"
+                                        ng-disabled="!reviewContentEditable('regular')"
+                                        chosen allow-single-deselect="true"
+                                        ng-model="content.propagation"
+                                        ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                                    <option value="NA"></option>
+                                </select>
+                            </div>
+                            <!--
+                                when level change is rejected, last reviewed propagation(if exist), will be set to treatment.name_eStatus. And it won't be updated to content.propagation before refresh page.
+                                Since we want to avoid adding more watcher, we will print out propagation from eStatus directly
+                            -->
+                            <div ng-if="rejectedAction() && es.get('propagation')">
+                                <span>Level of Evidence in other tumor types: </span>
+                                <p>{{es.get('propagation')}}</p>
+                            </div>
+                        </div>
+                        <div ng-if="reviewLayout('regular')">
+                            <h4>Old Content:</h4>
+                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.has('lastReviewed') ? reviewObj.get('lastReviewed') : content.stringO}}</p>
+                            <div class="propagation" ng-if="reviewObj.has('lastReviewedPropagation')">
+                                <span>Level of Evidence in other tumor types: </span>
+                                <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewedPropagation')}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-switch-when="implication" class="treatment-select">
+                    <div>
+                        <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                        <div>
+                            <select ng-disabled="!reviewContentEditable('regular')"
+                                    chosen allow-single-deselect="true"
+                                    ng-model="content.stringO"
+                                    ng-options="opt.value as opt.label for opt in o">
+                                <option value="NA"></option>
+                            </select>
+                        </div>
+                        <div ng-if="reviewLayout('regular')">
+                            <h4>Old Content:</h4>
+                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewed')}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div ng-switch-when="select-chosen" class="chosen-full-width">
+                    <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                    <select ng-disabled="!reviewContentEditable('regular')"
+                            chosen allow-single-deselect="true"
+                            ng-model="content.stringO"
+                            ng-options="opt for opt in o">
+                        <option value="NA"></option>
+                    </select>
+                    <div ng-if="reviewLayout('regular')">
+                        <h4>Old Content:</h4>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
+                    </div>
+                </div>
+                <div ng-switch-when="checkbox">
+                    <div>
+                        <br/>
+                        <h4 ng-if="key !== 'tsg' && reviewLayout('regular')">New Content:</h4>
+                        <div ng-if="key === 'tsg'" style="height:40px;"></div>
+                        <div>
+                            <span ng-repeat="checkbox in checkboxes">
+                              <input id="::{{uuid+$index}}"
+                                      type="radio"
+                                      ng-model="data[key]"
+                                      ng-value="checkbox"
+                                      ng-disabled="!reviewContentEditable('regular')"
+                                      ng-click="uncheck($event)">
+                              <label for="::{{uuid+$index}}">{{checkbox}}</label>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div ng-if="reviewLayout('regular')">
+                        <h4 ng-if="key !== 'tsg'">Old Content:</h4>
+                        <div ng-if="key === 'tsg'" style="height:40px;"></div>
+                        <div>
+                            <span ng-repeat="checkbox in checkboxes" class="reviewedBG">
+                              <input id="::{{uuid+$index+'_review'}}"
+                                      type="radio"
+                                      ng-checked="data[key+'_review'].lastReviewed === checkbox ? true : false"
+                                      ng-disabled="true">
+                              <label for="::{{uuid+$index+'_review'}}">{{checkbox}}</label>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+                <div ng-switch-default></div>
+            </div>
+        </div>
+        <div ng-switch-default></div>
+    </div>
+</div>

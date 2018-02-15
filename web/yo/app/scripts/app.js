@@ -351,7 +351,6 @@ OncoKB.curateInfo = {
         }
     }
 };
-
 function getString(string) {
     if(!string || !_.isString(string)) {
         return '';

@@ -7,33 +7,41 @@
  * # comments
  */
 angular.module('oncokbApp')
-    .directive('commentsDict', function(DatabaseConnector, users, $timeout) {
+    .directive('commentsDict', function(DatabaseConnector, users, $timeout, $firebaseObject, FirebaseModel) {
         return {
             templateUrl: 'views/comments.html',
             restrict: 'AE',
             scope: {
-                object: '=',
-                addComment: '&addComment',
-                comments: '=',
-                fileEditable: '=',
-                parentEvent: '='
+                key: '=',
+                path: '=',
+                vusObj: '='
             },
             replace: true,
             link: function postLink(scope, element, attrs) {
+                users.isFileEditable().then(function(result) {
+                    scope.fileEditable = result;
+                }, function(error) {
+                });                
                 scope.mouseLeaveTimeout = '';
-                scope.key = attrs.key;
                 scope.params = {};
                 scope.status = {
+                    rendering: true,
                     hasComment: false,
                     allResolved: false
                 };
                 scope.userRole = users.getMe().role;
-
-                // create a copy of comments. The original comments is a big
-                // object, has too many methods, cannot use scope watch on the
-                // whole object.
-                scope.commentsCopy = [];
-
+                if (!scope.vusObj) {
+                    $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "obj").then(function (success) {
+                        scope.checkResolvedStatus();
+                        scope.status.rendering = false;
+                    }, function (error) {
+                        console.log('error');
+                    });
+                } else {
+                    scope.obj = scope.vusObj;
+                    scope.checkResolvedStatus();
+                    scope.status.rendering = false;
+                }
                 element.find('i').off('mouseenter');
                 element.find('i').bind('mouseenter', function() {
                     if (scope.mouseLeaveTimeout) {
@@ -49,38 +57,6 @@ angular.module('oncokbApp')
                         element.find('commentsBody').hide();
                     }, 500);
                 });
-
-                scope.$watch('comments.length', function() {
-                    var commentsCopy = {
-                        resolved: [],
-                        content: []
-                    };
-                    for (var i = 0; i < scope.comments.length; i++) {
-                        commentsCopy.resolved.push(scope.comments.get(i).resolved.getText());
-                        commentsCopy.content.push(scope.comments.get(i).content.getText());
-                    }
-                    scope.commentsCopy = commentsCopy;
-                });
-
-                scope.$watch('commentsCopy.resolved', function() {
-                    var allResolved = true;
-                    if (scope.commentsCopy.resolved.length > 0) {
-                        scope.status.hasComment = true;
-                        for (var i = 0; i < scope.commentsCopy.resolved.length; i++) {
-                            if (scope.commentsCopy.resolved[i] !== 'true') {
-                                allResolved = false;
-                                break;
-                            }
-                        }
-                        scope.status.allResolved = allResolved;
-                    } else {
-                        scope.status = {
-                            hasComment: false,
-                            allResolved: false
-                        };
-                    }
-                }, true);
-
                 element.bind('keydown', function(event) {
                     if (event.which === 13) {
                         if (scope.params.newCommentContent) {
@@ -93,28 +69,38 @@ angular.module('oncokbApp')
                 });
             },
             controller: function($scope) {
-                $scope.blur = function(index) {
-                    /* eslint new-cap: 0*/
-                    if ($scope.comments.get(index).content.getText() !== $scope.commentsCopy.content[index]) {
-                        $scope.commentsCopy.content[index] = $scope.comments.get(index).content.getText();
-                    }
-                };
-
                 $scope.add = function() {
-                    console.log($scope);
-                    $scope.addComment({
-                        arg1: $scope.object,
-                        arg2: $scope.key,
-                        arg3: $scope.params.newCommentContent
-                    });
+                    var user = users.getMe();
+                    var comment = new FirebaseModel.Comment(user.name, user.email, $scope.params.newCommentContent);
+                    if(!$scope.obj[$scope.key+'_comments']) {
+                        $scope.obj[$scope.key+'_comments'] = [];
+                    }
+                    $scope.obj[$scope.key+'_comments'].push(comment);
                     $scope.params.newCommentContent = '';
+                    $scope.checkResolvedStatus();
                 };
                 $scope.resolve = function(index) {
-                    $scope.comments.get(index).resolved.setText('true');
-                    $scope.commentsCopy.resolved[index] = 'true';
+                    $scope.obj[$scope.key+'_comments'][index].resolved = 'true';
+                    $scope.checkResolvedStatus();
                 };
                 $scope.delete = function(index) {
-                    $scope.comments.remove(index);
+                    $scope.obj[$scope.key+'_comments'].splice(index, 1);
+                    $scope.checkResolvedStatus();
+                };
+                $scope.checkResolvedStatus = function() {
+                    if(!$scope.obj[$scope.key+'_comments']) {
+                        $scope.obj[$scope.key+'_comments'] = [];
+                    }
+                    $scope.status.hasComment = false;
+                    $scope.status.allResolved = true;
+                    if ($scope.obj[$scope.key+'_comments'].length > 0) {
+                        $scope.status.hasComment = true;
+                        _.each($scope.obj[$scope.key+'_comments'], function(comment) {
+                            if (comment.resolved === 'false') {
+                                $scope.status.allResolved = false;
+                            }
+                        });
+                    }
                 };
             }
         };

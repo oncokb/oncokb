@@ -369,7 +369,9 @@ angular.module('oncokbApp')
             }
             return false;
         }
-
+        function needReviewFire(uuid) {
+            return $rootScope.metaFire[uuid] && $rootScope.metaFire[uuid].review === true;
+        }
         /**
          * Check whether user is developer
          * @param {string} userName The user name
@@ -457,7 +459,7 @@ angular.module('oncokbApp')
             if (!type || !uuid) {
                 return false;
             }
-            uuid = uuid.getText();
+            // uuid = uuid.getText();
             switch(type) {
             case 'accept':
                 return ReviewResource.accepted.indexOf(uuid) !== -1;
@@ -510,6 +512,7 @@ angular.module('oncokbApp')
             processedInReview: processedInReview,
             notifyDeveloper: notifyDeveloper,
             updateLastModified: updateLastModified,
-            updateLastSavedToDB: updateLastSavedToDB
+            updateLastSavedToDB: updateLastSavedToDB,
+            needReviewFire: needReviewFire
         };
     });

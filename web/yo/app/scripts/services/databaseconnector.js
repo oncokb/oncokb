@@ -656,6 +656,35 @@ angular.module('oncokbApp')
                     });
                 return deferred.promise;
             }
+            function getTumorSubtypes() {
+                var deferred = $q.defer();
+                OncoTree.getTumorSubtypes()
+                    .success(function(data) {
+                        data.push({
+                            name: 'All Liquid Tumors'
+                        });
+                        data.push({
+                            name: 'All Solid Tumors'
+                        });
+                        data.push({
+                            name: 'All Tumors'
+                        });
+                        data.push({
+                            name: 'Germline Disposition'
+                        });
+                        data.push({
+                            name: 'All Pediatric Tumors'
+                        });
+                        data.push({
+                            name: 'Other Tumor Types'
+                        });
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
 
             function getIsoforms(type) {
                 var deferred = $q.defer();
@@ -840,6 +869,7 @@ angular.module('oncokbApp')
                 getPubMedArticle: getPubMedArticle,
                 getClinicalTrial: getClinicalTrial,
                 getReviewedData: getReviewedData,
-                lookupVariants: lookupVariants
+                lookupVariants: lookupVariants,
+                getTumorSubtypes: getTumorSubtypes
             };
         }]);

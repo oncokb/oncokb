@@ -18,22 +18,12 @@ angular.module('oncokbApp')
                 if ($rootScope.metaData) {
                     metaDefer.resolve('success');
                 } else {
-                    var meta = documents.getAdditionalDoc('meta');
-                    storage.getAdditionalRealtimeDocument(meta.id).then(function(metaRealtime) {
-                        if (metaRealtime && metaRealtime.error) {
-                            dialogs.error('Error', 'Fail to get meta document! Please stop editing and contact the developer!');
-                            metaDefer.reject('Fail to load meta file');
-                        } else {
-                            $rootScope.metaRealtime = metaRealtime;
-                            $rootScope.metaModel = metaRealtime.getModel();
-                            $rootScope.metaData = metaRealtime.getModel().getRoot().get('review');
-                            $rootScope.timeStamp = metaRealtime.getModel().getRoot().get('timeStamp');
-                            $rootScope.apiData = metaRealtime.getModel().getRoot().get('api');
-                            metaDefer.resolve('success');
-                            if ($rootScope.internal) {
-                                synchronizeData();
-                            }
-                        }
+                    var ref = firebase.database().ref('Meta');
+                    ref.on('value', function(doc) {
+                        $rootScope.metaData = doc.val();
+                        metaDefer.resolve('success');
+                    }, function(error) {
+                        metaDefer.reject('Fail to load queues file');
                     });
                 }
                 return metaDefer.promise;
