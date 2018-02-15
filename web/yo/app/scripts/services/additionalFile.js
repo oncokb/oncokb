@@ -40,22 +40,13 @@ angular.module('oncokbApp')
             }
             function loadQueues() {
                 var queuesDefer = $q.defer();
-                if ($rootScope.queuesData) {
+                var ref = firebase.database().ref('Queues');
+                ref.on('value', function(doc) {
+                    $rootScope.firebaseQueues = doc.val();
                     queuesDefer.resolve('success');
-                } else {
-                    var queuesDoc = documents.getAdditionalDoc('queues');
-                    storage.getAdditionalRealtimeDocument(queuesDoc.id).then(function(queuesRealtime) {
-                        if (queuesRealtime && queuesRealtime.error) {
-                            dialogs.error('Error', 'Fail to get queues document! Please stop editing and contact the developer!');
-                            queuesDefer.reject('Fail to load queues file');
-                        } else {
-                            $rootScope.queuesRealtime = queuesRealtime;
-                            $rootScope.queuesModel = queuesRealtime.getModel();
-                            $rootScope.queuesData = queuesRealtime.getModel().getRoot().get('queues');
-                            queuesDefer.resolve('success');
-                        }
-                    });
-                }
+                }, function(error) {
+                    queuesDefer.reject('Fail to load queues file');
+                });
                 return queuesDefer.promise;
             }
             /**
@@ -88,7 +79,7 @@ angular.module('oncokbApp')
             }
             var deferred = $q.defer();
             storage.retrieveAdditional().then(function(result) {
-                if (!result || result.error || !_.isArray(result) || result.length !== 2) {
+                if (!result || result.error || !_.isArray(result) || result.length !== 1) {
                     dialogs.error('Error', 'Fail to retrieve additional files! Please stop editing and contact the developer!');
                     var subject = 'Fail to retrieve meta file';
                     var content = 'The additional files are not correctly located. Please double check. ';

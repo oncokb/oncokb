@@ -121,24 +121,20 @@ angular.module('oncokbApp')
                         $scope.metaFlags[hugoSymbol].review = false;
                     }
                 }
-                var genesInQueues = $rootScope.queuesData.keys();
-                for (var i = 0; i < genesInQueues.length; i++) {
-                    var tempCount = 0;
-                    for (var j = 0; j < $rootScope.queuesData.get(genesInQueues[i]).length; j++) {
-                        if ($rootScope.queuesData.get(genesInQueues[i]).get(j).get('curated') !== true) {
-                            tempCount++;
+                _.each(_.keys($rootScope.firebaseQueues), function(key) {
+                    _.each($rootScope.firebaseQueues[key].queue, function(item) {
+                        var hugoSymbol = item.hugoSymbol;
+                        if (!item.curated) {
+                            if ($scope.metaFlags[hugoSymbol] && $scope.metaFlags[hugoSymbol].queues) {
+                                $scope.metaFlags[hugoSymbol].queues++;
+                            } else {
+                                $scope.metaFlags[hugoSymbol] = {
+                                    queues: 1
+                                };
+                            }
                         }
-                    }
-                    if (tempCount >0) {
-                        if ($scope.metaFlags[genesInQueues[i]]) {
-                            $scope.metaFlags[genesInQueues[i]].queues = tempCount;
-                        } else {
-                            $scope.metaFlags[genesInQueues[i]] = {
-                                queues: tempCount
-                            };
-                        }
-                    }
-                }
+                    });
+                });
                 var genesWithTimeStamp = $rootScope.timeStamp.keys();
                 for (var i = 0; i < genesWithTimeStamp.length; i++) {
                     var hugoSymbol = genesWithTimeStamp[i];
@@ -161,7 +157,6 @@ angular.module('oncokbApp')
                     OncoKB.backingUp = false;
                 });
             };
-
             $scope.redirect = function(path) {
                 $location.path(path);
             };
