@@ -541,7 +541,7 @@ public class MainUtils {
         return variants;
     }
 
-    public static boolean containsCaseInsensitive(String s, List<String> l) {
+    public static boolean containsCaseInsensitive(String s, Set<String> l) {
         for (String string : l) {
             if (string.equalsIgnoreCase(s)) {
                 return true;

@@ -2,12 +2,11 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
+import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
+import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
 import org.mskcc.cbio.oncokb.model.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -81,5 +80,26 @@ public interface PrivateUtilsApi {
             method = RequestMethod.GET)
     ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCT ID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
 
+    @ApiOperation(value = "", notes = "Check if the genomic example will be mapped to OncoKB variant.", response = Map.class, tags = "Utils")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/match/variant",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(
+        @ApiParam(value = "Gene Hugo Symbol") @RequestParam(value = "hugoSymbol") String hugoSymbol
+        , @ApiParam(value = "The OncoKB variant") @RequestParam(value = "variant") String variant
+        , @ApiParam(value = "The genomic examples.") @RequestParam(value = "examples") String examples
+    ) throws ParserConfigurationException, SAXException, IOException;
+
+    @ApiOperation(value = "", notes = "Check which OncoKB variants can be mapped on genomic examples.", response = List.class, tags = "Utils")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/match/variant",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body
+    );
 }
 

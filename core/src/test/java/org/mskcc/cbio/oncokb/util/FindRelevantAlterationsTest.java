@@ -103,7 +103,7 @@ public class FindRelevantAlterationsTest {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(alt, new ArrayList<>(AlterationUtils.getAllAlterations()));
+                .findRelevantAlterations(alt, AlterationUtils.getAllAlterations(alt.getGene()), true);
         String relevantAltsName = toString(relevantAlterations);
 
         assertEquals("Relevant alterations are not matched on case " +

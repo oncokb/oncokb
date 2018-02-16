@@ -48,7 +48,7 @@ public final class VariantAnnotationXML {
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        LinkedHashSet<Alteration> alterations = alterationBo.findRelevantAlterations(alt, null);
+        LinkedHashSet<Alteration> alterations = alterationBo.findRelevantAlterations(alt, true);
 
         // In previous logic, we do not include alternative alleles
         List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alt);
