@@ -788,24 +788,42 @@ public final class AlterationUtils {
         return isOncogenic;
     }
 
-    public static Boolean hasImportantCuratedOncogenicity(Alteration alteration) {
+    public static Boolean hasImportantCuratedOncogenicity(Set<Oncogenicity> oncogenicities) {
         Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
         curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+        return hasOncogenicityIntersection(curatedOncogenicities, oncogenicities);
+    }
 
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
-        Boolean isImportantCuratedOcnogenicity = false;
+    public static Boolean hasOncogenic(Set<Oncogenicity> oncogenicities) {
+        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
+        curatedOncogenicities.add(Oncogenicity.YES);
+        curatedOncogenicities.add(Oncogenicity.LIKELY);
+        return hasOncogenicityIntersection(curatedOncogenicities, oncogenicities);
+    }
 
-        for (Evidence evidence : oncogenicEvs) {
-            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
-            if (oncogenicity != null && curatedOncogenicities.contains(oncogenicity)) {
-                isImportantCuratedOcnogenicity = true;
+    private static Boolean hasOncogenicityIntersection(Set<Oncogenicity> expect, Set<Oncogenicity> actual) {
+        Boolean has = false;
+        for (Oncogenicity oncogenicity : actual) {
+            if (oncogenicity != null && expect.contains(oncogenicity)) {
+                has = true;
                 break;
             }
         }
-        return isImportantCuratedOcnogenicity;
+        return has;
+    }
+
+    public static Set<Oncogenicity> getCuratedOncogenicity(Alteration alteration) {
+        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
+
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
+
+        for (Evidence evidence : oncogenicEvs) {
+            curatedOncogenicities.add(Oncogenicity.getByEvidence(evidence));
+        }
+        return curatedOncogenicities;
     }
 
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {

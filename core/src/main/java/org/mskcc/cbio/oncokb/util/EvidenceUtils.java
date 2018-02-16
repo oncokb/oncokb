@@ -384,39 +384,42 @@ public class EvidenceUtils {
 
         if (evidenceQuery.getGene() != null) {
             for (Evidence evidence : evidences) {
-                Evidence tempEvidence = new Evidence(evidence, evidence.getId());
-                if (tempEvidence.getGene().equals(evidenceQuery.getGene())) {
+
+                if (evidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
-                    if (tempEvidence.getAlterations().isEmpty()) {
-                        filtered.add(tempEvidence);
+                    if (evidence.getAlterations().isEmpty()) {
+                        filtered.add(evidence);
                     } else {
-                        if (!Collections.disjoint(tempEvidence.getAlterations(), evidenceQuery.getAlterations())) {
-                            if (tempEvidence.getOncoTreeType() == null) {
-                                if (tempEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                                    if (tempEvidence.getDescription() == null) {
+                        boolean hasjointed = Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
+                        if (!hasjointed) {
+                            if (evidence.getOncoTreeType() == null) {
+                                if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+                                    if (evidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
-                                        alterations.addAll(tempEvidence.getAlterations());
+                                        alterations.addAll(evidence.getAlterations());
 //                                        tempEvidence.setDescription(SummaryUtils.variantSummary(Collections.singleton(tempEvidence.getGene()), alterations, evidenceQuery.getQueryAlteration(), Collections.singleton(tempEvidence.getTumorType()), evidenceQuery.getQueryTumorType()));
                                     }
                                 }
-                                filtered.add(tempEvidence);
+                                filtered.add(evidence);
                             } else {
                                 List<TumorType> tumorType = new ArrayList<>();
 
-                                if (tempEvidence.getOncoTreeType() != null) {
-                                    tumorType.add(tempEvidence.getOncoTreeType());
+                                if (evidence.getOncoTreeType() != null) {
+                                    tumorType.add(evidence.getOncoTreeType());
                                 }
 
-                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType)) {
-                                    filtered.add(tempEvidence);
+                                hasjointed = Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
+                                if (!hasjointed) {
+                                    filtered.add(evidence);
                                 } else {
-                                    if (tempEvidence.getLevelOfEvidence() != null && tempEvidence.getPropagation() != null) {
-                                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tempEvidence.getPropagation());
+                                    if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
+                                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
 
                                         if (propagationLevel != null) {
                                             if (evidenceQuery.getLevelOfEvidences() == null
                                                 || evidenceQuery.getLevelOfEvidences().size() == 0
                                                 || evidenceQuery.getLevelOfEvidences().contains(propagationLevel)) {
+                                                Evidence tempEvidence = new Evidence(evidence, evidence.getId());
                                                 tempEvidence.setLevelOfEvidence(propagationLevel);
                                                 filtered.add(tempEvidence);
                                             }

@@ -9,7 +9,7 @@ import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.util.*;
 
@@ -42,8 +42,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         Set<Alteration> altsSet = new HashSet<>(alterations);
         if (CacheUtils.isEnabled()) {
             for (Evidence evidence : getAllEvidencesByAlterationsGenes(alterations)) {
-                if (Sets.intersection(evidence.getAlterations(), altsSet).size() > 0
-                    && evidenceTypes.contains(evidence.getEvidenceType())) {
+                if (!Collections.disjoint(evidence.getAlterations(), altsSet) && evidenceTypes.contains(evidence.getEvidenceType())) {
                     set.add(evidence);
                 }
             }
