@@ -3,7 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -876,6 +878,10 @@ public class EvidenceUtils {
             } else {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
+            }
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences());
+            if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
+                CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
             }
         }
         return evidenceQueries;
