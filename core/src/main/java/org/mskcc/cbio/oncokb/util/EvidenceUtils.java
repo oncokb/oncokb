@@ -390,8 +390,8 @@ public class EvidenceUtils {
                     if (evidence.getAlterations().isEmpty()) {
                         filtered.add(evidence);
                     } else {
-                        boolean hasjointed = Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
-                        if (!hasjointed) {
+                        boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
+                        if (hasjointed) {
                             if (evidence.getOncoTreeType() == null) {
                                 if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                                     if (evidence.getDescription() == null) {
@@ -408,8 +408,8 @@ public class EvidenceUtils {
                                     tumorType.add(evidence.getOncoTreeType());
                                 }
 
-                                hasjointed = Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
-                                if (!hasjointed) {
+                                hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
+                                if (hasjointed) {
                                     filtered.add(evidence);
                                 } else {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {

@@ -793,25 +793,14 @@ public final class AlterationUtils {
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
         curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
-        return hasOncogenicityIntersection(curatedOncogenicities, oncogenicities);
+        return !Collections.disjoint(curatedOncogenicities, oncogenicities);
     }
 
     public static Boolean hasOncogenic(Set<Oncogenicity> oncogenicities) {
         Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
-        return hasOncogenicityIntersection(curatedOncogenicities, oncogenicities);
-    }
-
-    private static Boolean hasOncogenicityIntersection(Set<Oncogenicity> expect, Set<Oncogenicity> actual) {
-        Boolean has = false;
-        for (Oncogenicity oncogenicity : actual) {
-            if (oncogenicity != null && expect.contains(oncogenicity)) {
-                has = true;
-                break;
-            }
-        }
-        return has;
+        return !Collections.disjoint(curatedOncogenicities, oncogenicities);
     }
 
     public static Set<Oncogenicity> getCuratedOncogenicity(Alteration alteration) {

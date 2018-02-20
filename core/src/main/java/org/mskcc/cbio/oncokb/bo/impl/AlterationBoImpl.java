@@ -333,7 +333,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     for (Alteration alt : relevantAlts) {
                         Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
 
-                        if (isOncogenic != null && isOncogenic) {
+                        if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {
                             add = true;
                             break;
                         }
