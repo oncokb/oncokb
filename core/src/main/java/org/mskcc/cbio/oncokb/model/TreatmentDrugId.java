@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
@@ -36,9 +37,19 @@ public class TreatmentDrugId implements Serializable {
     }
 
     public void setDrug(Drug drug) {
-        Drug persistence = ApplicationContextSingleton.getDrugBo().guessUnambiguousDrug(drug.getDrugName());
+        Drug persistence = null;
+        if (CacheUtils.isEnabled()) {
+            if (CacheUtils.getAllDrugs().contains(drug)) {
+                persistence = drug;
+            }
+        } else {
+            persistence = ApplicationContextSingleton.getDrugBo().guessUnambiguousDrug(drug.getDrugName());
+        }
         if (persistence == null) {
             ApplicationContextSingleton.getDrugBo().save(drug);
+            if (CacheUtils.isEnabled()) {
+                CacheUtils.addDrug(drug);
+            }
             persistence = drug;
         }
         this.drug = persistence;

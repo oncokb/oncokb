@@ -321,14 +321,18 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         boolean add = false;
         if (!isKitSpecialVariants(exactAlt)) {
             if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
-                if (AlterationUtils.hasImportantCuratedOncogenicity(exactAlt)) {
-                    Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(exactAlt);
-                    if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(exactAlt)) {
+                Set<Oncogenicity> oncogenicities = AlterationUtils.getCuratedOncogenicity(exactAlt);
+                boolean has = AlterationUtils.hasImportantCuratedOncogenicity(oncogenicities);
+                if (has) {
+                    Boolean isOncogenic = AlterationUtils.hasOncogenic(oncogenicities);
+
+                    if (isOncogenic != null && isOncogenic) {
                         add = true;
                     }
                 } else {
                     for (Alteration alt : relevantAlts) {
                         Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
+
                         if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {
                             add = true;
                             break;

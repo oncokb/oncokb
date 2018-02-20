@@ -387,6 +387,12 @@ public class CacheUtils {
         return drugs;
     }
 
+    public static void addDrug(Drug drug) {
+        if (drug != null) {
+            drugs.add(drug);
+        }
+    }
+
     public static Set<Evidence> getAllEvidences() {
         Set<Evidence> evis = new HashSet<>();
         for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
