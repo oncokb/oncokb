@@ -13,10 +13,6 @@ import java.util.*;
  * Created by hongxinzhang on 4/5/16.
  */
 public class IndicatorUtils {
-    private static final List<String> KIT_TREATMENT_ORDER = Collections.unmodifiableList(
-        Arrays.asList("Imatinib", "Sunitinib", "Regorafenib", "Sorafenib")
-    );
-
     public static IndicatorQueryResp processQuery(Query query, String geneStatus,
                                                   Set<LevelOfEvidence> levels, String source, Boolean highestLevelOnly,
                                                   Set<EvidenceType> evidenceTypes) {
@@ -269,7 +265,7 @@ public class IndicatorUtils {
 
                     // Make sure the treatment in KIT is always sorted.
                     if (gene.getHugoSymbol().equals("KIT")) {
-                        sortKitTreatment(treatments);
+                        CustomizeComparator.sortKitTreatment(treatments);
                     }
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
@@ -369,67 +365,12 @@ public class IndicatorUtils {
         return otherSignificantLevels;
     }
 
-    private static void sortKitTreatment(List<IndicatorQueryTreatment> treatments) {
-        Collections.sort(treatments, new Comparator<IndicatorQueryTreatment>() {
-            public int compare(IndicatorQueryTreatment t1, IndicatorQueryTreatment t2) {
-                if (t1.getLevel() != null
-                    && t2.getLevel() != null
-                    && t1.getLevel().equals(t2.getLevel())
-                    && t1.getDrugs() != null
-                    && t2.getDrugs() != null
-                    && t1.getDrugs().size() == 1
-                    && t2.getDrugs().size() == 1
-                    ) {
-                    String tName1 = t1.getDrugs().get(0).getDrugName();
-                    String tName2 = t2.getDrugs().get(0).getDrugName();
-                    int i1 = KIT_TREATMENT_ORDER.indexOf(tName1);
-                    int i2 = KIT_TREATMENT_ORDER.indexOf(tName2);
-                    if (i1 == i2)
-                        return 0;
-                    if (i1 == -1)
-                        return 1;
-                    if (i2 == -1)
-                        return -1;
-                    return i1 - i2;
-                } else {
-                    return 0;
-                }
-            }
-        });
-    }
-
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             List<Evidence> sortedEvidence = new ArrayList<>(evidences);
 
-            Collections.sort(sortedEvidence, new Comparator<Evidence>() {
-                public int compare(Evidence e1, Evidence e2) {
-                    Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence());
-
-                    if (comparison != 0) {
-                        return comparison;
-                    }
-
-                    // Compare the highest priority of each evidence
-                    comparison = e1.getHighestTreatmentPriority() - e2.getHighestTreatmentPriority();
-
-                    if (comparison != 0) {
-                        return comparison;
-                    }
-
-                    if (e1.getId() == null) {
-                        if (e2.getId() == null) {
-                            return 0;
-                        } else {
-                            return 1;
-                        }
-                    }
-                    if (e2.getId() == null)
-                        return -1;
-                    return e1.getId() - e2.getId();
-                }
-            });
+            CustomizeComparator.sortEvidenceBasedOnPriority(sortedEvidence);
 
             for (Evidence evidence : sortedEvidence) {
                 Set<String> pmids = new HashSet<>();
