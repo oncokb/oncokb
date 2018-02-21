@@ -407,7 +407,6 @@ public class TumorTypeUtils {
                                                 String key, String keyword, Boolean exactMatch, Boolean includeParent) {
         Map<String, TumorType> childrenTumorTypes = currentTumorType.getChildren();
         Boolean match = false;
-        Integer keywordAsInteger = convertStringToInteger(keyword);
 
         if (includeParent == null) {
             includeParent = false;
@@ -477,6 +476,7 @@ public class TumorTypeUtils {
                 }
                 break;
             case "level":
+                Integer keywordAsInteger = convertStringToInteger(keyword);
                 match = currentTumorType == null ? false :
                     (currentTumorType.getLevel() == null ? false :
                         (currentTumorType.getLevel() == null ? false :

@@ -10,6 +10,7 @@ import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 
 import java.util.*;
 
@@ -23,8 +24,8 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         if (CacheUtils.isEnabled()) {
             Set<Alteration> alterationSet = new HashSet<>(alterations);
-            for (Evidence evidence : getAllEvidencesByAlterationsGenes(alterations)) {
-                if (Sets.intersection(evidence.getAlterations(), alterationSet).size() > 0) {
+            for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+                if (!Collections.disjoint(evidence.getAlterations(), alterationSet)) {
                     set.add(evidence);
                 }
             }
@@ -41,8 +42,8 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         Set<Alteration> altsSet = new HashSet<>(alterations);
         if (CacheUtils.isEnabled()) {
-            for (Evidence evidence : getAllEvidencesByAlterationsGenes(alterations)) {
-                if (!Collections.disjoint(evidence.getAlterations(), altsSet) && evidenceTypes.contains(evidence.getEvidenceType())) {
+            for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+                if (evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getAlterations(), altsSet)) {
                     set.add(evidence);
                 }
             }
@@ -64,7 +65,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         Set<Evidence> set = new LinkedHashSet<Evidence>();
 
         if (CacheUtils.isEnabled()) {
-            for (Evidence evidence : getAllEvidencesByAlterationsGenes(alterations)) {
+            for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
                 if (Sets.intersection(evidence.getAlterations(), new HashSet(alterations)).size() > 0
                     && evidenceTypes.contains(evidence.getEvidenceType())
                     && levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
@@ -399,17 +400,5 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         } else {
             return getDao().findEvidenceByUUIDs(uuids);
         }
-    }
-
-    private Set<Evidence> getAllEvidencesByAlterationsGenes(Collection<Alteration> alterations) {
-        Set<Gene> genes = new HashSet<>();
-        Set<Evidence> evidences = new HashSet<>();
-        for (Alteration alteration : alterations) {
-            genes.add(alteration.getGene());
-        }
-        for (Gene gene : genes) {
-            evidences.addAll(CacheUtils.getEvidences(gene));
-        }
-        return evidences;
     }
 }

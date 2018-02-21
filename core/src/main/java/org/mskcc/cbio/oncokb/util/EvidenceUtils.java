@@ -271,10 +271,7 @@ public class EvidenceUtils {
         List<Evidence> evidences = new ArrayList<>();
 
         if (CacheUtils.isEnabled()) {
-            Set<Evidence> geneEvidences = new HashSet<>();
-            for (Alteration alteration : alterations) {
-                geneEvidences.addAll(CacheUtils.getEvidences(alteration.getGene()));
-            }
+            Set<Evidence> geneEvidences = getAllEvidencesByAlterationsGenes(alterations);
             for (Evidence evidence : geneEvidences) {
                 if (!Collections.disjoint(evidence.getAlterations(), alterations)) {
                     evidences.add(evidence);
@@ -997,6 +994,21 @@ public class EvidenceUtils {
 
         if (isDesc) {
             Collections.reverse(evidences);
+        }
+        return evidences;
+    }
+
+    public static Set<Evidence> getAllEvidencesByAlterationsGenes(Collection<Alteration> alterations) {
+        Set<Gene> genes = new HashSet<>();
+        Set<Evidence> evidences = new HashSet<>();
+        for (Alteration alteration : alterations) {
+            genes.add(alteration.getGene());
+        }
+        if (genes.size() == 1) {
+            return CacheUtils.getEvidences(genes.iterator().next());
+        }
+        for (Gene gene : genes) {
+            evidences.addAll(CacheUtils.getEvidences(gene));
         }
         return evidences;
     }

@@ -603,18 +603,14 @@ public final class AlterationUtils {
     }
 
     private static List<Alteration> getAlleleAlterationsSub(Alteration alteration, Set<Alteration> fullAlterations) {
-        List<Alteration> alterations = new ArrayList<>();
-
         if (alteration == null || alteration.getConsequence() == null ||
             !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
-            return alterations;
+            return new ArrayList<>();
         }
-
-        alterations = new ArrayList<>(fullAlterations);
 
         List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
-            alteration.getProteinEnd(), alterations);
+            alteration.getProteinEnd(), fullAlterations);
 
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
