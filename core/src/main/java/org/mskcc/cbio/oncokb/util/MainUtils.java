@@ -143,13 +143,15 @@ public class MainUtils {
     }
 
     public static IndicatorQueryMutationEffect findHighestMutationEffectByEvidence(Set<Evidence> evidences) {
-        Integer index = 100;
+        int index = 100;
         IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
         for (Evidence evidence : evidences) {
             MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
-            if (PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect) < index) {
+            int _index = PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect);
+            if (_index < index) {
                 indicatorQueryMutationEffect.setMutationEffect(mutationEffect);
                 indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
+                index = _index;
             }
         }
         return indicatorQueryMutationEffect;
