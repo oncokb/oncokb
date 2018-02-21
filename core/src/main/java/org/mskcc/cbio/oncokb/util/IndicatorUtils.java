@@ -4,7 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
-import org.mskcc.cbio.oncokb.apiModels.References;
+import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -199,7 +199,7 @@ public class IndicatorUtils {
                         MutationEffectResp mutationEffectResp = new MutationEffectResp();
                         mutationEffectResp.setKnownEffect(indicatorQueryMutationEffect.getMutationEffect().getMutationEffect());
                         mutationEffectResp.setDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription());
-                        mutationEffectResp.setReferences(MainUtils.getReferencesByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
+                        mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
                         indicatorQuery.setMutationEffect(mutationEffectResp);
                     }
                 }
@@ -481,14 +481,14 @@ public class IndicatorUtils {
             });
 
             for (Evidence evidence : sortedEvidence) {
-                References references = MainUtils.getReferencesByEvidence(evidence);
+                Citations citations = MainUtils.getCitationsByEvidence(evidence);
                 for (Treatment treatment : evidence.getSortedTreatment()) {
                     IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
                     indicatorQueryTreatment.setDrugs(treatment.getDrugs());
                     indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
                     indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
-                    indicatorQueryTreatment.setPmids(references.getPmids());
-                    indicatorQueryTreatment.setAbstracts(references.getAbstracts());
+                    indicatorQueryTreatment.setPmids(citations.getPmids());
+                    indicatorQueryTreatment.setAbstracts(citations.getAbstracts());
                     treatments.add(indicatorQueryTreatment);
                 }
             }

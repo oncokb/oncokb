@@ -1,6 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.apiModels.References;
+import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.w3c.dom.Document;
@@ -612,19 +612,19 @@ public class MainUtils {
         return result;
     }
 
-    public static References getReferencesByEvidence(Evidence evidence) {
-        References references = new References();
+    public static Citations getCitationsByEvidence(Evidence evidence) {
+        Citations citations = new Citations();
         for (Article article : evidence.getArticles()) {
             if (article.getPmid() != null) {
-                references.getPmids().add(article.getPmid());
+                citations.getPmids().add(article.getPmid());
             }
             if (article.getAbstractContent() != null) {
                 ArticleAbstract articleAbstract = new ArticleAbstract();
                 articleAbstract.setAbstractContent(article.getAbstractContent());
                 articleAbstract.setLink(article.getLink());
-                references.getAbstracts().add(articleAbstract);
+                citations.getAbstracts().add(articleAbstract);
             }
         }
-        return references;
+        return citations;
     }
 }

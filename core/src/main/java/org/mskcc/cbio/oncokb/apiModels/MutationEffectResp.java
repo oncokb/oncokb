@@ -6,7 +6,7 @@ package org.mskcc.cbio.oncokb.apiModels;
 public class MutationEffectResp {
     String knownEffect = "";
     String description = "";
-    References references;
+    Citations citations;
 
     public String getKnownEffect() {
         return knownEffect;
@@ -24,11 +24,11 @@ public class MutationEffectResp {
         this.description = description;
     }
 
-    public References getReferences() {
-        return references;
+    public Citations getCitations() {
+        return citations;
     }
 
-    public void setReferences(References references) {
-        this.references = references;
+    public void setCitations(Citations citations) {
+        this.citations = citations;
     }
 }

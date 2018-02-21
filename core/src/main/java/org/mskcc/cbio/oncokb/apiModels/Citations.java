@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Created by Hongxin Zhang on 2/21/18.
  */
-public class References {
+public class Citations {
     Set<String> pmids = new HashSet<String>(0);
     Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
 
