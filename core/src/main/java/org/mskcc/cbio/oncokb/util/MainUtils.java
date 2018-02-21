@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.mskcc.cbio.oncokb.apiModels.References;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.w3c.dom.Document;
@@ -139,6 +140,19 @@ public class MainUtils {
             }
         }
         return index == 100 ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
+    }
+
+    public static IndicatorQueryMutationEffect findHighestMutationEffectByEvidence(Set<Evidence> evidences) {
+        Integer index = 100;
+        IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
+        for (Evidence evidence : evidences) {
+            MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
+            if (PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect) < index) {
+                indicatorQueryMutationEffect.setMutationEffect(mutationEffect);
+                indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
+            }
+        }
+        return indicatorQueryMutationEffect;
     }
 
     public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
@@ -596,5 +610,21 @@ public class MainUtils {
             }
         }
         return result;
+    }
+
+    public static References getReferencesByEvidence(Evidence evidence) {
+        References references = new References();
+        for (Article article : evidence.getArticles()) {
+            if (article.getPmid() != null) {
+                references.getPmids().add(article.getPmid());
+            }
+            if (article.getAbstractContent() != null) {
+                ArticleAbstract articleAbstract = new ArticleAbstract();
+                articleAbstract.setAbstractContent(article.getAbstractContent());
+                articleAbstract.setLink(article.getLink());
+                references.getAbstracts().add(articleAbstract);
+            }
+        }
+        return references;
     }
 }
