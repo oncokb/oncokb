@@ -45,9 +45,22 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
         return $http.get('data/summary.json');
     }
 
+    function getReviewedData(type) {
+        switch(type) {
+            case 'geneType':
+                return $http.get(OncoKB.config.publicApiLink + 'genes');
+            case 'mutationEffect':
+                return $http.get(OncoKB.config.publicApiLink + 'evidences/lookup?source=oncotree&evidenceTypes=MUTATION_EFFECT,ONCOGENIC');
+            case 'tumorSummary':
+                return $http.get(OncoKB.config.publicApiLink + 'evidences/lookup?source=oncotree&evidenceTypes=TUMOR_TYPE_SUMMARY');
+            case 'drugs':
+                return $http.get(OncoKB.config.publicApiLink + 'evidences/lookup?source=oncotree&evidenceTypes=STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE');
+        }
+    }
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromFile: getFromFile,
+        getReviewedData: getReviewedData
     };
 }]);
 

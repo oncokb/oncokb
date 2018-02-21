@@ -101,7 +101,17 @@ angular.module('oncokbApp')
                 }
                 return deferred.promise;
             }
-
+            function getReviewedData(evidenceType) {
+                var deferred = $q.defer();
+                DataSummary.getReviewedData(evidenceType)
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
             function getAllAlteration(callback, timestamp) {
                 if (dataFromFile) {
                     Alteration.getFromFile()
@@ -790,6 +800,7 @@ angular.module('oncokbApp')
                 getEvidencesByUUID: getEvidencesByUUID,
                 getEvidencesByUUIDs: getEvidencesByUUIDs,
                 getPubMedArticle: getPubMedArticle,
-                getClinicalTrial: getClinicalTrial
+                getClinicalTrial: getClinicalTrial,
+                getReviewedData: getReviewedData
             };
         }]);

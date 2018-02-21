@@ -153,24 +153,21 @@
         <table datatable="ng" class="row-border hover" dt-options="reviewedDT.dtOptions">
             <thead>
             <tr>
-                <th ng-repeat="x in reviewedDataHeaders[evidenceType]">{{ x }}</th>
+                <th ng-repeat="x in reviewedData[evidenceType].header">{{ x }}</th>
             </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="x in reviewedData[evidenceType]">
-                    <td><strong><a href="#/gene/{{x.gene}}">{{ x.gene }}</a></strong></td>
-                    <td ng-if="evidenceType === 'gene_type'">{{x.oncogene}}</td>
-                    <td ng-if="evidenceType === 'gene_type'">{{x.tsg}}</td>
-                    <td class="reviewedData" ng-if="evidenceType !== 'gene_type'">{{x.mutation}}</td>
-                    <td ng-if="evidenceType === 'mutation_effect'">{{x.oncogenic}}</td>
-                    <td ng-if="evidenceType === 'mutation_effect'">{{x.mutation_effect}}</td>
-                    <td ng-if="evidenceType === 'tumor_summary' || evidenceType === 'drugs'">{{x.tumor_type}}</td>
-                    <td ng-if="evidenceType === 'tumor_summary'">{{x.tumor_summary}}</td> 
-                    <td class="reviewedData" ng-if="evidenceType ===
-                     'drugs'">{{x.drugs}}</td> 
-                    <td ng-if="evidenceType === 'drugs'">{{x.level}}</td>
-                    <td ng-if="evidenceType === 'drugs' || evidenceType === 'mutation_effect'">{{x.description}}</td> 
-                    <td ng-if="evidenceType === 'drugs' || evidenceType === 'mutation_effect'">{{x.citations}}</td> 
+                <tr ng-repeat="item in reviewedData[evidenceType].body">
+                    <td ng-repeat="key in reviewedData[evidenceType].keys">
+                        <div ng-switch on="key">
+                                <div ng-switch-when="gene">
+                                    <strong><a href="#/gene/{{item.gene}}">{{ item.gene }}</a></strong>
+                                </div>
+                                <div class="reviewedData" ng-switch-when="mutation">{{item.mutation}}</div>
+                                <div class="reviewedData" ng-switch-when="drugs">{{item.drugs}}</div>
+                                <div ng-switch-default>{{ item[key] }}</div>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
