@@ -44,10 +44,17 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     function getFromFile() {
         return $http.get('data/summary.json');
     }
-
+    function getGeneType() {
+        return $http.get(OncoKB.config.publicApiLink + 'genes');
+    }
+    function getEvidenceByType(type) {
+        return $http.get(OncoKB.config.publicApiLink + 'evidences/lookup?source=oncotree&evidenceTypes=' + type);
+    }
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromFile: getFromFile,
+        getGeneType: getGeneType,
+        getEvidenceByType: getEvidenceByType
     };
 }]);
 

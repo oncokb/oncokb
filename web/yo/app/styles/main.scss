@@ -880,3 +880,7 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 .invalidPubIframe {
     color: red !important;
 }
+.reviewedData {
+  width: 200px;
+  word-break: break-all;
+}
