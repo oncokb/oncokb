@@ -238,7 +238,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addDeletion) {
-            Alteration deletion = findAlteration( "oncogenic mutations", fullAlterations);
+            Alteration deletion = findAlteration( "Deletion", fullAlterations);
             if (deletion != null) {
                 alterations.add(deletion);
 
