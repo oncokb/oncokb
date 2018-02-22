@@ -251,25 +251,29 @@ angular.module('oncokbApp')
                     header: ['Gene', 'Oncogene', 'Tumor Suppressor'],
                     body: [],
                     keys: ['gene', 'oncogene', 'tsg'],
-                    fileName: 'GeneType.xls'
+                    fileName: 'GeneType.xls',
+                    evidenceTypes: 'geneType'
                 },
                 mutationEffect: {
                     header:['Gene', 'Mutation', 'Oncogenic', 'Mutation Effect', 'Description', 'Citations'],
                     body: [],
                     keys: ['gene', 'mutation', 'oncogenic', 'mutationEffect', 'description', 'citations'],
-                    fileName: 'MutationEffect.xls'
+                    fileName: 'MutationEffect.xls',
+                    evidenceTypes: 'MUTATION_EFFECT,ONCOGENIC'
                 },
                 tumorSummary: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'tumorSummary'],
-                    fileName: 'TumorSummary.xls'
+                    fileName: 'TumorSummary.xls',
+                    evidenceTypes: 'TUMOR_TYPE_SUMMARY'
                 },
                 drugs: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Description', 'Citations'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'description', 'citations'],
-                    fileName: 'Drugs.xls'
+                    fileName: 'Drugs.xls',
+                    evidenceTypes: 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 }
             };
             $scope.loadingReviewed = false;
@@ -289,7 +293,7 @@ angular.module('oncokbApp')
                 $scope.reviewedData.tumorSummary.body = [];
                 $scope.reviewedData.drugs.body = [];
 
-                DatabaseConnector.getReviewedData($scope.evidenceType).then(function(response) {
+                DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
                     if ($scope.evidenceType === 'geneType') {
                         _.each(response, function(item) {
                             $scope.reviewedData.geneType.body.push({

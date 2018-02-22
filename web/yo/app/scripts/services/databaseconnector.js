@@ -103,13 +103,23 @@ angular.module('oncokbApp')
             }
             function getReviewedData(evidenceType) {
                 var deferred = $q.defer();
-                DataSummary.getReviewedData(evidenceType)
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
-                        deferred.reject(result);
-                    });
+                if (evidenceType === 'geneType') {
+                    DataSummary.getGeneType()
+                        .success(function(data) {
+                            deferred.resolve(data);
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                } else {
+                    DataSummary.getEvidenceByType(evidenceType)
+                        .success(function(data) {
+                            deferred.resolve(data);
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                }
                 return deferred.promise;
             }
             function getAllAlteration(callback, timestamp) {
