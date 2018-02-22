@@ -333,21 +333,17 @@ angular.module('oncokbApp')
                             });
                             if ($scope.evidenceType === 'tumorSummary') {
                                 _.each(response, function (item) {
+                                    var tempObj =  {
+                                        gene: item.gene.hugoSymbol,
+                                        mutation: getAlterations(item.alterations),
+                                        tumorSummary: item.description
+                                    };
                                     if (item.subtype) {
-                                        $scope.reviewedData.tumorSummary.body.push({
-                                            gene: item.gene.hugoSymbol,
-                                            mutation: getAlterations(item.alterations),
-                                            tumorType: subtypeMapping[item.subtype],
-                                            tumorSummary: item.description
-                                        });
+                                        tempObj.tumorType = subtypeMapping[item.subtype];
                                     } else {
-                                        $scope.reviewedData.tumorSummary.body.push({
-                                            gene: item.gene.hugoSymbol,
-                                            mutation: getAlterations(item.alterations),
-                                            tumorType: item.cancerType,
-                                            tumorSummary: item.description
-                                        });
+                                        tempObj.tumorType = item.cancerType;
                                     }
+                                    $scope.reviewedData.tumorSummary.body.push(tempObj);
                                 });
                             } else if ($scope.evidenceType === 'drugs') {
                                 _.each(response, function(item) {
