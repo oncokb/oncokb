@@ -39,7 +39,8 @@
     "file-saver.js": "~1.20150304.1",
     "fontawesome": "~4.4.0",
     "uuid-js": "^0.7.5",
-    "google-diff-match-patch-js": "^1.0.0"
+    "google-diff-match-patch-js": "^1.0.0",
+    "Blob": "*"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.8",
