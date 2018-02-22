@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 // Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
 
+import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Boolean variantExist;
     private Boolean alleleExist;
     private String oncogenic;
+    private MutationEffectResp mutationEffect;
     private LevelOfEvidence highestSensitiveLevel;
     private LevelOfEvidence highestResistanceLevel;
     private List<LevelOfEvidence> otherSignificantSensitiveLevels;
@@ -61,6 +64,14 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setOncogenic(String oncogenic) {
         this.oncogenic = oncogenic;
+    }
+
+    public MutationEffectResp getMutationEffect() {
+        return mutationEffect;
+    }
+
+    public void setMutationEffect(MutationEffectResp mutationEffect) {
+        this.mutationEffect = mutationEffect;
     }
 
     public LevelOfEvidence getHighestSensitiveLevel() {
