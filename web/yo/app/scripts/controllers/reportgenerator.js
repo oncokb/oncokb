@@ -214,24 +214,24 @@ angular.module('oncokbApp')
             };
             $scope.evidenceType = '';
             $scope.evidenceTypes = [{
-                label: 'Gene Type',
+                label: 'Oncogene/Tumor Suppressor',
                 value: 'geneType'
             }, {
                 label: 'Mutation Effect',
                 value: 'mutationEffect'
             }, {
-                label: 'Tumor Summary',
+                label: 'Tumor Type Summary',
                 value: 'tumorSummary'
             }, {
-                label: 'Drugs',
+                label: 'Therapeutics (All Levels)',
                 value: 'drugs'
             }];
             $scope.reviewedData = {
                 geneType: {
-                    header: ['Gene', 'Oncogene', 'Tumor Suppressor'],
+                    header: ['Gene', 'Oncogene', 'Tumor Suppressor', 'Truncating Mutations', 'Deletion', 'Amplification'],
                     body: [],
-                    keys: ['gene', 'oncogene', 'tsg'],
-                    fileName: 'GeneType.xls',
+                    keys: ['gene', 'oncogene', 'tsg', 'truncatingMutations', 'deletion', 'amplification'],
+                    fileName: 'Onc/TS.xls',
                     evidenceTypes: 'geneType'
                 },
                 mutationEffect: {
@@ -245,14 +245,14 @@ angular.module('oncokbApp')
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'tumorSummary'],
-                    fileName: 'TumorSummary.xls',
+                    fileName: 'TumorTypeSummary.xls',
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY'
                 },
                 drugs: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Description', 'Citations'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'description', 'citations'],
-                    fileName: 'Drugs.xls',
+                    fileName: 'Therapeutics.xls',
                     evidenceTypes: 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 }
             };
@@ -275,14 +275,55 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
                     if ($scope.evidenceType === 'geneType') {
-                        _.each(response, function(item) {
-                            $scope.reviewedData.geneType.body.push({
-                                gene: item.hugoSymbol,
-                                oncogene: item.oncogene,
-                                tsg: item.tsg
-                            });
+                        var variantLookupBody = _.map(response, function(item) {
+                            return {
+                                hugoSymbol: item.hugoSymbol
+                            };
                         });
-                        finishLoadingReviewedData();
+                        var geneWithVariants = {};
+                        DatabaseConnector.lookupVariants(variantLookupBody).then(function(result) {
+                            _.each(result, function(items) {
+                                var tempObj = {};
+                                _.each(items, function(item) {
+                                    if (_.isEmpty(tempObj)) {
+                                        tempObj = {
+                                            gene: item.gene.hugoSymbol,
+                                            oncogene: item.gene.oncogene,
+                                            tsg: item.gene.tsg,
+                                            truncatingMutations: false,
+                                            deletion: false,
+                                            amplification: false
+                                        };
+                                        geneWithVariants[item.gene.hugoSymbol] = true;
+                                    }
+                                    if (item.alteration === 'Truncating Mutations') {
+                                        tempObj.truncatingMutations = true;
+                                    }
+                                    if (item.alteration === 'Deletion') {
+                                        tempObj.deletion = true;
+                                    }
+                                    if (item.alteration === 'Amplification') {
+                                        tempObj.amplification = true;
+                                    }
+                                });
+                                if (!_.isEmpty(tempObj)) {
+                                    $scope.reviewedData.geneType.body.push(tempObj);
+                                }
+                            });
+                            _.each(response, function(item) {
+                                if (geneWithVariants[item.hugoSymbol] === true) {
+                                    $scope.reviewedData.geneType.body.push({
+                                        gene: item.hugoSymbol,
+                                        oncogene: item.oncogene,
+                                        tsg: item.tsg,
+                                        truncatingMutations: false,
+                                        deletion: false,
+                                        amplification: false
+                                    });
+                                }
+                            });
+                            finishLoadingReviewedData();
+                        });
                     } else if ($scope.evidenceType === 'mutationEffect') {
                         _.each(response, function (item) {
                             var flag = false;
