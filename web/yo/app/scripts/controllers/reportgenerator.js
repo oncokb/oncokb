@@ -462,4 +462,58 @@ angular.module('oncokbApp')
                     return 'Submit';
                 }
             }
+
+            $scope.validation = {
+                flag: false,
+                result: '',
+                validating: false
+            };
+            $scope.validateTruncating = function() {
+                $scope.validation = {
+                    flag: false,
+                    result: '',
+                    validating: true
+                };
+                DatabaseConnector.getReviewedData('geneType').then(function(response) {
+                    var geneTypes = {};
+                    var tempHugo = '';
+                    _.each(response, function(item) {
+                        geneTypes[item.hugoSymbol] = {
+                            oncogene: item.oncogene,
+                            tsg: item.tsg
+                        };
+                    });
+                    var variantCallBody = _.map(_.keys(geneTypes), function(hugoSymbol) {
+                        return {hugoSymbol: hugoSymbol};
+                    });
+                    DatabaseConnector.lookupVariants(variantCallBody).then(function(result) {
+                        var validationResult = [];
+                        _.each(result, function(alterations) {
+                            _.each(alterations, function(alteration) {
+                                if (alteration.alteration === 'Truncating Mutations') {
+                                    tempHugo = alteration.gene.hugoSymbol;
+                                    if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === false && geneTypes[tempHugo].oncogene === true) {
+                                        validationResult.push(tempHugo);
+                                    }
+                                }
+                            });
+                        });
+                        if (validationResult.length === 0) {
+                            $scope.validation.result = 'Yes! All genes passed the validation.';
+                            $scope.validation.flag = true;
+                        } else {
+                            $scope.validation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + validationResult.join(', ');
+                            $scope.validation.flag = false;
+                        }
+                        $scope.validation.validating = false;
+                    });
+                });
+            }
+            $scope.getValidationButtonContent = function() {
+                if ($scope.validation.validating) {
+                    return 'Validating <i class="fa fa-spinner fa-spin"></i>';
+                } else {
+                    return 'Validate';
+                }
+            }
         }]);

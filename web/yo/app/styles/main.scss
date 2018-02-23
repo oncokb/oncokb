@@ -888,3 +888,14 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   margin-right: -80px;
   margin-top:5px
 }
+
+.validResut {
+  color: green;
+}
+.invalidResut {
+  color: red;
+}
+.validationButton {
+  margin-top:-35px;
+  margin-left:800px
+}
