@@ -477,14 +477,15 @@ angular.module('oncokbApp')
                 DatabaseConnector.getReviewedData('geneType').then(function(response) {
                     var geneTypes = {};
                     var tempHugo = '';
+                    var variantCallBody = [];
                     _.each(response, function(item) {
                         geneTypes[item.hugoSymbol] = {
                             oncogene: item.oncogene,
                             tsg: item.tsg
                         };
-                    });
-                    var variantCallBody = _.map(_.keys(geneTypes), function(hugoSymbol) {
-                        return {hugoSymbol: hugoSymbol};
+                        variantCallBody.push({
+                            hugoSymbol: item.hugoSymbol
+                        });
                     });
                     DatabaseConnector.lookupVariants(variantCallBody).then(function(result) {
                         var validationResult = [];
