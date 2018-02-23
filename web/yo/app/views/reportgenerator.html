@@ -165,5 +165,14 @@
         </table>
     </div>
 
+    <hr/>
+    <h3>Are all truncating mutations curated under tumor suppressor genes? </h3>
+    <div class="validationButton">
+        <button type="button" class="btn btn-default" ng-click="validateTruncating()" ng-bind-html="getValidationButtonContent()"></button>
+    </div>
+    <h4 ng-class="{'invalidResut': !validation.flag, 'validResut': validation.flag}">
+        {{ validation.result }}
+    </h4>
+    <br/><br/>
     </div>
 </div>
