@@ -387,6 +387,17 @@ public class CacheUtils {
         return drugs;
     }
 
+    public static Drug getPersistentDrug(Drug drug) {
+        if (drug == null)
+            return null;
+
+        for (Drug persistent : drugs) {
+            if (persistent.equals(drug))
+                return persistent;
+        }
+        return null;
+    }
+
     public static void addDrug(Drug drug) {
         if (drug != null) {
             drugs.add(drug);
