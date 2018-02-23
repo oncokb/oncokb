@@ -300,7 +300,7 @@ angular.module('oncokbApp')
                                 hugoSymbol: item.hugoSymbol
                             };
                         });
-                        var geneWithVariants = [];
+                        var geneWithVariants = {};
                         DatabaseConnector.lookupVariants(variantLookupBody).then(function(result) {
                             _.each(result, function(items) {
                                 var tempObj = {};
@@ -314,7 +314,7 @@ angular.module('oncokbApp')
                                             deletion: false,
                                             amplification: false
                                         };
-                                        geneWithVariants.push(item.gene.hugoSymbol);
+                                        geneWithVariants[item.gene.hugoSymbol] = true;
                                     }
                                     if (item.alteration === 'Truncating Mutations') {
                                         tempObj.truncatingMutations = true;
@@ -331,7 +331,7 @@ angular.module('oncokbApp')
                                 }
                             });
                             _.each(response, function(item) {
-                                if (geneWithVariants.indexOf(item.hugoSymbol) === -1) {
+                                if (geneWithVariants[item.hugoSymbol] === true) {
                                     $scope.reviewedData.geneType.body.push({
                                         gene: item.hugoSymbol,
                                         oncogene: item.oncogene,
