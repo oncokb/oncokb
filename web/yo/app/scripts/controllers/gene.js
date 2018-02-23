@@ -2050,7 +2050,7 @@ angular.module('oncokbApp')
                         removeModel(type, mutation, tumor, ti, treatment, uuids);
 
                         // Update all priority if one of treatments is deleted.
-                        if (type || type === 'treatment') {
+                        if (type && type === 'treatment') {
                             $scope.updatePriority(ti.treatments);
                         }
                         ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
