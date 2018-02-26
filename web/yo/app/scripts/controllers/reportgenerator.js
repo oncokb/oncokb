@@ -311,7 +311,7 @@ angular.module('oncokbApp')
                                 }
                             });
                             _.each(response, function(item) {
-                                if (geneWithVariants[item.hugoSymbol] === true) {
+                                if (geneWithVariants[item.hugoSymbol] !== true) {
                                     $scope.reviewedData.geneType.body.push({
                                         gene: item.hugoSymbol,
                                         oncogene: item.oncogene,
