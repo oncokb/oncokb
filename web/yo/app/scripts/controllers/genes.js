@@ -172,7 +172,7 @@ angular.module('oncokbApp')
 
             $scope.saveAllGenes = function() {
                 $scope.status.saveAllGenes = false;
-                saveGene($scope.documents, 0, true, function() {
+                saveGene($scope.documents, 0, function() {
                     $scope.status.saveAllGenes = true;
                 });
             };
