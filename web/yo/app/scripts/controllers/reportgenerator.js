@@ -1,78 +1,10 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ReportgeneratorCtrl', ['$scope', 'FileUploader', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 
-        function($scope, FileUploader, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
-            function initUploader() {
-                var uploader = $scope.uploader = new FileUploader();
-
-                uploader.onWhenAddingFileFailed = function(item /* {File|FileLikeObject}*/, filter, options) {
-                    console.info('onWhenAddingFileFailed', item, filter, options);
-                };
-
-                uploader.onAfterAddingFile = function(fileItem) {
-                    console.info('onAfterAddingFile', fileItem);
-                    $scope.status = {
-                        fileSelected: false,
-                        isXLSX: false,
-                        isXML: false,
-                        rendering: true
-                    };
-                    $scope.status.fileSelected = true;
-                    $scope.fileItem = fileItem;
-
-                    if (fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-                        $scope.status.isXLSX = true;
-                    } else if (fileItem.file.type === 'text/xml') {
-                        $scope.status.isXML = true;
-                    } else {
-                        dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
-                        uploader.removeFromQueue(fileItem);
-                    }
-
-                    console.log($scope.status);
-                };
-
-                uploader.onAfterAddingAll = function(addedFileItems) {
-                    console.info('onAfterAddingAll', addedFileItems);
-                };
-                uploader.onBeforeUploadItem = function(item) {
-                    console.info('onBeforeUploadItem', item);
-                };
-                uploader.onProgressItem = function(fileItem, progress) {
-                    console.info('onProgressItem', fileItem, progress);
-                };
-                uploader.onProgressAll = function(progress) {
-                    console.info('onProgressAll', progress);
-                };
-                uploader.onSuccessItem = function(fileItem, response, status, headers) {
-                    console.info('onSuccessItem', fileItem, response, status, headers);
-                };
-                uploader.onErrorItem = function(fileItem, response, status, headers) {
-                    console.info('onErrorItem', fileItem, response, status, headers);
-                };
-                uploader.onCancelItem = function(fileItem, response, status, headers) {
-                    console.info('onCancelItem', fileItem, response, status, headers);
-                };
-                uploader.onCompleteItem = function(fileItem, response, status, headers) {
-                    console.info('onCompleteItem', fileItem, response, status, headers);
-                };
-                uploader.onCompleteAll = function() {
-                    console.info('onCompleteAll');
-                };
-            }
-
+    .controller('ReportgeneratorCtrl', ['$scope', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 
+        function($scope, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
             $scope.init = function() {
-                $scope.status = {
-                    fileSelected: false,
-                    isXLSX: false,
-                    isXML: false,
-                    rendering: false
-                };
-                initUploader();
-                $scope.resultTable = false;
                 $scope.loading = false;
-                $scope.disableButton = true;
                 var geneNames = [];
                 if (OncoKB.global.genes) {
                     storage.requireAuth(true).then(function() {
@@ -112,55 +44,7 @@ angular.module('oncokbApp')
                 scrollCollapse: true
 
             };
-            $scope.searchResults = [];
-            $scope.geneNames = [];
-            var results = [];
-            $scope.checkInputStatus = function() {
-                $scope.disableButton = true;
-                if (!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && $scope.inconclusive) {
-                    $scope.disableButton = false;
-                }
-            };
-            $scope.searchVariants = function(inputGenes, index) {
-                $scope.loading = true;
-                if (index === 0) {
-                    results = [];
-                }
-                var documents = Documents.get({title: inputGenes[index]});
-                var document = _.isArray(documents) && documents.length === 1 ? documents[0] : null;
-                if (document) {
-                    storage.getRealtimeDocument(document.id).then(function(realtime) {
-                        if (realtime && realtime.error) {
-                            console.log('did not get realtime document.');
-                        } else {
-                            var model = realtime.getModel();
-                            var geneModel = model.getRoot().get('gene');
-                            if (geneModel) {
-                                var gene = stringUtils.getGeneData(geneModel, false, false);
-                                if ($scope.inconclusive) {
-                                    _.each(gene.mutations, function(mutation) {
-                                        if (mutation.effect.value === 'Inconclusive' && mutation.oncogenic === 'Inconclusive') {
-                                            results.push({gene: gene.name, annotation: mutation.name, status: 'Inconclusive/Inconclusive'});
-                                        }
-                                    });
-                                }
-                                if (index === inputGenes.length - 1) {
-                                    $scope.searchResults = results;
-                                    $scope.resultTable = true;
-                                    $scope.loading = false;
-                                } else {
-                                    $timeout(function() {
-                                        index++;
-                                        $scope.searchVariants(inputGenes, index);
-                                    }, 200);
-                                }
-                            } else {
-                                console.log('\t\tNo gene model.');
-                            }
-                        }
-                    });
-                }
-            };
+            
             var historyResults;
             $scope.disableHistoryButton = true;
             $scope.checkHistoryInputStatus = function() {
@@ -192,7 +76,6 @@ angular.module('oncokbApp')
                             }
                             if (index === genesForHistory.length - 1) {
                                 $scope.historySearchResults = historyResults;
-                                $scope.showHistoryResultTable = true;
                                 $scope.loading = false;
                             } else {
                                 $timeout(function() {
@@ -204,6 +87,13 @@ angular.module('oncokbApp')
                     });
                 }
             };
+            $scope.getHistoryButtonContent = function() {
+                if ($scope.loading) {
+                    return 'Loading <i class="fa fa-spinner fa-spin"></i>';
+                } else {
+                    return 'Submit';
+                }
+            }
 
             $scope.reviewedDT = {};
             $scope.reviewedDT.dtOptions = {

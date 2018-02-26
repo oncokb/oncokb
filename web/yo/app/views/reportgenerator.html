@@ -1,67 +1,5 @@
 <div class="reportGenerator">
     <div class="reportGenerator" nv-file-drop="" uploader="uploader" filters="queueLimit, customFilter" ng-init="init()">
-        <h3>Select file</h3>
-
-        <div ng-show="uploader.isHTML5">
-            <!-- 3. nv-file-over uploader="link" over-class="className" -->
-            <div class="well my-drop-zone" nv-file-over="" uploader="uploader">
-                Drop your file in here. <br/>(xlsx file or quest annotated xml file only)
-            </div>
-        </div>
-        <input type="file" nv-file-select="" uploader="uploader" />
-
-        <loading ng-model="status.rendering" is-a-class="false"></loading>
-        <br/>
-        <div ng-show="!status.rendering">
-            <tool-xlsx ng-if="status.isXLSX" open="status.isXLSX" file="fileItem" rendering="status.rendering"></tool-xlsx>
-            <tool-xml ng-if="status.isXML" open="status.isXML" file="fileItem" rendering="status.rendering"></tool-xml>
-        </div>
-        <hr/>
-        <h3>Check variants by status</h3>
-        <br/>
-        <div class="row">
-            <div class="col-sm-1">Genes:</div>
-            <div class="col-sm-3">
-                <select chosen multiple
-                        data-placeholder="Enter A Gene"
-                        ng-model="inputGenes"
-                        ng-options="m as m for m in geneNames"
-                        ng-change="checkInputStatus()"
-                        class="chosen-select">
-                    <option value=""></option>
-                </select>
-            </div>
-            <div class="col-sm-3">
-                <input id="inconclusive" type="checkbox" ng-model="inconclusive" ng-change="checkInputStatus()"/>
-                <label for="inconclusive">Inconclusive/Inconclusive</label>
-            </div>
-            <div class="col-sm-1">
-                <button type="button" class="btn btn-default" ng-click="searchVariants(inputGenes, 0)" ng-disabled="disableButton"> Submit </button>
-            </div>
-            
-        </div>
-
-     <br/><br/><br/>
-    <table ng-if="resultTable" datatable="ng" class="row-border hover" dt-options="dt.dtOptions">
-        <thead>
-        <tr>
-            <th>Gene</th>
-            <th>Annotation</th>
-            <th>Status</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="x in searchResults">
-            <td><strong><a href="#/gene/{{x.gene}}" target="_blank">{{ x.gene }}</a></strong></td>
-            <td>{{ x.annotation}}</td>
-            <td>{{ x.status}}</td>
-        </tr>
-        </tbody>
-    </table>
-
-        <br/><br/><br/>
-        <loading ng-model="loading" content="Please wait, we are loading gene information."></loading>
-    <hr/>
     <h3>Review History</h3>
     <div class="row" style="margin-top:30px; margin-bottom:30px;">
         <div class="col-sm-1">Genes:</div>
@@ -80,11 +18,11 @@
             <label for="includeUUID">Include UUID</label>
         </div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-default" ng-click="searchHistory(genesForHistory, 0)" ng-disabled="disableHistoryButton"> Submit </button>
+            <button type="button" class="btn btn-default" ng-click="searchHistory(genesForHistory, 0)" ng-disabled="disableHistoryButton" ng-bind-html="getHistoryButtonContent()"></button>
         </div>
     </div>
-    <div style="margin-bottom:80px">
-        <table ng-if="showHistoryResultTable" datatable="ng" class="row-border hover" dt-options="dt.dtOptions">
+    <div style="margin-bottom:80px" ng-if="historySearchResults.length > 0">
+        <table datatable="ng" class="row-border hover" dt-options="dt.dtOptions">
             <thead>
             <tr>
                 <th>Gene</th>
@@ -135,7 +73,7 @@
             </select>
         </div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-default" ng-click="generateEvidences()" ng-bind-html="getReviewButtonContent()"></button>
+            <button type="button" class="btn btn-default" ng-click="generateEvidences()" ng-disabled="!evidenceType" ng-bind-html="getReviewButtonContent()"></button>
         </div>
         <div class="col-sm-1" ng-if="displayReviewedData">
             <button type="button" class="btn btn-default" ng-click="downloadReviewedData()"> Download </button>
@@ -164,7 +102,7 @@
             </tbody>
         </table>
     </div>
-
+    <br/><br/>
     <hr/>
     <h3>Are all truncating mutations curated under tumor suppressor genes? </h3>
     <div class="validationButton">
