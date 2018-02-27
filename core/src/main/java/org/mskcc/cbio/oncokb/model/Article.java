@@ -5,28 +5,56 @@ package org.mskcc.cbio.oncokb.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.persistence.*;
 import java.util.Objects;
 
 /**
  * @author jgao
  */
+
+@NamedQueries({
+    @NamedQuery(
+        name = "findArticleByPmid",
+        query = "select a from Article a where a.pmid=?"
+    ),
+    @NamedQuery(
+        name = "findArticleByAbstract",
+        query = "select a from Article a where a.abstractContent=?"
+    )
+})
+
+@Entity
+@Table(name = "article")
 public class Article implements java.io.Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
+
+    @Column(length = 40)
     @JsonIgnore
     private String uuid;
+
     private String pmid;
+
+    @Column(length = 1000)
     private String title;
     private String journal;
+
+    @Column(name = "pub_date")
     private String pubDate;
     private String volume;
     private String issue;
     private String pages;
     private String authors;
+
     private String elocationId;
+
+    @Column(name = "abstract_content")
     private String abstractContent;
+
+    @Column(length = 500)
     private String link;
-    private String reference;
 
     @JsonProperty("abstract")
     public String getAbstractContent() {

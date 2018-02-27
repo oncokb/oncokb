@@ -451,6 +451,21 @@ angular.module('oncokbApp')
                 }
             }
 
+            function updateEvidenceTreatmentPriorityBatch(data, success, fail) {
+                if (dataFromFile) {
+                    success('');
+                } else {
+                    DriveAnnotation
+                        .updateEvidenceTreatmentPriorityBatch(data)
+                        .success(function(data) {
+                            success(data);
+                        })
+                        .error(function() {
+                            fail();
+                        });
+                }
+            }
+
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
@@ -735,6 +750,18 @@ angular.module('oncokbApp')
                 $rootScope.model.getRoot().get('history').set('api', apiHistory);
             }
 
+            function lookupVariants(body) {
+                var deferred = $q.defer();
+                SearchVariant.lookupVariants(body)
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+
             // Public API here
             return {
                 getGeneAlterationTumorType: function(callback) {
@@ -784,6 +811,7 @@ angular.module('oncokbApp')
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,
+                updateEvidenceTreatmentPriorityBatch: updateEvidenceTreatmentPriorityBatch,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {
@@ -811,6 +839,7 @@ angular.module('oncokbApp')
                 getEvidencesByUUIDs: getEvidencesByUUIDs,
                 getPubMedArticle: getPubMedArticle,
                 getClinicalTrial: getClinicalTrial,
-                getReviewedData: getReviewedData
+                getReviewedData: getReviewedData,
+                lookupVariants: lookupVariants
             };
         }]);

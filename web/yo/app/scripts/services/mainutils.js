@@ -113,8 +113,6 @@ angular.module('oncokbApp')
                 }).join(',');
                 var mutation = model.create(OncoKB.Mutation);
                 mutation.name.setText(mutationName);
-                mutation.oncogenic_eStatus.set('obsolete', 'false');
-                mutation.shortSummary_eStatus.set('obsolete', 'false');
                 return mutation;
             }
             return null;
@@ -159,9 +157,6 @@ angular.module('oncokbApp')
                 if (_.isString(subtype)) {
                     newCancerType.subtype.setText(subtype);
                 }
-                newCancerType.cancerType_eStatus.set('obsolete', 'false');
-                newCancerType.subtype_eStatus.set('obsolete', 'false');
-                newCancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
                 return newCancerType;
             }
             return null;

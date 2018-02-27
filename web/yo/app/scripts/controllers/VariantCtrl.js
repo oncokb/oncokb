@@ -236,7 +236,7 @@ angular.module('oncokbApp')
                         'nccn_guidelines',
                         'standard_therapeutic_implications'],
                     'Clinical Trials': ['clinical_trial', 'investigational_therapeutic_implications'],
-                    'Additional Information': ['prevalence', 'prognostic_implications'],
+                    'Additional Information': [ 'prognostic_implications'],
                     'FDA Approved Drugs in Tumor Type': [],
                     'FDA Approved Drugs in Other Tumor Type': []
                 };

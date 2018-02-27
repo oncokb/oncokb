@@ -6,6 +6,7 @@
 
 # Test KIT
 KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 2B: Sorafenib;
+KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 2B: Sorafenib;
 KIT	N505I	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
 KIT	N505I	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
 KIT	N505I	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
@@ -38,9 +39,9 @@ KIT	D737N	Melanoma
 KIT	D737N	Colorectal Cancer
 KIT	D737N	Thymic Tumor
 KIT	C809G	Gastrointestinal Stromal Tumor	1: Regorafenib; 2A: Sorafenib; 2B: Imatinib; 2B: Sunitinib;
-KIT	C809G	Melanoma	2A: Imatinib; 2B: Regorafenib; 2B: Sunitinib; 2B: Sorafenib;
-KIT	C809G	Colorectal Cancer	2B: Regorafenib; 2B: Imatinib; 2B: Sunitinib; 2B: Sorafenib;
-KIT	C809G	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Regorafenib; 2B: Imatinib;
+KIT	C809G	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	C809G	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	C809G	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
 KIT	K642E	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 2B: Sorafenib;
 KIT	K642E	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
 KIT	K642E	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
@@ -51,21 +52,21 @@ KIT	K642G	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: So
 KIT	K642G	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
 KIT	V654A	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Regorafenib; 2B: Imatinib; 2B: Sorafenib;
 KIT	V654A	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
-KIT	V654A	Colorectal Cancer	2B: Sunitinib; 2B: Regorafenib; 2B: Imatinib; 2B: Sorafenib;
-KIT	V654A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Regorafenib; 2B: Imatinib;
-KIT	V654G	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Imatinib; 1: Regorafenib; 2B: Sorafenib;
+KIT	V654A	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	V654A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	V654G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 2B: Sorafenib;
 KIT	V654G	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
-KIT	V654G	Colorectal Cancer	2B: Sunitinib; 2B: Imatinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	V654G	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
 KIT	V654G	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
 KIT	T670I	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Regorafenib; 2B: Imatinib; 2B: Sorafenib;
 KIT	T670I	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
-KIT	T670I	Colorectal Cancer A	2B: Sunitinib; 2B: Regorafenib; 2B: Imatinib; 2B: Sorafenib;
-KIT	T670I	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Regorafenib; 2B: Imatinib;
-KIT	T670C	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Imatinib; 1: Regorafenib; 2B: Sorafenib;
-KIT	T670C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Sorafenib; 2B: Regorafenib;
-KIT	T670C	Colorectal Cancer	2B: Sunitinib; 2B: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
-KIT	T670C	Thymic Tumor	2A: Sorafenib; 2A: Sunitinib; 2B: Imatinib; 2B: Regorafenib;
-KIT	D816A	Gastrointestinal Stromal Tumor	4: BLU-285; 4: DCC-2618;
+KIT	T670I	Colorectal Cancer A	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	T670I	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	T670C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 2B: Sorafenib;
+KIT	T670C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	T670C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	T670C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	D816A	Gastrointestinal Stromal Tumor	4: Avapritinib; 4: DCC-2618;
 KIT	D816A	Melanoma	2A: Imatinib;
 KIT	D816A	Colorectal Cancer
 KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib;

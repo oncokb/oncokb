@@ -24,6 +24,7 @@ angular.module('oncokbApp')
                 confirmDeleteInGene: '&confirmDelete',
                 cancelDeleteInGene: '&cancelDelete',
                 getEvidenceInGene: '&getEvidence',
+                updatePriorityInGene: '&updatePriority',
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
                 rejectAddedInGene: '&rejectAdded'
@@ -211,7 +212,19 @@ angular.module('oncokbApp')
                             var historyData = [getEvidenceResult.historyData];
                             DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                if ($scope.adjustedEvidenceType === 'TREATMENT_NAME_CHANGE' && _.isFunction($scope.updatePriorityInGene)) {
+                                    $scope.updatePriorityInGene({
+                                        treatments: $scope.therapyCategory.treatments
+                                    }).then(function() {
+
+                                    }, function() {
+
+                                    }).finally(function() {
+                                        ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                    });
+                                } else {
+                                    ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                }
                             }, function(error) {
                                 console.log('fail to update to database', error);
                                 dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
@@ -308,10 +321,6 @@ angular.module('oncokbApp')
                             uuid = $scope.tumor.summary_uuid;
                             items = [{obj: $scope.tumor.summary, reviewObj: $scope.tumor.summary_review, uuid: $scope.tumor.summary_uuid}];
                             break;
-                        case 'PREVALENCE':
-                            uuid = $scope.tumor.prevalence_uuid;
-                            items = [{obj: $scope.tumor.prevalence, reviewObj: $scope.tumor.prevalence_review, uuid: $scope.tumor.prevalence_uuid}];
-                            break;
                         case 'PROGNOSTIC_IMPLICATION':
                             uuid = $scope.tumor.prognostic_uuid;
                             items = [{obj: $scope.tumor.prognostic.description, reviewObj: $scope.tumor.prognostic.description_review, uuid: $scope.tumor.prognostic.description_uuid},
@@ -321,13 +330,6 @@ angular.module('oncokbApp')
                             uuid = $scope.tumor.diagnostic_uuid;
                             items = [{obj: $scope.tumor.diagnostic.description, reviewObj: $scope.tumor.diagnostic.description_review, uuid: $scope.tumor.diagnostic.description_uuid},
                                 {obj: $scope.tumor.diagnostic.level, reviewObj: $scope.tumor.diagnostic.level_review, uuid: $scope.tumor.diagnostic.level_uuid}];
-                            break;
-                        case 'NCCN_GUIDELINES':
-                            uuid = $scope.tumor.nccn_uuid;
-                            items = [{obj: $scope.tumor.nccn.therapy, reviewObj: $scope.tumor.nccn.therapy_review, uuid: $scope.tumor.nccn.therapy_uuid},
-                                {obj: $scope.tumor.nccn.disease, reviewObj: $scope.tumor.nccn.disease_review, uuid: $scope.tumor.nccn.disease_uuid},
-                                {obj: $scope.tumor.nccn.version, reviewObj: $scope.tumor.nccn.version_review, uuid: $scope.tumor.nccn.version_uuid},
-                                {obj: $scope.tumor.nccn.description, reviewObj: $scope.tumor.nccn.description_review, uuid: $scope.tumor.nccn.description_uuid}];
                             break;
                         case 'Standard implications for sensitivity to therapy':
                         case 'Standard implications for resistance to therapy':
@@ -342,10 +344,6 @@ angular.module('oncokbApp')
                                     {obj: $scope.treatment.indication, reviewObj: $scope.treatment.indication_review, uuid: $scope.treatment.indication_uuid},
                                     {obj: $scope.treatment.description, reviewObj: $scope.treatment.description_review, uuid: $scope.treatment.description_uuid}];
                             }
-                            break;
-                        case 'CLINICAL_TRIAL':
-                            uuid = $scope.tumor.trials_uuid;
-                            items = [{reviewObj: $scope.tumor.trials_review, uuid: $scope.tumor.trials_uuid}];
                             break;
                         case 'MUTATION_NAME_CHANGE':
                             uuid = '';

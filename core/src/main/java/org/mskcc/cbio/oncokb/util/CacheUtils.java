@@ -203,6 +203,7 @@ public class CacheUtils {
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
+
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
         }
@@ -386,6 +387,23 @@ public class CacheUtils {
         return drugs;
     }
 
+    public static Drug getPersistentDrug(Drug drug) {
+        if (drug == null)
+            return null;
+
+        for (Drug persistent : drugs) {
+            if (persistent.equals(drug))
+                return persistent;
+        }
+        return null;
+    }
+
+    public static void addDrug(Drug drug) {
+        if (drug != null) {
+            drugs.add(drug);
+        }
+    }
+
     public static Set<Evidence> getAllEvidences() {
         Set<Evidence> evis = new HashSet<>();
         for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
@@ -510,14 +528,8 @@ public class CacheUtils {
         }
     }
 
-    public static void updateGene(Integer entrezGeneId) {
-        try {
-            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        GeneObservable.getInstance().update("update", entrezGeneId.toString());
-        notifyOtherServices("update", entrezGeneId);
+    public static void forceUpdateGeneAlterations(Integer entrezGeneId) {
+        alterations.remove(entrezGeneId);
     }
 
     public static void updateGene(Integer entrezGeneId, Boolean propagate) {

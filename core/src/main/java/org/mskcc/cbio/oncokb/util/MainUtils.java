@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.w3c.dom.Document;
@@ -139,6 +140,21 @@ public class MainUtils {
             }
         }
         return index == 100 ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
+    }
+
+    public static IndicatorQueryMutationEffect findHighestMutationEffectByEvidence(Set<Evidence> evidences) {
+        int index = 100;
+        IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
+        for (Evidence evidence : evidences) {
+            MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
+            int _index = PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect);
+            if (_index < index) {
+                indicatorQueryMutationEffect.setMutationEffect(mutationEffect);
+                indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
+                index = _index;
+            }
+        }
+        return indicatorQueryMutationEffect;
     }
 
     public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
@@ -399,8 +415,6 @@ public class MainUtils {
                 EvidenceType et = EvidenceType.valueOf(type);
                 evidenceTypes.add(et);
             }
-        } else {
-            return null;
         }
         return evidenceTypes;
     }
@@ -543,7 +557,7 @@ public class MainUtils {
         return variants;
     }
 
-    public static boolean containsCaseInsensitive(String s, List<String> l) {
+    public static boolean containsCaseInsensitive(String s, Set<String> l) {
         for (String string : l) {
             if (string.equalsIgnoreCase(s)) {
                 return true;
@@ -598,5 +612,21 @@ public class MainUtils {
             }
         }
         return result;
+    }
+
+    public static Citations getCitationsByEvidence(Evidence evidence) {
+        Citations citations = new Citations();
+        for (Article article : evidence.getArticles()) {
+            if (article.getPmid() != null) {
+                citations.getPmids().add(article.getPmid());
+            }
+            if (article.getAbstractContent() != null) {
+                ArticleAbstract articleAbstract = new ArticleAbstract();
+                articleAbstract.setAbstractContent(article.getAbstractContent());
+                articleAbstract.setLink(article.getLink());
+                citations.getAbstracts().add(articleAbstract);
+            }
+        }
+        return citations;
     }
 }

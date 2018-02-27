@@ -9,7 +9,7 @@ angular.module('oncokbApp')
                  config, importer, storage, Documents, users,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                  OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile) {
-            function saveGene(docs, docIndex, excludeObsolete, callback) {
+            function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
                     storage.getRealtimeDocument(fileId).then(function(realtime) {
@@ -21,7 +21,7 @@ angular.module('oncokbApp')
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, excludeObsolete, true, true, true);
+                                var geneData = stringUtils.getGeneData(gene, true, true);
                                 var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
@@ -35,20 +35,20 @@ angular.module('oncokbApp')
                                     function(result) {
                                         console.log('\t success', result);
                                         $timeout(function() {
-                                            saveGene(docs, ++docIndex, excludeObsolete, callback);
+                                            saveGene(docs, ++docIndex, callback);
                                         }, 200, false);
                                     },
                                     function(result) {
                                         console.log('\t failed', result);
                                         $timeout(function() {
-                                            saveGene(docs, ++docIndex, excludeObsolete, callback);
+                                            saveGene(docs, ++docIndex, callback);
                                         }, 200, false);
                                     }
                                 );
                             } else {
                                 console.log('\t\tNo gene model.');
                                 $timeout(function() {
-                                    saveGene(docs, ++docIndex, excludeObsolete, callback);
+                                    saveGene(docs, ++docIndex, callback);
                                 }, 200, false);
                             }
                         }
@@ -172,7 +172,7 @@ angular.module('oncokbApp')
 
             $scope.saveAllGenes = function() {
                 $scope.status.saveAllGenes = false;
-                saveGene($scope.documents, 0, true, function() {
+                saveGene($scope.documents, 0, function() {
                     $scope.status.saveAllGenes = true;
                 });
             };
@@ -1333,9 +1333,6 @@ angular.module('oncokbApp')
                                                 if (!exist) {
                                                     var cancerType = model.create(OncoKB.CancerType);
                                                     cancerType.cancerType.setText(map.name);
-                                                    cancerType.cancerType_eStatus.set('obsolete', 'false');
-                                                    cancerType.subtype_eStatus.set('obsolete', 'false');
-                                                    cancerType.oncoTreeCode_eStatus.set('obsolete', 'false');
                                                     tumor.cancerTypes.push(cancerType);
                                                 }
                                                 mappedName.push(map.name);
