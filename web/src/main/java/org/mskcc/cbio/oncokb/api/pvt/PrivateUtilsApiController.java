@@ -1,18 +1,24 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.ApiParam;
+import org.mskcc.cbio.oncokb.apiModels.MatchVariant;
+import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
+import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -23,7 +29,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<List<String>> utilsSuggestedVariantsGet() {
         HttpStatus status = HttpStatus.OK;
 
-        List<String> variants = AlterationUtils.getGeneralAlterations();
+        List<String> variants = new ArrayList<>(AlterationUtils.getGeneralVariants());
 
         return new ResponseEntity<>(variants, status);
     }
@@ -142,4 +148,81 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body) {
+        List<MatchVariantResult> results = new ArrayList<>();
+
+        for (Query query : body.getQueries()) {
+            MatchVariantResult matchVariantResult = new MatchVariantResult();
+            matchVariantResult.setQuery(query);
+            Set<MatchVariant> match = new HashSet<>();
+
+            for (MatchVariant matchVariantRequestVariant : body.getOncokbVariants()) {
+                if(query.getHugoSymbol().equals(matchVariantRequestVariant.getHugoSymbol())) {
+                    boolean isMatch = matchVariant(query.getHugoSymbol(), matchVariantRequestVariant.getAlteration(), query.getAlteration());
+                    if (isMatch) {
+                        match.add(matchVariantRequestVariant);
+                    }
+                }
+            }
+            matchVariantResult.setResult(match);
+            results.add(matchVariantResult);
+        }
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(String hugoSymbol, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
+        Map<String, Boolean> validation = new HashMap<>();
+        for (String example : examples.split(",")) {
+            validation.put(example, matchVariant(hugoSymbol, variant, example));
+        }
+        return new ResponseEntity<>(validation, HttpStatus.OK);
+    }
+
+    private boolean matchVariant(String hugoSymbol, String variant, String example) {
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        boolean isMatched = false;
+        if (gene != null) {
+            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+            boolean isGeneralAlteration = AlterationUtils.isGeneralAlterations(variant);
+
+            Alteration oncokbVariant = new Alteration();
+            oncokbVariant.setGene(gene);
+            oncokbVariant.setAlteration(variant);
+            oncokbVariant.setName(variant);
+            // Annotate OncoKB variant
+            AlterationUtils.annotateAlteration(oncokbVariant, variant);
+
+            example = example.trim();
+            Alteration exampleVariant = new Alteration();
+            exampleVariant.setGene(gene);
+            exampleVariant.setAlteration(example);
+            exampleVariant.setName(example);
+            AlterationUtils.annotateAlteration(exampleVariant, example);
+
+            LinkedHashSet<Alteration> relevantAlterations = new LinkedHashSet<>();
+            if (isGeneralAlteration) {
+                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
+
+                // If the general alteration is not annotated system, at least we need to add
+                // it into the list for mapping.
+                Alteration exactMatch = AlterationUtils.findAlteration(gene, variant);
+                if (exactMatch == null) {
+                    allAlterations.add(oncokbVariant);
+                }
+                relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, allAlterations, true);
+                for (Alteration alteration : relevantAlterations) {
+                    if (alteration.getAlteration().toLowerCase().equals(variant.toLowerCase())) {
+                        isMatched = true;
+                        break;
+                    }
+                }
+            } else {
+                relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, Collections.singleton(oncokbVariant), false);
+                isMatched = relevantAlterations.size() > 0;
+            }
+        }
+        return isMatched;
+    }
 }

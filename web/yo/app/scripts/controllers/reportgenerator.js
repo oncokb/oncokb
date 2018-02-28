@@ -1,78 +1,10 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ReportgeneratorCtrl', ['$scope', 'FileUploader', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 
-        function($scope, FileUploader, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
-            function initUploader() {
-                var uploader = $scope.uploader = new FileUploader();
-
-                uploader.onWhenAddingFileFailed = function(item /* {File|FileLikeObject}*/, filter, options) {
-                    console.info('onWhenAddingFileFailed', item, filter, options);
-                };
-
-                uploader.onAfterAddingFile = function(fileItem) {
-                    console.info('onAfterAddingFile', fileItem);
-                    $scope.status = {
-                        fileSelected: false,
-                        isXLSX: false,
-                        isXML: false,
-                        rendering: true
-                    };
-                    $scope.status.fileSelected = true;
-                    $scope.fileItem = fileItem;
-
-                    if (fileItem.file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-                        $scope.status.isXLSX = true;
-                    } else if (fileItem.file.type === 'text/xml') {
-                        $scope.status.isXML = true;
-                    } else {
-                        dialogs.error('Error', 'Do not support the type of selected file, only XLSX or XML file is supported.');
-                        uploader.removeFromQueue(fileItem);
-                    }
-
-                    console.log($scope.status);
-                };
-
-                uploader.onAfterAddingAll = function(addedFileItems) {
-                    console.info('onAfterAddingAll', addedFileItems);
-                };
-                uploader.onBeforeUploadItem = function(item) {
-                    console.info('onBeforeUploadItem', item);
-                };
-                uploader.onProgressItem = function(fileItem, progress) {
-                    console.info('onProgressItem', fileItem, progress);
-                };
-                uploader.onProgressAll = function(progress) {
-                    console.info('onProgressAll', progress);
-                };
-                uploader.onSuccessItem = function(fileItem, response, status, headers) {
-                    console.info('onSuccessItem', fileItem, response, status, headers);
-                };
-                uploader.onErrorItem = function(fileItem, response, status, headers) {
-                    console.info('onErrorItem', fileItem, response, status, headers);
-                };
-                uploader.onCancelItem = function(fileItem, response, status, headers) {
-                    console.info('onCancelItem', fileItem, response, status, headers);
-                };
-                uploader.onCompleteItem = function(fileItem, response, status, headers) {
-                    console.info('onCompleteItem', fileItem, response, status, headers);
-                };
-                uploader.onCompleteAll = function() {
-                    console.info('onCompleteAll');
-                };
-            }
-
+    .controller('ReportgeneratorCtrl', ['$scope', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 
+        function($scope, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
             $scope.init = function() {
-                $scope.status = {
-                    fileSelected: false,
-                    isXLSX: false,
-                    isXML: false,
-                    rendering: false
-                };
-                initUploader();
-                $scope.resultTable = false;
                 $scope.loading = false;
-                $scope.disableButton = true;
                 var geneNames = [];
                 if (OncoKB.global.genes) {
                     storage.requireAuth(true).then(function() {
@@ -112,75 +44,7 @@ angular.module('oncokbApp')
                 scrollCollapse: true
 
             };
-            $scope.searchResults = [];
-            $scope.geneNames = [];
-            var results = [];
-            $scope.checkInputStatus = function() {
-                $scope.disableButton = true;
-                if (!_.isUndefined($scope.inputGenes) && $scope.inputGenes.length > 0 && ($scope.redHand || $scope.obsolete || $scope.inconclusive)) {
-                    $scope.disableButton = false;
-                }
-            };
-            $scope.searchVariants = function(inputGenes, index) {
-                $scope.loading = true;
-                if (index === 0) {
-                    results = [];
-                }
-                var documents = Documents.get({title: inputGenes[index]});
-                var document = _.isArray(documents) && documents.length === 1 ? documents[0] : null;
-                if (document) {
-                    storage.getRealtimeDocument(document.id).then(function(realtime) {
-                        if (realtime && realtime.error) {
-                            console.log('did not get realtime document.');
-                        } else {
-                            var model = realtime.getModel();
-                            var geneModel = model.getRoot().get('gene');
-                            if (geneModel) {
-                                var gene = stringUtils.getGeneData(geneModel, false, false, false);
-                                if ($scope.redHand) {
-                                    _.each(gene.mutations, function(mutation) {
-                                        if (mutation.oncogenic_eStatus.curated === false) {
-                                            results.push({gene: gene.name, annotation: mutation.name, status: 'Red Hand'});
-                                        }
-                                    });
-                                }
-                                if ($scope.obsolete) {
-                                    if (gene.summary_eStatus.obsolete === 'true') {
-                                        results.push({gene: gene.name, annotation: 'summary', status: 'obsolete'});
-                                    }
-                                    if (gene.background_eStatus.obsolete === 'true') {
-                                        results.push({gene: gene.name, annotation: 'background', status: 'obsolete'});
-                                    }
-                                    _.each(gene.mutations, function(mutation) {
-                                        if (mutation.name_eStatus.obsolete === 'true') {
-                                            results.push({gene: gene.name, annotation: mutation.name, status: 'obsolete'});
-                                        }
-                                    });
-                                }
-                                if ($scope.inconclusive) {
-                                    _.each(gene.mutations, function(mutation) {
-                                        if (mutation.effect.value === 'Inconclusive' && mutation.oncogenic === 'Inconclusive') {
-                                            results.push({gene: gene.name, annotation: mutation.name, status: 'Inconclusive/Inconclusive'});
-                                        }
-                                    });
-                                }
-                                if (index === inputGenes.length - 1) {
-                                    $scope.searchResults = results;
-                                    $scope.resultTable = true;
-                                    $scope.loading = false;
-                                } else {
-                                    $timeout(function() {
-                                        index++;
-                                        $scope.searchVariants(inputGenes, index);
-                                    }, 200);
-                                }
-                            } else {
-                                console.log('\t\tNo gene model.');
-                            }
-                        }
-                    });
-                }
-            };
+            
             var historyResults;
             $scope.disableHistoryButton = true;
             $scope.checkHistoryInputStatus = function() {
@@ -212,7 +76,6 @@ angular.module('oncokbApp')
                             }
                             if (index === genesForHistory.length - 1) {
                                 $scope.historySearchResults = historyResults;
-                                $scope.showHistoryResultTable = true;
                                 $scope.loading = false;
                             } else {
                                 $timeout(function() {
@@ -224,6 +87,13 @@ angular.module('oncokbApp')
                     });
                 }
             };
+            $scope.getHistoryButtonContent = function() {
+                if ($scope.loading) {
+                    return 'Loading <i class="fa fa-spinner fa-spin"></i>';
+                } else {
+                    return 'Submit';
+                }
+            }
 
             $scope.reviewedDT = {};
             $scope.reviewedDT.dtOptions = {
@@ -234,24 +104,24 @@ angular.module('oncokbApp')
             };
             $scope.evidenceType = '';
             $scope.evidenceTypes = [{
-                label: 'Gene Type',
+                label: 'Oncogene/Tumor Suppressor',
                 value: 'geneType'
             }, {
                 label: 'Mutation Effect',
                 value: 'mutationEffect'
             }, {
-                label: 'Tumor Summary',
+                label: 'Tumor Type Summary',
                 value: 'tumorSummary'
             }, {
-                label: 'Drugs',
+                label: 'Therapeutics (All Levels)',
                 value: 'drugs'
             }];
             $scope.reviewedData = {
                 geneType: {
-                    header: ['Gene', 'Oncogene', 'Tumor Suppressor'],
+                    header: ['Gene', 'Oncogene', 'Tumor Suppressor', 'Truncating Mutations', 'Deletion', 'Amplification'],
                     body: [],
-                    keys: ['gene', 'oncogene', 'tsg'],
-                    fileName: 'GeneType.xls',
+                    keys: ['gene', 'oncogene', 'tsg', 'truncatingMutations', 'deletion', 'amplification'],
+                    fileName: 'Onc/TS.xls',
                     evidenceTypes: 'geneType'
                 },
                 mutationEffect: {
@@ -265,14 +135,14 @@ angular.module('oncokbApp')
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'tumorSummary'],
-                    fileName: 'TumorSummary.xls',
+                    fileName: 'TumorTypeSummary.xls',
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY'
                 },
                 drugs: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Description', 'Citations'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'description', 'citations'],
-                    fileName: 'Drugs.xls',
+                    fileName: 'Therapeutics.xls',
                     evidenceTypes: 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 }
             };
@@ -295,14 +165,55 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
                     if ($scope.evidenceType === 'geneType') {
-                        _.each(response, function(item) {
-                            $scope.reviewedData.geneType.body.push({
-                                gene: item.hugoSymbol,
-                                oncogene: item.oncogene,
-                                tsg: item.tsg
-                            });
+                        var variantLookupBody = _.map(response, function(item) {
+                            return {
+                                hugoSymbol: item.hugoSymbol
+                            };
                         });
-                        finishLoadingReviewedData();
+                        var geneWithVariants = {};
+                        DatabaseConnector.lookupVariants(variantLookupBody).then(function(result) {
+                            _.each(result, function(items) {
+                                var tempObj = {};
+                                _.each(items, function(item) {
+                                    if (_.isEmpty(tempObj)) {
+                                        tempObj = {
+                                            gene: item.gene.hugoSymbol,
+                                            oncogene: item.gene.oncogene,
+                                            tsg: item.gene.tsg,
+                                            truncatingMutations: false,
+                                            deletion: false,
+                                            amplification: false
+                                        };
+                                        geneWithVariants[item.gene.hugoSymbol] = true;
+                                    }
+                                    if (item.alteration === 'Truncating Mutations') {
+                                        tempObj.truncatingMutations = true;
+                                    }
+                                    if (item.alteration === 'Deletion') {
+                                        tempObj.deletion = true;
+                                    }
+                                    if (item.alteration === 'Amplification') {
+                                        tempObj.amplification = true;
+                                    }
+                                });
+                                if (!_.isEmpty(tempObj)) {
+                                    $scope.reviewedData.geneType.body.push(tempObj);
+                                }
+                            });
+                            _.each(response, function(item) {
+                                if (geneWithVariants[item.hugoSymbol] !== true) {
+                                    $scope.reviewedData.geneType.body.push({
+                                        gene: item.hugoSymbol,
+                                        oncogene: item.oncogene,
+                                        tsg: item.tsg,
+                                        truncatingMutations: false,
+                                        deletion: false,
+                                        amplification: false
+                                    });
+                                }
+                            });
+                            finishLoadingReviewedData();
+                        });
                     } else if ($scope.evidenceType === 'mutationEffect') {
                         _.each(response, function (item) {
                             var flag = false;
@@ -439,6 +350,61 @@ angular.module('oncokbApp')
                     return 'Loading <i class="fa fa-spinner fa-spin"></i>';
                 } else {
                     return 'Submit';
+                }
+            }
+
+            $scope.validation = {
+                flag: false,
+                result: '',
+                validating: false
+            };
+            $scope.validateTruncating = function() {
+                $scope.validation = {
+                    flag: false,
+                    result: '',
+                    validating: true
+                };
+                DatabaseConnector.getReviewedData('geneType').then(function(response) {
+                    var geneTypes = {};
+                    var tempHugo = '';
+                    var variantCallBody = [];
+                    _.each(response, function(item) {
+                        geneTypes[item.hugoSymbol] = {
+                            oncogene: item.oncogene,
+                            tsg: item.tsg
+                        };
+                        variantCallBody.push({
+                            hugoSymbol: item.hugoSymbol
+                        });
+                    });
+                    DatabaseConnector.lookupVariants(variantCallBody).then(function(result) {
+                        var validationResult = [];
+                        _.each(result, function(alterations) {
+                            _.each(alterations, function(alteration) {
+                                if (alteration.alteration === 'Truncating Mutations') {
+                                    tempHugo = alteration.gene.hugoSymbol;
+                                    if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === false && geneTypes[tempHugo].oncogene === true) {
+                                        validationResult.push(tempHugo);
+                                    }
+                                }
+                            });
+                        });
+                        if (validationResult.length === 0) {
+                            $scope.validation.result = 'Yes! All genes passed the validation.';
+                            $scope.validation.flag = true;
+                        } else {
+                            $scope.validation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + validationResult.join(', ');
+                            $scope.validation.flag = false;
+                        }
+                        $scope.validation.validating = false;
+                    });
+                });
+            }
+            $scope.getValidationButtonContent = function() {
+                if ($scope.validation.validating) {
+                    return 'Validating <i class="fa fa-spinner fa-spin"></i>';
+                } else {
+                    return 'Validate';
                 }
             }
         }]);

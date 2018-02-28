@@ -6,20 +6,63 @@
 package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import javax.persistence.*;
 
 /**
- * @author jiaojiao
+ * @author jiaojiao, Hongxin Zhang
  */
+
+@NamedQueries({
+    @NamedQuery(
+        name = "findPortalAlterationCountByGene",
+        query = "select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.id and pa.gene=? group by pa.cancerStudy"
+    ),
+    @NamedQuery(
+        name = "findPortalAlterationCount",
+        query = "select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy"
+    ),
+    @NamedQuery(
+        name = "findMutationMapperData",
+        query = "select distinct pa from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.id and pa.gene=?"
+    )
+})
+
+@Entity
+@Table(name = "portal_alteration")
 public class PortalAlteration {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
+
+    @Column(name = "cancer_type", length = 300, nullable = false)
     private String cancerType;
+
+    @Column(name = "cancer_study", length = 300, nullable = false)
     private String cancerStudy;
+
+    @Column(name = "sample_id")
     private String sampleId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @JoinColumn(name = "entrez_gene_id")
     private Gene gene;
+
+    @Column(name = "protein_change")
     private String proteinChange;
+
+    @Column(name = "protein_start")
     private Integer proteinStartPosition;
+
+    @Column(name = "protein_end")
     private Integer proteinEndPosition;
+
+    @Column(name = "alteration_type", length = 300)
     private String alterationType;
 
     public PortalAlteration() {

@@ -3,8 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.bo.*;
-import org.mskcc.cbio.oncokb.importer.ClinicalTrialsImporter;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -270,10 +271,7 @@ public class EvidenceUtils {
         List<Evidence> evidences = new ArrayList<>();
 
         if (CacheUtils.isEnabled()) {
-            Set<Evidence> geneEvidences = new HashSet<>();
-            for (Alteration alteration : alterations) {
-                geneEvidences.addAll(CacheUtils.getEvidences(alteration.getGene()));
-            }
+            Set<Evidence> geneEvidences = getAllEvidencesByAlterationsGenes(alterations);
             for (Evidence evidence : geneEvidences) {
                 if (!Collections.disjoint(evidence.getAlterations(), alterations)) {
                     evidences.add(evidence);
@@ -385,39 +383,42 @@ public class EvidenceUtils {
 
         if (evidenceQuery.getGene() != null) {
             for (Evidence evidence : evidences) {
-                Evidence tempEvidence = new Evidence(evidence, evidence.getId());
-                if (tempEvidence.getGene().equals(evidenceQuery.getGene())) {
+
+                if (evidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
-                    if (tempEvidence.getAlterations().isEmpty()) {
-                        filtered.add(tempEvidence);
+                    if (evidence.getAlterations().isEmpty()) {
+                        filtered.add(evidence);
                     } else {
-                        if (!Collections.disjoint(tempEvidence.getAlterations(), evidenceQuery.getAlterations())) {
-                            if (tempEvidence.getOncoTreeType() == null) {
-                                if (tempEvidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
-                                    if (tempEvidence.getDescription() == null) {
+                        boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
+                        if (hasjointed) {
+                            if (evidence.getOncoTreeType() == null) {
+                                if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
+                                    if (evidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
-                                        alterations.addAll(tempEvidence.getAlterations());
+                                        alterations.addAll(evidence.getAlterations());
 //                                        tempEvidence.setDescription(SummaryUtils.variantSummary(Collections.singleton(tempEvidence.getGene()), alterations, evidenceQuery.getQueryAlteration(), Collections.singleton(tempEvidence.getTumorType()), evidenceQuery.getQueryTumorType()));
                                     }
                                 }
-                                filtered.add(tempEvidence);
+                                filtered.add(evidence);
                             } else {
                                 List<TumorType> tumorType = new ArrayList<>();
 
-                                if (tempEvidence.getOncoTreeType() != null) {
-                                    tumorType.add(tempEvidence.getOncoTreeType());
+                                if (evidence.getOncoTreeType() != null) {
+                                    tumorType.add(evidence.getOncoTreeType());
                                 }
 
-                                if (!Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType)) {
-                                    filtered.add(tempEvidence);
+                                hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
+                                if (hasjointed) {
+                                    filtered.add(evidence);
                                 } else {
-                                    if (tempEvidence.getLevelOfEvidence() != null && tempEvidence.getPropagation() != null) {
-                                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tempEvidence.getPropagation());
+                                    if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
+                                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
 
                                         if (propagationLevel != null) {
                                             if (evidenceQuery.getLevelOfEvidences() == null
                                                 || evidenceQuery.getLevelOfEvidences().size() == 0
                                                 || evidenceQuery.getLevelOfEvidences().contains(propagationLevel)) {
+                                                Evidence tempEvidence = new Evidence(evidence, evidence.getId());
                                                 tempEvidence.setLevelOfEvidence(propagationLevel);
                                                 filtered.add(tempEvidence);
                                             }
@@ -627,7 +628,7 @@ public class EvidenceUtils {
 
         for (Evidence evidence : evidences) {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
-                String treatmentsName = TreatmentUtils.getTreatmentName(evidence.getTreatments(), true);
+                String treatmentsName = TreatmentUtils.getTreatmentName(new HashSet<>(evidence.getTreatments()));
                 if (!maps.containsKey(treatmentsName)) {
                     maps.put(treatmentsName, new HashSet<Evidence>());
                 }
@@ -878,6 +879,10 @@ public class EvidenceUtils {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
             }
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences());
+            if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
+                CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
+            }
         }
         return evidenceQueries;
     }
@@ -918,32 +923,13 @@ public class EvidenceUtils {
             evidence.setAlterations(alterations);
         }
 
-        Set<ClinicalTrial> trials = evidence.getClinicalTrials();
         Set<Article> articles = evidence.getArticles();
-        Set<Treatment> treatments = evidence.getTreatments();
-        Set<NccnGuideline> nccnGuidelines = evidence.getNccnGuidelines();
 
         if (evidence.getSubtype() != null && evidence.getSubtype().isEmpty()) {
             evidence.setSubtype(null);
         }
         if (evidence.getCancerType() != null && evidence.getCancerType().isEmpty()) {
             evidence.setCancerType(null);
-        }
-        if (trials != null && !trials.isEmpty()) {
-            ClinicalTrialBo clinicalTrialBo = ApplicationContextSingleton.getClinicalTrialBo();
-            Set<ClinicalTrial> annotatedTrials = new HashSet<>();
-            Set<String> nctIds = new HashSet<String>();
-            for (ClinicalTrial trial : trials) {
-                String tempNctID = trial.getNctId();
-                ClinicalTrial tempCT = clinicalTrialBo.findClinicalTrialByNctId(tempNctID);
-                if (tempCT == null) {
-                    nctIds.add(tempNctID);
-                } else {
-                    annotatedTrials.add(tempCT);
-                }
-            }
-            annotatedTrials.addAll(ClinicalTrialsImporter.importTrials(nctIds));
-            evidence.setClinicalTrials(annotatedTrials);
         }
         if (articles != null && !articles.isEmpty()) {
             ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
@@ -972,42 +958,6 @@ public class EvidenceUtils {
                 }
             }
             evidence.setArticles(annotatedArticles);
-        }
-
-        if (treatments != null && !treatments.isEmpty()) {
-            DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-            TreatmentBo treatmentBo = ApplicationContextSingleton.getTreatmentBo();
-            for (Treatment treatment : treatments) {
-                Set<Drug> drugs = treatment.getDrugs();
-                if (drugs != null && !drugs.isEmpty()) {
-                    Set<Drug> drugsFromDB = new HashSet<>();
-                    for (Drug drug : drugs) {
-                        Drug tempDrug = drugBo.findDrugByName(drug.getDrugName());
-                        if (tempDrug == null) {
-                            drugBo.save(drug);
-                            drugsFromDB.add(drug);
-                        } else {
-                            drugsFromDB.add(tempDrug);
-                        }
-                    }
-                    treatment.setDrugs(drugsFromDB);
-                }
-                treatmentBo.saveOrUpdate(treatment);
-            }
-        }
-        if (nccnGuidelines != null && !nccnGuidelines.isEmpty()) {
-            NccnGuidelineBo nccnGuidelineBo = ApplicationContextSingleton.getNccnGuidelineBo();
-            Set<NccnGuideline> nccnFromDB = new HashSet<>();
-            for (NccnGuideline nccnGuideline : nccnGuidelines) {
-                NccnGuideline tempNccnGuideline = nccnGuidelineBo.findNccnGuideline(nccnGuideline.getTherapy(), nccnGuideline.getDisease(), nccnGuideline.getVersion(), nccnGuideline.getPages());
-                if (tempNccnGuideline == null) {
-                    nccnGuidelineBo.saveOrUpdate(nccnGuideline);
-                    nccnFromDB.add(nccnGuideline);
-                } else {
-                    nccnFromDB.add(tempNccnGuideline);
-                }
-            }
-            evidence.setNccnGuidelines(nccnFromDB);
         }
     }
 
@@ -1044,6 +994,21 @@ public class EvidenceUtils {
 
         if (isDesc) {
             Collections.reverse(evidences);
+        }
+        return evidences;
+    }
+
+    public static Set<Evidence> getAllEvidencesByAlterationsGenes(Collection<Alteration> alterations) {
+        Set<Gene> genes = new HashSet<>();
+        Set<Evidence> evidences = new HashSet<>();
+        for (Alteration alteration : alterations) {
+            genes.add(alteration.getGene());
+        }
+        if (genes.size() == 1) {
+            return CacheUtils.getEvidences(genes.iterator().next());
+        }
+        for (Gene gene : genes) {
+            evidences.addAll(CacheUtils.getEvidences(gene));
         }
         return evidences;
     }

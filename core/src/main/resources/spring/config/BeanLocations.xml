@@ -6,15 +6,13 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<!-- Hibernate Configuration -->
 	<import resource="../beans/DataSource.xml"/>
 	<import resource="../beans/Hibernate.xml"/>
-	
+
 	<!-- Beans Declaration -->
 	<import resource="../beans/Gene.xml"/>
 	<import resource="../beans/VariantConsequence.xml"/>
 	<import resource="../beans/Drug.xml"/>
 	<import resource="../beans/Alteration.xml"/>
 	<import resource="../beans/Article.xml"/>
-	<import resource="../beans/ClinicalTrial.xml"/>
-	<import resource="../beans/NccnGuideline.xml"/>
 	<import resource="../beans/Treatment.xml"/>
 	<import resource="../beans/Evidence.xml"/>
 	<import resource="../beans/PortalAlteration.xml"/>

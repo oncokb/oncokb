@@ -4,16 +4,15 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>0.1.5-SNAPSHOT</version>
+        <version>0.2.1</version>
     </parent>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.2.1</version>
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
     <name>OncoKB Core</name>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-		<spring.version>3.2.10.RELEASE</spring.version>
     </properties>
 
     <dependencies>
@@ -46,12 +45,6 @@
 		</dependency>
 
         <!-- jackson -->
-        <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.4.2</version>
-        </dependency>
-
         <dependency>
                 <groupId>dom4j</groupId>
                 <artifactId>dom4j</artifactId>

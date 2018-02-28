@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.http.HttpMethod;
@@ -12,8 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.mskcc.cbio.oncokb.util.MainUtils.stringToEvidenceTypes;
 
 /**
  * @author jgao
@@ -41,18 +45,23 @@ public class IndicatorController {
         @RequestParam(value = "levels", required = false) String levels,
         @RequestParam(value = "queryType", required = false) String queryType,
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly,
+        @RequestParam(value = "fields", required = false) String fields,
         @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
         Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
-        return IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly, null);
+
+        return JsonResultFactory.getIndicatorQueryResp(resp, fields);
     }
 
 //    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     List<IndicatorQueryResp> getResult(
-        @RequestBody EvidenceQueries body) {
+        @RequestBody EvidenceQueries body,
+        @RequestParam(value = "fields", required = false) String fields
+    ) {
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -65,9 +74,10 @@ public class IndicatorController {
         for (Query query : body.getQueries()) {
             result.add(IndicatorUtils.processQuery(query, null,
                 body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
-                source, body.getHighestLevelOnly()));
+                source, body.getHighestLevelOnly(),  new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
         }
-        return result;
+
+        return JsonResultFactory.getIndicatorQueryResp(result, fields);
     }
 
 

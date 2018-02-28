@@ -26,13 +26,6 @@ public final class AlterationUtils {
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-    private final static String[] inferredAlts = {"Oncogenic Mutations", "Gain-of-function Mutations",
-        "Loss-of-function Mutations", "Switch-of-function Mutations"};
-    private final static List<String> inferredAlterations = Arrays.asList(inferredAlts);
-
-    private final static String[] structureAlts = {"Truncating Mutations", "Fusions", "Amplification", "Deletion"};
-    private final static List<String> structureAlterations = Arrays.asList(structureAlts);
-
     private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
@@ -469,7 +462,7 @@ public final class AlterationUtils {
             String name = alteration.getAlteration();
             if (name != null) {
                 Boolean contain = false;
-                for (String inferredAlt : inferredAlterations) {
+                for (String inferredAlt : getInferredMutations()) {
                     if (inferredAlt.equalsIgnoreCase(name)) {
                         contain = true;
                     }
@@ -485,7 +478,7 @@ public final class AlterationUtils {
     public static Boolean isInferredAlterations(String alteration) {
         Boolean isInferredAlt = false;
         if (alteration != null) {
-            for (String alt : inferredAlterations) {
+            for (String alt : getInferredMutations()) {
                 if (alteration.equalsIgnoreCase(alt)) {
                     isInferredAlt = true;
                     break;
@@ -501,7 +494,7 @@ public final class AlterationUtils {
             String lowerCaseAlteration = alteration.trim().toLowerCase();
             if (lowerCaseAlteration.startsWith("likely")) {
                 alteration = alteration.replaceAll("(?i)likely", "").trim();
-                for (String alt : inferredAlterations) {
+                for (String alt : getInferredMutations()) {
                     if (alteration.equalsIgnoreCase(alt)) {
                         isLikelyInferredAlt = true;
                         break;
@@ -562,7 +555,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, fullAlterations, true);
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -576,7 +569,7 @@ public final class AlterationUtils {
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(alt, fullAlterations, true);
                 if (!alts.isEmpty()) {
                     alterations.addAll(alts);
                 }
@@ -592,7 +585,7 @@ public final class AlterationUtils {
             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
             Alteration revertFusion = getRevertFusions(alt);
             if (revertFusion != null) {
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, new ArrayList<>(fullAlterations));
+                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, fullAlterations, true);
                 if (alts != null) {
                     alterations.addAll(alts);
                 }
@@ -602,21 +595,22 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getAlleleAlterations(Alteration alteration) {
-        List<Alteration> alterations = new ArrayList<>();
+        return getAlleleAlterationsSub(alteration, getAllAlterations(alteration.getGene()));
+    }
 
+    public static List<Alteration> getAlleleAlterations(Alteration alteration, Set<Alteration> fullAlterations) {
+        return getAlleleAlterationsSub(alteration, fullAlterations);
+    }
+
+    private static List<Alteration> getAlleleAlterationsSub(Alteration alteration, Set<Alteration> fullAlterations) {
         if (alteration == null || alteration.getConsequence() == null ||
             !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
-            return alterations;
-        }
-        if (CacheUtils.isEnabled()) {
-            alterations = new ArrayList<>(CacheUtils.getAlterations(alteration.getGene().getEntrezGeneId()));
-        } else {
-            alterations = alterationBo.findAlterationsByGene(Collections.singleton(alteration.getGene()));
+            return new ArrayList<>();
         }
 
         List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
-            alteration.getProteinEnd(), alterations);
+            alteration.getProteinEnd(), fullAlterations);
 
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
@@ -790,24 +784,31 @@ public final class AlterationUtils {
         return isOncogenic;
     }
 
-    public static Boolean hasImportantCuratedOncogenicity(Alteration alteration) {
+    public static Boolean hasImportantCuratedOncogenicity(Set<Oncogenicity> oncogenicities) {
         Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
         curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+        return !Collections.disjoint(curatedOncogenicities, oncogenicities);
+    }
+
+    public static Boolean hasOncogenic(Set<Oncogenicity> oncogenicities) {
+        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
+        curatedOncogenicities.add(Oncogenicity.YES);
+        curatedOncogenicities.add(Oncogenicity.LIKELY);
+        return !Collections.disjoint(curatedOncogenicities, oncogenicities);
+    }
+
+    public static Set<Oncogenicity> getCuratedOncogenicity(Alteration alteration) {
+        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
-        Boolean isImportantCuratedOcnogenicity = false;
 
         for (Evidence evidence : oncogenicEvs) {
-            Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
-            if (oncogenicity != null && curatedOncogenicities.contains(oncogenicity)) {
-                isImportantCuratedOcnogenicity = true;
-                break;
-            }
+            curatedOncogenicities.add(Oncogenicity.getByEvidence(evidence));
         }
-        return isImportantCuratedOcnogenicity;
+        return curatedOncogenicities;
     }
 
     public static Set<Alteration> getOncogenicMutations(Alteration alteration) {
@@ -819,25 +820,63 @@ public final class AlterationUtils {
         return oncogenicMutations;
     }
 
-    public static List<String> getGeneralAlterations() {
-        List<String> suggestedAlterations = new ArrayList<>();
-        suggestedAlterations.addAll(inferredAlterations);
-        suggestedAlterations.addAll(structureAlterations);
-        return suggestedAlterations;
+    public static Set<String> getGeneralVariants() {
+        Set<String> variants = new HashSet<>();
+        variants.addAll(getInferredMutations());
+        variants.addAll(getStructuralAlterations());
+        variants.addAll(getSpecialVariant());
+        return variants;
+    }
+
+    public static Set<String> getInferredMutations() {
+        Set<String> variants = new HashSet<>();
+        for (InferredMutation inferredMutation : InferredMutation.values()) {
+            variants.add(inferredMutation.getVariant());
+        }
+        return variants;
+    }
+
+    public static Set<String> getStructuralAlterations() {
+        Set<String> variants = new HashSet<>();
+        for (StructuralAlteration structuralAlteration : StructuralAlteration.values()) {
+            variants.add(structuralAlteration.getVariant());
+        }
+        return variants;
+    }
+
+    private static Set<String> getSpecialVariant() {
+        Set<String> variants = new HashSet<>();
+        for (SpecialVariant variant : SpecialVariant.values()) {
+            variants.add(variant.getVariant());
+        }
+        return variants;
+    }
+
+
+    public static boolean isGeneralAlterations(String variant) {
+        boolean is = false;
+        Set<String> generalAlterations = getGeneralVariants();
+        for (String generalAlteration : generalAlterations) {
+            if (generalAlteration.toLowerCase().equals(variant.toLowerCase())) {
+                is = true;
+                break;
+            }
+        }
+        return is;
     }
 
     public static Boolean isGeneralAlterations(String mutationStr, Boolean exactMatch) {
         exactMatch = exactMatch || false;
         if (exactMatch) {
-            return MainUtils.containsCaseInsensitive(mutationStr, AlterationUtils.getGeneralAlterations());
-        } else if (stringContainsItemFromList(mutationStr, getGeneralAlterations())
-            && itemFromListAtEndString(mutationStr, getGeneralAlterations())) {
+            return MainUtils.containsCaseInsensitive(mutationStr, getGeneralVariants());
+        } else if (stringContainsItemFromSet(mutationStr, getGeneralVariants())
+            && itemFromSetAtEndString(mutationStr, getGeneralVariants())) {
             return true;
         }
         return false;
     }
 
-    private static boolean stringContainsItemFromList(String inputString, List<String> items) {
+    private static boolean stringContainsItemFromSet(String inputString, Set<String> items) {
         for (String item : items) {
             if (StringUtils.containsIgnoreCase(inputString, item)) {
                 return true;
@@ -846,7 +885,7 @@ public final class AlterationUtils {
         return false;
     }
 
-    private static boolean itemFromListAtEndString(String inputString, List<String> items) {
+    private static boolean itemFromSetAtEndString(String inputString, Set<String> items) {
         for (String item : items) {
             if (StringUtils.endsWithIgnoreCase(inputString, item)) {
                 return true;

@@ -28,7 +28,7 @@ angular.module('oncokbApp')
                         modifiedCurator: {},
                         modifiedMainType: '',
                         modifiedSubType: {},
-                        sectionList: ['Mutation Effect', 'Prevalence', 'Prognostic implications', 'NCCN guidelines', 'Standard sensitivity', 'Standard resistance', 'Investigational sensitivity', 'Investigational resistance'],
+                        sectionList: ['Mutation Effect', 'Prognostic implications', 'Standard sensitivity', 'Standard resistance', 'Investigational sensitivity', 'Investigational resistance'],
                         modifiedSection: '',
                         mainTypes: [],
                         subTypes: [],

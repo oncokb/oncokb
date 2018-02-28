@@ -4,24 +4,54 @@ package org.mskcc.cbio.oncokb.model;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author jgao
+ * @author jgao, Hongxin ZHang
  */
+
+@NamedQueries({
+    @NamedQuery(
+        name = "findGeneByHugoSymbol",
+        query = "select g from Gene g where g.hugoSymbol=?"
+    ),
+    @NamedQuery(
+        name = "findGenesByAlias",
+        query = "select g from Gene g join g.geneAliases ga where ga=?"
+    )
+})
+
+@Entity
+@Table(name = "gene")
 public class Gene implements Serializable {
 
-    private int entrezGeneId;
+    @Id
+    @Column(name = "entrez_gene_id")
+    private Integer entrezGeneId;
+
+    @Column(name = "hugo_symbol", length = 50, unique = true)
     private String hugoSymbol;
+
+    @Column(length = 500)
     private String name;
+
+    @Column()
     @ApiModelProperty(value = "tumorSuppressorGene")
     private Boolean TSG;
     private Boolean oncogene;
+
+    @Column(length = 100)
     private String curatedIsoform;
+
+    @Column(length = 100)
     private String curatedRefSeq;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "gene_alias", joinColumns = @JoinColumn(name = "entrez_gene_id", nullable = false))
+    @Column(name = "alias")
     private Set<String> geneAliases = new HashSet<String>(0);
 
     public Gene() {
@@ -42,12 +72,12 @@ public class Gene implements Serializable {
     }
 
 
-    public int getEntrezGeneId() {
+    public Integer getEntrezGeneId() {
         return this.entrezGeneId;
     }
 
 
-    public void setEntrezGeneId(int entrezGeneId) {
+    public void setEntrezGeneId(Integer entrezGeneId) {
         this.entrezGeneId = entrezGeneId;
     }
 
@@ -110,25 +140,21 @@ public class Gene implements Serializable {
         this.curatedRefSeq = curatedRefSeq;
     }
 
+    @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + this.entrezGeneId;
-        return hash;
+        int result = getEntrezGeneId() != null ? getEntrezGeneId().hashCode() : 0;
+        result = 31 * result + (getHugoSymbol() != null ? getHugoSymbol().hashCode() : 0);
+        return result;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Gene)) return false;
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Gene other = (Gene) obj;
-        if (this.entrezGeneId != other.entrezGeneId) {
-            return false;
-        }
-        return true;
+        Gene gene = (Gene) o;
+
+        return getEntrezGeneId() != null ? getEntrezGeneId().equals(gene.getEntrezGeneId()) : gene.getEntrezGeneId() == null;
     }
 
     @Override
@@ -136,7 +162,5 @@ public class Gene implements Serializable {
         return hugoSymbol;
     }
 
-
 }
-
 

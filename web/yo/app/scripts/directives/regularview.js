@@ -50,33 +50,6 @@ angular.module('oncokbApp')
                 }
                 return false;
             };
-            $scope.generateNCCN = function(nccn) {
-                var str = '<i>';
-                str += (nccn.hasOwnProperty('therapy') && angular.isString(nccn.therapy)) ? ('Therapy: ' + nccn.therapy) : '';
-                str += (nccn.hasOwnProperty('disease') && angular.isString(nccn.disease)) ? ('Disease: ' + nccn.disease) : '';
-                str += (nccn.hasOwnProperty('version') && angular.isString(nccn.version)) ? (' Version: ' + nccn.version) : '';
-
-                str += '</i>';
-                str += (nccn.hasOwnProperty('description') && angular.isString(nccn.description)) ? ('<br>' + FindRegex.get(nccn.description) + '<br/>') : '';
-
-                return str;
-            };
-            $scope.generateTrial = function(trial) {
-                var str = '';
-
-                if (typeof $scope.isCollapsed[trial.trial_id] === 'undefined') {
-                    $scope.isCollapsed[trial.trial_id] = {
-                        purpose: true,
-                        eligibilityCriteria: true
-                    };
-                }
-
-                str += trial.hasOwnProperty('trial_id') ? ('TRIAL ID: ' + FindRegex.get(trial.trial_id) + (trial.hasOwnProperty('phase') ? (' / ' + trial.phase) : '') + '<br/>') : '';
-                str += trial.hasOwnProperty('title') ? ('TITLE: ' + trial.title + '<br/>') : '';
-
-                // str += trial.hasOwnProperty('description')?('<br>' + FindRegex.get(trial.description) + '<br/>'):'';
-                return str;
-            };
 
             $scope.getCollapseIcon = function(trial, attr) {
                 if (typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr]) {

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Map;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
@@ -23,7 +22,9 @@ public interface VariantsApi {
 //    @RequestMapping(value = "/variants",
 //        produces = {"application/json"},
 //        method = RequestMethod.GET)
-    ResponseEntity<List<Alteration>> variantsGet();
+    ResponseEntity<List<Alteration>> variantsGet(
+        @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
+    );
 
 
     @ApiOperation(value = "", notes = "Search for variants.", response = Alteration.class, responseContainer = "List", tags = {"Variants", "Search",})
@@ -41,6 +42,7 @@ public interface VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
     @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List", tags = {"Variants", "Search",})
@@ -51,6 +53,7 @@ public interface VariantsApi {
         method = RequestMethod.POST)
     ResponseEntity<List<List<Alteration>>> variantsLookupPost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
+        , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
 //    @ApiOperation(value = "", notes = "Get list of evidences for specific variant.", response = Evidence.class, responseContainer = "List", tags = {"Evidence",})

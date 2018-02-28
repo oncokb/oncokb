@@ -54,25 +54,33 @@ public final class TreatmentUtils {
         return getTreatmentsByGenesAndLevels(GeneUtils.getAllGenes(), levels);
     }
 
-    public static String getTreatmentName(Set<Treatment> treatments, Boolean sorted) {
-        StringBuilder sb = new StringBuilder();
-        sorted = sorted == null ? false : sorted;
-
+    public static String getTreatmentName(Set<Treatment> treatments) {
         List<String> treatmentNames = new ArrayList<>();
-        for (Treatment treatment : treatments) {
+        List<Treatment> sortedTreatment = new ArrayList<>(treatments);
+        Collections.sort(sortedTreatment, new Comparator<Treatment>() {
+            public int compare(Treatment t1, Treatment t2) {
+                if (t1.getPriority() == null) {
+                    if (t2.getPriority() == null) {
+                        return TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+                    } else {
+                        return 1;
+                    }
+                }
+                if (t2.getPriority() == null) {
+                    return -1;
+                }
+                return t1.getPriority() - t2.getPriority();
+            }
+        });
+
+        for (Treatment treatment : sortedTreatment) {
             List<String> drugNames = new ArrayList<>();
             for (Drug drug : treatment.getDrugs()) {
                 if (drug.getDrugName() != null) {
                     drugNames.add(drug.getDrugName().trim());
                 }
             }
-            if (sorted) {
-                Collections.sort(drugNames);
-            }
             treatmentNames.add(MainUtils.listToString(drugNames, "+"));
-        }
-        if (sorted) {
-            Collections.sort(treatmentNames);
         }
         return MainUtils.listToString(treatmentNames, ", ");
     }
