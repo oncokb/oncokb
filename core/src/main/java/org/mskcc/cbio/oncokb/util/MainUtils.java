@@ -157,6 +157,17 @@ public class MainUtils {
         return indicatorQueryMutationEffect;
     }
 
+    public static IndicatorQueryMutationEffect setToAlternativeAlleleMutationEffect(IndicatorQueryMutationEffect indicatorQueryMutationEffect) {
+        if (indicatorQueryMutationEffect != null && indicatorQueryMutationEffect.getMutationEffect() != null) {
+            MutationEffect mutationEffect = indicatorQueryMutationEffect.getMutationEffect();
+            MutationEffect likeME = MutationEffect.getByName("Likely " + mutationEffect.getMutationEffect().replaceAll("(?i)likely", "").trim());
+            if (likeME == null || likeME.equals(MutationEffect.LIKELY_NEUTRAL))
+                return new IndicatorQueryMutationEffect();
+            indicatorQueryMutationEffect.setMutationEffect(likeME);
+        }
+        return indicatorQueryMutationEffect;
+    }
+
     public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
         Integer index = -1;
 

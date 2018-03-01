@@ -3,8 +3,8 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
+import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -369,7 +369,18 @@ public class IndicatorUtils {
         // Find mutation effect from alternative alleles
         if ((indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE))
             && alternativeAllele.size() > 0) {
-            indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alternativeAllele), Collections.singleton(EvidenceType.MUTATION_EFFECT), null)));
+            indicatorQueryMutationEffect =
+                MainUtils.setToAlternativeAlleleMutationEffect(
+                    MainUtils.findHighestMutationEffectByEvidence(
+                        new HashSet<>(
+                            EvidenceUtils.getEvidence(
+                                new ArrayList<>(alternativeAllele)
+                                , Collections.singleton(EvidenceType.MUTATION_EFFECT)
+                                , null
+                            )
+                        )
+                    )
+                );
         }
 
         // If there is no mutation effect info available for this variant, find mutation effect from relevant variants
