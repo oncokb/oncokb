@@ -75,7 +75,7 @@ public class MainUtils {
                 evidenceTypes.add(et);
             }
         } else {
-            evidenceTypes = getAllEvidenceTypes();
+            evidenceTypes = EvidenceTypeUtils.getAllEvidenceTypes();
         }
 
         if (alteration != null) {
@@ -224,27 +224,6 @@ public class MainUtils {
                 oncogenic = null;
         }
         return oncogenic;
-    }
-
-    public static Set<EvidenceType> getTreatmentEvidenceTypes() {
-        Set<EvidenceType> types = new HashSet<>();
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-
-        return types;
-    }
-
-    public static List<EvidenceType> getAllEvidenceTypes() {
-        return Arrays.asList(EvidenceType.values());
-    }
-
-    public static Set<EvidenceType> getSensitiveTreatmentEvidenceTypes() {
-        Set<EvidenceType> types = new HashSet<>();
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-        return types;
     }
 
     public static Oncogenicity findHighestOncogenicByEvidences(Set<Evidence> evidences) {

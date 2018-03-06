@@ -24,7 +24,7 @@ public final class TreatmentUtils {
         }
         Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
         List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<Alteration>(alterations),
-            MainUtils.getTreatmentEvidenceTypes(), null);
+            EvidenceTypeUtils.getTreatmentEvidenceTypes(), null);
         Set<Treatment> treatments = new HashSet<>();
 
         for (Evidence evidence : evidences) {
@@ -38,7 +38,7 @@ public final class TreatmentUtils {
             return new HashSet<>();
         }
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
-            MainUtils.getTreatmentEvidenceTypes(), null);
+            EvidenceTypeUtils.getTreatmentEvidenceTypes(), null);
         Set<Treatment> treatments = new HashSet<>();
 
         for (Evidence evidence : evidences) {

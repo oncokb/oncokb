@@ -30,4 +30,23 @@ public class ArticleAbstract implements java.io.Serializable {
 
     public ArticleAbstract() {
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ArticleAbstract)) return false;
+
+        ArticleAbstract that = (ArticleAbstract) o;
+
+        if (getAbstractContent() != null ? !getAbstractContent().equals(that.getAbstractContent()) : that.getAbstractContent() != null)
+            return false;
+        return getLink() != null ? getLink().equals(that.getLink()) : that.getLink() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getAbstractContent() != null ? getAbstractContent().hashCode() : 0;
+        result = 31 * result + (getLink() != null ? getLink().hashCode() : 0);
+        return result;
+    }
 }

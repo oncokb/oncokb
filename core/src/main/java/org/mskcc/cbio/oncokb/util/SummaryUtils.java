@@ -1118,7 +1118,7 @@ public class SummaryUtils {
     private static Map<String, Object> getTumorTypeSummaryFromPickedTreatment(Gene gene, Alteration alteration, Set<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = null;
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
-        Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
+        Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), EvidenceTypeUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
 
         if (pickedTreatment != null && evidences != null) {
             for (Evidence evidence : evidences) {
@@ -1168,7 +1168,7 @@ public class SummaryUtils {
                     List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
 
                     // Send all allele tumor types treatment to pick up the unique one.
-                    pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternativeAlleles, MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
+                    pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternativeAlleles, EvidenceTypeUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
                     if (pickedTreatment != null) {
                         tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, (Alteration) CollectionUtils.intersection(alternativeAlleles, new ArrayList<>(pickedTreatment.getAlterations())).iterator().next(), relevantTumorTypes);
                         if (tumorTypeSummary != null) {
