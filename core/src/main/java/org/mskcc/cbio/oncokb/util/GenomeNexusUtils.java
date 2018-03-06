@@ -33,12 +33,17 @@ public class GenomeNexusUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            String response = HttpUtils.getRequest(genomeNexusApi + HGVS_ENDPOINT + "/" + encodedHgvs, true);
-            VariantAnnotation[] variantAnnotations = new Gson().fromJson(response, VariantAnnotation[].class);
-            if (variantAnnotations != null && variantAnnotations.length >= 1) {
-                variantAnnotation = variantAnnotations[0];
-                VEPDetailedEnrichmentService service = new VEPDetailedEnrichmentService();
-                variantAnnotation = service.enrich(variantAnnotation);
+            String response = null;
+            try {
+                response = HttpUtils.getRequest(genomeNexusApi + HGVS_ENDPOINT + "/" + encodedHgvs);
+                VariantAnnotation[] variantAnnotations = new Gson().fromJson(response, VariantAnnotation[].class);
+                if (variantAnnotations != null && variantAnnotations.length >= 1) {
+                    variantAnnotation = variantAnnotations[0];
+                    VEPDetailedEnrichmentService service = new VEPDetailedEnrichmentService();
+                    variantAnnotation = service.enrich(variantAnnotation);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         return variantAnnotation;
