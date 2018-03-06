@@ -161,6 +161,8 @@ public class MainUtils {
         if (indicatorQueryMutationEffect != null && indicatorQueryMutationEffect.getMutationEffect() != null) {
             MutationEffect mutationEffect = indicatorQueryMutationEffect.getMutationEffect();
             MutationEffect likeME = MutationEffect.getByName("Likely " + mutationEffect.getMutationEffect().replaceAll("(?i)likely", "").trim());
+
+            // likeME will be null if mutation effect without related likely mutation effect.
             if (likeME == null || likeME.equals(MutationEffect.LIKELY_NEUTRAL))
                 return new IndicatorQueryMutationEffect();
             indicatorQueryMutationEffect.setMutationEffect(likeME);
