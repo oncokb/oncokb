@@ -10,7 +10,6 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,39 +22,17 @@ public class HotspotUtils {
     private static List<SingleResidueHotspotMutation> hotspotMutations = null;
 
     public static void getHotspotsFromRemote() {
-        String cancerHotspotsUrl = null;
         try {
-            cancerHotspotsUrl = PropertiesUtils.getProperties("cancerhotspots.single");
-            if (cancerHotspotsUrl != null && cancerHotspotsUrl.isEmpty()) {
-                cancerHotspotsUrl = null;
-            }
-        } catch (IOException e) {
-            System.out.println("Please specify cancerhotspot.single url in the config.properties file.");
-            e.printStackTrace();
-        }
-
-        String response = null;
-
-        if (cancerHotspotsUrl != null) {
-            response = HttpUtils.postRequest(cancerHotspotsUrl, "", true);
-        }
-
-        if (cancerHotspotsUrl == null || response.equals("TIMEOUT")) {
+            String cancerHotspotsUrl = PropertiesUtils.getProperties("cancerhotspots.single");
+            String response = HttpUtils.postRequest(cancerHotspotsUrl, "");
+            hotspotMutations = new ObjectMapper().readValue(response, new TypeReference<List<SingleResidueHotspotMutation>>() {
+            });
+        } catch (Exception e) {
+            System.out.println("Fail to reach CancerHotspot endpoint. Fetch local file.");
             Gson gson = new GsonBuilder().create();
-            SingleResidueHotspotMutation[] mutations = gson.fromJson(new BufferedReader(new InputStreamReader(HotspotUtils.class.getResourceAsStream("/data/cancer-hotspots-public-single.json"))), SingleResidueHotspotMutation[].class);
+            SingleResidueHotspotMutation[] mutations = gson.fromJson(new BufferedReader(new InputStreamReader(HotspotUtils.class.getResourceAsStream("/data/cancer-hotspots-public-v2.json"))), SingleResidueHotspotMutation[].class);
             hotspotMutations = new ArrayList<>(Arrays.asList(mutations));
             if (hotspotMutations == null) {
-                hotspotMutations = new ArrayList<>();
-            }
-        } else {
-            if (response != null) {
-                try {
-                    hotspotMutations = new ObjectMapper().readValue(response, new TypeReference<List<SingleResidueHotspotMutation>>() {
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
                 hotspotMutations = new ArrayList<>();
             }
         }
