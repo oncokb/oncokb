@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -725,7 +726,7 @@ public class TumorTypeUtils {
         try {
             String json = FileUtils.readRemote(url);
             Map map = JsonUtils.jsonToMap(json);
-            subtypes = (List<TumorType>) map.get("data");
+            subtypes = new ObjectMapper().convertValue(map.get("data"), new TypeReference<List<TumorType>>() {});
         } catch (Exception e) {
             System.out.println(ACCESS_ERROR_ONCO_TREE_MESSAGE + " Fetch local file for all OncoTree Subtypes.");
             Gson gson = new GsonBuilder().create();
