@@ -307,7 +307,7 @@ public class validation {
     private static Set<Evidence> getEvidencesByLevel(LevelOfEvidence levelOfEvidence) {
         if (levelOfEvidence == null)
             return new HashSet<>();
-        return EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(MainUtils.getTreatmentEvidenceTypes(), Collections.singleton(levelOfEvidence));
+        return EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), Collections.singleton(levelOfEvidence));
     }
 
     private static void printEvidences(Set<Evidence> evidences, SpreadsheetService service, WorksheetEntry entry) throws IOException, ServiceException {

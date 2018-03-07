@@ -127,15 +127,23 @@ public class CacheUtils {
             if (gene != null) {
                 for (String service : otherServices) {
                     if (!StringUtils.isNullOrEmpty(service)) {
-                        HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
-                            gene.getHugoSymbol(), "", true);
+                        try {
+                            HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
+                                gene.getHugoSymbol(), "");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         } else if (cmd == "reset") {
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
-                    HttpUtils.postRequest(service + "?cmd=reset", "", true);
+                    try {
+                        HttpUtils.postRequest(service + "?cmd=reset", "");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

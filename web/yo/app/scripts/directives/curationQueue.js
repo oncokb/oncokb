@@ -564,7 +564,7 @@ angular.module('oncokbApp')
                 };
                 $scope.secondTimeAutoNotify = function() {
                     _.each($scope.queue, function (queueItem) {
-                        var hugoSymbol = queueItem[hugoSymbol];
+                        var hugoSymbol = queueItem.hugoSymbol;
                         if (hugoSymbol && queueItem.curator && !queueItem.curated && mainUtils.isExpiredCuration(queueItem.dueDay) && !queueItem.notified) {
                             for (var i = 0; i < $rootScope.queuesData.get(hugoSymbol).length; i++) {
                                 var queueModelItem = $rootScope.queuesData.get(hugoSymbol).get(i);

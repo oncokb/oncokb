@@ -45,9 +45,6 @@ public class TreatmentDrugId implements Serializable {
         }
         if (persistence == null) {
             ApplicationContextSingleton.getDrugBo().save(drug);
-            if (CacheUtils.isEnabled()) {
-                CacheUtils.addDrug(drug);
-            }
             persistence = drug;
         }
         this.drug = persistence;
