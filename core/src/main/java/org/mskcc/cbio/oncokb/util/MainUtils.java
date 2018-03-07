@@ -75,7 +75,7 @@ public class MainUtils {
                 evidenceTypes.add(et);
             }
         } else {
-            evidenceTypes = getAllEvidenceTypes();
+            evidenceTypes = EvidenceTypeUtils.getAllEvidenceTypes();
         }
 
         if (alteration != null) {
@@ -157,6 +157,19 @@ public class MainUtils {
         return indicatorQueryMutationEffect;
     }
 
+    public static IndicatorQueryMutationEffect setToAlternativeAlleleMutationEffect(IndicatorQueryMutationEffect indicatorQueryMutationEffect) {
+        if (indicatorQueryMutationEffect != null && indicatorQueryMutationEffect.getMutationEffect() != null) {
+            MutationEffect mutationEffect = indicatorQueryMutationEffect.getMutationEffect();
+            MutationEffect likeME = MutationEffect.getByName("Likely " + mutationEffect.getMutationEffect().replaceAll("(?i)likely", "").trim());
+
+            // likeME will be null if mutation effect without related likely mutation effect.
+            if (likeME == null || likeME.equals(MutationEffect.LIKELY_NEUTRAL))
+                return new IndicatorQueryMutationEffect();
+            indicatorQueryMutationEffect.setMutationEffect(likeME);
+        }
+        return indicatorQueryMutationEffect;
+    }
+
     public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
         Integer index = -1;
 
@@ -224,27 +237,6 @@ public class MainUtils {
                 oncogenic = null;
         }
         return oncogenic;
-    }
-
-    public static Set<EvidenceType> getTreatmentEvidenceTypes() {
-        Set<EvidenceType> types = new HashSet<>();
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-
-        return types;
-    }
-
-    public static List<EvidenceType> getAllEvidenceTypes() {
-        return Arrays.asList(EvidenceType.values());
-    }
-
-    public static Set<EvidenceType> getSensitiveTreatmentEvidenceTypes() {
-        Set<EvidenceType> types = new HashSet<>();
-        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-        return types;
     }
 
     public static Oncogenicity findHighestOncogenicByEvidences(Set<Evidence> evidences) {

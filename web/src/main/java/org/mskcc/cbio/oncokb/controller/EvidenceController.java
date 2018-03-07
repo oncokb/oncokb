@@ -254,7 +254,7 @@ public class EvidenceController {
         Boolean isEmpty = false;
         if (evidenceType.equals(EvidenceType.ONCOGENIC) || evidenceType.equals(EvidenceType.MUTATION_EFFECT)) {
             if (StringUtils.isNullOrEmpty(knownEffect) && StringUtils.isNullOrEmpty(description)) isEmpty = true;
-        } else if (MainUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
+        } else if (EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
             if (treatments == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if (evidenceType.equals(EvidenceType.DIAGNOSTIC_IMPLICATION) || evidenceType.equals(EvidenceType.PROGNOSTIC_IMPLICATION)) {
             if (level == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;
