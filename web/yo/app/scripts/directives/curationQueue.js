@@ -144,31 +144,6 @@ angular.module('oncokbApp')
                     }
                     return result;
                 };
-                $scope.generateQueuesList = function(hugoSymbol) {
-                    if (!$rootScope.queuesData.has(hugoSymbol)) {
-                        $rootScope.queuesData.set(hugoSymbol, $rootScope.queuesModel.createList());
-                    }
-                    _.each($rootScope.queuesData.get(hugoSymbol).asArray(), function(item) {
-                        $scope.queue.push({
-                            hugoSymbol: hugoSymbol,
-                            article: item.get('article'),
-                            pmid: item.get('pmid'),
-                            pmidString: 'PMID: ' + item.get('pmid'),
-                            link: item.get('link'),
-                            variant: item.get('variant'),
-                            mainType: item.get('mainType'),
-                            subType: item.get('subType'),
-                            section: item.get('section'),
-                            addedBy: item.get('addedBy'),
-                            addedAt: item.get('addedAt'),
-                            curated: item.get('curated'),
-                            curator: item.get('curator'),
-                            comment: item.get('comment'),
-                            dueDay: item.get('dueDay'),
-                            notified: item.get('notified') // when the curation expired, we sent an email automatically. notified is used to track when this automated get sent.
-                        });
-                    });
-                };
                 $scope.processCuration = function() {
                     if ($scope.data.editing) {
                         saveModifiedCuration();
@@ -214,25 +189,25 @@ angular.module('oncokbApp')
                         hugoSymbol: hugoSymbol
                     };
                     if ($scope.location === 'gene') {
-                        item['variant'] = $scope.input.variant;
+                        item.variant = $scope.input.variant;
                     } else if ($scope.location === 'queues') {
                         if ($scope.data.hugoVariantMapping[hugoSymbol]) {
-                            item['variant'] = $scope.data.hugoVariantMapping[hugoSymbol];
+                            item.variant = $scope.data.hugoVariantMapping[hugoSymbol];
                         } else {
-                            item['variant'] = '';
+                            item.variant = '';
                         }
                     }
                     if ($scope.predictedArticle && $scope.validPMID) {
-                        item['article'] = $scope.predictedArticle;
-                        item['pmid'] = $scope.input.article;
-                        item['pmidString'] = 'PMID: ' + item['pmid'];
+                        item.article = $scope.predictedArticle;
+                        item.pmid = $scope.input.article;
+                        item.pmidString = 'PMID: ' + item.pmid;
                     } else {
-                        item['article'] = $scope.input.article;
+                        item.article = $scope.input.article;
                     }
                     currentQueues.push(item);
                     $scope.updateQueueInDB(hugoSymbol, currentQueues).then(function(result) {
                         $scope.queue.push(item);
-                        if (item['curator']) {
+                        if (item.curator) {
                             $scope.sendEmail(item);
                         }
                     });
@@ -305,10 +280,10 @@ angular.module('oncokbApp')
                         hugoSymbols: [queueItem.hugoSymbol]
                     };
                     if (!_.isEmpty($scope.data.modifiedCurator)) {
-                        $scope.input['curator'] = $scope.data.modifiedCurator;
+                        $scope.input.curator = $scope.data.modifiedCurator;
                     }
                     if (!_.isEmpty($scope.data.modifiedSubType)) {
-                        $scope.input['subType'] = $scope.data.modifiedSubType;
+                        $scope.input.subType = $scope.data.modifiedSubType;
                     }
                     if (queueItem.section) {
                         $scope.input.section = queueItem.section.split(',');
@@ -336,20 +311,20 @@ angular.module('oncokbApp')
                     for (var i = 0; i < currentQueues.length; i++) {
                         if (currentQueues[i].addedAt === queueItem.addedAt) {
                             item = angular.copy(queueItem);
-                            item['link'] = $scope.input.link;
-                            item['mainType'] = $scope.input.mainType;
-                            item['subType'] = $scope.input.subType ? $scope.input.subType.name : '';
-                            item['section'] = $scope.input.section ? $scope.input.section.join() : '';
-                            item['dueDay'] = $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '';
-                            item['comment'] = $scope.input.comment;
-                            item['variant'] = $scope.input.variant;
-                            item['curator'] = $scope.input.curator ? $scope.input.curator.name : '';
+                            item.link = $scope.input.link;
+                            item.mainType = $scope.input.mainType;
+                            item.subType = $scope.input.subType ? $scope.input.subType.name : '';
+                            item.section = $scope.input.section ? $scope.input.section.join() : '';
+                            item.dueDay = $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '';
+                            item.comment = $scope.input.comment;
+                            item.variant = $scope.input.variant;
+                            item.curator = $scope.input.curator ? $scope.input.curator.name : '';
                             if ($scope.predictedArticle && $scope.validPMID) {
-                                item['article'] = $scope.predictedArticle;
-                                item['pmid'] = $scope.input.article;
-                                item['pmidString'] = 'PMID: ' + item['pmid'];
+                                item.article = $scope.predictedArticle;
+                                item.pmid = $scope.input.article;
+                                item.pmidString = 'PMID: ' + item.pmid;
                             } else {
-                                item['article'] = $scope.input.article;
+                                item.article = $scope.input.article;
                             }
                             currentQueues[i] = item;
                             break;
@@ -383,12 +358,12 @@ angular.module('oncokbApp')
                     var currentTimeStamp = new Date().getTime();
                     for (var i = 0; i < currentQueues.length; i++) {
                         if (currentQueues[i].addedAt === queueItem.addedAt) {
-                            currentQueues[i]['notified'] = currentTimeStamp;
+                            currentQueues[i].notified = currentTimeStamp;
                             break;
                         }
                     }
                     $scope.updateQueueInDB(hugoSymbol, currentQueues).then(function(result) {
-                        queueItem['notified'] = currentTimeStamp;
+                        queueItem.notified = currentTimeStamp;
                     });
                 };
                 function deleteCuration(queueItem) {

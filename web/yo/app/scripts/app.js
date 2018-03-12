@@ -503,7 +503,8 @@ var oncokbApp = angular.module('oncokbApp', [
     'datatables',
     'datatables.bootstrap',
     'localytics.directives',
-    'ui.sortable'
+    'ui.sortable',
+    'firebase'
 ])
     .value('user', {
         name: 'N/A',
