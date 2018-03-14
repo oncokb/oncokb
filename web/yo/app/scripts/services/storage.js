@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .service('storage', ['$q', '$rootScope', '$route', 'config', 'gapi', 'stringUtils', 'dialogs',
-        function($q, $rootScope, $route, config, gapi, stringUtils, dialogs) {
+    .service('storage', ['$q', '$rootScope', '$route', 'config', 'gapi', 'stringUtils', 'dialogs', '$firebaseAuth', '$firebaseObject', 'DriveOncokbInfo', 
+        function($q, $rootScope, $route, config, gapi, stringUtils, dialogs, $firebaseAuth, $firebaseObject, DriveOncokbInfo) {
             var self = {};
             self.id = null;
             self.document = null;
@@ -411,7 +411,11 @@ angular.module('oncokbApp')
                 gapi.auth.authorize(params, function(result) {
                     // console.log('get authorize', result);
                     if (result && !result.error) {
-                        deferred.resolve(result);
+                        self.requireFirebaseAuth().then(function(success) {
+                            deferred.resolve(result); 
+                        }).catch(function(error) {
+                            deferred.reject(result);
+                        });  
                     } else {
                         deferred.reject(result);
                     }
@@ -419,7 +423,38 @@ angular.module('oncokbApp')
                 });
                 return deferred.promise;
             };
-
+            self.requireFirebaseAuth = function() {
+                var deferred = $q.defer();
+                DriveOncokbInfo.getFirebasePermission().then(function(response) {
+                    var firebaseUserPermission = response.data;
+                    $firebaseAuth().$signInWithPopup("google").then(function(gResp) {
+                        var currentUser = $firebaseObject(firebase.database().ref('Users/' + gResp.user.uid));
+                        currentUser.$loaded().then(function(data) {
+                            if (!data.email) {
+                                currentUser.email = gResp.user.email;
+                                currentUser.displayName = gResp.user.displayName;
+                                if (firebaseUserPermission.admins.indexOf(gResp.user.email) !== -1) {
+                                    currentUser.admin = true;
+                                } else if (firebaseUserPermission.commonUsers[gResp.user.email]) {
+                                    currentUser.genes = firebaseUserPermission.commonUsers[gResp.user.email];
+                                }                                        
+                                currentUser.$save().then(function(res) {
+                                    deferred.resolve(res);
+                                }, function(error) {
+                                    deferred.reject(error);
+                                });
+                            } else {
+                                deferred.resolve('success');
+                            }
+                        }).catch(function(error) {
+                            deferred.reject(error);
+                        });
+                    }).catch(function(error) {
+                    deferred.reject(error);
+                    });    
+                });
+                return deferred.promise;
+            }
             /**
              * Actually load a document. If the document is new, initializes
              * the model with an empty list of todos.
