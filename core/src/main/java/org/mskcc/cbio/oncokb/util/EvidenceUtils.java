@@ -946,15 +946,23 @@ public class EvidenceUtils {
         }
     }
 
+    /**
+     *
+     * @param evidences
+     * @param isDesc default is false
+     * @return
+     */
     public static List<Evidence> sortTumorTypeEvidenceBasedNumOfAlts(List<Evidence> evidences, Boolean isDesc) {
-
+        // Default multiplier for the sorting
+        int flag = 1;
         if (evidences == null) {
             return new ArrayList<>();
         }
-        if (isDesc == null) {
-            isDesc = false;
+        if (isDesc) {
+            flag = -1;
         }
 
+        final int multiplier = flag;
         final Map<Evidence, Integer> originalIndices = new HashedMap();
         for (int i = 0; i < evidences.size(); i++) {
             originalIndices.put(evidences.get(i), i);
@@ -971,15 +979,11 @@ public class EvidenceUtils {
                 }
                 Integer result = x.getAlterations().size() - y.getAlterations().size();
                 if (result.equals(0)) {
-                    return originalIndices.get(y) - originalIndices.get(x);
+                    return originalIndices.get(x) - originalIndices.get(y);
                 }
-                return result;
+                return multiplier * result;
             }
         });
-
-        if (isDesc) {
-            Collections.reverse(evidences);
-        }
         return evidences;
     }
 
