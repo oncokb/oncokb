@@ -5,13 +5,15 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -120,7 +122,11 @@ public class SummaryUtils {
         }
 
         // Get tumor type summary from exact matched alteration
-        tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alteration, new HashSet<>(relevantTumorTypes));
+        for (int i = 0; i < relevantTumorTypes.size(); i++) {
+            tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alteration, Collections.singleton(relevantTumorTypes.get(i)));
+            if (tumorTypeSummary != null)
+                break;
+        }
 
         // Get Other Tumor Types summary within this alteration
         if (tumorTypeSummary == null) {
