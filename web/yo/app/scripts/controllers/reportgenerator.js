@@ -407,7 +407,7 @@ angular.module('oncokbApp')
                                 $scope.tmValidation.result = 'Yes! All genes passed the validation.';
                                 $scope.tmValidation.flag = true;
                             } else {
-                                $scope.tmValidation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + tmValidationResult.join(', ');
+                                $scope.tmValidation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + tmValidationResult.sort().join(', ');
                                 $scope.tmValidation.flag = false;
                             }
                             $scope.tmValidation.validating = false;
@@ -435,7 +435,7 @@ angular.module('oncokbApp')
                                 $scope.tsgValidation.result = 'Yes! All genes passed the validation.';
                                 $scope.tsgValidation.flag = true;
                             } else {
-                                $scope.tsgValidation.result = 'Tumor suppressor genes that have no Truncating Mutations curated are: ' + tsgValidationResult.join(', ');
+                                $scope.tsgValidation.result = 'Tumor suppressor genes that have no Truncating Mutations curated are: ' + tsgValidationResult.sort().join(', ');
                                 $scope.tsgValidation.flag = false;
                             }
                             $scope.tsgValidation.validating = false;
