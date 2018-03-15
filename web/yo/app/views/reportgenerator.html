@@ -62,7 +62,7 @@
     <div class="row" style="margin-top:30px; margin-bottom:30px;">
         <div class="col-sm-2 queryLabel">Query Type:</div>
         <div class="col-sm-4">
-            <select chosen 
+            <select chosen
                     data-placeholder="Enter A type"
                     ng-model="evidenceType"
                     ng-options="m.value as m.label for m in evidenceTypes"
@@ -108,7 +108,10 @@
         <button type="button" class="btn btn-default" ng-click="validateTruncating()" ng-bind-html="getValidationButtonContent()"></button>
     </div>
     <h4 ng-class="{'invalidResut': !validation.flag, 'validResut': validation.flag}">
-        {{ validation.result }}
+        {{ validation.oncoResult }}
+        <br />
+        <br />
+        {{ validation.tumorSuppressorResult }}
     </h4>
     <br/><br/>
 </div>
