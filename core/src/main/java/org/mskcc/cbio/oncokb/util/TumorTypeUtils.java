@@ -31,14 +31,19 @@ public class TumorTypeUtils {
         addAll(getAllSpecialTumorOncoTreeTypes());
     }};
 
-    private static List<TumorType> allOncoTreeSubtypes =
-        getOncoTreeSubtypesByCancerTypesFromSource(allOncoTreeCancerTypes);
+    private static List<TumorType> allOncoTreeSubtypes = getOncoTreeSubtypesFromSource();
     private static Map<String, TumorType> allNestedOncoTreeSubtypes = getAllNestedOncoTreeSubtypesFromSource();
     private static Map<String, List<TumorType>> questTumorTypeMap = null;
     private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
+    private static final ImmutableList<String> LiquidTumorTissues = ImmutableList.of(
+        "Lymph", "Blood", "Lymphoid", "Myeloid"
+    );
     private static final ImmutableList<String> LiquidTumorMainTypes = ImmutableList.of(
         "Blastic Plasmacytoid Dendritic Cell Neoplasm", "Histiocytosis", "Leukemia", "Multiple Myeloma",
-        "Myelodysplasia", "Myeloproliferative Neoplasm", "Mastocytosis");
+        "Myelodysplasia", "Myeloproliferative Neoplasm", "Mastocytosis", "Hodgkin Lymphoma", "Non-Hodgkin Lymphoma",
+        "Blood Cancer, NOS", "Myelodysplastic Syndromes", "Lymphatic Cancer, NOS", " B-Lymphoblastic Leukemia/Lymphoma",
+        "Mature B-Cell Neoplasms", "Mature T and NK Neoplasms", "Posttransplant Lymphoproliferative Disorders",
+        "T-Lymphoblastic Leukemia/Lymphoma", "Histiocytic Disorder");
 
     /**
      * Get all exist OncoTree tumor types including cancer types and subtypes
@@ -720,13 +725,14 @@ public class TumorTypeUtils {
         return result;
     }
 
-    private static List<TumorType> getOncoTreeSubtypesByCancerTypesFromSource(List<TumorType> cancerTypes) {
+    private static List<TumorType> getOncoTreeSubtypesFromSource() {
         List<TumorType> subtypes = new ArrayList<>();
         String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true&deprecated=false";
         try {
             String json = FileUtils.readRemote(url);
             Map map = JsonUtils.jsonToMap(json);
-            subtypes = new ObjectMapper().convertValue(map.get("data"), new TypeReference<List<TumorType>>() {});
+            subtypes = new ObjectMapper().convertValue(map.get("data"), new TypeReference<List<TumorType>>() {
+            });
         } catch (Exception e) {
             System.out.println(ACCESS_ERROR_ONCO_TREE_MESSAGE + " Fetch local file for all OncoTree Subtypes.");
             Gson gson = new GsonBuilder().create();
@@ -768,13 +774,14 @@ public class TumorTypeUtils {
     private static TumorForm checkTumorForm(TumorType tumorType) {
         if (tumorType == null)
             return null;
-        if (tumorType.getTissue() != null) {
-            if (tumorType.getTissue().equals("BLOOD"))
+        // This is mainly for subtypes
+        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getTissue())) {
+            if (LiquidTumorTissues.contains(tumorType.getTissue()))
                 return TumorForm.LIQUID;
             else
                 return TumorForm.SOLID;
         }
-        if (tumorType.getMainType() != null && tumorType.getMainType().getName() != null) {
+        if (tumorType.getMainType() != null && !com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getMainType().getName())) {
             if (LiquidTumorMainTypes.contains(tumorType.getMainType().getName()))
                 return TumorForm.LIQUID;
             else
