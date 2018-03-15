@@ -108,10 +108,15 @@
         <button type="button" class="btn btn-default" ng-click="validateTruncating()" ng-bind-html="getValidationButtonContent()"></button>
     </div>
     <h4 ng-class="{'invalidResut': !validation.flag, 'validResut': validation.flag}">
-        {{ validation.oncoResult }}
-        <br />
-        <br />
-        {{ validation.tumorSuppressorResult }}
+        {{ validation.result }}
+    </h4>
+    <hr/>
+    <h3>Do all tumor suppressor genes have truncating mutation curated? </h3>
+    <div class="validationButton">
+        <button type="button" class="btn btn-default" ng-click="reverseValidateTruncating()" ng-bind-html="getReverseValidationButtonContent()"></button>
+    </div>
+    <h4 ng-class="{'invalidResut': !reverseValidation.flag, 'validResut': reverseValidation.flag}">
+        {{ reverseValidation.result }}
     </h4>
     <br/><br/>
 </div>
