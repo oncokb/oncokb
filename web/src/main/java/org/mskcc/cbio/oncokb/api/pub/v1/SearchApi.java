@@ -29,6 +29,7 @@ public interface SearchApi {
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant
+        , @ApiParam(value = "Variant type.") @RequestParam(value = "variantType", required = false) String variantType
         , @ApiParam(value = "Structural Variant Type.") @RequestParam(value = "svType", required = false) StructuralVariantType svType
         , @ApiParam(value = "Consequence. Possible value: feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, start_lost, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "Protein Start") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
