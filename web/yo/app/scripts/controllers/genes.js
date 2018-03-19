@@ -9,6 +9,46 @@ angular.module('oncokbApp')
                  config, importer, storage, Documents, users,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                  OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile) {
+                var queuesHugoSymbols = [];
+                $scope.transferQueues = function() {
+                    queuesHugoSymbols = $rootScope.queuesData.keys();
+                    transferSingleQueue(0);
+                }
+                var queuesDataAdditional = {};
+                function transferSingleQueue(index) {
+                    if (index < queuesHugoSymbols.length) {
+                        var hugoSymbol = queuesHugoSymbols[index];
+                        var queuesSingleGene = [];
+                        _.each($rootScope.queuesData.get(hugoSymbol).asArray(), function(queue) {
+                            var queueJSON = {};
+                            _.each(queue.keys(), function(queueKey) {
+                                queueJSON[queueKey] = queue.get(queueKey);
+                            });
+                            if (!_.isEmpty(queueJSON)) {
+                                if (queueJSON.pmid) {
+                                    queueJSON.pmidString = 'PMID: ' + queueJSON.pmid;
+                                }
+                                queueJSON.hugoSymbol = hugoSymbol;
+                                queuesSingleGene.push(queueJSON);
+                            }   
+                        });
+                        if (queuesSingleGene.length > 0) {
+                            console.log(hugoSymbol);
+                            firebase.database().ref('Queues/' + hugoSymbol).set({
+                                queue: queuesSingleGene
+                              }).then(function() {
+                                    transferSingleQueue(++index);
+                            }).catch(function(error) {
+                                console.log('error', error);
+                                transferSingleQueue(++index);
+                            });
+                        } else {
+                            transferSingleQueue(++index);
+                        }
+                    } else {
+                        console.log('Finished.');
+                    }
+                }                     
             function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
