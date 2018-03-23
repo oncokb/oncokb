@@ -179,11 +179,9 @@ public class EvidenceUtils {
 
     private static Set<Evidence> getEvidence(List<EvidenceQueryRes> queries, Set<EvidenceType> evidenceTypes, String geneStatus, Set<LevelOfEvidence> levelOfEvidences) {
         Set<Evidence> evidences = new HashSet<>();
-        List<EvidenceType> filteredETs = new ArrayList<>();
 
         Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
         Map<Integer, Alteration> alterations = new HashMap<>();
-        Map<Integer, Alteration> alterationsME = new HashMap<>(); //Mutation effect only
         Set<TumorType> tumorTypes = new HashSet<>();
 
         for (EvidenceQueryRes query : queries) {
@@ -219,51 +217,36 @@ public class EvidenceUtils {
             }
         }
 
-        if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
-            filteredETs.add(EvidenceType.GENE_SUMMARY);
-        }
-        if (evidenceTypes.contains(EvidenceType.GENE_BACKGROUND)) {
-            filteredETs.add(EvidenceType.GENE_BACKGROUND);
-        }
-        if (filteredETs.size() > 0) {
-            Map<Gene, Set<Evidence>> mappedEvidences =
-                EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(new HashSet<>(genes.values()), new HashSet<>(filteredETs));
-
-            for (Map.Entry<Gene, Set<Evidence>> cursor : mappedEvidences.entrySet()) {
-                evidences.addAll(cursor.getValue());
-            }
+        // Get all gene related evidences
+        Map<Gene, Set<Evidence>> mappedEvidences =
+            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(new HashSet<>(genes.values()), Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(), evidenceTypes));
+        for (Map.Entry<Gene, Set<Evidence>> cursor : mappedEvidences.entrySet()) {
+            evidences.addAll(cursor.getValue());
         }
 
-        Set<Alteration> alts = new HashSet<>();
-        alts.addAll(alterations.values());
-        alts.addAll(alterationsME.values());
+        List<Alteration> uniqueAlterations = new ArrayList<>(alterations.values());
+        // Get all mutation related evidences
 
-        if (evidenceTypes.contains(EvidenceType.MUTATION_EFFECT)) {
-            filteredETs.add(EvidenceType.MUTATION_EFFECT);
-            evidences.addAll(getEvidence(new ArrayList<>(alts), Collections.singleton(EvidenceType.MUTATION_EFFECT), null));
+        Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(), evidenceTypes);
+        if (common.size() > 0) {
+            evidences.addAll(getEvidence(uniqueAlterations, common, null));
         }
-        if (evidenceTypes.contains(EvidenceType.ONCOGENIC)) {
-            filteredETs.add(EvidenceType.ONCOGENIC);
-            evidences.addAll(getEvidence(new ArrayList<>(alts), Collections.singleton(EvidenceType.ONCOGENIC), null));
-        }
-        if (evidenceTypes.contains(EvidenceType.VUS)) {
-            filteredETs.add(EvidenceType.VUS);
-            evidences.addAll(getEvidence(new ArrayList<>(alts), Collections.singleton(EvidenceType.VUS), null));
-        }
-        if (evidenceTypes.size() != filteredETs.size()) {
-            //Include all level 1 evidences
-            Set<EvidenceType> tmpTypes = new HashSet<>();
-            tmpTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-            tmpTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-            evidences.addAll(getEvidence(new ArrayList<>(alterations.values()), tmpTypes, levelOfEvidences));
 
-            evidenceTypes.remove(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-            evidenceTypes.remove(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-
-            List<Evidence> tumorTypesEvidences = getEvidence(new ArrayList<>(alterations.values()), evidenceTypes, tumorTypes.isEmpty() ? null : tumorTypes, levelOfEvidences);
-
-            evidences.addAll(tumorTypesEvidences);
+        // For sensitive evidences, get all ignore tumor types. They will be propagated to other tumor types
+        // in assignEvidence function
+        common = Sets.intersection(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), evidenceTypes);
+        if (common.size() > 0) {
+            evidences.addAll(getEvidence(uniqueAlterations, common, levelOfEvidences));
         }
+
+        // Get other tumor type related evidences
+        Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
+        restTTevidenceTypes.removeAll(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes());
+        common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
+        if (common.size() > 0) {
+            evidences.addAll(getEvidence(uniqueAlterations, common, tumorTypes, levelOfEvidences));
+        }
+
         return evidences;
     }
 
@@ -299,6 +282,8 @@ public class EvidenceUtils {
 
     public static Map<Gene, Set<Evidence>> getEvidenceByGenesAndEvidenceTypes(Set<Gene> genes, Set<EvidenceType> evidenceTypes) {
         Map<Gene, Set<Evidence>> result = new HashMap<>();
+        if (evidenceTypes == null && evidenceTypes.isEmpty())
+            return result;
         if (CacheUtils.isEnabled()) {
             for (Gene gene : genes) {
                 if (gene != null) {
@@ -408,7 +393,7 @@ public class EvidenceUtils {
                                 }
 
                                 hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
-                                if (hasjointed) {
+                                if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
                                 } else {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
@@ -778,7 +763,7 @@ public class EvidenceUtils {
         }
 
         if (evidenceTypes == null) {
-            evidenceTypes = new HashSet<>(MainUtils.getAllEvidenceTypes());
+            evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
         }
 
         if (requestQueries == null || requestQueries.size() == 0) {
@@ -809,7 +794,7 @@ public class EvidenceUtils {
                             TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
                     }
 
-                    if (requestQuery.getAlteration() != null) {
+                    if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
                         Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getAlteration());
 
                         if (alt == null)
@@ -833,7 +818,7 @@ public class EvidenceUtils {
                         query.setAlterations(relevantAlts);
 
                         query.setAlleles(new ArrayList<>(allelesAlts));
-                    } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
+                    } else {
                         // if no alteration assigned, but has tumor type
                         query.setAlterations(new ArrayList<Alteration>(AlterationUtils.getAllAlterations(query.getGene())));
                     }
@@ -961,15 +946,23 @@ public class EvidenceUtils {
         }
     }
 
+    /**
+     *
+     * @param evidences
+     * @param isDesc default is false
+     * @return
+     */
     public static List<Evidence> sortTumorTypeEvidenceBasedNumOfAlts(List<Evidence> evidences, Boolean isDesc) {
-
+        // Default multiplier for the sorting
+        int flag = 1;
         if (evidences == null) {
             return new ArrayList<>();
         }
-        if (isDesc == null) {
-            isDesc = false;
+        if (isDesc) {
+            flag = -1;
         }
 
+        final int multiplier = flag;
         final Map<Evidence, Integer> originalIndices = new HashedMap();
         for (int i = 0; i < evidences.size(); i++) {
             originalIndices.put(evidences.get(i), i);
@@ -986,15 +979,11 @@ public class EvidenceUtils {
                 }
                 Integer result = x.getAlterations().size() - y.getAlterations().size();
                 if (result.equals(0)) {
-                    return originalIndices.get(y) - originalIndices.get(x);
+                    return originalIndices.get(x) - originalIndices.get(y);
                 }
-                return result;
+                return multiplier * result;
             }
         });
-
-        if (isDesc) {
-            Collections.reverse(evidences);
-        }
         return evidences;
     }
 

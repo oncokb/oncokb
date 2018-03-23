@@ -5,13 +5,15 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -120,7 +122,11 @@ public class SummaryUtils {
         }
 
         // Get tumor type summary from exact matched alteration
-        tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alteration, new HashSet<>(relevantTumorTypes));
+        for (int i = 0; i < relevantTumorTypes.size(); i++) {
+            tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alteration, Collections.singleton(relevantTumorTypes.get(i)));
+            if (tumorTypeSummary != null)
+                break;
+        }
 
         // Get Other Tumor Types summary within this alteration
         if (tumorTypeSummary == null) {
@@ -1118,7 +1124,7 @@ public class SummaryUtils {
     private static Map<String, Object> getTumorTypeSummaryFromPickedTreatment(Gene gene, Alteration alteration, Set<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = null;
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null);
-        Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
+        Evidence pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(Collections.singletonList(alteration), EvidenceTypeUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
 
         if (pickedTreatment != null && evidences != null) {
             for (Evidence evidence : evidences) {
@@ -1168,7 +1174,7 @@ public class SummaryUtils {
                     List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAndRelevantAlterations(alteration);
 
                     // Send all allele tumor types treatment to pick up the unique one.
-                    pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternativeAlleles, MainUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
+                    pickedTreatment = pickSpecialGeneTreatmentEvidence(gene, EvidenceUtils.getEvidence(alternativeAlleles, EvidenceTypeUtils.getTreatmentEvidenceTypes(), relevantTumorTypes, null));
                     if (pickedTreatment != null) {
                         tumorTypeSummary = getTumorTypeSummaryFromPickedTreatment(gene, (Alteration) CollectionUtils.intersection(alternativeAlleles, new ArrayList<>(pickedTreatment.getAlterations())).iterator().next(), relevantTumorTypes);
                         if (tumorTypeSummary != null) {

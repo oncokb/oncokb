@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.bo.impl;
 
 import com.google.common.collect.Sets;
+import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
@@ -149,12 +150,12 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
             if (CacheUtils.isEnabled()) {
                 List<Evidence> evidences = findEvidencesByAlteration(alterations);
                 for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())) {
+                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
                         set.add(evidence);
                     }
                 }
             } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes(alts, tts, ets));
+                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(alts, tts, ets));
             }
 
         }

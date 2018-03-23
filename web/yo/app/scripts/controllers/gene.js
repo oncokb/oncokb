@@ -52,6 +52,7 @@ angular.module('oncokbApp')
              * The first one is about the mutation name validation result such as duplicated mutation or existed in VUS section. The result is stored in mutationMessages, and updated in real time as editing.
              * The other one is about the detailed mutation content inside when first loaded the gene page, and the result is stored in mutationContent.
              * **/
+            var sortedLevel = _.keys($rootScope.meta.levelsDesc).sort();
             $scope.getMutationMessages = function() {
                 $scope.mutationMessages = {};
                 $scope.mutationContent = {};
@@ -101,6 +102,9 @@ angular.module('oncokbApp')
                         }
                     }
                     if ($scope.mutationContent[uuid].TT > 0) {
+                        $scope.mutationContent[uuid].levels.sort(function(a, b) {
+                            return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
+                        });
                         $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
                         if ($scope.mutationContent[uuid].levels.length > 0) {
                             $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function(level) {
@@ -153,6 +157,9 @@ angular.module('oncokbApp')
                     }
                     var levels = _.keys($scope.tumorContent[uuid]);
                     if (levels.length > 0) {
+                        levels.sort(function(a, b) {
+                            return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
+                        });
                         var result = [];
                         _.each(levels, function(level) {
                             result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">Level ' + level + '</span>');

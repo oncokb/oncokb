@@ -1,5 +1,4 @@
-<div class="reportGenerator">
-    <div class="reportGenerator" nv-file-drop="" uploader="uploader" filters="queueLimit, customFilter" ng-init="init()">
+<div class="reportGenerator" ng-init="init()">
     <h3>Review History</h3>
     <div class="row" style="margin-top:30px; margin-bottom:30px;">
         <div class="col-sm-1">Genes:</div>
@@ -63,7 +62,7 @@
     <div class="row" style="margin-top:30px; margin-bottom:30px;">
         <div class="col-sm-2 queryLabel">Query Type:</div>
         <div class="col-sm-4">
-            <select chosen 
+            <select chosen
                     data-placeholder="Enter A type"
                     ng-model="evidenceType"
                     ng-options="m.value as m.label for m in evidenceTypes"
@@ -106,11 +105,18 @@
     <hr/>
     <h3>Are all truncating mutations curated under tumor suppressor genes? </h3>
     <div class="validationButton">
-        <button type="button" class="btn btn-default" ng-click="validateTruncating()" ng-bind-html="getValidationButtonContent()"></button>
+        <button type="button" class="btn btn-default" ng-click="validateTruncating('tmValidation')" ng-bind-html="getValidationButtonContent('tmValidation')"></button>
     </div>
-    <h4 ng-class="{'invalidResut': !validation.flag, 'validResut': validation.flag}">
-        {{ validation.result }}
+    <h4 ng-class="{'invalidResut': !tmValidation.flag, 'validResut': tmValidation.flag}">
+        {{ tmValidation.result }}
+    </h4>
+    <hr/>
+    <h3>Do all tumor suppressor genes have truncating mutation curated? </h3>
+    <div class="validationButton">
+        <button type="button" class="btn btn-default" ng-click="validateTruncating('tsgValidation')" ng-bind-html="getValidationButtonContent('tsgValidation')"></button>
+    </div>
+    <h4 ng-class="{'invalidResut': !tsgValidation.flag, 'validResut': tsgValidation.flag}">
+        {{ tsgValidation.result }}
     </h4>
     <br/><br/>
-    </div>
 </div>

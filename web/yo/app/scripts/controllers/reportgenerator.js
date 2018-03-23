@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ReportgeneratorCtrl', ['$scope', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 
+    .controller('ReportgeneratorCtrl', ['$scope', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils',
         function($scope, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
             $scope.init = function() {
                 $scope.loading = false;
@@ -44,7 +44,7 @@ angular.module('oncokbApp')
                 scrollCollapse: true
 
             };
-            
+
             var historyResults;
             $scope.disableHistoryButton = true;
             $scope.checkHistoryInputStatus = function() {
@@ -266,9 +266,9 @@ angular.module('oncokbApp')
                                             });
                                         });
                                         var tempObj = {
-                                            gene: item.gene.hugoSymbol, 
-                                            mutation: getAlterations(item.alterations), 
-                                            drugs: drugs.join(), 
+                                            gene: item.gene.hugoSymbol,
+                                            mutation: getAlterations(item.alterations),
+                                            drugs: drugs.join(),
                                             level: item.levelOfEvidence,
                                             description: item.description,
                                             citations: getCitations(item.description)
@@ -279,14 +279,14 @@ angular.module('oncokbApp')
                                             tempObj.tumorType = item.cancerType;
                                         }
                                         $scope.reviewedData.drugs.body.push(tempObj);
-                                    } 
+                                    }
                                 });
                             }
                             finishLoadingReviewedData();
                         });
                     }
                 });
-                 
+
             }
             function getAlterations(alterations) {
                 var result = [];
@@ -339,7 +339,7 @@ angular.module('oncokbApp')
                         tempArr.push(item[key]);
                     });
                     content.push(tempArr.join('\t'));
-                });  
+                });
                 var blob = new Blob([content.join('\n')], {
                     type: 'text/plain;charset=utf-8;',
                 });
@@ -353,17 +353,30 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.validation = {
+            $scope.tmValidation = {
                 flag: false,
                 result: '',
                 validating: false
             };
-            $scope.validateTruncating = function() {
-                $scope.validation = {
-                    flag: false,
-                    result: '',
-                    validating: true
-                };
+            $scope.tsgValidation = {
+                flag: false,
+                result: '',
+                validating: false
+            };
+            $scope.validateTruncating = function(type) {
+                if (type === 'tmValidation') {
+                    $scope.tmValidation = {
+                        flag: false,
+                        result: '',
+                        validating: true
+                    };
+                } else if (type === 'tsgValidation') {
+                    $scope.tsgValidation = {
+                        flag: false,
+                        result: '',
+                        validating: true
+                    };
+                }
                 DatabaseConnector.getReviewedData('geneType').then(function(response) {
                     var geneTypes = {};
                     var tempHugo = '';
@@ -378,30 +391,63 @@ angular.module('oncokbApp')
                         });
                     });
                     DatabaseConnector.lookupVariants(variantCallBody).then(function(result) {
-                        var validationResult = [];
-                        _.each(result, function(alterations) {
-                            _.each(alterations, function(alteration) {
-                                if (alteration.alteration === 'Truncating Mutations') {
-                                    tempHugo = alteration.gene.hugoSymbol;
-                                    if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === false && geneTypes[tempHugo].oncogene === true) {
-                                        validationResult.push(tempHugo);
+                        if (type === 'tmValidation') {
+                            var tmValidationResult = [];
+                            _.each(result, function(alterations) {
+                                _.each(alterations, function(alteration) {
+                                    if (alteration.alteration === 'Truncating Mutations') {
+                                        tempHugo = alteration.gene.hugoSymbol;
+                                        if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === false && geneTypes[tempHugo].oncogene === true) {
+                                            tmValidationResult.push(tempHugo);
+                                        }
+                                    }
+                                });
+                            });
+                            if (tmValidationResult.length === 0) {
+                                $scope.tmValidation.result = 'Yes! All genes passed the validation.';
+                                $scope.tmValidation.flag = true;
+                            } else {
+                                $scope.tmValidation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + tmValidationResult.sort().join(', ');
+                                $scope.tmValidation.flag = false;
+                            }
+                            $scope.tmValidation.validating = false;
+                        } else if (type === 'tsgValidation') {
+                            var tsgValidationResult = [];
+                            // Add a validation to find tumor suppressor genes that have no truncating mutations curated
+                            _.each(result, function(alterations) {
+                                if (alterations.length > 0) {
+                                    tempHugo = alterations[0].gene.hugoSymbol;
+                                    if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === true) {
+                                        var hasTruncating = false;
+                                        _.some(alterations, function(alteration) {
+                                            if (alteration.alteration === 'Truncating Mutations') {
+                                                hasTruncating = true;
+                                                return true;
+                                            }
+                                        });
+                                        if(!hasTruncating){
+                                            tsgValidationResult.push(tempHugo);
+                                        }
                                     }
                                 }
                             });
-                        });
-                        if (validationResult.length === 0) {
-                            $scope.validation.result = 'Yes! All genes passed the validation.';
-                            $scope.validation.flag = true;
-                        } else {
-                            $scope.validation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + validationResult.join(', ');
-                            $scope.validation.flag = false;
+                            if (tsgValidationResult.length === 0) {
+                                $scope.tsgValidation.result = 'Yes! All genes passed the validation.';
+                                $scope.tsgValidation.flag = true;
+                            } else {
+                                $scope.tsgValidation.result = 'Tumor suppressor genes that have no Truncating Mutations curated are: ' + tsgValidationResult.sort().join(', ');
+                                $scope.tsgValidation.flag = false;
+                            }
+                            $scope.tsgValidation.validating = false;
                         }
-                        $scope.validation.validating = false;
+
                     });
                 });
             }
-            $scope.getValidationButtonContent = function() {
-                if ($scope.validation.validating) {
+            $scope.getValidationButtonContent = function(type) {
+                if ($scope.tmValidation.validating && type === 'tmValidation') {
+                    return 'Validating <i class="fa fa-spinner fa-spin"></i>';
+                } else if ($scope.tsgValidation.validating && type === 'tsgValidation') {
                     return 'Validating <i class="fa fa-spinner fa-spin"></i>';
                 } else {
                     return 'Validate';
