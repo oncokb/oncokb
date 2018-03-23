@@ -546,6 +546,22 @@ angular.module('oncokbApp')
                 };
                 return deferred.promise;
             };
+
+            /**
+             * get History json from Firebase
+             */
+            self.loadHistory = function(geneName){
+                var historyDefer = $q.defer();
+                var ref = firebase.database().ref('History/' + geneName + '/api');
+                ref.on('value', function(doc) {
+                    var history = doc.val();
+                    historyDefer.resolve(history);
+                }, function(error) {
+                    historyDefer.reject('Fail to load History json');
+                    console.log(error);
+                });
+                return historyDefer.promise;
+            }
             return self;
         }]
     );
