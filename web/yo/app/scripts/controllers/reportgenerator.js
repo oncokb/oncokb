@@ -61,6 +61,9 @@ angular.module('oncokbApp')
                 }
 
                 storage.loadHistory(genesForHistory[index]).then(function (history) {
+                    _.each(history, function(item) {
+                        item.gene = genesForHistory[index];
+                    });
                     historyResults = _.union(historyResults,history);
                     if (index === genesForHistory.length - 1) {
                         $scope.historySearchResults = historyResults;

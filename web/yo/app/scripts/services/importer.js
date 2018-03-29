@@ -394,16 +394,13 @@ angular.module('oncokbApp')
                             console.log('\t Copying');
                             var gene = realtime.getModel().getRoot().get('gene');
                             var vus = realtime.getModel().getRoot().get('vus');
-                            var history = realtime.getModel().getRoot().get('history');
                             if (gene) {
                                 var geneData = stringUtils.getGeneData(gene);
                                 var vusData = stringUtils.getVUSFullData(vus);
-                                var historyData = stringUtils.getHistoryData(history);
                                 storage.getRealtimeDocument(file.id).then(function(newRealtime) {
                                     var model = createModel(newRealtime.getModel());
                                     var geneModel = model.getRoot().get('gene');
                                     var vusModel = model.getRoot().get('vus');
-                                    var historyModel = model.getRoot().get('history');
                                     model.beginCompoundOperation();
                                     for (var key in geneData) {
                                         if (geneModel[key]) {
@@ -415,10 +412,6 @@ angular.module('oncokbApp')
                                         _.each(vusData, function(vusItem) {
                                             createVUSItem(vusItem, vusModel, newRealtime.getModel());
                                         });
-                                    }
-
-                                    if (!_.isEmpty(historyData)) {
-                                        historyModel.set('api', historyData.api);
                                     }
                                     model.endCompoundOperation();
                                     console.log('\t Done.');
@@ -568,7 +561,6 @@ angular.module('oncokbApp')
         function createModel(model) {
             model = createGeneModel(model);
             model = createVUSModel(model);
-            model = createHistoryModel(model);
             return model;
         }
 
@@ -584,14 +576,6 @@ angular.module('oncokbApp')
             if (!model.getRoot().get('vus')) {
                 var vus = model.createList();
                 model.getRoot().set('vus', vus);
-            }
-            return model;
-        }
-
-        function createHistoryModel(model) {
-            if (!model.getRoot().get('history')) {
-                var history = model.createMap();
-                model.getRoot().set('history', history);
             }
             return model;
         }
