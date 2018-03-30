@@ -15,6 +15,7 @@ core/src/main/resources/properties
 core/src/main/resources/log4j.properties
 core/src/main/resources/certificate
 web/src/main/resources/certificate
+web/src/main/resources/sentry.properties
 
 # These files are coming from VS CODE while setting up
 .project
