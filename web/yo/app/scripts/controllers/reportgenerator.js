@@ -393,21 +393,27 @@ angular.module('oncokbApp')
                     DatabaseConnector.lookupVariants(variantCallBody).then(function(result) {
                         if (type === 'tmValidation') {
                             var tmValidationResult = [];
+                            var tmValidationResultOncogene = [];
                             _.each(result, function(alterations) {
                                 _.each(alterations, function(alteration) {
                                     if (alteration.alteration === 'Truncating Mutations') {
                                         tempHugo = alteration.gene.hugoSymbol;
-                                        if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === false && geneTypes[tempHugo].oncogene === true) {
-                                            tmValidationResult.push(tempHugo);
+                                        if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === false) {
+                                            if (geneTypes[tempHugo].oncogene === true) {
+                                                tmValidationResultOncogene.push(tempHugo + ' (Oncogene)');
+                                            } else {
+                                                tmValidationResult.push(tempHugo);
+                                            }                                            
                                         }
                                     }
                                 });
                             });
+                            tmValidationResult = tmValidationResult.sort().concat(tmValidationResultOncogene.sort());
                             if (tmValidationResult.length === 0) {
                                 $scope.tmValidation.result = 'Yes! All genes passed the validation.';
                                 $scope.tmValidation.flag = true;
                             } else {
-                                $scope.tmValidation.result = 'Genes that having Truncating Mutation curated but only marked as Oncogenes: ' + tmValidationResult.sort().join(', ');
+                                $scope.tmValidation.result = 'Genes that having Truncating Mutation curated but not marked as Tumor Suppressor Genes are: ' + tmValidationResult.join(', ');
                                 $scope.tmValidation.flag = false;
                             }
                             $scope.tmValidation.validating = false;
