@@ -239,16 +239,13 @@ public class TumorType {
             return false;
         }
         TumorType tumorType = (TumorType) o;
-        return Objects.equals(id, tumorType.id) &&
-            Objects.equals(code, tumorType.code) &&
+        return Objects.equals(code, tumorType.code) &&
             Objects.equals(color, tumorType.color) &&
             Objects.equals(name, tumorType.name) &&
             Objects.equals(mainType, tumorType.mainType) &&
             Objects.equals(NCI, tumorType.NCI) &&
             Objects.equals(UMLS, tumorType.UMLS) &&
             Objects.equals(tissue, tumorType.tissue) &&
-            Objects.equals(children, tumorType.children) &&
-            Objects.equals(parent, tumorType.parent) &&
             Objects.equals(deprecated, tumorType.deprecated) &&
             Objects.equals(history, tumorType.history) &&
             Objects.equals(links, tumorType.links);
