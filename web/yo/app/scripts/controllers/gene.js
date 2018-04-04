@@ -2394,7 +2394,7 @@ angular.module('oncokbApp')
                         return true;
                     }
                 default:
-                    return false;    
+                    return false;
                 }
             }
             $scope.move = function (angleType, event, type, mutation, tumor, ti, treatment) {
@@ -3248,15 +3248,21 @@ angular.module('oncokbApp')
             }
 
             function addVUS() {
-                var model = $scope.realtimeDocument.getModel();
-                var vus;
-                if (model.getRoot().get('vus')) {
-                    vus = model.getRoot().get('vus');
-                } else {
-                    vus = model.createList();
-                    model.getRoot().set('vus', vus);
-                }
-                $scope.vus = vus;
+                // var model = $scope.realtimeDocument.getModel();
+                // var vus;
+                // if (model.getRoot().get('vus')) {
+                //     vus = model.getRoot().get('vus');
+                // } else {
+                //     vus = model.createList();
+                //     model.getRoot().set('vus', vus);
+                // }
+                // $scope.vus = vus;
+                storage.loadVUS($scope.gene.name.getText()).then(function(vus) {
+                    if (!vus || !_.isArray(Array.from(vus))) {
+                        vus = [];
+                    }
+                    $scope.vus = vus;
+                });
             }
 
             function isDesiredGene() {

@@ -19,17 +19,12 @@ angular.module('oncokbApp')
                             console.log(docs[docIndex].title, '\t\t', docIndex);
                             console.log('\t copying');
                             var gene = realtime.getModel().getRoot().get('gene');
-                            var vus = realtime.getModel().getRoot().get('vus');
                             if (gene) {
                                 var geneData = stringUtils.getGeneData(gene, true, true);
-                                var vusData = stringUtils.getVUSFullData(vus, true);
                                 var params = {};
 
                                 if (geneData) {
                                     params.gene = JSON.stringify(geneData);
-                                }
-                                if (vusData) {
-                                    params.vus = JSON.stringify(vusData);
                                 }
                                 DatabaseConnector.updateGene(params,
                                     function(result) {

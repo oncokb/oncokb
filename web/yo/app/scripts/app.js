@@ -390,6 +390,7 @@ OncoKB.setUp = function(object) {
 OncoKB.keyMappings = {type: {TSG: '', OCG: ''}};
 
 OncoKB.initialize = function() {
+    firebase.initializeApp(OncoKB.config.firebaseConfig);
     var nonSetUp = ['TI'];
     var keys = window._.keys(OncoKB.curateInfo);
     var keysL = keys.length;
@@ -502,7 +503,8 @@ var oncokbApp = angular.module('oncokbApp', [
     'datatables',
     'datatables.bootstrap',
     'localytics.directives',
-    'ui.sortable'
+    'ui.sortable',
+    'firebase'
 ])
     .value('user', {
         name: 'N/A',

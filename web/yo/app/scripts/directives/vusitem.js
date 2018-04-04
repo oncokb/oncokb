@@ -20,9 +20,9 @@ angular.module('oncokbApp')
                 vusUpdateInGene: '&vusUpdate'
             },
             link: function postLink(scope) {
-                scope.variant = scope.vus.get(scope.index);
-                scope.dt = new Date(Number(scope.variant.time.get(scope.variant.time.length - 1).value.getText()));
-                scope.dtBy = scope.variant.time.get(scope.variant.time.length - 1).by.name.getText();
+                scope.variant = scope.vus[scope.index];
+                scope.dt = new Date(Number(scope.variant.time[scope.variant.time.length - 1].value));
+                scope.dtBy = scope.variant.time[scope.variant.time.length - 1].by.name;
                 scope.status = {
                     opened: false
                 };

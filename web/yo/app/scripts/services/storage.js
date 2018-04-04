@@ -546,6 +546,23 @@ angular.module('oncokbApp')
                 };
                 return deferred.promise;
             };
+
+            /**
+             * get VUS json from Firebase
+             */
+            self.loadVUS = function(geneName){
+                var vusDefer = $q.defer();
+                var ref = firebase.database().ref('VUS/' + geneName);
+                ref.on('value', function(doc) {
+                    var vus = doc.val();
+                    vusDefer.resolve(vus);
+                }, function(error) {
+                    vusDefer.reject('Fail to load History json');
+                    console.log(error);
+                });
+                return vusDefer.promise;
+            }
+
             return self;
         }]
     );
