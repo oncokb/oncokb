@@ -1033,7 +1033,7 @@ angular.module('oncokbApp')
                         data.knownEffect = mutation.oncogenic.getText();
                         dataUUID = mutation.oncogenic_uuid.getText();
                         data.lastEdit = mutation.oncogenic_review.get('updateTime');
-                        historyData.location = mutation.name.getText() + ', Mutation Effect';
+                        historyData.location = mutation.name.getText() + ', Oncogenicity';
                         reviewObj = mutation.oncogenic_review;
                     }
                     // tempFlag is set to true when MUTATION_EFFECT evidence exists which means either mutation effect or mutation description got changed.
@@ -1051,7 +1051,11 @@ angular.module('oncokbApp')
                         extraData.lastEdit = tempReviewObjArr[tempRecentIndex].get('updateTime');
                         extraData.description = mutation.description.text;
                         extraData.evidenceType = 'MUTATION_EFFECT';
-                        historyData.location = mutation.name.getText() + ', Mutation Effect';
+                        if (historyData.location) {
+                            historyData.location += ', Mutation Effect';
+                        } else {
+                            historyData.location = mutation.name.getText() + ', Mutation Effect';
+                        }                        
                         if (!reviewObj) {
                             if (mutation.effect_review.has('updatedBy')) {
                                 reviewObj = mutation.effect_review;
