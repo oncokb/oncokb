@@ -327,22 +327,12 @@ public class TumorTypeUtils {
         return false;
     }
 
-    /*-- PRIVATE --*/
     public static List<TumorType> findTumorTypes(String tumorType, String source) {
-        List<TumorType> mappedTumorTypesFromSource = new ArrayList<>();
-        if (source.equals("cbioportal")) {
-            mappedTumorTypesFromSource.addAll(fromCbioportalTumorType(tumorType));
-        } else {
-            mappedTumorTypesFromSource.addAll(fromQuestTumorType(tumorType));
-        }
+        LinkedHashSet<TumorType> mappedTumorTypesFromSource = new LinkedHashSet<>();
 
         // Include exact matched tumor type
-        if (mappedTumorTypesFromSource.size() == 0) {
-            Set<TumorType> oncoTreeTypes = getOncoTreeTypesByTumorType(tumorType);
-            if (oncoTreeTypes != null) {
-                mappedTumorTypesFromSource = new ArrayList<>(oncoTreeTypes);
-            }
-        }
+        LinkedHashSet<TumorType> oncoTreeTypes = getOncoTreeTypesByTumorType(tumorType);
+        mappedTumorTypesFromSource.addAll(oncoTreeTypes);
 
         // Include all parent nodes
         List<TumorType> parentIncludedMatchByCode = findTumorType(
@@ -354,19 +344,6 @@ public class TumorTypeUtils {
 
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByCode);
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
-
-        // Filter out tumor types that not with same main type (Example, GIST under soft tissue)
-        List<TumorType> oncoTreeTumorTypes = findTumorType(
-            allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
-            new ArrayList<TumorType>(), "code", tumorType, true, false);
-        if (oncoTreeTumorTypes == null || oncoTreeTumorTypes.size() == 0) {
-            oncoTreeTumorTypes = findTumorType(
-                allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
-                new ArrayList<TumorType>(), "name", tumorType, true, false);
-        }
-        if (oncoTreeTumorTypes != null && oncoTreeTumorTypes.size() > 0) {
-            mappedTumorTypesFromSource = filterOutDiffMainType(mappedTumorTypesFromSource, oncoTreeTumorTypes.get(0));
-        }
 
         // Include all solid tumors
         if (hasSolidTumor(new HashSet<>(mappedTumorTypesFromSource))) {
@@ -387,6 +364,7 @@ public class TumorTypeUtils {
         return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypesFromSource));
     }
 
+    /*-- PRIVATE --*/
     private static List<TumorType> filterOutDiffMainType(List<TumorType> tumorTypes, TumorType searchedTumorType) {
         List<TumorType> filteredResult = new ArrayList<>();
         if (searchedTumorType == null || searchedTumorType.getMainType() == null) {
@@ -501,7 +479,7 @@ public class TumorTypeUtils {
                 }
         }
 
-        if (match) {
+        if (match && currentTumorType.getLevel() > 0) {
             TumorType tumorType = new TumorType();
             tumorType.setTissue(currentTumorType.getTissue());
             tumorType.setCode(currentTumorType.getCode());
@@ -594,8 +572,8 @@ public class TumorTypeUtils {
         return ret == null ? new LinkedHashSet<TumorType>() : new LinkedHashSet<>(ret);
     }
 
-    private static Set<TumorType> getOncoTreeTypesByTumorType(String tumorType) {
-        Set<TumorType> types = new HashSet<>();
+    private static LinkedHashSet<TumorType> getOncoTreeTypesByTumorType(String tumorType) {
+        LinkedHashSet<TumorType> types = new LinkedHashSet<>();
         TumorType mapped;
 
         mapped = getOncoTreeSubtypeByCode(tumorType);
@@ -605,12 +583,13 @@ public class TumorTypeUtils {
 
         if (mapped == null) {
             mapped = getOncoTreeCancerType(tumorType);
+            if (mapped != null) {
+                types.add(mapped);
+            }
         } else if (mapped.getMainType() != null) {
             //Also include the cancer type into relevant types
-            types.add(getOncoTreeCancerType(mapped.getMainType().getName()));
-        }
-        if (mapped != null) {
             types.add(mapped);
+            types.add(getOncoTreeCancerType(mapped.getMainType().getName()));
         }
         return types;
     }

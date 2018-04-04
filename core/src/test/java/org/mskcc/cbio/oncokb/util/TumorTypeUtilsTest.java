@@ -5,10 +5,10 @@ import com.mysql.jdbc.StringUtils;
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 ;
 
@@ -16,6 +16,20 @@ import java.util.logging.Logger;
  * Created by Hongxin on 6/2/17.
  */
 public class TumorTypeUtilsTest extends TestCase {
+    public void testFindTumorTypes() throws Exception {
+        List<TumorType> tumorTypes = TumorTypeUtils.findTumorTypes("LIPO", "oncotree");
+        String expectedResult = "Liposarcoma, Soft Tissue Sarcoma, Soft Tissue, All Solid Tumors, All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findTumorTypes("DDLS", "oncotree");
+        expectedResult = "Dedifferentiated Liposarcoma, Soft Tissue Sarcoma, Liposarcoma, Soft Tissue, All Solid Tumors, All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findTumorTypes("NSCLC", "oncotree");
+        expectedResult = "Non-Small Cell Lung Cancer, Non-Small Cell Lung Cancer, Lung, All Solid Tumors, All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+    }
+
     public void testGetAllOncoTreeCancerTypes() throws Exception {
         List<TumorType> cancerTypes = TumorTypeUtils.getAllOncoTreeCancerTypes();
         System.out.println(cancerTypes.size() + " cancer types in total");
@@ -144,4 +158,12 @@ public class TumorTypeUtilsTest extends TestCase {
         assertTrue("Tumor types set does not have liquid tumor, but one of tumor types Blood is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
     }
 
+    private String tumorTypesToString(List<TumorType> tumorTypes) {
+        List<String> name = new ArrayList<>();
+        for (TumorType tumorType : tumorTypes) {
+            name.add(tumorType.getCode() == null ?
+                tumorType.getMainType().getName() : tumorType.getName());
+        }
+        return org.apache.commons.lang3.StringUtils.join(name, ", ");
+    }
 }
