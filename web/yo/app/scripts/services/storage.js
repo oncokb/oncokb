@@ -548,19 +548,19 @@ angular.module('oncokbApp')
             };
 
             /**
-             * get History json from Firebase
+             * get json data from Firebase
              */
-            self.loadHistory = function(geneName){
-                var historyDefer = $q.defer();
-                var ref = firebase.database().ref('History/' + geneName + '/api');
+            self.loadDataFromFirebase = function(path){
+                var defer = $q.defer();
+                var ref = firebase.database().ref(path);
                 ref.on('value', function(doc) {
-                    var history = doc.val();
-                    historyDefer.resolve(history);
+                    var data = doc.val();
+                    defer.resolve(data);
                 }, function(error) {
-                    historyDefer.reject('Fail to load History json');
+                    defer.reject('Fail to load json data from Firebase');
                     console.log(error);
                 });
-                return historyDefer.promise;
+                return defer.promise;
             }
             return self;
         }]

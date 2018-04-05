@@ -723,7 +723,8 @@ angular.module('oncokbApp')
 
             function updateHistory(historyData) {
                 var hugoSymbol = $rootScope.currentHugoSymbol;
-                storage.loadHistory(hugoSymbol).then(function (apiHistory) {
+                var path = 'History/' + hugoSymbol + '/api';
+                storage.loadDataFromFirebase(path).then(function (apiHistory) {
                     if (!apiHistory || !_.isArray(Array.from(apiHistory))) {
                         apiHistory = [];
                     } else {

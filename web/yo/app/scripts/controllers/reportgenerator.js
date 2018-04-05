@@ -60,20 +60,21 @@ angular.module('oncokbApp')
                     historyResults = [];
                 }
 
-                storage.loadHistory(genesForHistory[index]).then(function (history) {
-                    _.each(history, function(item) {
-                        item.gene = genesForHistory[index];
-                    });
-                    historyResults = _.union(historyResults,history);
-                    if (index === genesForHistory.length - 1) {
-                        $scope.historySearchResults = historyResults;
-                        $scope.loading = false;
-                    } else {
-                        $timeout(function() {
+                storage.loadDataFromFirebase('History').then(function (history) {
+                    _.each(genesForHistory, function(hugoSymbol) {
+                        var historyResult = history[hugoSymbol]['api'];
+                        _.map(historyResult, function(historyItem){
+                            historyItem.gene = hugoSymbol;
+                        });
+                        historyResults = _.union(historyResults, historyResult);
+                        if (index === genesForHistory.length - 1) {
+                            $scope.historySearchResults = historyResults;
+                            $scope.loading = false;
+                        } else {
                             index++;
-                            $scope.searchHistory(genesForHistory, index);
-                        }, 200);
-                    }
+                        }
+                    });
+
                 });
             };
             $scope.getHistoryButtonContent = function() {
