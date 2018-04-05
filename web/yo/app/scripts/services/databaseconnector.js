@@ -306,9 +306,7 @@ angular.module('oncokbApp')
 
             function updateGeneType(hugoSymbol, data, historyData, success, fail) {
                 if (dataFromFile) {
-                    // success('');
-                    updateHistory(historyData);
-                    success(data);
+                    success('');
                 } else {
                     DriveAnnotation
                         .updateGeneType(hugoSymbol, data)
