@@ -42,10 +42,6 @@ angular.module('oncokbApp')
                                             var vus = model.createList();
                                             model.getRoot().set('vus', vus);
                                         }
-                                        if (!model.getRoot().get('history')) {
-                                            var history = model.createMap();
-                                            model.getRoot().set('history', history);
-                                        }
                                         $q.all([getIsoform(hugoSymbol),
                                             getOncogeneTSG(hugoSymbol)])
                                             .then(function(result) {

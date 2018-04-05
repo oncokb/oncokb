@@ -22,6 +22,7 @@ angular.module('oncokbApp')
         'ApiUtils',
         'PrivateApiUtils',
         'user',
+        'storage',
         function($timeout,
                  $q,
                  $rootScope,
@@ -41,7 +42,8 @@ angular.module('oncokbApp')
                  InternalAccess,
                  ApiUtils,
                  PrivateApiUtils,
-                 user) {
+                 user,
+                 storage) {
             var numOfLocks = {};
             var data = {};
 
@@ -304,7 +306,9 @@ angular.module('oncokbApp')
 
             function updateGeneType(hugoSymbol, data, historyData, success, fail) {
                 if (dataFromFile) {
-                    success('');
+                    // success('');
+                    updateHistory(historyData);
+                    success(data);
                 } else {
                     DriveAnnotation
                         .updateGeneType(hugoSymbol, data)
@@ -720,34 +724,35 @@ angular.module('oncokbApp')
             }
 
             function updateHistory(historyData) {
-                if (!$rootScope.model.getRoot().get('history')) {
-                    $rootScope.model.getRoot().set('history', $rootScope.model.createList());
-                    return;
-                }
-                var apiHistory = $rootScope.model.getRoot().get('history').get('api');
-                if (!apiHistory || !_.isArray(Array.from(apiHistory))) {
-                    apiHistory = [];
-                } else {
-                    apiHistory = Array.from(apiHistory);
-                }
-                if (apiHistory.length > 3000) {
-                    // send email to the oncokb dev account with the oldest 500 records
-                    var historyToRemove = apiHistory.splice(0, 500);
-                    sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: 'OncoKB Review History', content: JSON.stringify(historyToRemove)},
-                        function(result) {
-                            console.log('sent old history to oncokb dev account');
-                        },
-                        function(error) {
-                            console.log('fail to send old history to oncokb dev account', error);
-                        }
-                    );
-                }
-                apiHistory.push({
-                    admin: user.name,
-                    timeStamp: new Date().getTime(),
-                    records: historyData
+                var hugoSymbol = $rootScope.currentHugoSymbol;
+                storage.loadHistory(hugoSymbol).then(function (apiHistory) {
+                    if (!apiHistory || !_.isArray(Array.from(apiHistory))) {
+                        apiHistory = [];
+                    } else {
+                        apiHistory = Array.from(apiHistory);
+                    }
+                    // if (apiHistory.length > 3000) {
+                    //     // send email to the oncokb dev account with the oldest 500 records
+                    //     var historyToRemove = apiHistory.splice(0, 500);
+                    //     sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: 'OncoKB Review History', content: JSON.stringify(historyToRemove)},
+                    //         function(result) {
+                    //             console.log('sent old history to oncokb dev account');
+                    //         },
+                    //         function(error) {
+                    //             console.log('fail to send old history to oncokb dev account', error);
+                    //         }
+                    //     );
+                    // }
+                    apiHistory.push({
+                        admin: user.name,
+                        timeStamp: new Date().getTime(),
+                        records: historyData
+                    });
+                    var historyRef = firebase.database().ref('History/' + hugoSymbol);
+                    historyRef.set({
+                        api: apiHistory
+                    });
                 });
-                $rootScope.model.getRoot().get('history').set('api', apiHistory);
             }
 
             function lookupVariants(body) {
