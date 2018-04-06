@@ -53,12 +53,12 @@ angular.module('oncokbApp')
              * The other one is about the detailed mutation content inside when first loaded the gene page, and the result is stored in mutationContent.
              * **/
             var sortedLevel = _.keys($rootScope.meta.levelsDesc).sort();
+            $scope.mutationMessages = {};
             $scope.getMutationMessages = function() {
-                $scope.mutationMessages = {};
                 $scope.mutationContent = {};
                 var vusList = [];
-                $scope.vus.asArray().forEach(function(e) {
-                    vusList.push(e.name.getText().trim().toLowerCase());
+                $scope.vus.forEach(function(e) {
+                    vusList.push(e.name.trim().toLowerCase());
                 });
                 var mutationNameBlackList = [
                     'activating mutations',
@@ -3248,21 +3248,18 @@ angular.module('oncokbApp')
             }
 
             function addVUS() {
-                // var model = $scope.realtimeDocument.getModel();
-                // var vus;
-                // if (model.getRoot().get('vus')) {
-                //     vus = model.getRoot().get('vus');
-                // } else {
-                //     vus = model.createList();
-                //     model.getRoot().set('vus', vus);
-                // }
-                // $scope.vus = vus;
-                storage.loadVUS($scope.gene.name.getText()).then(function(vus) {
+                var defer = $q.defer();
+                storage.loadDataFromFirebase('VUS/' + $scope.gene.name.getText()).then(function(vus) {
                     if (!vus || !_.isArray(Array.from(vus))) {
                         vus = [];
                     }
                     $scope.vus = vus;
+                    defer.resolve($scope.vus);
+                }, function(error) {
+                    defer.reject('Fail to load VUS data!');
+                    console.log(error);
                 });
+                return defer.promise;
             }
 
             function isDesiredGene() {
@@ -3544,10 +3541,11 @@ angular.module('oncokbApp')
                     } else {
                         $scope.model = '';
                     }
-                    addVUS();
-                    $scope.getMutationMessages();
                 })
                 .finally(function() {
+                    addVUS().then(function (vus) {
+                        $scope.getMutationMessages();
+                    });
                     getSuggestedMutations();
                     if (_.isArray(OncoKB.global.genes)) {
                         // isDesiredGene();

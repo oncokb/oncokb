@@ -548,21 +548,20 @@ angular.module('oncokbApp')
             };
 
             /**
-             * get VUS json from Firebase
+             * get json data from Firebase
              */
-            self.loadVUS = function(geneName){
-                var vusDefer = $q.defer();
-                var ref = firebase.database().ref('VUS/' + geneName);
+            self.loadDataFromFirebase = function(path){
+                var defer = $q.defer();
+                var ref = firebase.database().ref(path);
                 ref.on('value', function(doc) {
-                    var vus = doc.val();
-                    vusDefer.resolve(vus);
+                    var data = doc.val();
+                    defer.resolve(data);
                 }, function(error) {
-                    vusDefer.reject('Fail to load History json');
+                    defer.reject('Fail to load json data from Firebase');
                     console.log(error);
                 });
-                return vusDefer.promise;
+                return defer.promise;
             }
-
             return self;
         }]
     );
