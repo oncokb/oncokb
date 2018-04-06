@@ -37,11 +37,11 @@ angular.module('oncokbApp')
                         hugoVariantMapping: {},
                         resendEmail: false,
                         queueItemInEditing: '',
-                        queueModelItemInEditing: '',
                         invalidData: false,
                         hugoSymbols: [],
                         loading: true
                     };
+                    scope.resendEmail = false;
                     scope.input = {
                         article: '',
                         link: '',
@@ -81,12 +81,12 @@ angular.module('oncokbApp')
                     scope.queue = [];
                     additionalFile.load(['queues']).then(function(result) {
                         if (scope.location === 'gene') {
-                            scope.generateQueuesList(scope.hugoSymbol);
+                            scope.queue = scope.getQueuesByGene(scope.hugoSymbol);
                         } else if (scope.location === 'queues') {
-                            _.each($rootScope.queuesData.keys(), function(gene) {
-                                scope.generateQueuesList(gene);
+                            _.each(_.keys($rootScope.firebaseQueues), function(key) {
+                                scope.queue = scope.queue.concat($rootScope.firebaseQueues[key].queue);
                             });
-                        }
+                        }                        
                         scope.data.loading = false;
                         scope.secondTimeAutoNotify();
                     });
@@ -144,31 +144,6 @@ angular.module('oncokbApp')
                     }
                     return result;
                 };
-                $scope.generateQueuesList = function(hugoSymbol) {
-                    if (!$rootScope.queuesData.has(hugoSymbol)) {
-                        $rootScope.queuesData.set(hugoSymbol, $rootScope.queuesModel.createList());
-                    }
-                    _.each($rootScope.queuesData.get(hugoSymbol).asArray(), function(item) {
-                        $scope.queue.push({
-                            hugoSymbol: hugoSymbol,
-                            article: item.get('article'),
-                            pmid: item.get('pmid'),
-                            pmidString: 'PMID: ' + item.get('pmid'),
-                            link: item.get('link'),
-                            variant: item.get('variant'),
-                            mainType: item.get('mainType'),
-                            subType: item.get('subType'),
-                            section: item.get('section'),
-                            addedBy: item.get('addedBy'),
-                            addedAt: item.get('addedAt'),
-                            curated: item.get('curated'),
-                            curator: item.get('curator'),
-                            comment: item.get('comment'),
-                            dueDay: item.get('dueDay'),
-                            notified: item.get('notified') // when the curation expired, we sent an email automatically. notified is used to track when this automated get sent.
-                        });
-                    });
-                };
                 $scope.processCuration = function() {
                     if ($scope.data.editing) {
                         saveModifiedCuration();
@@ -198,10 +173,8 @@ angular.module('oncokbApp')
                     $scope.clearInput();
                 };
                 function addCuration(hugoSymbol) {
-                    if (!$rootScope.queuesData.has(hugoSymbol)) {
-                        $rootScope.queuesData.set(hugoSymbol, $rootScope.queuesModel.createList());
-                    }
-                    var item = $rootScope.queuesModel.createMap({
+                    var currentQueues = $scope.getQueuesByGene(hugoSymbol);
+                    var item = {
                         link: $scope.input.link,
                         mainType: $scope.input.mainType,
                         subType: $scope.input.subType ? $scope.input.subType.name : '',
@@ -212,46 +185,32 @@ angular.module('oncokbApp')
                         addedAt: new Date().getTime(),
                         dueDay: $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '',
                         comment: $scope.input.comment,
-                        notified: false
-                    });
+                        notified: false,
+                        hugoSymbol: hugoSymbol
+                    };
                     if ($scope.location === 'gene') {
-                        item.set('variant', $scope.input.variant);
+                        item.variant = $scope.input.variant;
                     } else if ($scope.location === 'queues') {
                         if ($scope.data.hugoVariantMapping[hugoSymbol]) {
-                            item.set('variant', $scope.data.hugoVariantMapping[hugoSymbol]);
+                            item.variant = $scope.data.hugoVariantMapping[hugoSymbol];
                         } else {
-                            item.set('variant', '');
+                            item.variant = '';
                         }
                     }
                     if ($scope.predictedArticle && $scope.validPMID) {
-                        item.set('article', $scope.predictedArticle);
-                        item.set('pmid', $scope.input.article);
+                        item.article = $scope.predictedArticle;
+                        item.pmid = $scope.input.article;
+                        item.pmidString = 'PMID: ' + item.pmid;
                     } else {
-                        item.set('article', $scope.input.article);
+                        item.article = $scope.input.article;
                     }
-                    $rootScope.queuesData.get(hugoSymbol).push(item);
-                    var queueItem = {
-                        article: item.get('article'),
-                        pmid: item.get('pmid'),
-                        pmidString: 'PMID: ' + item.get('pmid'),
-                        link: item.get('link'),
-                        variant: item.get('variant'),
-                        mainType: item.get('mainType'),
-                        subType: item.get('subType'),
-                        section: item.get('section'),
-                        addedBy: item.get('addedBy'),
-                        addedAt: item.get('addedAt'),
-                        curated: item.get('curated'),
-                        curator: item.get('curator'),
-                        dueDay: item.get('dueDay'),
-                        comment: item.get('comment'),
-                        notified: item.get('notified'),
-                        hugoSymbol: hugoSymbol
-                    };
-                    $scope.queue.push(queueItem);
-                    if (item.get('curator')) {
-                        $scope.sendEmail(queueItem);
-                    }
+                    currentQueues.push(item);
+                    $scope.updateQueueInDB(hugoSymbol, currentQueues).then(function(result) {
+                        $scope.queue.push(item);
+                        if (item.curator) {
+                            $scope.sendEmail(item);
+                        }
+                    });
                 }
                 $scope.initialProcess = function(x, type) {
                     var hugoSymbol;
@@ -260,38 +219,30 @@ angular.module('oncokbApp')
                     } else {
                         hugoSymbol = $scope.hugoSymbol;
                     }
-                    var queueItem, queueModelItem;
+                    var queueItem;
                     for (var i = 0; i < $scope.queue.length; i++) {
                         if ($scope.queue[i].addedAt === x.addedAt) {
                             queueItem = $scope.queue[i];
                             break;
                         }
                     }
-                    for (var i = 0; i < $rootScope.queuesData.get(hugoSymbol).length; i++) {
-                        var tempQueueItem = $rootScope.queuesData.get(hugoSymbol).get(i);
-                        if (tempQueueItem.get('addedAt') === x.addedAt) {
-                            queueModelItem = tempQueueItem;
-                            break;
-                        }
-                    }
                     switch (type) {
                     case 'edit':
-                        editCuration(queueItem, queueModelItem);
+                        editCuration(queueItem);
                         break;
                     case 'delete':
-                        deleteCuration(queueItem, queueModelItem, hugoSymbol);
+                        deleteCuration(queueItem);
                         break;
                     case 'complete':
-                        completeCuration(queueItem, queueModelItem);
+                        completeCuration(queueItem);
                         break;
                     }
                 };
 
-                function editCuration(queueItem, queueModelItem) {
+                function editCuration(queueItem) {
                     $scope.data.resendEmail = false;
                     $scope.data.editing = true;
                     $scope.data.queueItemInEditing = queueItem;
-                    $scope.data.queueModelItemInEditing = queueModelItem;
                     $scope.data.modifiedCurator = {};
                     if (queueItem.curator) {
                         for (var i = 0; i < $scope.data.curators.length; i++) {
@@ -325,18 +276,20 @@ angular.module('oncokbApp')
                         link: queueItem.link,
                         variant: queueItem.variant,
                         mainType: $scope.data.modifiedMainType,
-                        subType: $scope.data.modifiedSubType,
-                        curator: $scope.data.modifiedCurator,
-                        comment: queueItem.comment
+                        comment: queueItem.comment,
+                        hugoSymbols: [queueItem.hugoSymbol]
                     };
+                    if (!_.isEmpty($scope.data.modifiedCurator)) {
+                        $scope.input.curator = $scope.data.modifiedCurator;
+                    }
+                    if (!_.isEmpty($scope.data.modifiedSubType)) {
+                        $scope.input.subType = $scope.data.modifiedSubType;
+                    }
                     if (queueItem.section) {
                         $scope.input.section = queueItem.section.split(',');
                     }
                     if (queueItem.dueDay) {
                         $scope.input.dueDay = $scope.getFormattedDate(queueItem.dueDay);
-                    }
-                    if ($scope.location === 'queues') {
-                        $scope.input.hugoSymbols = [queueItem.hugoSymbol];
                     }
                     $timeout(function() {
                         var dueDay = angular.element(document.querySelector('#datepicker'));
@@ -351,41 +304,80 @@ angular.module('oncokbApp')
                     return month + "/" + day + "/" + year;
                 }
                 function saveModifiedCuration() {
-                    var queueModelItem = $scope.data.queueModelItemInEditing;
                     var queueItem = $scope.data.queueItemInEditing;
-
-                    queueModelItem.set('article', $scope.input.article);
-                    queueModelItem.set('link', $scope.input.link);
-                    queueModelItem.set('variant', $scope.input.variant);
-                    queueModelItem.set('mainType', $scope.input.mainType);
-                    queueModelItem.set('subType', $scope.input.subType ? $scope.input.subType.name : '');
-                    queueModelItem.set('section', $scope.input.section ? $scope.input.section.join() : '');
-                    queueModelItem.set('curator', $scope.input.curator ? $scope.input.curator.name : '');
-                    queueModelItem.set('comment', $scope.input.comment);
-                    if ($scope.input.dueDay) {
-                        queueModelItem.set('dueDay', new Date($scope.input.dueDay).getTime());
+                    var hugoSymbol = queueItem.hugoSymbol;
+                    var currentQueues = $scope.getQueuesByGene(hugoSymbol);
+                    var item = {};
+                    for (var i = 0; i < currentQueues.length; i++) {
+                        if (currentQueues[i].addedAt === queueItem.addedAt) {
+                            item = angular.copy(queueItem);
+                            item.link = $scope.input.link;
+                            item.mainType = $scope.input.mainType;
+                            item.subType = $scope.input.subType ? $scope.input.subType.name : '';
+                            item.section = $scope.input.section ? $scope.input.section.join() : '';
+                            item.dueDay = $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '';
+                            item.comment = $scope.input.comment;
+                            item.variant = $scope.input.variant;
+                            item.curator = $scope.input.curator ? $scope.input.curator.name : '';
+                            if ($scope.predictedArticle && $scope.validPMID) {
+                                item.article = $scope.predictedArticle;
+                                item.pmid = $scope.input.article;
+                                item.pmidString = 'PMID: ' + item.pmid;
+                            } else {
+                                item.article = $scope.input.article;
+                            }
+                            currentQueues[i] = item;
+                            break;
+                        }
                     }
-                    queueItem.article = queueModelItem.get('article');
-                    queueItem.link = queueModelItem.get('link');
-                    queueItem.variant = queueModelItem.get('variant');
-                    queueItem.mainType = queueModelItem.get('mainType');
-                    queueItem.subType = queueModelItem.get('subType');
-                    queueItem.section = queueModelItem.get('section');
-                    queueItem.curator = queueModelItem.get('curator');
-                    queueItem.dueDay = queueModelItem.get('dueDay');
-                    queueItem.comment = queueModelItem.get('comment');
-                    if ($scope.data.resendEmail) {
-                        $scope.sendEmail(queueItem, queueModelItem);
-                    }
+                    $scope.updateQueueInDB(hugoSymbol, currentQueues).then(function(result) {
+                        _.each(_.keys(item), function(key) {
+                            $scope.data.queueItemInEditing[key] = item[key];
+                        });
+                        if ($scope.resendEmail) {
+                            $scope.sendEmail(queueItem);
+                        }
+                    });
                 }
-                function completeCuration(queueItem, queueModelItem) {
-                    queueModelItem.set('curated', true);
-                    queueItem.curated = true;
+                function completeCuration(queueItem) {
+                    var hugoSymbol = queueItem.hugoSymbol;
+                    var currentQueues = $scope.getQueuesByGene(hugoSymbol);
+                    for (var i = 0; i < currentQueues.length; i++) {
+                        if (currentQueues[i].addedAt === queueItem.addedAt) {
+                            currentQueues[i].curated = true;
+                            break;
+                        }
+                    }
+                    $scope.updateQueueInDB(hugoSymbol, currentQueues).then(function(result) {
+                        queueItem.curated = true;
+                    });
                 };
-                function deleteCuration(queueItem, queueModelItem, hugoSymbol) {
-                    $rootScope.queuesData.get(hugoSymbol).removeValue(queueModelItem);
-                    var index = $scope.queue.indexOf(queueItem);
-                    $scope.queue.splice(index, 1);
+                function setCurationNotified(queueItem) {
+                    var hugoSymbol = queueItem.hugoSymbol;
+                    var currentQueues = $scope.getQueuesByGene(hugoSymbol);
+                    var currentTimeStamp = new Date().getTime();
+                    for (var i = 0; i < currentQueues.length; i++) {
+                        if (currentQueues[i].addedAt === queueItem.addedAt) {
+                            currentQueues[i].notified = currentTimeStamp;
+                            break;
+                        }
+                    }
+                    $scope.updateQueueInDB(hugoSymbol, currentQueues).then(function(result) {
+                        queueItem.notified = currentTimeStamp;
+                    });
+                };
+                function deleteCuration(queueItem) {
+                    var hugoSymbol = queueItem.hugoSymbol;
+                    var currentQueues = $scope.getQueuesByGene(hugoSymbol);
+                    var updatedQueues = [];
+                    _.each(currentQueues, function(item) {
+                        if (item.addedAt !== queueItem.addedAt) {
+                            updatedQueues.push(item);
+                        }
+                    });
+                    $scope.updateQueueInDB(hugoSymbol, updatedQueues).then(function(result) {
+                        $scope.queue = _.without($scope.queue, queueItem);
+                    });
                 };
                 $scope.getArticle = function(pmid) {
                     if (!pmid) {
@@ -425,7 +417,7 @@ angular.module('oncokbApp')
                         console.log('error');
                     });
                 };
-                $scope.sendEmail = function(queueItem, queueModelItem) {
+                $scope.sendEmail = function(queueItem) {
                     var expiredCuration = false;
                     if ($scope.isExpiredCuration(queueItem.dueDay)) {
                         expiredCuration = true;
@@ -475,9 +467,7 @@ angular.module('oncokbApp')
                     var subject = 'OncoKB Curation Assignment';
                     mainUtils.sendEmail(email, subject, content).then(function() {
                         if (expiredCuration) {
-                            var currentTimeStamp = new Date().getTime();
-                            queueModelItem.set('notified', currentTimeStamp);
-                            queueItem.notified = currentTimeStamp;
+                            setCurationNotified(queueItem);
                         }
                     }, function(error) {
                         dialogs.error('Error', 'Failed to notify curator automatically. Please send curator email manually.');
@@ -561,18 +551,13 @@ angular.module('oncokbApp')
                             $scope.data.resendEmail = false;
                         }
                     }
+                    $scope.resendEmail = $scope.data.resendEmail;
                 };
                 $scope.secondTimeAutoNotify = function() {
                     _.each($scope.queue, function (queueItem) {
                         var hugoSymbol = queueItem.hugoSymbol;
                         if (hugoSymbol && queueItem.curator && !queueItem.curated && mainUtils.isExpiredCuration(queueItem.dueDay) && !queueItem.notified) {
-                            for (var i = 0; i < $rootScope.queuesData.get(hugoSymbol).length; i++) {
-                                var queueModelItem = $rootScope.queuesData.get(hugoSymbol).get(i);
-                                if (queueModelItem.get('addedAt') === queueItem.addedAt) {
-                                    $scope.sendEmail(queueItem, queueModelItem);
-                                    break;
-                                }
-                            }
+                            $scope.sendEmail(queueItem);
                         }
                     });
                 };
@@ -583,6 +568,21 @@ angular.module('oncokbApp')
                     } else {
                         return 0;
                     }
+                }
+                $scope.getQueuesByGene = function(hugoSymbol) {
+                    return $rootScope.firebaseQueues[hugoSymbol] ? angular.copy($rootScope.firebaseQueues[hugoSymbol].queue) : [];
+                };
+                $scope.updateQueueInDB = function (hugoSymbol, updatedQueues) {
+                    var defer = $q.defer();
+                    firebase.database().ref('Queues/' + hugoSymbol).set({
+                        queue: updatedQueues
+                    }).then(function(result) {
+                        defer.resolve('success');
+                    }).catch(function(error) {
+                        dialogs.error('Error', 'Fail to save changes to database. Please contact developer!');
+                        defer.reject(error);
+                    });
+                    return defer.promise;
                 }
                 jQuery.extend(jQuery.fn.dataTableExt.oSort, {
                     'date-html-asc': function(a, b) {

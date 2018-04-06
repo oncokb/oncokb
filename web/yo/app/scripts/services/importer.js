@@ -83,7 +83,7 @@ angular.module('oncokbApp')
                     // open up the original additional files for copying purpose
                     additionalFile.load(['all']).then(function(result) {
                         var newFolderId = folderResult.id;
-                        var apiCalls = [backupMeta(newFolderId), backupQueues(newFolderId)];
+                        var apiCalls = [backupMeta(newFolderId)];
                         $q.all(apiCalls).then(function(result) {
                             backupGene(parentFolderId, callback);
                         }, function(error) {
@@ -150,50 +150,6 @@ angular.module('oncokbApp')
                         });
                         newMetaModel.getRoot().set('api', newAPI);
                         console.log('Completed back up meta file');
-                        deferred.resolve('success');
-                    }
-                });
-            });
-            return deferred.promise;
-        }
-        function backupQueues(parentFolderId) {
-            var deferred = $q.defer();
-            storage.createDocument('Queues', parentFolderId).then(function(file) {
-                console.log('Created queues file');
-                storage.getAdditionalRealtimeDocument(file.id).then(function(queuesRealtime) {
-                    if (queuesRealtime && queuesRealtime.error) {
-                        deferred.reject('Failed to get new queues realtime document');
-                    } else {
-                        var newQueuesModel = queuesRealtime.getModel();
-                        var newQueues = newQueuesModel.createMap();
-                        // backup queues file
-                        var originalQueues = $rootScope.queuesData;
-                        var hugoSymbols = originalQueues.keys();
-                        _.each(hugoSymbols, function(hugoSymbol) {
-                            var queuesByGene = newQueuesModel.createList();
-                            _.each(originalQueues.get(hugoSymbol).asArray(), function(item) {
-                                var newItem = newQueuesModel.createMap({
-                                    link: item.get('link'),
-                                    variant: item.get('variant'),
-                                    mainType: item.get('mainType'),
-                                    subType: item.get('subType'),
-                                    section: item.get('section'),
-                                    curator: item.get('curator'),
-                                    curated: item.get('curated'),
-                                    addedBy: item.get('addedBy'),
-                                    addedAt: item.get('addedAt'),
-                                    dueDay: item.get('dueDay'),
-                                    comment: item.get('comment'),
-                                    notified: item.get('notified'),
-                                    article: item.get('article'),
-                                    pmid: item.get('pmid'),
-                                });
-                                queuesByGene.push(newItem);
-                            });
-                            newQueues.set(hugoSymbol, queuesByGene);
-                        });
-                        newQueuesModel.getRoot().set('queues', newQueues);
-                        console.log('Completed back up queues file');
                         deferred.resolve('success');
                     }
                 });

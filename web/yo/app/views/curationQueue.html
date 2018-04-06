@@ -95,7 +95,7 @@
                 <button class="btn btn-default" ng-click="clearInput()">Cancel</button>
             </div>
         </div>
-        <table class="table" id="queues" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
+        <table ng-if="queue.length > 0" class="table" id="queues" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
             <thead>
                 <tr>
                     <th ng-if="location === 'queues'">Gene</th>
@@ -113,7 +113,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="x in queue" ng-show="data.allCurations || !x.curated">
+                <!--
+                    make sure to add track by $index, otherwise angualr will add $$hashkey to array element automatically,
+                    which will cause issue to update to firestore
+                -->
+                <tr ng-repeat="x in queue track by $index" ng-show="data.allCurations || !x.curated">
                     <td ng-if="location === 'queues'"><strong><a ng-href="#/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
                     <td>
                         <a href="{{x.link}}" target="_blank" ng-if="x.link">{{x.article}}</a>
