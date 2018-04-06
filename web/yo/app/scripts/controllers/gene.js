@@ -3239,7 +3239,7 @@ angular.module('oncokbApp')
                 var size = $scope.vus.length;
 
                 for (var i = 0; i < size; i++) {
-                    if ($scope.vus.get(i).name.getText() === variantName) {
+                    if ($scope.vus[i].name === variantName) {
                         return true;
                     }
                 }
@@ -3250,11 +3250,10 @@ angular.module('oncokbApp')
             function addVUS() {
                 var defer = $q.defer();
                 storage.loadDataFromFirebase('VUS/' + $scope.gene.name.getText()).then(function(vus) {
-                    if (!vus || !_.isArray(Array.from(vus))) {
+                    if (!vus || !_.isArray(vus)) {
                         vus = [];
                     }
-                    $scope.vus = vus;
-                    defer.resolve($scope.vus);
+                    defer.resolve(vus);
                 }, function(error) {
                     defer.reject('Fail to load VUS data!');
                     console.log(error);
@@ -3544,6 +3543,7 @@ angular.module('oncokbApp')
                 })
                 .finally(function() {
                     addVUS().then(function (vus) {
+                        $scope.vus = vus;
                         $scope.getMutationMessages();
                     });
                     getSuggestedMutations();
