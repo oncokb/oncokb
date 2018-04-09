@@ -2394,7 +2394,7 @@ angular.module('oncokbApp')
                         return true;
                     }
                 default:
-                    return false;    
+                    return false;
                 }
             }
             $scope.move = function (angleType, event, type, mutation, tumor, ti, treatment) {
@@ -3535,6 +3535,7 @@ angular.module('oncokbApp')
                             $scope.model = model;
                             loadMetaFile(afterCreateGeneModel);
                         }
+                        $rootScope.currentHugoSymbol = $scope.gene.name.getText();
                     } else {
                         $scope.model = '';
                     }

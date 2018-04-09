@@ -581,6 +581,22 @@ angular.module('oncokbApp')
                 };
                 return deferred.promise;
             };
+
+            /**
+             * get json data from Firebase
+             */
+            self.loadDataFromFirebase = function(path){
+                var defer = $q.defer();
+                var ref = firebase.database().ref(path);
+                ref.on('value', function(doc) {
+                    var data = doc.val();
+                    defer.resolve(data);
+                }, function(error) {
+                    defer.reject('Fail to load json data from Firebase');
+                    console.log(error);
+                });
+                return defer.promise;
+            }
             return self;
         }]
     );
