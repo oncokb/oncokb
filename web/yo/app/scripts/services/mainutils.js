@@ -38,10 +38,6 @@ angular.module('oncokbApp')
                                             gene.name.setText(hugoSymbol);
                                             model.getRoot().set('gene', gene);
                                         }
-                                        if (!model.getRoot().get('vus')) {
-                                            var vus = model.createList();
-                                            model.getRoot().set('vus', vus);
-                                        }
                                         if (!model.getRoot().get('history')) {
                                             var history = model.createMap();
                                             model.getRoot().set('history', history);

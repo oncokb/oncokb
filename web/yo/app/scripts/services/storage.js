@@ -499,11 +499,8 @@ angular.module('oncokbApp')
                     if (sendEmail) {
                         if (error.isFatal && self.document) {
                             var gene = self.document.getModel().getRoot().get('gene');
-                            var vus = self.document.getModel().getRoot().get('vus');
                             var geneData = stringUtils.getGeneData(gene, false, false);
-                            var vusData = stringUtils.getVUSFullData(vus, false);
-                            errorMessage += '\n\ngene: ' + geneData +
-                                '\n\nVUS: ' + vusData;
+                            errorMessage += '\n\ngene: ' + geneData;
                         }
                         $rootScope.$emit('oncokbError', {
                             message: errorMessage,
@@ -581,6 +578,22 @@ angular.module('oncokbApp')
                 };
                 return deferred.promise;
             };
+
+            /**
+             * get json data from Firebase
+             */
+            self.loadDataFromFirebase = function(path){
+                var defer = $q.defer();
+                var ref = firebase.database().ref(path);
+                ref.on('value', function(doc) {
+                    var data = doc.val();
+                    defer.resolve(data);
+                }, function(error) {
+                    defer.reject('Fail to load json data from Firebase');
+                    console.log(error);
+                });
+                return defer.promise;
+            }
             return self;
         }]
     );

@@ -51,33 +51,42 @@ angular.module('oncokbApp')
                 });
 
                 scope.$watch('comments.length', function() {
-                    var commentsCopy = {
-                        resolved: [],
-                        content: []
-                    };
-                    for (var i = 0; i < scope.comments.length; i++) {
-                        commentsCopy.resolved.push(scope.comments.get(i).resolved.getText());
-                        commentsCopy.content.push(scope.comments.get(i).content.getText());
+                    if(scope.comments !== undefined) {
+                        var commentsCopy = {
+                            resolved: [],
+                            content: []
+                        };
+                        for (var i = 0; i < scope.comments.length; i++) {
+                            if (_.isArray(scope.comments)) {
+                                commentsCopy.resolved.push(scope.comments[i].resolved);
+                                commentsCopy.content.push(scope.comments[i].content);
+                            } else {
+                                commentsCopy.resolved.push(scope.comments.get(i).resolved.getText());
+                                commentsCopy.content.push(scope.comments.get(i).content.getText());
+                            }
+                        }
+                        scope.commentsCopy = commentsCopy;
                     }
-                    scope.commentsCopy = commentsCopy;
                 });
 
                 scope.$watch('commentsCopy.resolved', function() {
-                    var allResolved = true;
-                    if (scope.commentsCopy.resolved.length > 0) {
-                        scope.status.hasComment = true;
-                        for (var i = 0; i < scope.commentsCopy.resolved.length; i++) {
-                            if (scope.commentsCopy.resolved[i] !== 'true') {
-                                allResolved = false;
-                                break;
+                    if(!_.isEmpty(scope.commentsCopy)) {
+                        var allResolved = true;
+                        if (scope.commentsCopy.resolved.length > 0) {
+                            scope.status.hasComment = true;
+                            for (var i = 0; i < scope.commentsCopy.resolved.length; i++) {
+                                if (scope.commentsCopy.resolved[i] !== 'true') {
+                                    allResolved = false;
+                                    break;
+                                }
                             }
+                            scope.status.allResolved = allResolved;
+                        } else {
+                            scope.status = {
+                                hasComment: false,
+                                allResolved: false
+                            };
                         }
-                        scope.status.allResolved = allResolved;
-                    } else {
-                        scope.status = {
-                            hasComment: false,
-                            allResolved: false
-                        };
                     }
                 }, true);
 
@@ -95,8 +104,14 @@ angular.module('oncokbApp')
             controller: function($scope) {
                 $scope.blur = function(index) {
                     /* eslint new-cap: 0*/
-                    if ($scope.comments.get(index).content.getText() !== $scope.commentsCopy.content[index]) {
-                        $scope.commentsCopy.content[index] = $scope.comments.get(index).content.getText();
+                    if(_.isArray($scope.comments)) {
+                        if ($scope.comments[index].content !== $scope.commentsCopy.content[index]) {
+                            $scope.commentsCopy.content[index] = $scope.comments[index].content;
+                        }
+                    } else {
+                        if ($scope.comments.get(index).content.getText() !== $scope.commentsCopy.content[index]) {
+                            $scope.commentsCopy.content[index] = $scope.comments.get(index).content.getText();
+                        }
                     }
                 };
 
@@ -110,12 +125,19 @@ angular.module('oncokbApp')
                     $scope.params.newCommentContent = '';
                 };
                 $scope.resolve = function(index) {
-                    $scope.comments.get(index).resolved.setText('true');
+                    if(_.isArray($scope.comments)) {
+                        $scope.comments[index].resolved = 'true';
+                    } else {
+                        $scope.comments.get(index).resolved.setText('true');
+                    }
                     $scope.commentsCopy.resolved[index] = 'true';
                 };
                 $scope.delete = function(index) {
                     $scope.comments.remove(index);
                 };
+                $scope.isArray = function(object) {
+                    return _.isArray(object);
+                }
             }
         };
     });

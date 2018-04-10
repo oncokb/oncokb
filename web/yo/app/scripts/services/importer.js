@@ -313,31 +313,6 @@ angular.module('oncokbApp')
             }
         }
 
-        function createVUSItem(vusItem, vusModel, model) {
-            var vus = model.create(OncoKB.VUSItem);
-
-            vus.name.setText(vusItem.name);
-            _.each(vusItem.time, function(time) {
-                var timeStamp = model.create(OncoKB.TimeStampWithCurator);
-                timeStamp.value.setText(time.value);
-                timeStamp.by.name.setText(time.by.name);
-                timeStamp.by.email.setText(time.by.email);
-                vus.time.push(timeStamp);
-            });
-
-            if (vusItem.nameComments) {
-                _.each(vusItem.nameComments, function(comment) {
-                    var _comment = model.create('Comment');
-                    _comment.date.setText(comment.date);
-                    _comment.userName.setText(comment.userName);
-                    _comment.email.setText(comment.email);
-                    _comment.content.setText(comment.content);
-                    _comment.resolved.setText(comment.resolved);
-                    vus.name_comments.push(_comment);
-                });
-            }
-            vusModel.push(vus);
-        }
         function copyFileData(folderId, fileId, fileTitle, docIndex) {
             var deferred = $q.defer();
             storage.requireAuth(true).then(function() {
@@ -349,28 +324,19 @@ angular.module('oncokbApp')
                         } else {
                             console.log('\t Copying');
                             var gene = realtime.getModel().getRoot().get('gene');
-                            var vus = realtime.getModel().getRoot().get('vus');
                             var history = realtime.getModel().getRoot().get('history');
                             if (gene) {
                                 var geneData = stringUtils.getGeneData(gene);
-                                var vusData = stringUtils.getVUSFullData(vus);
                                 var historyData = stringUtils.getHistoryData(history);
                                 storage.getRealtimeDocument(file.id).then(function(newRealtime) {
                                     var model = createModel(newRealtime.getModel());
                                     var geneModel = model.getRoot().get('gene');
-                                    var vusModel = model.getRoot().get('vus');
                                     var historyModel = model.getRoot().get('history');
                                     model.beginCompoundOperation();
                                     for (var key in geneData) {
                                         if (geneModel[key]) {
                                             geneModel = setValue(model, geneModel, geneData[key], key);
                                         }
-                                    }
-
-                                    if (vusData) {
-                                        _.each(vusData, function(vusItem) {
-                                            createVUSItem(vusItem, vusModel, newRealtime.getModel());
-                                        });
                                     }
 
                                     if (!_.isEmpty(historyData)) {
@@ -523,7 +489,6 @@ angular.module('oncokbApp')
 
         function createModel(model) {
             model = createGeneModel(model);
-            model = createVUSModel(model);
             model = createHistoryModel(model);
             return model;
         }
@@ -532,14 +497,6 @@ angular.module('oncokbApp')
             if (!model.getRoot().get('gene')) {
                 var gene = model.create('Gene');
                 model.getRoot().set('gene', gene);
-            }
-            return model;
-        }
-
-        function createVUSModel(model) {
-            if (!model.getRoot().get('vus')) {
-                var vus = model.createList();
-                model.getRoot().set('vus', vus);
             }
             return model;
         }
