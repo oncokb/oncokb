@@ -206,7 +206,7 @@ angular.module('oncokbApp')
                 ];
                 var vusList = [];
                 $scope.vus.forEach(function(e) {
-                    vusList.push(e.name.text.toLowerCase());
+                    vusList.push(e.name.toLowerCase());
                 });
                 if (vusList.indexOf(newMutationName) !== -1) {
                     isVUS = true;
