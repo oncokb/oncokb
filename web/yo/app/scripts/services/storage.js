@@ -464,11 +464,8 @@ angular.module('oncokbApp')
                     if (sendEmail) {
                         if (error.isFatal && self.document) {
                             var gene = self.document.getModel().getRoot().get('gene');
-                            var vus = self.document.getModel().getRoot().get('vus');
                             var geneData = stringUtils.getGeneData(gene, false, false);
-                            var vusData = stringUtils.getVUSFullData(vus, false);
-                            errorMessage += '\n\ngene: ' + geneData +
-                                '\n\nVUS: ' + vusData;
+                            errorMessage += '\n\ngene: ' + geneData;
                         }
                         $rootScope.$emit('oncokbError', {
                             message: errorMessage,

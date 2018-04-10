@@ -34,13 +34,16 @@ angular.module('oncokbApp')
 
                 scope.$watch('dt', function(n, o) {
                     if (n !== o) {
-                        var timeStamp = scope.dModel.create(OncoKB.TimeStampWithCurator);
-                        timeStamp.value.setText(n.getTime().toString());
-                        timeStamp.by.name.setText(user.name);
-                        timeStamp.by.email.setText(user.email);
+                        var timeStamp = {
+                            by: {
+                                email: user.email,
+                                name: user.name
+                            },
+                            value: n.getTime().toString()
+                        };
                         scope.variant.time.push(timeStamp);
                         scope.dtBy = user.name;
-                        var tempMessage = user.name + ' tried to refresh ' + scope.variant.name.text + ' at ' + new Date().toLocaleString();
+                        var tempMessage = user.name + ' tried to refresh ' + scope.variant.name + ' at ' + new Date().toLocaleString();
                         scope.vusUpdate(tempMessage);
                     }
                 });
@@ -49,8 +52,8 @@ angular.module('oncokbApp')
                 $scope.remove = function() {
                     var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
                     dlg.result.then(function() {
-                        var tempMessage = user.name + ' tried to delete ' + $scope.vus.get($scope.index).name.text + ' at ' + new Date().toLocaleString();
-                        $scope.vus.remove($scope.index);
+                        var tempMessage = user.name + ' tried to delete ' + $scope.vus[$scope.index].name + ' at ' + new Date().toLocaleString();
+                        $scope.vus.splice($scope.index, 1);
                         $scope.vusUpdate(tempMessage);
                     }, function() {
                     });
@@ -60,6 +63,7 @@ angular.module('oncokbApp')
                 };
                 $scope.update = function() {
                     $scope.dt = new Date();
+                    $scope.dtBy = user.name;
                 };
                 $scope.getClass = function(dt) {
                     if (dt instanceof Date) {

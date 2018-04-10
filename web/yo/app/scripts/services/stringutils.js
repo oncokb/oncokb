@@ -824,23 +824,24 @@ angular.module('oncokbApp')
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
 
             if (vus) {
-                vus.asArray().forEach(function(vusItem) {
+                vus.forEach(function(vusItem) {
                     var datum = {};
-                    datum.name = vusItem.name.getText();
+                    datum.name = vusItem.name;
                     datum.time = [];
-                    vusItem.time.asArray().forEach(function(time) {
+                    vusItem.time.forEach(function(time) {
                         var _time = {};
-                        _time.value = time.value.getText();
+                        _time.value = time.value;
                         _time.by = {};
-                        _time.by.name = time.by.name.getText();
-                        _time.by.email = time.by.email.getText();
+                        _time.by.name = time.by.name;
+                        _time.by.email = time.by.email;
                         datum.time.push(_time);
                     });
                     if (vusItem.time && vusItem.time.length > 0) {
-                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
+                        datum.lastEdit = vusItem.time[vusItem.time.length - 1].value;
                     }
                     if (!excludeComments) {
-                        datum.nameComments = getComments(vusItem.name_comments);
+                        //TODO adjust getComments() when changing Comments model
+                        datum.nameComments = getComments(vusItem.nameComments);
                     }
                     vusData.push(datum);
                 });
@@ -867,11 +868,11 @@ angular.module('oncokbApp')
         function getVUSData(vus) {
             var vusData = [];
             if (vus) {
-                vus.asArray().forEach(function(vusItem) {
+                vus.forEach(function(vusItem) {
                     var datum = {};
-                    datum.name = vusItem.name.getText();
+                    datum.name = vusItem.name;
                     if (vusItem.time && vusItem.time.length > 0) {
-                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
+                        datum.lastEdit = vusItem.time[vusItem.time.length - 1].value;
                     }
                     vusData.push(datum);
                 });

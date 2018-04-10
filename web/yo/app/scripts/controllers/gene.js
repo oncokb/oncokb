@@ -205,7 +205,7 @@ angular.module('oncokbApp')
                     'inactivating mutation'
                 ];
                 var vusList = [];
-                $scope.vus.asArray().forEach(function(e) {
+                $scope.vus.forEach(function(e) {
                     vusList.push(e.name.text.toLowerCase());
                 });
                 if (vusList.indexOf(newMutationName) !== -1) {
@@ -280,18 +280,24 @@ angular.module('oncokbApp')
             };
             $scope.vusUpdate = function(message) {
                 if ($scope.status.isDesiredGene) {
-                    if ($scope.status.vusUpdateTimeout) {
-                        $timeout.cancel($scope.status.vusUpdateTimeout);
-                    }
-                    $scope.status.vusUpdateTimeout = $timeout(function() {
-                        var vus = $scope.realtimeDocument.getModel().getRoot().get('vus');
-                        var vusData = stringUtils.getVUSData(vus);
-                        DatabaseConnector.updateVUS($scope.gene.name.text, JSON.stringify(vusData), function(result) {
-                            console.log('success saving vus to database');
-                        }, function(error) {
-                            console.log('error happened when saving VUS to DB', error);
-                        });
-                    }, 2000);
+                    var vusData = stringUtils.getVUSData($scope.vus);
+                    var updatedVus = $scope.vus;
+                    _.map(updatedVus, function(vusItem){
+                        vusItem.lastEdit = vusItem.time[vusItem.time.length - 1].value;
+                        delete vusItem['$$hashKey'];
+                        if(_.isArray(vusItem.nameComments)){
+                            _.map(vusItem.nameComments, function(commentItem){
+                                delete commentItem['$$hashKey'];
+                            });
+                        }
+                    });
+                    $rootScope.updatedVus = updatedVus;
+                    DatabaseConnector.updateVUS($scope.gene.name.text, JSON.stringify(vusData), function(result) {
+                        console.log('success saving vus to database');
+                    }, function(error) {
+                        console.log('error happened when saving VUS to DB', error);
+                    });
+
                 }
                 mainUtils.updateLastModified();
             };
@@ -1851,21 +1857,22 @@ angular.module('oncokbApp')
                     });
 
                     if (notExist && !containVariantInVUS(newVUSName)) {
-                        $scope.realtimeDocument.getModel().beginCompoundOperation();
-                        var vus = $scope.realtimeDocument.getModel().create(OncoKB.VUSItem);
-                        var timeStamp = $scope.realtimeDocument.getModel().create(OncoKB.TimeStampWithCurator);
-
                         if (!newVUSTime) {
                             newVUSTime = new Date().getTime().toString();
                         }
-
-                        timeStamp.value.setText(newVUSTime);
-                        timeStamp.by.name.setText(User.name);
-                        timeStamp.by.email.setText(User.email);
-                        vus.name.setText(newVUSName);
+                        var timeStamp = {
+                            by: {
+                                email: User.email,
+                                name: User.name
+                            },
+                            value: newVUSTime
+                        };
+                        var vus = {
+                            name: newVUSName,
+                            time: []
+                        };
                         vus.time.push(timeStamp);
                         $scope.vus.push(vus);
-                        $scope.realtimeDocument.getModel().endCompoundOperation();
                         var tempMessage = User.name + ' tried to add ' + newVUSName + ' at ' + new Date().toLocaleString();
                         $scope.vusUpdate(tempMessage);
                     } else {
@@ -2251,6 +2258,7 @@ angular.module('oncokbApp')
                 var annotationPMIDs = results.PMIDs;
                 var annotationAbstracts = results.abstracts;
 
+                // TODO check getVUSFullData() after getComments() is adjusted for firebase
                 var vusData = JSON.stringify(stringUtils.getVUSFullData(this.vus));
                 results = fetchResults(FindRegex.result(vusData));
                 var vusPMIDs = results.PMIDs;

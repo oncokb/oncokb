@@ -404,6 +404,7 @@ angular.module('oncokbApp')
                             .updateVUS(hugoSymbol, data)
                             .success(function(data) {
                                 success(data);
+                                updateVUSInFirebase(hugoSymbol);
                             })
                             .error(function(error) {
                                 var subject = 'VUS update Error for ' + hugoSymbol;
@@ -418,10 +419,12 @@ angular.module('oncokbApp')
                                 );
                                 fail(error);
                                 setAPIData('vus', hugoSymbol, data);
+                                updateVUSInFirebase(hugoSymbol);
                             });
                     }
                 } else {
                     setAPIData('vus', hugoSymbol, data);
+                    updateVUSInFirebase(hugoSymbol, data);
                 }
             }
             function setAPIData(type, hugoSymbol, data) {
@@ -435,6 +438,11 @@ angular.module('oncokbApp')
                     // $rootScope.apiData.get(hugoSymbol).set(type, $rootScope.metaModel.createList(''));
                 }
             }
+            function updateVUSInFirebase(hugoSymbol){
+                var vusRef = firebase.database().ref('VUS/' + hugoSymbol);
+                vusRef.set($rootScope.updatedVus);
+            }
+
             function updateEvidenceBatch(data, historyData, success, fail) {
                 if (dataFromFile) {
                     success('');
