@@ -79,7 +79,6 @@ angular.module('oncokbApp')
                     mainUtils.notifyDeveloper(subject, content);
                     deferred.reject(result);
                 } else {
-                    documents.setAdditionalDocs(result);
                     var apiCalls = [];
                     if (types.indexOf('all') !== -1  || types.indexOf('meta') !== -1) {
                         apiCalls.push(loadMeta());

@@ -496,8 +496,7 @@ angular.module('oncokbApp')
             nameChanged: [], // name changed sections
             added: [], // newly added sections
             removed: [], // deleted sections
-            precise: [], // the exact item that has been changed
-            isFileEditable: false
+            precise: [] // the exact item that has been changed
         };
     }]);
 angular.module('oncokbApp')

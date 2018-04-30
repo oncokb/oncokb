@@ -7,7 +7,7 @@
  * # vusItem
  */
 angular.module('oncokbApp')
-    .directive('vusItem', function(dialogs, OncoKB, user, FirebaseModel, users) {
+    .directive('vusItem', function(dialogs, OncoKB, FirebaseModel, $rootScope) {
         return {
             templateUrl: 'views/vusItem.html',
             restrict: 'E',
@@ -18,10 +18,6 @@ angular.module('oncokbApp')
                 vusUpdateInGene: '&vusUpdate'
             },
             link: function postLink(scope) {
-                users.isFileEditable().then(function(result) {
-                    scope.fileEditable = result;
-                }, function(error) {
-                });
                 scope.variant = scope.vus.vus[scope.index];
                 scope.dt = new Date(Number(scope.variant.time[scope.variant.time.length - 1].value));
                 scope.dtBy = scope.variant.time[scope.variant.time.length - 1].by.name;
@@ -32,6 +28,7 @@ angular.module('oncokbApp')
                 };
                 scope.$watch('dt', function(n, o) {
                     if (n !== o) {
+                        var user = $rootScope.me;
                         var timeStamp = new FirebaseModel.TimeStamp(user.name, user.email);
                         scope.variant.time.push(timeStamp);
                         scope.dtBy = user.name;
@@ -69,6 +66,7 @@ angular.module('oncokbApp')
                     // pass parameters in value pair mapping format
                     $scope.vusUpdateInGene();
                 };
+                $scope.fileEditable = $rootScope.fileEditable;
             }
         };
     });

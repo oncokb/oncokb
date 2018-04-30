@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'storage', 'loadFile', 'user', 'users', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils', 'mainUtils', 'ReviewResource', 'additionalFile', '$firebaseObject', '$firebaseArray', 'FirebaseModel',
-        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, storage, loadFile, User, Users, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource, additionalFile, $firebaseObject, $firebaseArray, FirebaseModel) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'storage', 'documents', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils', 'mainUtils', 'ReviewResource', 'additionalFile', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'userFire',
+        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, storage, Documents, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource, additionalFile, $firebaseObject, $firebaseArray, FirebaseModel, userFire) {
             $scope.test = function(event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
@@ -486,7 +486,7 @@ angular.module('oncokbApp')
                 ReviewResource.precise = [];
             };
             $scope.developerCheck = function() {
-                return mainUtils.developerCheck(Users.getMe().name);
+                return mainUtils.developerCheck($rootScope.me.name);
             };
             $scope.geneMainDivStyle = {
                 opacity: '1'
@@ -1937,7 +1937,8 @@ angular.module('oncokbApp')
 
                     // if (notExist && !containVariantInVUS(newVUSName)) {
                     if (true) {
-                        var vusItem = new FirebaseModel.VUSItem(newVUSName, Users.getMe().name, Users.getMe().email);
+                        console.log('adding new VUS is not working');
+                        var vusItem = new FirebaseModel.VUSItem(newVUSName, $rootScope.me.name, $rootScope.me.email);
                         // $scope.vusRef[$scope.fileTitle].push(vusItem);
                         $scope.vusFire.vus.push(vusItem);
                         $scope.vusUpdate();
@@ -3209,8 +3210,8 @@ angular.module('oncokbApp')
                 saving: false
             };
             $scope.addMutationPlaceholder = 'Mutation Name';
-            $scope.userRole = Users.getMe().role;
-            $rootScope.userRole = Users.getMe().role;
+            $scope.userRole = $rootScope.me.role;
+            $rootScope.userRole = $rootScope.me.role;
             $scope.levelExps = {
                 SR: $sce.trustAsHtml('<div><strong>Level R1:</strong> ' + $rootScope.meta.levelsDescHtml.R1 + '.<br/>Example 1: Colorectal cancer with KRAS mutation → resistance to cetuximab<br/>Example 2: EGFR-L858R or exon 19 mutant lung cancers with coincident T790M mutation → resistance to erlotinib</div>'),
                 IR: $sce.trustAsHtml('<div><strong>Level R2:</strong> ' + $rootScope.meta.levelsDescHtml.R2 + '.<br/>Example: Resistance to crizotinib in a patient with metastatic lung adenocarcinoma harboring a CD74-ROS1 rearrangement (PMID: 23724914).<br/><strong>Level R3:</strong> ' + $rootScope.meta.levelsDescHtml.R3 + '.<br/>Example: Preclinical evidence suggests that BRAF V600E mutant thyroid tumors are insensitive to RAF inhibitors (PMID: 23365119).<br/></div>')
@@ -3502,13 +3503,13 @@ angular.module('oncokbApp')
                 var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise];
                 $q.all(bindingAPI)
                     .then(function(result) {
-                        $scope.status.rendering = false;
-                        Users.isFileEditable().then(function(result) {
-                            ReviewResource.isFileEditable = result;
-                            $scope.fileEditable = result;
+                        userFire.setFileeditable([$scope.fileTitle]).then(function(result) {
+                            $scope.fileEditable = result[$scope.fileTitle];
+                            $scope.status.rendering = false;
+                            $rootScope.fileEditable = $scope.fileEditable;
                         }, function(error) {
-                            ReviewResource.isFileEditable = false;
                             $scope.fileEditable = false;
+                            $scope.status.rendering = false;
                         });
                     }, function(error) {
                         console.log('Error happened', error);

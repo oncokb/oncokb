@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector, $firebaseAuth, $firebaseObject, userFire) {
         var tabs = {
             // 'vus': 'VUS',
             tree: 'Tree',
@@ -21,7 +21,6 @@ angular.module('oncokbApp')
         };
 
         var accessLevels = config.accessLevels;
-
         function loginCallback() {
             // console.log('In login callback.');
 
@@ -54,19 +53,14 @@ angular.module('oncokbApp')
 
         function setParams() {
             var filterTabs = [];
-            $scope.user = $rootScope.user;
-            if (access.authorize(accessLevels.curator)) {
-                filterTabs.push({key: 'genes', value: tabs.genes});
-                filterTabs.push({key: 'queues', value: tabs.queues});
-            }
-            if (access.authorize(accessLevels.admin) && $rootScope.internal) {
+            filterTabs.push({key: 'genes', value: tabs.genes});
+            filterTabs.push({key: 'queues', value: tabs.queues});
+            if ($rootScope.me.role === 8) {
                 var keys = ['tree', 'variant', 'reportGenerator', 'feedback'];
-
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});
                 });
             }
-            $scope.signedIn = access.isLoggedIn();
             $scope.tabs = filterTabs;
         }
 
@@ -84,23 +78,40 @@ angular.module('oncokbApp')
                 }
             });
         }
-
+        $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
+            if (firebaseUser) {
+                console.log("Signed in as:", firebaseUser.uid);
+                console.log(firebaseUser);
+                $rootScope.isSignedIn = true;
+                userFire.setRole(firebaseUser).then(function() {
+                    $scope.user = $rootScope.me;
+                    setParams();
+                }, function(error) {
+                });
+            } else {
+                console.log('not logged in yet');
+            }                
+        });
         // Render the sign in button.
-        $scope.renderSignInButton = function(immediateMode) {
-            if (immediateMode !== false) {
-                immediateMode = true;
-            }
-            storage.requireAuth(immediateMode).then(function(result) {
-                $scope.signInCallback(result);
+        $scope.renderSignInButton = function() {
+            // if (!$rootScope.isSignedIn) {
+                
+            // }             
+            console.log('ready to login');
+            userFire.login().then(function() {
+                console.log('finished to login');
+                $scope.user = $rootScope.me;
+                setParams();
+            }, function(error) {
+                console.log('failed to login', error);
             });
         };
-
+        
         $scope.signOut = function() {
-            access.logout();
-            $scope.signedIn = false;
-            $scope.user = $rootScope.user;
-            $location.path('/');
-            gapi.auth.signOut();
+            userFire.logout().then(function() {
+                $location.path('/');
+                $scope.tabs = [];
+            });
         };
 
         $scope.tabIsActive = function(route) {
@@ -138,14 +149,17 @@ angular.module('oncokbApp')
         };
 
         // This flag we use to show or hide the button in our HTML.
-        $scope.signedIn = false;
-        $scope.user = $rootScope.user;
+        // $scope.signedIn = false;
 
-        $rootScope.$watch('user', setParams);
+        $rootScope.$watch('isSignedIn', function(n, o) {
+            if (n !== o) {
+                $scope.isSignedIn = $rootScope.isSignedIn;
+            }
+        });
 
         $rootScope.$watch('dataLoaded', function(n) {
             if (n) {
-                $scope.renderSignInButton();
+                // $scope.renderSignInButton();
             }
         });
     });

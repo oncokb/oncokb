@@ -7,7 +7,7 @@
  * # comments
  */
 angular.module('oncokbApp')
-    .directive('commentsDict', function(DatabaseConnector, users, $timeout, $firebaseObject, FirebaseModel) {
+    .directive('commentsDict', function(DatabaseConnector, $timeout, $firebaseObject, FirebaseModel, ReviewResource, $rootScope) {
         return {
             templateUrl: 'views/comments.html',
             restrict: 'AE',
@@ -18,10 +18,6 @@ angular.module('oncokbApp')
             },
             replace: true,
             link: function postLink(scope, element, attrs) {
-                users.isFileEditable().then(function(result) {
-                    scope.fileEditable = result;
-                }, function(error) {
-                });                
                 scope.mouseLeaveTimeout = '';
                 scope.params = {};
                 scope.status = {
@@ -29,7 +25,7 @@ angular.module('oncokbApp')
                     hasComment: false,
                     allResolved: false
                 };
-                scope.userRole = users.getMe().role;
+                scope.userRole = $rootScope.me.role;
                 if (!scope.vusObj) {
                     $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "obj").then(function (success) {
                         scope.checkResolvedStatus();
@@ -70,7 +66,7 @@ angular.module('oncokbApp')
             },
             controller: function($scope) {
                 $scope.add = function() {
-                    var user = users.getMe();
+                    var user = $rootScope.me;
                     var comment = new FirebaseModel.Comment(user.name, user.email, $scope.params.newCommentContent);
                     if(!$scope.obj[$scope.key+'_comments']) {
                         $scope.obj[$scope.key+'_comments'] = [];
@@ -102,6 +98,7 @@ angular.module('oncokbApp')
                         });
                     }
                 };
+                $scope.fileEditable = $rootScope.fileEditable;
             }
         };
     });

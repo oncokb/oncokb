@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function (gapi, $timeout, _, $rootScope, user, stringUtils, mainUtils, ReviewResource, $firebaseObject, users) {
+    .directive('realtimeString', function (gapi, $timeout, _, $rootScope, stringUtils, mainUtils, ReviewResource, $firebaseObject) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -21,10 +21,6 @@ angular.module('oncokbApp')
             replace: true,
             link: {
                 pre: function preLink(scope) {
-                    users.isFileEditable().then(function(result) {
-                        scope.fe = result;
-                    }, function(error) {
-                    });
                     $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "data").then(function (success) {
                         scope.uuid = scope.data[scope.key+'_uuid'];
                         if (scope.t === 'treatment-select') {
@@ -121,6 +117,7 @@ angular.module('oncokbApp')
                 $scope.inReviewMode = function () {
                     return ReviewResource.reviewMode;
                 };
+                $scope.fe = $rootScope.fileEditable;
                 function calculateDiff() {
                     if (($scope.t === 'p')) {
                         var dmp = new diff_match_patch();
@@ -142,7 +139,7 @@ angular.module('oncokbApp')
                         $scope.lastReviewed = $scope.data[$scope.key + '_review'].lastReviewed;
                         calculateDiff();
                     }
-                    var contentEditable = ReviewResource.reviewMode ? ($scope.uuid && ReviewResource.rejected.indexOf($scope.uuid) === -1 ? true : false) : $scope.fe;
+                    var contentEditable = ReviewResource.reviewMode ? ($scope.uuid && ReviewResource.rejected.indexOf($scope.uuid) === -1 ? true : false) : $rootScope.fileEditable;
                     var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
                     if ($scope.t === 'p') {
                         classResult += ' doubleH';

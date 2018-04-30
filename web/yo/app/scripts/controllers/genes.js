@@ -3,12 +3,12 @@
 angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config', 'storage', 'documents',
-        'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$firebaseObject', '$firebaseArray',
+        'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$firebaseObject', '$firebaseArray', 'userFire',
         function($scope, $rootScope, $location, $timeout, $routeParams, _,
-                 config, storage, Documents, users,
+                 config, storage, Documents,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $firebaseObject, $firebaseArray) {
+                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $firebaseObject, $firebaseArray, userFire) {
             function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -70,33 +70,38 @@ angular.module('oncokbApp')
             
             function processMeta() {
                 additionalFile.load(['all']).then(function(result) {
-                    _.each(_.keys($rootScope.metaData), function(hugoSymbol) {
-                        $scope.metaFlags[hugoSymbol] = {
-                            hugoSymbol: hugoSymbol,
-                            lastModifiedBy: $rootScope.metaData[hugoSymbol].lastModifiedBy,
-                            lastModifiedAt: $rootScope.metaData[hugoSymbol].lastModifiedAt,
-                            queues: 0,
-                            review: 'No'
-                        };
-                        if (_.keys($rootScope.metaData[hugoSymbol]).length > 2) {
-                            $scope.metaFlags[hugoSymbol].review = 'Yes';
-                        }
-                        if ($rootScope.firebaseQueues[hugoSymbol]) {
-                            _.each($rootScope.firebaseQueues[hugoSymbol].queue, function(item) {
-                                if (!item.curated) {
-                                    if ($scope.metaFlags[hugoSymbol] && $scope.metaFlags[hugoSymbol].queues) {
-                                        $scope.metaFlags[hugoSymbol].queues++;
-                                    } else {
-                                        $scope.metaFlags[hugoSymbol] = {
-                                            queues: 1
-                                        };
+                    var hugoSymbols = _.keys($rootScope.metaData);
+                    userFire.setFileeditable(hugoSymbols).then(function(editableData) {
+                        _.each(hugoSymbols, function(hugoSymbol) {
+                            $scope.metaFlags[hugoSymbol] = {
+                                hugoSymbol: hugoSymbol,
+                                lastModifiedBy: $rootScope.metaData[hugoSymbol].lastModifiedBy,
+                                lastModifiedAt: $rootScope.metaData[hugoSymbol].lastModifiedAt,
+                                queues: 0,
+                                review: 'No',
+                                editable: editableData[hugoSymbol]
+                            };
+                            if (_.keys($rootScope.metaData[hugoSymbol]).length > 2) {
+                                $scope.metaFlags[hugoSymbol].review = 'Yes';
+                            }
+                            if ($rootScope.firebaseQueues[hugoSymbol]) {
+                                _.each($rootScope.firebaseQueues[hugoSymbol].queue, function(item) {
+                                    if (!item.curated) {
+                                        if ($scope.metaFlags[hugoSymbol] && $scope.metaFlags[hugoSymbol].queues) {
+                                            $scope.metaFlags[hugoSymbol].queues++;
+                                        } else {
+                                            $scope.metaFlags[hugoSymbol] = {
+                                                queues: 1
+                                            };
+                                        }
                                     }
-                                }
-                            });
-                        }
+                                });
+                            }
+                        });
+                        $scope.status.rendering = false;
                     });
-                    $scope.status.rendering = false;
                 });
+                
             }
             processMeta();
             var dueDay = angular.element(document.querySelector('#genesdatepicker'));
@@ -116,10 +121,10 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.userRole = users.getMe().role;
+            $scope.userRole = $rootScope.me.role;
 
             var sorting = [[2, 'asc'], [1, 'desc'], [0, 'asc']];
-            if (users.getMe().role === 8) {
+            if ($scope.userRole === 8) {
                 sorting = [[4, 'desc'], [5, 'desc'], [1, 'desc'], [0, 'asc']];
             }
 
@@ -135,7 +140,7 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(2),
                 DTColumnDefBuilder.newColumnDef(3)
             ];
-            if (users.getMe().role === 8) {
+            if ($scope.userRole === 8) {
                 $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(4));
                 $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(5));
             }
@@ -226,7 +231,7 @@ angular.module('oncokbApp')
             };
 
             $scope.developerCheck = function() {
-                return MainUtils.developerCheck(users.getMe().name);
+                return MainUtils.developerCheck($rootScope.me.name);
             };
 
             function getCacheStatus() {

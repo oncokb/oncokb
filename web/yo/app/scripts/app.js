@@ -506,8 +506,9 @@ var oncokbApp = angular.module('oncokbApp', [
     'firebase'
 ])
     .value('user', {
-        name: 'N/A',
-        email: 'N/A'
+        name: '',
+        email: '',
+        photoURL: ''
     })
     .value('OncoKB', OncoKB)
     // This is used for typeahead
@@ -637,8 +638,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils', 'mainUtils',
-        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils, mainUtils) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'storage', 'access', 'config', 'DatabaseConnector', 'users', 'dialogs', 'stringUtils', 'mainUtils', 'userFire',
+        function($timeout, $rootScope, $location, loadingScreen, storage, Access, config, DatabaseConnector, Users, dialogs, stringUtils, mainUtils, userFire) {
             $rootScope.errors = [];
 
             // If data is loaded, the watch in nav controller should be triggered.
@@ -724,18 +725,9 @@ angular.module('oncokbApp').run(
             });
 
             $rootScope.$on('$routeChangeStart', function(event, next) {
-                if (!Access.authorize(next.access) || (next.internalUse && !$rootScope.internal)) {
-                    if (!Access.isLoggedIn()) {
-                        Access.setURL($location.path());
-                    }
+                if (!$rootScope.isSignedIn) {
                     $location.path('/');
-                }
-                if (Access.isLoggedIn() && Access.getURL()) {
-                    $location.path(Access.getURL());
-                    Access.setURL('');
-                } else if (Access.isLoggedIn() && !Access.getURL() && Access.authorize(config.accessLevels.curator) && next.templateUrl === 'views/welcome.html') {
-                    $location.path('/genes');
-                }
+                }                
             });
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {

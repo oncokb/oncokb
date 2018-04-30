@@ -73,7 +73,6 @@
                     </button>
                     <a class="navbar-brand" ng-href="#/">OncoKB</a>
                 </div>
-
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
 
@@ -84,20 +83,20 @@
                         <li>
                             <!-- <span ng-if="!signedIn"><i class="fa fa-google fa-lg"></i> Login with Google</span>
                             <span ng-if="signedIn">Welcome</span> -->
-
-                            <div ng-if="signedIn" style="float: left">
-                                <div  style="float: left; margin: 5px">
+                                
+                            <div ng-if="isSignedIn" style="float: left">
+                                <div style="float: left; margin: 5px">
                                     <span>{{user.email | cut:true:20}}</span><br/>
                                     <span id="signout" style="" ng-click="signOut()">Sign out</span>
                                 </div>
-                                <img style="float: left" ng-if="user.avatar !== ''" ng-src="{{user.avatar}}">
+                                <img style="float: left;width:50px" ng-if="user.photoURL !== ''" ng-src="{{user.photoURL}}">
                             </div>
-                            <div class="btn-group" role="group" ng-show="!signedIn" id="googleSignIn">
+                            <div class="btn-group" role="group" ng-show="!isSignedIn" id="googleSignIn">
                                 <!-- <span id="signInButton">
                                 </span> -->
                                 <!-- <i class="fa fa-google"></i> -->
                                 <button class="btn btn-default" disabled><i class="fa fa-google"></i></button>
-                                <button class="btn btn-default" ng-click="renderSignInButton(false)">Sign in</button>
+                                <button class="btn btn-default" ng-click="renderSignInButton()">Sign in</button>
                             </div>
                         </li>
                     </ul>
@@ -215,8 +214,8 @@
     <script src="scripts/services/storage.js"></script>
     <script src="scripts/controllers/nav.js"></script>
     <script src="scripts/services/users.js"></script>
+    <script src="scripts/services/userFire.js"></script>
     <script src="scripts/services/documents.js"></script>
-    <script src="scripts/services/loadfile.js"></script>
     <script src="scripts/services/additionalFile.js"></script>
     <script src="scripts/services/access.js"></script>
     <script src="scripts/directives/comments.js"></script>
