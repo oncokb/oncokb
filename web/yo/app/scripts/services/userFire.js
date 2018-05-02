@@ -11,7 +11,7 @@
  * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
-    .service('userFire', function user(config, $routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope) {
+    .service('userFire', function user(config, $routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, $location) {
         var me = {
             email: '',
             name: '',
@@ -19,6 +19,7 @@ angular.module('oncokbApp')
             genes: []
         };
         var editableData = {};
+        var allUsers = {};
         function login() {
             var defer = $q.defer();
             $firebaseAuth().$signInWithPopup("google").then(function(gResp) {
@@ -27,8 +28,8 @@ angular.module('oncokbApp')
                 me.photoURL = gResp.user.photoURL;
                 $rootScope.isSignedIn = true;
                 setRole(gResp.user).then(function() {
-                    defer.resolve();
                     $rootScope.me = me;
+                    defer.resolve();
                 }, function(error) {
                     defer.reject(error);
                 });
@@ -44,48 +45,16 @@ angular.module('oncokbApp')
                 me.photoURL = user.photoURL;
             }
             var defer = $q.defer();
-            var currentUser = $firebaseObject(firebase.database().ref('Users/' + user.uid));
-            currentUser.$loaded().then(function(data) {
-                if (!data.email) {
-                    saveNewUser(user).then(function() {
-                        defer.resolve();
-                        $rootScope.me = me;
-                    }, function(error) {
-                        defer.reject(error);
-                    });
-                } else {
-                    if (data.admin === true) {
-                        me.role = 8;
-                    } else {
-                        me.role = 4;
-                    }
-                    defer.resolve();
-                    $rootScope.me = me;
-                }
-            }).catch(function(error) {
-                defer.reject(error);
-            });
-            return defer.promise;
-        }
-        function saveNewUser(user) {
-            var defer = $q.defer();
-            DriveOncokbInfo.getFirebasePermission().then(function(response) {
-                var permission = response.data;
-                var currentUser = $firebaseObject(firebase.database().ref('Users/' + user.uid));
-                currentUser.email = user.email;
-                currentUser.displayName = user.displayName;
-                if (permission.admins.indexOf(user.email) !== -1) {
-                    currentUser.admin = true;
+            getAllUsers().then(function() {
+                if (allUsers[me.name.toLowerCase()].admin === true) {
                     me.role = 8;
-                } else if (permission.commonUsers[user.email]) {
-                    currentUser.genes = permission.commonUsers[user.email];
+                } else {
                     me.role = 4;
-                }                                        
-                currentUser.$save().then(function(res) {
-                    defer.resolve();
-                }, function(error) {
-                    defer.reject(error);
-                });    
+                }
+                defer.resolve();
+                $rootScope.me = me;
+            }, function(error) {
+                console.log('fail to get users information');
             });
             return defer.promise;
         }
@@ -101,22 +70,18 @@ angular.module('oncokbApp')
         }
         function setFileeditable(hugoSymbols) {
             var defer = $q.defer();
+            defer.resolve(editableData);
             if (_.isEmpty(editableData) || hugoSymbols.length === 1) {
-                firebase.database().ref('Users').on('value', function(users) {
-                    var usersInfo = users.val();
-                    for(var i = 0; i < _.keys(usersInfo).length; i++) {
-                        var currentUser = usersInfo[_.keys(usersInfo)[i]];
-                        if (currentUser.email === me.email) {
-                            _.each(hugoSymbols, function(hugoSymbol) {
-                                if (currentUser.admin || currentUser.genes.indexOf(hugoSymbol) !== -1) {
-                                    editableData[hugoSymbol] = true;
-                                } else {
-                                    editableData[hugoSymbol] = false;
-                                }
-                            });
-                            defer.resolve(editableData);
+                getAllUsers().then(function(users) {
+                    var name = me.name.toLowerCase();
+                    _.each(hugoSymbols, function(hugoSymbol) {
+                        if (users[name].admin === true || users[name].genes.indexOf(hugoSymbol) !== -1) {
+                            editableData[hugoSymbol] = true;
+                        } else {
+                            editableData[hugoSymbol] = false;
                         }
-                    }
+                    });
+                    defer.resolve(editableData);
                 }, function(error) {
                     defer.reject(error);
                 });
@@ -132,12 +97,26 @@ angular.module('oncokbApp')
                 return false;
             }
         }
-
+        function getAllUsers() {
+            var defer = $q.defer();
+            if (_.isEmpty(allUsers)) {
+                firebase.database().ref('Users').on('value', function(users) {
+                    allUsers = users.val();
+                    defer.resolve(allUsers);
+                }, function(error) {
+                    defer.reject(error);
+                });
+            } else {
+                defer.resolve(allUsers);
+            }            
+            return defer.promise;
+        }
         return {
             login: login,
             logout: logout,
             isFileEditable: isFileEditable,
             setFileeditable: setFileeditable,
-            setRole: setRole
+            setRole: setRole,
+            getAllUsers: getAllUsers
         };
     });

@@ -8,14 +8,12 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector, $firebaseAuth, $firebaseObject, userFire) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, DatabaseConnector, $firebaseAuth, $firebaseObject, userFire) {
         var tabs = {
-            // 'vus': 'VUS',
             tree: 'Tree',
             variant: 'Variant Annotation',
             genes: 'Genes',
-            // 'dataSummary': 'Summary',
-            reportGenerator: 'Tools',
+            tools: 'Tools',
             feedback: 'Feedback',
             queues: 'Curation Queue'
         };
@@ -56,7 +54,7 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'genes', value: tabs.genes});
             filterTabs.push({key: 'queues', value: tabs.queues});
             if ($rootScope.me.role === 8) {
-                var keys = ['tree', 'variant', 'reportGenerator', 'feedback'];
+                var keys = ['tree', 'variant', 'tools', 'feedback'];
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});
                 });
@@ -80,30 +78,25 @@ angular.module('oncokbApp')
         }
         $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
-                console.log("Signed in as:", firebaseUser.uid);
-                console.log(firebaseUser);
                 $rootScope.isSignedIn = true;
                 userFire.setRole(firebaseUser).then(function() {
                     $scope.user = $rootScope.me;
                     setParams();
+                    $location.url('/genes');
                 }, function(error) {
                 });
             } else {
                 console.log('not logged in yet');
             }                
         });
-        // Render the sign in button.
-        $scope.renderSignInButton = function() {
-            // if (!$rootScope.isSignedIn) {
-                
-            // }             
-            console.log('ready to login');
+        $scope.signIn = function() {
             userFire.login().then(function() {
-                console.log('finished to login');
                 $scope.user = $rootScope.me;
                 setParams();
+                $location.url('/genes');
             }, function(error) {
                 console.log('failed to login', error);
+                loadingScreen.finish();
             });
         };
         
@@ -154,12 +147,6 @@ angular.module('oncokbApp')
         $rootScope.$watch('isSignedIn', function(n, o) {
             if (n !== o) {
                 $scope.isSignedIn = $rootScope.isSignedIn;
-            }
-        });
-
-        $rootScope.$watch('dataLoaded', function(n) {
-            if (n) {
-                // $scope.renderSignInButton();
             }
         });
     });

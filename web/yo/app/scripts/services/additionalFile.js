@@ -11,7 +11,7 @@
  * Service in the oncokb.
  */
 angular.module('oncokbApp')
-    .service('additionalFile', function additionalFile($rootScope, $q, storage, mainUtils, documents, dialogs, $timeout, DatabaseConnector) {
+    .service('additionalFile', function additionalFile($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector) {
         function load(types) {
             function loadMeta() {
                 var metaDefer = $q.defer();
@@ -68,37 +68,23 @@ angular.module('oncokbApp')
                 }
             }
             var deferred = $q.defer();
-            storage.retrieveAdditional().then(function(result) {
-                if (!result || result.error || !_.isArray(result) || result.length !== 1) {
-                    dialogs.error('Error', 'Fail to retrieve additional files! Please stop editing and contact the developer!');
-                    var subject = 'Fail to retrieve meta file';
-                    var content = 'The additional files are not correctly located. Please double check. ';
-                    if (result && result.error) {
-                        content += 'System error is ' + JSON.stringify(result.error);
-                    }
-                    mainUtils.notifyDeveloper(subject, content);
-                    deferred.reject(result);
-                } else {
-                    var apiCalls = [];
-                    if (types.indexOf('all') !== -1  || types.indexOf('meta') !== -1) {
-                        apiCalls.push(loadMeta());
-                    }
-                    if (types.indexOf('all') !== -1 || types.indexOf('queues') !== -1) {
-                        apiCalls.push(loadQueues());
-                    }
-                    if (apiCalls.length > 0) {
-                        $q.all(apiCalls)
-                            .then(function(result) {
-                                deferred.resolve('success');
-                            }, function(error) {
-                                deferred.reject('fail to load specified files');
-                            });
-                    } else {
+            var apiCalls = [];
+            if (types.indexOf('all') !== -1  || types.indexOf('meta') !== -1) {
+                apiCalls.push(loadMeta());
+            }
+            if (types.indexOf('all') !== -1 || types.indexOf('queues') !== -1) {
+                apiCalls.push(loadQueues());
+            }
+            if (apiCalls.length > 0) {
+                $q.all(apiCalls)
+                    .then(function(result) {
                         deferred.resolve('success');
-                    }
-
-                }
-            });
+                    }, function(error) {
+                        deferred.reject('fail to load specified files');
+                    });
+            } else {
+                deferred.resolve('success');
+            }
             return deferred.promise;
         }
         return {

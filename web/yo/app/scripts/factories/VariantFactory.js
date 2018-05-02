@@ -86,14 +86,9 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', 'OncoKB', funct
         return $http.get('data/oncokbInfo.json');
     }
 
-    function getFirebasePermission() {
-        return $http.get('data/firebaseUserPermission.json');
-    }
-
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile,
-        getFirebasePermission: getFirebasePermission
+        getFromFile: getFromFile
     };
 }]);
 

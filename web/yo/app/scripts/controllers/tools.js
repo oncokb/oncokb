@@ -1,39 +1,12 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ReportgeneratorCtrl', ['$scope', 'dialogs', 'storage', 'documents', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils',
-        function($scope, dialogs, storage, Documents, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
+    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils',
+        function($scope, dialogs, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
             $scope.init = function() {
                 $scope.loading = false;
-                var geneNames = [];
-                if (OncoKB.global.genes) {
-                    storage.requireAuth(true).then(function() {
-                        storage.retrieveAllFiles().then(function(result) {
-                            Documents.set(result);
-                            Documents.setStatus(OncoKB.global.genes);
-                            $scope.documents = Documents.get();
-                            _.each($scope.documents, function(doc) {
-                                geneNames.push(doc.title);
-                            });
-                            $scope.geneNames = geneNames;
-                        });
-                    });
-                } else {
-                    DatabaseConnector.getAllGene(function(data) {
-                        OncoKB.global.genes = data;
-                        storage.requireAuth(true).then(function() {
-                            storage.retrieveAllFiles().then(function(result) {
-                                Documents.set(result);
-                                Documents.setStatus(OncoKB.global.genes);
-                                $scope.documents = Documents.get();
-                                _.each($scope.documents, function(doc) {
-                                    geneNames.push(doc.title);
-                                });
-                                $scope.geneNames = geneNames;
-                            });
-                        });
-                    });
-                }
+                // Need to be replaced with the right way to fetch gene name list
+                $scope.geneNames = ['APC', 'TP53'];
             };
             $scope.dt = {};
             $scope.dt.dtOptions = {

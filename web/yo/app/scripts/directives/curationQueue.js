@@ -10,7 +10,7 @@
  * # curationQueue
  */
 angular.module('oncokbApp')
-    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, users, mainUtils, dialogs, _, storage, $q, additionalFile) {
+    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, mainUtils, dialogs, _, $q, additionalFile) {
         return {
             templateUrl: 'views/curationQueue.html',
             restrict: 'E',
@@ -73,13 +73,9 @@ angular.module('oncokbApp')
                         DTColumnDefBuilder.newColumnDef(9),
                         DTColumnDefBuilder.newColumnDef(10)
                     ];
-                    storage.retrieveAllFiles().then(function(result) {
-                        _.each(result, function(doc) {
-                            scope.data.hugoSymbols.push(doc.title);
-                        });
-                    }, function() {});
                     scope.queue = [];
-                    additionalFile.load(['queues']).then(function(result) {
+                    additionalFile.load(['queues', 'meta']).then(function(result) {
+                        scope.data.hugoSymbols = _.keys($rootScope.metaData);
                         if (scope.location === 'gene') {
                             scope.queue = scope.getQueuesByGene(scope.hugoSymbol);
                         } else if (scope.location === 'queues') {
@@ -121,7 +117,7 @@ angular.module('oncokbApp')
                         $scope.data.curators = oncokbInfo.users;
                     }
                 });
-                $scope.userRole = users.getMe().role;
+                $scope.userRole = $rootScope.me.role;
                 $scope.getButtonHtml = function (type, addedAt) {
                     var result = '';
                     switch(type) {
@@ -181,7 +177,7 @@ angular.module('oncokbApp')
                         section: $scope.input.section ? $scope.input.section.join() : '',
                         curator: $scope.input.curator ? $scope.input.curator.name : '',
                         curated: false,
-                        addedBy: users.getMe().name,
+                        addedBy: $rootScope.me.name,
                         addedAt: new Date().getTime(),
                         dueDay: $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '',
                         comment: $scope.input.comment,

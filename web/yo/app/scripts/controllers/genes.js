@@ -2,11 +2,11 @@
 
 angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
-        '$routeParams', '_', 'config', 'storage', 'documents',
+        '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
         'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$firebaseObject', '$firebaseArray', 'userFire',
         function($scope, $rootScope, $location, $timeout, $routeParams, _,
-                 config, storage, Documents,
+                 config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                  OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $firebaseObject, $firebaseArray, userFire) {
             function saveGene(docs, docIndex, callback) {
@@ -99,6 +99,7 @@ angular.module('oncokbApp')
                             }
                         });
                         $scope.status.rendering = false;
+                        loadingScreen.finish();
                     });
                 });
                 
@@ -160,20 +161,6 @@ angular.module('oncokbApp')
             getCacheStatus();
 
             var newGenes = [];
-
-            $scope.migrate = function() {
-                // console.log($scope.documents);
-                $scope.status.migrate = false;
-                importer
-                    .migrate()
-                    .then(function(result) {
-                        if (result && result.error) {
-                            $scope.status.migrate = true;
-                        } else {
-                            $scope.status.migrate = true;
-                        }
-                    });
-            };
 
             $scope.create = function() {
             };

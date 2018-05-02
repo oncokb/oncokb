@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, storage, $q, DatabaseConnector, $rootScope, ReviewResource, user) {
+    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, user) {
         var isoforms = {};
         var oncogeneTSG = {};
 
