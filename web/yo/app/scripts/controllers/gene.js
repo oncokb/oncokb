@@ -2295,6 +2295,7 @@ angular.module('oncokbApp')
                 dialogs.notify('All Citations', messageContent.join(''), {size: 'lg'});
             };
             $scope.specifyAnnotation = function() {
+                return true;
                 var annotationLocation = {};
                 setAnnotationResult(annotationLocation, fetchResults(FindRegex.result(this.gene.background.text)), 'Gene Background');
                 var mutations = stringUtils.getGeneData(this.gene, true, false).mutations;
@@ -3050,33 +3051,6 @@ angular.module('oncokbApp')
                 });
             }
             getTumorSubtypes();
-            function getOncoTreeMainTypes() {
-                mainUtils.getOncoTreeMainTypes().then(function(result) {
-                    var mainTypesReturned = result.mainTypes,
-                        tumorTypesReturned = result.tumorTypes;
-                    if (mainTypesReturned) {
-                        $scope.oncoTree.mainTypes = mainTypesReturned;
-                        if (_.isArray(tumorTypesReturned)) {
-                            var tumorTypes = {};
-                            var allTumorTypes = [];
-                            _.each(mainTypesReturned, function(mainType, i) {
-                                tumorTypes[mainType.name] = tumorTypesReturned[i];
-                                allTumorTypes = _.union(allTumorTypes, tumorTypesReturned[i]);
-                            });
-                            $scope.oncoTree.tumorTypes = tumorTypes;
-                            // $scope.oncoTree.allTumorTypes = allTumorTypes;
-                            // $scope.meta = {
-                            //     newCancerTypes: [{
-                            //         mainType: '',
-                            //         subtype: '',
-                            //         oncoTreeTumorTypes: allTumorTypes
-                            //     }]
-                            // };
-                        }
-                    }
-                }, function(error) {
-                });
-            }
             function getLevels() {
                 var desS = {
                     '': '',
@@ -3400,18 +3374,6 @@ angular.module('oncokbApp')
                 $scope.datatest.items.push('Item ' + newItemNo);
                 // $scope.data.colors.push('Color ' + newItemNo);
               };
-            getOncoTreeMainTypes();
-            $interval(function() {
-                storage.requireAuth(true).then(function(result) {
-                    if (result && !result.error) {
-                        console.log('\t checked token', new Date().getTime(), gapi.auth.getToken());
-                    } else {
-                        documentClosed();
-                        $rootScope.$emit('realtimeDoc.token_refresh_required');
-                        console.log('error when renew token in interval func.');
-                    }
-                });
-            }, 600000);
             $scope.tumorsByMutation = {};
             $scope.TIsByTumor = {};
             $scope.treatmentsByII = {};

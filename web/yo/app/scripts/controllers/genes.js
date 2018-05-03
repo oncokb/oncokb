@@ -90,9 +90,7 @@ angular.module('oncokbApp')
                                         if ($scope.metaFlags[hugoSymbol] && $scope.metaFlags[hugoSymbol].queues) {
                                             $scope.metaFlags[hugoSymbol].queues++;
                                         } else {
-                                            $scope.metaFlags[hugoSymbol] = {
-                                                queues: 1
-                                            };
+                                            $scope.metaFlags[hugoSymbol].queues = 1;
                                         }
                                     }
                                 });

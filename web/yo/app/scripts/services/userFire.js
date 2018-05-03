@@ -53,8 +53,6 @@ angular.module('oncokbApp')
                 }
                 defer.resolve();
                 $rootScope.me = me;
-            }, function(error) {
-                console.log('fail to get users information');
             });
             return defer.promise;
         }
@@ -104,6 +102,7 @@ angular.module('oncokbApp')
                     allUsers = users.val();
                     defer.resolve(allUsers);
                 }, function(error) {
+                    console.log('Failed to load users information', error);
                     defer.reject(error);
                 });
             } else {
