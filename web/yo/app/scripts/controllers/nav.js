@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, DatabaseConnector, $firebaseAuth, $firebaseObject, userFire) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
         var tabs = {
             tree: 'Tree',
             variant: 'Variant Annotation',
@@ -79,7 +79,7 @@ angular.module('oncokbApp')
         $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
                 $rootScope.isSignedIn = true;
-                userFire.setRole(firebaseUser).then(function() {
+                user.setRole(firebaseUser).then(function() {
                     $scope.user = $rootScope.me;
                     setParams();
                     $location.url('/genes');
@@ -90,7 +90,7 @@ angular.module('oncokbApp')
             }                
         });
         $scope.signIn = function() {
-            userFire.login().then(function() {
+            user.login().then(function() {
                 $scope.user = $rootScope.me;
                 setParams();
                 $location.url('/genes');
@@ -101,7 +101,7 @@ angular.module('oncokbApp')
         };
         
         $scope.signOut = function() {
-            userFire.logout().then(function() {
+            user.logout().then(function() {
                 $location.path('/');
                 $scope.tabs = [];
             });

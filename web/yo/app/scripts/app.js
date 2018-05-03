@@ -90,11 +90,6 @@ var oncokbApp = angular.module('oncokbApp', [
     'ui.sortable',
     'firebase'
 ])
-    .value('user', {
-        name: '',
-        email: '',
-        photoURL: ''
-    })
     .value('OncoKB', OncoKB)
     // This is used for typeahead
     .constant('SecretEmptyKey', '[$empty$]')
@@ -204,8 +199,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'stringUtils', 'mainUtils', 'userFire',
-        function($timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, stringUtils, mainUtils, userFire) {
+    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'stringUtils', 'mainUtils', 'user',
+        function($timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, stringUtils, mainUtils, user) {
             $rootScope.errors = [];
             $rootScope.internal = true;
 

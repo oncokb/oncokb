@@ -4,11 +4,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$firebaseObject', '$firebaseArray', 'userFire',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$firebaseObject', '$firebaseArray', 'user',
         function($scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $firebaseObject, $firebaseArray, userFire) {
+                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $firebaseObject, $firebaseArray, user) {
             function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -71,7 +71,7 @@ angular.module('oncokbApp')
             function processMeta() {
                 additionalFile.load(['all']).then(function(result) {
                     var hugoSymbols = _.keys($rootScope.metaData);
-                    userFire.setFileeditable(hugoSymbols).then(function(editableData) {
+                    user.setFileeditable(hugoSymbols).then(function(editableData) {
                         _.each(hugoSymbols, function(hugoSymbol) {
                             $scope.metaFlags[hugoSymbol] = {
                                 hugoSymbol: hugoSymbol,

@@ -21,7 +21,6 @@ angular.module('oncokbApp')
         'InternalAccess',
         'ApiUtils',
         'PrivateApiUtils',
-        'user',
         function($timeout,
                  $q,
                  $rootScope,
@@ -40,8 +39,7 @@ angular.module('oncokbApp')
                  OncoTree,
                  InternalAccess,
                  ApiUtils,
-                 PrivateApiUtils,
-                 user) {
+                 PrivateApiUtils) {
             var numOfLocks = {};
             var data = {};
 

@@ -10,7 +10,7 @@
  * # curationQueue
  */
 angular.module('oncokbApp')
-    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, mainUtils, dialogs, _, $q, additionalFile, userFire) {
+    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, mainUtils, dialogs, _, $q, additionalFile, user) {
         return {
             templateUrl: 'views/curationQueue.html',
             restrict: 'E',
@@ -109,7 +109,7 @@ angular.module('oncokbApp')
                 }
             },
             controller: function($scope) {
-                userFire.getAllUsers().then(function(users) {
+                user.getAllUsers().then(function(users) {
                     var tempArr = [];
                     _.each(users, function(user) {
                         tempArr.push({

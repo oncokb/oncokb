@@ -12,7 +12,7 @@
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable || !metaDocStatus.saved"
           ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
-        <!--<button type="button" class="btn btn-default" ng-click="getData()">Gene</button>-->
+        <button type="button" class="btn btn-default" ng-click="getData()">Gene</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
         <button type="button" class="btn btn-default" uib-dropdown-toggle ng-if="::(userRole === 8)">
           More tools
@@ -386,7 +386,7 @@
       <button class="btn btn-default btn-sm" ng-click="vusUpdate('click update to database button')"
         ng-if="developerCheck()">Update to database</button>
     </h3>
-    <div ng-repeat="variant in vusFire.vus">
+    <div ng-repeat="variant in vusItems">
       <vus-item vus="vusFire" index="$index" gene="fileTitle" vus-update="vusUpdate()"></vus-item>
     </div>
 
