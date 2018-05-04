@@ -42,63 +42,7 @@ angular.module('oncokbApp')
                  PrivateApiUtils) {
             var numOfLocks = {};
             var data = {};
-
-            // When running locally, set this to true, all servlet will read data from relative files.
             var dataFromFile = config.testing || false;
-
-            function getAllGene(callback, timestamp) {
-                if (dataFromFile) {
-                    Gene.getFromFile()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                } else {
-                    Gene.getFromServer()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                }
-            }
-
-            function getDataSummary() {
-                var deferred = $q.defer();
-                if (dataFromFile) {
-                    DataSummary.getFromFile()
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function(result) {
-                            deferred.reject(result);
-                        });
-                } else {
-                    DataSummary.getFromFile()
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function(result) {
-                            deferred.reject(result);
-                        });
-                }
-                return deferred.promise;
-            }
             function getReviewedData(evidenceType) {
                 var deferred = $q.defer();
                 if (evidenceType === 'geneType') {
@@ -120,133 +64,6 @@ angular.module('oncokbApp')
                 }
                 return deferred.promise;
             }
-            function getAllAlteration(callback, timestamp) {
-                if (dataFromFile) {
-                    Alteration.getFromFile()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                } else {
-                    Alteration.getFromServer()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                }
-            }
-
-            function getOncokbInfo(callback, timestamp) {
-                if (dataFromFile) {
-                    DriveOncokbInfo.getFromFile()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                } else {
-                    DriveOncokbInfo.getFromServer()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                }
-            }
-
-            function getAllTumorType(callback, timestamp) {
-                if (dataFromFile) {
-                    TumorType.getFromFile()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                } else {
-                    TumorType.getFromServer()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                }
-            }
-
-            function getAllEvidence(callback, timestamp) {
-                if (dataFromFile) {
-                    Evidence.getFromFile()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                } else {
-                    Evidence.getFromServer()
-                        .success(function(data) {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback(data);
-                        })
-                        .error(function() {
-                            if (timestamp) {
-                                numOfLocks[timestamp]--;
-                            }
-                            callback();
-                        });
-                }
-            }
 
             function searchVariant(params, success, fail) {
                 if (dataFromFile) {
@@ -260,22 +77,6 @@ angular.module('oncokbApp')
                 } else {
                     SearchVariant
                         .getAnnotation(params)
-                        .success(function(data) {
-                            success(data);
-                        })
-                        .error(function() {
-                            fail();
-                        });
-                }
-            }
-
-            function generateGoogleDoc(params, success, fail) {
-                console.log(params);
-                if (dataFromFile) {
-                    success('');
-                } else {
-                    GenerateDoc
-                        .getDoc(params)
                         .success(function(data) {
                             success(data);
                         })
@@ -533,10 +334,9 @@ angular.module('oncokbApp')
                     deferred.resolve('enabled');
                 } else {
                     Cache.getStatus()
-                        .success(function(data) {
+                        .then(function(data) {
                             deferred.resolve(data);
-                        })
-                        .error(function(result) {
+                        }, function(result) {
                             deferred.reject(result);
                         });
                 }
@@ -788,24 +588,6 @@ angular.module('oncokbApp')
 
             // Public API here
             return {
-                getGeneAlterationTumorType: function(callback) {
-                    var timestamp = new Date().getTime().toString();
-
-                    numOfLocks[timestamp] = 3;
-                    data[timestamp] = {};
-
-                    getAllGene(function(d) {
-                        data[timestamp].genes = d;
-                    }, timestamp);
-                    getAllAlteration(function(d) {
-                        data[timestamp].alterations = d;
-                    }, timestamp);
-                    getAllTumorType(function(d) {
-                        data[timestamp].tumorTypes = d;
-                    }, timestamp);
-
-                    timeout(callback, timestamp);
-                },
                 getGeneTumorType: function(callback) {
                     var timestamp = new Date().getTime().toString();
 
@@ -821,14 +603,7 @@ angular.module('oncokbApp')
 
                     timeout(callback, timestamp);
                 },
-                getAllEvidence: getAllEvidence,
-                getAllGene: getAllGene,
-                getDataSummary: getDataSummary,
                 searchAnnotation: searchVariant,
-                googleDoc: generateGoogleDoc,
-                createGoogleFolder: createGoogleFolder,
-                getOncokbInfo: getOncokbInfo,
-                getAllTumorType: getAllTumorType,
                 updateGene: updateGene,
                 updateGeneType: updateGeneType,
                 updateEvidence: updateEvidence,
