@@ -1,4 +1,4 @@
-<div class="geneMainDiv" ng-hide="status.rendering" ng-style="geneMainDivStyle">
+<div class="geneMainDiv" ng-if="!status.rendering" ng-style="geneMainDivStyle">
   <div id="gene" style="margin-bottom:50px">
     <h2>
       <span>Gene:{{::geneFire.name}}</span>
@@ -73,14 +73,14 @@
           ng-repeat="x in namesWithChanges" ng-bind-html="getButtonContent(x)"></button>
       </span>
     </div>
-
+    <!-- <div id="firepad" style="height:200px"></div> -->
     <div ng-if="displayPrecisely(gene.summary_uuid)">
       <h3>Summary:
         <comments-dict key="'summary'" path="getObservePath({type: 'gene'})"></comments-dict>
         <review-panel uuid="gene.summary_uuid" review-obj="gene.summary_review" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)"
           model-update="modelUpdate(type)"></review-panel>
       </h3>
-      <realtime-string t="'p'" key="'summary'" path="getObservePath({type: 'gene'})"></realtime-string>
+      <realtime-string t="'p'" key="'summary'" path="getObservePath({type: 'gene'})" uuid="getUUID({type: 'gene', key: 'summary'})"></realtime-string>
     </div>
     <!-- <div ng-if="displayPrecisely(gene.type_uuid)">
            <h3 ng-if="reviewMode">Gene Type:
@@ -104,7 +104,7 @@
         <review-panel uuid="gene.background_uuid" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene"
           get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
       </h3>
-      <realtime-string t="'p'" key="'background'" path="getObservePath({type: 'gene'})"></realtime-string>
+      <realtime-string t="'p'" key="'background'" path="getObservePath({type: 'gene'})" uuid="getUUID({type: 'gene', key: 'background'})"></realtime-string>
     </div>
     <div ng-if="gene.name.text && !reviewMode">
       <table class="table geneLinks">
@@ -130,7 +130,7 @@
       <button class="headerLevel1" ng-click="toggleSection(mutation.name_uuid)">
         <i ng-class="getAngleClass(mutation.name_uuid)"></i> Mutation:
         <div style="display:inline-block">
-          <realtime-string t="'MUTATION_NAME'" key="'name'" path="path"></realtime-string>
+          <realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string>
         </div>
         <div style="display:inline-block">
           <comments-dict key="'name'" path="path"></comments-dict>
@@ -168,12 +168,12 @@
             <span ng-if="displayPrecisely(mutation.description_uuid)">
               <strong>Description of Evidence:</strong>
               <br/>
-              <realtime-string t="'p'" key="'description'" path="effectPath"></realtime-string>
+              <realtime-string t="'p'" key="'description'" path="effectPath" uuid="getUUID({type: 'mutation_effect', key: 'description', path: path})"></realtime-string>
             </span>
             <span ng-if="!reviewMode">
               <strong>Additional Information (Optional):</strong>
               <br/>
-              <realtime-string t="'p'" key="'short'" path="effectPath"></realtime-string>
+              <realtime-string t="'p'" key="'short'" path="effectPath" uuid="getUUID({type: 'mutation_effect', key: 'short', path: path})"></realtime-string>
             </span>
           </div>
         </div>
@@ -216,12 +216,12 @@
                   <div ng-if="displayPrecisely(tumor.diagnostic.description_uuid)">
                     <strong>Description of Evidence:</strong>
                     <br/>
-                    <realtime-string t="'p'" key="'description'" path="diagnosticPath"></realtime-string>
+                    <realtime-string t="'p'" key="'description'" path="diagnosticPath" uuid="getUUID({type: 'diagnostic', key: 'description', path: path})"></realtime-string>
                   </div>
                   <div ng-if="!reviewMode">
                     <strong>Additional Information (Optional):</strong>
                     <br/>
-                    <realtime-string t="'p'" key="'short'" path="diagnosticPath"></realtime-string>
+                    <realtime-string t="'p'" key="'short'" path="diagnosticPath" uuid="getUUID({type: 'diagnostic', key: 'short', path: path})"></realtime-string>
                   </div>
                 </div>
               </div>
@@ -244,12 +244,12 @@
                   <div ng-if="displayPrecisely(tumor.prognostic.description_uuid)">
                     <strong>Description of Evidence:</strong>
                     <br/>
-                    <realtime-string t="'p'" key="'description'" path="prognosticPath"></realtime-string>
+                    <realtime-string t="'p'" key="'description'" path="prognosticPath" uuid="getUUID({type: 'prognostic', key: 'description', path: path})"></realtime-string>
                   </div>
                   <div ng-if="!reviewMode">
                     <strong>Additional Information (Optional):</strong>
                     <br/>
-                    <realtime-string t="'p'" key="'short'" path="prognosticPath"></realtime-string>
+                    <realtime-string t="'p'" key="'short'" path="prognosticPath" uuid="getUUID({type: 'prognostic', key: 'short', path: path})"></realtime-string>
                   </div>
                 </div>
               </div>
@@ -267,7 +267,7 @@
                         <b>General Summary (Optional): </b>
                         <!-- review panel -->
                       </h5>
-                      <realtime-string t="'p'" key="'description'" path="path"></realtime-string>
+                      <realtime-string t="'p'" key="'description'" path="path" uuid="getUUID({type: 'ti', key: 'description', path: path})"></realtime-string>
                     </div>
                     <br/>
                     <div ng-repeat="treatment in treatmentsByII[ti.name_uuid]" ng-init="path=getObservePath({type: 'treatment', path: path, index: $index});">
@@ -325,17 +325,17 @@
                           <div ng-if="displayPrecisely(treatment.indication_uuid)">
                             <strong>FDA approved indications:</strong>
                             <br/>
-                            <realtime-string t="'p'" key="'indication'" path="path"></realtime-string>
+                            <realtime-string t="'p'" key="'indication'" path="path" uuid="getUUID({type: 'treatment', key: 'indication', path: path})"></realtime-string>
                           </div>
                           <div ng-if="displayPrecisely(treatment.description_uuid)">
                             <strong>Description of Evidence:</strong>
                             <br/>
-                            <realtime-string t="'p'" key="'description'" path="path"></realtime-string>
+                            <realtime-string t="'p'" key="'description'" path="path" uuid="getUUID({type: 'treatment', key: 'description', path: path})"></realtime-string>
                           </div>
                           <div ng-if="!reviewMode">
                             <strong>Additional Information (Optional):</strong>
                             <br/>
-                            <realtime-string t="'p'" key="'short'" path="path"></realtime-string>
+                            <realtime-string t="'p'" key="'short'" path="path" uuid="getUUID({type: 'treatment', key: 'short', path: path})"></realtime-string>
                           </div>
                         </div>
                       </div>

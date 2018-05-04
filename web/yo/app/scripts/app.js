@@ -189,7 +189,7 @@ var oncokbApp = angular.module('oncokbApp', [
                     case: cause
                 });
                 // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                if (!config.production && exception && exception.name !== 'DocumentClosedError') {
+                if (!config.production && exception) {
                     $delegate(exception, cause);
                 }
             };
@@ -256,9 +256,13 @@ angular.module('oncokbApp').run(
             $rootScope.$on('$routeChangeError', function() {
                 $location.url('/');
             });
-
+            var loading = true;
             $rootScope.$on('$routeChangeStart', function(event, next) {
                 if (!$rootScope.isSignedIn) {
+                    if (loading) {
+                        loadingScreen.finish();
+                        loading = false;
+                    }
                     $location.path('/');
                 }                
             });

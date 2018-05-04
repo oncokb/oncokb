@@ -16,56 +16,57 @@ angular.module('oncokbApp')
                 key: '=',
                 path: '=',
                 checkboxes: '=',
-                o: '='
+                o: '=',
+                uuid: '='
             },
             replace: true,
             link: {
                 pre: function preLink(scope) {
-                    $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "data").then(function (success) {
-                        scope.uuid = scope.data[scope.key+'_uuid'];
-                        if (scope.t === 'treatment-select') {
-                            scope.changePropagation(true);
-                        }
-                    }, function (error) {
-                        console.log('error');
-                    });
+                    // $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "data").then(function (success) {
+                    //     scope.uuid = scope.data[scope.key+'_uuid'];
+                    //     if (scope.t === 'treatment-select') {
+                    //         scope.changePropagation(true);
+                    //     }                     
+                    // }, function (error) {
+                    //     console.log('error');
+                    // });
                 },
                 post: function postLink(scope) {
                     scope.reviewMode = ReviewResource.reviewMode;
-
+                    scope.pContent = '';
                     // scope.preStringO = scope.data[scope.key];
-                    scope.$watch('data[key]', function (n, o) {
-                        if (n !== o) {
-                            scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
-                            if (scope.key !== 'short') {
-                                // we track the change in two conditions:
-                                // 1) When editing happens not in review mode
-                                // 2) When editing happends in review mode but not from admin's "Reject" action
-                                // if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
-                                //     if (_.isUndefined(scope.data[scope.key + '_review'])) {
-                                //         scope.data[scope.key + '_review'] = {
-                                //             updatedBy: user.name,
-                                //             updateTime: new Date().getTime()
-                                //         };
-                                //     }
-                                //     if (_.isUndefined(scope.data[scope.key + '_review'].lastReviewed)) {
-                                //         scope.data[scope.key + '_review'].lastReviewed = o;
-                                //         scope.data[scope.key + '_review'].updatedBy = user.name;
-                                //         scope.data[scope.key + '_review'].updateTime = new Date().getTime();
-                                //         $rootScope.metaFire[scope.uuid] = { review: true };
-                                //         ReviewResource.rollback = _.without(ReviewResource.rollback, scope.uuid);
-                                //     } else if (n === scope.data[scope.key]) {
-                                //         delete scope.data[scope.key + '_review'].lastReviewed;
-                                //         delete $rootScope.metaFire[scope.uuid];
-                                //         // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
-                                //         if (ReviewResource.reviewMode) {
-                                //             ReviewResource.rollback.push(scope.uuid);
-                                //         }
-                                //     }
-                                // }
-                            }
-                        }
-                    });
+                    // scope.$watch('data[key]', function (n, o) {
+                    //     if (n !== o) {
+                    //         scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
+                    //         if (scope.key !== 'short') {
+                    //             // we track the change in two conditions:
+                    //             // 1) When editing happens not in review mode
+                    //             // 2) When editing happends in review mode but not from admin's "Reject" action
+                    //             // if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
+                    //             //     if (_.isUndefined(scope.data[scope.key + '_review'])) {
+                    //             //         scope.data[scope.key + '_review'] = {
+                    //             //             updatedBy: user.name,
+                    //             //             updateTime: new Date().getTime()
+                    //             //         };
+                    //             //     }
+                    //             //     if (_.isUndefined(scope.data[scope.key + '_review'].lastReviewed)) {
+                    //             //         scope.data[scope.key + '_review'].lastReviewed = o;
+                    //             //         scope.data[scope.key + '_review'].updatedBy = user.name;
+                    //             //         scope.data[scope.key + '_review'].updateTime = new Date().getTime();
+                    //             //         $rootScope.metaFire[scope.uuid] = { review: true };
+                    //             //         ReviewResource.rollback = _.without(ReviewResource.rollback, scope.uuid);
+                    //             //     } else if (n === scope.data[scope.key]) {
+                    //             //         delete scope.data[scope.key + '_review'].lastReviewed;
+                    //             //         delete $rootScope.metaFire[scope.uuid];
+                    //             //         // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
+                    //             //         if (ReviewResource.reviewMode) {
+                    //             //             ReviewResource.rollback.push(scope.uuid);
+                    //             //         }
+                    //             //     }
+                    //             // }
+                    //         }
+                    //     }
+                    // });
                 }
             },
             controller: function ($scope) {
@@ -164,6 +165,24 @@ angular.module('oncokbApp')
                         return !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid);
                     }
                 };
+                $scope.initFirepad = function() {
+                    $timeout(function() {
+                        var firepadRef = firebase.database().ref($scope.path+'/'+$scope.key+'_firepad');
+                        var codeMirror = CodeMirror(document.getElementById($scope.uuid), {lineWrapping: true, readOnly: !$scope.fe});
+                        var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, 
+                            {
+                                richTextShortcuts: false, 
+                                richTextToolbar: false, 
+                                defaultText: '',
+                                userId: 'jiaojiao wang'
+                        });
+                        firepad.on('ready', function() {
+                            $scope.pContent = firepad.getText();
+                            // var text = firepad.getText();
+                            // firepad.setText('');
+                        });
+                    }, 200);
+                }
             }
         };
     })

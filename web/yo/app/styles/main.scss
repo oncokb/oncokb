@@ -962,3 +962,10 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 .sectionStyle {
   border: 0.5px solid #ddd; 
 }
+a.powered-by-firepad {
+  display: none;
+}
+
+.CodeMirror {
+  background-color: #F1F9FF !important;
+}

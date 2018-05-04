@@ -60,12 +60,6 @@ angular.module('oncokbApp')
                     console.log('finished.');
                 }
             }
-            $scope.showDocs = function() {
-                $scope.documents.forEach(function(item) {
-                    console.log(item.title);
-                });
-                // console.log($scope.documents);
-            };
             $scope.metaFlags = {};
             
             function processMeta() {
@@ -97,7 +91,6 @@ angular.module('oncokbApp')
                             }
                         });
                         $scope.status.rendering = false;
-                        loadingScreen.finish();
                     });
                 });
                 
@@ -151,13 +144,10 @@ angular.module('oncokbApp')
                 queueRendering: true
             };
             $scope.adminEmails = [];
-            // $scope.getDocs();
             $scope.oncoTree = {
                 mainTypes: {}
             };
             $scope.mappedTumorTypes = {};
-            getCacheStatus();
-
             var newGenes = [];
 
             $scope.create = function() {

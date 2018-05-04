@@ -96,6 +96,7 @@ angular.module('oncokbApp')
                 $location.url('/genes');
             }, function(error) {
                 console.log('failed to login', error);
+                console.log('finish is called');
                 loadingScreen.finish();
             });
         };

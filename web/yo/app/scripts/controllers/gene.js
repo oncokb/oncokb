@@ -325,6 +325,19 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function(data) {
+                console.log('init firepad');
+                $scope.init();
+                // var firepadRef = firebase.database().ref('Genes/APC/summary_firepad');
+
+                // // Create CodeMirror (with lineWrapping on).
+                // var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+          
+                // // Create Firepad (with rich text toolbar and shortcuts enabled).
+                // var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, {
+                //   richTextShortcuts: false,
+                //   richTextToolbar: false,
+                //   defaultText: 'Hello, World!'
+                // });
             };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
@@ -3278,6 +3291,35 @@ angular.module('oncokbApp')
                     }, 100);
                 }
             });
+            var firepad;
+            var initialized = false;
+            $scope.init = function() {
+                if (initialized) {
+                    return;
+                } else {
+                    initialized = true;
+                }
+                console.log('start initialized');   
+                var firepadParams = [{
+                    path: 'Genes/APC/background_firepad',
+                    uuid: $scope.geneFire.background_uuid
+                }, {
+                    path: 'Genes/APC/summary_firepad',
+                    uuid: $scope.geneFire.summary_uuid
+                }];
+                _.each(firepadParams, function(item) {
+                    var firepadRef = firebase.database().ref(item.path);
+                    var codeMirror = CodeMirror(document.getElementById(item.uuid), { lineWrapping: true });
+                    firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, 
+                        {
+                            richTextShortcuts: false, 
+                            richTextToolbar: false, 
+                            defaultText: $scope.geneFire.background,
+                            userId: 'jiaojiao wang'
+                        });
+                });   
+                console.log('initialized');              
+            }
             $scope.datatest = {
                 colors: ['red', 'green', 'white'],
                 items: ['Item 1', 'Item 2', 'Item 3']
@@ -3381,6 +3423,7 @@ angular.module('oncokbApp')
                 $q.all(bindingAPI)
                     .then(function(result) {
                         user.setFileeditable([$scope.fileTitle]).then(function(result) {
+                            console.log('done loading...');
                             $scope.fileEditable = result[$scope.fileTitle];
                             $scope.status.rendering = false;
                             $rootScope.fileEditable = $scope.fileEditable;
@@ -3411,6 +3454,30 @@ angular.module('oncokbApp')
                     return data.path + '/treatments/' + data.index;
                 }
             };
+            $scope.getUUID = function(data) {
+                var obj;
+                if (data.type === 'gene') {
+                    obj = $scope.geneFire; 
+                } else {
+                    var indices = getIndexByPath(data.path);
+                    if (data.type === 'mutation') {
+                        obj = $scope.geneFire.mutations[indices[0]];
+                    } else if (data.type === 'mutation_effect') {
+                        obj = $scope.geneFire.mutations[indices[0]].mutation_effect;
+                    } else if (data.type === 'tumor') {
+                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]];
+                    } else if (data.type === 'diagnostic') {
+                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].diagnostic;
+                    } else if (data.type === 'prognostic') {
+                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].prognostic;
+                    } else if (data.type === 'ti') {
+                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+                    } else if (data.type === 'treatment') {
+                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
+                    }
+                } 
+                return obj[data.key+'_uuid'];
+            }            
             populateBindings();
             // Token expired, refresh
             $rootScope.$on('realtimeDoc.token_refresh_required', function() {

@@ -3,41 +3,21 @@
         <div ng-switch-when="false">
             <div ng-switch on="t">
                 <div ng-switch-when="p">
-                    <p contenteditable="{{fe}}"
-                       ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
-                       ng-model="data[key]"
-                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
-                    </p>
-                    <!-- <pub-iframe
-                            ng-model="data[key]">
-                    </pub-iframe> -->
-                </div>
-                <div ng-switch-when="short">
-                    <p contenteditable="{{fe}}"
-                       ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
-                       ng-model="content.stringO">
-                    </p>
+                    <div id="{{uuid}}" style="height:200px"></div>
+                    <div ng-init="initFirepad()"></div>
                     <pub-iframe
-                            ng-model="content.stringO">
+                            ng-model="pContent">
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME">
-                    <span contenteditable="{{fe}}"
-                          ng-class="editableBox"
-                          ng-model="data[key]"
-                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
-                    </span>
+                    <div id="{{uuid}}" style="height:200px"></div>
+                    <div ng-init="initFirepad()"></div>
                     <span style="color:red">{{getDuplicationMessage()}}</span>
                     <br/>
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
-                    <span contenteditable="{{fe}}"
-                          ng-class="editableBox"
-                          ng-model="data[key]"
-                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
-                    </span>
+                    <div id="{{uuid}}" style="height:200px"></div>
+                    <div ng-init="initFirepad()"></div>
                     <span style="color:red">{{getDuplicationMessage()}}</span>
                     <br/>
                 </div>
@@ -108,21 +88,6 @@
                     </div>
                     <pub-iframe
                             ng-model="data[key]">
-                    </pub-iframe>
-                </div>
-                <div ng-switch-when="short">
-                    <h4 ng-if="reviewLayout('regular')">New Content:</h4>
-                    <p contenteditable="{{reviewContentEditable('regular')}}"
-                       ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
-                       ng-model="content.stringO">
-                    </p>
-                    <div ng-if="reviewLayout('regular')">
-                        <h4>Difference comparing to the old content:</h4>
-                        <p ng-bind-html="diffHTML"></p>
-                    </div>
-                    <pub-iframe
-                            ng-model="content.stringO">
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME">
