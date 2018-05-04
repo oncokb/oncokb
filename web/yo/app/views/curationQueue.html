@@ -108,7 +108,7 @@
                     which will cause issue to update to firestore
                 -->
                 <tr ng-repeat="x in queue track by $index" ng-show="data.allCurations || !x.curated">
-                    <td ng-if="location === 'queues'"><strong><a ng-href="#/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
+                    <td ng-if="location === 'queues'"><strong><a ng-href="#!/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
                     <td>
                         <a href="{{x.link}}" target="_blank" ng-if="x.link">{{x.article}}</a>
                         <span ng-if="!x.link">{{x.article}}</span>

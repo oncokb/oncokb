@@ -359,10 +359,9 @@ angular.module('oncokbApp')
             function getPubMedArticle(pubMedIDs, success, fail) {
                 DriveAnnotation
                     .getPubMedArticle(pubMedIDs)
-                    .success(function(data) {
+                    .then(function(data) {
                         success(data);
-                    })
-                    .error(function() {
+                    }, function() {
                         fail();
                     });
             }
@@ -656,31 +655,29 @@ angular.module('oncokbApp')
             }
             function getTumorSubtypes() {
                 var deferred = $q.defer();
-                OncoTree.getTumorSubtypes()
-                    .success(function(data) {
-                        data.push({
-                            name: 'All Liquid Tumors'
-                        });
-                        data.push({
-                            name: 'All Solid Tumors'
-                        });
-                        data.push({
-                            name: 'All Tumors'
-                        });
-                        data.push({
-                            name: 'Germline Disposition'
-                        });
-                        data.push({
-                            name: 'All Pediatric Tumors'
-                        });
-                        data.push({
-                            name: 'Other Tumor Types'
-                        });
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
-                        deferred.reject(result);
+                OncoTree.getTumorSubtypes().then(function(data) {
+                    data.data.push({
+                        name: 'All Liquid Tumors'
                     });
+                    data.data.push({
+                        name: 'All Solid Tumors'
+                    });
+                    data.data.push({
+                        name: 'All Tumors'
+                    });
+                    data.data.push({
+                        name: 'Germline Disposition'
+                    });
+                    data.data.push({
+                        name: 'All Pediatric Tumors'
+                    });
+                    data.data.push({
+                        name: 'Other Tumor Types'
+                    });
+                    deferred.resolve(data.data);
+                }, function(result) {
+                    deferred.reject(result);
+                });
                 return deferred.promise;
             }
 
