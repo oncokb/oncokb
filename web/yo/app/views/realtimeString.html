@@ -3,22 +3,22 @@
         <div ng-switch-when="false">
             <div ng-switch on="t">
                 <div ng-switch-when="p">
-                    <div id="{{uuid}}" style="height:200px"></div>
+                    <div id="{{uuid}}"></div>
                     <div ng-init="initFirepad()"></div>
                     <pub-iframe
                             ng-model="pContent">
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME">
-                    <div id="{{uuid}}" style="height:200px"></div>
+                    <div id="{{uuid}}"></div>
                     <div ng-init="initFirepad()"></div>
-                    <span style="color:red">{{getDuplicationMessage()}}</span>
+                    <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
-                    <div id="{{uuid}}" style="height:200px"></div>
+                    <div id="{{uuid}}"></div>
                     <div ng-init="initFirepad()"></div>
-                    <span style="color:red">{{getDuplicationMessage()}}</span>
+                    <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>
                 <div ng-switch-when="treatment-select" class="treatment-select">

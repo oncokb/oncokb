@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function (gapi, $timeout, _, $rootScope, stringUtils, mainUtils, ReviewResource, $firebaseObject) {
+    .directive('realtimeString', function ($timeout, _, $rootScope, stringUtils, mainUtils, ReviewResource, $firebaseObject) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -22,51 +22,48 @@ angular.module('oncokbApp')
             replace: true,
             link: {
                 pre: function preLink(scope) {
-                    // $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "data").then(function (success) {
-                    //     scope.uuid = scope.data[scope.key+'_uuid'];
-                    //     if (scope.t === 'treatment-select') {
-                    //         scope.changePropagation(true);
-                    //     }                     
-                    // }, function (error) {
-                    //     console.log('error');
-                    // });
+                    $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "data").then(function (success) {
+                        if (scope.t === 'treatment-select') {
+                            scope.changePropagation(true);
+                        }  
+                    }, function (error) {
+                        console.log('error');
+                    }); 
                 },
                 post: function postLink(scope) {
                     scope.reviewMode = ReviewResource.reviewMode;
                     scope.pContent = '';
-                    // scope.preStringO = scope.data[scope.key];
-                    // scope.$watch('data[key]', function (n, o) {
-                    //     if (n !== o) {
-                    //         scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
-                    //         if (scope.key !== 'short') {
-                    //             // we track the change in two conditions:
-                    //             // 1) When editing happens not in review mode
-                    //             // 2) When editing happends in review mode but not from admin's "Reject" action
-                    //             // if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
-                    //             //     if (_.isUndefined(scope.data[scope.key + '_review'])) {
-                    //             //         scope.data[scope.key + '_review'] = {
-                    //             //             updatedBy: user.name,
-                    //             //             updateTime: new Date().getTime()
-                    //             //         };
-                    //             //     }
-                    //             //     if (_.isUndefined(scope.data[scope.key + '_review'].lastReviewed)) {
-                    //             //         scope.data[scope.key + '_review'].lastReviewed = o;
-                    //             //         scope.data[scope.key + '_review'].updatedBy = user.name;
-                    //             //         scope.data[scope.key + '_review'].updateTime = new Date().getTime();
-                    //             //         $rootScope.metaFire[scope.uuid] = { review: true };
-                    //             //         ReviewResource.rollback = _.without(ReviewResource.rollback, scope.uuid);
-                    //             //     } else if (n === scope.data[scope.key]) {
-                    //             //         delete scope.data[scope.key + '_review'].lastReviewed;
-                    //             //         delete $rootScope.metaFire[scope.uuid];
-                    //             //         // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
-                    //             //         if (ReviewResource.reviewMode) {
-                    //             //             ReviewResource.rollback.push(scope.uuid);
-                    //             //         }
-                    //             //     }
-                    //             // }
-                    //         }
-                    //     }
-                    // });
+                    scope.contentModified = false;
+                    scope.$watch('pContent', function(n, o) {
+                        if (scope.contentModified && scope.key !== 'short' && n !== o) {
+                            // we track the change in two conditions:
+                            // 1) When editing happens not in review mode
+                            // 2) When editing happends in review mode but not from admin's "Reject" action
+                            if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
+                                // The first time this piece of data is recorded in review mode
+                                if (_.isUndefined(scope.data[scope.key + '_review']) || _.isUndefined(scope.data[scope.key + '_review'].lastReviewed)) {
+                                    scope.data[scope.key + '_review'] = {
+                                        updatedBy: $rootScope.me.name,
+                                        updateTime: new Date().getTime(),
+                                        lastReviewed: o
+                                    };
+                                    $rootScope.metaFire[scope.uuid] = { review: true };
+                                    ReviewResource.rollback = _.without(ReviewResource.rollback, scope.uuid);
+                                }
+                                // If the data was reviewed before
+                                if (n === scope.data[scope.key + '_review'].lastReviewed) {
+                                    // If the data is changed back to the original value
+                                    delete scope.data[scope.key + '_review'].lastReviewed;
+                                    delete $rootScope.metaFire[scope.uuid];
+                                    // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
+                                    if (ReviewResource.reviewMode) {
+                                        ReviewResource.rollback.push(scope.uuid);
+                                    }
+                                }
+                            }
+                        }
+
+                    });
                 }
             },
             controller: function ($scope) {
@@ -174,12 +171,17 @@ angular.module('oncokbApp')
                                 richTextShortcuts: false, 
                                 richTextToolbar: false, 
                                 defaultText: '',
-                                userId: 'jiaojiao wang'
+                                userId: $rootScope.me.name
                         });
                         firepad.on('ready', function() {
                             $scope.pContent = firepad.getText();
-                            // var text = firepad.getText();
                             // firepad.setText('');
+                        });
+                        firepad.on('synced', function(isSynced) {
+                            $scope.pContent = firepad.getText();
+                            $scope.contentModified = true;
+                            // $timeout(function() {                                                                
+                            // }, 1000);                       
                         });
                     }, 200);
                 }

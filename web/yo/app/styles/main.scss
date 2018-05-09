@@ -966,6 +966,11 @@ a.powered-by-firepad {
   display: none;
 }
 
+.firepad {
+  min-height: 100px;
+  height: auto;
+}
 .CodeMirror {
   background-color: #F1F9FF !important;
+  height: auto;
 }

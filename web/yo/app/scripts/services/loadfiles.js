@@ -5,13 +5,13 @@
 
 /**
  * @ngdoc service
- * @name oncokb.additionalFile
+ * @name oncokb.loadFiles
  * @description
  * # Additional Files, currently including meta and queues.
  * Service in the oncokb.
  */
 angular.module('oncokbApp')
-    .service('additionalFile', function additionalFile($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector) {
+    .service('loadFiles', function loadFiles($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector, $firebaseObject) {
         function load(types) {
             function loadMeta() {
                 var metaDefer = $q.defer();
@@ -87,7 +87,38 @@ angular.module('oncokbApp')
             }
             return deferred.promise;
         }
+        function loadMetaByGene(hugoSymbol) {
+            var metaByGeneDefer = $q.defer();
+            if (!hugoSymbol) {
+                metaByGeneDefer.reject('No hugoSymbol passed in');
+            }
+            if ($rootScope.metaByGeneFire) {
+                metaByGeneDefer.resolve('success');
+            } else {
+                $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "metaByGeneFire").then(function() {
+                    metaByGeneDefer.resolve('success');
+                }, function(error) {
+                    metaByGeneDefer.reject('Failed to bind meta by gene');
+                });
+            }
+            return metaByGeneDefer.promise;
+        }
+        function loadMetaFire() {
+            var metaFireDefer = $q.defer();
+            if ($rootScope.allMetaFire) {
+                metaFireDefer.resolve('success');
+            } else {
+                $firebaseObject(firebase.database().ref('Meta')).$bindTo($rootScope, "allMetaFire").then(function() {
+                    metaFireDefer.resolve('success');
+                }, function(error) {
+                    metaFireDefer.reject('Failed to bind meta by gene');
+                });
+            }
+            return metaFireDefer.promise;
+        }
         return {
-            load: load
+            load: load,
+            loadMetaByGene: loadMetaByGene,
+            loadMetaFire: loadMetaFire
         }
     });

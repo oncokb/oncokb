@@ -1,10 +1,10 @@
 <div class="geneMainDiv" ng-if="!status.rendering" ng-style="geneMainDivStyle">
   <div id="gene" style="margin-bottom:50px">
     <h2>
-      <span>Gene:{{::geneFire.name}}</span>
+      <span>Gene: {{::geneFire.name}}</span>
       <comments-dict key="'name'" path="getObservePath({type: 'gene'})"></comments-dict>
       <span ng-repeat="collaborator in collaborators">
-        <img style="height:30px" ng-src="{{::collaborator.photoUrl}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.displayName}}">
+        <img style="height:30px" ng-src="{{collaborator.photoURL}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.name}}">
       </span>
       <span ng-if="::(document && geneTimeStamp.get('lastModifiedAt'))" class="geneLastModify">Last edit was made on {{geneTimeStamp.get('lastModifiedAt') | date : 'MMM d, h:mm a yyyy'}} by {{geneTimeStamp.get('lastModifiedBy')}}</span>
       <span ng-if="::(document && userRole === 8 && geneTimeStamp.get('lastSavedAt'))" class="geneLastModify">Last update to database was made on {{geneTimeStamp.get('lastSavedAt') | date : 'MMM d, h:mm a'}} by {{geneTimeStamp.get('lastSavedBy')}}</span>
@@ -129,9 +129,10 @@
     <div class="sectionStyle">
       <button class="headerLevel1" ng-click="toggleSection(mutation.name_uuid)">
         <i ng-class="getAngleClass(mutation.name_uuid)"></i> Mutation:
-        <div style="display:inline-block">
-          <realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string>
-        </div>
+        <!-- <div style="display:inline-block">
+        </div> -->
+        <realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string>
+
         <div style="display:inline-block">
           <comments-dict key="'name'" path="path"></comments-dict>
         </div>

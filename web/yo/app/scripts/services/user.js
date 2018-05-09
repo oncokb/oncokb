@@ -27,6 +27,7 @@ angular.module('oncokbApp')
                 me.email = gResp.user.email;
                 me.photoURL = gResp.user.photoURL;
                 $rootScope.isSignedIn = true;
+                updateUserInfo();
                 setRole(gResp.user).then(function() {
                     $rootScope.me = me;
                     defer.resolve();
@@ -53,6 +54,21 @@ angular.module('oncokbApp')
                 }
                 defer.resolve();
                 $rootScope.me = me;
+            });
+            return defer.promise;
+        }
+        function updateUserInfo() {
+            var defer = $q.defer();
+            var myName = $rootScope.me.name.toLowerCase();
+            var updatedUserInfo = {
+                name: $rootScope.me.name,
+                email: $rootScope.me.email,
+                photoURL: $rootScope.me.photoURL
+            };
+            firebase.database().ref('Users/'+myName).update(updatedUserInfo).then(function() {
+                defer.resolve();
+            }, function(error) {
+                defer.reject(error);
             });
             return defer.promise;
         }

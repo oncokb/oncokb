@@ -10,7 +10,7 @@
  * # curationQueue
  */
 angular.module('oncokbApp')
-    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, mainUtils, dialogs, _, $q, additionalFile, user) {
+    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, mainUtils, dialogs, _, $q, loadFiles, user) {
         return {
             templateUrl: 'views/curationQueue.html',
             restrict: 'E',
@@ -71,7 +71,7 @@ angular.module('oncokbApp')
                         DTColumnDefBuilder.newColumnDef(10)
                     ];
                     scope.queue = [];
-                    additionalFile.load(['queues', 'meta']).then(function(result) {
+                    loadFiles.load(['queues', 'meta']).then(function(result) {
                         scope.data.hugoSymbols = _.keys($rootScope.metaData);
                         if (scope.location === 'gene') {
                             scope.queue = scope.getQueuesByGene(scope.hugoSymbol);

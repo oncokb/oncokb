@@ -1,26 +1,21 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils', 'mainUtils', 'ReviewResource', 'additionalFile', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
-        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource, additionalFile, $firebaseObject, $firebaseArray, FirebaseModel, user) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'gapi', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'stringUtils', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
+        function(_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, gapi, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
             $scope.test = function(event, a, b, c, d, e, f, g) {
                 $scope.stopCollopse(event);
                 console.log(a, b, c, d, e, f, g);
             };
-            $scope.authorize = function() {
-                storage.requireAuth(false).then(function() {
-                    var target = $location.search().target;
-                    if (target) {
-                        $location.url(target);
-                    } else {
-                        storage.getDocument('1rFgBCL0ftynBxRl5E6mgNWn0WoBPfLGm8dgvNBaHw38').then(function(file) {
-                            storage.downloadFile(file).then(function(text) {
-                                $scope.curateFile = text;
-                            });
-                        });
-                    }
-                });
-            };
+            $window.onbeforeunload = function (event) {
+                var myName = $rootScope.me.name.toLowerCase();
+                var genesOpened = _.without($rootScope.allMetaFire.collaborators[myName], $scope.fileTitle);
+                firebase.database().ref('Meta/collaborators/' + myName).set(genesOpened).then(function(result) {
+                    console.log('success');
+                }).catch(function(error) {
+                    console.log(error);
+                });        
+            }
             function isValidVariant(originalVariantName) {
                 var variantName = originalVariantName.trim().toLowerCase();
                 var validMutation = true;
@@ -325,19 +320,6 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function(data) {
-                console.log('init firepad');
-                $scope.init();
-                // var firepadRef = firebase.database().ref('Genes/APC/summary_firepad');
-
-                // // Create CodeMirror (with lineWrapping on).
-                // var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
-          
-                // // Create Firepad (with rich text toolbar and shortcuts enabled).
-                // var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, {
-                //   richTextShortcuts: false,
-                //   richTextToolbar: false,
-                //   defaultText: 'Hello, World!'
-                // });
             };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
@@ -2667,7 +2649,7 @@ angular.module('oncokbApp')
             }
             function loadMetaFile(callback) {
                 if(!$rootScope.metaData) {
-                    additionalFile.load(['all']).then(function(result) {
+                    loadFiles.load(['all']).then(function(result) {
                         assignMeta(callback);
                     }, function(error) {
                         $scope.fileEditable = false;
@@ -3351,6 +3333,29 @@ angular.module('oncokbApp')
                     $scope.initialOpen[treatment.name_uuid] = false;
                 });
             }
+            function getAllCollaborators() {
+                var defer = $q.defer();
+                user.getAllUsers().then(function(allUsersInfo) {
+                    firebase.database().ref('Meta/collaborators').on('value', function(collaborators) {
+                        var allColl = collaborators.val();
+                        var tempCollaborators = {};
+                        _.each(_.keys(allColl), function(key) {
+                            if (allColl[key].indexOf($scope.fileTitle) !== -1) {
+                                tempCollaborators[key] = allUsersInfo[key];
+                            }
+                        });
+                        $scope.collaborators = tempCollaborators;
+                        defer.resolve();
+                    }, function(error) {
+                        defer.reject(error);
+                    });
+                }, function(error) {
+                    console.log(error);
+                    defer.reject(error);
+                });
+                
+                return defer.promise;
+            }
             function getRefByPath(path) {
                 var indicies = getIndexByPath(path);
                 var result = 'Genes/'+$scope.fileTitle+'/mutations/';
@@ -3407,7 +3412,7 @@ angular.module('oncokbApp')
                 });
                 $scope.mutations = $firebaseArray(firebase.database().ref('Genes/'+$scope.fileTitle+'/mutations'));                
                 var deferred2 = $q.defer();
-                $firebaseObject(firebase.database().ref('Meta/'+$scope.fileTitle)).$bindTo($rootScope, "metaFire").then(function() {
+                $firebaseObject(firebase.database().ref('Meta/'+$scope.fileTitle+'/review')).$bindTo($rootScope, "metaFire").then(function() {
                     deferred2.resolve();
                 }, function(error) {
                     deferred2.reject(error);
@@ -3419,11 +3424,10 @@ angular.module('oncokbApp')
                 }, function(error) {
                     deferred3.reject(error);
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, getAllCollaborators()];
                 $q.all(bindingAPI)
                     .then(function(result) {
                         user.setFileeditable([$scope.fileTitle]).then(function(result) {
-                            console.log('done loading...');
                             $scope.fileEditable = result[$scope.fileTitle];
                             $scope.status.rendering = false;
                             $rootScope.fileEditable = $scope.fileEditable;
@@ -3479,37 +3483,6 @@ angular.module('oncokbApp')
                 return obj[data.key+'_uuid'];
             }            
             populateBindings();
-            // Token expired, refresh
-            $rootScope.$on('realtimeDoc.token_refresh_required', function() {
-                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                dialogs.error('Error', errorMessage);
-                documentClosed();
-                $location.path('/genes');
-            });
-
-            // Other unidentify error
-            $rootScope.$on('realtimeDoc.other_error', function() {
-                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                dialogs.error('Error', errorMessage);
-                documentClosed();
-                $location.path('/genes');
-            });
-
-            // Realtime documet not found
-            $rootScope.$on('realtimeDoc.client_error', function() {
-                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                dialogs.error('Error', errorMessage);
-                documentClosed();
-                $location.path('/genes');
-            });
-
-            // Realtime documet not found
-            $rootScope.$on('realtimeDoc.not_found', function() {
-                var errorMessage = 'An error has occurred. This page will be redirected to Genes page.';
-                dialogs.error('Error', errorMessage);
-                documentClosed();
-                $location.path('/genes');
-            });
 
             $scope.$on('interruptedDueToOtherReview', function() {
                 // if previously the document is editable, need to notify
@@ -3539,13 +3512,13 @@ angular.module('oncokbApp')
             $scope.$on('$locationChangeStart', function() {
                 documentClosed();
             });
-            $window.onbeforeunload = function() {
-                // If in the review mode, exit the review mode first then
-                // close the tab.
-                if ($rootScope.reviewMode) {
-                    $scope.exitReview();
-                }
-            };
+            // $window.onbeforeunload = function() {
+            //     // If in the review mode, exit the review mode first then
+            //     // close the tab.
+            //     if ($rootScope.reviewMode) {
+            //         $scope.exitReview();
+            //     }
+            // };
         }]
     )
     .controller('ModifyTumorTypeCtrl', function($scope, $modalInstance, data, _, OncoKB, $rootScope, user, mainUtils, FirebaseModel) {

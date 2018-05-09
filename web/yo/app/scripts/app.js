@@ -166,17 +166,6 @@ var oncokbApp = angular.module('oncokbApp', [
         $animateProvider.classNameFilter(/^((?!(fa-spinner)).)*$/);
 
         x2jsProvider.config = {
-            /*
-             escapeMode               : true|false - Escaping XML characters. Default is true from v1.1.0+
-             attributePrefix          : '<string>' - Prefix for XML attributes in JSon model. Default is '_'
-             arrayAccessForm          : 'none'|'property' - The array access form (none|property). Use this property if you want X2JS generates an additional property <element>_asArray to access in array form for any XML element. Default is none from v1.1.0+
-             emptyNodeForm            : 'text'|'object' - Handling empty nodes (text|object) mode. When X2JS found empty node like <test></test> it will be transformed to test : '' for 'text' mode, or to Object for 'object' mode. Default is 'text'
-             enableToStringFunc       : true|false - Enable/disable an auxiliary function in generated JSON objects to print text nodes with text/cdata. Default is true
-             arrayAccessFormPaths     : [] - Array access paths. Use this option to configure paths to XML elements always in 'array form'. You can configure beforehand paths to all your array elements based on XSD or your knowledge. Every path could be a simple string (like 'parent.child1.child2'), a regex (like /.*\.child2/), or a custom function. Default is empty
-             skipEmptyTextNodesForObj : true|false - Skip empty text tags for nodes with children. Default is true.
-             stripWhitespaces         : true|false - Strip whitespaces (trimming text nodes). Default is true.
-             datetimeAccessFormPaths  : [] - Datetime access paths. Use this option to configure paths to XML elements for 'datetime form'. You can configure beforehand paths to all your array elements based on XSD or your knowledge. Every path could be a simple string (like 'parent.child1.child2'), a regex (like /.*\.child2/), or a custom function. Default is empty
-             */
             attributePrefix: '$'
         };
 
@@ -199,8 +188,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'stringUtils', 'mainUtils', 'user',
-        function($timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, stringUtils, mainUtils, user) {
+    ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'stringUtils', 'mainUtils', 'user', 'loadFiles',
+        function($window, $timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, stringUtils, mainUtils, user, loadFiles) {
             $rootScope.errors = [];
             $rootScope.internal = true;
 
@@ -209,7 +198,13 @@ angular.module('oncokbApp').run(
             $rootScope.user = {
                 role: config.userRoles.public
             };
-
+            // $window.onbeforeunload = function() {
+            //     $rootScope.metaFire['helloworld'] = { review: true };
+            //     // var answer = confirm("Are you sure you want to leave this page?")
+            // }
+            // $window.onbeforeunload = function (event) {
+            //     return 'You have made changes, but you did not save them yet.\nLeaving the page will revert all changes.';
+            // }
             $rootScope.meta = {
                 levelsDesc: {
                     '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker',
@@ -258,6 +253,39 @@ angular.module('oncokbApp').run(
             });
             var loading = true;
             $rootScope.$on('$routeChangeStart', function(event, next) {
+                var fromIndex = window.location.href.indexOf('/gene/');
+                var hugoSymbol = '';
+                if (fromIndex !== -1) {
+                    //When the curator left the gene page
+                    hugoSymbol = window.location.href.substring(fromIndex+6);
+                }
+                var toIndex = $location.path().indexOf('/gene/');
+                if (toIndex !== -1) {
+                    //When the curator enter the gene page
+                    hugoSymbol = $location.path().substring(toIndex+6);
+                }
+                if (fromIndex !== -1 || toIndex !== -1) {
+                    loadFiles.loadMetaFire().then(function() {
+                        var myName = $rootScope.me.name.toLowerCase();
+                        if (!$rootScope.allMetaFire.collaborators) {
+                            $rootScope.allMetaFire.collaborators = {};
+                        }
+                        if (fromIndex !== -1) {
+                            var genesOpened = $rootScope.allMetaFire.collaborators[myName];
+                            $rootScope.allMetaFire.collaborators[myName] = _.without(genesOpened, hugoSymbol);
+                        }                        
+                        if (toIndex !== -1) {
+                            if (!$rootScope.allMetaFire.collaborators[myName]) {
+                                $rootScope.allMetaFire.collaborators[myName] = [];
+                            }
+                            if ($rootScope.allMetaFire.collaborators[myName].indexOf(hugoSymbol) === -1) {
+                                $rootScope.allMetaFire.collaborators[myName].push(hugoSymbol);
+                            }
+                        }                        
+                    }, function(error) {
+                        console.log(error);
+                    });
+                }
                 if (!$rootScope.isSignedIn) {
                     if (loading) {
                         loadingScreen.finish();
@@ -272,12 +300,6 @@ angular.module('oncokbApp').run(
                 var content = 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message;
                 mainUtils.notifyDeveloper(subject, content);
             });
-
-            //$rootScope.$watch('internal', function(n) {
-            //    if (!n && $rootScope.user.role === OncoKB.config.userRoles.admin) {
-            //        dialogs.notify('Notification', 'Please notice the website can not connect to internal network. All admin features will not be available at this moment.');
-            //    }
-            //});
         }]);
 
 /**

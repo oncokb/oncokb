@@ -1,14 +1,14 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
+    .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$firebaseObject', '$firebaseArray', 'user',
-        function($scope, $rootScope, $location, $timeout, $routeParams, _,
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'user',
+        function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $firebaseObject, $firebaseArray, user) {
+                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, user) {
             function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -61,10 +61,13 @@ angular.module('oncokbApp')
                 }
             }
             $scope.metaFlags = {};
-            
+            // $window.onbeforeunload = function (event) {
+            //     return 'You have made changes, but you did not save them yet.\nLeaving the page will revert all changes.';
+            // }
             function processMeta() {
-                additionalFile.load(['all']).then(function(result) {
+                loadFiles.load(['all']).then(function(result) {
                     var hugoSymbols = _.keys($rootScope.metaData);
+                    hugoSymbols = _.without(hugoSymbols, 'collaborators');
                     user.setFileeditable(hugoSymbols).then(function(editableData) {
                         _.each(hugoSymbols, function(hugoSymbol) {
                             $scope.metaFlags[hugoSymbol] = {
