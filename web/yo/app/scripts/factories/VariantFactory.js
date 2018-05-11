@@ -536,10 +536,10 @@ angular.module('oncokbApp')
                 effect_uuid: getUUID(),
                 description: '',
                 description_uuid: getUUID(),
-                short: ''
+                short: '',
+                short_uuid: getUUID()
             };
             this.mutation_effect_uuid = getUUID();
-            this.tumors = [];
             this.tumors_uuid = getUUID();
         };
         var Tumor = function (cancerTypes) {
@@ -552,7 +552,8 @@ angular.module('oncokbApp')
                 level_uuid: getUUID(),
                 description: '',
                 description_uuid: getUUID(),
-                short: ''
+                short: '',
+                short_uuid: getUUID()
             };
             this.prognostic_uuid = getUUID();
             this.diagnostic = {
@@ -560,7 +561,8 @@ angular.module('oncokbApp')
                 level_uuid: getUUID(),
                 description: '',
                 description_uuid: getUUID(),
-                short: ''
+                short: '',
+                short_uuid: getUUID()
             };
             this.diagnostic_uuid = getUUID();
             this.TIs = createTIs();
@@ -588,6 +590,7 @@ angular.module('oncokbApp')
             this.description = '';
             this.description_uuid = getUUID();
             this.short = '';
+            this.short_uuid = getUUID();
         };
         var Comment = function(userName, email, content) {
             this.date = (new Date()).getTime().toString();

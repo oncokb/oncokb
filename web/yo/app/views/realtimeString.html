@@ -3,21 +3,36 @@
         <div ng-switch-when="false">
             <div ng-switch on="t">
                 <div ng-switch-when="p">
-                    <div id="{{uuid}}"></div>
-                    <div ng-init="initFirepad()"></div>
+                    <p ng-if="!fe" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
+                    <p contenteditable="{{fe}}"
+                        ng-class="getInputClass()"
+                        placeholder="{{::ph}}"
+                        ng-model="data[key]"
+                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }">
+                     </p>
                     <pub-iframe
                             ng-model="pContent">
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME">
-                    <div id="{{uuid}}"></div>
-                    <div ng-init="initFirepad()"></div>
+                    <p ng-if="!fe" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
+                    <p contenteditable="{{fe}}"
+                        ng-class="getInputClass()"
+                        placeholder="{{::ph}}"
+                        ng-model="data[key]"
+                        ng-model-options="{ debounce: 500 }">
+                    </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
-                    <div id="{{uuid}}"></div>
-                    <div ng-init="initFirepad()"></div>
+                    <p ng-if="!fe" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
+                    <p contenteditable="{{fe}}"
+                        ng-class="getInputClass()"
+                        placeholder="{{::ph}}"
+                        ng-model="data[key]"
+                        ng-model-options="{ debounce: 500 }">
+                    </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>

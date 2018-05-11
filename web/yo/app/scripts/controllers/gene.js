@@ -31,7 +31,7 @@ angular.module('oncokbApp')
                     message += 'is a not allowed name!';
                 }
                 if (validMutation) {
-                    _.some($scope.geneFire.mutations, function(mutation) {
+                    _.some($scope.mutations, function(mutation) {
                         if (mutation.name.toLowerCase() === variantName) {
                             validMutation = false;
                             message += 'has already been added in the mutation section!';
@@ -58,7 +58,11 @@ angular.module('oncokbApp')
             $scope.addMutation = function(newMutationName) {
                 if (isValidVariant(newMutationName)) {
                     var mutation = new FirebaseModel.Mutation(newMutationName);
-                    $scope.geneFire.mutations.push(mutation);
+                    if (!$scope.geneFire.mutations) {
+                        $scope.geneFire.mutations = [mutation];
+                    } else {
+                        $scope.geneFire.mutations.push(mutation);
+                    }                    
                 }
             };
             /**
@@ -67,12 +71,11 @@ angular.module('oncokbApp')
              * The other one is about the detailed mutation content inside when first loaded the gene page, and the result is stored in mutationContent.
              * **/
             var sortedLevel = _.keys($rootScope.meta.levelsDesc).sort();
-            $scope.getMutationMessagesNew = function() {
+            $scope.getMutationMessages = function() {
                 $scope.mutationContent = {};
                 var tempNameList = [];
-                for (var i = 0; i < $scope.geneFire.mutations.length; i++) {
-                    var mutation = $scope.geneFire.mutations[i];
-                    var mutationName = mutation.name.trim().toLowerCase();
+                for (var i = 0; i < $scope.mutations.length; i++) {
+                    var mutation = $scope.mutations[i];
                     var uuid = mutation.name_uuid;
                     $scope.mutationContent[uuid] = {
                         TT: 0,
@@ -97,68 +100,6 @@ angular.module('oncokbApp')
                             }
                         }
                     }                    
-                    if ($scope.mutationContent[uuid].TT > 0) {
-                        $scope.mutationContent[uuid].levels.sort(function(a, b) {
-                            return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
-                        });
-                        $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
-                        if ($scope.mutationContent[uuid].levels.length > 0) {
-                            $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function(level) {
-                                return '<span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">' + level + '</span>';
-                            });
-                            $scope.mutationContent[uuid].result += ', Levels: ' + $scope.mutationContent[uuid].levels.join(', ') + '</span>';
-                        }
-                    }
-                }
-            };
-            $scope.getMutationMessages = function() {
-                $scope.mutationMessages = {};
-                $scope.mutationContent = {};
-                var vusList = [];
-                // $scope.vus.asArray().forEach(function(e) {
-                //     vusList.push(e.name.getText().trim().toLowerCase());
-                // });
-                var mutationNameBlackList = [
-                    'activating mutations',
-                    'activating mutation',
-                    'inactivating mutations',
-                    'inactivating mutation'
-                ];
-
-                var tempNameList = [];
-                for (var i = 0; i < $scope.geneFire.mutations.length; i++) {
-                    var mutation = $scope.geneFire.mutations[i];
-                    var mutationName = mutation.name.trim().toLowerCase();
-                    var uuid = mutation.name_uuid;
-                    if (mutationNameBlackList.indexOf(mutationName) !== -1) {
-                        $scope.mutationMessages[mutationName] = 'This mutation name is not allowed';
-                    } else if (vusList.indexOf(mutationName) !== -1) {
-                        $scope.mutationMessages[mutationName] = 'Mutation exists in VUS list';
-                    } else if (tempNameList.indexOf(mutationName) !== -1) {
-                        $scope.mutationMessages[mutationName] = 'Mutation exists';
-                    }  else if (tempNameList.indexOf(mutationName) === -1) {
-                        tempNameList.push(mutationName);
-                        $scope.mutationMessages[mutationName] = '';
-                    }
-                    $scope.mutationContent[uuid] = {
-                        TT: 0,
-                        levels: []
-                    };
-                    for (var j = 0; j < mutation.tumors.length; j++) {
-                        var tumor = mutation.tumors[j];
-                        if (!tumor.name_review.removed) {
-                            $scope.mutationContent[uuid].TT++;
-                            for (var m = 0; m < tumor.TIs.length; m++) {
-                                var ti = tumor.TI[m];
-                                for (var n = 0; n < ti.treatments.length; n++) {
-                                    var treatment = ti.treatments[n];
-                                    if (!treatment.name_review.removed) {
-                                        $scope.mutationContent[uuid].levels.push(treatment.level);
-                                    }
-                                }
-                            }
-                        }
-                    }
                     if ($scope.mutationContent[uuid].TT > 0) {
                         $scope.mutationContent[uuid].levels.sort(function(a, b) {
                             return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
@@ -1780,7 +1721,7 @@ angular.module('oncokbApp')
             function isValidTumor(mutationIndex, newTumorTypesName) {
                 var isValid = true;
                 var message = '';
-                _.some($scope.geneFire.mutations[mutationIndex].tumors, function(tumor) {
+                _.some($scope.mutations[mutationIndex].tumors, function(tumor) {
                     if ($scope.getCancerTypesName(tumor) === newTumorTypesName) {
                         isValid = false;
                         message = newTumorTypesName + ' has already been added';
@@ -1839,66 +1780,6 @@ angular.module('oncokbApp')
                 }, function() {
                     console.log('failed to updated tumor type');
                 });
-            };
-            $scope.validateTreatment = function(newTreatmentName, firstEnter, alert, mutation, tumor, ti) {
-                var exists = false;
-                var removed = false;
-                var tempTreatment;
-                newTreatmentName = newTreatmentName.toString().trim().toLowerCase();
-                _.some(ti.treatments.asArray(), function(e) {
-                    if (e.name.getText().toLowerCase() === newTreatmentName) {
-                        exists = true;
-                        if(e.name_review.get('removed')) {
-                            removed = true;
-                            tempTreatment = e;
-                        } else {
-                            removed = false;
-                            return true;
-                        }
-                    }
-                });
-                if (exists) {
-                    if(removed) {
-                        dialogs.notify('Warning', 'This Therapy just got removed, we will reuse the old one.');
-                        tempTreatment.name_review.set('removed', false);
-                        $rootScope.geneMetaData.delete(tempTreatment.name_uuid.getText());
-                        return false;
-                    } else {
-                        dialogs.notify('Warning', 'Therapy exists.');
-                        return false;
-                    }
-                } else {
-                    return true;
-                }
-            };
-
-            // Add new therapeutic implication
-            $scope.addTI = function(newTIName, mutation, tumor, ti) {
-                if (ti && newTIName) {
-                    if ($scope.validateTreatment(newTIName, false, true, mutation, tumor, ti) === true) {
-                        $scope.getTreatmentMessages(mutation, tumor, ti);
-                        $scope.realtimeDocument.getModel().beginCompoundOperation();
-                        var _treatment = $scope.realtimeDocument.getModel().create(OncoKB.Treatment);
-                        _treatment.name.setText(newTIName);
-                        _treatment.type.setText('Therapy');
-                        if ($scope.checkTI(ti, 1, 1)) {
-                            _treatment.level.setText('1');
-                        } else if ($scope.checkTI(ti, 0, 1)) {
-                            _treatment.level.setText('4');
-                        } else if ($scope.checkTI(ti, 1, 0)) {
-                            _treatment.level.setText('1');
-                        } else if ($scope.checkTI(ti, 0, 0)) {
-                            _treatment.level.setText('4');
-                        }
-                        _treatment.name_review.set('added', true);
-                        _treatment.name_review.set('updatedBy', User.name);
-                        _treatment.name_review.set('updateTime', new Date().getTime());
-                        ti.treatments.push(_treatment);
-                        $scope.realtimeDocument.getModel().endCompoundOperation();
-                        $scope.initGeneStatus(mutation, tumor, ti, _treatment);
-                        mainUtils.updateLastModified();
-                    }
-                }
             };
             function isValidTreatment(indices, newTreatmentName) {
                 var isValid = true;
@@ -2377,15 +2258,15 @@ angular.module('oncokbApp')
                 var indicies = getIndexByPath(path);
                 if (indicies[1] === -1) {
                     // mutation section
-                    dataList = this.geneFire.mutations;
+                    dataList = this.mutations;
                     index = indicies[0];
                 } else if(indicies[2] === -1) {
                     // tumor section
-                    dataList = this.geneFire.mutations[indicies[0]].tumors;
+                    dataList = this.mutations[indicies[0]].tumors;
                     index = indicies[1];
                 } else if(indicies[3] !== -1) {
                     // treatment section
-                    dataList = this.geneFire.mutations[indicies[0]].tumors[indicies[1]].TIs[indicies[2]].treatments;
+                    dataList = this.mutations[indicies[0]].tumors[indicies[1]].TIs[indicies[2]].treatments;
                     index = indicies[3];
                     type = 'treatment';
                 }
@@ -2421,10 +2302,9 @@ angular.module('oncokbApp')
                     dataList[dataList.length-1] = tempObj;
                 } 
                 if (type === 'treatment') {
-                    $scope.updatePriority(dataList, index, moveIndex);
+                    // $scope.updatePriority(dataList, index, moveIndex);
                 }
             }
-
             $scope.generatePDF = function() {
                 jspdf.create(stringUtils.getGeneData(this.gene, true, false));
             };
@@ -2433,12 +2313,12 @@ angular.module('oncokbApp')
             $scope.changeIsOpen = function(target) {
                 target = !target;
             };
-
-            $scope.checkEmpty = function(obj, type) {
+            $rootScope.savingGene = false;
+            $scope.isEmptySection = function(obj, type) {
                 if (type === 'mutation_effect') {
                     if (obj.oncogenic || obj.effect || obj.description || obj.short) {
-                        return false;
-                    }
+                        return false;             
+                    } 
                 } else if (type === 'diagnostic' || type === 'prognostic') {
                     if (obj.level || obj.description || obj.short) {
                         return false;
@@ -2450,10 +2330,15 @@ angular.module('oncokbApp')
                 } else if (type === 'treatment') {
                     if (obj.level || obj.indication || obj.description || obj.short) {
                         return false;
-                    }
+                    } 
                 }
                 return true;
             };
+            function redoEmptyCheck(obj, type) {
+                $timeout(function() {    
+                    $scope.isEmptySection(obj, type);                                                
+                }, 500); 
+            }
 
             $scope.curatedIconClick = function(event, status) {
                 $scope.stopCollopse(event);
@@ -3071,7 +2956,7 @@ angular.module('oncokbApp')
             $scope.vus = '';
             $scope.comments = '';
             $scope.newGene = {};
-            $scope.collaborators = {};
+            $rootScope.collaborators = {};
             $scope.checkboxes = {
                 oncogenic: ['Yes', 'Likely', 'Likely Neutral', 'Inconclusive'],
                 mutationEffect: ['Gain-of-function', 'Likely Gain-of-function', 'Loss-of-function', 'Likely Loss-of-function', 'Switch-of-function', 'Likely Switch-of-function', 'Neutral', 'Likely Neutral', 'Inconclusive'],
@@ -3273,45 +3158,6 @@ angular.module('oncokbApp')
                     }, 100);
                 }
             });
-            var firepad;
-            var initialized = false;
-            $scope.init = function() {
-                if (initialized) {
-                    return;
-                } else {
-                    initialized = true;
-                }
-                console.log('start initialized');   
-                var firepadParams = [{
-                    path: 'Genes/APC/background_firepad',
-                    uuid: $scope.geneFire.background_uuid
-                }, {
-                    path: 'Genes/APC/summary_firepad',
-                    uuid: $scope.geneFire.summary_uuid
-                }];
-                _.each(firepadParams, function(item) {
-                    var firepadRef = firebase.database().ref(item.path);
-                    var codeMirror = CodeMirror(document.getElementById(item.uuid), { lineWrapping: true });
-                    firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, 
-                        {
-                            richTextShortcuts: false, 
-                            richTextToolbar: false, 
-                            defaultText: $scope.geneFire.background,
-                            userId: 'jiaojiao wang'
-                        });
-                });   
-                console.log('initialized');              
-            }
-            $scope.datatest = {
-                colors: ['red', 'green', 'white'],
-                items: ['Item 1', 'Item 2', 'Item 3']
-              };
-            $scope.addItem = function() {
-                var newItemNo = $scope.datatest.items.length + 1;
-                $scope.datatest.items[0] = 'This is something';
-                $scope.datatest.items.push('Item ' + newItemNo);
-                // $scope.data.colors.push('Color ' + newItemNo);
-              };
             $scope.tumorsByMutation = {};
             $scope.TIsByTumor = {};
             $scope.treatmentsByII = {};
@@ -3344,7 +3190,7 @@ angular.module('oncokbApp')
                                 tempCollaborators[key] = allUsersInfo[key];
                             }
                         });
-                        $scope.collaborators = tempCollaborators;
+                        $rootScope.collaborators = tempCollaborators;
                         defer.resolve();
                     }, function(error) {
                         defer.reject(error);
@@ -3400,17 +3246,11 @@ angular.module('oncokbApp')
             $scope.initialOpen = {};
             function populateBindings() {
                 var deferred1 = $q.defer();
-                $firebaseObject(firebase.database().ref("Genes/"+$scope.fileTitle)).$bindTo($scope, "geneFire").then(function() {
-                    $scope.getMutationMessagesNew();
-                    _.each($scope.geneFire.mutations, function(mutation) {
-                        $scope.initialOpen[mutation.name_uuid] = false;
-                        $scope.initialOpen[mutation.mutation_effect_uuid] = true;
-                    });
+                $firebaseObject(firebase.database().ref("Genes/"+$scope.fileTitle)).$bindTo($scope, "geneFire").then(function() {               
                     deferred1.resolve();
                 }, function(error) {
                     deferred1.reject(error);
-                });
-                $scope.mutations = $firebaseArray(firebase.database().ref('Genes/'+$scope.fileTitle+'/mutations'));                
+                });     
                 var deferred2 = $q.defer();
                 $firebaseObject(firebase.database().ref('Meta/'+$scope.fileTitle+'/review')).$bindTo($rootScope, "metaFire").then(function() {
                     deferred2.resolve();
@@ -3424,7 +3264,19 @@ angular.module('oncokbApp')
                 }, function(error) {
                     deferred3.reject(error);
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, getAllCollaborators()];
+                var deferred4 = $q.defer();
+                $scope.mutations = $firebaseArray(firebase.database().ref('Genes/'+$scope.fileTitle+'/mutations'));    
+                $scope.mutations.$loaded().then(function(success) {
+                    $scope.getMutationMessages();
+                    _.each($scope.mutations, function(mutation, index) {
+                        $scope.initialOpen[mutation.name_uuid] = false;
+                        $scope.initialOpen[mutation.mutation_effect_uuid] = true;
+                    });
+                    deferred4.resolve();
+                }, function(error) {
+                    deferred4.reject(error);
+                });
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, getAllCollaborators()];
                 $q.all(bindingAPI)
                     .then(function(result) {
                         user.setFileeditable([$scope.fileTitle]).then(function(result) {
@@ -3465,19 +3317,19 @@ angular.module('oncokbApp')
                 } else {
                     var indices = getIndexByPath(data.path);
                     if (data.type === 'mutation') {
-                        obj = $scope.geneFire.mutations[indices[0]];
+                        obj = $scope.mutations[indices[0]];
                     } else if (data.type === 'mutation_effect') {
-                        obj = $scope.geneFire.mutations[indices[0]].mutation_effect;
+                        obj = $scope.mutations[indices[0]].mutation_effect;
                     } else if (data.type === 'tumor') {
-                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]];
+                        obj = $scope.mutations[indices[0]].tumors[indices[1]];
                     } else if (data.type === 'diagnostic') {
-                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].diagnostic;
+                        obj = $scope.mutations[indices[0]].tumors[indices[1]].diagnostic;
                     } else if (data.type === 'prognostic') {
-                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].prognostic;
+                        obj = $scope.mutations[indices[0]].tumors[indices[1]].prognostic;
                     } else if (data.type === 'ti') {
-                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+                        obj = $scope.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
                     } else if (data.type === 'treatment') {
-                        obj = $scope.geneFire.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
+                        obj = $scope.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
                     }
                 } 
                 return obj[data.key+'_uuid'];
