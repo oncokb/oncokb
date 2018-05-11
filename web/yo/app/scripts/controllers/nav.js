@@ -8,20 +8,17 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
         var tabs = {
-            // 'vus': 'VUS',
             tree: 'Tree',
             variant: 'Variant Annotation',
             genes: 'Genes',
-            // 'dataSummary': 'Summary',
-            reportGenerator: 'Tools',
+            tools: 'Tools',
             feedback: 'Feedback',
             queues: 'Curation Queue'
         };
 
         var accessLevels = config.accessLevels;
-
         function loginCallback() {
             // console.log('In login callback.');
 
@@ -54,19 +51,14 @@ angular.module('oncokbApp')
 
         function setParams() {
             var filterTabs = [];
-            $scope.user = $rootScope.user;
-            if (access.authorize(accessLevels.curator)) {
-                filterTabs.push({key: 'genes', value: tabs.genes});
-                filterTabs.push({key: 'queues', value: tabs.queues});
-            }
-            if (access.authorize(accessLevels.admin) && $rootScope.internal) {
-                var keys = ['tree', 'variant', 'reportGenerator', 'feedback'];
-
+            filterTabs.push({key: 'genes', value: tabs.genes});
+            filterTabs.push({key: 'queues', value: tabs.queues});
+            if ($rootScope.me.role === 8) {
+                var keys = ['tree', 'variant', 'tools', 'feedback'];
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});
                 });
             }
-            $scope.signedIn = access.isLoggedIn();
             $scope.tabs = filterTabs;
         }
 
@@ -84,23 +76,36 @@ angular.module('oncokbApp')
                 }
             });
         }
-
-        // Render the sign in button.
-        $scope.renderSignInButton = function(immediateMode) {
-            if (immediateMode !== false) {
-                immediateMode = true;
-            }
-            storage.requireAuth(immediateMode).then(function(result) {
-                $scope.signInCallback(result);
+        $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
+            if (firebaseUser) {
+                $rootScope.isSignedIn = true;
+                user.setRole(firebaseUser).then(function() {
+                    $scope.user = $rootScope.me;
+                    setParams();
+                    $location.url('/genes');
+                }, function(error) {
+                });
+            } else {
+                console.log('not logged in yet');
+            }                
+        });
+        $scope.signIn = function() {
+            user.login().then(function() {
+                $scope.user = $rootScope.me;
+                setParams();
+                $location.url('/genes');
+            }, function(error) {
+                console.log('failed to login', error);
+                console.log('finish is called');
+                loadingScreen.finish();
             });
         };
-
+        
         $scope.signOut = function() {
-            access.logout();
-            $scope.signedIn = false;
-            $scope.user = $rootScope.user;
-            $location.path('/');
-            gapi.auth.signOut();
+            user.logout().then(function() {
+                $location.path('/');
+                $scope.tabs = [];
+            });
         };
 
         $scope.tabIsActive = function(route) {
@@ -138,14 +143,11 @@ angular.module('oncokbApp')
         };
 
         // This flag we use to show or hide the button in our HTML.
-        $scope.signedIn = false;
-        $scope.user = $rootScope.user;
+        // $scope.signedIn = false;
 
-        $rootScope.$watch('user', setParams);
-
-        $rootScope.$watch('dataLoaded', function(n) {
-            if (n) {
-                $scope.renderSignInButton();
+        $rootScope.$watch('isSignedIn', function(n, o) {
+            if (n !== o) {
+                $scope.isSignedIn = $rootScope.isSignedIn;
             }
         });
     });

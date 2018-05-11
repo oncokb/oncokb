@@ -86,14 +86,9 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', 'OncoKB', funct
         return $http.get('data/oncokbInfo.json');
     }
 
-    function getFirebasePermission() {
-        return $http.get('data/firebaseUserPermission.json');
-    }
-
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile,
-        getFirebasePermission: getFirebasePermission
+        getFromFile: getFromFile
     };
 }]);
 
@@ -424,11 +419,16 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
             });
     }
 
+    function getTumorSubtypes() {
+        return $http.get(OncoKB.config.oncoTreeLink + 'tumorTypes?version=' + OncoKB.config.oncoTreeVersion);
+    }
+
     return {
         getMainType: getMainType,
         getTumorTypeByMainType: getTumorTypeByMainType,
         getTumorType: getTumorType,
-        getTumorTypesByMainTypes: getTumorTypesByMainTypes
+        getTumorTypesByMainTypes: getTumorTypesByMainTypes,
+        getTumorSubtypes: getTumorSubtypes
     };
 }]);
 
@@ -492,5 +492,130 @@ angular.module('oncokbApp')
             added: [], // newly added sections
             removed: [], // deleted sections
             precise: [] // the exact item that has been changed
+        };
+    }]);
+angular.module('oncokbApp')
+    .factory('FirebaseModel', ['$http', 'OncoKB', function() {
+        'use strict';
+        var getUUID = function() {
+            return UUIDjs.create(4).toString();
+        };
+        var createTIs = function() {
+            var result = [];
+            for (var i = 0; i < 4; i++) {
+                var ti = new TI();
+                switch(i) {
+                    case 0:
+                        ti.type = 'SS';
+                        ti.name = 'Standard implications for sensitivity to therapy';
+                        break;
+                    case 1:
+                        ti.type = 'SR';
+                        ti.name = 'Standard implications for resistance to therapy';
+                        break;
+                    case 2:
+                        ti.type = 'IS';
+                        ti.name = 'Investigational implications for sensitivity to therapy';
+                        break;
+                    case 3:
+                        ti.type = 'IR';
+                        ti.name = 'Investigational implications for resistance to therapy';
+                        break;
+                }
+                result.push(ti);
+            }
+            return result;
+        }
+        var Mutation = function(name) {
+            this.name = name;
+            this.name_uuid = getUUID();
+            this.mutation_effect = {
+                oncogenic: '',
+                oncogenic_uuid: getUUID(),
+                effect: '',
+                effect_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.mutation_effect_uuid = getUUID();
+            this.tumors = [];
+            this.tumors_uuid = getUUID();
+        };
+        var Tumor = function (cancerTypes) {
+            this.cancerTypes = cancerTypes;
+            this.cancerTypes_uuid = getUUID();
+            this.summary = '';
+            this.summary_uuid = getUUID();
+            this.prognostic = {
+                level: '',
+                level_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.prognostic_uuid = getUUID();
+            this.diagnostic = {
+                level: '',
+                level_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.diagnostic_uuid = getUUID();
+            this.TIs = createTIs();
+        };
+        var Cancertype = function(name, code) {
+            this.name = name;
+            this.code = code;
+        }
+        var TI = function() {
+            this.name =  '';
+            this.name_uuid = getUUID();
+            this.type = '';
+            this.treatments = [];
+            this.treatments_uuid = getUUID();
+            this.description = '';
+            this.description_uuid = getUUID();
+        }
+        var Treatment = function(name) {
+            this.name = name;
+            this.name_uuid = getUUID();
+            this.level = '';
+            this.level_uuid = getUUID();
+            this.indication = '';
+            this.indication_uuid = getUUID();
+            this.description = '';
+            this.description_uuid = getUUID();
+            this.short = '';
+        };
+        var Comment = function(userName, email, content) {
+            this.date = (new Date()).getTime().toString();
+            this.userName = userName;
+            this.email = email;
+            this.content = content;
+            this.resolved = 'false';
+        }
+        var VUSItem = function(name, userName, userEmail) {
+            this.name = name;
+            this.time = [
+                new TimeStamp(userName, userEmail)
+            ];
+        }
+        var TimeStamp = function(userName, userEmail) {
+            this.by = {
+                by: userName,
+                email: userEmail
+            };
+            this.value = (new Date()).getTime().toString();
+        }
+        return {
+            Mutation: Mutation,
+            Tumor: Tumor,
+            Treatment: Treatment,
+            Comment: Comment,
+            Cancertype: Cancertype,
+            VUSItem: VUSItem,
+            TimeStamp: TimeStamp
         };
     }]);

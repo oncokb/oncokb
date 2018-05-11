@@ -4,10 +4,9 @@ angular.module('oncokbApp').controller('TreeCtrl', [
     '$timeout',
     'DatabaseConnector',
     'AnalysisEvidence',
-    'storage',
     'OncoKB',
     'Tree',
-    function($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence, storage, OncoKB, Tree) {
+    function($scope, $location, $timeout, DatabaseConnector, AnalysisEvidence, OncoKB, Tree) {
         'use strict';
 
         function drawTree(data) {

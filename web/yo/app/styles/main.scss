@@ -899,3 +899,78 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   margin-top:-35px;
   margin-left:800px
 }
+.headerLevel1 {
+  background-color: #E2F1EF;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 500;
+  transition: 0.4s;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 6px solid #2BB09A;
+}
+.headerLevel2 {
+  background-color: #FFF9EF;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 500;
+  transition: 0.4s;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 6px solid #FFB83E;
+}
+.headerLevel3 {
+  background-color: #FFF5EF;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 500;
+  transition: 0.4s;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 6px solid #FF8C3E;
+}
+.headerLevel4 {
+  background-color: #E4EAF2;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 500;
+  transition: 0.4s;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 6px solid #396BB6;
+}
+.panelContent {
+  padding: 18px;
+  display: block;
+}
+.angleIconStyle {
+  font-size: 22px;
+  font-weight: bolder;
+}
+.sectionStyle {
+  border: 0.5px solid #ddd; 
+}
+a.powered-by-firepad {
+  display: none;
+}
+
+.firepad {
+  min-height: 100px;
+  height: auto;
+}
+.CodeMirror {
+  background-color: #F1F9FF !important;
+  height: auto;
+}

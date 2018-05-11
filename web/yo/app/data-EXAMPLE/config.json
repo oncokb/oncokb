@@ -4,15 +4,12 @@
         "https://www.googleapis.com/auth/plus.profile.emails.read",
         "https://www.googleapis.com/auth/drive.file"
     ],
-    "folderId": "0BzBfo69g8fP6NkgtWGZxd0NjcWs",
-    "additionalsFolderId": "0BzBfo69g8fP6WkstN2FERlVwaFE",
     "userRoles": {
         "public": 1,
         "user": 2,
         "curator": 4,
         "admin": 8
     },
-    "backupFolderId": "0BzBfo69g8fP6LWozVE56Mk1RYkU",
     "users": "144i_5lLZGtvT44j0ByKhX0mx69CEQTQS38uDECY8nHg",
     "apiLink": "legacy-api/",
     "curationLink": "legacy-api/",
@@ -21,6 +18,14 @@
     "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
     "oncoTreeVersion": "oncotree_2017_06_21",
     "accessLevels": {},
-    "testing": false
+    "testing": false,
+    "firebaseConfig": {
+        "apiKey": "",
+        "authDomain": "",
+        "databaseURL": "",
+        "projectId": "",
+        "storageBucket": "",
+        "messagingSenderId": ""
+    }
 }
 

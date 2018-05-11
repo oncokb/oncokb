@@ -1177,6 +1177,35 @@ angular.module('oncokbApp')
             return mostRecent;
         }
 
+        function mostRecentItemFire(reviewObjs, include) {
+            var mostRecent = -1;
+            for (var i = 0; i < reviewObjs.length; i++) {
+                if (!include) {
+                    // This is designed to handle the reviewObj with systematically set updatetime
+                    // when 'include' equals true, it will use all reviewObj in the list
+                    // otherwise, we will only use the reviewObj with updatedBy info.
+                    if (!reviewObjs[i].updatedBy) continue;
+                }
+                var currentItemTime = new Date(reviewObjs[i].updateTime);
+                // we only continue to check if current item time is valid
+                if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
+                    if (mostRecent < 0) {
+                        mostRecent = i;
+                    } else {
+                        // reset mostRect time when current item time is closer
+                        var mostRecentTime = new Date(reviewObjs[mostRecent].updateTime);
+                        if(mostRecentTime < currentItemTime) {
+                            mostRecent = i;
+                        }
+                    }
+                }
+            }
+            if (mostRecent < 0) {
+                return 0;
+            }
+            return mostRecent;
+        }
+
         // Public API here
         return {
             trimMutationName: function(mutation) {
@@ -1206,6 +1235,7 @@ angular.module('oncokbApp')
             getVUSFullData: getVUSFullData,
             getTextString: OncoKB.utils.getString,
             mostRecentItem: mostRecentItem,
-            getHistoryData: getHistoryData
+            getHistoryData: getHistoryData,
+            mostRecentItemFire: mostRecentItemFire
         };
     });

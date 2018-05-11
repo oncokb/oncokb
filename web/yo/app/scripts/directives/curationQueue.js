@@ -10,7 +10,7 @@
  * # curationQueue
  */
 angular.module('oncokbApp')
-    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, users, mainUtils, dialogs, _, storage, $q, additionalFile) {
+    .directive('curationQueue', function(DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, $rootScope, $timeout, mainUtils, dialogs, _, $q, loadFiles, user) {
         return {
             templateUrl: 'views/curationQueue.html',
             restrict: 'E',
@@ -26,11 +26,9 @@ angular.module('oncokbApp')
                         allCurations: false,
                         curators: [],
                         modifiedCurator: {},
-                        modifiedMainType: '',
                         modifiedSubType: {},
                         sectionList: ['Mutation Effect', 'Prognostic implications', 'Standard sensitivity', 'Standard resistance', 'Investigational sensitivity', 'Investigational resistance'],
                         modifiedSection: '',
-                        mainTypes: [],
                         subTypes: [],
                         formExpanded: false,
                         editing: false,
@@ -47,7 +45,6 @@ angular.module('oncokbApp')
                         link: '',
                         hugoSymbols: '',
                         variant: '',
-                        mainType: '',
                         subType: '',
                         section: '',
                         curator: '',
@@ -73,13 +70,9 @@ angular.module('oncokbApp')
                         DTColumnDefBuilder.newColumnDef(9),
                         DTColumnDefBuilder.newColumnDef(10)
                     ];
-                    storage.retrieveAllFiles().then(function(result) {
-                        _.each(result, function(doc) {
-                            scope.data.hugoSymbols.push(doc.title);
-                        });
-                    }, function() {});
                     scope.queue = [];
-                    additionalFile.load(['queues']).then(function(result) {
+                    loadFiles.load(['queues', 'meta']).then(function(result) {
+                        scope.data.hugoSymbols = _.keys($rootScope.metaData);
                         if (scope.location === 'gene') {
                             scope.queue = scope.getQueuesByGene(scope.hugoSymbol);
                         } else if (scope.location === 'queues') {
@@ -116,12 +109,17 @@ angular.module('oncokbApp')
                 }
             },
             controller: function($scope) {
-                DatabaseConnector.getOncokbInfo(function(oncokbInfo) {
-                    if (oncokbInfo && oncokbInfo.users) {
-                        $scope.data.curators = oncokbInfo.users;
-                    }
+                user.getAllUsers().then(function(users) {
+                    var tempArr = [];
+                    _.each(users, function(user) {
+                        tempArr.push({
+                            name: user.name,
+                            email: user.email
+                        });
+                    });
+                    $scope.data.curators = tempArr;
                 });
-                $scope.userRole = users.getMe().role;
+                $scope.userRole = $rootScope.me.role;
                 $scope.getButtonHtml = function (type, addedAt) {
                     var result = '';
                     switch(type) {
@@ -176,12 +174,11 @@ angular.module('oncokbApp')
                     var currentQueues = $scope.getQueuesByGene(hugoSymbol);
                     var item = {
                         link: $scope.input.link,
-                        mainType: $scope.input.mainType,
                         subType: $scope.input.subType ? $scope.input.subType.name : '',
                         section: $scope.input.section ? $scope.input.section.join() : '',
                         curator: $scope.input.curator ? $scope.input.curator.name : '',
                         curated: false,
-                        addedBy: users.getMe().name,
+                        addedBy: $rootScope.me.name,
                         addedAt: new Date().getTime(),
                         dueDay: $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '',
                         comment: $scope.input.comment,
@@ -252,20 +249,11 @@ angular.module('oncokbApp')
                             }
                         }
                     }
-                    $scope.data.modifiedMainType = '';
                     $scope.data.modifiedSubType = {};
-                    if (queueItem.mainType) {
-                        for (var i = 0;i < $scope.data.mainTypes.length; i++) {
-                            if ($scope.data.mainTypes[i] === queueItem.mainType) {
-                                $scope.data.modifiedMainType = $scope.data.mainTypes[i];
-                                break;
-                            }
-                        }
-                    }
-                    if ($scope.data.modifiedMainType && queueItem.subType) {
-                        for (var i = 0;i < $scope.data.subTypes[$scope.data.modifiedMainType].length; i++) {
-                            if ($scope.data.subTypes[$scope.data.modifiedMainType][i].name === queueItem.subType) {
-                                $scope.data.modifiedSubType = $scope.data.subTypes[$scope.data.modifiedMainType][i];
+                    if (queueItem.subType) {
+                        for (var i = 0;i < $scope.data.subTypes.length; i++) {
+                            if ($scope.data.subTypes[i].name === queueItem.subType) {
+                                $scope.data.modifiedSubType = $scope.data.subTypes[i];
                                 break;
                             }
                         }
@@ -275,7 +263,6 @@ angular.module('oncokbApp')
                         article: queueItem.article,
                         link: queueItem.link,
                         variant: queueItem.variant,
-                        mainType: $scope.data.modifiedMainType,
                         comment: queueItem.comment,
                         hugoSymbols: [queueItem.hugoSymbol]
                     };
@@ -312,7 +299,6 @@ angular.module('oncokbApp')
                         if (currentQueues[i].addedAt === queueItem.addedAt) {
                             item = angular.copy(queueItem);
                             item.link = $scope.input.link;
-                            item.mainType = $scope.input.mainType;
                             item.subType = $scope.input.subType ? $scope.input.subType.name : '';
                             item.section = $scope.input.section ? $scope.input.section.join() : '';
                             item.dueDay = $scope.input.dueDay ? new Date($scope.input.dueDay).getTime() : '';
@@ -449,8 +435,6 @@ angular.module('oncokbApp')
                         }
                         if (queueItem.subType) {
                             tempArr = tempArr.concat(['Tumor type:', queueItem.subType + ',']);
-                        } else if (queueItem.mainType) {
-                            tempArr = tempArr.concat(['Tumor type:', queueItem.mainType + ',']);
                         }
                         if (queueItem.section) {
                             tempArr = tempArr.concat(['Section:', queueItem.section]);
@@ -482,31 +466,22 @@ angular.module('oncokbApp')
                         return annotationLocation[x.article].join('; ');
                     }
                 };
-                function getOncoTreeMainTypes() {
-                    mainUtils.getOncoTreeMainTypes().then(function(result) {
-                        var mainTypesReturned = result.mainTypes,
-                            tumorTypesReturned = result.tumorTypes;
-                        if (mainTypesReturned) {
-                            $scope.data.mainTypes = _.map(mainTypesReturned, function(item) {
-                                return item.name;
+                function getTumorSubtypes() {
+                    var tempRes = [];
+                    DatabaseConnector.getTumorSubtypes().then(function(result) {
+                        _.each(result, function(item) {
+                            tempRes.push({
+                                name: item.name,
+                                code: item.code
                             });
-                            if (_.isArray(tumorTypesReturned)) {
-                                if (tumorTypesReturned.length === mainTypesReturned.length) {
-                                    var tumorTypes = {};
-                                    var allTumorTypes = [];
-                                    _.each(mainTypesReturned, function(mainType, i) {
-                                        tumorTypes[mainType.name] = tumorTypesReturned[i];
-                                    });
-                                    $scope.data.subTypes = tumorTypes;
-                                } else {
-                                    console.error('The number of returned tumor types is not matched with number of main types.');
-                                }
-                            }
-                        }
-                    }, function(error) {
+                        });
+                        tempRes.sort(function(a, b) {
+                            return a.name.localeCompare(b.name);
+                        });
+                        $scope.data.subTypes = tempRes;
                     });
                 }
-                getOncoTreeMainTypes();
+                getTumorSubtypes();
                 $scope.toggleForm = function() {
                     $scope.data.formExpanded = !$scope.data.formExpanded;
                     $timeout(function() {
@@ -522,7 +497,6 @@ angular.module('oncokbApp')
                         link: '',
                         hugoSymbols: '',
                         variant: '',
-                        mainType: '',
                         subType: '',
                         section: '',
                         curator: '',

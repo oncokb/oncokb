@@ -40,23 +40,13 @@
                 <input type="text" class="inputStyle" id="variant" ng-model="input.variant" placeholder="{{location === 'queues' ? 'Gene A: Variant A;Gene B: Variant B' : 'Variant'}}" size="10">
             </div>
             <div class="inputMargin">
-                <label for="cancerType" class="labelAlign">Cancer Type:</label>
+                <label for="subType" class="labelAlign">Tumor Type:</label>
                 <select chosen
-                        ng-if="data.mainTypes.length > 0"
-                        id="cancerType"
                         allow-single-deselect="true"
-                        ng-model="input.mainType"
-                        ng-options="m for m in data.mainTypes | orderBy: m">
+                        id="subType"
+                        ng-model="input.subType"
+                        ng-options="tt.name for tt in data.subTypes | orderBy: tt.name" class="subTypeSelect">
                 </select>
-                <div ng-if="data.subTypes[input.mainType].length > 0" class="subType">
-                    <label for="subType">Subtype:</label>
-                    <select chosen
-                            allow-single-deselect="true"
-                            id="subType"
-                            ng-model="input.subType"
-                            ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name" class="subTypeSelect">
-                    </select>
-                </div>
             </div>
             <div class="inputMargin">
                 <label for="section" class="labelAlign">Section(s):</label>
@@ -118,7 +108,7 @@
                     which will cause issue to update to firestore
                 -->
                 <tr ng-repeat="x in queue track by $index" ng-show="data.allCurations || !x.curated">
-                    <td ng-if="location === 'queues'"><strong><a ng-href="#/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
+                    <td ng-if="location === 'queues'"><strong><a ng-href="#!/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
                     <td>
                         <a href="{{x.link}}" target="_blank" ng-if="x.link">{{x.article}}</a>
                         <span ng-if="!x.link">{{x.article}}</span>
@@ -131,7 +121,7 @@
                         <span>{{x.variant}}</span>
                     </td>
                     <td>
-                        <span>{{x.subType ? x.subType : x.mainType}}</span>
+                        <span>{{x.subType}}</span>
                     </td>
                     <td>
                         <span>{{x.section}}</span>

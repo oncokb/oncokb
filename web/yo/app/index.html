@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.css" />
     <link rel="stylesheet" href="components/please-wait/build/please-wait.css" />
     <link rel="stylesheet" href="components/spinkit/css/spinkit.css" />
+    <link rel="stylesheet" href="components/angular-ui-notification/dist/angular-ui-notification.css" />
+    <link rel="stylesheet" href="components/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" href="components/firepad/dist/firepad.css" />
     <!-- endbower -->
     <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css">
     <link rel="stylesheet" href="_components/jquery.qtip.min.css">
@@ -43,6 +46,7 @@
     <link rel="mask-icon" href="images/favicon/safari-pinned-tab.svg?v=rMM202dQYX" color="#1c75cd">
     <link rel="shortcut icon" href="images/favicon/favicon.ico?v=rMM202dQYX">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
     <meta name="msapplication-TileColor" content="#2d89ef">
     <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png?v=rMM202dQYX">
     <meta name="theme-color" content="#ffffff">
@@ -73,31 +77,30 @@
                     </button>
                     <a class="navbar-brand" ng-href="#/">OncoKB</a>
                 </div>
-
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
 
                     <ul class="nav navbar-nav">
-                        <li ng-repeat="tab in tabs" ng-class="{active:tabIsActive('/'+tab.key)}"><a ng-href="#/{{tab.key}}">{{tab.value}}</a></li>
+                        <li ng-repeat="tab in tabs" ng-class="{active:tabIsActive('/'+tab.key)}"><a ng-href="#!/{{tab.key}}">{{tab.value}}</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <!-- <span ng-if="!signedIn"><i class="fa fa-google fa-lg"></i> Login with Google</span>
                             <span ng-if="signedIn">Welcome</span> -->
-
-                            <div ng-if="signedIn" style="float: left">
-                                <div  style="float: left; margin: 5px">
+                                
+                            <div ng-if="isSignedIn" style="float: left">
+                                <div style="float: left; margin: 5px">
                                     <span>{{user.email | cut:true:20}}</span><br/>
                                     <span id="signout" style="" ng-click="signOut()">Sign out</span>
                                 </div>
-                                <img style="float: left" ng-if="user.avatar !== ''" ng-src="{{user.avatar}}">
+                                <img style="float: left;width:50px" ng-if="user.photoURL !== ''" ng-src="{{user.photoURL}}">
                             </div>
-                            <div class="btn-group" role="group" ng-show="!signedIn" id="googleSignIn">
+                            <div class="btn-group" role="group" ng-show="!isSignedIn" id="googleSignIn">
                                 <!-- <span id="signInButton">
                                 </span> -->
                                 <!-- <i class="fa fa-google"></i> -->
                                 <button class="btn btn-default" disabled><i class="fa fa-google"></i></button>
-                                <button class="btn btn-default" ng-click="renderSignInButton(false)">Sign in</button>
+                                <button class="btn btn-default" ng-click="signIn()">Sign in</button>
                             </div>
                         </li>
                     </ul>
@@ -111,7 +114,6 @@
         <ie-warning></ie-warning>
         <div ng-view="" class="container oncokbMainView"></div>
     </div>
-
     <!-- build:js scripts/common.js -->
     <!-- bower:js -->
     <script src="components/es5-shim/es5-shim.js"></script>
@@ -173,8 +175,9 @@
     <script src="components/uuid-js/lib/uuid.js"></script>
     <script src="components/google-diff-match-patch-js/diff_match_patch.js"></script>
     <script src="components/Blob/Blob.js"></script>
-    <script src="components/firebase/firebase.js"></script>
-    <script src="components/angularfire/dist/angularfire.js"></script>
+    <script src="components/angular-ui-notification/dist/angular-ui-notification.js"></script>
+    <script src="components/codemirror/lib/codemirror.js"></script>
+    <script src="components/firepad/dist/firepad.min.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -183,12 +186,14 @@
     <!-- build:js scripts/contenteditable.js -->
     <script src="components/angular-contenteditable/angular-contenteditable.js"></script>
     <!-- endbuild -->
-
+    
     <script src="//apis.google.com/js/api.js"></script>
     <script src="//apis.google.com/js/client:platform.js"></script>
     <!-- build:js scripts/oncokb.js -->
     <script src="components/chosen/chosen.jquery.min.js"></script>
     <script src="_components/jquery.qtip.min.js"></script>
+    <script src="components/firebase/firebase.js"></script>
+    <script src="components/angularfire/dist/angularfire.js"></script>
     <script src="scripts/DataTableSortingMethods.js"></script>
     <script src="scripts/directives/Tree.js"></script>
     <script src="scripts/app.js"></script>
@@ -203,23 +208,18 @@
     <script src="scripts/directives/reportview.js"></script>
     <script src="scripts/directives/reportinfo.js"></script>
     <script src="scripts/directives/reportviewrecursioncell.js"></script>
-    <script src="scripts/controllers/reportgenerator.js"></script>
+    <script src="scripts/controllers/tools.js"></script>
     <script src="scripts/services/generatereportdataservice.js"></script>
     <script src="scripts/services/databaseconnector.js"></script>
     <script src="scripts/services/deepmerge.js"></script>
     <script src="scripts/services/findregex.js"></script>
     <script src="scripts/controllers/gene.js"></script>
     <script src="scripts/controllers/genes.js"></script>
-    <script src="scripts/services/storage.js"></script>
     <script src="scripts/controllers/nav.js"></script>
-    <script src="scripts/services/users.js"></script>
-    <script src="scripts/services/documents.js"></script>
-    <script src="scripts/services/loadfile.js"></script>
-    <script src="scripts/services/additionalFile.js"></script>
-    <script src="scripts/services/access.js"></script>
+    <script src="scripts/services/user.js"></script>
+    <script src="scripts/services/loadFiles.js"></script>
     <script src="scripts/directives/comments.js"></script>
     <script src="scripts/directives/typeaheadfocus.js"></script>
-    <script src="scripts/services/importer.js"></script>
     <script src="scripts/services/browser.js"></script>
     <script src="scripts/directives/iewarning.js"></script>
     <script src="scripts/directives/qtip.js"></script>
@@ -236,8 +236,9 @@
     <script src="scripts/services/cbioutil.js"></script>
     <script src="scripts/directives/loading.js"></script>
     <script src="scripts/directives/reviewPanel.js"></script>
+    <script src="scripts/directives/panel.js"></script>
     <script src="scripts/directives/curationQueue.js"></script>
-    <script src="scripts/directives/driverealtimestring.js"></script>
+    <script src="scripts/directives/realtimestring.js"></script>
     <script src="scripts/services/stringutils.js"></script>
     <script src="scripts/directives/vusitem.js"></script>
     <script src="scripts/services/mainutils.js"></script>

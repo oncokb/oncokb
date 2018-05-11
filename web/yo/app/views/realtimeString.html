@@ -3,46 +3,29 @@
         <div ng-switch-when="false">
             <div ng-switch on="t">
                 <div ng-switch-when="p">
-                    <p contenteditable="{{fe}}"
-                       ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
-                       ng-model="content.stringO">
-                    </p>
+                    <div id="{{uuid}}"></div>
+                    <div ng-init="initFirepad()"></div>
                     <pub-iframe
-                            ng-model="content.stringO">
-                    </pub-iframe>
-                </div>
-                <div ng-switch-when="short">
-                    <p contenteditable="{{fe}}"
-                       ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
-                       ng-model="content.stringO">
-                    </p>
-                    <pub-iframe
-                            ng-model="content.stringO">
+                            ng-model="pContent">
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME">
-                    <span contenteditable="{{fe}}"
-                          ng-class="editableBox"
-                          ng-model="content.stringO">
-                    </span>
-                    <span style="color:red">{{getDuplicationMessage()}}</span>
+                    <div id="{{uuid}}"></div>
+                    <div ng-init="initFirepad()"></div>
+                    <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
-                    <span contenteditable="{{fe}}"
-                          ng-class="editableBox"
-                          ng-model="content.stringO">
-                    </span>
-                    <span style="color:red">{{getDuplicationMessage()}}</span>
+                    <div id="{{uuid}}"></div>
+                    <div ng-init="initFirepad()"></div>
+                    <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>
                 <div ng-switch-when="treatment-select" class="treatment-select">
                     <div>
                         <select ng-disabled="!fe"
                                 chosen allow-single-deselect="true"
-                                ng-model="content.stringO"
+                                ng-model="data[key]"
                                 ng-options="opt.value as opt.label for opt in o">
                             <option value="NA"></option>
                         </select>
@@ -51,7 +34,7 @@
                             <select style="width:100px"
                                     ng-disabled="!fe"
                                     chosen allow-single-deselect="true"
-                                    ng-model="content.propagation"
+                                    ng-model="data.propagation"
                                     ng-options="opt.value as opt.name for opt in content.propagationOpts">
                                 <option value="NA"></option>
                             </select>
@@ -61,7 +44,7 @@
                 <div ng-switch-when="implication" class="chosen-full-width">
                     <select ng-disabled="!fe"
                             chosen allow-single-deselect="true"
-                            ng-model="content.stringO"
+                            ng-model="data[key]"
                             ng-options="opt.value as opt.label for opt in o">
                         <option value="NA"></option>
                     </select>
@@ -77,13 +60,13 @@
                 <div ng-switch-when="checkbox">
                     <div>
                             <span ng-repeat="checkbox in checkboxes">
-                              <input id="::({{checkboxid}}-{{$index}})"
+                              <input id="::{{uuid+$index}}"
                                       type="radio"
-                                      ng-model="content.stringO"
+                                      ng-model="data[key]"
                                       ng-value="checkbox"
                                       ng-disabled="!fe"
                                       ng-click="uncheck($event)">
-                              <label for="::({{checkboxid}}-{{$index}})">{{checkbox}}</label>
+                              <label for="::{{uuid+$index}}">{{checkbox}}</label>
                             </span>
                     </div>
                 </div>
@@ -97,29 +80,14 @@
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                        ng-class="getInputClass()"
                        placeholder="{{::ph}}"
-                       ng-model="content.stringO">
+                       ng-model="data[key]">
                     </p>
                     <div ng-if="reviewLayout('regular')">
                         <h4>Difference comparing to the old content:</h4>
                         <p ng-bind-html="diffHTML"></p>
                     </div>
                     <pub-iframe
-                            ng-model="content.stringO">
-                    </pub-iframe>
-                </div>
-                <div ng-switch-when="short">
-                    <h4 ng-if="reviewLayout('regular')">New Content:</h4>
-                    <p contenteditable="{{reviewContentEditable('regular')}}"
-                       ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
-                       ng-model="content.stringO">
-                    </p>
-                    <div ng-if="reviewLayout('regular')">
-                        <h4>Difference comparing to the old content:</h4>
-                        <p ng-bind-html="diffHTML"></p>
-                    </div>
-                    <pub-iframe
-                            ng-model="content.stringO">
+                            ng-model="data[key]">
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME">
@@ -218,29 +186,31 @@
                 <div ng-switch-when="checkbox">
                     <div>
                         <br/>
-                        <h4 ng-if="!objecttype && reviewLayout('regular')">New Content:</h4>
+                        <h4 ng-if="key !== 'tsg' && reviewLayout('regular')">New Content:</h4>
+                        <div ng-if="key === 'tsg'" style="height:40px;"></div>
                         <div>
                             <span ng-repeat="checkbox in checkboxes">
-                              <input id="::({{checkboxid}}-{{$index}})"
+                              <input id="::{{uuid+$index}}"
                                       type="radio"
-                                      ng-model="content.stringO"
+                                      ng-model="data[key]"
                                       ng-value="checkbox"
                                       ng-disabled="!reviewContentEditable('regular')"
                                       ng-click="uncheck($event)">
-                              <label for="::({{checkboxid}}-{{$index}})">{{checkbox}}</label>
+                              <label for="::{{uuid+$index}}">{{checkbox}}</label>
                             </span>
                         </div>
                     </div>
 
-                    <div ng-if="!objecttype && reviewLayout('regular')">
-                        <h4>Old Content:</h4>
+                    <div ng-if="reviewLayout('regular')">
+                        <h4 ng-if="key !== 'tsg'">Old Content:</h4>
+                        <div ng-if="key === 'tsg'" style="height:40px;"></div>
                         <div>
                             <span ng-repeat="checkbox in checkboxes" class="reviewedBG">
-                              <input id="::({{checkboxid}}-{{$index}}-review)"
+                              <input id="::{{uuid+$index+'_review'}}"
                                       type="radio"
-                                      ng-checked="reviewObj.get('lastReviewed')=== checkbox ? true : false"
+                                      ng-checked="data[key+'_review'].lastReviewed === checkbox ? true : false"
                                       ng-disabled="true">
-                              <label for="::({{checkboxid}}-{{$index}}-review)">{{checkbox}}</label>
+                              <label for="::{{uuid+$index+'_review'}}">{{checkbox}}</label>
                             </span>
                         </div>
 

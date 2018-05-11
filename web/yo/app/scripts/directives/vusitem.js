@@ -7,41 +7,32 @@
  * # vusItem
  */
 angular.module('oncokbApp')
-    .directive('vusItem', function(dialogs, OncoKB, user) {
+    .directive('vusItem', function(dialogs, OncoKB, FirebaseModel, $rootScope) {
         return {
             templateUrl: 'views/vusItem.html',
             restrict: 'E',
             scope: {
                 vus: '=',
                 index: '=',
-                fileEditable: '=',
-                dModel: '=', // drive realtime document model
-                addCommentInGene: '&addComment', // reference to the external function "addComment" in the gene controller
+                gene: '=',
                 vusUpdateInGene: '&vusUpdate'
             },
             link: function postLink(scope) {
-                scope.variant = scope.vus.get(scope.index);
-                scope.dt = new Date(Number(scope.variant.time.get(scope.variant.time.length - 1).value.getText()));
-                scope.dtBy = scope.variant.time.get(scope.variant.time.length - 1).by.name.getText();
-                scope.status = {
-                    opened: false
-                };
+                scope.variant = scope.vus.vus[scope.index];
+                scope.dt = new Date(Number(scope.variant.time[scope.variant.time.length - 1].value));
+                scope.dtBy = scope.variant.time[scope.variant.time.length - 1].by.name;
                 scope.dateOptions = {
                     formatYear: 'yy',
                     startingDay: 1,
                     popupPosition: 'top'
                 };
-
                 scope.$watch('dt', function(n, o) {
                     if (n !== o) {
-                        var timeStamp = scope.dModel.create(OncoKB.TimeStampWithCurator);
-                        timeStamp.value.setText(n.getTime().toString());
-                        timeStamp.by.name.setText(user.name);
-                        timeStamp.by.email.setText(user.email);
+                        var user = $rootScope.me;
+                        var timeStamp = new FirebaseModel.TimeStamp(user.name, user.email);
                         scope.variant.time.push(timeStamp);
                         scope.dtBy = user.name;
-                        var tempMessage = user.name + ' tried to refresh ' + scope.variant.name.text + ' at ' + new Date().toLocaleString();
-                        scope.vusUpdate(tempMessage);
+                        scope.vusUpdate();
                     }
                 });
             },
@@ -49,14 +40,10 @@ angular.module('oncokbApp')
                 $scope.remove = function() {
                     var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
                     dlg.result.then(function() {
-                        var tempMessage = user.name + ' tried to delete ' + $scope.vus.get($scope.index).name.text + ' at ' + new Date().toLocaleString();
-                        $scope.vus.remove($scope.index);
-                        $scope.vusUpdate(tempMessage);
+                        $scope.vus.vus.splice($scope.index, 1);
+                        $scope.vusUpdate();
                     }, function() {
                     });
-                };
-                $scope.open = function() {
-                    $scope.status.opened = true;
                 };
                 $scope.update = function() {
                     $scope.dt = new Date();
@@ -75,20 +62,11 @@ angular.module('oncokbApp')
 
                     return '';
                 };
-                $scope.addComment = function(arg1, arg2, arg3) {
+                $scope.vusUpdate = function() {
                     // pass parameters in value pair mapping format
-                    $scope.addCommentInGene({
-                        arg1: arg1,
-                        arg2: arg2,
-                        arg3: arg3
-                    });
+                    $scope.vusUpdateInGene();
                 };
-                $scope.vusUpdate = function(message) {
-                    // pass parameters in value pair mapping format
-                    $scope.vusUpdateInGene({
-                        message: message
-                    });
-                };
+                $scope.fileEditable = $rootScope.fileEditable;
             }
         };
     });
