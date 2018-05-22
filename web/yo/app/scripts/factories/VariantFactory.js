@@ -491,7 +491,8 @@ angular.module('oncokbApp')
             nameChanged: [], // name changed sections
             added: [], // newly added sections
             removed: [], // deleted sections
-            precise: [] // the exact item that has been changed
+            precise: [], // the exact item that has been changed
+            reviewObjs: {}
         };
     }]);
 angular.module('oncokbApp')
@@ -536,8 +537,7 @@ angular.module('oncokbApp')
                 effect_uuid: getUUID(),
                 description: '',
                 description_uuid: getUUID(),
-                short: '',
-                short_uuid: getUUID()
+                short: ''
             };
             this.mutation_effect_uuid = getUUID();
             this.tumors_uuid = getUUID();
@@ -552,8 +552,7 @@ angular.module('oncokbApp')
                 level_uuid: getUUID(),
                 description: '',
                 description_uuid: getUUID(),
-                short: '',
-                short_uuid: getUUID()
+                short: ''
             };
             this.prognostic_uuid = getUUID();
             this.diagnostic = {
@@ -561,8 +560,7 @@ angular.module('oncokbApp')
                 level_uuid: getUUID(),
                 description: '',
                 description_uuid: getUUID(),
-                short: '',
-                short_uuid: getUUID()
+                short: ''
             };
             this.diagnostic_uuid = getUUID();
             this.TIs = createTIs();
@@ -585,12 +583,13 @@ angular.module('oncokbApp')
             this.name_uuid = getUUID();
             this.level = '';
             this.level_uuid = getUUID();
+            this.propagation = '';
+            this.propagation_uuid = getUUID();
             this.indication = '';
             this.indication_uuid = getUUID();
             this.description = '';
             this.description_uuid = getUUID();
             this.short = '';
-            this.short_uuid = getUUID();
         };
         var Comment = function(userName, email, content) {
             this.date = (new Date()).getTime().toString();

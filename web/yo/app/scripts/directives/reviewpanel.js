@@ -13,13 +13,13 @@ angular.module('oncokbApp')
             templateUrl: 'views/reviewPanel.html',
             restrict: 'AE',
             scope: {
-                reviewObj: '=', // review object
+                data: '=',
+                key: '=',
                 evidenceType: '=',  // evidence type
                 mutation: '=', // mutation
                 tumor: '=', // tumor
                 therapyCategory: '=', // therapy category
                 treatment: '=', // treatment
-                uuid: '=',
                 obj: '=', // temporary object
                 confirmDeleteInGene: '&confirmDelete',
                 cancelDeleteInGene: '&cancelDelete',
@@ -27,7 +27,9 @@ angular.module('oncokbApp')
                 updatePriorityInGene: '&updatePriority',
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
-                rejectAddedInGene: '&rejectAdded'
+                rejectAddedInGene: '&rejectAdded',
+                uuid: '=',
+                reviewObj: '='
             },
             link: function(scope, element, attrs) {
             },
@@ -36,10 +38,7 @@ angular.module('oncokbApp')
                 $scope.operationsName = {'update': 'Updated', 'name': 'Name Changed', 'add': 'Added', 'delete': 'Deleted'};
                 $scope.adjustedEvidenceType = $scope.evidenceType;
                 $scope.panelType = '';
-                $scope.processDecision = function(event, type) {
-                    if (event !== null) {
-                        $scope.$parent.stopCollopse(event);
-                    }
+                $scope.processDecision = function(type) {
                     // Do nothing if the change has already been accepted or rejected
                     if (mainUtils.processedInReview('accept', $scope.uuid) || mainUtils.processedInReview('reject', $scope.uuid)) {
                         return;
@@ -116,17 +115,17 @@ angular.module('oncokbApp')
                 };
                 $scope.signatureCheck = function() {
                     // Prepare values for panel signature text
-                    if ($scope.uuid && ReviewResource.mostRecent[$scope.uuid.getText()]) {
+                    if ($scope.uuid && ReviewResource.mostRecent[$scope.uuid]) {
                         // If there are mutiple items inside one section, we use the most recent one, which is calculated in prepareReviewItems() in gene.js and stored in ReviewResource.mostRecent
-                        $scope.updatedBy = ReviewResource.mostRecent[$scope.uuid.getText()].updatedBy;
-                        $scope.updateTime = ReviewResource.mostRecent[$scope.uuid.getText()].updateTime;
+                        $scope.updatedBy = ReviewResource.mostRecent[$scope.uuid].updatedBy;
+                        $scope.updateTime = ReviewResource.mostRecent[$scope.uuid].updateTime;
                     } else if ($scope.adjustedEvidenceType === 'TUMOR_NAME_CHANGE') {
                         // For tumor name change, the review info is stored in cancerTypes_review
                         $scope.updatedBy = $scope.tumor.cancerTypes_review.get('updatedBy');
                         $scope.updateTime = $scope.tumor.cancerTypes_review.get('updateTime');
                     } else {
-                        $scope.updatedBy = $scope.reviewObj.get('updatedBy');
-                        $scope.updateTime = $scope.reviewObj.get('updateTime');
+                        $scope.updatedBy = $scope.reviewObj.updatedBy;
+                        $scope.updateTime = $scope.reviewObj.updateTime;
                     }
                     // If any decision hasn't been made yet, we display the panel signature which is a text describing what kind of change is made by who at what time
                     // on the other hand, if the evidence already got accepted or rejected, we hide the panel signature
@@ -182,31 +181,31 @@ angular.module('oncokbApp')
                 $scope.accept = function() {
                     if ($scope.adjustedEvidenceType === 'GENE_TYPE') {
                         var params = {
-                            hugoSymbol: $scope.obj.name.getText(),
-                            oncogene: $scope.obj.type.get('OCG').trim().length > 0,
-                            tsg: $scope.obj.type.get('TSG').trim().length > 0
+                            hugoSymbol: $scope.data.name,
+                            oncogene: $scope.data.type.ocg.trim().length > 0,
+                            tsg: $scope.data.type.tsg.trim().length > 0
                         };
                         var historyData = [{
-                            lastEditBy: $scope.obj.type_review.get('updatedBy'),
+                            lastEditBy: ReviewResource.mostRecent[$scope.uuid].updatedBy,
                             operationName: 'update',
-                            uuids: $scope.obj.type_uuid.getText()
+                            uuids: $scope.uuid
                         }];
                         if ($rootScope.isDesiredGene) {
-                            ReviewResource.loading.push($scope.uuid.getText());
-                            DatabaseConnector.updateGeneType($scope.obj.name.getText(), params, historyData, function(result) {
-                                $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                            ReviewResource.loading.push($scope.uuid);
+                            DatabaseConnector.updateGeneType($scope.data.name, params, historyData, function(result) {
+                                $scope.modelUpdate($scope.adjustedEvidenceType);
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
                             }, function(error) {
                                 console.log('fail to update to database', error);
                                 dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
                             });
                         } else {
                             $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                         }
                     } else {
                         if($rootScope.isDesiredGene) {
-                            ReviewResource.loading.push($scope.uuid.getText());
+                            ReviewResource.loading.push($scope.uuid);
                             var getEvidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                             var evidences = getEvidenceResult.evidences;
                             var historyData = [getEvidenceResult.historyData];
@@ -220,78 +219,57 @@ angular.module('oncokbApp')
                                     }, function() {
 
                                     }).finally(function() {
-                                        ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                        ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
                                     });
                                 } else {
-                                    ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                    ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
                                 }
                             }, function(error) {
                                 console.log('fail to update to database', error);
                                 dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid.getText());
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
                             });
                         } else {
                             $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                         }
                     }
                 };
-                function rejectItem(arr) {
-                    _.each(arr, function(item) {
-                        if(mainUtils.needReview(item.uuid)) {
-                            if(item.obj && item.reviewObj.has('lastReviewed')) {
-                                item.obj.setText(item.reviewObj.get('lastReviewed'));
-                            }
-                            var tempTime = $scope.lastUpdateTime;
-                            if(!tempTime) {
-                                tempTime = new Date().getTime();
-                            }
-                            item.reviewObj.delete('lastReviewed');
-                            // use the updateTime fetched from database to update reviewObj
-                            item.reviewObj.set('updateTime', tempTime);
-                            $rootScope.geneMetaData.get(item.uuid.getText()).set('review', false);
-                            ReviewResource.rejected.push(item.uuid.getText());
-                        }
+                function setRejectedUUIDs(uuids) {
+                    _.each(uuids, function() {
+                        $rootScope.rejectedUUIDs[$scope.uuid] = true;
                     });
-                    if($scope.bothChanged) {
-                        effectSection();
-                    }
                 }
-                function effectSection() {
-                    $scope.mutation.oncogenic_review.set('updateTime', $scope.oncogenicLastUpdateTime);
-                    $scope.mutation.effect_review.set('updateTime', $scope.effectLastUpdateTime);
+                function rejectItem() {
+
                 }
                 $scope.reject = function() {
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                     dlg.result.then(function() {
-                        var uuid; // uuid that is used as evidence identifier in the database
+                        var uuid = $scope.uuid; // uuid that is used as evidence identifier in the database
                         var items = [];
+                        var uuids = [];
                         $scope.bothChanged = false;
                         switch ($scope.adjustedEvidenceType) {
                         case 'GENE_SUMMARY':
-                            uuid = $scope.obj.summary_uuid;
-                            items = [{obj: $scope.obj.summary, reviewObj: $scope.obj.summary_review, uuid: $scope.obj.summary_uuid}];
+                            uuids.push($scope.obj.summary_uuid);
                             break;
                         case 'GENE_BACKGROUND':
-                            uuid = $scope.obj.background_uuid;
-                            items = [{obj: $scope.obj.background, reviewObj: $scope.obj.background_review, uuid: $scope.obj.background_uuid}];
+                            uuids.push($scope.obj.background_uuid);
                             break;
                         case 'GENE_TYPE':
-                            // since gene type is not stored in evidence table, there is no need to fetch it.
-                            uuid = '';
-                            items = [{reviewObj: $scope.obj.type_review, uuid: $scope.obj.type_uuid}];
+                            items = ['ocg', 'tsg'];
                             break;
                         case 'ONCOGENIC':
-                            var oncogenicUUID = $scope.mutation.oncogenic_uuid.getText();
-                            var effectUUID = $scope.mutation.effect_uuid.getText();
+                            var oncogenicUUID = $scope.mutation.mutation_effect.oncogenic_uuid;
+                            var effectUUID = $scope.mutation.mutation_effect.effect_uuid;
+                            var descriptionUUID = $scope.mutation.mutation_effect.description_uuid;
                             $scope.oncogenicLastUpdateTime = new Date().getTime();
                             $scope.effectLastUpdateTime = new Date().getTime();
-                            items = [{obj: $scope.mutation.oncogenic, reviewObj: $scope.mutation.oncogenic_review, uuid: $scope.mutation.oncogenic_uuid},
-                                {obj: $scope.mutation.effect.value, reviewObj: $scope.mutation.effect_review, uuid: $scope.mutation.effect_uuid},
-                                {obj: $scope.mutation.description, reviewObj: $scope.mutation.description_review, uuid: $scope.mutation.description_uuid}];
 
-                            var oncogenicChange = mainUtils.needReview($scope.mutation.oncogenic_uuid);
-                            var effectChange = mainUtils.needReview($scope.mutation.effect_uuid) || mainUtils.needReview($scope.mutation.description_uuid);
+                            var oncogenicChange = $rootScope.geneMeta.review[oncogenicUUID];
+                            var effectChange = $rootScope.geneMeta.review[effectUUID] || $rootScope.geneMeta.review[descriptionUUID];
                             if(oncogenicChange && effectChange) {
+                                uuids = [oncogenicUUID, effectUUID, descriptionUUID];
                                 $scope.bothChanged = true;
                                 if ($rootScope.isDesiredGene) {
                                     DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
@@ -313,8 +291,8 @@ angular.module('oncokbApp')
                                     rejectItem(items);
                                 }
                             } else {
-                                if(oncogenicChange) uuid = $scope.mutation.oncogenic_uuid;
-                                if(effectChange) uuid = $scope.mutation.effect_uuid;
+                                if(oncogenicChange) uuids.push(oncogenicUUID);
+                                if(effectChange) uuids.push(effectUUID);
                             }
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
@@ -360,11 +338,8 @@ angular.module('oncokbApp')
                         default:
                             break;
                         }
-                        if (uuid) {
-                            uuid = uuid.getText();
-                            ReviewResource.rejected.push(uuid);
-                        }
-                        if ($rootScope.isDesiredGene && uuid) {
+                        setRejectedUUIDs(uuids);
+                        if ($rootScope.isDesiredGene && $scope.adjustedEvidenceType !== 'GENE_TYPE') {
                             DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
                                 if (result && result.status) {
                                     var resultJSON = JSON.parse(result.status);
@@ -395,10 +370,10 @@ angular.module('oncokbApp')
                 }
                 function specialCases() {
                     switch ($scope.adjustedEvidenceType) {
-                    case 'GENE_TYPE':
-                        $scope.obj.type.set('TSG', $scope.obj.type_review.get('lastReviewed').TSG);
-                        $scope.obj.type.set('OCG', $scope.obj.type_review.get('lastReviewed').OCG);
-                        break;
+                    // case 'GENE_TYPE':
+                    //     $scope.obj.type.set('TSG', $scope.obj.type_review.get('lastReviewed').TSG);
+                    //     $scope.obj.type.set('OCG', $scope.obj.type_review.get('lastReviewed').OCG);
+                    //     break;
                     case 'Standard implications for sensitivity to therapy':
                     case 'Standard implications for resistance to therapy':
                     case 'Investigational implications for sensitivity to therapy':
@@ -413,8 +388,8 @@ angular.module('oncokbApp')
                                     $scope.treatment.level.setText(lastReviewedLevel);
                                 }
                                 $scope.treatment.name_eStatus.set('propagation', lastReviewedPropagation);
-                                $rootScope.geneMetaData.get($scope.treatment.level_uuid.getText()).set('review', false);
-                                ReviewResource.rejected.push($scope.treatment.level_uuid.getText());
+                                $rootScope.geneMetaData.get($scope.treatment.level_uuid).set('review', false);
+                                ReviewResource.rejected.push($scope.treatment.level_uuid);
                                 $scope.treatment.level_review.delete('lastReviewed');
                             }
                         }
@@ -467,7 +442,7 @@ angular.module('oncokbApp')
                 };
                 $scope.inReviewMode = function () {
                     return ReviewResource.reviewMode;
-                }
+                };
             }
         };
     });

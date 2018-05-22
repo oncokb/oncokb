@@ -486,12 +486,12 @@ angular.module('oncokbApp')
             }
         }
         function updateLastModified() {
-            $rootScope.geneTimeStamp.set('lastModifiedBy', user.name);
-            $rootScope.geneTimeStamp.set('lastModifiedAt', new Date().getTime());
+            $rootScope.geneMeta.lastModifiedBy = $rootScope.me.name;
+            $rootScope.geneMeta.lastModifiedAt = new Date().getTime();
         }
         function updateLastSavedToDB() {
-            $rootScope.geneTimeStamp.set('lastSavedBy', user.name);
-            $rootScope.geneTimeStamp.set('lastSavedAt', new Date().getTime());
+            $rootScope.geneMeta.lastSavedBy = $rootScope.me.name;
+            $rootScope.geneMeta.lastSavedAt = new Date().getTime();
         }
         return {
             getCancerTypesName: getCancerTypesName,

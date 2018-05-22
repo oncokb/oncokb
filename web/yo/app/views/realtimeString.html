@@ -67,7 +67,7 @@
                 <div ng-switch-when="select-chosen" class="chosen-full-width">
                     <select ng-disabled="!fe"
                             chosen allow-single-deselect="true"
-                            ng-model="content.stringO"
+                            ng-model="data[key]"
                             ng-options="opt for opt in o">
                         <option value="NA"></option>
                     </select>
@@ -109,7 +109,7 @@
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <span contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
-                          ng-model="content.stringO">
+                          ng-model="data[key]">
                     </span>
                     <br/>
                     <div ng-if="reviewLayout('name')">
@@ -121,7 +121,7 @@
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <span contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
-                          ng-model="content.stringO">
+                          ng-model="data[key]">
                     </span>
                     <br/>
                     <div ng-if="reviewLayout('name')">
@@ -135,7 +135,7 @@
                         <div>
                             <select ng-disabled="!reviewContentEditable('regular')"
                                     chosen allow-single-deselect="true"
-                                    ng-model="content.stringO"
+                                    ng-model="data[key]"
                                     ng-options="opt.value as opt.label for opt in o">
                                 <option value="NA"></option>
                             </select>
@@ -160,7 +160,7 @@
                         </div>
                         <div ng-if="reviewLayout('regular')">
                             <h4>Old Content:</h4>
-                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.has('lastReviewed') ? reviewObj.get('lastReviewed') : content.stringO}}</p>
+                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.has('lastReviewed') ? reviewObj.get('lastReviewed') : data[key]}}</p>
                             <div class="propagation" ng-if="reviewObj.has('lastReviewedPropagation')">
                                 <span>Level of Evidence in other tumor types: </span>
                                 <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewedPropagation')}}</p>
@@ -174,7 +174,7 @@
                         <div>
                             <select ng-disabled="!reviewContentEditable('regular')"
                                     chosen allow-single-deselect="true"
-                                    ng-model="content.stringO"
+                                    ng-model="data[key]"
                                     ng-options="opt.value as opt.label for opt in o">
                                 <option value="NA"></option>
                             </select>
@@ -189,7 +189,7 @@
                     <h4 ng-if="reviewLayout('regular')">New Content:</h4>
                     <select ng-disabled="!reviewContentEditable('regular')"
                             chosen allow-single-deselect="true"
-                            ng-model="content.stringO"
+                            ng-model="data[key]"
                             ng-options="opt for opt in o">
                         <option value="NA"></option>
                     </select>

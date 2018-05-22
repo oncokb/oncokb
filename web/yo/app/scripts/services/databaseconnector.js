@@ -42,7 +42,7 @@ angular.module('oncokbApp')
                  PrivateApiUtils) {
             var numOfLocks = {};
             var data = {};
-            var dataFromFile = config.testing || false;
+            var testing = config.testing || false;
             function getReviewedData(evidenceType) {
                 var deferred = $q.defer();
                 if (evidenceType === 'geneType') {
@@ -66,7 +66,7 @@ angular.module('oncokbApp')
             }
 
             function searchVariant(params, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     SearchVariant.annotationFromFile(params)
                         .success(function(data) {
                             success(data);
@@ -87,7 +87,7 @@ angular.module('oncokbApp')
             }
 
             function updateGene(data, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
@@ -102,7 +102,7 @@ angular.module('oncokbApp')
             }
 
             function updateGeneType(hugoSymbol, data, historyData, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
@@ -129,7 +129,7 @@ angular.module('oncokbApp')
             }
 
             function getEvidencesByUUID(uuid, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
@@ -144,7 +144,7 @@ angular.module('oncokbApp')
             }
 
             function getEvidencesByUUIDs(uuids, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
@@ -178,7 +178,7 @@ angular.module('oncokbApp')
             }
 
             function deleteEvidences(data, historyData, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
@@ -195,7 +195,7 @@ angular.module('oncokbApp')
 
             function updateVUS(hugoSymbol, data, success, fail) {
                 if ($rootScope.internal) {
-                    if (dataFromFile) {
+                    if (testing) {
                         success('');
                     } else {
                         DriveAnnotation
@@ -234,23 +234,22 @@ angular.module('oncokbApp')
                 }
             }
             function updateEvidenceBatch(data, historyData, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
                         .updateEvidenceBatch(data)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
                             updateHistory(historyData);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
             }
 
             function updateEvidenceTreatmentPriorityBatch(data, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success('');
                 } else {
                     DriveAnnotation
@@ -267,7 +266,7 @@ angular.module('oncokbApp')
             function createGoogleFolder(params) {
                 var deferred = $q.defer();
 
-                if (dataFromFile) {
+                if (testing) {
                     deferred.resolve('test name');
                 } else {
                     GenerateDoc
@@ -283,7 +282,7 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                if (dataFromFile) {
+                if (testing) {
                     success(true);
                 } else {
                     SendEmail
@@ -308,7 +307,7 @@ angular.module('oncokbApp')
             }
 
             function testAccess(successCallback, failCallback) {
-                if (dataFromFile) {
+                if (testing) {
                     if (angular.isFunction(successCallback)) {
                         successCallback();
                     }
@@ -330,7 +329,7 @@ angular.module('oncokbApp')
 
             function getCacheStatus() {
                 var deferred = $q.defer();
-                if (dataFromFile) {
+                if (testing) {
                     deferred.resolve('enabled');
                 } else {
                     Cache.getStatus()
@@ -345,7 +344,7 @@ angular.module('oncokbApp')
 
             function setCache(operation) {
                 var deferred = $q.defer();
-                if (dataFromFile) {
+                if (testing) {
                     if (operation === 'enable') {
                         deferred.resolve('enabled');
                     }
@@ -390,7 +389,7 @@ angular.module('oncokbApp')
 
             function updateGeneCache(hugoSymbol) {
                 var deferred = $q.defer();
-                if (dataFromFile) {
+                if (testing) {
                     deferred.resolve();
                 } else if (hugoSymbol) {
                     Cache.updateGene(hugoSymbol)
@@ -507,7 +506,7 @@ angular.module('oncokbApp')
 
             function getSuggestedVariants() {
                 var deferred = $q.defer();
-                if (dataFromFile) {
+                if (testing) {
                     deferred.resolve({
                         meta: '',
                         data: ['Fusion']
@@ -526,7 +525,7 @@ angular.module('oncokbApp')
 
             function isHotspot(hugoSymbol, variant) {
                 var deferred = $q.defer();
-                if (dataFromFile) {
+                if (testing) {
                     deferred.resolve({
                         meta: '',
                         data: false
