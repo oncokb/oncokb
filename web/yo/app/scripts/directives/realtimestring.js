@@ -23,47 +23,96 @@ angular.module('oncokbApp')
             link: {
                 pre: function preLink(scope) {
                     $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "data").then(function (success) {
+                        scope.pContent = scope.data[scope.key];
                         if (scope.t === 'treatment-select') {
                             scope.changePropagation(true);
-                        }  
+                        }
+                        scope.cleanUpEditing();
+                        scope.initializeFE();
                     }, function (error) {
                         console.log('error');
-                    }); 
+                    });
                 },
                 post: function postLink(scope) {
                     scope.reviewMode = ReviewResource.reviewMode;
+                    scope.timeoutRef = '';
                     scope.pContent = '';
-                    scope.contentModified = false;
-                    scope.$watch('pContent', function(n, o) {
-                        if (scope.contentModified && scope.key !== 'short' && n !== o) {
-                            // we track the change in two conditions:
-                            // 1) When editing happens not in review mode
-                            // 2) When editing happends in review mode but not from admin's "Reject" action
-                            if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
-                                // The first time this piece of data is recorded in review mode
-                                if (_.isUndefined(scope.data[scope.key + '_review']) || _.isUndefined(scope.data[scope.key + '_review'].lastReviewed)) {
-                                    scope.data[scope.key + '_review'] = {
-                                        updatedBy: $rootScope.me.name,
-                                        updateTime: new Date().getTime(),
-                                        lastReviewed: o
-                                    };
-                                    $rootScope.metaFire[scope.uuid] = { review: true };
-                                    ReviewResource.rollback = _.without(ReviewResource.rollback, scope.uuid);
+                    // scope.contentModified = false;
+                    scope.$watch('data[key]', function (n, o) {
+                        if (scope.t === 'treatment-select' && scope.key === 'level') {
+                            scope.$watch('data.propagation', function(newPro, oldPro) {
+                                if (newPro !== oldPro) {
+                                    scope.setReviewRelatedContent(n, o, true);
                                 }
-                                // If the data was reviewed before
-                                if (n === scope.data[scope.key + '_review'].lastReviewed) {
-                                    // If the data is changed back to the original value
-                                    delete scope.data[scope.key + '_review'].lastReviewed;
-                                    delete $rootScope.metaFire[scope.uuid];
-                                    // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
-                                    if (ReviewResource.reviewMode) {
-                                        ReviewResource.rollback.push(scope.uuid);
-                                    }
+                            });
+                        }
+                        if (n !== o) {     
+                            scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
+                            scope.pContent = scope.data[scope.key];
+                            if (scope.t === 'treatment-select' && scope.key === 'level') {
+                                scope.changePropagation();
+                            }
+                            $timeout.cancel(scope.timeoutRef);
+                            if (scope.fe === true && !scope.data[scope.key+'_editing']) {
+                                scope.data[scope.key+'_editing'] = $rootScope.me.name;
+                            }
+                            if (scope.data[scope.key+'_editing'] !== $rootScope.me.name) {
+                                scope.initializeFE();
+                            }
+                            if (scope.key !== 'short') {
+                                scope.setReviewRelatedContent(n, o, false);
+                            }
+                            scope.timeoutRef = $timeout(function() {
+                                if (scope.fe === true && scope.data[scope.key+'_editing'] === $rootScope.me.name) {
+                                    delete scope.data[scope.key+'_editing'];
+                                }
+                                scope.initializeFE();
+                            }, 30*1000);
+                        }  
+                    });
+                    $rootScope.$watch('rejectedUUIDs["'+scope.uuid+'"]', function(n, o) {
+                        if (n !== o && n === true) {
+                            scope.data[scope.key] = scope.data[scope.key+'_review'].lastReviewed;
+                            delete scope.data[scope.key+'_review'].lastReviewed;
+                            delete $rootScope.geneMeta.review[scope.uuid];
+                            delete $rootScope.rejectedUUIDs[scope.uuid];
+                            ReviewResource.rejected.push(scope.uuid);
+                        }
+                    });
+                    scope.setReviewRelatedContent = function(n, o, isPropogation) {
+                        var key = scope.key;
+                        var uuid = scope.uuid;
+                        if (isPropogation === true) {
+                            key = 'propagation';
+                            uuid = scope.data.propagation_uuid;
+                        }
+                        // 1) we track the change in two conditions:
+                        // 2) When editing happens not in review mode
+                        // 3) When editing happends in review mode but not from admin's "Reject" action
+                        if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(uuid) === -1) {
+                            if (_.isUndefined(scope.data[key + '_review'])) {
+                                scope.data[key + '_review'] = {
+                                    updatedBy: $rootScope.me.name,
+                                    updateTime: new Date().getTime()
+                                };
+                            }
+                            if (_.isUndefined(scope.data[key + '_review'].lastReviewed) && !_.isUndefined(o)) {
+                                scope.data[key + '_review'].lastReviewed = o;
+                                if (_.isUndefined($rootScope.geneMeta.review)) {
+                                    $rootScope.geneMeta.review = {};
+                                }
+                                $rootScope.geneMeta.review[uuid] = true;                                       
+                                ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
+                            } else if (n === scope.data[key + '_review'].lastReviewed) {
+                                delete scope.data[key + '_review'].lastReviewed;
+                                delete $rootScope.geneMeta.review[uuid];
+                                // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
+                                if (ReviewResource.reviewMode) {
+                                    ReviewResource.rollback.push(uuid);
                                 }
                             }
                         }
-
-                    });
+                    }
                 }
             },
             controller: function ($scope) {
@@ -87,7 +136,29 @@ angular.module('oncokbApp')
                         value: '4'
                     }
                 };
-                $scope.changePropagation = function(initialize) {
+                $scope.initializeFE = function() {
+                    if ($scope.data[$scope.key+'_editing']) {
+                        if ($scope.data[$scope.key+'_editing'] === $rootScope.me.name) {
+                            $scope.fe = true;
+                            $scope.editingMessage = '';
+                        } else {
+                            $scope.fe = false;
+                            $scope.editingMessage = 'Please wait. ' + $scope.data[$scope.key+'_editing'] + ' is editing this section...';
+                        }                        
+                    } else {
+                        $scope.fe = $rootScope.fileEditable;
+                    }
+                };
+                $scope.cleanUpEditing = function() {
+                    if ($scope.data[$scope.key+'_editing'] && !$rootScope.collaborators[$scope.data[$scope.key+'_editing']]) {
+                        $scope.data[$scope.key+'_editing'] = '';
+                    }
+                }
+                $scope.changePropagation = function (initialize) {
+                    if ($scope.data.propagation_review) {
+                        delete $scope.data.propagation_review.lastReviewed;
+                    }
+                    delete $rootScope.geneMeta.review[$scope.data.propagation_uuid];
                     var _propagationOpts = [];
                     if ($scope.data[$scope.key] === '1' || $scope.data[$scope.key] === '2A') {
                         _propagationOpts = [
@@ -115,7 +186,6 @@ angular.module('oncokbApp')
                 $scope.inReviewMode = function () {
                     return ReviewResource.reviewMode;
                 };
-                $scope.fe = $rootScope.fileEditable;
                 function calculateDiff() {
                     if (($scope.t === 'p')) {
                         var dmp = new diff_match_patch();
@@ -133,12 +203,15 @@ angular.module('oncokbApp')
                     $scope.preStringO = $scope.data[$scope.key];
                 };
                 $scope.getInputClass = function () {
-                    if (ReviewResource.reviewMode) {
+                    if (ReviewResource.reviewMode && $scope.data[$scope.key + '_review'] && $scope.data[$scope.key + '_review'].lastReviewed) {
                         $scope.lastReviewed = $scope.data[$scope.key + '_review'].lastReviewed;
                         calculateDiff();
                     }
-                    var contentEditable = ReviewResource.reviewMode ? ($scope.uuid && ReviewResource.rejected.indexOf($scope.uuid) === -1 ? true : false) : $rootScope.fileEditable;
-                    var classResult = contentEditable ? 'editableBox' : 'unEditableBox';
+                    var contentEditable = ReviewResource.reviewMode ? (!mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid)) : $scope.fe;
+                    var classResult = '' ;
+                    if (['MUTATION_NAME', 'TREATMENT_NAME'].indexOf($scope.t) === -1) {
+                        classResult = contentEditable ? 'editableBox' : 'unEditableBox';
+                    }
                     if ($scope.t === 'p') {
                         classResult += ' doubleH';
                     }
@@ -162,29 +235,16 @@ angular.module('oncokbApp')
                         return !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid);
                     }
                 };
-                $scope.initFirepad = function() {
-                    $timeout(function() {
-                        var firepadRef = firebase.database().ref($scope.path+'/'+$scope.key+'_firepad');
-                        var codeMirror = CodeMirror(document.getElementById($scope.uuid), {lineWrapping: true, readOnly: !$scope.fe});
-                        var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror, 
-                            {
-                                richTextShortcuts: false, 
-                                richTextToolbar: false, 
-                                defaultText: '',
-                                userId: $rootScope.me.name
-                        });
-                        firepad.on('ready', function() {
-                            $scope.pContent = firepad.getText();
-                            // firepad.setText('');
-                        });
-                        firepad.on('synced', function(isSynced) {
-                            $scope.pContent = firepad.getText();
-                            $scope.contentModified = true;
-                            // $timeout(function() {                                                                
-                            // }, 1000);                       
-                        });
-                    }, 200);
-                }
+                $scope.updateThePath = function() {
+                    console.log($scope.uuid, $scope.path);
+                    var tempArr = $scope.path.split('/');
+                    var lastEle = Number(tempArr[tempArr.length-1]);
+                    if (_.isNumber(lastEle) && !_.isNaN(lastEle)) {
+                        tempArr[tempArr.length-1] = $rootScope.indiciesByUUID[$scope.uuid];
+                        $scope.path = tempArr.join('/');
+                        console.log($scope.path);
+                    }
+                }                
             }
         };
     })

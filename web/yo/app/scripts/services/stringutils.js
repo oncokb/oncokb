@@ -1155,16 +1155,19 @@ angular.module('oncokbApp')
                     // This is designed to handle the reviewObj with systematically set updatetime
                     // when 'include' equals true, it will use all reviewObj in the list
                     // otherwise, we will only use the reviewObj with updatedBy info.
-                    if (!reviewObjs[i].get('updatedBy')) continue;
+                    if (!reviewObjs[i] || !reviewObjs[i].updatedBy) continue;
                 }
-                var currentItemTime = new Date(reviewObjs[i].get('updateTime'));
+                var currentItemTime;
+                if (reviewObjs[i] && reviewObjs[i].updateTime) {
+                    currentItemTime = new Date(reviewObjs[i].updateTime);
+                }
                 // we only continue to check if current item time is valid
                 if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
                     if (mostRecent < 0) {
                         mostRecent = i;
                     } else {
                         // reset mostRect time when current item time is closer
-                        var mostRecentTime = new Date(reviewObjs[mostRecent].get('updateTime'));
+                        var mostRecentTime = new Date(reviewObjs[mostRecent].updateTime);
                         if(mostRecentTime < currentItemTime) {
                             mostRecent = i;
                         }

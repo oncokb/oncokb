@@ -491,7 +491,8 @@ angular.module('oncokbApp')
             nameChanged: [], // name changed sections
             added: [], // newly added sections
             removed: [], // deleted sections
-            precise: [] // the exact item that has been changed
+            precise: [], // the exact item that has been changed
+            reviewObjs: {}
         };
     }]);
 angular.module('oncokbApp')
@@ -539,7 +540,6 @@ angular.module('oncokbApp')
                 short: ''
             };
             this.mutation_effect_uuid = getUUID();
-            this.tumors = [];
             this.tumors_uuid = getUUID();
         };
         var Tumor = function (cancerTypes) {
@@ -583,6 +583,8 @@ angular.module('oncokbApp')
             this.name_uuid = getUUID();
             this.level = '';
             this.level_uuid = getUUID();
+            this.propagation = '';
+            this.propagation_uuid = getUUID();
             this.indication = '';
             this.indication_uuid = getUUID();
             this.description = '';

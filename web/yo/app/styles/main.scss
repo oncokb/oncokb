@@ -903,6 +903,7 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   background-color: #E2F1EF;
   cursor: pointer;
   width: 100%;
+  min-height: 50px;
   text-align: left;
   font-size: 17px;
   font-weight: 500;
@@ -942,6 +943,7 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   background-color: #E4EAF2;
   cursor: pointer;
   width: 100%;
+  min-height: 50px;
   text-align: left;
   font-size: 17px;
   font-weight: 500;
@@ -966,11 +968,6 @@ a.powered-by-firepad {
   display: none;
 }
 
-.firepad {
-  min-height: 100px;
-  height: auto;
-}
 .CodeMirror {
-  background-color: #F1F9FF !important;
-  height: auto;
+  background-color: #F1F9FF;
 }

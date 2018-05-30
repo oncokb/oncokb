@@ -87,21 +87,21 @@ angular.module('oncokbApp')
             }
             return deferred.promise;
         }
-        function loadMetaByGene(hugoSymbol) {
-            var metaByGeneDefer = $q.defer();
+        function loadGeneMeta(hugoSymbol) {
+            var geneMetaDefer = $q.defer();
             if (!hugoSymbol) {
-                metaByGeneDefer.reject('No hugoSymbol passed in');
+                geneMetaDefer.reject('No hugoSymbol passed in');
             }
-            if ($rootScope.metaByGeneFire) {
-                metaByGeneDefer.resolve('success');
+            if ($rootScope.geneMeta) {
+                geneMetaDefer.resolve('success');
             } else {
-                $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "metaByGeneFire").then(function() {
-                    metaByGeneDefer.resolve('success');
+                $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "geneMeta").then(function() {
+                    geneMetaDefer.resolve('success');
                 }, function(error) {
-                    metaByGeneDefer.reject('Failed to bind meta by gene');
+                    geneMetaDefer.reject('Failed to bind meta by gene');
                 });
             }
-            return metaByGeneDefer.promise;
+            return geneMetaDefer.promise;
         }
         function loadMetaFire() {
             var metaFireDefer = $q.defer();
@@ -118,7 +118,7 @@ angular.module('oncokbApp')
         }
         return {
             load: load,
-            loadMetaByGene: loadMetaByGene,
+            loadGeneMeta: loadGeneMeta,
             loadMetaFire: loadMetaFire
         }
     });
