@@ -18,8 +18,6 @@ OncoKB.global = {};
 // OncoKB.global.treeEvidence
 // OncoKB.global.processedData
 
-// Variables for tree tab
-OncoKB.tree = {};
 // processedData
 
 // OncoKB configurations, reading from config.json
@@ -112,12 +110,6 @@ var oncokbApp = angular.module('oncokbApp', [
                 templateUrl: 'views/welcome.html',
                 access: access.public,
                 internalUse: false
-            })
-            .when('/tree', {
-                templateUrl: 'views/tree.html',
-                controller: 'TreeCtrl',
-                access: access.admin,
-                internalUse: true
             })
             .when('/variant', {
                 templateUrl: 'views/variant.html',

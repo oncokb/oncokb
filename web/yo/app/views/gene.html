@@ -147,16 +147,16 @@
                 <i ng-click="remove('mutation', path)" class="fa fa-trash-o"></i>
               </span>
             </div>
-            <span class="pull-right">
+            <div style="margin-top:-20px">
                 <review-panel uuid="mutation.name_uuid" review-obj="mutation.name_review" evidence-type="'mutation'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"
                               accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"
                               confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)"></review-panel>
-            </span>
+            </div>
 
           </div>
         </div>
         <div class="panelContent" ng-if="initialOpen[mutation.name_uuid]" id="{{mutation.name_uuid}}">
-          <div class="sectionStyle" ng-init="bindTumors({uuid: mutation.name_uuid, path: path});getTumorContent(mutation);effectPath=getObservePath({type: 'mutation_effect', path: path});">
+          <div class="sectionStyle" ng-init="bindTumors({uuid: mutation.name_uuid, path: path});getTumorContent(mutation);effectPath=getObservePath({type: 'mutation_effect', path: path});" ng-show="displayCheck(mutation.mutation_effect_uuid, mutation.name_review)">
             <div class="headerLevel2" ng-click="toggleSection(mutation.mutation_effect_uuid)">
               <i ng-class="getAngleClass(mutation.mutation_effect_uuid)"></i> Mutation Effect
               <span class="curationNoEntry" ng-if="isEmptySection(mutation.mutation_effect, 'mutation_effect')">No Entry</span>
@@ -186,7 +186,7 @@
               </span>
             </div>
           </div>
-          <div ng-repeat="tumor in tumorsByMutation[mutation.name_uuid]" class="accordionMarginTop" ng-init="path=getObservePath({path: path, type: 'tumor', index: $index});">
+          <div ng-repeat="tumor in tumorsByMutation[mutation.name_uuid]" class="accordionMarginTop" ng-init="path=getObservePath({path: path, type: 'tumor', index: $index});" ng-show="displayCheck(tumor.cancerTypes_uuid, tumor.cancerTypes_review)">
             <div class="sectionStyle">
               <div class="headerLevel2" ng-click="toggleSection(tumor.cancerTypes_uuid)">
                 <i ng-class="getAngleClass(tumor.cancerTypes_uuid)"></i>

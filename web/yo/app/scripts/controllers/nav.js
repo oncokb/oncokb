@@ -10,7 +10,6 @@
 angular.module('oncokbApp')
     .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
         var tabs = {
-            tree: 'Tree',
             variant: 'Variant Annotation',
             genes: 'Genes',
             tools: 'Tools',
@@ -54,7 +53,7 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'genes', value: tabs.genes});
             filterTabs.push({key: 'queues', value: tabs.queues});
             if ($rootScope.me.role === 8) {
-                var keys = ['tree', 'variant', 'tools', 'feedback'];
+                var keys = ['variant', 'tools', 'feedback'];
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});
                 });
