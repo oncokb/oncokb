@@ -527,6 +527,15 @@ angular.module('oncokbApp')
             }
             return result;
         }
+        var Gene = function(name) {
+            this.name = name;
+            this.summary = '';
+            this.summary_uuid = getUUID();
+            this.background = '';
+            this.background_uuid = getUUID();
+            // gene type to be added
+            this.mutations_uuid = getUUID();
+        }
         var Mutation = function(name) {
             this.name = name;
             this.name_uuid = getUUID();
@@ -612,6 +621,7 @@ angular.module('oncokbApp')
             this.value = (new Date()).getTime().toString();
         }
         return {
+            Gene: Gene,
             Mutation: Mutation,
             Tumor: Tumor,
             Treatment: Treatment,
