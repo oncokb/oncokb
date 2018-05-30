@@ -84,10 +84,10 @@ angular.module('oncokbApp')
                     }
                 };
                 function isTreatmentType() {
-                    return $scope.therapyCategory && $scope.evidenceType === $scope.therapyCategory.name.getText();
+                    return $scope.therapyCategory && $scope.evidenceType === $scope.therapyCategory.name;
                 }
                 $scope.assignPanelType = function() {
-                    // The panel type is assigned in the priority of remove, add, name change and update. Caution should be exercised when adjusting the order, which is reflected in the following if else statements
+                    // The panel type is assigned in the priority of remove, add, name change and update. We need to pay special attentions when adjusting the order, which is reflected in the following if else statements
                     if (mainUtils.processedInReview('remove', $scope.uuid)) {
                         $scope.panelType = 'delete';
                         if (isTreatmentType()) {
@@ -259,7 +259,7 @@ angular.module('oncokbApp')
                         case 'GENE_TYPE':
                             items = ['ocg', 'tsg'];
                             break;
-                        case 'ONCOGENIC':
+                        case 'MUTATION_EFFECT':
                             var oncogenicUUID = $scope.mutation.mutation_effect.oncogenic_uuid;
                             var effectUUID = $scope.mutation.mutation_effect.effect_uuid;
                             var descriptionUUID = $scope.mutation.mutation_effect.description_uuid;
