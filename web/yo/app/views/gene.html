@@ -195,7 +195,7 @@
                 </span>
                 <i class="fa fa-edit" ng-click="modifyTumorType(tumor, path)" ng-if="!reviewMode"></i>
                 <span ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
-                <span class="pull-right" ng-show="!reviewMode && fileEditable">
+                <span ng-show="!reviewMode && fileEditable">
                   <span style="margin-right: 20px">
                     <i class="fa fa-angle-up" ng-if="displayMoveIcon(path, 'up')" ng-click="move('up', tumor.cancerTypes_uuid, path)"></i>
                     <i class="fa fa-angle-down" ng-if="displayMoveIcon(path, 'down')" ng-click="move('down', tumor.cancerTypes_uuid, path)"></i>
@@ -203,6 +203,11 @@
                     <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(path, 'bottom')" ng-click="move('bottom', tumor.cancerTypes_uuid, path)"></i>
                   </span>
                   <i ng-click="remove('tumor', path)" class="fa fa-trash-o pull-right"></i>
+                </span>
+                <span style="margin-top:-20px">
+                  <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
+                                confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)"
+                                accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"></review-panel>
                 </span>
               </div>
               <div class="panelContent" ng-if="initialOpen[tumor.cancerTypes_uuid]" id="{{tumor.cancerTypes_uuid}}" ng-init="bindTIs({uuid: tumor.cancerTypes_uuid, path: path})">
