@@ -15,17 +15,13 @@ angular.module('oncokbApp')
         function load(types) {
             function loadMeta() {
                 var metaDefer = $q.defer();
-                if ($rootScope.metaData) {
+                var ref = firebase.database().ref('Meta');
+                ref.on('value', function(doc) {
+                    $rootScope.metaData = doc.val();
                     metaDefer.resolve('success');
-                } else {
-                    var ref = firebase.database().ref('Meta');
-                    ref.on('value', function(doc) {
-                        $rootScope.metaData = doc.val();
-                        metaDefer.resolve('success');
-                    }, function(error) {
-                        metaDefer.reject('Fail to load queues file');
-                    });
-                }
+                }, function(error) {
+                    metaDefer.reject('Fail to load queues file');
+                });
                 return metaDefer.promise;
             }
             function loadQueues() {
@@ -38,6 +34,17 @@ angular.module('oncokbApp')
                     queuesDefer.reject('Fail to load queues file');
                 });
                 return queuesDefer.promise;
+            }
+            function loadHistory() {
+                var historyDefer = $q.defer();
+                var ref = firebase.database().ref('History');
+                ref.on('value', function(doc) {
+                    $rootScope.historyData = doc.val();
+                    historyDefer.resolve('success');
+                }, function(error) {
+                    historyDefer.reject('Fail to load history file');
+                });
+                return historyDefer.promise;
             }
             /**
              * Loop through api calls recorded in the meta file and update it to database every 5 mins
@@ -69,11 +76,14 @@ angular.module('oncokbApp')
             }
             var deferred = $q.defer();
             var apiCalls = [];
-            if (types.indexOf('all') !== -1  || types.indexOf('meta') !== -1) {
+            if (types.indexOf('meta') !== -1) {
                 apiCalls.push(loadMeta());
             }
-            if (types.indexOf('all') !== -1 || types.indexOf('queues') !== -1) {
+            if (types.indexOf('queues') !== -1) {
                 apiCalls.push(loadQueues());
+            }
+            if (types.indexOf('history') !== -1) {
+                apiCalls.push(loadHistory());
             }
             if (apiCalls.length > 0) {
                 $q.all(apiCalls)
@@ -87,38 +97,7 @@ angular.module('oncokbApp')
             }
             return deferred.promise;
         }
-        function loadGeneMeta(hugoSymbol) {
-            var geneMetaDefer = $q.defer();
-            if (!hugoSymbol) {
-                geneMetaDefer.reject('No hugoSymbol passed in');
-            }
-            if ($rootScope.geneMeta) {
-                geneMetaDefer.resolve('success');
-            } else {
-                $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "geneMeta").then(function() {
-                    geneMetaDefer.resolve('success');
-                }, function(error) {
-                    geneMetaDefer.reject('Failed to bind meta by gene');
-                });
-            }
-            return geneMetaDefer.promise;
-        }
-        function loadMetaFire() {
-            var metaFireDefer = $q.defer();
-            if ($rootScope.allMetaFire) {
-                metaFireDefer.resolve('success');
-            } else {
-                $firebaseObject(firebase.database().ref('Meta')).$bindTo($rootScope, "allMetaFire").then(function() {
-                    metaFireDefer.resolve('success');
-                }, function(error) {
-                    metaFireDefer.reject('Failed to bind meta by gene');
-                });
-            }
-            return metaFireDefer.promise;
-        }
         return {
-            load: load,
-            loadGeneMeta: loadGeneMeta,
-            loadMetaFire: loadMetaFire
+            load: load
         }
     });

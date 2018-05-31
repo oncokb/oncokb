@@ -65,7 +65,7 @@ angular.module('oncokbApp')
             //     return 'You have made changes, but you did not save them yet.\nLeaving the page will revert all changes.';
             // }
             function processMeta() {
-                loadFiles.load(['all']).then(function(result) {
+                loadFiles.load(['meta', 'queues']).then(function(result) {
                     var hugoSymbols = _.keys($rootScope.metaData);
                     hugoSymbols = _.without(hugoSymbols, 'collaborators');
                     user.setFileeditable(hugoSymbols).then(function(editableData) {
