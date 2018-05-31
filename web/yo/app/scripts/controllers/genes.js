@@ -1,11 +1,11 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$q', '$window', '$scope', '$rootScope', '$location', '$timeout',
+    .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
         'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
-        function($q, $window, $scope, $rootScope, $location, $timeout, $routeParams, _,
+        function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                  OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
