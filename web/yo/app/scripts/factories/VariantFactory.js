@@ -496,7 +496,7 @@ angular.module('oncokbApp')
         };
     }]);
 angular.module('oncokbApp')
-    .factory('FirebaseModel', ['$http', 'OncoKB', function() {
+    .factory('FirebaseModel', ['$rootScope', function($rootScope) {
         'use strict';
         var getUUID = function() {
             return UUIDjs.create(4).toString();
@@ -620,6 +620,10 @@ angular.module('oncokbApp')
             };
             this.value = (new Date()).getTime().toString();
         }
+        var Meta = function() {
+            this.lastModifiedBy = $rootScope.me.name;
+            this.lastModifiedAt = (new Date()).getTime().toString();
+        }
         return {
             Gene: Gene,
             Mutation: Mutation,
@@ -628,6 +632,7 @@ angular.module('oncokbApp')
             Comment: Comment,
             Cancertype: Cancertype,
             VUSItem: VUSItem,
-            TimeStamp: TimeStamp
+            TimeStamp: TimeStamp,
+            Meta: Meta
         };
     }]);

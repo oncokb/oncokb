@@ -381,7 +381,7 @@ angular.module('oncokbApp')
             if (!userName) {
                 return false;
             }
-            var developers = ['Hongxin Zhang', 'Jianjiong Gao', 'Jiaojiao Wang'];
+            var developers = ['Hongxin Zhang', 'Jianjiong Gao', 'Jiaojiao Wang', 'Jing Su'];
             if (developers.indexOf(userName) !== -1) {
                 return true;
             }
