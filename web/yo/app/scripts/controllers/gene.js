@@ -1272,8 +1272,8 @@ angular.module('oncokbApp')
                     ReviewResource.accepted.push(uuid);
                 }
             }
-            $scope.modelUpdate = function (type, mutationAdded, tumorAdded, tiAdded, treatmentAdded) {
-                var data = getRealtimeRef(type, mutationAdded, tumorAdded, tiAdded, treatmentAdded);
+            $scope.modelUpdate = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+                var data = getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -1496,24 +1496,24 @@ angular.module('oncokbApp')
                         break;
                 }
             }
-            function getRealtimeRef(type, mutationAdded, tumorAdded, tiAdded, treatmentAdded) {
+            function getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
                 var mutation = '';
                 var tumor = '';
                 var ti = '';
                 var treatment = '';
                 _.some($scope.gene.mutations, function (mutationRef) {
-                    if (mutationRef.name_uuid === mutationAdded.name_uuid) {
+                    if (mutationRef.name_uuid === mutationCopy.name_uuid) {
                         mutation = mutationRef;
-                        if (tumorAdded) {
+                        if (tumorCopy) {
                             _.some(mutationRef.tumors, function (tumorRef) {
-                                if (tumorAdded.cancerTypes_uuid === tumorRef.cancerTypes_uuid) {
+                                if (tumorCopy.cancerTypes_uuid === tumorRef.cancerTypes_uuid) {
                                     tumor = tumorRef;
-                                    if (tiAdded) {
+                                    if (tiCopy) {
                                         _.some(tumorRef.TIs, function (tiRef) {
-                                            if (tiAdded.name_uuid === tiRef.name_uuid) {
+                                            if (tiCopy.name_uuid === tiRef.name_uuid) {
                                                 ti = tiRef;
                                                 _.some(tiRef.treatments, function (treatmentRef) {
-                                                    if (treatmentAdded.name_uuid === treatmentRef.name_uuid) {
+                                                    if (treatmentCopy.name_uuid === treatmentRef.name_uuid) {
                                                         treatment = treatmentRef;
                                                         return true;
                                                     }
@@ -1537,8 +1537,8 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.acceptAdded = function (type, mutationAdded, tumorAdded, tiAdded, treatmentAdded) {
-                var data = getRealtimeRef(type, mutationAdded, tumorAdded, tiAdded, treatmentAdded);
+            $scope.acceptAdded = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+                var data = getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -2082,7 +2082,12 @@ angular.module('oncokbApp')
                     cancelDelteSection(type, mutation, tumor, ti, treatment);
                 });
             };
-            function cancelDelteSection(type, mutation, tumor, ti, treatment) {
+            function cancelDelteSection(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+                var data = getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var mutation = data.mutation;
+                var tumor = data.tumor;
+                var ti = data.ti;
+                var treatment = data.treatment;
                 switch (type) {
                     case 'mutation':
                         cancelDeleteItem($scope.gene.mutations[$scope.mutIndexByUUID[mutation.name_uuid]]);
@@ -2109,7 +2114,9 @@ angular.module('oncokbApp')
             }
             function cancelDeleteItem(obj) {
                 delete obj.name_review.removed;
-                delete $rootScope.geneMeta.review[obj.name_uuid];
+                if ($rootScope.geneMeta.review) {
+                    delete $rootScope.geneMeta.review[obj.name_uuid];
+                }
                 ReviewResource.removed = _.without(ReviewResource.removed, obj.name_uuid);
             }
             function fetchResults(data) {
