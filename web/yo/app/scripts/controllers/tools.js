@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils',
-        function($scope, dialogs, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils) {
+    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 'loadFiles', '$rootScope',
+        function($scope, dialogs, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope) {
             $scope.init = function() {
                 $scope.loading = false;
                 // Need to be replaced with the right way to fetch gene name list
@@ -29,36 +29,16 @@ angular.module('oncokbApp')
             };
             $scope.searchHistory = function(genesForHistory, index) {
                 $scope.loading = true;
-                if (index === 0) {
-                    historyResults = [];
-                }
-                var documents = Documents.get({title: genesForHistory[index]});
-                var document = _.isArray(documents) && documents.length === 1 ? documents[0] : null;
-                if (document) {
-                    storage.getRealtimeDocument(document.id).then(function(realtime) {
-                        if (realtime && realtime.error) {
-                            dialogs.error('Error', 'Fail to load ' + genesForHistory[index] + ' document. Please contact the developer.');
-                        } else {
-                            var model = realtime.getModel();
-                            var historyModel = model.getRoot().get('history');
-                            if (historyModel) {
-                                var historyData = stringUtils.getHistoryData(historyModel).api;
-                                _.each(historyData, function(item) {
-                                    historyResults.push({gene: genesForHistory[index], admin: item.admin, timeStamp: item.timeStamp, records: item.records});
-                                });
-                            }
-                            if (index === genesForHistory.length - 1) {
-                                $scope.historySearchResults = historyResults;
-                                $scope.loading = false;
-                            } else {
-                                $timeout(function() {
-                                    index++;
-                                    $scope.searchHistory(genesForHistory, index);
-                                }, 200);
-                            }
-                        }
+                loadFiles.load('history').then(function(success) {
+                    var historyResults = [];
+                    _.each(_.keys($rootScope.historyData), function(hugoSymbol) {
+                        _.each($rootScope.historyData[hugoSymbol].api, function(item) {
+                            historyResults.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: item.records});
+                        });
                     });
-                }
+                    $scope.historySearchResults = historyResults;
+                    $scope.loading = false;
+                });
             };
             $scope.getHistoryButtonContent = function() {
                 if ($scope.loading) {

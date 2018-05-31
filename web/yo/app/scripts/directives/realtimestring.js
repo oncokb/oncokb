@@ -105,7 +105,9 @@ angular.module('oncokbApp')
                                 ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
                             } else if (n === scope.data[key + '_review'].lastReviewed) {
                                 delete scope.data[key + '_review'].lastReviewed;
-                                delete $rootScope.geneMeta.review[uuid];
+                                if ($rootScope.geneMeta.review) {
+                                    delete $rootScope.geneMeta.review[uuid];
+                                }
                                 // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
                                 if (ReviewResource.reviewMode) {
                                     ReviewResource.rollback.push(uuid);

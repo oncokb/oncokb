@@ -257,21 +257,21 @@ angular.module('oncokbApp').run(
                     hugoSymbol = $location.path().substring(toIndex+6);
                 }
                 if (fromIndex !== -1 || toIndex !== -1) {
-                    loadFiles.loadMetaFire().then(function() {
+                    loadFiles.load(['meta']).then(function() {
                         var myName = $rootScope.me.name.toLowerCase();
-                        if (!$rootScope.allMetaFire.collaborators) {
-                            $rootScope.allMetaFire.collaborators = {};
+                        if (!$rootScope.metaData.collaborators) {
+                            $rootScope.metaData.collaborators = {};
                         }
                         if (fromIndex !== -1) {
-                            var genesOpened = $rootScope.allMetaFire.collaborators[myName];
-                            $rootScope.allMetaFire.collaborators[myName] = _.without(genesOpened, hugoSymbol);
+                            var genesOpened = $rootScope.metaData.collaborators[myName];
+                            $rootScope.metaData.collaborators[myName] = _.without(genesOpened, hugoSymbol);
                         }                        
                         if (toIndex !== -1) {
-                            if (!$rootScope.allMetaFire.collaborators[myName]) {
-                                $rootScope.allMetaFire.collaborators[myName] = [];
+                            if (!$rootScope.metaData.collaborators[myName]) {
+                                $rootScope.metaData.collaborators[myName] = [];
                             }
-                            if ($rootScope.allMetaFire.collaborators[myName].indexOf(hugoSymbol) === -1) {
-                                $rootScope.allMetaFire.collaborators[myName].push(hugoSymbol);
+                            if ($rootScope.metaData.collaborators[myName].indexOf(hugoSymbol) === -1) {
+                                $rootScope.metaData.collaborators[myName].push(hugoSymbol);
                             }
                         }                        
                     }, function(error) {
