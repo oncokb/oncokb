@@ -158,7 +158,9 @@ angular.module('oncokbApp')
                     if ($scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
                     }
-                    delete $rootScope.geneMeta.review[$scope.data.propagation_uuid];
+                    if ($rootScope.geneMeta.review) {
+                        delete $rootScope.geneMeta.review[$scope.data.propagation_uuid];
+                    }
                     var _propagationOpts = [];
                     if ($scope.data[$scope.key] === '1' || $scope.data[$scope.key] === '2A') {
                         _propagationOpts = [

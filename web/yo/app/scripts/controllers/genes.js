@@ -78,7 +78,7 @@ angular.module('oncokbApp')
                                 review: 'No',
                                 editable: editableData[hugoSymbol]
                             };
-                            if (_.keys($rootScope.metaData[hugoSymbol]).length > 2) {
+                            if ($rootScope.metaData[hugoSymbol].review) {
                                 $scope.metaFlags[hugoSymbol].review = 'Yes';
                             }
                             if ($rootScope.firebaseQueues[hugoSymbol]) {
