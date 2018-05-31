@@ -262,6 +262,7 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function (data) {
+                console.log(JSON.stringify($scope.gene));
             };
 
             function parseMutationString(mutationStr) {
@@ -2128,7 +2129,7 @@ angular.module('oncokbApp')
 
             $scope.getAllCitations = function () {
                 var results = [];
-                var geneData = JSON.stringify(stringUtils.getGeneData(this.gene, true, false));
+                var geneData = JSON.stringify($scope.gene);
                 results = fetchResults(FindRegex.result(geneData));
                 var annotationPMIDs = results.PMIDs;
                 var annotationAbstracts = results.abstracts;
