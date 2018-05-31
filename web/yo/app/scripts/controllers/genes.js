@@ -1,14 +1,14 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
+    .controller('GenesCtrl', ['$q', '$window', '$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'user',
-        function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
+        function($q, $window, $scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, user) {
+                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
             function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -154,6 +154,10 @@ angular.module('oncokbApp')
             var newGenes = [];
 
             $scope.create = function() {
+                newGenes = $scope.newGenes.split(",");
+                _.each(newGenes, function (geneName) {
+                    createGene(geneName.trim());
+                });
             };
 
             $scope.convertData = function() {
@@ -211,6 +215,29 @@ angular.module('oncokbApp')
             $scope.developerCheck = function() {
                 return MainUtils.developerCheck($rootScope.me.name);
             };
+
+            function createGene(geneName) {
+                var allGeneNameList = _.keys($scope.metaFlags);
+                if (allGeneNameList.includes(geneName)) {
+                    dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
+                } else {
+                    var gene = new FirebaseModel.Gene(geneName);
+                    firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
+                        var meta = new FirebaseModel.Meta();
+                        firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
+                            processMeta();
+                        }, function(error) {
+                            // Delete saved new gene from Genes collection
+                            firebase.database().ref('Genes/' + geneName).remove();
+                            console.log(error);
+                            dialogs.notify('Warning', 'Failed to create a Meta record for the new gene ' + geneName + '!');
+                        });
+                    }, function(error) {
+                        console.log(error);
+                        dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                    });
+                }
+            }
 
             function getCacheStatus() {
                 DatabaseConnector.getCacheStatus().then(function(result) {

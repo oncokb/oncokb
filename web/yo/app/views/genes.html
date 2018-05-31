@@ -4,6 +4,12 @@
             <span class="btn-group btn-group-sm pull-left group" role="group">
                 <button type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
             </span>
+            <span class="input-group input-group-sm create group" role="group" ng-show="userRole === 8 && developerCheck()">
+                <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default  btn-secondary" ng-click="create()">Create Genes</button>
+                </span>
+            </span>
         </div>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
             <thead>
