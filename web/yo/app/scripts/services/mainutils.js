@@ -394,41 +394,31 @@ angular.module('oncokbApp')
             var deferred = $q.defer();
             DatabaseConnector.getOncoTreeMainTypes()
                 .then(function(result) {
-                    if (result.data) {
-                        result.data.push({
-                            id: -1,
-                            name: 'All Liquid Tumors'
-                        });
-                        result.data.push({
-                            id: -2,
-                            name: 'All Solid Tumors'
-                        });
-                        result.data.push({
-                            id: -3,
-                            name: 'All Tumors'
-                        });
-                        result.data.push({
-                            id: -4,
-                            name: 'Germline Disposition'
-                        });
-                        result.data.push({
-                            id: -5,
-                            name: 'All Pediatric Tumors'
-                        });
-                        result.data.push({
-                            id: -6,
-                            name: 'Other Tumor Types'
-                        });
-                        var mainTypeList = _.map(result.data, function(mainType) {
-                            return mainType.name;
-                        });
-                        DatabaseConnector.getOncoTreeTumorTypesByMainTypes(mainTypeList).then(function(tumorTypesResult) {
-                            if (result.data.length !== tumorTypesResult.data.length) {
+                    if (result) {
+                        result = result.concat(['All Liquid Tumors', 'All Solid Tumors', 'All Tumors', 'Germline Disposition', 'All Pediatric Tumors', 'Other Tumor Types']);
+                        DatabaseConnector.getOncoTreeTumorTypesByMainTypes(result).then(function(tumorTypesResult) {
+                            if (result.length !== tumorTypesResult.length) {
                                 deferred.reject('The number of returned tumor types is not matched with number of main types.');
                             } else {
+                                var mainTypesResult = _.map(result, function(item, index) {
+                                    return {
+                                        id: index,
+                                        name: item
+                                    };
+                                });
+                                var tempMap = {};
+                                _.each(tumorTypesResult, function(items, index) {
+                                    _.each(items, function(item) {
+                                        tempMap = {
+                                            name: item.mainType,
+                                            id: index
+                                        };
+                                        item.mainType = tempMap;
+                                    });
+                                });
                                 deferred.resolve({
-                                    mainTypes:result.data,
-                                    tumorTypes: tumorTypesResult.data
+                                    mainTypes: mainTypesResult,
+                                    tumorTypes: tumorTypesResult
                                 });
                             }
                         }, function() {
