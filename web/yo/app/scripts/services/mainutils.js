@@ -378,14 +378,18 @@ angular.module('oncokbApp')
          * @return {boolean} whether user is developer
          */
         function developerCheck(userName) {
+            var result = false;
             if (!userName) {
-                return false;
+                return result;
             }
             var developers = ['Hongxin Zhang', 'Jianjiong Gao', 'Jiaojiao Wang', 'Jing Su'];
-            if (developers.indexOf(userName) !== -1) {
-                return true;
-            }
-            return false;
+            _.some(developers, function(item) {
+                if (item.toLowerCase() === userName.toLowerCase()) {
+                    result = true;
+                    return true;
+                }
+            });
+            return result;
         }
 
         /**

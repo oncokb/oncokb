@@ -1497,6 +1497,10 @@ angular.module('oncokbApp')
                 }
             }
             function getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+                if (!mutationCopy) {
+                    // this is the gene level update
+                    return true;
+                }
                 var mutation = '';
                 var tumor = '';
                 var ti = '';
@@ -2309,10 +2313,12 @@ angular.module('oncokbApp')
                         return false;
                 }
             }
-            $scope.displayMove = true;
-            $scope.reArrangeSections = function () {
-                $scope.displayMove = !$scope.displayMove;
-            }
+            $scope.startMoving = function() {
+                $scope.status.preMoving = false;
+            };
+            $scope.endMoving = function() {
+                $scope.status.preMoving = true;
+            };
             $scope.move = function (angleType, uuid, path) {
                 $scope.status.processing = true;
                 var dataList;
@@ -3108,7 +3114,8 @@ angular.module('oncokbApp')
                 isDesiredGene: true,
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false, // indicate there are changes in mutation section
-                processing: false
+                processing: false,
+                preMoving: true
             };
 
             $scope.$watch('meta.newCancerTypes', function (n) {
@@ -3353,6 +3360,7 @@ angular.module('oncokbApp')
                 });
                 var deferred5 = $q.defer();
                 $firebaseObject(firebase.database().ref('Meta/' + $scope.fileTitle)).$bindTo($rootScope, "geneMeta").then(function () {
+                    $scope.geneStautMessage = 'Last edit was made on ' + new Date($rootScope.geneMeta.lastModifiedAt) + ' by ' + $rootScope.geneMeta.lastModifiedBy;
                     deferred5.resolve('success');
                 }, function (error) {
                     deferred5.reject('Failed to bind meta by gene');
