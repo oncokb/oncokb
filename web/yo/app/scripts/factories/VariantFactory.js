@@ -498,10 +498,10 @@ angular.module('oncokbApp')
 angular.module('oncokbApp')
     .factory('FirebaseModel', ['$rootScope', function($rootScope) {
         'use strict';
-        var getUUID = function() {
+        function getUUID() {
             return UUIDjs.create(4).toString();
         };
-        var createTIs = function() {
+        function createTIs() {
             var result = [];
             for (var i = 0; i < 4; i++) {
                 var ti = new TI();
@@ -527,16 +527,20 @@ angular.module('oncokbApp')
             }
             return result;
         }
-        var Gene = function(name) {
+        function Gene(name) {
             this.name = name;
             this.summary = '';
             this.summary_uuid = getUUID();
             this.background = '';
             this.background_uuid = getUUID();
+            this.isoform_override = '';
+            this.dmp_refseq_id = '';
+            this.tsg = '';
+            this.ocg = '';
             // gene type to be added
             this.mutations_uuid = getUUID();
         }
-        var Mutation = function(name) {
+        function Mutation(name) {
             this.name = name;
             this.name_uuid = getUUID();
             this.mutation_effect = {
@@ -551,7 +555,7 @@ angular.module('oncokbApp')
             this.mutation_effect_uuid = getUUID();
             this.tumors_uuid = getUUID();
         };
-        var Tumor = function (cancerTypes) {
+        function Tumor(cancerTypes) {
             this.cancerTypes = cancerTypes;
             this.cancerTypes_uuid = getUUID();
             this.summary = '';
@@ -574,11 +578,11 @@ angular.module('oncokbApp')
             this.diagnostic_uuid = getUUID();
             this.TIs = createTIs();
         };
-        var Cancertype = function(name, code) {
+        function Cancertype(name, code) {
             this.name = name;
             this.code = code;
         }
-        var TI = function() {
+        function TI() {
             this.name =  '';
             this.name_uuid = getUUID();
             this.type = '';
@@ -587,7 +591,7 @@ angular.module('oncokbApp')
             this.description = '';
             this.description_uuid = getUUID();
         }
-        var Treatment = function(name) {
+        function Treatment(name) {
             this.name = name;
             this.name_uuid = getUUID();
             this.level = '';
@@ -600,27 +604,27 @@ angular.module('oncokbApp')
             this.description_uuid = getUUID();
             this.short = '';
         };
-        var Comment = function(userName, email, content) {
+        function Comment(userName, email, content) {
             this.date = (new Date()).getTime().toString();
             this.userName = userName;
             this.email = email;
             this.content = content;
             this.resolved = 'false';
         }
-        var VUSItem = function(name, userName, userEmail) {
+        function VUSItem(name, userName, userEmail) {
             this.name = name;
             this.time = [
                 new TimeStamp(userName, userEmail)
             ];
         }
-        var TimeStamp = function(userName, userEmail) {
+        function TimeStamp(userName, userEmail) {
             this.by = {
                 by: userName,
                 email: userEmail
             };
             this.value = (new Date()).getTime().toString();
         }
-        var Meta = function() {
+        function Meta() {
             this.lastModifiedBy = $rootScope.me.name;
             this.lastModifiedAt = (new Date()).getTime().toString();
         }
