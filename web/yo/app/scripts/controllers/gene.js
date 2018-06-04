@@ -2257,124 +2257,78 @@ angular.module('oncokbApp')
             $scope.mutationEffectChanged = function (mutationEffect) {
                 mutationEffect.addOn.setText('');
             };
-
-            $scope.displayMoveIcon = function (path, type) {
-                if (!path || ['top', 'bottom', 'up', 'down'].indexOf(type) === -1) {
+            var sectionToMoveUUID = '';
+            var startIndex = -1;
+            $scope.displayMoveIcon = function(type, uuid) {
+                if (type === 'initial') {
+                    if (uuid === sectionToMoveUUID) {
+                        return true;
+                    } else {
+                        return $scope.status.moving;
+                    }
+                } else if (type === 'move') {
+                    if (uuid === sectionToMoveUUID) {
+                        return false;
+                    } else {
+                        return !$scope.status.moving;
+                    }
+                }
+            };
+            $scope.startMoving = function(path, uuid, index) {
+                $scope.status.moving = !$scope.status.moving;
+                sectionToMoveUUID = uuid;
+                startIndex = index;
+            };
+            $scope.endMoving = function(path, moveType) {
+                console.log(path, moveType);
+                if (startIndex === -1) {
                     return false;
                 }
-                var index = -1;
-                var totalLength = 0;
-                var indicies = getIndexByPath(path);
-                if (indicies[1] === -1) {
-                    // mutation section
-                    index = indicies[0];
-                    if ($scope.mutations) {
-                        totalLength = $scope.mutations.length;
-                    }
-                } else if (indicies[2] === -1) {
-                    // tumor section
-                    index = indicies[1];
-                    if ($scope.mutations[indicies[0]].tumors) {
-                        totalLength = $scope.mutations[indicies[0]].tumors.length;
-                    }
-                } else if (indicies[3] !== -1) {
-                    // treatment section
-                    index = indicies[3];
-                    if ($scope.mutations[indicies[0]].tumors[indicies[1]].TIs[indicies[2]].treatments) {
-                        totalLength = $scope.mutations[indicies[0]].tumors[indicies[1]].TIs[indicies[2]].treatments.length;
-                    }
-                }
-                switch (type) {
-                    case 'top':
-                        if (index <= 1) {
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    case 'bottom':
-                        if (index >= totalLength - 2) {
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    case 'up':
-                        if (index === 0) {
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    case 'down':
-                        if (index === totalLength - 1) {
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    default:
-                        return false;
-                }
-            }
-            $scope.startMoving = function() {
-                $scope.status.preMoving = false;
-            };
-            $scope.endMoving = function() {
-                $scope.status.preMoving = true;
-            };
-            $scope.move = function (angleType, uuid, path) {
-                $scope.status.processing = true;
                 var dataList;
-                var index;
-                var moveIndex;
+                var endIndex;
                 var type = '';
                 var indicies = getIndexByPath(path);
                 if (indicies[1] === -1) {
                     // mutation section
-                    dataList = this.mutations;
-                    index = indicies[0];
+                    dataList = this.gene.mutations;
+                    endIndex = indicies[0];
                 } else if (indicies[2] === -1) {
                     // tumor section
-                    dataList = this.mutations[indicies[0]].tumors;
-                    index = indicies[1];
+                    dataList = this.gene.mutations[indicies[0]].tumors;
+                    endIndex = indicies[1];
                 } else if (indicies[3] !== -1) {
                     // treatment section
-                    dataList = this.mutations[indicies[0]].tumors[indicies[1]].TIs[indicies[2]].treatments;
-                    index = indicies[3];
+                    dataList = this.gene.mutations[indicies[0]].tumors[indicies[1]].TIs[indicies[2]].treatments;
+                    endIndex = indicies[3];
                     type = 'treatment';
                 }
-                switch (angleType) {
-                    case 'up':
-                        moveIndex = index - 1;
-                        break;
-                    case 'down':
-                        moveIndex = index + 1;
-                        break;
-                    case 'top':
-                        moveIndex = 0;
-                        break;
-                    case 'bottom':
-                        moveIndex = dataList.length;
-                        break;
-                }
-                if (angleType === 'up' || angleType === 'down') {
-                    var tempObj = _.clone(dataList[index]);
-                    dataList[index] = _.clone(dataList[moveIndex]);
-                    dataList[moveIndex] = tempObj;
-                } else if (angleType === 'top') {
-                    var tempObj = _.clone(dataList[index]);
-                    for (var i = index; i > 0; i--) {
-                        dataList[i] = _.clone(dataList[i - 1]);
+                var movingSectionCopy = _.clone(dataList[startIndex]);
+                if (startIndex > endIndex) {
+                    for (var i = startIndex-1; i >= endIndex+1; i--) {
+                        dataList[i+1] = _.clone(dataList[i]); 
                     }
-                    dataList[0] = tempObj;
-                } else if (angleType === 'bottom') {
-                    var tempObj = _.clone(dataList[index]);
-                    for (var i = index; i < dataList.length - 1; i++) {
-                        dataList[i] = _.clone(dataList[i + 1]);
+                    if (moveType === 'up') {
+                        dataList[endIndex+1] = _.clone(dataList[endIndex]);
+                        dataList[endIndex] = movingSectionCopy;
+                    } else if (moveType === 'down') {
+                        dataList[endIndex+1] = movingSectionCopy;
                     }
-                    dataList[dataList.length - 1] = tempObj;
+                } else if (startIndex < endIndex) {
+                    for (var i = startIndex+1; i <= endIndex-1; i++) {
+                        dataList[i-1] = _.clone(dataList[i]);
+                    }
+                    if (moveType === 'up') {
+                        dataList[endIndex-1] = movingSectionCopy;
+                    } else if (moveType === 'down') {
+                        dataList[endIndex-1] = _.clone(dataList[endIndex]);
+                        dataList[endIndex] = movingSectionCopy; 
+                    }
                 }
                 if (type === 'treatment') {
                     // $scope.updatePriority(dataList, index, moveIndex);
                 }
-            }
+                $scope.status.moving = true;                
+            };
             $scope.generatePDF = function () {
                 jspdf.create(stringUtils.getGeneData(this.gene, true, false));
             };
@@ -3115,7 +3069,7 @@ angular.module('oncokbApp')
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false, // indicate there are changes in mutation section
                 processing: false,
-                preMoving: true
+                moving: true
             };
 
             $scope.$watch('meta.newCancerTypes', function (n) {

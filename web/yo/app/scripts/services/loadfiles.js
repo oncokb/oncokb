@@ -24,6 +24,15 @@ angular.module('oncokbApp')
                 });
                 return metaDefer.promise;
             }
+            function loadMetaRealtime() {
+                var metaRelatimeDefer = $q.defer();
+                $firebaseObject(firebase.database().ref('Meta')).$bindTo($rootScope, "metaRealtime").then(function () {
+                    metaRelatimeDefer.resolve('success');
+                }, function (error) {
+                    metaRelatimeDefer.reject('Failed to bind meta firebase object');
+                });
+                return metaRelatimeDefer.promise;
+            }
             function loadQueues() {
                 var queuesDefer = $q.defer();
                 var ref = firebase.database().ref('Queues');
@@ -78,6 +87,9 @@ angular.module('oncokbApp')
             var apiCalls = [];
             if (types.indexOf('meta') !== -1) {
                 apiCalls.push(loadMeta());
+            }
+            if (types.indexOf('metaRealtime') !== -1) {
+                apiCalls.push(loadMetaRealtime());
             }
             if (types.indexOf('queues') !== -1) {
                 apiCalls.push(loadQueues());
