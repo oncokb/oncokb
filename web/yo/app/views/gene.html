@@ -55,20 +55,17 @@
       </h3>
       <realtime-string t="'p'" key="'summary'" path="getObservePath({type: 'gene'})" uuid="getUUID({type: 'gene', key: 'summary'})"></realtime-string>
     </div>
-    <!-- <div ng-if="displayPrecisely(gene.type_uuid)">
+    <div ng-if="displayCheck(gene.type_uuid)">
            <h3 ng-if="reviewMode">Gene Type:
                <review-panel uuid="gene.type_uuid" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
            </h3>
-           <span><h4 style="margin-bottom:-10px" ng-if="reviewContentDisplay(gene.type_uuid)">New Content:</h4></span>
-           <div ng-if="!reviewMode || notDecisedYet(gene.type_uuid)">
-               <span style="float:left">
-               <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
-               </span>
-               <span style="float:left">
-                   <drive-realtime-string review-obj="gene.type_review" uuid="::gene.type_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
-               </span>
-           </div>
-       </div> -->
+           <span style="float:left">
+              <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></drive-realtime-string>
+           </span>
+           <span style="float:left">
+              <realtime-string key="'ocg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.ocg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></drive-realtime-string>
+           </span>
+      </div>
     <div ng-if="displayPrecisely(gene.background_uuid)">
       <br/>
       <br/>
@@ -108,11 +105,11 @@
             <realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string>
             <div ng-show="!reviewMode && fileEditable" style="margin-top:-50px">
               <span style="float:left;margin-left:71%">
-                <comments-dict key="'name'" path="path"></comments-dict>
                 <span ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
               </span>
               <span style="float:right">
-                <i class="fa fa-arrows" ng-if="displayMoveIcon('initial', mutation.name_uuid)" style="margin-right:10px;color:orange" ng-click="startMoving(path, mutation.name_uuid, $index)"></i>
+                <comments-dict key="'name'" path="path"></comments-dict>
+                <i class="fa fa-arrows" ng-if="displayMoveIcon('initial', mutation.name_uuid)" style="margin-right:10px;margin-left:10px;color:orange" ng-click="startMoving(path, mutation.name_uuid, $index)"></i>
                 <i class="fa fa-arrow-up" ng-if="displayMoveIcon('move', mutation.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                 <i class="fa fa-arrow-down" ng-if="displayMoveIcon('move', mutation.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
                 <i ng-click="remove('mutation', path)" class="fa fa-trash-o"></i>
@@ -255,7 +252,7 @@
                       <div ng-if="displayPrecisely(ti.description_uuid)">
                         <h5>
                           <b>General Summary (Optional): </b>
-                          <!-- review panel -->
+                          <review-panel uuid="ti.description_uuid" review-obj="ti.description_review" evidence-type="ti.name" mutation="mutation" tumor="tumor" therapy-category="ti" get-evidence="getEvidence(type, mutation, tumor, ti)" model-update="modelUpdate(type, mutation, tumor, ti)"></review-panel>
                         </h5>
                         <realtime-string t="'p'" key="'description'" path="path" uuid="getUUID({type: 'ti', key: 'description', path: path})"></realtime-string>
                       </div>

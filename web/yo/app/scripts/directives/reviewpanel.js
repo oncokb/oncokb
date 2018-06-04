@@ -181,9 +181,9 @@ angular.module('oncokbApp')
                 $scope.accept = function() {
                     if ($scope.adjustedEvidenceType === 'GENE_TYPE') {
                         var params = {
-                            hugoSymbol: $scope.data.name,
-                            oncogene: $scope.data.type.ocg.trim().length > 0,
-                            tsg: $scope.data.type.tsg.trim().length > 0
+                            hugoSymbol: $scope.obj.name,
+                            oncogene: !(!$scope.obj.type.ocg),
+                            tsg: !(!$scope.obj.type.tsg)
                         };
                         var historyData = [{
                             lastEditBy: ReviewResource.mostRecent[$scope.uuid].updatedBy,
@@ -192,7 +192,7 @@ angular.module('oncokbApp')
                         }];
                         if ($rootScope.isDesiredGene) {
                             ReviewResource.loading.push($scope.uuid);
-                            DatabaseConnector.updateGeneType($scope.data.name, params, historyData, function(result) {
+                            DatabaseConnector.updateGeneType($scope.obj.name, params, historyData, function(result) {
                                 $scope.modelUpdate($scope.adjustedEvidenceType);
                                 ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
                             }, function(error) {
@@ -235,12 +235,11 @@ angular.module('oncokbApp')
                     }
                 };
                 function setRejectedUUIDs(uuids) {
-                    _.each(uuids, function() {
-                        $rootScope.rejectedUUIDs[$scope.uuid] = true;
+                    _.each(uuids, function(uuid) {
+                        if ($rootScope.geneMeta.review[uuid]) {
+                            $rootScope.rejectedUUIDs[uuid] = true;
+                        }
                     });
-                }
-                function rejectItem() {
-
                 }
                 $scope.reject = function() {
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
@@ -249,6 +248,7 @@ angular.module('oncokbApp')
                         var items = [];
                         var uuids = [];
                         $scope.bothChanged = false;
+                        ReviewResource.rejected.push($scope.uuid);
                         switch ($scope.adjustedEvidenceType) {
                         case 'GENE_SUMMARY':
                             uuids.push($scope.obj.summary_uuid);
@@ -257,7 +257,7 @@ angular.module('oncokbApp')
                             uuids.push($scope.obj.background_uuid);
                             break;
                         case 'GENE_TYPE':
-                            items = ['ocg', 'tsg'];
+                            uuids = [$scope.obj.type.tsg_uuid, $scope.obj.type.ocg_uuid];
                             break;
                         case 'MUTATION_EFFECT':
                             var oncogenicUUID = $scope.mutation.mutation_effect.oncogenic_uuid;
@@ -283,12 +283,9 @@ angular.module('oncokbApp')
                                                 });
                                             }
                                         }
-                                        rejectItem(items);
                                     }, function(error) {
                                         console.log('Failed to fetch evidence based on uuid', error);
                                     });
-                                } else {
-                                    rejectItem(items);
                                 }
                             } else {
                                 if(oncogenicChange) uuids.push(oncogenicUUID);
@@ -296,31 +293,22 @@ angular.module('oncokbApp')
                             }
                             break;
                         case 'TUMOR_TYPE_SUMMARY':
-                            uuid = $scope.tumor.summary_uuid;
-                            items = [{obj: $scope.tumor.summary, reviewObj: $scope.tumor.summary_review, uuid: $scope.tumor.summary_uuid}];
+                            uuids.push($scope.tumor.summary_uuid);
                             break;
                         case 'PROGNOSTIC_IMPLICATION':
-                            uuid = $scope.tumor.prognostic_uuid;
-                            items = [{obj: $scope.tumor.prognostic.description, reviewObj: $scope.tumor.prognostic.description_review, uuid: $scope.tumor.prognostic.description_uuid},
-                                {obj: $scope.tumor.prognostic.level, reviewObj: $scope.tumor.prognostic.level_review, uuid: $scope.tumor.prognostic.level_uuid}];
+                            uuids = [$scope.tumor.prognostic.level_uuid, $scope.tumor.prognostic.description_uuid];
                             break;
                         case 'DIAGNOSTIC_IMPLICATION':
-                            uuid = $scope.tumor.diagnostic_uuid;
-                            items = [{obj: $scope.tumor.diagnostic.description, reviewObj: $scope.tumor.diagnostic.description_review, uuid: $scope.tumor.diagnostic.description_uuid},
-                                {obj: $scope.tumor.diagnostic.level, reviewObj: $scope.tumor.diagnostic.level_review, uuid: $scope.tumor.diagnostic.level_uuid}];
-                            break;
+                            uuids = [$scope.tumor.diagnostic.level_uuid, $scope.tumor.diagnostic.description_uuid];
+                        break;
                         case 'Standard implications for sensitivity to therapy':
                         case 'Standard implications for resistance to therapy':
                         case 'Investigational implications for sensitivity to therapy':
                         case 'Investigational implications for resistance to therapy':
                             if (!$scope.treatment) {
-                                uuid = $scope.therapyCategory.description_uuid;
-                                items = [{obj: $scope.therapyCategory.description, reviewObj: $scope.therapyCategory.description_review, uuid: $scope.therapyCategory.description_uuid}];
+                                uuids = [$scope.therapyCategory.description_uuid];
                             } else {
-                                uuid = $scope.treatment.name_uuid;
-                                items = [{obj: $scope.treatment.name, reviewObj: $scope.treatment.name_review, uuid: $scope.treatment.name_uuid},
-                                    {obj: $scope.treatment.indication, reviewObj: $scope.treatment.indication_review, uuid: $scope.treatment.indication_uuid},
-                                    {obj: $scope.treatment.description, reviewObj: $scope.treatment.description_review, uuid: $scope.treatment.description_uuid}];
+                                uuids = [$scope.treatment.level_uuid, $scope.treatment.propagation_uuid, $scope.treatment.indication_uuid, $scope.treatment.description_uuid];
                             }
                             break;
                         case 'MUTATION_NAME_CHANGE':
@@ -349,13 +337,11 @@ angular.module('oncokbApp')
                                     }
                                 }
                                 specialCases();
-                                rejectItem(items);
                             }, function(error) {
                                 console.log('Failed to fetch evidence based on uuid', error);
                             });
                         } else if(!$scope.bothChanged) {
                             specialCases();
-                            rejectItem(items);
                         }
                     });
                 };
@@ -370,36 +356,6 @@ angular.module('oncokbApp')
                 }
                 function specialCases() {
                     switch ($scope.adjustedEvidenceType) {
-                    // case 'GENE_TYPE':
-                    //     $scope.obj.type.set('TSG', $scope.obj.type_review.get('lastReviewed').TSG);
-                    //     $scope.obj.type.set('OCG', $scope.obj.type_review.get('lastReviewed').OCG);
-                    //     break;
-                    case 'Standard implications for sensitivity to therapy':
-                    case 'Standard implications for resistance to therapy':
-                    case 'Investigational implications for sensitivity to therapy':
-                    case 'Investigational implications for resistance to therapy':
-                        if ($scope.treatment) {
-                            // handle level specifically because level and propagation share the same uuid and review object
-                            var levelChanged =  mainUtils.processedInReview('precise', $scope.treatment.level_uuid);
-                            if(levelChanged) {
-                                var lastReviewedLevel = $scope.treatment.level_review.get('lastReviewed');
-                                var lastReviewedPropagation = $scope.treatment.level_review.get('lastReviewedPropagation');
-                                if(lastReviewedLevel !== null) {
-                                    $scope.treatment.level.setText(lastReviewedLevel);
-                                }
-                                $scope.treatment.name_eStatus.set('propagation', lastReviewedPropagation);
-                                $rootScope.geneMetaData.get($scope.treatment.level_uuid).set('review', false);
-                                ReviewResource.rejected.push($scope.treatment.level_uuid);
-                                $scope.treatment.level_review.delete('lastReviewed');
-                            }
-                        }
-                        break;
-                    case 'CLINICAL_TRIAL':
-                        $scope.tumor.trials.clear();
-                        if ($scope.tumor.trials_review.has('lastReviewed')) {
-                            $scope.tumor.trials.pushAll($scope.tumor.trials_review.get('lastReviewed'));
-                        }
-                        break;
                     case 'TUMOR_NAME_CHANGE':
                         var lastReviewed = $rootScope.model.createList();
                         _.each($scope.tumor.cancerTypes_review.get('lastReviewed'), function(ct) {

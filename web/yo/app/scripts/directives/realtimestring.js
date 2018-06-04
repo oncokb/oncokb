@@ -29,6 +29,9 @@ angular.module('oncokbApp')
                         }
                         scope.cleanUpEditing();
                         scope.initializeFE();
+                        $rootScope.$watch('reviewMode', function(n, o) {
+                            scope.calculateDiff();
+                        });
                     }, function (error) {
                         console.log('error');
                     });
@@ -42,7 +45,7 @@ angular.module('oncokbApp')
                         if (scope.t === 'treatment-select' && scope.key === 'level') {
                             scope.$watch('data.propagation', function(newPro, oldPro) {
                                 if (newPro !== oldPro) {
-                                    scope.setReviewRelatedContent(n, o, true);
+                                    scope.setReviewRelatedContent(newPro, oldPro, true);
                                 }
                             });
                         }
@@ -190,11 +193,14 @@ angular.module('oncokbApp')
                 $scope.inReviewMode = function () {
                     return ReviewResource.reviewMode;
                 };
-                function calculateDiff() {
-                    if (($scope.t === 'p')) {
+                $scope.calculateDiff = function() {
+                    if (ReviewResource.reviewMode && $scope.t === 'p') {
                         var dmp = new diff_match_patch();
                         var newContent = stringUtils.getTextString($scope.data[$scope.key]);
-                        var oldContent = stringUtils.getTextString($scope.lastReviewed);
+                        var oldContent = '';
+                        if ($scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed) {
+                            oldContent = stringUtils.getTextString($scope.data[$scope.key+'_review'].lastReviewed);
+                        }
                         var diff = dmp.diff_main(oldContent, newContent);
                         dmp.diff_cleanupSemantic(diff);
                         $scope.diffHTML = dmp.diff_prettyHtml(diff);
@@ -207,10 +213,6 @@ angular.module('oncokbApp')
                     $scope.preStringO = $scope.data[$scope.key];
                 };
                 $scope.getInputClass = function () {
-                    if (ReviewResource.reviewMode && $scope.data && $scope.data[$scope.key + '_review'] && $scope.data[$scope.key + '_review'].lastReviewed) {
-                        $scope.lastReviewed = $scope.data[$scope.key + '_review'].lastReviewed;
-                        calculateDiff();
-                    }
                     var contentEditable = ReviewResource.reviewMode ? (!mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid)) : $scope.fe;
                     var classResult = '' ;
                     if (['MUTATION_NAME', 'TREATMENT_NAME'].indexOf($scope.t) === -1) {

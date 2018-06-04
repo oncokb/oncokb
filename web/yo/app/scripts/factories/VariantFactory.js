@@ -535,9 +535,13 @@ angular.module('oncokbApp')
             this.background_uuid = getUUID();
             this.isoform_override = '';
             this.dmp_refseq_id = '';
-            this.tsg = '';
-            this.ocg = '';
-            // gene type to be added
+            this.type = {
+                tsg: '',
+                tsg_uuid: getUUID(),
+                ocg: '',
+                ocg_uuid: getUUID()
+            };
+            this.type_uuid = getUUID();
             this.mutations_uuid = getUUID();
         }
         function Mutation(name) {
