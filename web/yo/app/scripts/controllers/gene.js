@@ -417,18 +417,6 @@ angular.module('oncokbApp')
              * This function is used to find the most recent update from a section change. e.g. There are 4 items under NCCN section, and they might get changed at very different time.
              * And we will find the one changed most recently and store them in ReviewResource.mostRecent mapping, so it could be shared across directives and controllers
              * */
-            function setUpdatedSignatureFire(tempArr, uuid) {
-                if (uuid) {
-                    var uuidString = uuid;
-                    var mostRecent = stringUtils.mostRecentItemFire(tempArr);
-                    ReviewResource.mostRecent[uuidString] = {
-                        updatedBy: tempArr[mostRecent].updatedBy,
-                        updateTime: tempArr[mostRecent].updateTime
-                    };
-                    userNames.push(tempArr[mostRecent].updatedBy);
-                }
-            }
-
             function setUpdatedSignature(tempArr, uuid) {
                 if (uuid) {
                     var uuidString = uuid;
@@ -485,16 +473,10 @@ angular.module('oncokbApp')
                     var changeHappened = false;
                     var userName = '';
                     if (item === 'type') {
-                        // var metaObjOCG = $rootScope.metaFire[$scope.geneFire.type.ocg_uuid];
-                        // var metaObjTSG = $rootScope.metaFire[$scope.geneFire.type.tsg_uuid];
-                        // if (metaObjOCG && metaObjOCG.review === true) {
-                        //     userName = $scope.geneFire.type.ocg_review.updatedBy;
-                        //     changeHappened = true;
-                        // } else if (metaObjTSG && metaObjTSG.review === true) {
-                        //     userName = $scope.geneFire.type.tsg_review.updatedBy;
-                        //     changeHappened = true;
-                        // }
-                        // setUpdatedSignatureFire([$scope.geneFire.type.ocg_review, $scope.geneFire.type.tsg_review], $scope.geneFire.type_uuid);
+                        if ($rootScope.geneMeta.review[$scope.gene.type.tsg_uuid] || $rootScope.geneMeta.review[$scope.gene.type.ocg_uuid]) {
+                            setUpdatedSignature([$scope.gene.type.ocg_review, $scope.gene.type.tsg_review], $scope.gene.type_uuid);
+                            changeHappened = true;
+                        }
                     } else {
                         if ($rootScope.geneMeta.review[$scope.gene[item + '_uuid']]) {
                             userName = $scope.gene[item + '_review'].updatedBy;
@@ -1286,7 +1268,7 @@ angular.module('oncokbApp')
                         acceptItem([{ reviewObj: $scope.gene.background_review, uuid: $scope.gene.background_uuid }], $scope.gene.background_uuid);
                         break;
                     case 'GENE_TYPE':
-                        acceptItem([{ reviewObj: $scope.gene.type.tsg_review, uuid: $scope.gene.type.tsg_uuid }, { reviewObj: $scope.gene.type.ocg_review, uuid: $scope.geneFire.type.ocg_uuid }], $scope.geneFire.type_uuid);
+                        acceptItem([{ reviewObj: $scope.gene.type.tsg_review, uuid: $scope.gene.type.tsg_uuid }, { reviewObj: $scope.gene.type.ocg_review, uuid: $scope.gene.type.ocg_uuid }], $scope.gene.type_uuid);
                         break;
                     case 'MUTATION_EFFECT':
                         acceptItem([{ reviewObj: mutation.mutation_effect.oncogenic_review, uuid: mutation.mutation_effect.oncogenic_uuid },
@@ -1516,12 +1498,14 @@ angular.module('oncokbApp')
                                         _.some(tumorRef.TIs, function (tiRef) {
                                             if (tiCopy.name_uuid === tiRef.name_uuid) {
                                                 ti = tiRef;
-                                                _.some(tiRef.treatments, function (treatmentRef) {
-                                                    if (treatmentCopy.name_uuid === treatmentRef.name_uuid) {
-                                                        treatment = treatmentRef;
-                                                        return true;
-                                                    }
-                                                });
+                                                if (treatmentCopy) {
+                                                    _.some(tiRef.treatments, function (treatmentRef) {
+                                                        if (treatmentCopy.name_uuid === treatmentRef.name_uuid) {
+                                                            treatment = treatmentRef;
+                                                            return true;
+                                                        }
+                                                    });
+                                                }                                                
                                                 return true;
                                             }
                                         });
@@ -3343,6 +3327,8 @@ angular.module('oncokbApp')
             $scope.getObservePath = function (data) {
                 if (data.type === 'gene') {
                     return 'Genes/' + $scope.fileTitle;
+                } else if (data.type === 'geneType') {
+                    return 'Genes/' + $scope.fileTitle + '/type';
                 } else if (data.type === 'mutation') {
                     return 'Genes/' + $scope.fileTitle + '/mutations/' + data.index;
                 } else if (data.type === 'mutation_effect') {

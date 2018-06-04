@@ -36,7 +36,7 @@
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
                 </div>
-                <div ng-switch-when="treatment-select" class="treatment-select">
+                <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <div>
                         <select ng-disabled="!fe"
                                 chosen allow-single-deselect="true"
@@ -45,9 +45,9 @@
                             <option value="NA"></option>
                         </select>
                         <div class="propagation" ng-if="content.propagationOpts.length > 0">
+                            <br/>
                             <span>Level of Evidence in other tumor types: </span>
-                            <select style="width:100px"
-                                    ng-disabled="!fe"
+                            <select ng-disabled="!fe"
                                     chosen allow-single-deselect="true"
                                     ng-model="data.propagation"
                                     ng-options="opt.value as opt.name for opt in content.propagationOpts">
@@ -114,7 +114,7 @@
                     <br/>
                     <div ng-if="reviewLayout('name')">
                         <h4>Old Content:</h4>
-                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.lastReviewed}}</p>
                     </div>
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
@@ -126,7 +126,7 @@
                     <br/>
                     <div ng-if="reviewLayout('name')">
                         <h4>Old Content:</h4>
-                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.lastReviewed}}</p>
                     </div>
                 </div>
                 <div ng-switch-when="treatment-select" class="treatment-select">
@@ -160,7 +160,13 @@
                         </div>
                         <div ng-if="reviewLayout('regular')">
                             <h4>Old Content:</h4>
-                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.has('lastReviewed') ? reviewObj.get('lastReviewed') : data[key]}}</p>
+                            <select ng-disabled="true"
+                                    chosen 
+                                    ng-model="data[key+'_review'].lastReviewed"
+                                    ng-options="opt.value as opt.label for opt in o">
+                                <option value="NA"></option>
+                            </select>
+                            <!-- <p ng-class="unEditableBox" contenteditable="false">{{!_.isUndefined(reviewObj.lastReviewed) ? reviewObj.lastReviewed : data[key]}}</p> -->
                             <div class="propagation" ng-if="reviewObj.has('lastReviewedPropagation')">
                                 <span>Level of Evidence in other tumor types: </span>
                                 <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewedPropagation')}}</p>
@@ -181,7 +187,14 @@
                         </div>
                         <div ng-if="reviewLayout('regular')">
                             <h4>Old Content:</h4>
-                            <p ng-class="unEditableBox" contenteditable="false">{{reviewObj.get('lastReviewed')}}</p>
+                            <select ng-disabled="true"
+                                    chosen 
+                                    ng-model="data[key+'_review'].lastReviewed"
+                                    ng-options="opt.value as opt.label for opt in o">
+                                <option value="NA"></option>
+                            </select>
+
+                            <!-- <p ng-class="unEditableBox" contenteditable="false">{{}}</p> -->
                         </div>
                     </div>
                 </div>
@@ -195,14 +208,14 @@
                     </select>
                     <div ng-if="reviewLayout('regular')">
                         <h4>Old Content:</h4>
-                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewed')}}</p>
+                        <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.lastReviewed}}</p>
                     </div>
                 </div>
                 <div ng-switch-when="checkbox">
                     <div>
                         <br/>
-                        <h4 ng-if="key !== 'tsg' && reviewLayout('regular')">New Content:</h4>
-                        <div ng-if="key === 'tsg'" style="height:40px;"></div>
+                        <h4 ng-if="key !== 'ocg' && reviewLayout('regular')">New Content:</h4>
+                        <div ng-if="key === 'ocg' && reviewLayout('regular')" style="height:40px;"></div>
                         <div>
                             <span ng-repeat="checkbox in checkboxes">
                               <input id="::{{uuid+$index}}"
@@ -217,8 +230,8 @@
                     </div>
 
                     <div ng-if="reviewLayout('regular')">
-                        <h4 ng-if="key !== 'tsg'">Old Content:</h4>
-                        <div ng-if="key === 'tsg'" style="height:40px;"></div>
+                        <h4 ng-if="key !== 'ocg'">Old Content:</h4>
+                        <div ng-if="key === 'ocg'" style="height:40px;"></div>
                         <div>
                             <span ng-repeat="checkbox in checkboxes" class="reviewedBG">
                               <input id="::{{uuid+$index+'_review'}}"
