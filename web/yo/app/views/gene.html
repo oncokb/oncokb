@@ -112,12 +112,9 @@
                 <span ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
               </span>
               <span style="float:right">
-                <!-- <i class="fa fa-scissors" aria-hidden="true" style="margin-right:10px" ng-if="displayMove" ng-click="reArrangeSections()"></i> -->
-                <i class="fa fa-arrows" aria-hidden="true" style="margin-right:10px;color:orange" ng-if="status.preMoving" ng-click="startMoving()"></i>
-                <i class="fa fa-angle-up fa-1x" ng-if="!status.preMoving" style="margin-right:10px;color:green" ng-click="endMoving('up', mutation.name_uuid, path)"></i>
-                <i class="fa fa-angle-down fa-1x" ng-if="!status.preMoving" style="margin-right:10px;color:green" ng-click="endMoving('down', mutation.name_uuid, path)"></i>
-                <!-- <i class="fa fa-angle-double-up" ng-if="displayMoveIcon(path, 'top')" ng-click="move('top', mutation.name_uuid, path)"></i>
-                <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(path, 'bottom')" ng-click="move('bottom', mutation.name_uuid, path)"></i> -->
+                <i class="fa fa-arrows" ng-if="displayMoveIcon('initial', mutation.name_uuid)" style="margin-right:10px;color:orange" ng-click="startMoving(path, mutation.name_uuid, $index)"></i>
+                <i class="fa fa-arrow-up" ng-if="displayMoveIcon('move', mutation.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
+                <i class="fa fa-arrow-down" ng-if="displayMoveIcon('move', mutation.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
                 <i ng-click="remove('mutation', path)" class="fa fa-trash-o"></i>
               </span>
             </div>
@@ -172,13 +169,12 @@
                 <i class="fa fa-edit" ng-click="modifyTumorType(tumor, path)" ng-if="!reviewMode"></i>
                 <span ng-show="!reviewMode && fileEditable">
                   <span ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
-                  <span style="margin-right: 20px">
-                    <i class="fa fa-angle-up" ng-if="displayMoveIcon(path, 'up')" ng-click="move('up', tumor.cancerTypes_uuid, path)"></i>
-                    <i class="fa fa-angle-down" ng-if="displayMoveIcon(path, 'down')" ng-click="move('down', tumor.cancerTypes_uuid, path)"></i>
-                    <i class="fa fa-angle-double-up" ng-if="displayMoveIcon(path, 'top')" ng-click="move('top', tumor.cancerTypes_uuid, path)"></i>
-                    <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(path, 'bottom')" ng-click="move('bottom', tumor.cancerTypes_uuid, path)"></i>
-                  </span>
-                  <i ng-click="remove('tumor', path)" class="fa fa-trash-o pull-right"></i>
+                  <span style="float:right">
+                      <i class="fa fa-arrows" ng-if="displayMoveIcon('initial', tumor.cancerTypes_uuid)" style="margin-right:10px;color:orange" ng-click="startMoving(path, tumor.cancerTypes_uuid, $index)"></i>
+                      <i class="fa fa-arrow-up" ng-if="displayMoveIcon('move', tumor.cancerTypes_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
+                      <i class="fa fa-arrow-down" ng-if="displayMoveIcon('move', tumor.cancerTypes_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                      <i ng-click="remove('tumor', path)" class="fa fa-trash-o pull-right"></i>
+                    </span>
                 </span>
                 <span>
                   <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
@@ -276,11 +272,10 @@
                                   <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
                                 </div>
                                 <span style="float:right" ng-show="!reviewMode && fileEditable">
-                                  <i class="fa fa-angle-up" ng-if="displayMoveIcon(path, 'up')" ng-click="move('up', treatment.name_uuid, path)"></i>
-                                  <i class="fa fa-angle-down" ng-if="displayMoveIcon(path, 'down')" ng-click="move('down', treatment.name_uuid, path)"></i>
-                                  <i class="fa fa-angle-double-up" ng-if="displayMoveIcon(path, 'top')" ng-click="move('top', treatment.name_uuid, path)"></i>
-                                  <i class="fa fa-angle-double-down" ng-if="displayMoveIcon(path, 'bottom')" ng-click="move('bottom', treatment.name_uuid, path)"></i>
-                                  <i ng-click="remove('treatment', path)" class="fa fa-trash-o"></i>
+                                    <i class="fa fa-arrows" ng-if="displayMoveIcon('initial', treatment.name_uuid)" style="margin-right:10px;color:orange" ng-click="startMoving(path, treatment.name_uuid, $index)"></i>
+                                    <i class="fa fa-arrow-up" ng-if="displayMoveIcon('move', treatment.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
+                                    <i class="fa fa-arrow-down" ng-if="displayMoveIcon('move', treatment.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                                    <i ng-click="remove('treatment', path)" class="fa fa-trash-o"></i>
                                 </span>
                               </div>
                             </div>

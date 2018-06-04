@@ -207,7 +207,7 @@ angular.module('oncokbApp')
                     $scope.preStringO = $scope.data[$scope.key];
                 };
                 $scope.getInputClass = function () {
-                    if (ReviewResource.reviewMode && $scope.data[$scope.key + '_review'] && $scope.data[$scope.key + '_review'].lastReviewed) {
+                    if (ReviewResource.reviewMode && $scope.data && $scope.data[$scope.key + '_review'] && $scope.data[$scope.key + '_review'].lastReviewed) {
                         $scope.lastReviewed = $scope.data[$scope.key + '_review'].lastReviewed;
                         calculateDiff();
                     }
