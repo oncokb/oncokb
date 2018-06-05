@@ -82,6 +82,12 @@ angular.module('oncokbApp')
                             ReviewResource.rejected.push(scope.uuid);
                         }
                     });
+                    $rootScope.$watch('fileEditable', function(n, o) {
+                        if (n !== o) {
+                            scope.fe = n;
+                            scope.editingMessage = '';
+                        }
+                    });
                     scope.setReviewRelatedContent = function(n, o, isPropogation) {
                         var key = scope.key;
                         var uuid = scope.uuid;

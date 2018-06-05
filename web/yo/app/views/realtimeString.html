@@ -3,7 +3,7 @@
         <div ng-switch-when="false">
             <div ng-switch on="t">
                 <div ng-switch-when="p">
-                    <p ng-if="!fe" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
                     <p contenteditable="{{fe}}"
                         ng-class="getInputClass()"
                         placeholder="{{::ph}}"

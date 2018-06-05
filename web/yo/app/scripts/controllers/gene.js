@@ -1255,7 +1255,7 @@ angular.module('oncokbApp')
                 }
             }
             $scope.modelUpdate = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = getRealtimeRef(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -1478,9 +1478,9 @@ angular.module('oncokbApp')
                         break;
                 }
             }
-            function getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+            function getRealtimeRef(mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
                 if (!mutationCopy) {
-                    // this is the gene level update
+                    // this is the gene level update such as gene summary, background and gene type
                     return true;
                 }
                 var mutation = '';
@@ -1526,7 +1526,7 @@ angular.module('oncokbApp')
             }
 
             $scope.acceptAdded = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = getRealtimeRef(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -1998,9 +1998,9 @@ angular.module('oncokbApp')
                 });
                 var uuids = collectUUIDs(type, obj, [], false, false);
                 if ($scope.status.isDesiredGene) {
-                    var historyData = [{ operation: 'delete', lastEditBy: obj.name_review.updatedBy, location: location }];
+                    var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location }];
                     // make the api call to delete evidences
-                    var loadingUUID = obj.name_uuid;
+                    var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
                     if (loadingUUID) {
                         ReviewResource.loading.push(loadingUUID);
                     }
@@ -2034,11 +2034,13 @@ angular.module('oncokbApp')
                 } else if (data.type === 'treatment') {
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.splice(indices[3], 1);
                 }
-                _.each(data.uuids, function (uuid) {
-                    if ($rootScope.geneMeta.review[uuid]) {
-                        delete $rootScope.geneMeta.review[uuid];
-                    }
-                });
+                if ($rootScope.geneMeta.review) {
+                    _.each(data.uuids, function (uuid) {
+                        if ($rootScope.geneMeta.review[uuid]) {
+                            delete $rootScope.geneMeta.review[uuid];
+                        }
+                    });
+                }                
             }
             function removeUUIDs(uuids) {
                 if (uuids && _.isArray(uuids)) {
@@ -2071,7 +2073,7 @@ angular.module('oncokbApp')
                 });
             };
             function cancelDelteSection(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = getRealtimeRef(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = getRealtimeRef(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -2264,7 +2266,6 @@ angular.module('oncokbApp')
                 startIndex = index;
             };
             $scope.endMoving = function(path, moveType) {
-                console.log(path, moveType);
                 if (startIndex === -1) {
                     return false;
                 }
@@ -2321,7 +2322,6 @@ angular.module('oncokbApp')
             $scope.changeIsOpen = function (target) {
                 target = !target;
             };
-            $rootScope.savingGene = false;
             // emptySectionsUUIDs is still TBD in terms of where it should be used 
             var emptySectionsUUIDs = {};
             $scope.isEmptySection = function (obj, type) {
@@ -3053,7 +3053,8 @@ angular.module('oncokbApp')
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false, // indicate there are changes in mutation section
                 processing: false,
-                moving: true
+                moving: true,
+                fileEditable : false
             };
 
             $scope.$watch('meta.newCancerTypes', function (n) {
@@ -3313,9 +3314,11 @@ angular.module('oncokbApp')
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$scope.fileTitle]).then(function (result) {
-                            $scope.fileEditable = result[$scope.fileTitle];
+                            $scope.status.fileEditable = result[$scope.fileTitle];
+                            $scope.fileEditable = $scope.status.fileEditable;
                             $scope.status.rendering = false;
                             $rootScope.fileEditable = $scope.fileEditable;
+                            watchCurrentReviewer();
                         }, function (error) {
                             $scope.fileEditable = false;
                             $scope.status.rendering = false;
@@ -3324,6 +3327,20 @@ angular.module('oncokbApp')
                         console.log('Error happened', error);
                     });
             }
+            function watchCurrentReviewer() {
+                var ref = firebase.database().ref('Meta/APC/currentReviewer');
+                ref.on('value', function(doc) {
+                    if (!doc.val()) {
+                        $rootScope.fileEditable = $scope.status.fileEditable;
+                        $scope.fileEditable = $scope.status.fileEditable;
+                    } else if (doc.val() !== $rootScope.me.name) {
+                        $rootScope.fileEditable = false;
+                        $scope.fileEditable = false;
+                    }
+                }, function(error) {
+                    console.log('failed to get current reviewer data');
+                });
+            }            
             $scope.getObservePath = function (data) {
                 if (data.type === 'gene') {
                     return 'Genes/' + $scope.fileTitle;
