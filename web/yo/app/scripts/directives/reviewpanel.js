@@ -235,6 +235,9 @@ angular.module('oncokbApp')
                     }
                 };
                 function setRejectedUUIDs(uuids) {
+                    if (!$rootScope.geneMeta.review) {
+                        $rootScope.geneMeta.review = {};
+                    }
                     _.each(uuids, function(uuid) {
                         if ($rootScope.geneMeta.review[uuid]) {
                             $rootScope.rejectedUUIDs[uuid] = true;
