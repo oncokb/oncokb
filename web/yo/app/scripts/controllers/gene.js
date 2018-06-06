@@ -262,7 +262,6 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function (data) {
-                console.log(JSON.stringify($scope.gene));
             };
 
             function parseMutationString(mutationStr) {
@@ -356,7 +355,7 @@ angular.module('oncokbApp')
                     var collaborators = $rootScope.collaborators;
                     var otherCollaborators = [];
                     _.each(collaborators, function (collaborator) {
-                        if (collaborator.name !== $rootScope.me.name) {
+                        if (collaborator && collaborator.name !== $rootScope.me.name) {
                             otherCollaborators.push(collaborator.name);
                         }
                     });
@@ -1470,8 +1469,8 @@ angular.module('oncokbApp')
                         break;
                     case 'treatment':
                         delete treatment.name_review.added;
-                        ReviewResource.accepted = _.union(ReviewResource.accepted, [treatment.name_uuid, treatment.level_uuid, treatment.indication_uuid, treatment.description_uuid]);
-                        clearReview([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review]);
+                        ReviewResource.accepted = _.union(ReviewResource.accepted, [treatment.name_uuid, treatment.level_uuid, treatment.propagation_uuid, treatment.indication_uuid, treatment.description_uuid]);
+                        clearReview([treatment.name_review, treatment.level_review, treatment.propagation_review, treatment.indication_review, treatment.description_review]);
                         if (firstLayer) {
                             $scope.updatePriority(ti.treatments);
                         }
@@ -1809,6 +1808,9 @@ angular.module('oncokbApp')
                 if (newVUSName) {
                     if (isValidVariant(newVUSName)) {
                         var vusItem = new FirebaseModel.VUSItem(newVUSName, $rootScope.me.name, $rootScope.me.email);
+                        if (!$scope.vusFire.vus) {
+                            $scope.vusFire.vus = [];    
+                        }
                         $scope.vusFire.vus.push(vusItem);
                         $scope.vusUpdate();
                     }

@@ -96,26 +96,18 @@ angular.module('oncokbApp')
 
         function drawFuncMutation(mutation) {
             drawFunc('Mutation: ' + mutation.name, '2', 'Bold');
-            if (mutation.summary) {
-                drawFunc('Summary:', '4', 'Bold');
-                drawFunc(mutation.summary);
-            }
             if (mutation.oncogenic) {
                 drawFunc('Oncogenic: ' + mutation.oncogenic, '4', 'Bold');
             }
-            if (mutation.shortSummary) {
-                drawFunc('Summary of oncogenic: ' + mutation.shortSummary, '4', 'Bold');
-            }
-            if (mutation.effect.value || mutation.effect.addOn) {
-                drawFunc('Mutation effect: ' + mutation.effect.value + mutation.effect.addOn, '4', 'Bold');
-            }
-            if (mutation.short) {
-                drawFunc('Short description of mutation effect:', '4', 'Bold');
-                drawFunc(mutation.short);
+            if (mutation.effect) {
+                drawFunc('Mutation effect: ' + mutation.effect, '4', 'Bold');
             }
             if (mutation.description) {
                 drawFunc('Description of mutation effect:', '4', 'Bold');
                 drawFunc(mutation.description);
+            }
+            if (mutation.short) {
+                drawFunc('Summary of oncogenic: ' + mutation.short, '4', 'Bold');
             }
         }
 
@@ -141,7 +133,7 @@ angular.module('oncokbApp')
         }
 
         function drawFuncTumorType(tumorType) {
-            drawFunc('Tumor Type: ' + getCancerTypesName(tumorType.cancerTypes), '2', 'Bold');
+            // drawFunc('Tumor Type: ' + getCancerTypesName(tumorType.cancerTypes), '2', 'Bold');
             if (tumorType.summary) {
                 drawFunc('Summary:', '4', 'Bold');
                 drawFunc(tumorType.summary);
@@ -153,7 +145,7 @@ angular.module('oncokbApp')
                 }
             }
 
-            tumorType.TI.forEach(function(e) {
+            tumorType.TIs.forEach(function(e) {
                 var title = '';
 
                 if (e.type) {
