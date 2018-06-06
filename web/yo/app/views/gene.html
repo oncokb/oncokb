@@ -104,10 +104,8 @@
           <div style="margin-top:-25px;margin-left:100px">
             <realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string>
             <div ng-show="!reviewMode" style="margin-top:-50px">
-              <span style="float:left;margin-left:71%">
-                <span ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
-              </span>
               <span style="float:right">
+                  <span style="margin-right:10px" ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
                   <span ng-show="!reviewMode && userRole === 8 && fileEditable">
                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-if="displayMoveIcon('initial', mutation.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving(path, mutation.name_uuid, $index)"></i>
                       <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation" ng-if="displayMoveIcon('up', mutation.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
@@ -169,14 +167,14 @@
                   Tumor type: {{ getCancerTypesName(tumor) }}
                 </span>
                 <i class="fa fa-edit" ng-click="modifyTumorType(tumor, path)" ng-if="!reviewMode"></i>
-                <span ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
                 <span style="float:right">
-                    <span style="margin-right:10px" ng-if="!reviewMode"><comments-dict key="'cancerTypes'" path="path"></comments-dict></span>
+                    <span style="margin-right:10px"  ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
                     <span ng-if="!reviewMode && userRole === 8 && fileEditable">
                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-if="displayMoveIcon('initial', tumor.cancerTypes_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving(path, tumor.cancerTypes_uuid, $index)"></i>
                       <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation"  ng-if="displayMoveIcon('up', tumor.cancerTypes_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                       <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('down', tumor.cancerTypes_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
                     </span>
+                    <span style="margin-right:10px" ng-if="!reviewMode"><comments-dict key="'cancerTypes'" path="path"></comments-dict></span>
                     <span ng-if="!reviewMode && fileEditable">
                         <i ng-click="remove('tumor', path)" class="fa fa-trash-o"></i>
                     </span>
@@ -276,12 +274,12 @@
                                   <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
                                 </div>
                                 <span style="float:right">
-                                  <span style="margin-right:10px" ng-if="!reviewMode"><comments-dict key="'name'" path="path"></comments-dict></span>
                                   <span ng-if="!reviewMode && userRole === 8 && fileEditable">
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}"  ng-if="displayMoveIcon('initial', treatment.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving(path, treatment.name_uuid, $index)"></i>
                                       <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put below this treatment"  ng-if="displayMoveIcon('up', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                                       <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this treatment"  ng-if="displayMoveIcon('down', treatment.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>  
                                   </span>
+                                  <span style="margin-right:10px" ng-if="!reviewMode"><comments-dict key="'name'" path="path"></comments-dict></span>
                                   <span ng-if="!reviewMode && fileEditable"><i ng-click="remove('treatment', path)" class="fa fa-trash-o"></i></span>
                                 </span>
                               </div>
@@ -305,14 +303,14 @@
                                 </div>
                                 <div ng-switch-when="SR">
                                   <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.SR" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
-                                  <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i>
+                                  <div ng-if="!reviewMode" style="float:right;margin-right:180px;margin-top:-25px"><i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i></div>
                                 </div>
                                 <div ng-switch-when="IS">
                                   <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.IS" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
                                 </div>
                                 <div ng-switch-when="IR">
                                   <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.IR" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
-                                  <i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i>
+                                  <div ng-if="!reviewMode" style="float:right;margin-right:180px;margin-top:-25px"><i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i></div>
                                 </div>
                               </div>
                             </p>
