@@ -96,24 +96,13 @@ angular.module('oncokbApp')
             }
 
             function searchVariant(params, success, fail) {
-                if (testing) {
-                    SearchVariant.annotationFromFile(params)
-                        .success(function(data) {
-                            success(data);
-                        })
-                        .error(function() {
-                            fail();
-                        });
-                } else {
-                    SearchVariant
-                        .getAnnotation(params)
-                        .success(function(data) {
-                            success(data);
-                        })
-                        .error(function() {
-                            fail();
-                        });
-                }
+                SearchVariant
+                    .getAnnotation(params)
+                    .then(function(data) {
+                        success(data);
+                    }, function() {
+                        fail();
+                    });
             }
 
             function updateGene(data, success, fail) {
@@ -607,10 +596,10 @@ angular.module('oncokbApp')
                     data[timestamp] = {};
 
                     getAllGene(function(d) {
-                        data[timestamp].genes = d;
+                        data[timestamp].genes = d.data;
                     }, timestamp);
                     getAllTumorType(function(d) {
-                        data[timestamp].tumorTypes = d;
+                        data[timestamp].tumorTypes = d.data;
                     }, timestamp);
 
                     timeout(callback, timestamp);

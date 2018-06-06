@@ -382,7 +382,7 @@ angular.module('oncokbApp')
                 changeUrl(params);
 
                 DatabaseConnector.searchAnnotation(params, function(data) {
-                    searchAnnotationCallback('success', data);
+                    searchAnnotationCallback('success', data.data);
                 }, function() {
                     searchAnnotationCallback('fail');
                 });

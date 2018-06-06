@@ -75,7 +75,7 @@ angular.module('oncokbApp')
                     });
                     $rootScope.$watch('rejectedUUIDs["'+scope.uuid+'"]', function(n, o) {
                         if (n !== o && n === true) {
-                            scope.data[scope.key] = scope.data[scope.key+'_review'].lastReviewed;
+                            scope.data[scope.key] = _.clone(scope.data[scope.key+'_review'].lastReviewed);
                             delete scope.data[scope.key+'_review'].lastReviewed;
                             delete $rootScope.geneMeta.review[scope.uuid];
                             delete $rootScope.rejectedUUIDs[scope.uuid];
