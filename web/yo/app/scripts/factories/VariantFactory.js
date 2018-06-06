@@ -582,8 +582,9 @@ angular.module('oncokbApp')
             this.diagnostic_uuid = getUUID();
             this.TIs = createTIs();
         };
-        function Cancertype(name, code) {
-            this.name = name;
+        function Cancertype(maintype, subtype, code) {
+            this.maintype = maintype;
+            this.subtype = subtype;
             this.code = code;
         }
         function TI() {

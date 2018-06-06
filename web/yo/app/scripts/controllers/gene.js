@@ -2245,25 +2245,45 @@ angular.module('oncokbApp')
             };
             var sectionToMoveUUID = '';
             var startIndex = -1;
-            $scope.displayMoveIcon = function(type, uuid) {
+            $scope.displayMoveIcon = function(type, uuid, index) {
                 if (type === 'initial') {
                     if (uuid === sectionToMoveUUID) {
                         return true;
                     } else {
-                        return $scope.status.moving;
+                        return $scope.status.preMoving;
                     }
-                } else if (type === 'move') {
-                    if (uuid === sectionToMoveUUID) {
+                } else {
+                    if ($scope.status.preMoving === true) {
                         return false;
                     } else {
-                        return !$scope.status.moving;
+                        if (uuid === sectionToMoveUUID) {
+                            return false;
+                        }
+                        if (type === 'up') {
+                            return index === 0;
+                        } else if (type === 'down') {
+                            return true;
+                        }
                     }
                 }
             };
+            $scope.movingInfo = {
+                style: {
+                    color: 'gray'
+                },
+                message: 'Click to move'
+            };
             $scope.startMoving = function(path, uuid, index) {
-                $scope.status.moving = !$scope.status.moving;
+                $scope.status.preMoving = !$scope.status.preMoving;
                 sectionToMoveUUID = uuid;
                 startIndex = index;
+                if ($scope.status.preMoving) {
+                    $scope.movingInfo.style.color = 'gray';
+                    $scope.movingInfo.message = 'Click to move';                        
+                } else {
+                    $scope.movingInfo.style.color = 'orange';
+                    $scope.movingInfo.message = 'Click again to cancel';    
+                }
             };
             $scope.endMoving = function(path, moveType) {
                 if (startIndex === -1) {
@@ -2312,7 +2332,9 @@ angular.module('oncokbApp')
                 if (type === 'treatment') {
                     // $scope.updatePriority(dataList, index, moveIndex);
                 }
-                $scope.status.moving = true;                
+                $scope.status.preMoving = true;   
+                $scope.movingInfo.style.color = 'gray';  
+                $scope.movingInfo.message = 'Click to move';
             };
             $scope.generatePDF = function () {
                 jspdf.create(stringUtils.getGeneData(this.gene, true, false));
@@ -2325,6 +2347,9 @@ angular.module('oncokbApp')
             // emptySectionsUUIDs is still TBD in terms of where it should be used 
             var emptySectionsUUIDs = {};
             $scope.isEmptySection = function (obj, type) {
+                if ($scope.reviewMode) {
+                    return false;
+                }
                 if (type === 'mutation_effect') {
                     if (obj.oncogenic || obj.effect || obj.description || obj.short) {
                         return false;
@@ -3053,7 +3078,7 @@ angular.module('oncokbApp')
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false, // indicate there are changes in mutation section
                 processing: false,
-                moving: true,
+                preMoving: true,
                 fileEditable : false
             };
 

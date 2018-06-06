@@ -43,6 +43,36 @@ angular.module('oncokbApp')
             var numOfLocks = {};
             var data = {};
             var testing = config.testing || false;
+
+            function getAllGene(callback, timestamp) {
+                Gene.getFromServer()
+                    .then(function(data) {
+                        if (timestamp) {
+                            numOfLocks[timestamp]--;
+                        }
+                        callback(data);
+                    }, function() {
+                        if (timestamp) {
+                            numOfLocks[timestamp]--;
+                        }
+                        callback();
+                    });
+            }
+            function getAllTumorType(callback, timestamp) {
+                TumorType.getFromServer()
+                    .then(function(data) {
+                        if (timestamp) {
+                            numOfLocks[timestamp]--;
+                        }
+                        callback(data);
+                    }, function() {
+                        if (timestamp) {
+                            numOfLocks[timestamp]--;
+                        }
+                        callback();
+                    });
+            }
+
             function getReviewedData(evidenceType) {
                 var deferred = $q.defer();
                 if (evidenceType === 'geneType') {
