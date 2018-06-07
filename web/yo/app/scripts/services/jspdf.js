@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('jspdf', function(PDF) {
+    .service('jspdf', function(PDF, mainUtils) {
         // AngularJS will instantiate a singleton by calling "new" on this function
 
         var FONT = ['Times', 'Roman'];
@@ -23,11 +23,6 @@ angular.module('oncokbApp')
         var MARGIN = 0.5;
         var Y = MARGIN;
         var DOC = '';
-        var tumorTypeAttrs = {
-            shortProgImp: 'Short Prognostic implications',
-            progImp: 'Prognostic implications'
-        };
-
         function create(data) {
             Y = MARGIN;
             DOC = new PDF('p', 'in', 'letter'); // inches on a 8.5 x 11 inch sheet.
@@ -96,18 +91,18 @@ angular.module('oncokbApp')
 
         function drawFuncMutation(mutation) {
             drawFunc('Mutation: ' + mutation.name, '2', 'Bold');
-            if (mutation.oncogenic) {
-                drawFunc('Oncogenic: ' + mutation.oncogenic, '4', 'Bold');
+            if (mutation.mutation_effect.oncogenic) {
+                drawFunc('Oncogenic: ' + mutation.mutation_effect.oncogenic, '4', 'Bold');
             }
-            if (mutation.effect) {
-                drawFunc('Mutation effect: ' + mutation.effect, '4', 'Bold');
+            if (mutation.mutation_effect.effect) {
+                drawFunc('Mutation effect: ' + mutation.mutation_effect.effect, '4', 'Bold');
             }
-            if (mutation.description) {
+            if (mutation.mutation_effect.description) {
                 drawFunc('Description of mutation effect:', '4', 'Bold');
-                drawFunc(mutation.description);
+                drawFunc(mutation.mutation_effect.description);
             }
-            if (mutation.short) {
-                drawFunc('Summary of oncogenic: ' + mutation.short, '4', 'Bold');
+            if (mutation.mutation_effect.short) {
+                drawFunc('Additional information: ' + mutation.mutation_effect.short, '4', 'Bold');
             }
         }
 
@@ -118,34 +113,33 @@ angular.module('oncokbApp')
                 });
             }
         }
-
-        function getCancerTypesName(cancerTypes) {
-            var list = [];
-            cancerTypes.forEach(function(cancerType) {
-                if (cancerType.subtype.length > 0) {
-                    var str = cancerType.subtype;
-                    list.push(str);
-                } else if (cancerType.cancerType.length > 0) {
-                    list.push(cancerType.cancerType);
+        function drawFuncImplications(tumor) {            
+            var keys = ['diagnostic', 'prognostic'];
+            _.each(keys, function(key) {
+                drawFunc(key[0].toUpperCase() + key.slice(1) + ' implications:', '4', 'Bold');
+                if (tumor[key].level) {
+                    drawFunc('Level:', '4', 'Bold');
+                    drawFunc(tumor[key].level);
+                }
+                if (tumor[key].description) {
+                    drawFunc('description:', '4', 'Bold');
+                    drawFunc(tumor[key].description);
+                }
+                if (tumor[key].short) {
+                    drawFunc('Additional information:', '4', 'Bold');
+                    drawFunc(tumor[key].short);
                 }
             });
-            return list.join(', ');
+            
         }
-
-        function drawFuncTumorType(tumorType) {
-            // drawFunc('Tumor Type: ' + getCancerTypesName(tumorType.cancerTypes), '2', 'Bold');
-            if (tumorType.summary) {
+        function drawFuncTumorType(tumor) {
+            drawFunc('Tumor Type: ' + mainUtils.getCancerTypesName(tumor.cancerTypes), '3', 'Bold');
+            if (tumor.summary) {
                 drawFunc('Summary:', '4', 'Bold');
-                drawFunc(tumorType.summary);
+                drawFunc(tumor.summary);
             }
-            for (var key in tumorTypeAttrs) {
-                if (tumorType[key]) {
-                    drawFunc(tumorTypeAttrs[key] + ': ', '3', 'Bold');
-                    drawFunc(tumorType[key]);
-                }
-            }
-
-            tumorType.TIs.forEach(function(e) {
+            drawFuncImplications(tumor);
+            tumor.TIs.forEach(function(e) {
                 var title = '';
 
                 if (e.type) {
@@ -154,13 +148,13 @@ angular.module('oncokbApp')
                     title = 'Resistant to';
                 }
 
-                if (e.description || e.treatments.length) {
+                if (e.description || e.treatments) {
                     drawFunc(e.name, '3', 'Bold');
                     if (e.description) {
                         drawFunc(e.description);
                     }
 
-                    if (e.treatments.length) {
+                    if (e.treatments) {
                         e.treatments.forEach(function(e1) {
                             therapyFunc(e1, title);
                         });
