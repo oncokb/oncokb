@@ -263,7 +263,6 @@ angular.module('oncokbApp')
 
             $scope.getData = function (data) {
             };
-
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
                 var parts = _.map(mutationStr.split(','), function (item) {
@@ -628,7 +627,7 @@ angular.module('oncokbApp')
                         }
                         tumorChanged = false;
                     });
-                    if (isChangedSection[mutation.name_uuid]) {
+                    if (isChangedSection([mutation.name_uuid])) {
                         mutationChanged = true;
                         userNames.push(mutation.name_review.updatedBy);
                         ReviewResource.nameChanged.push(mutation.name_uuid);
