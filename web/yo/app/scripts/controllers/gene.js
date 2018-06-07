@@ -998,11 +998,7 @@ angular.module('oncokbApp')
                             extraData.evidenceType = 'MUTATION_EFFECT';
                             historyData.location = mutation.name + ', Mutation Effect';
                             if (!reviewObj) {
-                                if (MEObj.effect_review.updatedBy) {
-                                    reviewObj = MEObj.effect_review;
-                                } else if (MEObj.description_review.updatedBy) {
-                                    reviewObj = MEObj.description_review;
-                                }
+                                reviewObj = tempReviewObjArr[tempRecentIndex];
                             }
                         }
                         break;
@@ -1722,15 +1718,13 @@ angular.module('oncokbApp')
                         tempArr.push(ct.subtype.name);
                     }
                 });
-                if (isValidTumor(index, tempArr.sort().join())) {
+                // if (isValidTumor(index, tempArr.sort().join())) {
+                if (true) {
                     var cancerTypes = [];
                     _.each($scope.meta.newCancerTypes, function (ct) {
                         if (ct.subtype.name) {
-                            var tempCode = '';
-                            if (ct.subtype.code) {
-                                tempCode = ct.subtype.code;
-                            }
-                            var cancerType = new FirebaseModel.Cancertype(ct.subtype.name, tempCode);
+                            var tempCode = ct.subtype.code ? ct.subtype.code : '';
+                            var cancerType = new FirebaseModel.Cancertype(ct.mainType.name, ct.subtype.name, tempCode);
                             cancerTypes.push(cancerType);
                         }
                     });
@@ -1834,11 +1828,7 @@ angular.module('oncokbApp')
             };
 
             $scope.getCancerTypesName = function (tumor) {
-                var result = [];
-                tumor.cancerTypes.forEach(function (cancerType) {
-                    result.push(cancerType.name);
-                });
-                return result.sort().join(', ');
+                return mainUtils.getCancerTypesName(tumor.cancerTypes);
             };
 
             $scope.getLastReviewedCancerTypesName = mainUtils.getLastReviewedCancerTypesName;
@@ -2021,7 +2011,7 @@ angular.module('oncokbApp')
                         location = historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name;
                         break;
                 }
-                var data = getDataByLayers(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = getDataByLayers(mutation, tumor, ti, treatment);
                 var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                 var uuids = collectUUIDs(type, obj, [], false, false);
                 if ($scope.status.isDesiredGene) {
@@ -2367,10 +2357,6 @@ angular.module('oncokbApp')
                 jspdf.create(stringUtils.getGeneData(this.gene, true, false));
             };
 
-            /* eslint no-unused-vars: 0*/
-            $scope.changeIsOpen = function (target) {
-                target = !target;
-            };
             // emptySectionsUUIDs is still TBD in terms of where it should be used 
             var emptySectionsUUIDs = {};
             $scope.isEmptySection = function (obj, type) {
@@ -2405,10 +2391,6 @@ angular.module('oncokbApp')
                     $scope.isEmptySection(obj, type);
                 }, 500);
             }
-
-            $scope.curatedIconClick = function (event, status) {
-                status.set('curated', !status.get('curated'));
-            };
 
             $scope.mutationNameEditable = function (mutationName) {
                 return $scope.fileEditable && !($scope.userRole !== 8 &&
@@ -2521,64 +2503,6 @@ angular.module('oncokbApp')
                 }
                 return count;
             }
-
-            function migrateGeneStatusPosition(object, indexRemoved) {
-                if (angular.isNumber(indexRemoved)) {
-                    var indexes = [];
-                    for (var key in object) {
-                        if (!isNaN(key) && Number(key) > indexRemoved) {
-                            indexes.push(Number(key));
-                        }
-                    }
-
-                    indexes.sort(function (a, b) {
-                        return a - b;
-                    }).forEach(function (e) {
-                        object[e - 1] = object[e];
-                    });
-
-                    delete object[indexes.pop()];
-                    return object;
-                }
-                return false;
-            }
-
-            function checkNumWatchers() {
-                var root = angular.element(document.getElementsByTagName('body'));
-
-                var watchers = [];
-
-                var f = function (element) {
-                    angular.forEach(['$scope', '$isolateScope'], function (scopeProperty) {
-                        if (element.data() && element.data().hasOwnProperty(scopeProperty)) {
-                            angular.forEach(element.data()[scopeProperty].$$watchers, function (watcher) {
-                                watchers.push(watcher);
-                            });
-                        }
-                    });
-
-                    angular.forEach(element.children(), function (childElement) {
-                        f(angular.element(childElement));
-                    });
-                };
-
-                f(root);
-
-                // Remove duplicate watchers
-                var watchersWithoutDuplicates = [];
-                angular.forEach(watchers, function (item) {
-                    if (watchersWithoutDuplicates.indexOf(item) < 0) {
-                        watchersWithoutDuplicates.push(item);
-                    }
-                });
-
-                console.log(watchersWithoutDuplicates);
-
-                return watchersWithoutDuplicates.length;
-            }
-
-
-
             function getSuggestedMutations() {
                 var defaultPlaceHolder = 'No suggestion found. Please curate according to literature.';
                 DatabaseConnector.getSuggestedVariants()
@@ -2596,300 +2520,6 @@ angular.module('oncokbApp')
                             $scope.addMutationPlaceholder = defaultPlaceHolder;
                         }
                     });
-            }
-            function loadMetaFile(callback) {
-                if (!$rootScope.metaData) {
-                    loadFiles.load(['all']).then(function (result) {
-                        assignMeta(callback);
-                    }, function (error) {
-                        $scope.fileEditable = false;
-                        callback();
-                    });
-                } else {
-                    assignMeta(callback);
-                }
-
-            }
-            function assignMeta(callback) {
-                if (!$rootScope.metaData.get($scope.fileTitle)) {
-                    var tempMap = $rootScope.metaModel.createMap();
-                    $rootScope.metaData.set($scope.fileTitle, tempMap);
-                }
-                $rootScope.geneMetaData = $rootScope.metaData.get($scope.fileTitle);
-                if (!$rootScope.geneMetaData.has('currentReviewer') || $rootScope.geneMetaData.get('currentReviewer').type !== 'EditableString') {
-                    $rootScope.geneMetaData.set('currentReviewer', $rootScope.metaModel.createString(''));
-                }
-                if (!$rootScope.timeStamp.has($scope.fileTitle)) {
-                    $rootScope.timeStamp.set($scope.fileTitle, $rootScope.metaModel.createMap());
-                }
-                $rootScope.geneTimeStamp = $rootScope.timeStamp.get($scope.fileTitle);
-                var tempReviewer = $rootScope.geneMetaData.get('currentReviewer');
-                tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_INSERTED, reviewerChange);
-                tempReviewer.addEventListener(gapi.drive.realtime.EventType.TEXT_DELETED, reviewerChange);
-                callback();
-            }
-
-            function bindDocEvents() {
-                $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_JOINED, displayCollaboratorEvent);
-                $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.COLLABORATOR_LEFT, displayCollaboratorEvent);
-                $scope.realtimeDocument.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveStateChangedEvent);
-                $scope.model.addEventListener(gapi.drive.realtime.EventType.UNDO_REDO_STATE_CHANGED, onUndoStateChanged);
-                $scope.gene.addEventListener(gapi.drive.realtime.EventType.VALUE_CHANGED, valueChangedEvent);
-                $rootScope.metaRealtime.addEventListener(gapi.drive.realtime.EventType.DOCUMENT_SAVE_STATE_CHANGED, saveMetaChangedEvent);
-            }
-            function reviewerChange() {
-                // set gene document to readable only when it s in review
-                if (underOthersReview()) {
-                    $scope.$emit('interruptedDueToOtherReview');
-                } else {
-                    // If document is editable again, need to notify the user.
-                    if (!$scope.fileEditable && $scope.document.editable) {
-                        dialogs.notify('Notification',
-                            'You can now continue editing the document. Thanks.');
-                    }
-                    $scope.fileEditable = $scope.document.editable;
-                }
-            }
-            function saveStateChangedEvent(evt) {
-                if ($scope.$$phase) {
-                    updateDocStatus(evt);
-                } else {
-                    $scope.$apply(function () {
-                        updateDocStatus(evt);
-                    });
-                }
-            }
-
-            function updateDocStatus(evt) {
-                if (evt.isSaving) {
-                    documentSaving();
-                } else if (!evt.isSaving && !evt.currentTarget.isClosed) {
-                    documentSaved();
-                } else {
-                    documentClosed();
-                }
-            }
-
-            function saveMetaChangedEvent(evt) {
-                if ($rootScope.$$phase) {
-                    updateMetaDocStatus(evt);
-                } else {
-                    $rootScope.$apply(function () {
-                        updateMetaDocStatus(evt);
-                    });
-                }
-            }
-
-            function updateMetaDocStatus(evt) {
-                if (evt.isSaving) {
-                    documentSaving('meta');
-                } else if (!evt.isSaving && !evt.currentTarget.isClosed) {
-                    documentSaved('meta');
-                } else {
-                    documentClosed('meta');
-                }
-            }
-
-            function afterCreateGeneModel() {
-                var file = Documents.get({ title: $scope.fileTitle });
-                file = file[0];
-                // Only allow admins to edit Other Biomarkers Gene Sumarry, Background and Gene Type
-                if ($scope.gene.name.trim().toLowerCase() === 'other biomarkers' && $scope.userRole !== 8) {
-                    $scope.geneEditable = false;
-                }
-                $scope.document = file;
-                $scope.fileEditable = file.editable;
-                $scope.status.rendering = false;
-                displayAllCollaborators($scope.realtimeDocument, bindDocEvents);
-
-                if (underReview()) {
-                    // This will only happen if the currentReviewer is not empty
-                    $scope.fileEditable = false;
-                }
-                // Add timeout until the collaborator join event is triggered.
-                $timeout(function () {
-                    if (underOthersReview()) {
-                        $scope.$emit('interruptedDueToOtherReview');
-                    } else if (underReview()) {
-                        // if no other is reviewing the current document,
-                        // need to reset the document to initial state.
-                        $scope.exitReview();
-                    }
-                }, 2000);
-            }
-
-            function valueChangedEvent(evt) {
-                console.log('valueChanged', evt);
-                if ($scope.gene) {
-                    var hasCurator = false;
-                    if ($scope.gene.curators && angular.isArray($scope.gene.curators) && $scope.gene.curators.length > 0) {
-                        var _array = $scope.gene.curators;
-                        for (var i = 0; i < _array.length; i++) {
-                            if (_array[i].email === User.email) {
-                                hasCurator = true;
-                                break;
-                            }
-                        }
-
-                        if (!hasCurator) {
-                            $scope.realtimeDocument.getModel().beginCompoundOperation();
-                            var __curator = $scope.realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
-                            $scope.gene.curators.push(__curator);
-                            $scope.realtimeDocument.getModel().endCompoundOperation();
-                        }
-                    } else {
-                        $scope.realtimeDocument.getModel().beginCompoundOperation();
-                        var _curator = $scope.realtimeDocument.getModel().create(OncoKB.Curator, User.name, User.email);
-                        $scope.gene.curators.push(_curator);
-                        $scope.realtimeDocument.getModel().endCompoundOperation();
-                    }
-                }
-            }
-
-            function displayCollaboratorEvent(evt) {
-                switch (evt.type) {
-                    case 'collaborator_left':
-                        removeCollaborator(evt.collaborator);
-                        break;
-                    case 'collaborator_joined':
-                        addCollaborator(evt.collaborator);
-                        break;
-                    default:
-                        console.info('Unknown event:', evt);
-                        break;
-                }
-                $scope.$apply($scope.collaborators);
-            }
-
-            function underOthersReview() {
-                var currentReviewer = $rootScope.geneMetaData.get('currentReviewer');
-                if (currentReviewer) {
-                    var _name = currentReviewer;
-                    if (_name &&
-                        _name.toUpperCase() !== User.name.toUpperCase() &&
-                        hasCollaborator(currentReviewer)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            function hasCollaborator(name) {
-                var collaborators = $scope.realtimeDocument.getCollaborators();
-                if (_.isArray(collaborators)) {
-                    for (var i = 0; i < collaborators.length; i++) {
-                        if (collaborators[i].displayName.toUpperCase() === name.toUpperCase()) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-
-            function underReview() {
-                var currentReviewer = $rootScope.geneMetaData.get('currentReviewer');
-                if (currentReviewer && currentReviewer) {
-                    return true;
-                }
-                return false;
-            }
-
-            function addCollaborator(user) {
-                if (!$scope.collaborators.hasOwnProperty(user.userId)) {
-                    $scope.collaborators[user.sessionId] = {};
-                }
-                $scope.collaborators[user.sessionId] = user;
-            }
-
-            function removeCollaborator(user) {
-                if ($scope.collaborators.hasOwnProperty(user.sessionId)) {
-                    delete $scope.collaborators[user.sessionId];
-                } else {
-                    console.log('Unknown collaborator:', user);
-                }
-            }
-
-            function displayAllCollaborators(document, callback) {
-                var collaborators = document.getCollaborators();
-                var collaboratorCount = collaborators.length;
-                var _user = {};
-                for (var i = 0; i < collaboratorCount; i++) {
-                    var user = collaborators[i];
-                    if (!$scope.collaborators.hasOwnProperty(user.userId)) {
-                        $scope.collaborators[user.sessionId] = {};
-                    }
-                    $scope.collaborators[user.sessionId] = user;
-                    if (user.isMe) {
-                        _user = user;
-                    }
-                }
-
-                if (User.email === 'N/A') {
-                    storage.getUserInfo(_user.userId).then(function (userInfo) {
-                        User.name = userInfo.displayName;
-                        if (angular.isArray(userInfo.emails)) {
-                            if (userInfo.emails.length > 0) {
-                                User.email = userInfo.emails[0].value;
-                            } else {
-                                User.email = 'N/A';
-                            }
-                        } else {
-                            User.email = userInfo.emails;
-                        }
-                        callback();
-                    });
-                } else {
-                    callback();
-                }
-            }
-
-            function onUndoStateChanged(evt) {
-                if (evt.canUndo) {
-                    $scope.canUndo = true;
-                } else {
-                    $scope.canUndo = false;
-                }
-                if (evt.canRedo) {
-                    $scope.canRedo = true;
-                } else {
-                    $scope.canRedo = false;
-                }
-            }
-
-            function documentSaving(type) {
-                $scope.docStatus.saving = true;
-                $scope.docStatus.saved = false;
-                $scope.docStatus.closed = false;
-
-                if (type === 'meta') {
-                    $scope.metaDocStatus.saved = false;
-                }
-
-                if ($rootScope.reviewMode) {
-                    setReviewModeInterval();
-                }
-            }
-
-            function documentSaved(type) {
-                $scope.docStatus.saving = false;
-                $scope.docStatus.saved = true;
-                $scope.docStatus.closed = false;
-                $scope.docStatus.updateGene = false;
-
-                if (type === 'meta') {
-                    $scope.metaDocStatus.saved = true;
-                }
-            }
-
-            function documentClosed(type) {
-                $scope.docStatus.closed = true;
-                $scope.docStatus.saving = false;
-                $scope.docStatus.saved = false;
-                $scope.fileEditable = false;
-
-                if (type === 'meta') {
-                    $scope.metaDocStatus.saved = false;
-                }
             }
             function getTumorSubtypes() {
                 var tempRes = [];
@@ -2971,13 +2601,6 @@ angular.module('oncokbApp')
                     label: 'Dx3 - Compelling peer reviewed literature'
                 }];
                 return levels;
-            }
-
-            function GeneStatusSingleton(isOpen) {
-                if (!_.isBoolean(isOpen)) {
-                    isOpen = false;
-                }
-                this.isOpen = isOpen;
             }
 
             function containVariantInVUS(variantName) {
@@ -3383,11 +3006,19 @@ angular.module('oncokbApp')
                 var ref = firebase.database().ref('Meta/APC/currentReviewer');
                 ref.on('value', function(doc) {
                     if (!doc.val()) {
-                        $rootScope.fileEditable = $scope.status.fileEditable;
-                        $scope.fileEditable = $scope.status.fileEditable;
+                        if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
+                            dialogs.notify('Notification',
+                            'You can now continue editing the document. Thanks!');
+                            $scope.fileEditable = $scope.status.fileEditable;
+                            $rootScope.fileEditable = $scope.status.fileEditable;
+                        }                        
                     } else if (doc.val() !== $rootScope.me.name) {
+                        if ($scope.fileEditable) {
+                            dialogs.notify('Warning',
+                                doc.val() + ' started to review the document, you can not change anything at this moment. We will notify you once the review is finished. Sorry for any inconvinience.');
+                                $scope.fileEditable = false;
+                        }
                         $rootScope.fileEditable = false;
-                        $scope.fileEditable = false;
                     }
                 }, function(error) {
                     console.log('failed to get current reviewer data');
@@ -3439,21 +3070,34 @@ angular.module('oncokbApp')
                 return obj[data.key + '_uuid'];
             }
             populateBindings();
-
-            $scope.$on('interruptedDueToOtherReview', function () {
-                // if previously the document is editable, need to notify
-                // the current user.
-                if ($scope.fileEditable) {
-                    dialogs.notify('Warning',
-                        $rootScope.geneMetaData.get('currentReviewer') +
-                        ' started to review the document, ' +
-                        'you can not change anything at this moment. ' +
-                        'We will notify you once the reviewer finished ' +
-                        'the editing. Thanks. ' +
-                        'Sorry for any inconvinience.');
-                }
-                $scope.fileEditable = false;
-            });
+            function getOncoTreeMainTypes() {
+                mainUtils.getOncoTreeMainTypes().then(function(result) {
+                    var mainTypesReturned = result.mainTypes,
+                        tumorTypesReturned = result.tumorTypes;
+                    if (mainTypesReturned) {
+                        $scope.oncoTree.mainTypes = mainTypesReturned;
+                        if (_.isArray(tumorTypesReturned)) {
+                            var tumorTypes = {};
+                            var allTumorTypes = [];
+                            _.each(mainTypesReturned, function(mainType, i) {
+                                tumorTypes[mainType.name] = tumorTypesReturned[i];
+                                allTumorTypes = _.union(allTumorTypes, tumorTypesReturned[i]);
+                            });
+                            $scope.oncoTree.tumorTypes = tumorTypes;
+                            $scope.oncoTree.allTumorTypes = allTumorTypes;
+                            $scope.meta = {
+                                newCancerTypes: [{
+                                    mainType: '',
+                                    subtype: '',
+                                    oncoTreeTumorTypes: allTumorTypes
+                                }]
+                            };
+                        }
+                    }
+                }, function(error) {
+                });
+            }
+            getOncoTreeMainTypes();
 
             $scope.$on('startSaveDataToDatabase', function () {
                 $scope.status.saveDataToDatabase = true;
@@ -3464,25 +3108,14 @@ angular.module('oncokbApp')
                 $scope.status.saveDataToDatabase = false;
                 $scope.geneMainDivStyle.opacity = 1;
             });
-
-            $scope.$on('$locationChangeStart', function () {
-                documentClosed();
-            });
-            // $window.onbeforeunload = function() {
-            //     // If in the review mode, exit the review mode first then
-            //     // close the tab.
-            //     if ($rootScope.reviewMode) {
-            //         $scope.exitReview();
-            //     }
-            // };
         }]
     )
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, user, mainUtils, FirebaseModel) {
         $scope.meta = {
-            cancerTypes: data.cancerTypes,
+            cancerTypes: data.tumor.cancerTypes,
             newCancerTypes: [],
-            cancerTypes_review: data.cancerTypes_review,
-            cancerTypes_uuid: data.cancerTypes_uuid,
+            cancerTypes_review: data.tumor.cancerTypes_review,
+            cancerTypes_uuid: data.tumor.cancerTypes_uuid,
             oncoTree: data.oncoTree
         };
 
@@ -3493,12 +3126,10 @@ angular.module('oncokbApp')
         $scope.save = function () {
             var cancerTypes = [];
             _.each($scope.meta.newCancerTypes, function (ct) {
-                if (ct.subtype.name) {
-                    var tempCode = '';
-                    if (ct.subtype.code) {
-                        tempCode = ct.subtype.code;
-                    }
-                    var cancerType = new FirebaseModel.Cancertype(ct.subtype.name, tempCode);
+                if (ct.mainType.name) {
+                    var tempSubtype = ct.subtype.name ? ct.subtype.name : '';
+                    var tempCode = ct.subtype.code ? ct.subtype.code : '';
+                    var cancerType = new FirebaseModel.Cancertype(ct.mainType.name, tempSubtype, tempCode);
                     cancerTypes.push(cancerType);
                 }
             });
@@ -3507,15 +3138,16 @@ angular.module('oncokbApp')
         };
 
         $scope.$watch('meta.newCancerTypes', function (n) {
-            if (n.length > 0 && (n[n.length - 1].subtype)) {
+            if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                 $scope.meta.newCancerTypes.push({
+                    mainType: '',
                     subtype: '',
                     oncoTreeTumorTypes: angular.copy($scope.meta.oncoTree.allTumorTypes)
                 });
             }
             for (var i = n.length - 2; i >= 0; i--) {
-                if (!n[i].subtype) {
-                    if (n[i].subtype !== '') {
+                if (!n[i].mainType) {
+                    if (n[i].mainType !== '') {
                         n.splice(i, 1);
                         i--;
                     }
@@ -3542,7 +3174,6 @@ angular.module('oncokbApp')
         initNewCancerTypes();
 
         function findCancerType(index, mainType, subtype, callback) {
-            return true;
             var list;
             var _mainType;
             if (mainType && mainType.name) {
@@ -3558,14 +3189,18 @@ angular.module('oncokbApp')
             var newCancerTypes = [];
             _.each(data.tumor.cancerTypes, function (cancerType) {
                 newCancerTypes.push({
+                    mainType: {
+                        name: cancerType.mainType
+                    },
                     subtype: {
-                        name: cancerType.name,
+                        name: cancerType.subtype,
                         code: cancerType.code
                     },
                     oncoTreeTumorTypes: angular.copy($scope.meta.oncoTree.allTumorTypes)
                 });
             });
             newCancerTypes.push({
+                mainType: '',
                 subtype: '',
                 oncoTreeTumorTypes: angular.copy($scope.meta.oncoTree.allTumorTypes)
             });

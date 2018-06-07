@@ -430,10 +430,9 @@ angular.module('oncokbApp')
             function getOncoTreeMainTypes() {
                 var deferred = $q.defer();
                 OncoTree.getMainType()
-                    .success(function(data) {
+                    .then(function(data) {
                         deferred.resolve(data);
-                    })
-                    .error(function(result) {
+                    }, function(result) {
                         deferred.reject(result);
                     });
                 return deferred.promise;
@@ -454,10 +453,9 @@ angular.module('oncokbApp')
             function getOncoTreeTumorTypesByMainTypes(mainTypes) {
                 var deferred = $q.defer();
                 OncoTree.getTumorTypesByMainTypes(mainTypes)
-                    .success(function(data) {
+                    .then(function(data) {
                         deferred.resolve(data);
-                    })
-                    .error(function(result) {
+                    }, function(result) {
                         deferred.reject(result);
                     });
                 return deferred.promise;

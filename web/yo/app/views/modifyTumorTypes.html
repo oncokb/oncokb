@@ -6,9 +6,21 @@
         <div class="input-group input-group-sm" style="width: 100%">
             <div ng-repeat="cancerType in meta.newCancerTypes" style="width: 100%;">
                 <div class="row">
-                    <div class="col-lg-2 col-md-2 col-sm-4 col-xm-4">
-                        <span>Tumor Type: </span>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xm-2">
+                        <span>Cancer Type: </span></div>
+                    <div class="col-lg-4 col-md-4 col-sm-10 col-xm-10">
+                        <select chosen
+                                allow-single-deselect="true"
+                                data-placeholder="Choose a main tumor type"
+                                no-results-text="'Could not find any'"
+                                ng-model="cancerType.mainType"
+                                ng-options="tt.name for tt in meta.oncoTree.mainTypes | orderBy: 'name' track by tt.name"
+                                ng-change="tumorDuplicationCheck()">
+                            <option value=""></option>
+                        </select>
                     </div>
+                    <div class="col-lg-1 col-md-1 col-sm-2 col-xm-2">
+                        <span>Subtype: </span></div>
                     <div class="col-lg-5 col-md-5 col-sm-10 col-xm-10">
                         <select style="width: 100%;"
                                 chosen
@@ -16,7 +28,7 @@
                                 data-placeholder="Choose a tumor type"
                                 no-results-text="'Could not find any'"
                                 ng-model="cancerType.subtype"
-                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.name"
+                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code"
                                 ng-change="tumorDuplicationCheck()">
                             <option value=""></option>
                         </select>

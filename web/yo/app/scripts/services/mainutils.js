@@ -214,12 +214,11 @@ angular.module('oncokbApp')
                 return null;
             }
             var list = [];
-            cancerTypes.asArray().forEach(function(cancerType) {
-                if (cancerType.subtype.length > 0) {
-                    var str = cancerType.subtype.getText();
-                    list.push(str);
-                } else if (cancerType.cancerType.length > 0) {
-                    list.push(cancerType.cancerType.getText());
+            _.each(cancerTypes, function(cancerType) {
+                if (cancerType.subtype) {
+                    list.push(cancerType.subtype);
+                } else if (cancerType.mainType) {
+                    list.push(cancerType.mainType);
                 }
             });
             return list.join(', ');
@@ -401,40 +400,30 @@ angular.module('oncokbApp')
             DatabaseConnector.getOncoTreeMainTypes()
                 .then(function(result) {
                     if (result.data) {
-                        result.data.push({
-                            id: -1,
-                            name: 'All Liquid Tumors'
-                        });
-                        result.data.push({
-                            id: -2,
-                            name: 'All Solid Tumors'
-                        });
-                        result.data.push({
-                            id: -3,
-                            name: 'All Tumors'
-                        });
-                        result.data.push({
-                            id: -4,
-                            name: 'Germline Disposition'
-                        });
-                        result.data.push({
-                            id: -5,
-                            name: 'All Pediatric Tumors'
-                        });
-                        result.data.push({
-                            id: -6,
-                            name: 'Other Tumor Types'
-                        });
-                        var mainTypeList = _.map(result.data, function(mainType) {
-                            return mainType.name;
+                        var mainTypeList = result.data;
+                        mainTypeList = _.union(mainTypeList, ['All Liquid Tumors', 'All Solid Tumors', 'All Tumors', 'Germline Disposition', 'All Pediatric Tumors', 'Other Tumor Types']);
+                        var mainTypeResult = _.map(mainTypeList, function(item) {
+                            return {
+                                name: item,
+                                id: 0
+                            }
                         });
                         DatabaseConnector.getOncoTreeTumorTypesByMainTypes(mainTypeList).then(function(tumorTypesResult) {
-                            if (result.data.length !== tumorTypesResult.data.length) {
+                            if (mainTypeList.length !== tumorTypesResult.data.length) {
                                 deferred.reject('The number of returned tumor types is not matched with number of main types.');
                             } else {
+                                var subtypeResult = [];
+                                _.each(tumorTypesResult.data, function(items) {
+                                    _.each(items, function(item) {
+                                        item.mainType = {
+                                            name: item.mainType
+                                        };
+                                    });                                    
+                                    subtypeResult.push(items);
+                                });
                                 deferred.resolve({
-                                    mainTypes:result.data,
-                                    tumorTypes: tumorTypesResult.data
+                                    mainTypes: mainTypeResult,
+                                    tumorTypes: subtypeResult
                                 });
                             }
                         }, function() {
