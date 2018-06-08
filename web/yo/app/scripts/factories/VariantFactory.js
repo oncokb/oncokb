@@ -489,3 +489,156 @@ angular.module('oncokbApp')
             precise: [] // the exact item that has been changed
         };
     }]);
+    angular.module('oncokbApp')
+    .factory('FirebaseModel', ['$rootScope', function($rootScope) {
+        'use strict';
+        function getUUID() {
+            return UUIDjs.create(4).toString();
+        };
+        function createTIs() {
+            var result = [];
+            for (var i = 0; i < 4; i++) {
+                var ti = new TI();
+                switch(i) {
+                    case 0:
+                        ti.type = 'SS';
+                        ti.name = 'Standard implications for sensitivity to therapy';
+                        break;
+                    case 1:
+                        ti.type = 'SR';
+                        ti.name = 'Standard implications for resistance to therapy';
+                        break;
+                    case 2:
+                        ti.type = 'IS';
+                        ti.name = 'Investigational implications for sensitivity to therapy';
+                        break;
+                    case 3:
+                        ti.type = 'IR';
+                        ti.name = 'Investigational implications for resistance to therapy';
+                        break;
+                }
+                result.push(ti);
+            }
+            return result;
+        }
+        function Gene(name) {
+            this.name = name;
+            this.summary = '';
+            this.summary_uuid = getUUID();
+            this.background = '';
+            this.background_uuid = getUUID();
+            this.isoform_override = '';
+            this.dmp_refseq_id = '';
+            this.type = {
+                tsg: '',
+                tsg_uuid: getUUID(),
+                ocg: '',
+                ocg_uuid: getUUID()
+            };
+            this.type_uuid = getUUID();
+            this.mutations_uuid = getUUID();
+        }
+        function Mutation(name) {
+            this.name = name;
+            this.name_uuid = getUUID();
+            this.mutation_effect = {
+                oncogenic: '',
+                oncogenic_uuid: getUUID(),
+                effect: '',
+                effect_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.mutation_effect_uuid = getUUID();
+            this.tumors_uuid = getUUID();
+        };
+        function Tumor(cancerTypes) {
+            this.cancerTypes = cancerTypes;
+            this.cancerTypes_uuid = getUUID();
+            this.summary = '';
+            this.summary_uuid = getUUID();
+            this.prognostic = {
+                level: '',
+                level_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.prognostic_uuid = getUUID();
+            this.diagnostic = {
+                level: '',
+                level_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.diagnostic_uuid = getUUID();
+            this.TIs = createTIs();
+        };
+        function Cancertype(mainType, subtype, code) {
+            this.mainType = mainType;
+            this.subtype = subtype;
+            this.code = code;
+        }
+        function TI() {
+            this.name =  '';
+            this.name_uuid = getUUID();
+            this.type = '';
+            this.treatments = [];
+            this.treatments_uuid = getUUID();
+            this.description = '';
+            this.description_uuid = getUUID();
+        }
+        function Treatment(name) {
+            this.name = name;
+            this.name_uuid = getUUID();
+            this.level = '';
+            this.level_uuid = getUUID();
+            this.propagation = '';
+            this.propagation_uuid = getUUID();
+            this.indication = '';
+            this.indication_uuid = getUUID();
+            this.description = '';
+            this.description_uuid = getUUID();
+            this.short = '';
+        };
+        function Comment(userName, email, content) {
+            this.date = (new Date()).getTime().toString();
+            this.userName = userName;
+            this.email = email;
+            this.content = content;
+            this.resolved = 'false';
+        }
+        function VUSItem(name, userName, userEmail) {
+            this.name = name;
+            this.time = [
+                new TimeStamp(userName, userEmail)
+            ];
+        }
+        function TimeStamp(userName, userEmail) {
+            this.by = {
+                by: userName,
+                email: userEmail
+            };
+            this.value = (new Date()).getTime().toString();
+        }
+        function Meta() {
+            this.lastModifiedBy = $rootScope.me.name;
+            this.lastModifiedAt = (new Date()).getTime().toString();
+            this.review = {
+                currentReviewer: ''
+            };
+        }
+        return {
+            Gene: Gene,
+            Mutation: Mutation,
+            Tumor: Tumor,
+            Treatment: Treatment,
+            Comment: Comment,
+            Cancertype: Cancertype,
+            VUSItem: VUSItem,
+            TimeStamp: TimeStamp,
+            Meta: Meta
+        };
+    }]);

@@ -4,11 +4,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config', 'importer', 'storage', 'documents',
         'users', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'additionalFile', '$q', 'FirebaseModel',
         function($scope, $rootScope, $location, $timeout, $routeParams, _,
                  config, importer, storage, Documents, users,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile) {
+                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, additionalFile, $q, FirebaseModel) {
             function saveGene(docs, docIndex, callback) {
                 if (docIndex < docs.length) {
                     var fileId = docs[docIndex].id;
@@ -59,6 +59,314 @@ angular.module('oncokbApp')
                     }
                     console.log('finished.');
                 }
+            }
+            $scope.exportData = function() {
+                exportGene(0);
+            }
+            function exportGene(docIndex) {
+                if (docIndex < $scope.documents.length) {
+                    if (docIndex%10 === 0) {
+                        console.log(docIndex);
+                    }
+                    var fileId = $scope.documents[docIndex].id;
+                    var hugoSymbol = $scope.documents[docIndex].title;
+                    if (['BRAF', 'AKT1', 'EGFR', 'MTOR'].indexOf(hugoSymbol) !== -1) {
+                    // if (['BRAF'].indexOf(hugoSymbol) !== -1) {
+                        storage.getRealtimeDocument(fileId).then(function(realtime) {
+                            var apiCalls = [];
+                            var gene = realtime.getModel().getRoot().get('gene');
+                            if (gene) {
+                                var geneData = stringUtils.getGeneData(gene);
+                                apiCalls.push(importGeneData(geneData));
+                            }
+                            var vus = realtime.getModel().getRoot().get('vus');
+                            if (vus) {
+                                var vusData = stringUtils.getVUSFullData(vus);
+                                console.log(vusData);
+                                apiCalls.push(importVUSData({
+                                    hugoSymbol: hugoSymbol,
+                                    data: vusData
+                                }));
+                            }
+                            var history = realtime.getModel().getRoot().get('history');
+                            if (history) {
+                                var historyData = stringUtils.getHistoryData(history);
+                                apiCalls.push(importHistoryData({
+                                    hugoSymbol: hugoSymbol,
+                                    data: historyData
+                                }));
+                            }
+                            $q.all(apiCalls).then(function() {
+                                $timeout(function() {
+                                    exportGene(++docIndex);
+                                }, 500, false);
+                            }, function(error) {
+                                console.log('fail to save gene ', error);
+                                $timeout(function() {
+                                    exportGene(++docIndex);
+                                }, 500, false);
+                            });
+                        }, function() {
+                            console.log('fail to load drive gene ', hugoSymbol);
+                            $timeout(function() {
+                                exportGene(++docIndex);
+                            }, 1000, false);
+                        });
+                    } else {
+                        exportGene(++docIndex);
+                    }                    
+                } else {
+                    console.log('finished');
+                    // exportMeta();
+                }
+            }
+            var exportAdditional = {};
+            function exportMeta() {
+                additionalFile.load(['meta']).then(function(result) {
+                    var metaByGene = {};
+                    _.each($rootScope.metaData.keys(), function(hugoSymbol) {
+                        var uuidsToCopy = {
+                            currentReviewer: ''
+                        };
+                        var uuids = $rootScope.metaData.get(hugoSymbol).keys();
+                        _.each(uuids, function(uuid) {
+                            if ($rootScope.metaData.get(hugoSymbol).get(uuid).type === 'Map') {
+                                if ($rootScope.metaData.get(hugoSymbol).get(uuid).get('review') === true) {
+                                    uuidsToCopy[uuid] = true;
+                                }
+                            }
+                        });
+                        if (!_.isEmpty(uuidsToCopy)) {
+                            metaByGene[hugoSymbol] = {
+                                review: uuidsToCopy
+                            };
+                        }
+                    });
+                    _.each($rootScope.timeStamp.keys(), function(hugoSymbol) {
+                        if (!metaByGene[hugoSymbol]) {
+                            metaByGene[hugoSymbol] = {};
+                        }
+                        _.each($rootScope.timeStamp.get(hugoSymbol).keys(), function(timeStampKey) {
+                            metaByGene[hugoSymbol][timeStampKey] = $rootScope.timeStamp.get(hugoSymbol).get(timeStampKey);
+                        });
+                    });
+                    _.each($rootScope.apiData.keys(), function(hugoSymbol) {
+                        if (!metaByGene[hugoSymbol]) {
+                            metaByGene[hugoSymbol] = {};
+                        }
+                        if ($rootScope.apiData.get(hugoSymbol).has('vus')) {
+                            metaByGene[hugoSymbol].vus = $rootScope.apiData.get(hugoSymbol).get('vus').get('data');
+                        }
+                    });
+                    exportAdditional.meta = metaByGene;
+                    importMetaData(metaByGene).then(function() {
+                        exportQueues();
+                    }, function() {
+                        exportQueues();
+                    });
+                });
+            }
+            function exportQueues() {
+                var queuesInfo = {};
+                additionalFile.load(['queue']).then(function(result) {
+                    _.each($rootScope.queuesData.keys(), function(hugoSymbol) {
+                        var queuesByGene = [];
+                        _.each($rootScope.queuesData.get(hugoSymbol).asArray(), function(item) {
+                            var keys = ['link', 'variant', 'mainType', 'subType', 'section', 'curator', 'curated', 'addedBy', 'addedAt', 'dueDay', 'comment', 'notified', 'article', 'pmid'];
+                            var newItem = {
+                                hugoSymbol: hugoSymbol
+                            };
+                            _.each(keys, function(key) {
+                                newItem[key] = item.get(key) ? item.get(key) : '';
+                            });
+                            queuesByGene.push(newItem);
+                        });
+                        if (queuesByGene.length > 0) {
+                            queuesInfo[hugoSymbol] = {
+                                queue: queuesByGene
+                            };
+                        }
+                    });
+                    exportAdditional.queues = queuesInfo;
+                    importQueueData(queuesInfo).then(function() {
+                       console.log('Finished.');     
+                    }, function() {
+                        
+                    });
+                });
+            }
+            function importGeneData(data) {
+                var defer = $q.defer();
+                var gene = data;
+                if (gene.transcripts[0]) {
+                    gene.isoform_override = gene.transcripts[0].isoform_override ? gene.transcripts[0].isoform_override : '';
+                    gene.dmp_refseq_id = gene.transcripts[0].dmp_refseq_id ? gene.transcripts[0].dmp_refseq_id : '';
+                }
+                gene.type = {
+                    tsg_uuid: UUIDjs.create(4).toString(),
+                    ocg_uuid: UUIDjs.create(4).toString(),
+                    tsg: gene.type.TSG,
+                    ocg: gene.type.OCG,
+                    tsg_review: gene.type_review,
+                    ocg_review: gene.type_review
+                };
+                delete gene.type.TSG;
+                delete gene.type.OCG;
+                delete gene.type_review;
+                delete gene.transcripts;
+                delete gene.name_reivew;
+                delete gene.name_uuid;
+                var mutationsArr = [];
+                _.each(gene.mutations, function(mutation) {
+                    mutation.mutation_effect = {
+                        oncogenic: mutation.oncogenic,
+                        oncogenic_uuid: mutation.oncogenic_uuid,
+                        oncogenic_review: mutation.oncogenic_review,
+                        effect: mutation.effect.value,
+                        effect_uuid: mutation.effect_uuid,
+                        effect_review: mutation.effect_review,
+                        description: mutation.description,
+                        description_uuid: mutation.description_uuid,
+                        description_review: mutation.description_review,
+                        short: mutation.short
+                    };
+                    mutation.mutation_effect_uuid = UUIDjs.create(4).toString();
+                    mutation.mutation_effect_comments = mutation.shortSummary_comments;
+                    _.each(_.keys(mutation), function(key) {
+                        if (['name', 'name_review', 'name_comments', 'name_uuid', 'mutation_effect', 'mutation_effect_uuid', 'mutation_effect_comments', 'tumors'].indexOf(key) === -1) {
+                            delete mutation[key];
+                        }
+                    });
+                    _.each(mutation.tumors, function(tumor) {
+                        tumor.TIs = tumor.TI;
+                        var newCancertypes = [];
+                        _.each(tumor.cancerTypes, function(cancerType) {
+                            var tempCancertype = {
+                                mainType: cancerType.cancerType,
+                                code: cancerType.oncoTreeCode,
+                                subtype: cancerType.subtype
+                            };
+                            newCancertypes.push(tempCancertype);
+                        });
+                        tumor.cancerTypes = newCancertypes;
+                        tumor.cancerTypes_uuid = tumor.name_uuid;
+                        tumor.cancerTypes_comments = tumor.name_comments;
+                        delete tumor.name;
+                        delete tumor.name_review;
+                        delete tumor.name_uuid;
+                        delete tumor.name_comments;
+                        delete tumor.summary_comments;
+
+                        delete tumor.diagnostic_review;
+                        delete tumor.diagnostic.description_comments;
+                        delete tumor.diagnostic.level_comments;
+                        delete tumor.diagnostic.short_uuid;
+                        delete tumor.diagnostic.short_comments;
+                        delete tumor.diagnostic.short_review;
+
+                        delete tumor.prognostic_review;
+                        delete tumor.prognostic.description_comments;
+                        delete tumor.prognostic.level_comments;
+                        delete tumor.prognostic.short_uuid;
+                        delete tumor.prognostic.short_comments;
+                        delete tumor.prognostic.short_review;
+                        delete tumor.TI;
+                        _.each(tumor.TIs, function(ti) {
+                            switch(ti.name) {
+                                case 'Standard implications for sensitivity to therapy':
+                                    ti.type = 'SS';
+                                    break;
+                                case 'Standard implications for resistance to therapy':
+                                    ti.type = 'SR';
+                                    break;
+                                case 'Investigational implications for sensitivity to therapy':
+                                    ti.type = 'IS';
+                                    break;
+                                case 'Investigational implications for resistance to therapy':
+                                    ti.type = 'IR';
+                                    break;
+                            }
+                            delete ti.short;
+                            delete ti.short_uuid;
+                            delete ti.short_review;
+                            delete ti.short_comments;
+                            delete ti.status;
+                            delete ti.description;
+                            delete ti.description_uuid;
+                            delete ti.description_review;
+                            delete ti.description_comments;
+                            delete ti.name_review;
+                            _.each(ti.treatments, function(treatment) {
+                                treatment.propagation_uuid = UUIDjs.create(4).toString();
+                                delete treatment.type_uuid;
+                                delete treatment.short_uuid;      
+                                delete treatment.short_comments;
+                                delete treatment.short_review;
+                                delete treatment.description_comments;
+                                delete treatment.indication_comments;
+                                delete treatment.level_comments;
+                                delete treatment.type;
+                                delete treatment.type_comments;
+                                delete treatment.type_review;  
+                            });    
+                        });
+                    });
+                    mutationsArr.push(mutation);
+                });
+                gene.mutations = mutationsArr;
+                // console.log(gene);
+                firebase.database().ref('Genes/' + gene.name).set(gene).then(function(result) {
+                    console.log(gene.name, 'gene');
+                    defer.resolve();
+                }, function(error) {
+                    console.log(error);
+                    defer.reject();
+                });
+                return defer.promise;
+            };
+            function importVUSData(data) {
+                var defer = $q.defer();
+                firebase.database().ref('VUS_temp/' + data.hugoSymbol).set({vus: data.data}).then(function(result) {
+                    console.log(data.hugoSymbol, 'vus');
+                    defer.resolve();
+                }, function(error) {
+                    console.log(error);
+                    defer.reject();
+                });
+                return defer.promise;
+            }
+            function importHistoryData(data) {
+                var defer = $q.defer();
+                firebase.database().ref('History/' + data.hugoSymbol).set(data.data).then(function(result) {
+                    console.log(data.hugoSymbol, 'history');
+                    defer.resolve();
+                }, function(error) {
+                    console.log(error);
+                    defer.reject();
+                });
+                return defer.promise;
+            }
+            function importMetaData(metaData) {
+                var defer = $q.defer();
+                firebase.database().ref('Meta').set(metaData).then(function(result) {
+                    console.log('loading meta');
+                    defer.resolve();
+                }, function(error) {
+                    console.log(error);
+                    defer.reject();
+                });
+                return defer.promise;
+            };
+            function importQueueData(queuesData) {
+                var defer = $q.defer();
+                firebase.database().ref('Queues').set(queuesData).then(function(result) {
+                    console.log('loading queues');
+                    defer.resolve();
+                }, function(error) {
+                    console.log(error);
+                    defer.reject();
+                });
+                return defer.promise;
             }
             $scope.showDocs = function() {
                 $scope.documents.forEach(function(item) {

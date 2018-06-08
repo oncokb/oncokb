@@ -836,11 +836,8 @@ angular.module('oncokbApp')
                         _time.by.email = time.by.email.getText();
                         datum.time.push(_time);
                     });
-                    if (vusItem.time && vusItem.time.length > 0) {
-                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
-                    }
                     if (!excludeComments) {
-                        datum.nameComments = getComments(vusItem.name_comments);
+                        datum.name_comments = getComments(vusItem.name_comments);
                     }
                     vusData.push(datum);
                 });
@@ -886,20 +883,21 @@ angular.module('oncokbApp')
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
 
-            gene = combineData(gene, geneData, ['name', 'status', 'summary', 'background', 'type'], excludeComments, onlyReviewedContent);
+            gene = combineData(gene, geneData, ['name', 'summary', 'background', 'type'], excludeComments, onlyReviewedContent);
             gene.mutations = [];
-            gene.curators = [];
+            // gene.curators = [];
             gene.transcripts = [];
-            geneData.curators.asArray().forEach(function(e) {
-                var _curator = {};
-                _curator = combineData(_curator, e, ['name', 'email'], excludeComments, onlyReviewedContent);
-                gene.curators.push(_curator);
-            });
+            // geneData.curators.asArray().forEach(function(e) {
+            //     var _curator = {};
+            //     _curator = combineData(_curator, e, ['name', 'email'], excludeComments, onlyReviewedContent);
+            //     gene.curators.push(_curator);
+            // });
             geneData.transcripts.asArray().forEach(function(e) {
                 var _transcript = {};
                 _transcript = combineData(_transcript, e, ['isoform_override', 'gene_name', 'dmp_refseq_id', 'ccds_id'], excludeComments, onlyReviewedContent);
                 gene.transcripts.push(_transcript);
             });
+            
             geneData.mutations.asArray().forEach(function(e) {
                 if (onlyReviewedContent && e.name_review.get('added') == true || !onlyReviewedContent && e.name_review.get('removed') == true) return;
                 var _mutation = {};
@@ -926,7 +924,7 @@ angular.module('oncokbApp')
 
                     __tumor.cancerTypes = [];
                     __tumor.TI = [];
-                    __tumor.interactAlts = {};
+                    // __tumor.interactAlts = {};
                     __tumor.prognostic = {};
                     __tumor.prognostic_uuid = '';
                     __tumor.diagnostic = {};
@@ -982,7 +980,7 @@ angular.module('oncokbApp')
                     }
                     __tumor.prognostic = combineData(__tumor.prognostic, e1.prognostic, ['description', 'level'], excludeComments, onlyReviewedContent);
                     __tumor.diagnostic = combineData(__tumor.diagnostic, e1.diagnostic, ['description', 'level'], excludeComments, onlyReviewedContent);
-                    __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeComments, onlyReviewedContent);
+                    // __tumor.interactAlts = combineData(__tumor.interactAlts, e1.interactAlts, ['alterations', 'description'], excludeComments, onlyReviewedContent);
                     _mutation.tumors.push(__tumor);
                 });
 
@@ -1036,12 +1034,12 @@ angular.module('oncokbApp')
                     if (!excludeComments && model[e + '_comments']) {
                         object[e + '_comments'] = getComments(model[e + '_comments']);
                     }
-                    if (model[e + '_eStatus']) {
-                        object[e + '_eStatus'] = getEvidenceStatus(model[e + '_eStatus']);
-                    }
-                    if (model[e + '_timeStamp']) {
-                        object[e + '_timeStamp'] = getTimeStamp(model[e + '_timeStamp']);
-                    }
+                    // if (model[e + '_eStatus']) {
+                    //     object[e + '_eStatus'] = getEvidenceStatus(model[e + '_eStatus']);
+                    // }
+                    // if (model[e + '_timeStamp']) {
+                    //     object[e + '_timeStamp'] = getTimeStamp(model[e + '_timeStamp']);
+                    // }
                     if (model[e + '_uuid']) {
                         object[e + '_uuid'] = validUUID(model[e + '_uuid']);
                     }
