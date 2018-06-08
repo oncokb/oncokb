@@ -236,7 +236,7 @@
                             <span ng-repeat="checkbox in checkboxes" class="reviewedBG">
                               <input id="::{{uuid+$index+'_review'}}"
                                       type="radio"
-                                      ng-checked="data[key+'_review'].lastReviewed === checkbox ? true : false"
+                                      ng-checked="geneTypeChecked(key, checkbox)"
                                       ng-disabled="true">
                               <label for="::{{uuid+$index+'_review'}}">{{checkbox}}</label>
                             </span>
