@@ -789,7 +789,7 @@ angular.module('oncokbApp')
                                 return true;
                             }
                         }
-                        if (tumor.cancerTypes_review.updatedBy === userName && mainUtils.processedInReview('name', tumor.cancerTypes_uuid)) {
+                        if (tumor.cancerTypes_review && tumor.cancerTypes_review.updatedBy === userName && mainUtils.processedInReview('name', tumor.cancerTypes_uuid)) {
                             formEvidencesPerUser(userName, 'TUMOR_NAME_CHANGE', mutation, tumor, null, null);
                         }
                         if (isChangedBy('section', tumor.prognostic_uuid, userName)) {
@@ -1191,6 +1191,9 @@ angular.module('oncokbApp')
                             historyData.lastEditBy = treatment.name_review.updatedBy;
                             break;
                     }
+                }
+                if (!historyData.lastEditBy) {
+                    historyData.lastEditBy = '';
                 }
                 return { evidences: evidences, historyData: historyData };
             };
@@ -1689,7 +1692,7 @@ angular.module('oncokbApp')
                 var result = true;
                 for (var i = 0; i < $scope.meta.newCancerTypes.length; i++) {
                     var ct = $scope.meta.newCancerTypes[i];
-                    if (ct.subtype && ct.subtype.name) {
+                    if (ct.mainType && ct.mainType.name || ct.subtype && ct.subtype.name) {
                         result = false;
                         break;
                     }
@@ -1722,9 +1725,10 @@ angular.module('oncokbApp')
                 if (true) {
                     var cancerTypes = [];
                     _.each($scope.meta.newCancerTypes, function (ct) {
-                        if (ct.subtype.name) {
+                        if (ct.mainType.name) {
                             var tempCode = ct.subtype.code ? ct.subtype.code : '';
-                            var cancerType = new FirebaseModel.Cancertype(ct.mainType.name, ct.subtype.name, tempCode);
+                            var tempSubtype = ct.subtype.name ? ct.subtype.name : '';
+                            var cancerType = new FirebaseModel.Cancertype(ct.mainType.name, tempSubtype, tempCode);
                             cancerTypes.push(cancerType);
                         }
                     });
