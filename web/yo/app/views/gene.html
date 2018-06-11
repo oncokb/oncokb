@@ -164,7 +164,12 @@
               <div class="headerLevel2">
                 <span ng-click="toggleSection(tumor.cancerTypes_uuid)">
                   <i ng-class="getAngleClass(tumor.cancerTypes_uuid)"></i>
-                  Tumor type: {{ getCancerTypesName(tumor) }}
+                    <span>Tumor type: </span>
+                    <span ng-if="reviewContentDisplay(tumor.cancerTypes_uuid, true)">
+                        <br/>
+                        <p>New Content: </p>
+                    </span>
+                  <span>{{getCancerTypesName(tumor)}}</span>
                 </span>
                 <i class="fa fa-edit" ng-click="modifyTumorType(tumor, path)" ng-if="!reviewMode"></i>
                 <span style="float:right">
@@ -179,6 +184,10 @@
                         <i ng-click="remove('tumor', path)" class="fa fa-trash-o"></i>
                     </span>
                 </span>
+                  <span ng-if="reviewContentDisplay(tumor.cancerTypes_uuid, true)">
+                        <p style="margin-top:10px;">Old Content: </p>
+                        <span>{{getLastReviewedCancerTypesName(tumor.cancerTypes_review.lastReviewed)}}</span>
+                    </span>
                 <div style="margin-top:-20px;margin-bottom:20px">
                     <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
                                   confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)"
