@@ -63,7 +63,7 @@ angular.module('oncokbApp')
                             if (scope.data[scope.key+'_editing'] !== $rootScope.me.name) {
                                 scope.initializeFE();
                             }
-                            if (scope.key !== 'short') {
+                            if (scope.key !== 'short' && scope.key !== 'name') {
                                 scope.setReviewRelatedContent(n, o, false);
                             }
                             scope.timeoutRef = $timeout(function() {
