@@ -214,8 +214,8 @@
                 <div ng-switch-when="checkbox">
                     <div>
                         <br/>
-                        <h4 ng-if="key !== 'ocg' && reviewLayout('regular')">New Content:</h4>
-                        <div ng-if="key === 'ocg' && reviewLayout('regular')" style="height:40px;"></div>
+                        <h4 ng-if="key !== 'ocg' && reviewLayout('regular') && (geneTypeChanged('ocg') || geneTypeChanged('tsg'))">New Content:</h4>
+                        <div ng-if="key === 'ocg' && reviewLayout('regular') && (geneTypeChanged('ocg') || geneTypeChanged('tsg'))" style="height:40px;"></div>
                         <div>
                             <span ng-repeat="checkbox in checkboxes">
                               <input id="::{{uuid+$index}}"
@@ -229,14 +229,14 @@
                         </div>
                     </div>
 
-                    <div ng-if="reviewLayout('regular')">
+                    <div ng-if="reviewLayout('regular') && (geneTypeChanged('ocg') || geneTypeChanged('tsg'))">
                         <h4 ng-if="key !== 'ocg'">Old Content:</h4>
                         <div ng-if="key === 'ocg'" style="height:40px;"></div>
                         <div>
                             <span ng-repeat="checkbox in checkboxes" class="reviewedBG">
                               <input id="::{{uuid+$index+'_review'}}"
                                       type="radio"
-                                      ng-checked="data[key+'_review'].lastReviewed === checkbox ? true : false"
+                                      ng-checked="geneTypeChecked(key, checkbox)"
                                       ng-disabled="true">
                               <label for="::{{uuid+$index+'_review'}}">{{checkbox}}</label>
                             </span>
