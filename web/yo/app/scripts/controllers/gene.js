@@ -1245,11 +1245,13 @@ angular.module('oncokbApp')
             }
             function acceptItem(arr, uuid) {
                 _.each(arr, function (item) {
-                    if ($rootScope.geneMeta.review[item.uuid]) {
+                    if (item.reviewObj) {
                         delete item.reviewObj.lastReviewed;
-                        delete $rootScope.geneMeta.review[item.uuid];
-                        ReviewResource.accepted.push(item.uuid);
                     }
+                    if ($rootScope.geneMeta.review) {
+                        delete $rootScope.geneMeta.review[item.uuid];
+                    }                
+                    ReviewResource.accepted.push(item.uuid);
                 });
                 if (uuid) {
                     ReviewResource.accepted.push(uuid);
