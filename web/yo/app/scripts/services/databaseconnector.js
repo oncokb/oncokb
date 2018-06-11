@@ -171,13 +171,14 @@ angular.module('oncokbApp')
                 }
             }
             function getPubMedArticle(pubMedIDs, success, fail) {
-                DriveAnnotation
-                    .getPubMedArticle(pubMedIDs)
-                    .then(function(data) {
-                        success(data);
-                    }, function() {
-                        fail();
-                    });
+                success(data);
+                // DriveAnnotation
+                //     .getPubMedArticle(pubMedIDs)
+                //     .then(function(data) {
+                //         success(data);
+                //     }, function() {
+                //         fail();
+                //     });
             }
             function deleteEvidences(data, historyData, success, fail) {
                 if (testing) {
@@ -535,10 +536,9 @@ angular.module('oncokbApp')
             function lookupVariants(body) {
                 var deferred = $q.defer();
                 SearchVariant.lookupVariants(body)
-                    .success(function(data) {
+                    .then(function(data) {
                         deferred.resolve(data);
-                    })
-                    .error(function(result) {
+                    }, function(result) {
                         deferred.reject(result);
                     });
                 return deferred.promise;

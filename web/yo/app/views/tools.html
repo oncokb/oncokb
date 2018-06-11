@@ -17,7 +17,7 @@
             <label for="includeUUID">Include UUID</label>
         </div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-default" ng-click="searchHistory(genesForHistory, 0)" ng-disabled="disableHistoryButton" ng-bind-html="getHistoryButtonContent()"></button>
+            <button type="button" class="btn btn-default" ng-click="searchHistory(genesForHistory)" ng-disabled="disableHistoryButton" ng-bind-html="getHistoryButtonContent()"></button>
         </div>
     </div>
     <div style="margin-bottom:80px" ng-if="historySearchResults.length > 0">
