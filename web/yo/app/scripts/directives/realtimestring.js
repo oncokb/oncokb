@@ -257,14 +257,17 @@ angular.module('oncokbApp')
                         $scope.path = tempArr.join('/');
                         console.log($scope.path);
                     }
-                }
+                };
                 $scope.geneTypeChecked = function(key, checkbox) {
                     if (_.isUndefined($scope.data[key+'_review'].lastReviewed)) {
                         return $scope.data[key] === checkbox;
                     } else {
                         return $scope.data[key+'_review'].lastReviewed === checkbox;
                     }
-                }
+                };
+                $scope.geneTypeChanged = function(key) {
+                    return !_.isUndefined($scope.data[key+'_review'].lastReviewed);
+                };
             }
         };
     })
