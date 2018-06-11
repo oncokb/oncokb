@@ -40,7 +40,6 @@ angular.module('oncokbApp')
                     scope.reviewMode = ReviewResource.reviewMode;
                     scope.timeoutRef = '';
                     scope.pContent = '';
-                    // scope.contentModified = false;
                     scope.$watch('data[key]', function (n, o) {
                         if (scope.t === 'treatment-select' && scope.key === 'level') {
                             scope.$watch('data.propagation', function(newPro, oldPro) {
@@ -68,18 +67,20 @@ angular.module('oncokbApp')
                                 scope.setReviewRelatedContent(n, o, false);
                             }
                             scope.timeoutRef = $timeout(function() {
-                                if (scope.fe === true && scope.data[scope.key+'_editing'] === $rootScope.me.name) {
-                                    delete scope.data[scope.key+'_editing'];
-                                }
+                                delete scope.data[scope.key+'_editing'];
                                 scope.initializeFE();
                             }, 30*1000);
                         }  
                     });
                     $rootScope.$watch('rejectedUUIDs["'+scope.uuid+'"]', function(n, o) {
                         if (n !== o && n === true) {
-                            scope.data[scope.key] = _.clone(scope.data[scope.key+'_review'].lastReviewed);
-                            delete scope.data[scope.key+'_review'].lastReviewed;
-                            delete $rootScope.geneMeta.review[scope.uuid];
+                            if (scope.data[scope.key+'_review']) {
+                                scope.data[scope.key] = _.clone(scope.data[scope.key+'_review'].lastReviewed);
+                                delete scope.data[scope.key+'_review'].lastReviewed;
+                            }
+                            if ($rootScope.geneMeta.review) {
+                                delete $rootScope.geneMeta.review[scope.uuid];
+                            }                            
                             delete $rootScope.rejectedUUIDs[scope.uuid];
                             ReviewResource.rejected.push(scope.uuid);
                         }
