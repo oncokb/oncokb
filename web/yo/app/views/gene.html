@@ -13,7 +13,7 @@
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable"
           ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
-        <button type="button" class="btn btn-default" ng-click="getData()">Gene</button>
+        <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="getData()">Gene</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
       </span>

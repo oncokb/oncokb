@@ -77,18 +77,16 @@ angular.module('oncokbApp')
                 var deferred = $q.defer();
                 if (evidenceType === 'geneType') {
                     DataSummary.getGeneType()
-                        .success(function(data) {
+                        .then(function(data) {
                             deferred.resolve(data);
-                        })
-                        .error(function(result) {
+                        }, function(result) {
                             deferred.reject(result);
                         });
                 } else {
                     DataSummary.getEvidenceByType(evidenceType)
-                        .success(function(data) {
+                        .then(function(data) {
                             deferred.resolve(data);
-                        })
-                        .error(function(result) {
+                        }, function(result) {
                             deferred.reject(result);
                         });
                 }
@@ -111,10 +109,9 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .updateGene(data)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
@@ -127,11 +124,10 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .updateGeneType(hugoSymbol, data)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
                             updateHistory(historyData);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
@@ -140,10 +136,9 @@ angular.module('oncokbApp')
             function updateEvidence(uuid, data, success, fail) {
                 DriveAnnotation
                     .updateEvidence(uuid, data)
-                    .success(function(data) {
+                    .then(function(data) {
                         success(data);
-                    })
-                    .error(function() {
+                    }, function() {
                         fail();
                     });
             }
@@ -154,10 +149,9 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .getEvidencesByUUID(uuid)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
@@ -169,10 +163,9 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .getEvidencesByUUIDs(uuids)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
@@ -186,17 +179,6 @@ angular.module('oncokbApp')
                         fail();
                     });
             }
-            function getClinicalTrial(nctId, success, fail) {
-                DriveAnnotation
-                    .getClinicalTrial(nctId)
-                    .success(function(data) {
-                        success(data);
-                    })
-                    .error(function() {
-                        fail();
-                    });
-            }
-
             function deleteEvidences(data, historyData, success, fail) {
                 if (testing) {
                     success('');
@@ -204,11 +186,10 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .deleteEvidences(data)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
                             updateHistory(historyData);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
@@ -221,10 +202,9 @@ angular.module('oncokbApp')
                     } else {
                         DriveAnnotation
                             .updateVUS(hugoSymbol, data)
-                            .success(function(data) {
+                            .then(function(data) {
                                 success(data);
-                            })
-                            .error(function(error) {
+                            }, function(error) {
                                 var subject = 'VUS update Error for ' + hugoSymbol;
                                 var content = 'The system error returned is ' + JSON.stringify(error);
                                 sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
@@ -276,31 +256,12 @@ angular.module('oncokbApp')
                 } else {
                     DriveAnnotation
                         .updateEvidenceTreatmentPriorityBatch(data)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
-            }
-
-            function createGoogleFolder(params) {
-                var deferred = $q.defer();
-
-                if (testing) {
-                    deferred.resolve('test name');
-                } else {
-                    GenerateDoc
-                        .createFolder(params)
-                        .success(function(data) {
-                            deferred.resolve(data);
-                        })
-                        .error(function() {
-                            deferred.reject();
-                        });
-                }
-                return deferred.promise;
             }
 
             function sendEmail(params, success, fail) {
@@ -309,10 +270,9 @@ angular.module('oncokbApp')
                 } else {
                     SendEmail
                         .init(params)
-                        .success(function(data) {
+                        .then(function(data) {
                             success(data);
-                        })
-                        .error(function() {
+                        }, function() {
                             fail();
                         });
                 }
@@ -336,12 +296,11 @@ angular.module('oncokbApp')
                 } else {
                     InternalAccess
                         .hasAccess()
-                        .success(function(data, status, headers, config) {
+                        .then(function(data, status, headers, config) {
                             if (angular.isFunction(successCallback)) {
                                 successCallback(data, status, headers, config);
                             }
-                        })
-                        .error(function(data, status, headers, config) {
+                        }, function(data, status, headers, config) {
                             if (angular.isFunction(failCallback)) {
                                 failCallback(data, status, headers, config);
                             }
@@ -636,7 +595,6 @@ angular.module('oncokbApp')
                 getEvidencesByUUID: getEvidencesByUUID,
                 getEvidencesByUUIDs: getEvidencesByUUIDs,
                 getPubMedArticle: getPubMedArticle,
-                getClinicalTrial: getClinicalTrial,
                 getReviewedData: getReviewedData,
                 lookupVariants: lookupVariants,
                 getTumorSubtypes: getTumorSubtypes
