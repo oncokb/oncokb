@@ -15,6 +15,9 @@ angular.module('oncokbApp')
             link: function(scope, element, attr, ngModel) {
                 /* eslint new-cap: 0*/
                 function updatePubs(modelValue) {
+                    if (!modelValue) {
+                        modelValue = '';
+                    }
                     modelValue = S(modelValue).decodeHTMLEntities().s;
                     modelValue = S(modelValue).stripTags().s;
                     modelValue = S(modelValue).collapseWhitespace().s;

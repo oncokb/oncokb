@@ -50,6 +50,8 @@ angular.module('oncokbApp')
                             });
                         }
                         if (n !== o) {     
+                            $rootScope.geneMeta.lastModifiedAt = new Date().getTime();
+                            $rootScope.geneMeta.lastModifiedBy = $rootScope.me.name;
                             scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
                             scope.pContent = scope.data[scope.key];
                             if (scope.t === 'treatment-select' && scope.key === 'level') {
