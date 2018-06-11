@@ -5,8 +5,7 @@ angular.module('oncokbApp')
         function($scope, dialogs, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope) {
             $scope.init = function() {
                 $scope.loading = false;
-                // Need to be replaced with the right way to fetch gene name list
-                $scope.geneNames = ['APC', 'TP53'];
+                $scope.geneNames =  _.keys($rootScope.metaData);
             };
             $scope.dt = {};
             $scope.dt.dtOptions = {
@@ -27,14 +26,16 @@ angular.module('oncokbApp')
                     $scope.disableHistoryButton = true;
                 }
             };
-            $scope.searchHistory = function(genesForHistory, index) {
+            $scope.searchHistory = function(genesForHistory) {
                 $scope.loading = true;
                 loadFiles.load('history').then(function(success) {
                     var historyResults = [];
                     _.each(_.keys($rootScope.historyData), function(hugoSymbol) {
-                        _.each($rootScope.historyData[hugoSymbol].api, function(item) {
-                            historyResults.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: item.records});
-                        });
+                        if (genesForHistory.indexOf(hugoSymbol) !== -1){
+                            _.each($rootScope.historyData[hugoSymbol].api, function(item) {
+                                historyResults.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: item.records});
+                            });
+                        }                        
                     });
                     $scope.historySearchResults = historyResults;
                     $scope.loading = false;
@@ -118,14 +119,14 @@ angular.module('oncokbApp')
 
                 DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
                     if ($scope.evidenceType === 'geneType') {
-                        var variantLookupBody = _.map(response, function(item) {
+                        var variantLookupBody = _.map(response.data, function(item) {
                             return {
                                 hugoSymbol: item.hugoSymbol
                             };
                         });
                         var geneWithVariants = {};
                         DatabaseConnector.lookupVariants(variantLookupBody).then(function(result) {
-                            _.each(result, function(items) {
+                            _.each(result.data, function(items) {
                                 var tempObj = {};
                                 _.each(items, function(item) {
                                     if (_.isEmpty(tempObj)) {
@@ -153,7 +154,7 @@ angular.module('oncokbApp')
                                     $scope.reviewedData.geneType.body.push(tempObj);
                                 }
                             });
-                            _.each(response, function(item) {
+                            _.each(response.data, function(item) {
                                 if (geneWithVariants[item.hugoSymbol] !== true) {
                                     $scope.reviewedData.geneType.body.push({
                                         gene: item.hugoSymbol,
@@ -168,7 +169,7 @@ angular.module('oncokbApp')
                             finishLoadingReviewedData();
                         });
                     } else if ($scope.evidenceType === 'mutationEffect') {
-                        _.each(response, function (item) {
+                        _.each(response.data, function (item) {
                             var flag = false;
                             for (var i = 0; i < $scope.reviewedData.mutationEffect.body.length; i++) {
                                 var evidence = $scope.reviewedData.mutationEffect.body[i];
@@ -196,7 +197,7 @@ angular.module('oncokbApp')
                                 });
                             });
                             if ($scope.evidenceType === 'tumorSummary') {
-                                _.each(response, function (item) {
+                                _.each(response.data, function (item) {
                                     var tempObj =  {
                                         gene: item.gene.hugoSymbol,
                                         mutation: getAlterations(item.alterations),
@@ -210,7 +211,7 @@ angular.module('oncokbApp')
                                     $scope.reviewedData.tumorSummary.body.push(tempObj);
                                 });
                             } else if ($scope.evidenceType === 'drugs') {
-                                _.each(response, function(item) {
+                                _.each(response.data, function(item) {
                                     var drugs = [];
                                     if (item.treatments.length > 0) {
                                         _.each(item.treatments, function (treatment) {
@@ -334,7 +335,7 @@ angular.module('oncokbApp')
                     var geneTypes = {};
                     var tempHugo = '';
                     var variantCallBody = [];
-                    _.each(response, function(item) {
+                    _.each(response.data, function(item) {
                         geneTypes[item.hugoSymbol] = {
                             oncogene: item.oncogene,
                             tsg: item.tsg
@@ -346,7 +347,7 @@ angular.module('oncokbApp')
                     DatabaseConnector.lookupVariants(variantCallBody).then(function(result) {
                         if (type === 'tmValidation') {
                             var tmValidationResult = [];
-                            _.each(result, function(alterations) {
+                            _.each(result.data, function(alterations) {
                                 _.each(alterations, function(alteration) {
                                     if (alteration.alteration === 'Truncating Mutations') {
                                         tempHugo = alteration.gene.hugoSymbol;
@@ -367,7 +368,7 @@ angular.module('oncokbApp')
                         } else if (type === 'tsgValidation') {
                             var tsgValidationResult = [];
                             // Add a validation to find tumor suppressor genes that have no truncating mutations curated
-                            _.each(result, function(alterations) {
+                            _.each(result.data, function(alterations) {
                                 if (alterations.length > 0) {
                                     tempHugo = alterations[0].gene.hugoSymbol;
                                     if (geneTypes[tempHugo] && geneTypes[tempHugo].tsg === true) {
