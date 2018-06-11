@@ -104,12 +104,19 @@ angular.module('oncokbApp')
                                     updatedBy: $rootScope.me.name,
                                     updateTime: new Date().getTime()
                                 };
-                            }
-                            if (_.isUndefined(scope.data[key + '_review'].lastReviewed) && !_.isUndefined(o)) {
-                                scope.data[key + '_review'].lastReviewed = o;
-                                if (_.isUndefined($rootScope.geneMeta.review)) {
-                                    $rootScope.geneMeta.review = {};
+                            } else {
+                                if (_.isUndefined(scope.data[key + '_review'].updatedBy)) {
+                                    scope.data[key + '_review'].updatedBy = $rootScope.me.name;
                                 }
+                                if (_.isUndefined(scope.data[key + '_review'].updateTime)) {
+                                    scope.data[key + '_review'].updateTime = new Date().getTime();
+                                }
+                            }
+                            if (_.isUndefined($rootScope.geneMeta.review)) {
+                                $rootScope.geneMeta.review = {};
+                            }
+                            if ((!$rootScope.geneMeta.review[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
+                                scope.data[key + '_review'].lastReviewed = o;
                                 $rootScope.geneMeta.review[uuid] = true;                                       
                                 ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
                             } else if (n === scope.data[key + '_review'].lastReviewed) {

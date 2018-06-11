@@ -124,9 +124,16 @@ angular.module('oncokbApp')
                         $scope.updatedBy = $scope.tumor.cancerTypes_review.get('updatedBy');
                         $scope.updateTime = $scope.tumor.cancerTypes_review.get('updateTime');
                     } else {
-                        $scope.updatedBy = $scope.reviewObj.updatedBy;
-                        $scope.updateTime = $scope.reviewObj.updateTime;
+                        $scope.updatedBy = $scope.reviewObj.updatedBy ? $scope.reviewObj.updatedBy : '';
+                        $scope.updateTime = $scope.reviewObj.updateTime ? $scope.reviewObj.updateTime : '';
                     }
+                    if (!$scope.updatedBy) {
+                        $scope.updatedBy = '';
+                    }
+                    if (!$scope.updateTime) {
+                        $scope.updateTime = '';
+                    }
+                        
                     // If any decision hasn't been made yet, we display the panel signature which is a text describing what kind of change is made by who at what time
                     // on the other hand, if the evidence already got accepted or rejected, we hide the panel signature
                     if (!mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid)) {
