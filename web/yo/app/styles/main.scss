@@ -970,7 +970,10 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 a.powered-by-firepad {
   display: none;
 }
-
 .CodeMirror {
   background-color: #F1F9FF;
+}
+.editEmpty:empty{
+    display: block;
+    height: 24px;
 }
