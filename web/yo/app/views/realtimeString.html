@@ -20,7 +20,8 @@
                         ng-class="getInputClass()"
                         placeholder="{{::ph}}"
                         ng-model="data[key]"
-                        ng-model-options="{ debounce: 500 }">
+                        ng-model-options="{ debounce: 500 }"
+                        class="editEmpty">
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
@@ -31,7 +32,8 @@
                         ng-class="getInputClass()"
                         placeholder="{{::ph}}"
                         ng-model="data[key]"
-                        ng-model-options="{ debounce: 500 }">
+                        ng-model-options="{ debounce: 500 }"
+                        class="editEmpty">
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <br/>
@@ -109,7 +111,8 @@
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <span contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
-                          ng-model="data[key]">
+                          ng-model="data[key]"
+                          class="editEmpty">
                     </span>
                     <br/>
                     <div ng-if="reviewLayout('name')">
@@ -121,7 +124,8 @@
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <span contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
-                          ng-model="data[key]">
+                          ng-model="data[key]"
+                          class="editEmpty">
                     </span>
                     <br/>
                     <div ng-if="reviewLayout('name')">
