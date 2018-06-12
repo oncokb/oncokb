@@ -186,7 +186,7 @@
                 </span>
                   <span ng-if="reviewContentDisplay(tumor.cancerTypes_uuid, true)">
                         <p style="margin-top:10px;">Old Content: </p>
-                        <span>{{getLastReviewedCancerTypesName(tumor.cancerTypes_review.lastReviewed)}}</span>
+                        <span>{{getLastReviewedCancerTypesName(tumor)}}</span>
                     </span>
                 <div style="margin-top:-20px;margin-bottom:20px">
                     <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"

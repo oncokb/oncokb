@@ -121,8 +121,8 @@ angular.module('oncokbApp')
                         $scope.updateTime = ReviewResource.mostRecent[$scope.uuid].updateTime;
                     } else if ($scope.adjustedEvidenceType === 'TUMOR_NAME_CHANGE') {
                         // For tumor name change, the review info is stored in cancerTypes_review
-                        $scope.updatedBy = $scope.tumor.cancerTypes_review.get('updatedBy');
-                        $scope.updateTime = $scope.tumor.cancerTypes_review.get('updateTime');
+                        $scope.updatedBy = $scope.tumor.cancerTypes_review.updatedBy;
+                        $scope.updateTime = $scope.tumor.cancerTypes_review.updateTime;
                     } else {
                         $scope.updatedBy = $scope.reviewObj.updatedBy ? $scope.reviewObj.updatedBy : '';
                         $scope.updateTime = $scope.reviewObj.updateTime ? $scope.reviewObj.updateTime : '';
@@ -242,9 +242,6 @@ angular.module('oncokbApp')
                     }
                 };
                 function setRejectedUUIDs(uuids) {
-                    if (!$rootScope.geneMeta.review) {
-                        $rootScope.geneMeta.review = {};
-                    }
                     _.each(uuids, function(uuid) {
                         if ($rootScope.geneMeta.review[uuid]) {
                             $rootScope.rejectedUUIDs[uuid] = true;
@@ -368,7 +365,7 @@ angular.module('oncokbApp')
                     switch ($scope.adjustedEvidenceType) {
                     case 'TUMOR_NAME_CHANGE':
                         var lastReviewed = $rootScope.model.createList();
-                        _.each($scope.tumor.cancerTypes_review.get('lastReviewed'), function(ct) {
+                        _.each($scope.tumor.cancerTypes_review.lastReviewed, function(ct) {
                             var cancerType = $rootScope.model.create(OncoKB.CancerType);
                             cancerType.cancerType.setText(ct.cancerType);
                             cancerType.subtype.setText(ct.subtype);
