@@ -143,7 +143,7 @@ angular.module('oncokbApp')
                         var ti = tumor.TIs.get(m);
                         for (var n = 0; n < ti.treatments.length; n++) {
                             var treatment = ti.treatments.get(n);
-                            if (!treatment.name_review.get('removed')) {
+                            if (!treatment.name_review.removed) {
                                 if (!$scope.tumorContent[uuid]) {
                                     $scope.tumorContent[uuid] = {};
                                 }
@@ -339,7 +339,7 @@ angular.module('oncokbApp')
                     // review mode logic checks
                     if (mainUtils.processedInReview('inside', uuid)) {
                         return true;
-                    } else if ($rootScope.geneMeta.review && $rootScope.geneMeta.review[uuid]) {
+                    } else if ($rootScope.geneMeta.review[uuid]) {
                         if (!mainUtils.processedInReview('precise', uuid)) {
                             ReviewResource.precise.push(uuid);
                         }
@@ -457,10 +457,6 @@ angular.module('oncokbApp')
             }
             var userNames = [];
             function prepareReviewItems() {
-                if (_.isUndefined($rootScope.geneMeta.review)) {
-                    dialogs.notify('Warning', 'No changes need to be reviewed');
-                    return true;
-                }
                 $scope.sectionUUIDs = []; // sectionUUIDs is used to store uuid per section.
                 $scope.status.noChanges = false;
                 $scope.status.hasReviewContent = false;
@@ -641,7 +637,16 @@ angular.module('oncokbApp')
                 });
                 if ($scope.status.hasReviewContent === false) {
                     $rootScope.geneMeta.currentReviewer = '';
-                    delete $rootScope.geneMeta.review;
+                    // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection. 
+                    // If after scaning whole gene document and found nothing need to be reviewed, then we clean up everything in the review EXCEPT currentReviewer
+                    if (_.keys($rootScope.geneMeta.review).length > 1) {
+                        _.each(_.keys($rootScope.geneMeta.review), function(key) {
+                            if (key !== 'currentReviewer') {
+                                delete $rootScope.geneMeta.review;
+                            }
+                        });
+                    }
+                    
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
                     $rootScope.geneMeta.currentReviewer = $rootScope.me.name;
@@ -851,11 +856,9 @@ angular.module('oncokbApp')
                 if ($scope.status.isDesiredGene) {
                     var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
                     var historyData = evidencesAllUsers[userName].historyData.update;
-                    if ($rootScope.geneMeta.review) {
-                        _.each(_.keys(updatedEvidences), function (uuid) {
-                            delete $rootScope.geneMeta.review[uuid];    
-                        });
-                    }
+                    _.each(_.keys(updatedEvidences), function (uuid) {
+                        delete $rootScope.geneMeta.review[uuid];    
+                    });
                     DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
                         for (var i = 0; i < updatedEvidenceModels.length; i++) {
                             $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
@@ -1248,9 +1251,7 @@ angular.module('oncokbApp')
                     if (item.reviewObj) {
                         delete item.reviewObj.lastReviewed;
                     }
-                    if ($rootScope.geneMeta.review) {
-                        delete $rootScope.geneMeta.review[item.uuid];
-                    }                
+                    delete $rootScope.geneMeta.review[item.uuid];          
                     ReviewResource.accepted.push(item.uuid);
                 });
                 if (uuid) {
@@ -1656,7 +1657,7 @@ angular.module('oncokbApp')
                 _.some(mutation.tumors, function (e) {
                     if ($scope.getCancerTypesName(e).toLowerCase() === newTumorTypesName) {
                         exists = true;
-                        if (e.name_review.get('removed')) {
+                        if (e.name_review.removed) {
                             removed = true;
                             tempTumor = e;
                         } else {
@@ -1837,7 +1838,9 @@ angular.module('oncokbApp')
                 return mainUtils.getCancerTypesName(tumor.cancerTypes);
             };
 
-            $scope.getLastReviewedCancerTypesName = mainUtils.getLastReviewedCancerTypesName;
+            $scope.getLastReviewedCancerTypesName = function (tumor) {
+                return mainUtils.getCancerTypesName(tumor.cancerTypes_review.lastReviewed);
+            };
 
             function getNewCancerTypesName(cancerTypes) {
                 var list = [];
@@ -1899,9 +1902,6 @@ angular.module('oncokbApp')
                                 updateTime: new Date().getTime(),
                                 removed: true
                             }
-                        }
-                        if (_.isUndefined($rootScope.geneMeta.review)) {
-                            $rootScope.geneMeta.review = {};
                         }
                         $rootScope.geneMeta.review[uuid] = true;
                     }
@@ -2057,13 +2057,11 @@ angular.module('oncokbApp')
                 } else if (data.type === 'treatment') {
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.splice(indices[3], 1);
                 }
-                if ($rootScope.geneMeta.review) {
-                    _.each(data.uuids, function (uuid) {
-                        if ($rootScope.geneMeta.review[uuid]) {
-                            delete $rootScope.geneMeta.review[uuid];
-                        }
-                    });
-                }                
+                _.each(data.uuids, function (uuid) {
+                    if ($rootScope.geneMeta.review[uuid]) {
+                        delete $rootScope.geneMeta.review[uuid];
+                    }
+                });              
             }
             function removeUUIDs(uuids) {
                 if (uuids && _.isArray(uuids)) {
@@ -2127,9 +2125,7 @@ angular.module('oncokbApp')
             }
             function cancelDeleteItem(reviewObj, uuid) {
                 delete reviewObj.removed;
-                if ($rootScope.geneMeta.review) {
-                    delete $rootScope.geneMeta.review[uuid];
-                }
+                delete $rootScope.geneMeta.review[uuid];
                 ReviewResource.removed = _.without(ReviewResource.removed, uuid);
             }
             function fetchResults(data) {
@@ -2980,6 +2976,11 @@ angular.module('oncokbApp')
                 });
                 var deferred5 = $q.defer();
                 $firebaseObject(firebase.database().ref('Meta/' + $scope.fileTitle)).$bindTo($rootScope, "geneMeta").then(function () {
+                    if (_.isUndefined($rootScope.geneMeta.review)) {
+                        $rootScope.geneMeta.review = {
+                            currentReviewer: ''
+                        };
+                    }
                     $scope.geneStautMessage = 'Last edit was made on ' + new Date($rootScope.geneMeta.lastModifiedAt) + ' by ' + $rootScope.geneMeta.lastModifiedBy;
                     deferred5.resolve('success');
                 }, function (error) {
@@ -3132,10 +3133,18 @@ angular.module('oncokbApp')
         $scope.save = function () {
             var cancerTypes = [];
             if(!_.isEmpty($scope.meta.cancerTypes)) {
-                data.tumorRef.cancerTypes_review.lastReviewed = $scope.meta.cancerTypes;
-                if (_.isUndefined($rootScope.geneMeta.review)) {
-                    $rootScope.geneMeta.review = {};
+                if (_.isUndefined(data.tumorRef.cancerTypes_review)) {
+                    data.tumorRef.cancerTypes_review = {};
                 }
+                if (_.isUndefined(data.tumorRef.cancerTypes_review.updatedBy)) {
+                    data.tumorRef.cancerTypes_review.updatedBy = $rootScope.me.name;
+                }
+                if (_.isUndefined(data.tumorRef.cancerTypes_review.updateTime)) {
+                    data.tumorRef.cancerTypes_review.updateTime = new Date().getTime();
+                }
+                if (_.isUndefined(data.tumorRef.cancerTypes_review.lastReviewed)) {
+                    data.tumorRef.cancerTypes_review.lastReviewed = $scope.meta.cancerTypes;
+                }   
                 $rootScope.geneMeta.review[$scope.meta.cancerTypes_uuid] = true;
             }
             _.each($scope.meta.newCancerTypes, function (ct) {
