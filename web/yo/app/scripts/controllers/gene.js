@@ -3131,6 +3131,13 @@ angular.module('oncokbApp')
 
         $scope.save = function () {
             var cancerTypes = [];
+            if(!_.isEmpty($scope.meta.cancerTypes)) {
+                data.tumorRef.cancerTypes_review.lastReviewed = $scope.meta.cancerTypes;
+                if (_.isUndefined($rootScope.geneMeta.review)) {
+                    $rootScope.geneMeta.review = {};
+                }
+                $rootScope.geneMeta.review[$scope.meta.cancerTypes_uuid] = true;
+            }
             _.each($scope.meta.newCancerTypes, function (ct) {
                 if (ct.mainType.name) {
                     var tempSubtype = ct.subtype.name ? ct.subtype.name : '';
