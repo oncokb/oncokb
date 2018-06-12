@@ -3,10 +3,9 @@
         <div ng-switch-when="false">
             <div ng-switch on="t">
                 <div ng-switch-when="p">
-                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
                     <p contenteditable="{{fe}}"
                         ng-class="getInputClass()"
-                        placeholder="{{::ph}}"
                         ng-model="data[key]"
                         ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }">
                      </p>
@@ -14,29 +13,17 @@
                             ng-model="pContent">
                     </pub-iframe>
                 </div>
-                <div ng-switch-when="MUTATION_NAME">
-                    <p ng-if="!fe" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
+                <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
                     <p contenteditable="{{fe}}"
                         ng-class="getInputClass()"
-                        placeholder="{{::ph}}"
                         ng-model="data[key]"
+                        ng-click="setTrackSignal()"
                         ng-model-options="{ debounce: 500 }"
                         class="editEmpty">
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
-                    <br/>
-                </div>
-                <div ng-switch-when="TREATMENT_NAME">
-                    <p ng-if="!fe" style="font-style:italic;margin-top:-30px;margin-left:30%">{{editingMessage}}</p>
-                    <p contenteditable="{{fe}}"
-                        ng-class="getInputClass()"
-                        placeholder="{{::ph}}"
-                        ng-model="data[key]"
-                        ng-model-options="{ debounce: 500 }"
-                        class="editEmpty">
-                    </p>
-                    <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
-                    <br/>
+                    <!-- <br/> -->
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <div>
@@ -96,7 +83,6 @@
                     <h4 ng-if="reviewLayout('regular')">New Content:</h4>
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                        ng-class="getInputClass()"
-                       placeholder="{{::ph}}"
                        ng-model="data[key]">
                     </p>
                     <div ng-if="reviewLayout('regular')">
@@ -107,20 +93,7 @@
                             ng-model="data[key]">
                     </pub-iframe>
                 </div>
-                <div ng-switch-when="MUTATION_NAME">
-                    <h4 ng-if="reviewLayout('name')">New Content:</h4>
-                    <span contenteditable="{{reviewContentEditable('regular')}}"
-                          ng-class="editableBox"
-                          ng-model="data[key]"
-                          class="editEmpty">
-                    </span>
-                    <br/>
-                    <div ng-if="reviewLayout('name')">
-                        <h4>Old Content:</h4>
-                        <p ng-class="unEditableBox" contenteditable="false">{{::data[key+'_review'].lastReviewed}}</p>
-                    </div>
-                </div>
-                <div ng-switch-when="TREATMENT_NAME">
+                <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <span contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
