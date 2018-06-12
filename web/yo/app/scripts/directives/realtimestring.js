@@ -63,7 +63,7 @@ angular.module('oncokbApp')
                             if (scope.data[scope.key+'_editing'] !== $rootScope.me.name) {
                                 scope.initializeFE();
                             }
-                            if (scope.key !== 'short' && scope.key !== 'name') {
+                            if (scope.key !== 'short' && (scope.key !== 'name' || !$rootScope.moving)) {
                                 scope.setReviewRelatedContent(n, o, false);
                             }
                             scope.timeoutRef = $timeout(function() {
@@ -149,6 +149,9 @@ angular.module('oncokbApp')
                         name: 'Level 4',
                         value: '4'
                     }
+                };
+                $scope.setTrackSignal = function() {
+                    $rootScope.moving = false;
                 };
                 $scope.initializeFE = function() {
                     if ($scope.data[$scope.key+'_editing']) {

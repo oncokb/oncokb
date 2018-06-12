@@ -2304,10 +2304,12 @@ angular.module('oncokbApp')
                     $scope.movingInfo.message = 'Click again to cancel';    
                 }
             };
+            $rootScope.moving = false;
             $scope.endMoving = function(path, moveType) {
                 if (startIndex === -1) {
                     return false;
                 }
+                $rootScope.moving = true;
                 var dataList;
                 var endIndex;
                 var type = '';
