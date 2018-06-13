@@ -1,4 +1,4 @@
-<div class="drive-realtime-string">
+<div>
     <div ng-switch on="inReviewMode()">
         <div ng-switch-when="false">
             <div ng-switch on="t">
@@ -106,7 +106,7 @@
                         <p ng-class="unEditableBox" contenteditable="false">{{::data[key+'_review'].lastReviewed}}</p>
                     </div>
                 </div>
-                <div ng-switch-when="treatment-select" class="treatment-select">
+                <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <div>
                         <h4 ng-if="reviewLayout('regular')">New Content:</h4>
                         <div>
@@ -151,7 +151,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-switch-when="implication" class="treatment-select">
+                <div ng-switch-when="implication" class="chosen-full-width">
                     <div>
                         <h4 ng-if="reviewLayout('regular')">New Content:</h4>
                         <div>
