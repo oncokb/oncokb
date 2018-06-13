@@ -27,9 +27,9 @@ angular.module('oncokbApp')
                 me.email = gResp.user.email;
                 me.photoURL = gResp.user.photoURL;
                 $rootScope.isSignedIn = true;
-                updateUserInfo();
                 setRole(gResp.user).then(function() {
                     $rootScope.me = me;
+                    updateUserInfo();
                     defer.resolve();
                 }, function(error) {
                     defer.reject(error);
