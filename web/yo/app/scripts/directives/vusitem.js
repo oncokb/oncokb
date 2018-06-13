@@ -30,7 +30,7 @@ angular.module('oncokbApp')
                     if (n !== o) {
                         var user = $rootScope.me;
                         var timeStamp = new FirebaseModel.TimeStamp(user.name, user.email);
-                        scope.variant.time.push(timeStamp);
+                        scope.vus.vus[scope.index].time.push(timeStamp);
                         scope.dtBy = user.name;
                         scope.vusUpdate();
                     }
