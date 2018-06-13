@@ -19,7 +19,7 @@
                         ng-class="getInputClass()"
                         ng-model="data[key]"
                         ng-click="setTrackSignal()"
-                        ng-model-options="{ debounce: 500 }"
+                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                         class="editEmpty">
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
@@ -83,7 +83,8 @@
                     <h4 ng-if="reviewLayout('regular')">New Content:</h4>
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                        ng-class="getInputClass()"
-                       ng-model="data[key]">
+                       ng-model="data[key]"
+                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }">
                     </p>
                     <div ng-if="reviewLayout('regular')">
                         <h4>Difference comparing to the old content:</h4>
@@ -95,11 +96,12 @@
                 </div>
                 <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
-                    <span contenteditable="{{reviewContentEditable('regular')}}"
+                    <p contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
                           ng-model="data[key]"
+                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                           class="editEmpty">
-                    </span>
+                    </p>
                     <br/>
                     <div ng-if="reviewLayout('name')">
                         <h4>Old Content:</h4>
