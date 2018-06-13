@@ -624,7 +624,7 @@ angular.module('oncokbApp')
         }
         function TimeStamp(userName, userEmail) {
             this.by = {
-                by: userName,
+                name: userName,
                 email: userEmail
             };
             this.value = (new Date()).getTime().toString();
