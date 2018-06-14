@@ -8,8 +8,6 @@
  * Main module of the application.
  */
 var OncoKB = {};
-var gapi = window.gapi;
-
 // Global variables
 OncoKB.global = {};
 // OncoKB.global.genes
@@ -91,14 +89,12 @@ var oncokbApp = angular.module('oncokbApp', [
     .value('OncoKB', OncoKB)
     // This is used for typeahead
     .constant('SecretEmptyKey', '[$empty$]')
-    .constant('gapi', window.gapi)
     .constant('loadingScreen', window.loadingScreen)
     .constant('S', window.S)
     .constant('_', window._)
     .constant('Levenshtein', window.Levenshtein)
     .constant('XLSX', window.XLSX)
     .constant('PDF', window.jsPDF)
-    .constant('gapi', window.gapi)
     .constant('Tree', window.Tree)
     .constant('UUIDjs', window.UUIDjs)
     .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
@@ -295,7 +291,7 @@ angular.module('oncokbApp').run(
 /**
  * Bootstrap the app
  */
-(function(_, gapi, angular, $) {
+(function(_, angular, $) {
     /**
      * Get OncoKB configurations
      */
@@ -331,4 +327,4 @@ angular.module('oncokbApp').run(
     }
 
     fetchData();
-})(window._, window.gapi, window.angular, window.jQuery);
+})(window._, window.angular, window.jQuery);

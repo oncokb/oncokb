@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, config, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
         var tabs = {
             variant: 'Variant Annotation',
             genes: 'Genes',
